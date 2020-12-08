@@ -28,7 +28,7 @@ There is a lack of programs for CLI invoice maintenance, especially those which 
 	```
 * [ ] List
 	```sh
-	clinvoice list [-c|--client <client_name>] [-s|--sort <sort_by>]
+	clinvoice list [-c|--client <client_name>] [-i|--issued|--no-issued] [-o|--outstanding|--no-outstanding] [-s|--sort <sort_by>]
 	```
 * [ ] New
 	```sh

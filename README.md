@@ -71,5 +71,5 @@ There is a lack of programs for CLI invoice maintenance, especially those which 
 	```
 * [ ] Track time in specific intervals (less than `1` to disable):
 	```sh
-	clinvoice config -r|--track <integer>
+	clinvoice config -i|--interval <integer>
 	```

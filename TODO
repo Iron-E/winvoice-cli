@@ -1,0 +1,2 @@
+* Should be able to create clients independently of invoices.
+* Should be able to reference clients and client information on invoices.

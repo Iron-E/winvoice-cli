@@ -1,4 +1,4 @@
-pub struct CLInvoiceConfig
+pub struct CLInvoiceConfig<'directory>
 {
-
+	directory: &'directory str
 }

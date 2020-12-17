@@ -69,7 +69,7 @@ There is a lack of programs for CLI invoice maintenance, especially those which 
 	```sh
 	clinvoice config -t|--technician <technician_name>
 	```
-* [ ] Track time in specific intervals (less than `1` to disable):
+* [ ] Track time in specific intervals (`0` to disable):
 	```sh
 	clinvoice config -i|--interval <integer>
 	```

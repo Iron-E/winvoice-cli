@@ -1,4 +1,4 @@
-use chrono;
+use chrono::{DateTime, TimeZone};
 
 /// # Summary
 ///
@@ -10,17 +10,17 @@ use chrono;
 /// It is likely that a given CLInvoice business object will contain multiple timesheets. As such,
 /// it is proposed that the container for business logic contain an array of `Timesheet`, rather
 /// than only one.
-pub struct Timesheet<'work_notes, Tz> where Tz : chrono::TimeZone
+pub struct Timesheet<'work_notes, Tz> where Tz : TimeZone
 {
 	/// # Summary
 	///
 	/// The time at which this period of work began.
-	pub time_begin: chrono::DateTime<Tz>,
+	pub time_begin: DateTime<Tz>,
 
 	/// # Summary
 	///
 	/// The time at which this period of work ended.
-	pub time_end: Option<chrono::DateTime<Tz>>,
+	pub time_end: Option<DateTime<Tz>>,
 
 	/// # Summary
 	///

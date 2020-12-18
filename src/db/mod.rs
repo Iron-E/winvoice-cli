@@ -1,4 +1,9 @@
-pub mod clinvoice;
+pub mod client;
+pub mod employee;
+pub mod employer;
 pub mod invoice;
 pub mod job;
+pub mod location;
+pub mod organization;
+pub mod person;
 pub mod timesheet;

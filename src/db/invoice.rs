@@ -1,9 +1,9 @@
-use chrono;
+use chrono::{DateTime, TimeZone};
 
 /// # Summary
 ///
 /// An `Invoice` represents the accounts receivable for the user or their employer.
-pub struct Invoice<Tz> where Tz : chrono::TimeZone
+pub struct Invoice<Tz> where Tz : TimeZone
 {
 	/// # Summary
 	///
@@ -16,7 +16,7 @@ pub struct Invoice<Tz> where Tz : chrono::TimeZone
 	///
 	/// When running `clinvoice export`, this field will be set automatically to the current date
 	/// and time.
-	pub date_issued: Option<chrono::DateTime<Tz>>,
+	pub date_issued: Option<DateTime<Tz>>,
 
 	/// # Summary
 	///
@@ -28,7 +28,7 @@ pub struct Invoice<Tz> where Tz : chrono::TimeZone
 	/// underlying [`Invoice`] has not been sent to the client.
 	///
 	/// This field will be updated when running `clinvoice rec`/`receive`
-	pub date_paid: Option<chrono::DateTime<Tz>>,
+	pub date_paid: Option<DateTime<Tz>>,
 
 	/// # Summary
 	///

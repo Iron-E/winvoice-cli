@@ -17,9 +17,9 @@ repository = "https://www.github.com/Iron-E/clinvoice"
 # Currency
 rusty-money = "0.3"
 
+# Database
+serde = {version = "1", features = ["derive"]}
+mongodb = {version = "1", default-features = false, features=["sync"]}
+
 # Date/Time
 chrono = "0.4"
-
-# JSON
-serde = {version = "1.0", features = ["derive"]}
-toml = "0.5"

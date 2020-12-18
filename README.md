@@ -22,9 +22,9 @@ There is a lack of programs for CLI invoice maintenance, especially those which 
 	```sh
 	clinvoice help <command>
 	```
-* [ ] Export
+* [ ] Export / issue invoice:
 	```sh
-	clinvoice export <input_file> [-o|--output <output_file>]
+	clinvoice export <job_id> [-c|--currency <currency>] [-o|--output <output_file>]
 	```
 * [ ] List
 	```sh
@@ -37,6 +37,15 @@ There is a lack of programs for CLI invoice maintenance, especially those which 
 * [ ] Manipulate timesheets:
 	```sh
 	clinvoice time [start|stop] <job_number>
+	```
+* [ ] Receive invoice payment:
+	```sh
+	clinvoice rec|receive <job_id>
+	```
+* [ ] Manipulate jobs:
+	```sh
+	clinvoice job <job_id> [-c|--client <client_id>]
+	clinvoice job <job_id> [-e|--employer <employer_id>]
 	```
 
 ## Configuration
@@ -72,4 +81,8 @@ There is a lack of programs for CLI invoice maintenance, especially those which 
 * [ ] Track time in specific intervals (`0` to disable):
 	```sh
 	clinvoice config -i|--interval <integer>
+	```
+* [ ] Specify default currency for hourly rates:
+	```sh
+	clinvoice config -c|--currency '$'
 	```

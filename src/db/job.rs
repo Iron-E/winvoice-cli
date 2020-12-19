@@ -18,16 +18,7 @@ use super::{client::Client, employee::Employee, invoice::Invoice, timesheet::Tim
 /// work _may_ performed.
 ///
 /// [invoice]: super::invoice::Invoice
-pub struct Job<
-	/* Client    */ 'client_location,    'client_location_outer, 'client_name,
-	/* Employer  */ 'employer_location,  'employer_location_outer, 'employer_name,   'employee_name,
-	/* Job       */ 'objectives,         'notes,
-	/* Timesheet */ 'timesheets,         'timesheet_note,
-	Tz
-> where
-	'client_location_outer : 'client_location,
-	'employer_location_outer : 'employer_location,
-	Tz : TimeZone,
+pub struct Job<'objectives,  'notes, 'timesheets,  'timesheet_note, Tz> where Tz : TimeZone
 {
 	/// # Summary
 	///
@@ -42,12 +33,12 @@ pub struct Job<
 	/// # Summary
 	///
 	/// The client who the work is being performed for.
-	pub client: Client<'client_location, 'client_location_outer, 'client_name>,
+	pub client: Client,
 
 	/// # Summary
 	///
 	/// The employer who the work is being performed for.
-	pub employer: Employee<'employer_location, 'employer_location_outer, 'employer_name, 'employee_name>,
+	pub employer: Employee,
 
 	/// # Summary
 	///

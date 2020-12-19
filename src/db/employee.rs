@@ -1,7 +1,10 @@
-use super::{employer::Employer, person::Person};
+use super::id::Id;
 
-pub struct Employee<'employer_location, 'employer_location_outer, 'employer_name, 'person_name> where 'employer_location_outer : 'employer_location
+/// TODO
+pub struct Employee
 {
-	pub employer: Employer<'employer_location, 'employer_location_outer, 'employer_name>,
-	pub person: Person<'person_name>,
+	/// TODO
+	_employer_id: Id,
+	/// TODO
+	_person_id: Id,
 }

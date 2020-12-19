@@ -1,6 +1,8 @@
-use super::organization::Organization;
+use super::id::Id;
 
-pub struct Employer<'location_name, 'location_outer, 'name> where 'location_outer : 'location_name
+/// TODO
+pub struct Employer
 {
-	pub organization: Organization<'location_name, 'location_outer, 'name>,
+	/// TODO
+	_organization_id: Id,
 }

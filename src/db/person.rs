@@ -1,10 +1,17 @@
 use super::id::Id;
 
-/// TODO
+/// # Summary
+///
+/// A person is a physical human being.
 pub struct Person<'name>
 {
-	/// TODO
+	/// # Summary
+	///
+	/// This is the unique reference number for the [`Person`].
 	_id: Id,
-	/// TODO
+
+	/// # Summary
+	///
+	/// This is the name of the [`Person`].
 	pub name: &'name str,
 }

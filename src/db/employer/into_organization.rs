@@ -3,14 +3,18 @@ use super::Employer;
 
 impl<'name> Into<Organization<'name>> for &Employer
 {
-	/// TODO
+	/// # Summary
+	///
+	/// Convert the [`Employer`] to an [`Organization`].
+	///
+	/// # Returns
+	///
+	/// The [`Organization`] with `self._organization_id`.
 	fn into(self) -> Organization<'name>
 	{
-		// TODO
-		//
-		//	SELECT O
-		//	FROM Employer E
-		//	JOIN Organization O ON E._organization_id = O._id;
+		// SELECT O
+		// FROM Employer E
+		// JOIN Organization O ON E._organization_id = O._id;
 
 		todo!();
 	}

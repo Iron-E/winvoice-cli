@@ -3,14 +3,18 @@ use super::Employee;
 
 impl<'name> Into<Person<'name>> for &Employee
 {
-	/// TODO
+	/// # Summary
+	///
+	/// Convert the [`Employee`] to a [`Person`].
+	///
+	/// # Returns
+	///
+	/// The [`Person`] with `self._person_id`.
 	fn into(self) -> Person<'name>
 	{
-		// TODO
-		//
-		//	SELECT P
-		//	FROM Person P
-		//	JOIN Employee E ON E._person_id = P._id;
+		// SELECT P
+		// FROM Person P
+		// JOIN Employee E ON E._person_id = P._id;
 
 		todo!();
 	}

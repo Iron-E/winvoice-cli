@@ -1,45 +1,64 @@
 use super::id::Id;
-use core::fmt::{Display, Formatter};
-use core::fmt::Result as FmtResult;
 
-/// TODO
+pub mod display;
+
+/// # Summary
+///
+/// A physical space where other `Location`s or
+/// [`Organization`](super::organization::Organization)s exist.
 pub struct Location<'name>
 {
-	/// TODO
+	/// # Summary
+	///
+	/// The reference number of the [`Location`].
 	_id: Id,
-	/// TODO
+
+	/// # Summary
+	///
+	/// The reference number of the [`Location`] in which _this_ [`Location`] resides.
 	_outer_id: Option<Id>,
-	/// TODO
+
+	/// # Summary
+	///
+	/// The name of the [`Location`].
 	pub name: &'name str,
 }
 
-impl<'name> Display for Location<'name>
+impl Location<'_>
 {
-	fn fmt(&self, formatter: &mut Formatter<'_>) -> FmtResult
+	/// # Summary
+	///
+	/// Create a new [`Location`] with a generated ID.
+	///
+	/// # Parameters
+	///
+	/// * `name`, the name of the location.
+	///
+	/// # Returns
+	///
+	/// ```rust
+	/// Location { name, _id: /* generated */ };
+	/// ```
+	pub fn new(name: &str) -> Self
 	{
-		let output = String::from(self.name);
-
-		loop
-		{
-			// TODO
-			//
-			//	let outer = (
-			//		SELECT O
-			//		FROM Location L
-			//		JOIN Location O ON L._outer_id = O._id;
-			//	);
-			//
-			//	output::push(outer.name)
-			//
-			//	if outer._outer_id.is_none() { break; }
-
-			break;
-		}
-
-		// TODO
-		//
-		// write!(formatter, output)
-
 		todo!();
+	}
+
+	/// # Summary
+	///
+	/// Create a new [`Location`] which is inside of `self`.
+	///
+	/// # Parameters
+	///
+	/// * `name`, the name of the inner location.
+	///
+	/// # Returns
+	///
+	/// ```rust
+	/// Location { name, _id: /* generated */, _outside_id: self._id };
+	/// ```
+	pub fn new_inner(&self, name: &'_ str) -> Location<'_>
+	{
+		todo!()
 	}
 }

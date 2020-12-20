@@ -1,3 +1,4 @@
+# See https://doc.rust-lang.org/cargo/reference/manifest.html
 [package]
 name = "clinvoice"
 version = "0.1.0"
@@ -11,18 +12,10 @@ license = "GPL3"
 readme = "./README.md"
 repository = "https://www.github.com/Iron-E/clinvoice"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[[bin]]
+bench = false
+path = "crates/clinvoice_bin/main.rs"
+name = "invoice"
 
-[dependencies]
-# Currency
-rusty-money = "0.3"
-
-# Database
-mongodb = {version = "1", default-features = false, features=["sync"]}
-
-# Date/Time
-chrono = "0.4"
-
-# Serialization
-serde = {version = "1", features = ["derive"]}
-toml = "0.5"
+[workspace]
+members = ["crates/clinvoice_bin"]

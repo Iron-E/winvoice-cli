@@ -324,6 +324,7 @@ dependencies = [
 name = "clinvoice_config"
 version = "0.1.0"
 dependencies = [
+ "clinvoice_adapter",
  "clinvoice_data",
  "serde",
  "toml",

@@ -1,4 +1,4 @@
-use clinvoice_data::{chrono::TimeZone, timesheet::Timesheet};
+use clinvoice_data::{chrono::TimeZone, Timesheet};
 
 /// # Summary
 ///

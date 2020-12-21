@@ -1,7 +1,8 @@
-use clinvoice_data::location::Location;
+use clinvoice_data::Location;
 
 pub mod display;
-pub mod implementation;
+pub mod insertable_location;
+pub mod wrapper;
 
 /// # Summary
 ///

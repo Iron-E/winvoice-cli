@@ -1,4 +1,4 @@
-use clinvoice_data::employer::Employer;
+use clinvoice_data::Employer;
 
 pub mod into_organization;
 

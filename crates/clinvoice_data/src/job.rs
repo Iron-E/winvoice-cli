@@ -1,5 +1,5 @@
 use chrono::{DateTime, TimeZone};
-use super::{client::Client, invoice::Invoice, timesheet::Timesheet};
+use crate::{Client, Invoice, Timesheet};
 
 /// # Summary
 ///

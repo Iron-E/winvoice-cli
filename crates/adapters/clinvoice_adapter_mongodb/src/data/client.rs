@@ -1,4 +1,4 @@
-use clinvoice_data::client::Client;
+use clinvoice_data::Client;
 
 pub mod into_organization;
 

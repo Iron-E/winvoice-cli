@@ -1,4 +1,4 @@
-use clinvoice_data::{chrono::TimeZone, invoice::Invoice};
+use clinvoice_data::{chrono::TimeZone, Invoice};
 
 /// # Summary
 ///

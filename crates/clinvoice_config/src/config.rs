@@ -1,10 +1,10 @@
-pub mod employees;
-pub mod employers;
-pub mod invoices;
-pub mod timesheets;
+mod employees;
+mod employers;
+mod invoices;
+mod timesheets;
 
-use clinvoice_adapter::connection::Connections;
-use {employees::Employees, employers::Employers, invoices::Invoices, timesheets::Timesheets};
+use clinvoice_adapter::Connections;
+pub use self::{employees::Employees, employers::Employers, invoices::Invoices, timesheets::Timesheets};
 
 /// # Summary
 ///

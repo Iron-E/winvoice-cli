@@ -1,13 +1,25 @@
-pub mod client;
-pub mod employee;
-pub mod employer;
-pub mod id;
-pub mod invoice;
-pub mod job;
-pub mod location;
-pub mod organization;
-pub mod person;
-pub mod timesheet;
+mod client;
+mod employee;
+mod employer;
+mod id;
+mod invoice;
+mod job;
+mod location;
+mod organization;
+mod person;
+mod timesheet;
 
 pub use chrono;
 pub use rusty_money;
+pub use self::{
+	client::Client,
+	employee::Employee,
+	employer::Employer,
+	id::Id,
+	invoice::Invoice,
+	job::Job,
+	location::Location,
+	organization::Organization,
+	person::Person,
+	timesheet::Timesheet,
+};

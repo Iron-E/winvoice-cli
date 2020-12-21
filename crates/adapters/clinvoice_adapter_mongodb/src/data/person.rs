@@ -1,4 +1,4 @@
-use clinvoice_data::person::Person;
+use clinvoice_data::Person;
 
 /// # Summary
 ///

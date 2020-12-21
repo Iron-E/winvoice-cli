@@ -1,4 +1,4 @@
-use clinvoice_data::employee::Employee;
+use clinvoice_data::Employee;
 
 pub mod into_employer;
 pub mod into_person;

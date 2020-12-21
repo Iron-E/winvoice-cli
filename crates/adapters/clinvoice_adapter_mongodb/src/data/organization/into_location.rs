@@ -1,6 +1,6 @@
 use crate::data::{location::MongoLocation, organization::MongoOrganization};
 
-impl<'location_name, 'org_name> Into<MongoLocation<'location_name>> for &MongoOrganization<'org_name>
+impl<'location_name, 'org_name> Into<MongoLocation<'location_name>> for MongoOrganization<'org_name>
 {
 	/// # Summary
 	///

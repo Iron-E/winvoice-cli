@@ -1,4 +1,4 @@
-use clinvoice_data::{chrono::TimeZone, job::Job};
+use clinvoice_data::{chrono::TimeZone, Job};
 
 /// # Summary
 ///

@@ -1,4 +1,4 @@
-use clinvoice_data::organization::Organization;
+use clinvoice_data::Organization;
 
 pub mod into_location;
 

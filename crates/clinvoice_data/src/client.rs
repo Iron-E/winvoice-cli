@@ -1,4 +1,4 @@
-use super::id::Id;
+use crate::Id;
 
 /// # Summary
 ///

@@ -1,6 +1,6 @@
-use crate::data::{employee::MongoEmployee, person::MongoPerson};
+use crate::data::{MongoEmployee, MongoPerson};
 
-impl<'name> Into<MongoPerson<'name>> for &MongoEmployee
+impl<'name> Into<MongoPerson<'name>> for MongoEmployee
 {
 	/// # Summary
 	///

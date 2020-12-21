@@ -1,6 +1,7 @@
-use super::MongoLocation;
+use clinvoice_adapter::insertable::InsertableLocation;
+use super::{Location, MongoLocation};
 
-impl MongoLocation<'_>
+impl<'name> InsertableLocation<Location<'name>, MongoLocation<'name>> for MongoLocation<'name>
 {
 	/// # Summary
 	///
@@ -13,9 +14,9 @@ impl MongoLocation<'_>
 	/// # Returns
 	///
 	/// ```rust
-	/// Location { name, pub id: /* generated */ };
+	/// Location { name, id: /* generated */ };
 	/// ```
-	pub fn new(name: &str) -> Self
+	fn insert(name: &'_ str) -> MongoLocation<'name>
 	{
 		todo!();
 	}
@@ -31,9 +32,9 @@ impl MongoLocation<'_>
 	/// # Returns
 	///
 	/// ```rust
-	/// Location { name, pub id: /* generated */, pub outside_id: self.pub id };
+	/// Location { name, id: /* generated */, outside_id: self.0.id };
 	/// ```
-	pub fn new_inner(&self, name: &'_ str) -> MongoLocation<'_>
+	fn insert_inner(&self, name: &'_ str) -> MongoLocation<'name>
 	{
 		todo!()
 	}

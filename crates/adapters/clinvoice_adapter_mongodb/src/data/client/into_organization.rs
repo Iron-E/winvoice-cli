@@ -1,6 +1,6 @@
-use crate::data::{client::MongoClient, organization::MongoOrganization};
+use crate::data::{MongoClient, MongoOrganization};
 
-impl<'name> Into<MongoOrganization<'name>> for &MongoClient
+impl<'name> Into<MongoOrganization<'name>> for MongoClient
 {
 	/// # Summary
 	///

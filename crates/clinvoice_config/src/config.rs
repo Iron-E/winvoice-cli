@@ -3,13 +3,19 @@ pub mod employers;
 pub mod invoices;
 pub mod timesheets;
 
-use self::{employees::Employees, employers::Employers, invoices::Invoices, timesheets::Timesheets};
+use clinvoice_adapter::connection::Connections;
+use {employees::Employees, employers::Employers, invoices::Invoices, timesheets::Timesheets};
 
 /// # Summary
 ///
 /// The `Config` contains settings that affect all areas of the application.
-pub struct Config
+pub struct Config<'name, 'url>
 {
+	/// # Summary
+	///
+	/// Configurations for database connections.
+	pub connections: Connections<'name, 'url>,
+
 	/// # Summary
 	///
 	/// Configurations for [`Employee`](clinvoice_data::employee::Employee)s.

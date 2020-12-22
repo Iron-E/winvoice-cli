@@ -1,0 +1,11 @@
+[connections]
+name = {adapter="POSTGRES", url="postgres://foo"}
+
+[employees]
+default_id = 3
+
+[invoices]
+default_currency = "USD"
+
+[timesheets]
+interval = {minutes=5}

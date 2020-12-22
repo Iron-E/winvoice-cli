@@ -1,6 +1,7 @@
+use clinvoice_data::Location;
 use crate::Wrapper;
 
-pub trait InsertableLocation<T, W> where W : Wrapper<T>
+pub trait InsertableLocation<'name, W> where W : Wrapper<Location<'name>>
 {
 	/// # Summary
 	///

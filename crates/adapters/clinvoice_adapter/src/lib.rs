@@ -1,6 +1,12 @@
-mod connections;
-pub mod insertable;
+mod connection;
+mod adapter;
+mod adapters;
+pub mod data;
 mod wrapper;
 
-pub use connections::Connections;
-pub use wrapper::Wrapper;
+pub use {
+	adapters::Adapters,
+	connection::Connection,
+	wrapper::Wrapper,
+};
+

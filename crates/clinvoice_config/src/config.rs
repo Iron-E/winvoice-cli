@@ -3,8 +3,10 @@ mod employers;
 mod invoices;
 mod timesheets;
 
-use clinvoice_adapter::Connections;
+use clinvoice_adapter::Connection;
 pub use self::{employees::Employees, employers::Employers, invoices::Invoices, timesheets::Timesheets};
+
+use std::collections::HashMap;
 
 /// # Summary
 ///
@@ -14,17 +16,12 @@ pub struct Config<'name, 'url>
 	/// # Summary
 	///
 	/// Configurations for database connections.
-	pub connections: Connections<'name, 'url>,
+	pub connections: HashMap<&'name str, Connection<'url>>,
 
 	/// # Summary
 	///
 	/// Configurations for [`Employee`](clinvoice_data::employee::Employee)s.
 	pub employees: Employees,
-
-	/// # Summary
-	///
-	/// Configurations for [`Employer`](clinvoice_data::employer::Employer)s.
-	pub employers: Employers,
 
 	/// # Summary
 	///

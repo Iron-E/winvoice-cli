@@ -1,4 +1,4 @@
-use clinvoice_data::id::Id;
+use clinvoice_data::Id;
 
 /// # Summary
 ///

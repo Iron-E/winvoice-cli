@@ -1,5 +1,11 @@
-[connections]
-name = {adapter="POSTGRES", url="postgres://foo"}
+# clinvoice -s|--store "name_one" new <client> ## NEW
+
+# TODO: rewrite `connection` class into `store` class that either has a connection or a path.
+
+[store]
+default = "name_one"
+name_one = {adapter="JOSN", path="/home/user/Documents/foo", user="name"}
+name_two = {adapter="POSTGRES", pass="word", user="name"}
 
 [employees]
 default_id = 3

@@ -1,6 +1,6 @@
 use clinvoice_data::Client;
 
-pub mod into_organization;
+mod into_organization;
 
 /// # Summary
 ///

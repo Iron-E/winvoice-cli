@@ -1,8 +1,8 @@
 use clinvoice_data::Location;
 
-pub mod display;
-pub mod insertable_location;
-pub mod wrapper;
+mod display;
+mod insertable_location;
+mod wrapper;
 
 /// # Summary
 ///

@@ -1,7 +1,7 @@
 use clinvoice_data::Employee;
 
-pub mod into_employer;
-pub mod into_person;
+mod into_employer;
+mod into_person;
 
 /// # Summary
 ///

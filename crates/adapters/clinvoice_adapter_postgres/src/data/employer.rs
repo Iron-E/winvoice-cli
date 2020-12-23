@@ -1,6 +1,6 @@
 use clinvoice_data::Employer;
 
-pub mod into_organization;
+mod into_organization;
 
 /// # Summary
 ///

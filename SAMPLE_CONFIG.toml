@@ -4,7 +4,7 @@
 
 [store]
 default = "name_one"
-name_one = {adapter="JOSN", path="/home/user/Documents/foo", user="name"}
+name_one = {adapter="JSON", path="/home/user/Documents/foo"}
 name_two = {adapter="POSTGRES", pass="word", user="name"}
 
 [employees]

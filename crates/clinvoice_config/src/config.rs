@@ -3,6 +3,7 @@ mod invoices;
 mod store_value;
 mod timesheets;
 
+use clinvoice_adapter::Store;
 pub use self::{employees::Employees, invoices::Invoices, store_value::StoreValue, timesheets::Timesheets};
 
 use std::collections::HashMap;
@@ -10,7 +11,7 @@ use std::collections::HashMap;
 /// # Summary
 ///
 /// The `Config` contains settings that affect all areas of the application.
-pub struct Config<'alias, 'db, 'name, 'pass, 'path, 'user>
+pub struct Config<'alias, 'name, 'pass, 'path, 'user>
 {
 	/// # Summary
 	///
@@ -25,7 +26,7 @@ pub struct Config<'alias, 'db, 'name, 'pass, 'path, 'user>
 	/// # Summary
 	///
 	/// Configurations for data storages.
-	stores: HashMap<&'name str, StoreValue<'alias, 'db, 'pass, 'path, 'user>>,
+	stores: HashMap<&'name str, StoreValue<'alias, 'pass, 'path, 'user>>,
 
 	/// # Summary
 	///
@@ -33,20 +34,19 @@ pub struct Config<'alias, 'db, 'name, 'pass, 'path, 'user>
 	pub timesheets: Timesheets,
 }
 
-impl Config
+impl Config<'_, '_, '_, '_, '_>
 {
-	pub fn get_storage(&self, name: &str) -> Option<StoreValue>
+	pub fn get_store(&self, name: &str) -> Option<&Store<'_, '_, '_>>
 	{
-		let value = match self.stores.get(name)
+		return match self.stores.get(name)
 		{
-			Some(v) => v,
-			None => return None,
+			None => None,
+			Some(value) => match value
+			{
+				StoreValue::Alias(alias) => self.get_store(alias),
+				StoreValue::Storage(store) => Some(store),
+			},
 		};
 
-		return match value
-		{
-			Database(d) => d,
-			FileSystem(fs) => self.get_storage(fs),
-		};
 	}
 }

@@ -1,8 +1,8 @@
 mod adapter;
 
-use clinvoice_adapter::Connection;
+use clinvoice_adapter::Store;
 
-pub struct PostgresAdapter<'db, 'url>
+pub struct PostgresAdapter<'path, 'pass, 'user>
 {
-	connection: Connection<'db, 'url>
+	store: Store<'path, 'pass, 'user>,
 }

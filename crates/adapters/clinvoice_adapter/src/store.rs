@@ -8,6 +8,7 @@ use crate::Adapters;
 ///
 /// A `Store` can be either on a local or remote filesystem. This filesystem may or may not be a
 /// database.
+#[derive(Debug, PartialEq)]
 pub struct Store<'pass, 'path, 'user>
 {
 	/// # Summary

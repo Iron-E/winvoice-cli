@@ -3,6 +3,7 @@ use clinvoice_data::chrono::Duration;
 /// # Summary
 ///
 /// Configurations for [`Timesheet`](clinvoice_data::timesheet:Timesheet)s.
+#[derive(Debug)]
 pub struct Timesheets
 {
 	/// # Summary

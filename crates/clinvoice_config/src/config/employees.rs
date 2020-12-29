@@ -3,6 +3,7 @@ use clinvoice_data::Id;
 /// # Summary
 ///
 /// Configurations for [`Employee`](clinvoice_data::employee::Employee)s.
+#[derive(Debug)]
 pub struct Employees
 {
 	/// # Summary

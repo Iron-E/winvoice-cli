@@ -10,7 +10,7 @@ pub trait Adapter<'pass, 'path, 'user, E> where E : Error
 	/// # Summary
 	///
 	/// Get the actively focused [`Store`].
-	fn active_store(self) -> Store<'pass, 'path, 'user>;
+	fn active_store(&self) -> &Store<'pass, 'path, 'user>;
 
 	/// # Summary
 	///

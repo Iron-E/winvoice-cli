@@ -14,8 +14,11 @@ impl Display for MongoLocation<'_>
 	///
 	/// > Earth, USA, Arizona
 	///
-	/// ```rust
-	/// println!("{}", Location::new("Earth").new_inner("USA").new_inner("Arizona"));
+	/// ```no_run
+	/// use clinvoice_adapter::{Adapter, data::InsertableLocation};
+	/// use clinvoice_adapter_postgres::data::MongoLocation;
+	///
+	/// println!("{}", MongoLocation::insert("Earth").insert_inner("USA").insert_inner("Arizona"));
 	/// ```
 	fn fmt(&self, formatter: &mut Formatter<'_>) -> FmtResult
 	{
@@ -41,4 +44,3 @@ impl Display for MongoLocation<'_>
 		write!(formatter, "{}", output)
 	}
 }
-

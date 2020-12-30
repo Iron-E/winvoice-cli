@@ -8,9 +8,9 @@ impl<'path, 'pass, 'user> Adapter<'path, 'pass, 'user, PostgresError> for Postgr
 	/// # Summary
 	///
 	/// Retrieve the current [`Store`].
-	fn active_store(self) -> Store<'path, 'pass, 'user>
+	fn active_store(&self) -> &Store<'path, 'pass, 'user>
 	{
-		return self.store;
+		return &self.store;
 	}
 
 	/// # Summary

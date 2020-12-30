@@ -13,7 +13,9 @@ pub trait InsertableLocation<'name, W> where W : Wrapper<Location<'name>>
 	///
 	/// # Returns
 	///
-	/// * `Location { name, id: /* generated */ };`
+	/// ```ignore
+	/// Location { name, id: /* generated */ };
+	/// ```
 	fn insert(name: &'_ str) -> W;
 
 	/// # Summary
@@ -26,6 +28,8 @@ pub trait InsertableLocation<'name, W> where W : Wrapper<Location<'name>>
 	///
 	/// # Returns
 	///
-	/// * `Location { name, id: /* generated */, outside_id: self.unroll().id };`
+	/// ```ignore
+	/// Location { name, id: /* generated */, outside_id: self.unroll().id };
+	/// ```
 	fn insert_inner(&self, name: &'_ str) -> W;
 }

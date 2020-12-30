@@ -53,7 +53,7 @@ pub struct Invoice<Tz> where Tz : TimeZone
 	/// Given that [`super::config::InvoiceConfig::currency`] is set to '\\$', then the following
 	/// will be interpreted as \\$15.00 per hour.
 	///
-	/// ```rust
+	/// ```ignore
 	/// Invoice {hourly_rate: 15.0}
 	/// ```
 	pub hourly_rate: f32,

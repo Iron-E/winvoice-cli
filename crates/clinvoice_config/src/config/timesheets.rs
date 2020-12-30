@@ -13,7 +13,10 @@ pub struct Timesheets
 	/// # Example
 	///
 	/// ```rust
-	/// config::Timesheets {interval: Duration::minutes(5)}
+	/// use clinvoice_config::Timesheets;
+	/// use clinvoice_data::chrono::Duration;
+	///
+	/// Timesheets {interval: Duration::minutes(5)};
 	/// ```
 	pub interval: Duration,
 }

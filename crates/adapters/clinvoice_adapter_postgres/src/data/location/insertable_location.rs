@@ -13,10 +13,10 @@ impl<'name> InsertableLocation<'name, MongoLocation<'name>> for MongoLocation<'n
 	///
 	/// # Returns
 	///
-	/// ```rust
+	/// ```ignore
 	/// Location { name, id: /* generated */ };
 	/// ```
-	fn insert(name: &'_ str) -> MongoLocation<'name>
+	fn insert(name: &'_ str) -> Self
 	{
 		todo!();
 	}
@@ -31,12 +31,11 @@ impl<'name> InsertableLocation<'name, MongoLocation<'name>> for MongoLocation<'n
 	///
 	/// # Returns
 	///
-	/// ```rust
+	/// ```ignore
 	/// Location { name, id: /* generated */, outside_id: self.0.id };
 	/// ```
-	fn insert_inner(&self, name: &'_ str) -> MongoLocation<'name>
+	fn insert_inner(&self, name: &'_ str) -> Self
 	{
 		todo!()
 	}
 }
-

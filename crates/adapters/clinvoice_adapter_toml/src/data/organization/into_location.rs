@@ -1,6 +1,6 @@
-use crate::data::{location::MongoLocation, organization::MongoOrganization};
+use crate::data::{location::TomlLocation, organization::TomlOrganization};
 
-impl<'location_name, 'org_name> Into<MongoLocation<'location_name>> for MongoOrganization<'org_name>
+impl<'location_name, 'org_name> Into<TomlLocation<'location_name>> for &TomlOrganization<'org_name>
 {
 	/// # Summary
 	///
@@ -9,7 +9,7 @@ impl<'location_name, 'org_name> Into<MongoLocation<'location_name>> for MongoOrg
 	/// # Returns
 	///
 	/// The [`Location`] with `self.location_id`.
-	fn into(self) -> MongoLocation<'location_name>
+	fn into(self) -> TomlLocation<'location_name>
 	{
 		// SELECT L
 		// FROM Organization O

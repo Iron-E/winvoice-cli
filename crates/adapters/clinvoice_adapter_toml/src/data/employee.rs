@@ -5,8 +5,8 @@ mod into_person;
 
 /// # Summary
 ///
-/// Wrapper around [`Employee`] for use with MongoDB.
-pub struct MongoEmployee
+/// Wrapper around [`Employee`] for use with TomlDB.
+pub struct TomlEmployee
 (
 	Employee,
 );

@@ -1,7 +1,7 @@
 use clinvoice_adapter::Wrapper;
-use super::{Location, MongoLocation};
+use super::{Location, TomlLocation};
 
-impl<'name> Wrapper<Location<'name>> for MongoLocation<'name>
+impl<'name> Wrapper<Location<'name>> for TomlLocation<'name>
 {
 	/// # Summary
 	///

@@ -1,7 +1,7 @@
 use core::fmt::{Display, Formatter, Result as FmtResult};
-use super::MongoLocation;
+use super::TomlLocation;
 
-impl Display for MongoLocation<'_>
+impl Display for TomlLocation<'_>
 {
 	/// # Summary
 	///
@@ -16,9 +16,9 @@ impl Display for MongoLocation<'_>
 	///
 	/// ```no_run
 	/// use clinvoice_adapter::{Adapter, data::InsertableLocation};
-	/// use clinvoice_adapter_postgres::data::MongoLocation;
+	/// use clinvoice_adapter_toml::data::TomlLocation;
 	///
-	/// println!("{}", MongoLocation::insert("Earth").insert_inner("USA").insert_inner("Arizona"));
+	/// println!("{}", TomlLocation::insert("Earth").insert_inner("USA").insert_inner("Arizona"));
 	/// ```
 	fn fmt(&self, formatter: &mut Formatter<'_>) -> FmtResult
 	{

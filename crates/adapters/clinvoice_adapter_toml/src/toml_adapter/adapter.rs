@@ -1,9 +1,10 @@
+use super::TomlAdapter;
+
 use clinvoice_adapter::{Adapter, Store};
-use super::PostgresAdapter;
 
-use postgres::Error as PostgresError;
+use std::io::Error as IOError;
 
-impl<'path, 'pass, 'user> Adapter<'path, 'pass, 'user, PostgresError> for PostgresAdapter<'path, 'pass, 'user>
+impl<'path, 'pass, 'user> Adapter<'path, 'pass, 'user, IOError> for TomlAdapter<'path, 'pass, 'user>
 {
 	/// # Summary
 	///
@@ -16,22 +17,22 @@ impl<'path, 'pass, 'user> Adapter<'path, 'pass, 'user, PostgresError> for Postgr
 	/// # Summary
 	///
 	/// Initialize the postgresql database on [`Store`].
-	fn init() -> Result<(), PostgresError>
+	fn init() -> Result<(), IOError>
 	{
 		todo!()
 	}
 
 	/// # Summary
 	///
-	/// Create a new [`PostgresAdapter`].
+	/// Create a new [`TomlAdapter`].
 	///
 	/// # Remarks
 	///
 	/// # Panics
 	///
-	/// If `store.adapter` is not [`POSTGRES`](crate::Adapters::POSTGRES).
+	/// If `store.adapter` is not [`toml`](crate::Adapters::toml).
 	fn new(store: Store<'path, 'pass, 'user>) -> Self
 	{
-		return PostgresAdapter { store };
+		return TomlAdapter { store };
 	}
 }

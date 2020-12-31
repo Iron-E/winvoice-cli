@@ -4,8 +4,8 @@ mod into_organization;
 
 /// # Summary
 ///
-/// A wrapper around [`Employer`] for use with MongoDB.
-pub struct MongoEmployer
+/// A wrapper around [`Employer`] for use with TomlDB.
+pub struct TomlEmployer
 (
 	Employer,
 );

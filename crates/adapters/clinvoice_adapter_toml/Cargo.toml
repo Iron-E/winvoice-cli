@@ -1,9 +1,9 @@
 # See https://doc.rust-lang.org/cargo/reference/manifest.html
 [package]
-name = "clinvoice_adapter_postgres"
+name = "clinvoice_adapter_toml"
 version = "0.1.0"
 authors = ["Iron-E <code.iron.e@gmail.com>"]
-description = "mongodb adapter for CLInvoice."
+description = "TOML filesystem adapter for CLInvoice."
 
 edition = "2018"
 license = "GPL3"
@@ -15,5 +15,6 @@ repository = "https://www.github.com/Iron-E/clinvoice"
 clinvoice_adapter = {path="../clinvoice_adapter", version="0.1"}
 clinvoice_data = {path="../../clinvoice_data", version="0.1"}
 
-# Database
-postgres = "0.18"
+# Serialization
+serde = {version="1", features=["derive"]}
+toml = "0.5"

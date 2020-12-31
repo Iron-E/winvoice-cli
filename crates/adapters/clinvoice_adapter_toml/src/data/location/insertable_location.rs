@@ -1,7 +1,7 @@
 use clinvoice_adapter::data::InsertableLocation;
-use super::MongoLocation;
+use super::TomlLocation;
 
-impl<'name> InsertableLocation<'name, MongoLocation<'name>> for MongoLocation<'name>
+impl<'name> InsertableLocation<'name, TomlLocation<'name>> for TomlLocation<'name>
 {
 	/// # Summary
 	///

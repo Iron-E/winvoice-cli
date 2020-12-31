@@ -9,8 +9,6 @@ mod organization;
 mod person;
 mod timesheet;
 
-pub use chrono;
-pub use rusty_money;
 pub use self::{
 	client::Client,
 	employee::Employee,
@@ -23,3 +21,6 @@ pub use self::{
 	person::Person,
 	timesheet::Timesheet,
 };
+
+pub use chrono;
+pub use rusty_money;

@@ -1,6 +1,6 @@
-use std::error::Error;
-
 use crate::Store;
+
+use std::error::Error;
 
 /// # Summary
 ///

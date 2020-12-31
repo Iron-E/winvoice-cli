@@ -1,6 +1,6 @@
-use chrono::{DateTime, TimeZone};
-
 use crate::Employee;
+
+use chrono::{DateTime, TimeZone};
 
 /// # Summary
 ///

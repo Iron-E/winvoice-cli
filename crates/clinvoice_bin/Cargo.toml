@@ -12,5 +12,5 @@ repository = "https://www.github.com/Iron-E/clinvoice"
 
 [dependencies]
 # CLInvoice
-clinvoice_adapter_postgres = {path='../adapters/clinvoice_adapter_postgres', version="0.1"}
+clinvoice_adapter_toml = {path='../adapters/clinvoice_adapter_toml', version="0.1"}
 clinvoice_config = {path='../clinvoice_config', version="0.1"}

@@ -1,5 +1,5 @@
+mod crud_location;
 mod display;
-mod insertable_location;
 mod wrapper;
 
 use clinvoice_data::Location;

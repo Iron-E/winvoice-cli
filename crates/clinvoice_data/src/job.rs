@@ -19,17 +19,19 @@ use chrono::{DateTime, TimeZone};
 /// work _may_ performed.
 ///
 /// [invoice]: super::invoice::Invoice
-pub struct Job<'objectives,  'notes, 'timesheets, 'timesheet_note, Tz> where Tz : TimeZone
+pub struct Job<'objectives,  'notes, 'timesheets, 'timesheet_note, TZone> where
+	'timesheet_note : 'timesheets,
+	TZone : TimeZone,
 {
 	/// # Summary
 	///
 	/// The date upon which the client accepted the work as "complete".
-	pub date_close: Option<DateTime<Tz>>,
+	pub date_close: Option<DateTime<TZone>>,
 
 	/// # Summary
 	///
 	/// The date upon which the client requested the work.
-	pub date_open: DateTime<Tz>,
+	pub date_open: DateTime<TZone>,
 
 	/// # Summary
 	///
@@ -48,7 +50,7 @@ pub struct Job<'objectives,  'notes, 'timesheets, 'timesheet_note, Tz> where Tz 
 	/// # Summary
 	///
 	/// The [`Invoice`] which will be sent to the [`Client`] after the [`Job`] is done.
-	pub invoice: Invoice<Tz>,
+	pub invoice: Invoice<TZone>,
 
 	/// # Summary
 	///
@@ -83,5 +85,5 @@ pub struct Job<'objectives,  'notes, 'timesheets, 'timesheet_note, Tz> where Tz 
 	/// # Summary
 	///
 	/// The periods of time during which work was performed for this [`Job`].
-	pub timesheets: &'timesheets [Timesheet<'timesheet_note, Tz>]
+	pub timesheets: &'timesheets [Timesheet<'timesheet_note, TZone>]
 }

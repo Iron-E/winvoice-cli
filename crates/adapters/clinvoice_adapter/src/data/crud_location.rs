@@ -2,7 +2,7 @@ use crate::Wrapper;
 
 use clinvoice_data::Location;
 
-pub trait InsertableLocation<'name, W> where W : Wrapper<Location<'name>>
+pub trait CrudLocation<'name, W> where W : Wrapper<Location<'name>>
 {
 	/// # Summary
 	///

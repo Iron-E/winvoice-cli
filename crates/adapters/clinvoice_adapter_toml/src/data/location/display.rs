@@ -15,7 +15,7 @@ impl Display for TomlLocation<'_>
 	/// > Earth, USA, Arizona
 	///
 	/// ```no_run
-	/// use clinvoice_adapter::{Adapter, data::InsertableLocation};
+	/// use clinvoice_adapter::{Adapter, data::CrudLocation};
 	/// use clinvoice_adapter_toml::data::TomlLocation;
 	///
 	/// println!("{}", TomlLocation::insert("Earth").insert_inner("USA").insert_inner("Arizona"));

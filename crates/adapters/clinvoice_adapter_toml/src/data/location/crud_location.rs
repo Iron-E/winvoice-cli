@@ -1,7 +1,7 @@
-use clinvoice_adapter::data::InsertableLocation;
+use clinvoice_adapter::data::CrudLocation;
 use super::TomlLocation;
 
-impl<'name> InsertableLocation<'name, TomlLocation<'name>> for TomlLocation<'name>
+impl<'name> CrudLocation<'name, TomlLocation<'name>> for TomlLocation<'name>
 {
 	/// # Summary
 	///

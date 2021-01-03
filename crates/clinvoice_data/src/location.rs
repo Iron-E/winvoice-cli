@@ -14,6 +14,13 @@ pub struct Location<'name>
 	/// # Summary
 	///
 	/// The reference number of the [`Location`] in which _this_ [`Location`] resides.
+	///
+	/// # Remarks
+	///
+	/// * If there is [`Some`] `outer_id`, it means that `this` [`Location`] is located inside
+	///   another.
+	/// * If there is [`None`] `outer_id`, it means that `this` [`Location`] is an outermost
+	///   residence.
 	pub outer_id: Option<Id>,
 
 	/// # Summary

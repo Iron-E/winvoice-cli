@@ -17,7 +17,7 @@ pub trait CrudLocation<'name, W> where W : Wrapper<Location<'name>>
 	/// ```ignore
 	/// Location { name, id: /* generated */ };
 	/// ```
-	fn insert(name: &'_ str) -> W;
+	fn create(name: &'_ str) -> W;
 
 	/// # Summary
 	///
@@ -32,5 +32,5 @@ pub trait CrudLocation<'name, W> where W : Wrapper<Location<'name>>
 	/// ```ignore
 	/// Location { name, id: /* generated */, outside_id: self.unroll().id };
 	/// ```
-	fn insert_inner(&self, name: &'_ str) -> W;
+	fn create_inner(&self, name: &'_ str) -> W;
 }

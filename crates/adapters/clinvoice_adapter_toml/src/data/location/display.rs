@@ -18,7 +18,7 @@ impl Display for TomlLocation<'_>
 	/// use clinvoice_adapter::{Adapter, data::CrudLocation};
 	/// use clinvoice_adapter_toml::data::TomlLocation;
 	///
-	/// println!("{}", TomlLocation::insert("Earth").insert_inner("USA").insert_inner("Arizona"));
+	/// println!("{}", TomlLocation::create("Earth").create_inner("USA").create_inner("Arizona"));
 	/// ```
 	fn fmt(&self, formatter: &mut Formatter<'_>) -> FmtResult
 	{

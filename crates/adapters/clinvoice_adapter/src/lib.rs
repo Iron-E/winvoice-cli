@@ -5,7 +5,7 @@ pub mod data;
 mod store;
 mod wrapper;
 
-pub use {
+pub use self::{
 	adapter::Adapter,
 	adapters::Adapters,
 	store::Store,

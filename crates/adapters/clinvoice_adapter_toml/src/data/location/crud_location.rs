@@ -16,7 +16,7 @@ impl<'name> CrudLocation<'name, TomlLocation<'name>> for TomlLocation<'name>
 	/// ```ignore
 	/// Location { name, id: /* generated */ };
 	/// ```
-	fn insert(name: &'_ str) -> Self
+	fn create(name: &'_ str) -> Self
 	{
 		todo!();
 	}
@@ -34,7 +34,7 @@ impl<'name> CrudLocation<'name, TomlLocation<'name>> for TomlLocation<'name>
 	/// ```ignore
 	/// Location { name, id: /* generated */, outside_id: self.0.id };
 	/// ```
-	fn insert_inner(&self, name: &'_ str) -> Self
+	fn create_inner(&self, name: &'_ str) -> Self
 	{
 		todo!()
 	}

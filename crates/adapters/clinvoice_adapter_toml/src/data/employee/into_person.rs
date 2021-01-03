@@ -1,6 +1,6 @@
 use crate::data::{TomlEmployee, TomlPerson};
 
-impl<'name> Into<TomlPerson<'name>> for &TomlEmployee
+impl<'addr, 'contact_info, 'email, 'name> Into<TomlPerson<'addr, 'contact_info, 'email, 'name>> for &TomlEmployee<'addr, 'contact_info, 'email>
 {
 	/// # Summary
 	///
@@ -9,7 +9,7 @@ impl<'name> Into<TomlPerson<'name>> for &TomlEmployee
 	/// # Returns
 	///
 	/// The [`TomlPerson`] with `self.0.person_id`.
-	fn into(self) -> TomlPerson<'name>
+	fn into(self) -> TomlPerson<'addr, 'contact_info, 'email, 'name>
 	{
 		// SELECT P
 		// FROM Person P

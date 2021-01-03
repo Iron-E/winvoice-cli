@@ -1,4 +1,4 @@
-use crate::Employee;
+use crate::Id;
 
 use chrono::{DateTime, TimeZone};
 
@@ -17,7 +17,7 @@ pub struct Timesheet<'work_notes, TZone> where TZone : TimeZone
 	/// # Summary
 	///
 	/// The person who performed this work.
-	pub employee: Employee,
+	pub employee: Id,
 
 	/// # Summary
 	///

@@ -1,4 +1,5 @@
 mod client;
+mod contact;
 mod employee;
 mod employer;
 mod id;
@@ -11,6 +12,7 @@ mod timesheet;
 
 pub use self::{
 	client::Client,
+	contact::Contact,
 	employee::Employee,
 	employer::Employer,
 	id::Id,

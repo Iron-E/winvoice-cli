@@ -1,6 +1,6 @@
 use crate::data::{TomlEmployer, TomlOrganization};
 
-impl<'name> Into<TomlOrganization<'name>> for &TomlEmployer
+impl<'name, 'rep_title> Into<TomlOrganization<'name, 'rep_title>> for &TomlEmployer
 {
 	/// # Summary
 	///
@@ -9,7 +9,7 @@ impl<'name> Into<TomlOrganization<'name>> for &TomlEmployer
 	/// # Returns
 	///
 	/// The [`TomlOrganization`] with `self.0.organization_id`.
-	fn into(self) -> TomlOrganization<'name>
+	fn into(self) -> TomlOrganization<'name, 'rep_title>
 	{
 		// SELECT O
 		// FROM Employer E

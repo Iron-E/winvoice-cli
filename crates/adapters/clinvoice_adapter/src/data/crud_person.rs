@@ -2,7 +2,10 @@ use crate::Wrapper;
 
 use clinvoice_data::Person;
 
-pub trait CrudPerson<'name, W> where W : Wrapper<Person<'name>>
+pub trait CrudPerson<'addr, 'contact_info, 'email, 'name, W> where
+	'addr  : 'contact_info,
+	'email : 'contact_info,
+	 W     :  Wrapper<Person<'addr, 'contact_info, 'email, 'name>>,
 {
 
 }

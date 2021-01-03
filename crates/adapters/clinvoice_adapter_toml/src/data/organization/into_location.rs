@@ -1,6 +1,6 @@
 use crate::data::{location::TomlLocation, organization::TomlOrganization};
 
-impl<'location_name, 'org_name> Into<TomlLocation<'location_name>> for &TomlOrganization<'org_name>
+impl<'loc_name, 'org_name, 'org_rep_title> Into<TomlLocation<'loc_name>> for &TomlOrganization<'org_name, 'org_rep_title>
 {
 	/// # Summary
 	///
@@ -9,7 +9,7 @@ impl<'location_name, 'org_name> Into<TomlLocation<'location_name>> for &TomlOrga
 	/// # Returns
 	///
 	/// The [`Location`] with `self.location_id`.
-	fn into(self) -> TomlLocation<'location_name>
+	fn into(self) -> TomlLocation<'loc_name>
 	{
 		// SELECT L
 		// FROM Organization O

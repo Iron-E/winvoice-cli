@@ -1,5 +1,7 @@
 use crate::Id;
 
+use std::collections::HashMap;
+
 /// # Summary
 ///
 /// An `Organization` is a facilitator of business.
@@ -12,7 +14,7 @@ use crate::Id;
 /// An `Organization` has no specific affitilation to the user, and as such can be both a
 /// [`Client`](super::client::Client) _and_ an [`Emlpoyer`](super::employer::Employer) at the same
 /// time.
-pub struct Organization<'name>
+pub struct Organization<'name, 'rep_title>
 {
 	/// # Summary
 	///
@@ -29,4 +31,18 @@ pub struct Organization<'name>
 	///
 	/// The name of the [`Organization`].
 	pub name: &'name str,
+
+	/// # Summary
+	///
+	/// The [`Employee`](crate::Employee)s who represent the [`Organization`].
+	///
+	/// # Example
+	///
+	/// ```ignore
+	/// [representatives]
+	/// chief_executive_officer = 1
+	/// chief_operations_officer = 2
+	/// director_of_finance = 43
+	/// ```
+	pub representatives: HashMap<&'rep_title str, Id>,
 }

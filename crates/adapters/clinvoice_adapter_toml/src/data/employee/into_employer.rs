@@ -1,6 +1,6 @@
 use crate::data::{TomlEmployee, TomlEmployer};
 
-impl Into<TomlEmployer> for &TomlEmployee
+impl Into<TomlEmployer> for &TomlEmployee<'_, '_, '_>
 {
 	/// # Summary
 	///

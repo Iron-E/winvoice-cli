@@ -5,20 +5,18 @@ use chrono::{DateTime, TimeZone};
 /// # Summary
 ///
 /// A [`Job`] contains all of the information which pertains to the specific
-/// reasons that a [`Client`] has contacted the user's
-/// [employer](crate::Organization) / the user.
+/// reasons that a [client](Organization) has contacted the user's
+/// [employer](Organization) / the user.
 ///
 /// It also defines the scope of the problem which is to be solved before an
-/// [`Invoice`][invoice] is issued.
+/// [`Invoice`] is issued.
 ///
 /// # Remarks
 ///
 /// The [`Job`] can be thought of similarly to a support ticket. Whereas other
-/// structures may define [the method of payment][invoice], [`Client`]
-/// information, and [work periods](Timesheet)— this structure defines what
-/// work _may_ performed.
-///
-/// [invoice]: super::invoice::Invoice
+/// structures may define [the method of payment](Invoice),
+/// [client](Organization) information, and [work periods](Timesheet)— this
+/// structure defines what work _may_ performed.
 pub struct Job<'objectives,  'names, 'notes, 'rep_title, 'timesheets, 'timesheet_note, TZone> where
 	'timesheet_note : 'timesheets,
 	TZone           : 'timesheets + TimeZone,
@@ -49,7 +47,7 @@ pub struct Job<'objectives,  'names, 'notes, 'rep_title, 'timesheets, 'timesheet
 
 	/// # Summary
 	///
-	/// The [`Invoice`] which will be sent to the [`Client`] after the [`Job`] is done.
+	/// The [`Invoice`] which will be sent to the [client](Organization) after the [`Job`] is done.
 	pub invoice: Invoice<TZone>,
 
 	/// # Summary

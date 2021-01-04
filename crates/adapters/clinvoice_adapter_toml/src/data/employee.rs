@@ -1,6 +1,6 @@
 use clinvoice_data::Employee;
 
-mod into_employer;
+mod into_organization;
 mod into_person;
 
 /// # Summary

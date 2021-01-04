@@ -1,6 +1,4 @@
-mod client;
 mod employee;
-mod employer;
 mod invoice;
 mod job;
 mod location;
@@ -9,9 +7,7 @@ mod person;
 mod timesheet;
 
 pub use self::{
-	client::TomlClient,
 	employee::TomlEmployee,
-	employer::TomlEmployer,
 	invoice::TomlInvoice,
 	job::TomlJob,
 	location::TomlLocation,

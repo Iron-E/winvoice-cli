@@ -1,7 +1,7 @@
 use clinvoice_adapter::data::CrudLocation;
 use super::TomlLocation;
 
-impl<'name> CrudLocation<'name, TomlLocation<'name>> for TomlLocation<'name>
+impl<'name> CrudLocation<'name> for TomlLocation<'name>
 {
 	/// # Summary
 	///

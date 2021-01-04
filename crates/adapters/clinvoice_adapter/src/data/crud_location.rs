@@ -2,7 +2,9 @@ use crate::Wrapper;
 
 use clinvoice_data::Location;
 
-pub trait CrudLocation<'name, W> where W : Wrapper<Location<'name>>
+use core::fmt::Display;
+
+pub trait CrudLocation<'name> : Display + Wrapper<Location<'name>>
 {
 	/// # Summary
 	///
@@ -17,7 +19,7 @@ pub trait CrudLocation<'name, W> where W : Wrapper<Location<'name>>
 	/// ```ignore
 	/// Location { name, id: /* generated */ };
 	/// ```
-	fn create(name: &'_ str) -> W;
+	fn create(name: &'_ str) -> Self;
 
 	/// # Summary
 	///
@@ -32,5 +34,5 @@ pub trait CrudLocation<'name, W> where W : Wrapper<Location<'name>>
 	/// ```ignore
 	/// Location { name, id: /* generated */, outside_id: self.unroll().id };
 	/// ```
-	fn create_inner(&self, name: &'_ str) -> W;
+	fn create_inner(&self, name: &'_ str) -> Self;
 }

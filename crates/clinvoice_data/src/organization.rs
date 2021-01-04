@@ -12,8 +12,7 @@ use std::collections::HashMap;
 /// `Organization` would simply be themselves.
 ///
 /// An `Organization` has no specific affitilation to the user, and as such can be both a
-/// [`Client`](super::client::Client) _and_ an [`Emlpoyer`](super::employer::Employer) at the same
-/// time.
+/// Client and an Emlpoyer at the same time.
 pub struct Organization<'name, 'rep_title>
 {
 	/// # Summary

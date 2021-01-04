@@ -1,4 +1,4 @@
-use crate::{Client, Invoice, Timesheet};
+use crate::{Invoice, Organization, Timesheet};
 
 use chrono::{DateTime, TimeZone};
 
@@ -6,7 +6,7 @@ use chrono::{DateTime, TimeZone};
 ///
 /// A [`Job`] contains all of the information which pertains to the specific
 /// reasons that a [`Client`] has contacted the user's
-/// [`Employer`](super::employer::Employer) / the user.
+/// [employer](crate::Organization) / the user.
 ///
 /// It also defines the scope of the problem which is to be solved before an
 /// [`Invoice`][invoice] is issued.
@@ -19,9 +19,9 @@ use chrono::{DateTime, TimeZone};
 /// work _may_ performed.
 ///
 /// [invoice]: super::invoice::Invoice
-pub struct Job<'objectives,  'notes, 'timesheets, 'timesheet_note, TZone> where
+pub struct Job<'objectives,  'names, 'notes, 'rep_title, 'timesheets, 'timesheet_note, TZone> where
 	'timesheet_note : 'timesheets,
-	TZone : TimeZone,
+	TZone           : 'timesheets + TimeZone,
 {
 	/// # Summary
 	///
@@ -36,7 +36,7 @@ pub struct Job<'objectives,  'notes, 'timesheets, 'timesheet_note, TZone> where
 	/// # Summary
 	///
 	/// The client who the work is being performed for.
-	pub client: Client,
+	pub client: Organization<'names, 'rep_title>,
 
 	/// # Summary
 	///

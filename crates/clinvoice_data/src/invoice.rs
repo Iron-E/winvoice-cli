@@ -1,5 +1,7 @@
 use chrono::{DateTime, TimeZone};
 
+use rusty_money::Money;
+
 /// # Summary
 ///
 /// An `Invoice` represents the accounts receivable for the user or their employer.
@@ -47,14 +49,5 @@ pub struct Invoice<TZone> where TZone : TimeZone
 	/// ```sh
 	/// clinvoice config -c '\$'
 	/// ```
-	///
-	/// # Example
-	///
-	/// Given that [`super::config::InvoiceConfig::currency`] is set to '\\$', then the following
-	/// will be interpreted as \\$15.00 per hour.
-	///
-	/// ```ignore
-	/// Invoice {hourly_rate: 15.0}
-	/// ```
-	pub hourly_rate: f32,
+	pub hourly_rate: Money,
 }

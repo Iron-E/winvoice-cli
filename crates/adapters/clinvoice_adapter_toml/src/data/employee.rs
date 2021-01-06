@@ -6,7 +6,7 @@ mod into_person;
 /// # Summary
 ///
 /// Wrapper around [`Employee`] for use with TomlDB.
-pub struct TomlEmployee<'addr, 'contact_info, 'employee>
+pub struct TomlEmployee<'contact_info, 'email, 'phone>
 (
-	Employee<'addr, 'contact_info, 'employee>,
+	Employee<'contact_info, 'email, 'phone>,
 );

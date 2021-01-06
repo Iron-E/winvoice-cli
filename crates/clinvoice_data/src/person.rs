@@ -3,12 +3,13 @@ use crate::{Contact, Id};
 /// # Summary
 ///
 /// A person is a physical human being.
-pub struct Person<'addr, 'contact_info, 'email, 'name>
+pub struct Person<'contact_info, 'email, 'name, 'phone>
 {
 	/// # Summary
 	///
-	/// Contact information specific to the [`Organization`] that the [`Employee`] does work for.
-	pub contact_info: &'contact_info [Contact<'addr, 'email,>],
+	/// Contact information specific to the individual [`Person`], rather than a corporation they
+	/// work at.
+	pub contact_info: &'contact_info [Contact<'email, 'phone>],
 
 	/// # Summary
 	///

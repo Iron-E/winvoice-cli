@@ -1,4 +1,4 @@
-use crate::{Invoice, Organization, Timesheet};
+use crate::{Id, Invoice};
 
 use chrono::{DateTime, TimeZone};
 
@@ -17,9 +17,7 @@ use chrono::{DateTime, TimeZone};
 /// structures may define [the method of payment](Invoice),
 /// [client](Organization) information, and [work periods](Timesheet)— this
 /// structure defines what work _may_ performed.
-pub struct Job<'objectives,  'names, 'notes, 'rep_title, 'timesheets, 'timesheet_note, TZone> where
-	'timesheet_note : 'timesheets,
-	TZone           : 'timesheets + TimeZone,
+pub struct Job<'objectives, 'notes, TZone> where TZone : TimeZone,
 {
 	/// # Summary
 	///
@@ -28,13 +26,13 @@ pub struct Job<'objectives,  'names, 'notes, 'rep_title, 'timesheets, 'timesheet
 
 	/// # Summary
 	///
-	/// The date upon which the client requested the work.
+	/// The [date](DateTime) upon which the client requested the work.
 	pub date_open: DateTime<TZone>,
 
 	/// # Summary
 	///
-	/// The client who the work is being performed for.
-	pub client: Organization<'names, 'rep_title>,
+	/// The [`Organization`](crate::Organization) who the work is being performed for.
+	pub client_id: Id,
 
 	/// # Summary
 	///
@@ -43,7 +41,7 @@ pub struct Job<'objectives,  'names, 'notes, 'rep_title, 'timesheets, 'timesheet
 	/// # Remarks
 	///
 	/// Should be automatically generated.
-	pub id: u64,
+	pub id: Id,
 
 	/// # Summary
 	///
@@ -79,9 +77,4 @@ pub struct Job<'objectives,  'names, 'notes, 'rep_title, 'timesheets, 'timesheet
 	/// * Contact customer support for X hardware device.
 	/// ```
 	pub objectives: &'objectives str,
-
-	/// # Summary
-	///
-	/// The periods of time during which work was performed for this [`Job`].
-	pub timesheets: &'timesheets [Timesheet<'timesheet_note, TZone>]
 }

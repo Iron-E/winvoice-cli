@@ -4,14 +4,14 @@ use crate::{Contact, Id};
 ///
 /// An `Employee` is a [`Person`](super::person::Person) who completes [`Job`](super::job::Job)s
 /// for an [employer](crate::Organization).
-pub struct Employee<'addr, 'contact_info, 'email> where
-	'addr  : 'contact_info,
+pub struct Employee<'contact_info, 'email, 'phone> where
 	'email : 'contact_info,
+	'phone : 'contact_info,
 {
 	/// # Summary
 	///
 	/// Contact information specific to the [`Organization`] that the [`Employee`] does work for.
-	pub contact_info: &'contact_info [Contact<'addr, 'email>],
+	pub contact_info: &'contact_info [Contact<'email, 'phone>],
 
 	/// # Summary
 	///

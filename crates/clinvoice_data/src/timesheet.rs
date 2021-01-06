@@ -16,8 +16,13 @@ pub struct Timesheet<'work_notes, TZone> where TZone : TimeZone
 {
 	/// # Summary
 	///
-	/// The person who performed this work.
-	pub employee: Id,
+	/// The ID of the [`Employee`](crate::Employee) who performed this work.
+	pub employee_id: Id,
+
+	/// # Summary
+	///
+	/// The ID of the [`Job`](crate::Job) which this [`Timesheet`] is in reference to.
+	pub job_id: Id,
 
 	/// # Summary
 	///

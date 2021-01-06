@@ -1,16 +1,17 @@
-use crate::Wrapper;
+use crate::{data::{CrudLocation, CrudOrganization, CrudPerson}, Wrapper};
 
-use clinvoice_data::{Employee, Organization, Person};
+use clinvoice_data::Employee;
 
-pub trait CrudEmployee<'addr, 'contact_info, 'email, 'name, 'rep_title, WOrganization, WPerson> :
-	Into<WOrganization> +
-	Into<WPerson> +
-	Wrapper<Employee<'addr, 'contact_info, 'email>> +
+pub trait CrudEmployee<'contact_info, 'email, 'name, 'phone, 'rep_title, CLoc, COrg, CPrsn> :
+	Into<COrg> +
+	Into<CPrsn> +
+	Wrapper<Employee<'contact_info, 'email, 'phone>> +
 where
-	'addr  : 'contact_info,
 	'email : 'contact_info,
-	 WOrganization : Wrapper<Organization<'name, 'rep_title>>,
-	 WPerson       : Wrapper<Person<'addr, 'contact_info, 'email, 'name>>,
+	'phone : 'contact_info,
+	 CLoc  : CrudLocation<'name>,
+	 COrg  : CrudOrganization<'contact_info, 'email, 'name, 'phone, 'rep_title, Self, CLoc, CPrsn>,
+	 CPrsn : CrudPerson<'contact_info, 'email, 'name, 'phone>,
 {
 
 }

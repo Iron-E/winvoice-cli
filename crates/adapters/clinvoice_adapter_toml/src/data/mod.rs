@@ -6,7 +6,8 @@ mod organization;
 mod person;
 mod timesheet;
 
-pub use self::{
+pub use
+{
 	employee::TomlEmployee,
 	invoice::TomlInvoice,
 	job::TomlJob,

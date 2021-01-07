@@ -1,3 +1,3 @@
 mod into_location;
 
-clinvoice_adapter::newtype_organization!(TomlOrganization);
+clinvoice_adapter::Newtype!(Organization => TomlOrganization);

@@ -1,23 +1,22 @@
 #[macro_export]
-macro_rules! newtype_job
+macro_rules! NewtypeJob
 {
-	($name:ident) =>
+	($name: ident, $($life: lifetime)*, $T: ident) =>
 	{
 		use clinvoice_data::{chrono::TimeZone, Job};
 
 		/// # Summary
 		///
 		/// A wrapper around [`Job`] for use with TomlDB.
-		pub struct $name<'objectives, 'notes, TZone> (Job<'objectives, 'notes, TZone>) where TZone : TimeZone;
+		pub struct $name<$($life),*, $T> (Job<$($life),*, $T>) where $T : TimeZone;
 
-		impl<'objectives, 'notes, TZone> From<Job<'objectives, 'notes, TZone>>
-		for $name<'objectives, 'notes, TZone>
-		where TZone : TimeZone
+		impl<$($life),*, $T> From<Job<$($life),*, $T>> for $name<$($life),*, $T> where
+			$T : TimeZone
 		{
-			fn from(job: Job<'objectives, 'notes, TZone>) -> Self
+			fn from(job: Job<$($life),*, $T>) -> Self
 			{
 				return $name (job);
 			}
 		}
-	}
+	};
 }

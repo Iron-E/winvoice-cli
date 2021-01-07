@@ -1,5 +1,6 @@
 #![macro_use]
 
+mod newtype;
 mod newtype_employee;
 mod newtype_invoice;
 mod newtype_job;

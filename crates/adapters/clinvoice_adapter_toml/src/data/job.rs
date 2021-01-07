@@ -1,1 +1,1 @@
-clinvoice_adapter::newtype_job!(TomlJob);
+clinvoice_adapter::Newtype!(Job => TomlJob);

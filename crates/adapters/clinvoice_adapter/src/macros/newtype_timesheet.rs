@@ -1,20 +1,19 @@
 #[macro_export]
-macro_rules! newtype_timesheet
+macro_rules! NewtypeTimesheet
 {
-	($name:ident) =>
+	($name: ident, $($life: lifetime)*, $T: ident) =>
 	{
 		use clinvoice_data::{chrono::TimeZone, Timesheet};
 
 		/// # Summary
 		///
 		/// Wrapper around [`Employee`].
-		pub struct $name<'work_notes, TZone> (Timesheet<'work_notes, TZone>) where TZone : TimeZone;
+		pub struct $name<$($life),*, $T> (Timesheet<$($life),*, $T>) where $T : TimeZone;
 
-		impl<'work_notes, TZone> From<Timesheet<'work_notes, TZone>>
-		for $name<'work_notes, TZone>
-		where TZone : TimeZone
+		impl<$($life),*, $T> From<Timesheet<$($life),*, $T>> for $name<$($life),*, $T> where
+			$T : TimeZone
 		{
-			fn from(timesheet: Timesheet<'work_notes, TZone>) -> Self
+			fn from(timesheet: Timesheet<$($life),*, $T>) -> Self
 			{
 				return $name (timesheet);
 			}

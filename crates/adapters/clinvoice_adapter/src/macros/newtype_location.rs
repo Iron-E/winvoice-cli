@@ -1,18 +1,18 @@
 #[macro_export]
-macro_rules! newtype_location
+macro_rules! NewtypeLocation
 {
-	($name:ident) =>
+	($name: ident, $($life: lifetime)*) =>
 	{
 		use clinvoice_data::Location;
 
 		/// # Summary
 		///
 		/// Wrapper around [`Employee`].
-		pub struct $name<'name> (Location<'name>);
+		pub struct $name<$($life),*> (Location<$($life),*>);
 
-		impl<'name> From<Location<'name>> for $name<'name>
+		impl<$($life),*> From<Location<$($life),*>> for $name<$($life),*>
 		{
-			fn from(location: Location<'name>) -> Self
+			fn from(location: Location<$($life),*>) -> Self
 			{
 				return $name (location);
 			}

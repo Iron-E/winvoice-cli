@@ -1,18 +1,18 @@
 #[macro_export]
-macro_rules! newtype_organization
+macro_rules! NewtypeOrganization
 {
-	($name:ident) =>
+	($name: ident, $($life: lifetime)*) =>
 	{
 		use clinvoice_data::Organization;
 
 		/// # Summary
 		///
 		/// Wrapper around [`Employee`].
-		pub struct $name<'name, 'rep_title> (Organization<'name, 'rep_title>);
+		pub struct $name<$($life),*> (Organization<$($life),*>);
 
-		impl<'name, 'rep_title> From<Organization<'name, 'rep_title>> for $name<'name, 'rep_title>
+		impl<$($life),*> From<Organization<$($life),*>> for $name<$($life),*>
 		{
-			fn from(organization: Organization<'name, 'rep_title>) -> Self
+			fn from(organization: Organization<$($life),*>) -> Self
 			{
 				return $name (organization);
 			}

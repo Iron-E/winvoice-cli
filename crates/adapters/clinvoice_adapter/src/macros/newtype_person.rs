@@ -1,19 +1,20 @@
 #[macro_export]
-macro_rules! newtype_person
+macro_rules! NewtypePerson
 {
-	($name:ident) =>
+	($name: ident, $($life: lifetime)*) =>
 	{
 		use clinvoice_data::Person;
 
 		/// # Summary
 		///
 		/// A wrapper around [`Job`] for use with TomlDB.
-		pub struct $name<'contact_info, 'email, 'name, 'phone> (Person<'contact_info, 'email, 'name, 'phone>);
+		pub struct $name<$($life),*> (Person<$($life),*>);
 
-		impl<'contact_info, 'email, 'name, 'phone> From<Person<'contact_info, 'email, 'name, 'phone>>
-		for $name<'contact_info, 'email, 'name, 'phone>
+		impl<$($life),*> From<Person<$($life),*>> for $name<$($life),*> where
+			'email : 'contact_info,
+			'phone : 'contact_info,
 		{
-			fn from(person: Person<'contact_info, 'email, 'name, 'phone>) -> Self
+			fn from(person: Person<$($life),*>) -> Self
 			{
 				return $name (person);
 			}

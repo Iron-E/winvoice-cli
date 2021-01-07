@@ -1,1 +1,1 @@
-clinvoice_adapter::newtype_timesheet!(TomlTimesheet);
+clinvoice_adapter::Newtype!(Timesheet => TomlTimesheet);

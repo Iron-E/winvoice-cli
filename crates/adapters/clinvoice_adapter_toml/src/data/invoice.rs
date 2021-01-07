@@ -1,1 +1,1 @@
-clinvoice_adapter::newtype_invoice!(TomlInvoice);
+clinvoice_adapter::Newtype!(Invoice => TomlInvoice);

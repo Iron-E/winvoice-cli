@@ -1,1 +1,1 @@
-clinvoice_adapter::newtype_person!(TomlPerson);
+clinvoice_adapter::Newtype!(Person => TomlPerson);

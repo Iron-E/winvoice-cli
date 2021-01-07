@@ -1,10 +1,10 @@
-use crate::Wrapper;
-
 use clinvoice_data::Location;
 
 use core::fmt::Display;
 
-pub trait CrudLocation<'name> : Display + Wrapper<Location<'name>>
+pub trait CrudLocation<'name> :
+	Display +
+	From<Location<'name>> +
 {
 	/// # Summary
 	///

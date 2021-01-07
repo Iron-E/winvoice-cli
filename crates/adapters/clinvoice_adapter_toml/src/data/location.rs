@@ -1,6 +1,6 @@
 mod crud_location;
+mod from_location;
 mod display;
-mod wrapper;
 
 use clinvoice_data::Location;
 

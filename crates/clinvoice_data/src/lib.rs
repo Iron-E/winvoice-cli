@@ -8,7 +8,8 @@ mod organization;
 mod person;
 mod timesheet;
 
-pub use self::{
+pub use
+{
 	contact::Contact,
 	employee::Employee,
 	id::Id,

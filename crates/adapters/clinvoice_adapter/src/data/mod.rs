@@ -7,7 +7,8 @@ mod crud_organization;
 mod crud_person;
 mod crud_timesheet;
 
-pub use self::{
+pub use
+{
 	crud_employee::CrudEmployee,
 	crud_invoice::CrudInvoice,
 	crud_job::CrudJob,

@@ -1,10 +1,11 @@
 use clinvoice_data::{chrono::TimeZone, Job, Organization};
 
-pub trait CrudJob<'objectives, 'name, 'notes, 'rep_title, TZone> :
-	From<Job<'objectives, 'notes, TZone>> +
+pub trait CrudJob<'objectives, 'name, 'notes, 'rep_title, 'timesheets, 'work_notes, TZone> :
+	From<Job<'objectives, 'notes, 'timesheets, 'work_notes, TZone>> +
 	Into<Organization<'name, 'rep_title>> +
 where
-	 TZone : TimeZone,
+	 'work_notes : 'timesheets,
+	  TZone : 'timesheets + TimeZone,
 {
 
 }

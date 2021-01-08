@@ -1,4 +1,4 @@
-use crate::{Id, Invoice};
+use crate::{Id, Invoice, Timesheet};
 
 use chrono::{DateTime, TimeZone};
 
@@ -17,7 +17,9 @@ use chrono::{DateTime, TimeZone};
 /// structures may define [the method of payment](Invoice),
 /// [client](Organization) information, and [work periods](Timesheet)— this
 /// structure defines what work _may_ performed.
-pub struct Job<'objectives, 'notes, TZone> where TZone : TimeZone,
+pub struct Job<'objectives, 'notes, 'timesheets, 'work_notes, TZone> where
+	'work_notes : 'timesheets,
+	 TZone : 'timesheets + TimeZone,
 {
 	/// # Summary
 	///
@@ -77,4 +79,9 @@ pub struct Job<'objectives, 'notes, TZone> where TZone : TimeZone,
 	/// * Contact customer support for X hardware device.
 	/// ```
 	pub objectives: &'objectives str,
+
+	/// # Summary
+	///
+	/// The periods of time during which work was performed for this [`Job`].
+	pub timesheets: &'timesheets [Timesheet<'work_notes, TZone>],
 }

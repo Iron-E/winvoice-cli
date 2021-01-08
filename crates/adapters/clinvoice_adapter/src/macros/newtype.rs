@@ -35,7 +35,7 @@ macro_rules! Newtype
 
 	(Job => $name: ident) =>
 	{
-		clinvoice_adapter::NewtypeJob!($name, 'objectives 'notes, TZone);
+		clinvoice_adapter::NewtypeJob!($name, 'objectives 'notes 'timesheets 'work_notes, TZone);
 	};
 
 	(Location => $name: ident) =>

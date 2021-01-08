@@ -21,11 +21,6 @@ pub struct Timesheet<'work_notes, TZone> where TZone : TimeZone
 
 	/// # Summary
 	///
-	/// The ID of the [`Job`](crate::Job) which this [`Timesheet`] is in reference to.
-	pub job_id: Id,
-
-	/// # Summary
-	///
 	/// The time at which this period of work began.
 	pub time_begin: DateTime<TZone>,
 

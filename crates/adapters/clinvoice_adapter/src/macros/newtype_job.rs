@@ -11,7 +11,8 @@ macro_rules! NewtypeJob
 		pub struct $name<$($life),*, $T> (Job<$($life),*, $T>) where $T : TimeZone;
 
 		impl<$($life),*, $T> From<Job<$($life),*, $T>> for $name<$($life),*, $T> where
-			$T : TimeZone
+			'work_notes : 'timesheets,
+			 $T : 'timesheets + TimeZone,
 		{
 			fn from(job: Job<$($life),*, $T>) -> Self
 			{

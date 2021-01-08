@@ -17,7 +17,7 @@ impl<'path, 'pass, 'user> Adapter<'path, 'pass, 'user, IOError> for TomlAdapter<
 	/// # Summary
 	///
 	/// Initialize the postgresql database on [`Store`].
-	fn init() -> Result<(), IOError>
+	fn init(&self) -> Result<(), IOError>
 	{
 		todo!()
 	}

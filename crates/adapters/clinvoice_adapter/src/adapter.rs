@@ -15,7 +15,7 @@ pub trait Adapter<'pass, 'path, 'user, E> where E : Error
 	/// # Summary
 	///
 	/// Initialize the database for a given [`Store`].
-	fn init() -> Result<(), E>;
+	fn init(&self) -> Result<(), E>;
 
 	/// # Summary
 	///

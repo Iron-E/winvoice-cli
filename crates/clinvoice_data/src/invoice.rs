@@ -1,5 +1,4 @@
 use chrono::{DateTime, TimeZone};
-
 use rusty_money::Money;
 
 /// # Summary
@@ -27,7 +26,7 @@ pub struct Invoice<TZone> where TZone : TimeZone
 	/// # Remarks
 	///
 	/// Upon running `clinvoice new`, this field is left blank. This is to signify that the
-	/// underlying [`Invoice`] has not been sent to the client.
+	/// underlying [`Invoice`] has not paid by the client.
 	///
 	/// This field will be updated when running `clinvoice rec`/`receive`
 	pub date_paid: Option<DateTime<TZone>>,

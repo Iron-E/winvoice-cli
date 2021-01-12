@@ -1,6 +1,6 @@
 use crate::data::{location::TomlLocation, organization::TomlOrganization};
 
-impl<'loc_name, 'org_name, 'org_rep_title> Into<TomlLocation<'loc_name>> for &TomlOrganization<'org_name, 'org_rep_title>
+impl<'loc_name, 'org_name> Into<TomlLocation<'loc_name>> for &TomlOrganization<'org_name>
 {
 	/// # Summary
 	///

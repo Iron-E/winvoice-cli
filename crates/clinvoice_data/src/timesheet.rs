@@ -27,6 +27,10 @@ pub struct Timesheet<'work_notes, TZone> where TZone : TimeZone
 	/// # Summary
 	///
 	/// The time at which this period of work ended.
+	///
+	/// # Remarks
+	///
+	/// Is [`Option`] because the time that a work period ends is not known upon first creation.
 	pub time_end: Option<DateTime<TZone>>,
 
 	/// # Summary

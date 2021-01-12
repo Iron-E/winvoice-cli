@@ -25,7 +25,7 @@ macro_rules! Newtype
 {
 	(Employee => $name: ident) =>
 	{
-		clinvoice_adapter::NewtypeEmployee!($name, 'contact_info 'email 'phone);
+		clinvoice_adapter::NewtypeEmployee!($name, 'contact_info 'email 'phone 'title);
 	};
 
 	(Invoice => $name: ident) =>
@@ -45,7 +45,7 @@ macro_rules! Newtype
 
 	(Organization => $name: ident) =>
 	{
-		clinvoice_adapter::NewtypeOrganization!($name, 'name 'rep_title);
+		clinvoice_adapter::NewtypeOrganization!($name, 'name);
 	};
 
 	(Person => $name: ident) =>

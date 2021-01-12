@@ -1,6 +1,6 @@
 use crate::Id;
 
-use std::collections::HashMap;
+use std::collections::HashSet;
 
 /// # Summary
 ///
@@ -13,7 +13,7 @@ use std::collections::HashMap;
 ///
 /// An `Organization` has no specific affitilation to the user, and as such can be both a
 /// Client and an Emlpoyer at the same time.
-pub struct Organization<'name, 'rep_title>
+pub struct Organization<'name>
 {
 	/// # Summary
 	///
@@ -43,5 +43,5 @@ pub struct Organization<'name, 'rep_title>
 	/// chief_operations_officer = 2
 	/// director_of_finance = 43
 	/// ```
-	pub representatives: HashMap<&'rep_title str, Id>,
+	pub representatives: HashSet<Id>,
 }

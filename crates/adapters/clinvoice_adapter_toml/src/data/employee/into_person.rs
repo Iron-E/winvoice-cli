@@ -1,6 +1,7 @@
 use crate::data::{TomlEmployee, TomlPerson};
 
-impl<'addr, 'contact_info, 'email, 'name> Into<TomlPerson<'addr, 'contact_info, 'email, 'name>> for &TomlEmployee<'addr, 'contact_info, 'email>
+impl<'addr, 'contact_info, 'email, 'name, 'title> Into<TomlPerson<'addr, 'contact_info, 'email, 'name>>
+for &TomlEmployee<'addr, 'contact_info, 'email, 'title>
 {
 	/// # Summary
 	///

@@ -4,7 +4,7 @@ use crate::{Contact, Id};
 ///
 /// An `Employee` is a [`Person`](super::person::Person) who completes [`Job`](super::job::Job)s
 /// for an [employer](crate::Organization).
-pub struct Employee<'contact_info, 'email, 'phone> where
+pub struct Employee<'contact_info, 'email, 'phone, 'title> where
 	'email : 'contact_info,
 	'phone : 'contact_info,
 {
@@ -30,4 +30,14 @@ pub struct Employee<'contact_info, 'email, 'phone> where
 	/// The reference number of the [`Person`](super::person::Person) which this
 	/// [`Employee`] is in reference to.
 	pub person_id: Id,
+
+	/// # Summary
+	///
+	/// The [`Employee`]'s title  in the company.
+	///
+	/// # Example
+	///
+	/// * CEO
+	/// * Media Manager
+	pub title: &'title str,
 }

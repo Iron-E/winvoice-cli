@@ -1,10 +1,10 @@
 use clinvoice_data::{Employee, Location, Organization};
 
-use std::collections::HashMap;
+use std::collections::HashSet;
 
-pub trait CrudOrganization<'contact_info, 'email, 'name, 'phone, 'rep_title> :
-	From<Organization<'name, 'rep_title>> +
-	Into<HashMap<&'rep_title str, Employee<'contact_info, 'email, 'phone>>> +
+pub trait CrudOrganization<'contact_info, 'email, 'name, 'phone, 'title> :
+	From<Organization<'name>> +
+	Into<HashSet<Employee<'contact_info, 'email, 'phone, 'title>>> +
 	Into<Location<'name>> +
 where
 	'email : 'contact_info,

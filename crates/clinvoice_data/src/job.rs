@@ -1,5 +1,4 @@
 use crate::{Id, Invoice, Timesheet};
-
 use chrono::{DateTime, TimeZone};
 
 /// # Summary

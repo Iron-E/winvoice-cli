@@ -3,16 +3,8 @@ mod invoices;
 mod store_value;
 mod timesheets;
 
-pub use
-{
-	employees::Employees,
-	invoices::Invoices,
-	store_value::StoreValue,
-	timesheets::Timesheets,
-};
-
+pub use {employees::Employees, invoices::Invoices, store_value::StoreValue, timesheets::Timesheets};
 use clinvoice_adapter::Store;
-
 use std::collections::HashMap;
 
 /// # Summary

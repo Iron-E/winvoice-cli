@@ -1,5 +1,4 @@
 use super::AdapterMismatchError;
-
 use core::fmt::{Display, Formatter, Result as FmtResult};
 
 impl Display for AdapterMismatchError<'_>

@@ -1,5 +1,4 @@
 use crate::{AdapterMismatchError, Store};
-
 use std::error::Error;
 
 /// # Summary

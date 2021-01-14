@@ -1,5 +1,4 @@
 use crate::Id;
-
 use chrono::{DateTime, TimeZone};
 
 /// # Summary

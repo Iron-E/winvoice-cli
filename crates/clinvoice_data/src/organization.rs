@@ -1,5 +1,4 @@
 use crate::Id;
-
 use std::collections::HashSet;
 
 /// # Summary

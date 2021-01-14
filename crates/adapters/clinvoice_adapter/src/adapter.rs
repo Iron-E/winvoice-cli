@@ -1,11 +1,11 @@
-use crate::Store;
+use crate::{AdapterMismatchError, Store};
 
 use std::error::Error;
 
 /// # Summary
 ///
 /// Defines a set of functions which are necessary to adapt across DBMS.
-pub trait Adapter<'pass, 'path, 'user, E> where E : Error
+pub trait Adapter<'pass, 'path, 'user, E> : Sized where E : Error
 {
 	/// # Summary
 	///
@@ -28,5 +28,5 @@ pub trait Adapter<'pass, 'path, 'user, E> where E : Error
 	/// # Returns
 	///
 	/// A new [`Adapter`], that remembers the desired [`Store`].
-	fn new(store: Store<'pass, 'path, 'user>) -> Self;
+	fn new<'msg>(store: Store<'pass, 'path, 'user>) -> Result<Self, AdapterMismatchError<'msg>>;
 }

@@ -20,9 +20,9 @@ pub trait CrudLocation<'err, 'name> :
 	/// # Returns
 	///
 	/// ```ignore
-	/// Location { name, id: /* generated */ };
+	/// Location {name, id: /* generated */};
 	/// ```
-	fn create(name: &'_ str) -> Self;
+	fn create(name: &'_ str) -> Result<Self, &'err dyn Error>;
 
 	/// # Summary
 	///
@@ -35,9 +35,9 @@ pub trait CrudLocation<'err, 'name> :
 	/// # Returns
 	///
 	/// ```ignore
-	/// Location { name, id: /* generated */, outside_id: self.unroll().id };
+	/// Location {name, id: /* generated */, outside_id: self.unroll().id};
 	/// ```
-	fn create_inner(&self, name: &'_ str) -> Self;
+	fn create_inner(&self, name: &'_ str) -> Result<Self, &'err dyn Error>;
 
 	/// # Summary
 	///

@@ -1,7 +1,9 @@
-use clinvoice_adapter::data::CrudLocation;
 use super::TomlLocation;
+use clinvoice_adapter::data::{AnyValue, CrudLocation};
+use clinvoice_data::Id;
+use std::error::Error;
 
-impl<'name> CrudLocation<'name> for TomlLocation<'name>
+impl<'err, 'name> CrudLocation<'err, 'name> for TomlLocation<'name>
 {
 	/// # Summary
 	///
@@ -14,9 +16,9 @@ impl<'name> CrudLocation<'name> for TomlLocation<'name>
 	/// # Returns
 	///
 	/// ```ignore
-	/// Location { name, id: /* generated */ };
+	/// Location {name, id: /* generated */};
 	/// ```
-	fn create(name: &'_ str) -> Self
+	fn create(name: &'_ str) -> Result<Self, &'err dyn Error>
 	{
 		todo!();
 	}
@@ -32,9 +34,14 @@ impl<'name> CrudLocation<'name> for TomlLocation<'name>
 	/// # Returns
 	///
 	/// ```ignore
-	/// Location { name, id: /* generated */, outside_id: self.0.id };
+	/// Location {name, id: /* generated */, outside_id: self.0.id};
 	/// ```
-	fn create_inner(&self, name: &'_ str) -> Self
+	fn create_inner(&self, name: &'_ str) -> Result<Self, &'err dyn Error>
+	{
+		todo!()
+	}
+
+	fn retrieve<'arr>(id: AnyValue<Id>, name: AnyValue<&'_ str>) -> Result<&'arr [Self], &'err dyn Error>
 	{
 		todo!()
 	}

@@ -28,7 +28,7 @@ impl<'path, 'pass, 'user> Adapter<'path, 'pass, 'user, IOError> for TomlAdapter<
 		}
 
 		fs::create_dir_all(store_path)?;
-		for dir in vec![paths::EMPLOYEE, paths::JOB, paths::LOCATION, paths::ORGANIZATION, paths::PERSON]
+		for dir in &[paths::EMPLOYEE, paths::JOB, paths::LOCATION, paths::ORGANIZATION, paths::PERSON]
 		{
 			fs::create_dir(store_path.join(Path::new(dir)))?;
 		}
@@ -55,5 +55,40 @@ impl<'path, 'pass, 'user> Adapter<'path, 'pass, 'user, IOError> for TomlAdapter<
 			Adapters::TOML => Ok(TomlAdapter {store}),
 			_ => Err(Adapters::TOML.mismatch(store.adapter)),
 		}
+	}
+}
+
+#[cfg(test)]
+mod tests
+{
+	use super::{Adapter, Adapters, fs, ErrorKind, IOError, Path, Store, TomlAdapter};
+	use std::env;
+
+	#[test]
+	fn test_init() -> Result<(), IOError>
+	{
+		let mut temp_path_buf = env::temp_dir();
+		temp_path_buf.push("clinvoice_adapter_toml_test_init");
+
+		let temp_path: &Path = temp_path_buf.as_path();
+		if temp_path.is_dir() { fs::remove_dir_all(temp_path)?; }
+
+		let adapter = TomlAdapter::new(
+			Store
+			{
+				adapter: Adapters::TOML,
+				password: None,
+				path: temp_path.to_str().ok_or::<IOError>(IOError::new(ErrorKind::InvalidInput, "Invalid path unicode."))?,
+				username: None,
+			}
+		).unwrap();
+
+		// Test that the dir can be created successfully.
+		assert!(adapter.init().is_ok());
+
+		// Test that the dir won't be re-initted when pre-existing.
+		assert!(adapter.init().is_err());
+
+		return Ok(());
 	}
 }

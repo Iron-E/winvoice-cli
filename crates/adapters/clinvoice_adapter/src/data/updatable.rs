@@ -3,7 +3,7 @@ use std::error::Error;
 /// # Summary
 ///
 /// A structure which can be updated on some remote [`Store`](crate::Store).
-pub trait Updatable<'err>
+pub trait Updatable
 {
 	/// # Summary
 	///
@@ -15,5 +15,5 @@ pub trait Updatable<'err>
 	/// * An `Error`, when:
 	///   * `self.id` had not already been `create`d.
 	///   * Something goes wrong.
-	fn update(&self) -> Result<(), &'err dyn Error>;
+	fn update<'err>(&self) -> Result<(), &'err dyn Error>;
 }

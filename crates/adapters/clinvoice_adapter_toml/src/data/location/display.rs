@@ -1,7 +1,7 @@
 use super::TomlLocation;
 use core::fmt::{Display, Formatter, Result as FmtResult};
 
-impl Display for TomlLocation<'_>
+impl Display for TomlLocation<'_, '_, '_, '_>
 {
 	/// # Summary
 	///
@@ -25,7 +25,7 @@ impl Display for TomlLocation<'_>
 	/// ```
 	fn fmt(&self, formatter: &mut Formatter<'_>) -> FmtResult
 	{
-		let output = String::from(self.0.name);
+		let output = String::from(self.location.name);
 
 		loop
 		{

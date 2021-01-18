@@ -1,13 +1,15 @@
 use super::{AnyValue, Deletable, Updatable};
+use crate::Store;
 use clinvoice_data::{Id, Location};
 use core::fmt::Display;
 use std::error::Error;
 
-pub trait CrudLocation<'err, 'name> :
-	Deletable<'err> +
+pub trait LocationAdapter<'name, 'pass, 'path, 'user> :
+	Deletable<'pass, 'path, 'user> +
 	Display +
-	From<Location<'name>> +
-	Updatable<'err> +
+	Into<Location<'name>> +
+	Into<Store<'pass, 'path, 'user>> +
+	Updatable +
 {
 	/// # Summary
 	///
@@ -22,7 +24,7 @@ pub trait CrudLocation<'err, 'name> :
 	/// ```ignore
 	/// Location {name, id: /* generated */};
 	/// ```
-	fn create(name: &'_ str) -> Result<Self, &'err dyn Error>;
+	fn create<'err>(name: &'_ str, store: Store<'pass, 'path, 'user>) -> Result<Self, &'err dyn Error>;
 
 	/// # Summary
 	///
@@ -37,7 +39,12 @@ pub trait CrudLocation<'err, 'name> :
 	/// ```ignore
 	/// Location {name, id: /* generated */, outside_id: self.unroll().id};
 	/// ```
-	fn create_inner(&self, name: &'_ str) -> Result<Self, &'err dyn Error>;
+	fn create_inner<'err>(&self, name: &'_ str) -> Result<Self, &'err dyn Error>;
+
+	/// # Summary
+	///
+	/// Initialize the database for a given [`Store`].
+	fn init<'err>(store: Store<'pass, 'path, 'user>) -> Result<(), &'err dyn Error>;
 
 	/// # Summary
 	///
@@ -51,5 +58,9 @@ pub trait CrudLocation<'err, 'name> :
 	///
 	/// * An [`Error`], when something goes wrong.
 	/// * A list of matches, if there are any.
-	fn retrieve<'arr>(id: AnyValue<Id>, name: AnyValue<&'_ str>) -> Result<&'arr [Self], &'err dyn Error>;
+	fn retrieve<'arr, 'err>(
+		id: AnyValue<Id>,
+		name: AnyValue<&'_ str>,
+		store: Store<'pass, 'path, 'user>,
+	) -> Result<&'arr [Self], &'err dyn Error>;
 }

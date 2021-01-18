@@ -10,7 +10,7 @@
 ///
 /// * `Employee => $name:ident` creates new [`Employee`](clinvoice_data::Employee) wrapper.
 /// * `Job => $name:ident` creates new [`Job`](clinvoice_data::Job) wrapper.
-/// * `Location => $name:ident` creates new [`Job`](clinvoice_data::Job) wrapper.
+/// * `Location => $name:ident` creates new [`Location`](clinvoice_data::Location) wrapper.
 /// * `Organization => $name:ident` creates new [`Organization`](clinvoice_data::Organization) wrapper.
 /// * `Person => $name:ident` creates new [`Person`](clinvoice_data::Person) wrapper.
 ///
@@ -23,26 +23,26 @@ macro_rules! Newtype
 {
 	(Employee => $name: ident) =>
 	{
-		clinvoice_adapter::NewtypeEmployee!($name, 'contact_info 'email 'phone 'title);
+		clinvoice_adapter::NewtypeEmployee!($name, 'contact_info 'email 'phone 'title, 'pass 'path 'user);
 	};
 
 	(Job => $name: ident) =>
 	{
-		clinvoice_adapter::NewtypeJob!($name, 'objectives 'notes 'timesheets 'work_notes, TZone);
+		clinvoice_adapter::NewtypeJob!($name, 'objectives 'notes 'timesheets 'work_notes, 'pass 'path 'user, TZone);
 	};
 
 	(Location => $name: ident) =>
 	{
-		clinvoice_adapter::NewtypeLocation!($name, 'name);
+		clinvoice_adapter::NewtypeLocation!($name, 'name, 'pass 'path 'user);
 	};
 
 	(Organization => $name: ident) =>
 	{
-		clinvoice_adapter::NewtypeOrganization!($name, 'name);
+		clinvoice_adapter::NewtypeOrganization!($name, 'name, 'pass 'path 'user);
 	};
 
 	(Person => $name: ident) =>
 	{
-		clinvoice_adapter::NewtypePerson!($name, 'contact_info 'email 'name 'phone);
+		clinvoice_adapter::NewtypePerson!($name, 'contact_info 'email 'name 'phone, 'pass 'path 'user);
 	};
 }

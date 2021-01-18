@@ -1,25 +1,39 @@
 #[macro_export]
 macro_rules! NewtypeEmployee
 {
-	($name:ident, $($life:lifetime)*) =>
+	($name: ident, $($life: lifetime)*, $($store_life: lifetime)*) =>
 	{
+		use clinvoice_adapter::Store;
 		use clinvoice_data::Employee;
 
 		/// # Summary
 		///
 		/// Wrapper around [`Employee`].
-		pub struct $name<$($life),*> (Employee<$($life),*>) where
+		pub struct $name<$($life),*, $($store_life),*> where
 			'email : 'contact_info,
 			'phone : 'contact_info,
-		;
+		{
+			pub employee: Employee<$($life),*>,
+			pub store: Store<$($store_life),*>,
+		}
 
-		impl<$($life),*> From<Employee<$($life),*>> for $name<$($life),*> where
+		impl<$($life),*, $($store_life),*> Into<Employee<$($life),*>> for $name<$($life),*, $($store_life),*> where
 			 'email : 'contact_info,
 			 'phone : 'contact_info,
 		{
-			fn from(employee: Employee<$($life),*>) -> Self
+			fn into(self) -> Employee<$($life),*>
 			{
-				return $name (employee);
+				return self.employee;
+			}
+		}
+
+		impl<$($life),*, $($store_life),*> Into<Store<$($store_life),*>> for $name<$($life),*, $($store_life),*> where
+			 'email : 'contact_info,
+			 'phone : 'contact_info,
+		{
+			fn into(self) -> Store<$($store_life),*>
+			{
+				return self.store;
 			}
 		}
 	};

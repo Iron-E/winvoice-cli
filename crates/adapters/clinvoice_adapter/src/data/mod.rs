@@ -1,21 +1,21 @@
 // LOCAL
 mod any_value;
-mod crud_employee;
-mod crud_job;
-mod crud_location;
-mod crud_organization;
-mod crud_person;
+mod employee_adapter;
+mod job_adapter;
+mod location_adapter;
+mod organization_adapter;
+mod person_adapter;
 mod deletable;
 mod updatable;
 
 pub use
 {
 	any_value::AnyValue,
-	crud_employee::CrudEmployee,
-	crud_job::CrudJob,
-	crud_location::CrudLocation,
-	crud_organization::CrudOrganization,
-	crud_person::CrudPerson,
+	employee_adapter::EmployeeAdapter,
+	job_adapter::JobAdapter,
+	location_adapter::LocationAdapter,
+	organization_adapter::OrganizationAdapter,
+	person_adapter::PersonAdapter,
 	deletable::Deletable,
 	updatable::Updatable,
 };

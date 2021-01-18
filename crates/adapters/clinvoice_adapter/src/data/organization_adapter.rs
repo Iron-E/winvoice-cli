@@ -1,13 +1,15 @@
 use super::{AnyValue, Deletable, Updatable};
+use crate::Store;
 use clinvoice_data::{Employee, Id, Location, Organization};
 use std::{collections::HashSet, error::Error};
 
-pub trait CrudOrganization<'contact_info, 'email, 'err, 'name, 'phone, 'title> :
-	Deletable<'err> +
-	From<Organization<'name>> +
-	Into<HashSet<Employee<'contact_info, 'email, 'phone, 'title>>> +
-	Into<Location<'name>> +
-	Updatable<'err> +
+pub trait OrganizationAdapter<'contact_info, 'email, 'err, 'name, 'pass, 'path, 'phone, 'title, 'user> :
+	Deletable<'pass, 'path, 'user> +
+	Into<Organization<'name>> +
+	Into<Result<HashSet<Employee<'contact_info, 'email, 'phone, 'title>>, &'err dyn Error>> +
+	Into<Result<Location<'name>, &'err dyn Error>> +
+	Into<Store<'pass, 'path, 'user>> +
+	Updatable +
 where
 	'email : 'contact_info,
 	'phone : 'contact_info,
@@ -27,11 +29,17 @@ where
 		location: Location<'name>,
 		name: &'name str,
 		representatives: HashSet<Employee>,
+		store: Store<'pass, 'path, 'user>,
 	) -> Result<Self, &'err dyn Error>;
 
 	/// # Summary
 	///
-	/// Retrieve some [`Organization`] from the active [`Store`](crate::Store).
+	/// Initialize the database for a given [`Store`].
+	fn init(store: Store<'pass, 'path, 'user>) -> Result<(), &'err dyn Error>;
+
+	/// # Summary
+	///
+	/// Retrieve some [`Organization`] from the active [`Store`]crate::Store).
 	///
 	/// # Parameters
 	///
@@ -46,5 +54,6 @@ where
 		location: AnyValue<Location<'name>>,
 		name: AnyValue<&'name str>,
 		representatives: AnyValue<HashSet<Employee>>,
+		store: Store<'pass, 'path, 'user>,
 	) -> Result<Option<&'arr [Self]>, &'err dyn Error>;
 }

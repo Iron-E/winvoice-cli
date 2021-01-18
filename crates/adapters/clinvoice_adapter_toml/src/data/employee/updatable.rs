@@ -1,8 +1,8 @@
-use super::TomlLocation;
+use super::TomlEmployee;
 use clinvoice_adapter::data::Updatable;
 use std::error::Error;
 
-impl Updatable for TomlLocation<'_, '_, '_, '_>
+impl Updatable for TomlEmployee<'_, '_, '_, '_, '_, '_, '_>
 {
 	fn update<'err>(&self) -> Result<(), &'err dyn Error>
 	{

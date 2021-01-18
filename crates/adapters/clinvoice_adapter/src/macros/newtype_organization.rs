@@ -1,20 +1,33 @@
 #[macro_export]
 macro_rules! NewtypeOrganization
 {
-	($name: ident, $($life: lifetime)*) =>
+	($name: ident, $($life: lifetime)*, $($store_life: lifetime)*) =>
 	{
+		use clinvoice_adapter::Store;
 		use clinvoice_data::Organization;
 
 		/// # Summary
 		///
-		/// Wrapper around [`Employee`].
-		pub struct $name<$($life),*> (Organization<$($life),*>);
-
-		impl<$($life),*> From<Organization<$($life),*>> for $name<$($life),*>
+		/// A wrapper around [`Organization`] for use with TomlDB.
+		pub struct $name<$($life),*, $($store_life),*>
 		{
-			fn from(organization: Organization<$($life),*>) -> Self
+			pub organization: Organization<$($life),*>,
+			pub store: Store<$($store_life),*>,
+		}
+
+		impl<$($life),*, $($store_life),*> Into<Organization<$($life),*>> for $name<$($life),*, $($store_life),*>
+		{
+			fn into(self) -> Organization<$($life),*>
 			{
-				return $name (organization);
+				return self.organization;
+			}
+		}
+
+		impl<$($life),*, $($store_life),*> Into<Store<$($store_life),*>> for $name<$($life),*, $($store_life),*>
+		{
+			fn into(self) -> Store<$($store_life),*>
+			{
+				return self.store;
 			}
 		}
 	}

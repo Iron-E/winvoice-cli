@@ -1,4 +1,5 @@
 mod display;
+mod error;
 
 use std::borrow::Cow;
 

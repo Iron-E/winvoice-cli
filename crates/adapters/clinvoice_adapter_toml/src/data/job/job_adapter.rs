@@ -1,12 +1,10 @@
-use super::{AnyValue, Deletable, Updatable};
-use clinvoice_data::{chrono::{DateTime, TimeZone}, Id, Job, Organization, Timesheet};
+use super::TomlJob;
+use clinvoice_adapter::{data::{AnyValue, JobAdapter}, Store};
+use clinvoice_data::{chrono::{DateTime, TimeZone}, Id, Organization, Timesheet};
 use std::error::Error;
 
-pub trait CrudJob<'err, 'objectives, 'name, 'notes, 'timesheets, 'title, 'work_notes, TZone> :
-	Deletable<'err> +
-	From<Job<'objectives, 'notes, 'timesheets, 'work_notes, TZone>> +
-	Into<Organization<'name>> +
-	Updatable<'err> +
+impl<'err, 'objectives, 'name, 'notes, 'pass, 'path, 'timesheets, 'title, 'user, 'work_notes, TZone> JobAdapter<'err, 'objectives, 'name, 'notes, 'pass, 'path, 'timesheets, 'title, 'user, 'work_notes, TZone>
+for TomlJob<'objectives, 'notes, 'timesheets, 'work_notes, 'pass, 'path, 'user, TZone>
 where
 	 'work_notes : 'timesheets,
 	  TZone : 'timesheets + TimeZone,
@@ -27,8 +25,20 @@ where
 		date_open: DateTime<TZone>,
 		client: Organization<'name>,
 		notes: &'notes str,
+		store: Store<'pass, 'path, 'user>,
 		timesheets: &'timesheets [Timesheet<'work_notes, TZone>],
-	) -> Result<Self, &'err dyn Error>;
+	) -> Result<Self, &'err dyn Error>
+	{
+		todo!()
+	}
+
+	/// # Summary
+	///
+	/// Initialize the database for a given [`Store`].
+	fn init(store: Store<'pass, 'path, 'user>) -> Result<(), &'err dyn Error>
+	{
+		todo!()
+	}
 
 	/// # Summary
 	///
@@ -48,6 +58,11 @@ where
 		client_id: AnyValue<Organization<'name>>,
 		id: AnyValue<Id>,
 		notes: AnyValue<&'notes str>,
+		store: Store<'pass, 'path, 'user>,
 		timesheets: AnyValue<&'timesheets [Timesheet<'work_notes, TZone>]>,
-	) -> Result<Option<&'arr [Self]>, &'err dyn Error>;
+	) -> Result<Option<&'arr [Self]>, &'err dyn Error>
+	{
+		todo!()
+	}
 }
+

@@ -1,20 +1,33 @@
 #[macro_export]
 macro_rules! NewtypeLocation
 {
-	($name: ident, $($life: lifetime)*) =>
+	($name: ident, $($life: lifetime)*, $($store_life: lifetime)*) =>
 	{
+		use clinvoice_adapter::Store;
 		use clinvoice_data::Location;
 
 		/// # Summary
 		///
-		/// Wrapper around [`Employee`].
-		pub struct $name<$($life),*> (Location<$($life),*>);
-
-		impl<$($life),*> From<Location<$($life),*>> for $name<$($life),*>
+		/// A wrapper around [`Location`] for use with TomlDB.
+		pub struct $name<$($life),*, $($store_life),*>
 		{
-			fn from(location: Location<$($life),*>) -> Self
+			pub location: Location<$($life),*>,
+			pub store: Store<$($store_life),*>,
+		}
+
+		impl<$($life),*, $($store_life),*> Into<Location<$($life),*>> for $name<$($life),*, $($store_life),*>
+		{
+			fn into(self) -> Location<$($life),*>
 			{
-				return $name (location);
+				return self.location;
+			}
+		}
+
+		impl<$($life),*, $($store_life),*> Into<Store<$($store_life),*>> for $name<$($life),*, $($store_life),*>
+		{
+			fn into(self) -> Store<$($store_life),*>
+			{
+				return self.store;
 			}
 		}
 	}

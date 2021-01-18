@@ -1,11 +1,13 @@
 use super::{AnyValue, Deletable, Updatable};
+use crate::Store;
 use clinvoice_data::{Contact, Id, Person};
 use std::error::Error;
 
-pub trait CrudPerson<'contact_info, 'err, 'email, 'name, 'phone> :
-	Deletable<'err> +
-	From<Person<'contact_info, 'email, 'name, 'phone>> +
-	Updatable<'err> +
+pub trait PersonAdapter<'contact_info, 'email, 'name, 'pass, 'path, 'phone, 'user> :
+	Deletable<'pass, 'path, 'user> +
+	Into<Person<'contact_info, 'email, 'name, 'phone>> +
+	Into<Store<'pass, 'path, 'user>> +
+	Updatable +
 where
 	'email : 'contact_info,
 	'phone : 'contact_info,
@@ -21,11 +23,16 @@ where
 	/// # Returns
 	///
 	/// The newly created [`Person`].
-	fn create(contact_info: &'contact_info [Contact<'email, 'phone>], name: &'name str) -> Result<Self, &'err dyn Error>;
+	fn create<'err>(contact_info: &'contact_info [Contact<'email, 'phone>], name: &'name str) -> Result<Self, &'err dyn Error>;
 
 	/// # Summary
 	///
-	/// Retrieve some [`Person`] from the active [`Store`](crate::Store).
+	/// Initialize the database for a given [`Store`].
+	fn init<'err>(store: Store<'pass, 'path, 'user>) -> Result<(), &'err dyn Error>;
+
+	/// # Summary
+	///
+	/// Retrieve some [`Person`] from the active [`Store`]<'err>(crate::Store).
 	///
 	/// # Parameters
 	///
@@ -35,7 +42,7 @@ where
 	///
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`Job`]s.
-	fn retrieve<'arr>(
+	fn retrieve<'arr, 'err>(
 		contact_info: AnyValue<&'contact_info [Contact<'email, 'phone>]>,
 		id: AnyValue<Id>,
 		name: AnyValue<&'name str>,

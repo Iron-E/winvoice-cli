@@ -1,22 +1,39 @@
 #[macro_export]
 macro_rules! NewtypePerson
 {
-	($name: ident, $($life: lifetime)*) =>
+	($name: ident, $($life: lifetime)*, $($store_life: lifetime)*) =>
 	{
+		use clinvoice_adapter::Store;
 		use clinvoice_data::Person;
 
 		/// # Summary
 		///
-		/// A wrapper around [`Job`] for use with TomlDB.
-		pub struct $name<$($life),*> (Person<$($life),*>);
-
-		impl<$($life),*> From<Person<$($life),*>> for $name<$($life),*> where
+		/// A wrapper around [`Person`] for use with TomlDB.
+		pub struct $name<$($life),*, $($store_life),*> where
 			'email : 'contact_info,
 			'phone : 'contact_info,
 		{
-			fn from(person: Person<$($life),*>) -> Self
+			pub person: Person<$($life),*>,
+			pub store: Store<$($store_life),*>,
+		}
+
+		impl<$($life),*, $($store_life),*> Into<Person<$($life),*>> for $name<$($life),*, $($store_life),*> where
+			'email : 'contact_info,
+			'phone : 'contact_info,
+		{
+			fn into(self) -> Person<$($life),*>
 			{
-				return $name (person);
+				return self.person;
+			}
+		}
+
+		impl<$($life),*, $($store_life),*> Into<Store<$($store_life),*>> for $name<$($life),*, $($store_life),*> where
+			'email : 'contact_info,
+			'phone : 'contact_info,
+		{
+			fn into(self) -> Store<$($store_life),*>
+			{
+				return self.store;
 			}
 		}
 	}

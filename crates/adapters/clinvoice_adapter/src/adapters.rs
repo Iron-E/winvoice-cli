@@ -27,7 +27,7 @@ impl Adapters
 	/// # Returns
 	///
 	/// An [`AdapterMismatchException`] with a descriptive error message.
-	pub fn mismatch<'msg>(&self, actual: Self) -> AdapterMismatchError<'msg>
+	pub fn mismatch<'msg>(&self, actual: &Self) -> AdapterMismatchError<'msg>
 	{
 		return AdapterMismatchError
 		{

@@ -1,4 +1,5 @@
-use super::TomlPerson;
+use super::{PATH, TomlPerson};
+use crate::util;
 use clinvoice_adapter::{data::{AnyValue, PersonAdapter}, Store};
 use clinvoice_data::{Contact, Id};
 use std::error::Error;
@@ -28,9 +29,9 @@ where
 	/// # Summary
 	///
 	/// Initialize the database for a given [`Store`].
-	fn init(store: Store<'pass, 'path, 'user>) -> Result<(), Box<dyn Error>>
+	fn init(store: &Store<'pass, 'path, 'user>) -> Result<(), Box<dyn Error>>
 	{
-		todo!()
+		return util::create_store_dir(store, PATH);
 	}
 
 	/// # Summary

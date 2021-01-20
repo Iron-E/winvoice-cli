@@ -1,4 +1,5 @@
-use super::TomlJob;
+use super::{PATH, TomlJob};
+use crate::util;
 use clinvoice_adapter::{data::{AnyValue, JobAdapter}, Store};
 use clinvoice_data::{chrono::{DateTime, TimeZone}, Id, Organization, Timesheet};
 use std::error::Error;
@@ -35,9 +36,9 @@ where
 	/// # Summary
 	///
 	/// Initialize the database for a given [`Store`].
-	fn init(store: Store<'pass, 'path, 'user>) -> Result<(), Box<dyn Error>>
+	fn init(store: &Store<'pass, 'path, 'user>) -> Result<(), Box<dyn Error>>
 	{
-		todo!()
+		return util::create_store_dir(store, PATH);
 	}
 
 	/// # Summary

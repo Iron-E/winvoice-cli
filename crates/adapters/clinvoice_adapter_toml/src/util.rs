@@ -1,14 +1,24 @@
 use clinvoice_adapter::{Adapters, Store};
-use std::{fs, error::Error, io, path::Path};
+use std::{error::Error, fs, io, path::Path};
 
 /// # Summary
 ///
-/// Initialize the postgresql database on [`Store`].
-pub fn create_store_dir(store: Store<'_, '_, '_>, dir: &str) -> Result<(), Box<dyn Error>>
+/// Create some `dir` within `store`.
+///
+/// # Parameters
+///
+/// * `store`, the store to reference location with.
+/// * `dir`, the directory name to create.
+///
+/// # Returns
+///
+/// * `()`, if the directory was created successfully.
+/// * An `Error`, if something went wrong.
+pub fn create_store_dir(store: &Store<'_, '_, '_>, dir: &str) -> Result<(), Box<dyn Error>>
 {
 	if store.adapter != Adapters::TOML
 	{
-		return Err(Box::new(Adapters::TOML.mismatch(store.adapter)));
+		return Err(Box::new(Adapters::TOML.mismatch(&store.adapter)));
 	}
 
 	let store_path = Path::new(store.path);

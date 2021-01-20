@@ -19,7 +19,7 @@ for TomlLocation<'name, 'pass, 'path, 'user>
 	/// ```ignore
 	/// Location {name, id: /* generated */};
 	/// ```
-	fn create<'err>(name: &'_ str, store: Store<'pass, 'path, 'user>) -> Result<Self, &'err dyn Error>
+	fn create(name: &'_ str, store: Store<'pass, 'path, 'user>) -> Result<Self, Box<dyn Error>>
 	{
 		todo!()
 	}
@@ -37,7 +37,7 @@ for TomlLocation<'name, 'pass, 'path, 'user>
 	/// ```ignore
 	/// Location {name, id: /* generated */, outside_id: self.unroll().id};
 	/// ```
-	fn create_inner<'err>(&self, name: &'_ str) -> Result<Self, &'err dyn Error>
+	fn create_inner(&self, name: &'_ str) -> Result<Self, Box<dyn Error>>
 	{
 		todo!()
 	}
@@ -45,7 +45,7 @@ for TomlLocation<'name, 'pass, 'path, 'user>
 	/// # Summary
 	///
 	/// Initialize the database for a given [`Store`].
-	fn init<'err>(store: Store<'pass, 'path, 'user>) -> Result<(), &'err dyn Error>
+	fn init(store: Store<'pass, 'path, 'user>) -> Result<(), Box<dyn Error>>
 	{
 		todo!()
 	}
@@ -62,11 +62,11 @@ for TomlLocation<'name, 'pass, 'path, 'user>
 	///
 	/// * An [`Error`], when something goes wrong.
 	/// * A list of matches, if there are any.
-	fn retrieve<'arr, 'err>(
+	fn retrieve<'arr>(
 		id: AnyValue<Id>,
 		name: AnyValue<&'_ str>,
 		store: Store<'pass, 'path, 'user>,
-	) -> Result<&'arr [Self], &'err dyn Error>
+	) -> Result<&'arr [Self], Box<dyn Error>>
 	{
 		todo!()
 	}

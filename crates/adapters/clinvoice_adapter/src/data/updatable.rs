@@ -15,5 +15,5 @@ pub trait Updatable
 	/// * An `Error`, when:
 	///   * `self.id` had not already been `create`d.
 	///   * Something goes wrong.
-	fn update<'err>(&self) -> Result<(), &'err dyn Error>;
+	fn update(&self) -> Result<(), Box<dyn Error>>;
 }

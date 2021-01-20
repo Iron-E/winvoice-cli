@@ -1,10 +1,10 @@
 use clinvoice_adapter::{Adapters, Store};
-use std::{fs, error::Error, io::{Error as IOError, ErrorKind}, path::Path};
+use std::{fs, error::Error, io, path::Path};
 
 /// # Summary
 ///
 /// Initialize the postgresql database on [`Store`].
-pub fn create_store_dir<'err, 'pass, 'path, 'user>(store: Store<'pass, 'path, 'user>, dir: &str) -> Result<(), Box<dyn Error>>
+pub fn create_store_dir(store: Store<'_, '_, '_>, dir: &str) -> Result<(), Box<dyn Error>>
 {
 	if store.adapter != Adapters::TOML
 	{
@@ -15,10 +15,17 @@ pub fn create_store_dir<'err, 'pass, 'path, 'user>(store: Store<'pass, 'path, 'u
 
 	if store_path.exists()
 	{
-		if match store_path.read_dir() { Ok(r) => r.count(), Err(e) => return Err(Box::new(e)) } > 0
+		let node_count = match store_path.read_dir()
 		{
-			return Err(Box::new(IOError::new(
-				ErrorKind::AlreadyExists, format!("The specified path, {}, is already in use.", store.path)
+			Ok(nodes) => nodes.count(),
+			Err(e) => return Err(Box::new(e)),
+		};
+
+		if node_count > 0
+		{
+			return Err(Box::new(io::Error::new(
+				io::ErrorKind::AlreadyExists,
+				format!("The specified path, {}, is already in use.", store.path)
 			)));
 		}
 	}

@@ -3,11 +3,11 @@ use crate::Store;
 use clinvoice_data::{Contact, Employee, Id, Organization, Person};
 use std::error::Error;
 
-pub trait EmployeeAdapter<'contact_info, 'email, 'err, 'name, 'pass, 'path, 'phone, 'title, 'user> :
+pub trait EmployeeAdapter<'contact_info, 'email, 'name, 'pass, 'path, 'phone, 'title, 'user> :
 	Deletable<'pass, 'path, 'user> +
 	Into<Employee<'contact_info, 'email, 'phone, 'title>> +
-	Into<Result<Organization<'name>, &'err dyn Error>> +
-	Into<Result<Person<'contact_info, 'email, 'name, 'phone>, &'err dyn Error>> +
+	Into<Result<Organization<'name>, Box<dyn Error>>> +
+	Into<Result<Person<'contact_info, 'email, 'name, 'phone>, Box<dyn Error>>> +
 	Into<Store<'pass, 'path, 'user>> +
 	Updatable +
 where
@@ -32,12 +32,12 @@ where
 		person: Person<'contact_info, 'email, 'name, 'phone>,
 		store: Store<'pass, 'path, 'user>,
 		title: &'title str,
-	) -> Result<Self, &'err dyn Error>;
+	) -> Result<Self, Box<dyn Error>>;
 
 	/// # Summary
 	///
 	/// Initialize the database for a given [`Store`].
-	fn init(store: Store<'pass, 'path, 'user>) -> Result<(), &'err dyn Error>;
+	fn init(store: Store<'pass, 'path, 'user>) -> Result<(), Box<dyn Error>>;
 
 	/// # Summary
 	///
@@ -58,5 +58,5 @@ where
 		person: AnyValue<Person<'contact_info, 'email, 'name, 'phone>>,
 		store: Store<'pass, 'path, 'user>,
 		title: AnyValue<&'title str>,
-	) -> Result<&'arr [Self], &'err dyn Error>;
+	) -> Result<&'arr [Self], Box<dyn Error>>;
 }

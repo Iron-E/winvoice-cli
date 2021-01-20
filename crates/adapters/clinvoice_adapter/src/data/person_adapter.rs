@@ -23,16 +23,16 @@ where
 	/// # Returns
 	///
 	/// The newly created [`Person`].
-	fn create<'err>(contact_info: &'contact_info [Contact<'email, 'phone>], name: &'name str) -> Result<Self, &'err dyn Error>;
+	fn create(contact_info: &'contact_info [Contact<'email, 'phone>], name: &'name str) -> Result<Self, Box<dyn Error>>;
 
 	/// # Summary
 	///
 	/// Initialize the database for a given [`Store`].
-	fn init<'err>(store: Store<'pass, 'path, 'user>) -> Result<(), &'err dyn Error>;
+	fn init(store: Store<'pass, 'path, 'user>) -> Result<(), Box<dyn Error>>;
 
 	/// # Summary
 	///
-	/// Retrieve some [`Person`] from the active [`Store`]<'err>(crate::Store).
+	/// Retrieve some [`Person`] from the active [`Store`](crate::Store).
 	///
 	/// # Parameters
 	///
@@ -42,9 +42,9 @@ where
 	///
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`Job`]s.
-	fn retrieve<'arr, 'err>(
+	fn retrieve<'arr>(
 		contact_info: AnyValue<&'contact_info [Contact<'email, 'phone>]>,
 		id: AnyValue<Id>,
 		name: AnyValue<&'name str>,
-	) -> Result<Option<&'arr [Self]>, &'err dyn Error>;
+	) -> Result<Option<&'arr [Self]>, Box<dyn Error>>;
 }

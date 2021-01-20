@@ -3,11 +3,11 @@ use crate::Store;
 use clinvoice_data::{Employee, Id, Location, Organization};
 use std::{collections::HashSet, error::Error};
 
-pub trait OrganizationAdapter<'contact_info, 'email, 'err, 'name, 'pass, 'path, 'phone, 'title, 'user> :
+pub trait OrganizationAdapter<'contact_info, 'email, 'name, 'pass, 'path, 'phone, 'title, 'user> :
 	Deletable<'pass, 'path, 'user> +
 	Into<Organization<'name>> +
-	Into<Result<HashSet<Employee<'contact_info, 'email, 'phone, 'title>>, &'err dyn Error>> +
-	Into<Result<Location<'name>, &'err dyn Error>> +
+	Into<Result<HashSet<Employee<'contact_info, 'email, 'phone, 'title>>, Box<dyn Error>>> +
+	Into<Result<Location<'name>, Box<dyn Error>>> +
 	Into<Store<'pass, 'path, 'user>> +
 	Updatable +
 where
@@ -30,12 +30,12 @@ where
 		name: &'name str,
 		representatives: HashSet<Employee>,
 		store: Store<'pass, 'path, 'user>,
-	) -> Result<Self, &'err dyn Error>;
+	) -> Result<Self, Box<dyn Error>>;
 
 	/// # Summary
 	///
 	/// Initialize the database for a given [`Store`].
-	fn init(store: Store<'pass, 'path, 'user>) -> Result<(), &'err dyn Error>;
+	fn init(store: Store<'pass, 'path, 'user>) -> Result<(), Box<dyn Error>>;
 
 	/// # Summary
 	///
@@ -55,5 +55,5 @@ where
 		name: AnyValue<&'name str>,
 		representatives: AnyValue<HashSet<Employee>>,
 		store: Store<'pass, 'path, 'user>,
-	) -> Result<Option<&'arr [Self]>, &'err dyn Error>;
+	) -> Result<Option<&'arr [Self]>, Box<dyn Error>>;
 }

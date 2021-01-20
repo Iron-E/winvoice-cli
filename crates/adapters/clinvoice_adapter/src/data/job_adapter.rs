@@ -3,10 +3,10 @@ use crate::Store;
 use clinvoice_data::{chrono::{DateTime, TimeZone}, Id, Job, Organization, Timesheet};
 use std::error::Error;
 
-pub trait JobAdapter<'err, 'objectives, 'name, 'notes, 'pass, 'path, 'timesheets, 'title, 'user, 'work_notes, TZone> :
+pub trait JobAdapter<'objectives, 'name, 'notes, 'pass, 'path, 'timesheets, 'title, 'user, 'work_notes, TZone> :
 	Deletable<'pass, 'path, 'user> +
 	Into<Job<'objectives, 'notes, 'timesheets, 'work_notes, TZone>> +
-	Into<Result<Organization<'name>, &'err dyn Error>> +
+	Into<Result<Organization<'name>, Box<dyn Error>>> +
 	Into<Store<'pass, 'path, 'user>> +
 	Updatable +
 where
@@ -31,12 +31,12 @@ where
 		notes: &'notes str,
 		store: Store<'pass, 'path, 'user>,
 		timesheets: &'timesheets [Timesheet<'work_notes, TZone>],
-	) -> Result<Self, &'err dyn Error>;
+	) -> Result<Self, Box<dyn Error>>;
 
 	/// # Summary
 	///
 	/// Initialize the database for a given [`Store`].
-	fn init(store: Store<'pass, 'path, 'user>) -> Result<(), &'err dyn Error>;
+	fn init(store: Store<'pass, 'path, 'user>) -> Result<(), Box<dyn Error>>;
 
 	/// # Summary
 	///
@@ -58,5 +58,5 @@ where
 		notes: AnyValue<&'notes str>,
 		store: Store<'pass, 'path, 'user>,
 		timesheets: AnyValue<&'timesheets [Timesheet<'work_notes, TZone>]>,
-	) -> Result<Option<&'arr [Self]>, &'err dyn Error>;
+	) -> Result<Option<&'arr [Self]>, Box<dyn Error>>;
 }

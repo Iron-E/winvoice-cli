@@ -1,9 +1,10 @@
-use super::TomlEmployee;
+use super::{PATH, TomlEmployee};
+use crate::util;
 use clinvoice_adapter::{data::{AnyValue, EmployeeAdapter}, Store};
 use clinvoice_data::{Contact, Id, Organization, Person};
 use std::error::Error;
 
-impl<'contact_info, 'email, 'err, 'name, 'pass, 'path, 'phone, 'title, 'user> EmployeeAdapter<'contact_info, 'email, 'err, 'name, 'pass, 'path, 'phone, 'title, 'user>
+impl<'contact_info, 'email, 'name, 'pass, 'path, 'phone, 'title, 'user> EmployeeAdapter<'contact_info, 'email, 'name, 'pass, 'path, 'phone, 'title, 'user>
 for TomlEmployee<'contact_info, 'email, 'phone, 'title, 'pass, 'path, 'user>
 where
 	'email : 'contact_info,
@@ -27,7 +28,7 @@ where
 		person: Person<'contact_info, 'email, 'name, 'phone>,
 		store: Store<'pass, 'path, 'user>,
 		title: &'title str,
-	) -> Result<Self, &'err dyn Error>
+	) -> Result<Self, Box<dyn Error>>
 	{
 		todo!()
 	}
@@ -35,9 +36,9 @@ where
 	/// # Summary
 	///
 	/// Initialize the database for a given [`Store`].
-	fn init(store: Store<'pass, 'path, 'user>) -> Result<(), &'err dyn Error>
+	fn init(store: Store<'pass, 'path, 'user>) -> Result<(), Box<dyn Error>>
 	{
-		todo!()
+		return util::create_store_dir(store, PATH);
 	}
 
 	/// # Summary
@@ -59,7 +60,7 @@ where
 		person: AnyValue<Person<'contact_info, 'email, 'name, 'phone>>,
 		store: Store<'pass, 'path, 'user>,
 		title: AnyValue<&'title str>,
-	) -> Result<&'arr [Self], &'err dyn Error>
+	) -> Result<&'arr [Self], Box<dyn Error>>
 	{
 		todo!()
 	}

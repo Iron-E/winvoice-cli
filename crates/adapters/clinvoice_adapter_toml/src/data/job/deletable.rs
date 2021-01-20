@@ -7,7 +7,7 @@ impl<'pass, 'path, 'user, TZone> Deletable<'pass, 'path, 'user>
 for TomlJob<'_, '_, '_, '_, 'pass, 'path, 'user, TZone>
 where TZone : TimeZone
 {
-	fn delete<'err>(store: Store<'pass, 'path, 'user>, id: Id, cascade: bool) -> Result<(), &'err dyn Error>
+	fn delete(store: Store<'pass, 'path, 'user>, id: Id, cascade: bool) -> Result<(), Box<dyn Error>>
 	{
 		todo!()
 	}

@@ -3,7 +3,7 @@ use clinvoice_adapter::{data::{AnyValue, OrganizationAdapter}, Store};
 use clinvoice_data::{Employee, Id, Location};
 use std::{collections::HashSet, error::Error};
 
-impl<'contact_info, 'email, 'err, 'name, 'pass, 'path, 'phone, 'title, 'user> OrganizationAdapter<'contact_info, 'email, 'err, 'name, 'pass, 'path, 'phone, 'title, 'user>
+impl<'contact_info, 'email, 'name, 'pass, 'path, 'phone, 'title, 'user> OrganizationAdapter<'contact_info, 'email, 'name, 'pass, 'path, 'phone, 'title, 'user>
 for TomlOrganization<'name, 'pass, 'path, 'user>
 where
 	'email : 'contact_info,
@@ -25,7 +25,7 @@ where
 		name: &'name str,
 		representatives: HashSet<Employee>,
 		store: Store<'pass, 'path, 'user>,
-	) -> Result<Self, &'err dyn Error>
+	) -> Result<Self, Box<dyn Error>>
 	{
 		todo!()
 	}
@@ -33,7 +33,7 @@ where
 	/// # Summary
 	///
 	/// Initialize the database for a given [`Store`].
-	fn init(store: Store<'pass, 'path, 'user>) -> Result<(), &'err dyn Error>
+	fn init(store: Store<'pass, 'path, 'user>) -> Result<(), Box<dyn Error>>
 	{
 		todo!()
 	}
@@ -56,7 +56,7 @@ where
 		name: AnyValue<&'name str>,
 		representatives: AnyValue<HashSet<Employee>>,
 		store: Store<'pass, 'path, 'user>,
-	) -> Result<Option<&'arr [Self]>, &'err dyn Error>
+	) -> Result<Option<&'arr [Self]>, Box<dyn Error>>
 	{
 		todo!()
 	}

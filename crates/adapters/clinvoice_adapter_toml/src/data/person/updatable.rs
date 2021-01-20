@@ -4,7 +4,7 @@ use std::error::Error;
 
 impl Updatable for TomlPerson<'_, '_, '_, '_, '_, '_, '_>
 {
-	fn update<'err>(&self) -> Result<(), &'err dyn Error>
+	fn update(&self) -> Result<(), Box<dyn Error>>
 	{
 		todo!()
 	}

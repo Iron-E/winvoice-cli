@@ -1,4 +1,5 @@
-use super::TomlOrganization;
+use super::{PATH, TomlOrganization};
+use crate::util;
 use clinvoice_adapter::{data::{AnyValue, OrganizationAdapter}, Store};
 use clinvoice_data::{Employee, Id, Location};
 use std::{collections::HashSet, error::Error};
@@ -33,9 +34,9 @@ where
 	/// # Summary
 	///
 	/// Initialize the database for a given [`Store`].
-	fn init(store: Store<'pass, 'path, 'user>) -> Result<(), Box<dyn Error>>
+	fn init(store: &Store<'pass, 'path, 'user>) -> Result<(), Box<dyn Error>>
 	{
-		todo!()
+		return util::create_store_dir(store, PATH);
 	}
 
 	/// # Summary
@@ -62,3 +63,36 @@ where
 	}
 }
 
+#[cfg(test)]
+mod tests
+{
+	use super::{Store, OrganizationAdapter, TomlOrganization};
+	use clinvoice_adapter::Adapters;
+	use std::{env, io};
+
+	#[test]
+	fn test_init() -> Result<(), io::Error>
+	{
+		let temp_path = env::temp_dir().join("clinvoice_adapter_toml_test_init");
+
+		let test_store = Store
+		{
+			adapter: Adapters::TOML,
+			password: None,
+			path: match temp_path.to_str()
+			{
+				Some(s) => s,
+				None => return Err(io::Error::new(
+					io::ErrorKind::InvalidInput,
+					"`env::temp_path` did not resolve to a valid path."
+				)),
+			},
+			username: None,
+		};
+
+		assert!(TomlOrganization::init(&test_store).is_ok());
+		assert!(TomlOrganization::init(&test_store).is_err());
+
+		return Ok(());
+	}
+}

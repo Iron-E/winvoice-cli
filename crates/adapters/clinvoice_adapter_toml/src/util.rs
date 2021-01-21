@@ -25,30 +25,27 @@ pub fn create_store_dir(store: &Store<'_, '_, '_>, dir: &str) -> Result<(), Box<
 
 	if store_path.exists()
 	{
-		let node_count = match store_path.read_dir()
+		for node_result in store_path.read_dir()?
 		{
-			Ok(nodes) => nodes.count(),
-			Err(e) => return Err(Box::new(e)),
-		};
+			let node = node_result?.path();
 
-		if node_count > 0
-		{
-			return Err(Box::new(io::Error::new(
-				io::ErrorKind::AlreadyExists,
-				format!("The specified path, {}, is already in use.", store.path)
-			)));
+			if node.is_dir() && node.to_str().ok_or_else(|| io::Error::new(
+				io::ErrorKind::InvalidInput,
+				"The name of the node could not be read as a string."
+			))? == dir
+			{
+				fs::remove_dir(node)?;
+			}
 		}
 	}
-	else if let Err(e) = fs::create_dir_all(store_path)
+	else
 	{
-		return Err(Box::new(e));
+		fs::create_dir_all(store_path)?;
 	}
 
-	return match fs::create_dir(store_path.join(Path::new(dir)))
-	{
-		Ok(_) => Ok(()),
-		Err(e) => Err(Box::new(e)),
-	};
+	fs::create_dir(store_path.join(dir))?;
+
+	return Ok(());
 }
 
 /// # Summary
@@ -67,7 +64,6 @@ pub fn create_store_dir(store: &Store<'_, '_, '_>, dir: &str) -> Result<(), Box<
 /// * An [`Error`](io::Error), if [temp dir][fn_temp_dir] could not be read.
 ///
 /// # Panics
-///
 /// If the `assertion` failed.
 ///
 /// [fn_temp_dir]: std::env::temp_dir

@@ -1,5 +1,5 @@
 use clinvoice_adapter::{Adapters, Store};
-use std::{error::Error, fs, io, path::Path};
+use std::{env, error::Error, fs, io, path::Path};
 
 /// # Summary
 ///
@@ -49,4 +49,45 @@ pub fn create_store_dir(store: &Store<'_, '_, '_>, dir: &str) -> Result<(), Box<
 		Ok(_) => Ok(()),
 		Err(e) => Err(Box::new(e)),
 	};
+}
+
+/// # Summary
+///
+/// Test some `assertion` using a `root` directory within the OS's [temp dir][fn_temp_dir].
+///
+/// # Parameters
+///
+/// * `root`, the directory within the [temp dir][fn_temp_dir] to use.
+///     * e.g. "foo" -> "%temp%/foo"
+/// * `assertion`, the test to run.
+///
+/// # Returns
+///
+/// * Nothing, if the `assertion` passed.
+/// * An [`Error`](io::Error), if [temp dir][fn_temp_dir] could not be read.
+///
+/// # Panics
+///
+/// If the `assertion` failed.
+///
+/// [fn_temp_dir]: std::env::temp_dir
+pub fn test_temp_store(root: &str, assertion: impl FnOnce(&Store<'_, '_, '_>)) -> Result<(), io::Error>
+{
+	let temp_path = env::temp_dir().join(root);
+
+	assertion(&Store {
+		adapter: Adapters::TOML,
+		password: None,
+		path: match temp_path.to_str()
+		{
+			Some(s) => s,
+			None => return Err(io::Error::new(
+				io::ErrorKind::InvalidInput,
+				"`env::temp_path` did not resolve to a valid path."
+			)),
+		},
+		username: None,
+	});
+
+	return Ok(());
 }

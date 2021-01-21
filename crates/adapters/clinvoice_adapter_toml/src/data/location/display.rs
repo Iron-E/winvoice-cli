@@ -15,7 +15,7 @@ impl Display for TomlLocation<'_, '_, '_, '_>
 	/// > Earth, USA, Arizona
 	///
 	/// ```no_run
-	/// use clinvoice_adapter::{Adapter, data::CrudLocation};
+	/// use clinvoice_adapter::data::LocationAdapter;
 	/// use clinvoice_adapter_toml::data::TomlLocation;
 	///
 	/// let earth = TomlLocation::create("Earth").unwrap();

@@ -66,33 +66,22 @@ where
 #[cfg(test)]
 mod tests
 {
-	use super::{Store, OrganizationAdapter, TomlOrganization};
-	use clinvoice_adapter::Adapters;
-	use std::{env, io};
+	use super::{OrganizationAdapter, TomlOrganization, util};
+	use std::io;
 
 	#[test]
 	fn test_init() -> Result<(), io::Error>
 	{
-		let temp_path = env::temp_dir().join("clinvoice_adapter_toml_test_init");
-
-		let test_store = Store
-		{
-			adapter: Adapters::TOML,
-			password: None,
-			path: match temp_path.to_str()
+		return util::test_temp_store(
+			"clinvoice_adapter_toml_test_init",
+			|store|
 			{
-				Some(s) => s,
-				None => return Err(io::Error::new(
-					io::ErrorKind::InvalidInput,
-					"`env::temp_path` did not resolve to a valid path."
-				)),
-			},
-			username: None,
-		};
+				// Assert that the function can initialize the store.
+				assert!(TomlOrganization::init(&store).is_ok());
 
-		assert!(TomlOrganization::init(&test_store).is_ok());
-		assert!(TomlOrganization::init(&test_store).is_err());
-
-		return Ok(());
+				// Assert that the function won't re-initialize the store.
+				assert!(TomlOrganization::init(&store).is_err());
+			}
+		);
 	}
 }

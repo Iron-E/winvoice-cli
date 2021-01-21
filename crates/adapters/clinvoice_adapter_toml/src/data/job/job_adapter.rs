@@ -67,3 +67,26 @@ where
 	}
 }
 
+#[cfg(test)]
+mod tests
+{
+	use super::{JobAdapter, TomlJob, util};
+	use clinvoice_data::chrono::offset::Local;
+	use std::io;
+
+	#[test]
+	fn test_init() -> Result<(), io::Error>
+	{
+		return util::test_temp_store(
+			"clinvoice_adapter_toml_test_init",
+			|store|
+			{
+				// Assert that the function can initialize the store.
+				assert!(<TomlJob<Local>>::init(&store).is_ok());
+
+				// Assert that the function won't re-initialize the store.
+				assert!(<TomlJob<Local>>::init(&store).is_err());
+			}
+		);
+	}
+}

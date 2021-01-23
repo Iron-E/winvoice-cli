@@ -16,6 +16,7 @@ use chrono::{DateTime, TimeZone};
 /// structures may define [the method of payment](Invoice),
 /// [client](Organization) information, and [work periods](Timesheet)— this
 /// structure defines what work _may_ performed.
+#[derive(Debug)]
 pub struct Job<'objectives, 'notes, 'timesheets, 'work_notes, TZone> where
 	'work_notes : 'timesheets,
 	 TZone : 'timesheets + TimeZone,

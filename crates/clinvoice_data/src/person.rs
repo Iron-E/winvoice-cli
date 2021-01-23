@@ -3,6 +3,7 @@ use crate::{Contact, Id};
 /// # Summary
 ///
 /// A person is a physical human being.
+#[derive(Debug)]
 pub struct Person<'contact_info, 'email, 'name, 'phone> where
 	'email : 'contact_info,
 	'phone : 'contact_info,

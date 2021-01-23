@@ -11,6 +11,7 @@ use chrono::{DateTime, TimeZone};
 /// It is likely that a given CLInvoice business object will contain multiple timesheets. As such,
 /// it is proposed that the container for business logic contain an array of `Timesheet`, rather
 /// than only one.
+#[derive(Debug)]
 pub struct Timesheet<'work_notes, TZone> where TZone : TimeZone
 {
 	/// # Summary

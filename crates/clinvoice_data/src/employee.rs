@@ -4,6 +4,7 @@ use crate::{Contact, Id};
 ///
 /// An `Employee` is a [`Person`](super::person::Person) who completes [`Job`](super::job::Job)s
 /// for an [employer](crate::Organization).
+#[derive(Debug)]
 pub struct Employee<'contact_info, 'email, 'phone, 'title> where
 	'email : 'contact_info,
 	'phone : 'contact_info,

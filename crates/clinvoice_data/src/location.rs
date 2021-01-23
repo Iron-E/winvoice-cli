@@ -4,6 +4,7 @@ use crate::Id;
 ///
 /// A physical space where other `Location`s or
 /// [`Organization`](super::organization::Organization)s exist.
+#[derive(Debug)]
 pub struct Location<'name>
 {
 	/// # Summary

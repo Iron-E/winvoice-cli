@@ -9,6 +9,7 @@ macro_rules! NewtypeLocation
 		/// # Summary
 		///
 		/// A wrapper around [`Location`] for use with TomlDB.
+		#[derive(Debug)]
 		pub struct $name<$($life),*, $($store_life),*>
 		{
 			pub location: Location<$($life),*>,

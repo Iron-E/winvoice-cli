@@ -9,6 +9,7 @@ macro_rules! NewtypeEmployee
 		/// # Summary
 		///
 		/// Wrapper around [`Employee`].
+		#[derive(Debug)]
 		pub struct $name<$($life),*, $($store_life),*> where
 			'email : 'contact_info,
 			'phone : 'contact_info,

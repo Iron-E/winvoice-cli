@@ -9,6 +9,7 @@ macro_rules! NewtypePerson
 		/// # Summary
 		///
 		/// A wrapper around [`Person`] for use with TomlDB.
+		#[derive(Debug)]
 		pub struct $name<$($life),*, $($store_life),*> where
 			'email : 'contact_info,
 			'phone : 'contact_info,

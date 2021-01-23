@@ -4,6 +4,7 @@ use rusty_money::Money;
 /// # Summary
 ///
 /// An `Invoice` represents the accounts receivable for the user or their employer.
+#[derive(Debug)]
 pub struct Invoice<TZone> where TZone : TimeZone
 {
 	/// # Summary

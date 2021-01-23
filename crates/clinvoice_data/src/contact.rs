@@ -3,6 +3,7 @@ use crate::Id;
 /// # Summary
 ///
 /// A method through which something can be communicated with.
+#[derive(Debug)]
 pub enum Contact<'email, 'phone>
 {
 	/// # Summary

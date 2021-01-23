@@ -9,6 +9,7 @@ macro_rules! NewtypeOrganization
 		/// # Summary
 		///
 		/// A wrapper around [`Organization`] for use with TomlDB.
+		#[derive(Debug)]
 		pub struct $name<$($life),*, $($store_life),*>
 		{
 			pub organization: Organization<$($life),*>,

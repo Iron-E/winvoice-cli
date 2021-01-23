@@ -9,6 +9,7 @@ macro_rules! NewtypeJob
 		/// # Summary
 		///
 		/// A wrapper around [`Job`] for use with TomlDB.
+		#[derive(Debug)]
 		pub struct $name<$($life),*, $($store_life),*, $T> where
 			'work_notes : 'timesheets,
 			 $T : 'timesheets + TimeZone,

@@ -12,6 +12,7 @@ use std::collections::HashSet;
 ///
 /// An `Organization` has no specific affitilation to the user, and as such can be both a
 /// Client and an Emlpoyer at the same time.
+#[derive(Debug)]
 pub struct Organization<'name>
 {
 	/// # Summary

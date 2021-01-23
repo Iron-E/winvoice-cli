@@ -37,7 +37,7 @@ pub struct Organization<'name>
 	///
 	/// # Example
 	///
-	/// ```ignore
+	/// ```toml
 	/// [representatives]
 	/// chief_executive_officer = 1
 	/// chief_operations_officer = 2

@@ -15,10 +15,18 @@ impl Display for TomlLocation<'_, '_, '_, '_>
 	/// > Earth, USA, Arizona
 	///
 	/// ```no_run
-	/// use clinvoice_adapter::data::LocationAdapter;
+	/// use clinvoice_adapter::{Adapters, data::LocationAdapter, Store};
 	/// use clinvoice_adapter_toml::data::TomlLocation;
 	///
-	/// let earth = TomlLocation::create("Earth").unwrap();
+	/// let store = Store
+	/// {
+	/// 	adapter: Adapters::TOML,
+	/// 	password: None,
+	/// 	path: "/some/path",
+	/// 	username: None,
+	/// };
+	///
+	/// let earth = TomlLocation::create("Earth", store).unwrap();
 	/// let usa = earth.create_inner("USA").unwrap();
 	/// let arizona = usa.create_inner("Arizona").unwrap();
 	/// println!("{}", arizona);

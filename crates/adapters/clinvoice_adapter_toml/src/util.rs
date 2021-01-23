@@ -8,13 +8,13 @@ use std::{env, error::Error, fs, io, path::Path};
 /// # Parameters
 ///
 /// * `store`, the store to reference location with.
-/// * `dir`, the directory name to create.
+/// * `child_dir_name`, the directory name to create.
 ///
 /// # Returns
 ///
 /// * `()`, if the directory was created successfully.
 /// * An `Error`, if something went wrong.
-pub fn create_store_dir(store: &Store<'_, '_, '_>, dir: &str) -> Result<(), Box<dyn Error>>
+pub fn create_store_dir(store: &Store<'_, '_, '_>, child_dir_name: &str) -> Result<(), Box<dyn Error>>
 {
 	if store.adapter != Adapters::TOML
 	{
@@ -22,6 +22,7 @@ pub fn create_store_dir(store: &Store<'_, '_, '_>, dir: &str) -> Result<(), Box<
 	}
 
 	let store_path = Path::new(store.path);
+	let child_path = store_path.join(child_dir_name);
 
 	if store_path.exists()
 	{
@@ -29,10 +30,7 @@ pub fn create_store_dir(store: &Store<'_, '_, '_>, dir: &str) -> Result<(), Box<
 		{
 			let node = node_result?.path();
 
-			if node.is_dir() && node.to_str().ok_or_else(|| io::Error::new(
-				io::ErrorKind::InvalidInput,
-				"The name of the node could not be read as a string."
-			))? == dir
+			if node.is_dir() && node == child_path
 			{
 				fs::remove_dir(node)?;
 			}
@@ -43,7 +41,7 @@ pub fn create_store_dir(store: &Store<'_, '_, '_>, dir: &str) -> Result<(), Box<
 		fs::create_dir_all(store_path)?;
 	}
 
-	fs::create_dir(store_path.join(dir))?;
+	fs::create_dir(child_path)?;
 
 	return Ok(());
 }

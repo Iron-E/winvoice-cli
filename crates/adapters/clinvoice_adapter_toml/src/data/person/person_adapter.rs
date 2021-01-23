@@ -59,8 +59,8 @@ where
 #[cfg(test)]
 mod tests
 {
-	use super::{PersonAdapter, TomlPerson, util};
-	use std::io;
+	use super::{PATH, PersonAdapter, TomlPerson, util};
+	use std::{fs, io, path::Path};
 
 	#[test]
 	fn test_init() -> Result<(), io::Error>
@@ -72,8 +72,15 @@ mod tests
 				// Assert that the function can initialize the store.
 				assert!(TomlPerson::init(&store).is_ok());
 
-				// Assert that the function won't re-initialize the store.
+				// Assert that creation of a file inside the initialized space is done
+				let filepath = Path::new(&store.path).join(PATH).join("testfile.txt");
+				assert!(fs::write(&filepath, "").is_ok());
+
+				// Assert that the function won't re-initialize the store if it isn't empty.
 				assert!(TomlPerson::init(&store).is_err());
+
+				// Assert cleanup
+				assert!(fs::remove_file(&filepath).is_ok());
 			}
 		);
 	}

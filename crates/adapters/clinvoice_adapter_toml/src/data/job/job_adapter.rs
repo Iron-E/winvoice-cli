@@ -70,9 +70,9 @@ where
 #[cfg(test)]
 mod tests
 {
-	use super::{JobAdapter, TomlJob, util};
+	use super::{JobAdapter, PATH, TomlJob, util};
 	use clinvoice_data::chrono::offset::Local;
-	use std::io;
+	use std::{fs, io, path::Path};
 
 	#[test]
 	fn test_init() -> Result<(), io::Error>
@@ -84,8 +84,15 @@ mod tests
 				// Assert that the function can initialize the store.
 				assert!(<TomlJob<Local>>::init(&store).is_ok());
 
-				// Assert that the function won't re-initialize the store.
+				// Assert that creation of a file inside the initialized space is done
+				let filepath = Path::new(&store.path).join(PATH).join("testfile.txt");
+				assert!(fs::write(&filepath, "").is_ok());
+
+				// Assert that the function won't re-initialize the store if it isn't empty.
 				assert!(<TomlJob<Local>>::init(&store).is_err());
+
+				// Assert cleanup
+				assert!(fs::remove_file(&filepath).is_ok());
 			}
 		);
 	}

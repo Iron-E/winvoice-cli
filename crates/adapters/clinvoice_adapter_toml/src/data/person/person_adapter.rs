@@ -1,7 +1,7 @@
 use super::TomlPerson;
 use crate::util;
 use clinvoice_adapter::{data::{AnyValue, PersonAdapter}, Store};
-use clinvoice_data::{Contact, Id};
+use clinvoice_data::{Contact, Id, Person};
 use std::error::Error;
 
 impl<'contact_info, 'email, 'name, 'pass, 'path, 'phone, 'user> PersonAdapter<'contact_info, 'email, 'name, 'pass, 'path, 'phone, 'user>
@@ -27,6 +27,13 @@ where
 		store: Store<'pass, 'path, 'user>,
 	) -> Result<Self, Box<dyn Error>>
 	{
+		let person = Person
+		{
+			contact_info,
+			id: util::next_id(&TomlPerson::path(&store))?,
+			name,
+		};
+
 		todo!()
 	}
 

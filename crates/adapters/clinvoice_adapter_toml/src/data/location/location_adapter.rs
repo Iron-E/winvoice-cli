@@ -20,7 +20,7 @@ for TomlLocation<'name, 'pass, 'path, 'user>
 	/// ```ignore
 	/// Location {name, id: /* generated */};
 	/// ```
-	fn create(name: &'_ str, store: Store<'pass, 'path, 'user>) -> Result<Self, Box<dyn Error>>
+	fn create(name: &str, store: Store<'pass, 'path, 'user>) -> Result<Self, Box<dyn Error>>
 	{
 		todo!()
 	}
@@ -38,7 +38,7 @@ for TomlLocation<'name, 'pass, 'path, 'user>
 	/// ```ignore
 	/// Location {name, id: /* generated */, outside_id: self.unroll().id};
 	/// ```
-	fn create_inner(&self, name: &'_ str) -> Result<Self, Box<dyn Error>>
+	fn create_inner(&self, name: &str) -> Result<Self, Box<dyn Error>>
 	{
 		todo!()
 	}
@@ -65,7 +65,7 @@ for TomlLocation<'name, 'pass, 'path, 'user>
 	/// * A list of matches, if there are any.
 	fn retrieve<'arr>(
 		id: AnyValue<Id>,
-		name: AnyValue<&'_ str>,
+		name: AnyValue<&str>,
 		store: Store<'pass, 'path, 'user>,
 	) -> Result<&'arr [Self], Box<dyn Error>>
 	{
@@ -83,14 +83,15 @@ mod tests
 	fn test_init() -> Result<(), io::Error>
 	{
 		return util::test_temp_store(
-			"clinvoice_adapter_toml_test_init",
 			|store|
 			{
 				// Assert that the function can initialize the store.
 				assert!(TomlLocation::init(&store).is_ok());
 
-				// Assert that creation of a file inside the initialized space is done
+				// Create filepath for temporary test file.
 				let filepath = Path::new(&store.path).join(PATH).join("testfile.txt");
+
+				// Assert that creation of a file inside the initialized space is done
 				assert!(fs::write(&filepath, "").is_ok());
 
 				// Assert that the function won't re-initialize the store if it isn't empty.
@@ -98,7 +99,7 @@ mod tests
 
 				// Assert cleanup
 				assert!(fs::remove_file(&filepath).is_ok());
-			}
+			},
 		);
 	}
 }

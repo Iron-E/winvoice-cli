@@ -65,23 +65,26 @@ pub fn create_store_dir(store: &Store<'_, '_, '_>, child_dir_name: &str) -> Resu
 /// If the `assertion` failed.
 ///
 /// [fn_temp_dir]: std::env::temp_dir
-pub fn test_temp_store(root: &str, assertion: impl FnOnce(&Store<'_, '_, '_>)) -> Result<(), io::Error>
+pub fn test_temp_store(assertion: impl FnOnce(&Store<'_, '_, '_>)) -> Result<(), io::Error>
 {
-	let temp_path = env::temp_dir().join(root);
+	let temp_path = env::temp_dir().join("clinvoice_adapter_toml_data");
 
-	assertion(&Store {
-		adapter: Adapters::TOML,
-		password: None,
-		path: match temp_path.to_str()
+	assertion(
+		&Store
 		{
-			Some(s) => s,
-			None => return Err(io::Error::new(
-				io::ErrorKind::InvalidInput,
-				"`env::temp_path` did not resolve to a valid path."
-			)),
+			adapter: Adapters::TOML,
+			password: None,
+			path: match temp_path.to_str()
+			{
+				Some(s) => s,
+				None => return Err(io::Error::new(
+					io::ErrorKind::InvalidInput,
+					"`env::temp_path` did not resolve to a valid path."
+				)),
+			},
+			username: None,
 		},
-		username: None,
-	});
+	);
 
 	return Ok(());
 }

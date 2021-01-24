@@ -76,14 +76,15 @@ mod tests
 	fn test_init() -> Result<(), io::Error>
 	{
 		return util::test_temp_store(
-			"clinvoice_adapter_toml_test_init",
 			|store|
 			{
 				// Assert that the function can initialize the store.
 				assert!(TomlEmployee::init(&store).is_ok());
 
-				// Assert that creation of a file inside the initialized space is done
+				// Create filepath for temporary test file.
 				let filepath = Path::new(&store.path).join(PATH).join("testfile.txt");
+
+				// Assert that creation of a file inside the initialized space is done
 				assert!(fs::write(&filepath, "").is_ok());
 
 				// Assert that the function won't re-initialize the store if it isn't empty.
@@ -91,7 +92,7 @@ mod tests
 
 				// Assert cleanup
 				assert!(fs::remove_file(&filepath).is_ok());
-			}
+			},
 		);
 	}
 }

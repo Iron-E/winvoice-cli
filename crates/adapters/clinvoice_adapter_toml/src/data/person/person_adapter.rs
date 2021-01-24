@@ -21,7 +21,11 @@ where
 	/// # Returns
 	///
 	/// The newly created [`Person`].
-	fn create(contact_info: &'contact_info [Contact<'email, 'phone>], name: &'name str) -> Result<Self, Box<dyn Error>>
+	fn create(
+		contact_info: &'contact_info [Contact<'email, 'phone>],
+		name: &'name str,
+		store: Store<'pass, 'path, 'user>,
+	) -> Result<Self, Box<dyn Error>>
 	{
 		todo!()
 	}
@@ -51,6 +55,7 @@ where
 		contact_info: AnyValue<&'contact_info [Contact<'email, 'phone>]>,
 		id: AnyValue<Id>,
 		name: AnyValue<&'name str>,
+		store: Store<'pass, 'path, 'user>,
 	) -> Result<Option<&'arr [Self]>, Box<dyn Error>>
 	{
 		todo!()

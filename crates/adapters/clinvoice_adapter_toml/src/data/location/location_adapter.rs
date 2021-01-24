@@ -1,4 +1,4 @@
-use super::{PATH, TomlLocation};
+use super::TomlLocation;
 use crate::util;
 use clinvoice_adapter::{data::{AnyValue, LocationAdapter}, Store};
 use clinvoice_data::Id;
@@ -48,7 +48,8 @@ for TomlLocation<'name, 'pass, 'path, 'user>
 	/// Initialize the database for a given [`Store`].
 	fn init(store: &Store<'pass, 'path, 'user>) -> Result<(), Box<dyn Error>>
 	{
-		return util::create_store_dir(store, PATH);
+		util::create_store_dir(&TomlLocation::path(store))?;
+		return Ok(());
 	}
 
 	/// # Summary
@@ -76,8 +77,8 @@ for TomlLocation<'name, 'pass, 'path, 'user>
 #[cfg(test)]
 mod tests
 {
-	use super::{PATH, LocationAdapter, TomlLocation, util};
-	use std::{fs, io, path::Path};
+	use super::{LocationAdapter, TomlLocation, util};
+	use std::{fs, io};
 
 	#[test]
 	fn test_init() -> Result<(), io::Error>
@@ -86,19 +87,19 @@ mod tests
 			|store|
 			{
 				// Assert that the function can initialize the store.
-				assert!(TomlLocation::init(&store).is_ok());
+				assert!(TomlLocation::init(store).is_ok());
 
 				// Create filepath for temporary test file.
-				let filepath = Path::new(&store.path).join(PATH).join("testfile.txt");
+				let filepath = TomlLocation::path(store).join("testfile.txt");
 
 				// Assert that creation of a file inside the initialized space is done
 				assert!(fs::write(&filepath, "").is_ok());
 
-				// Assert that the function won't re-initialize the store if it isn't empty.
-				assert!(TomlLocation::init(&store).is_err());
+				// Assert that the function will still return OK with files in the directory.
+				assert!(TomlLocation::init(store).is_ok());
 
 				// Assert cleanup
-				assert!(fs::remove_file(&filepath).is_ok());
+				assert!(fs::remove_file(filepath).is_ok());
 			},
 		);
 	}

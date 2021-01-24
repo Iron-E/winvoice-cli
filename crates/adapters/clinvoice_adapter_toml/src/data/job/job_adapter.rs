@@ -1,4 +1,4 @@
-use super::{PATH, TomlJob};
+use super::TomlJob;
 use crate::util;
 use clinvoice_adapter::{data::{AnyValue, JobAdapter}, Store};
 use clinvoice_data::{chrono::{DateTime, TimeZone}, Id, Organization, Timesheet};
@@ -38,7 +38,8 @@ where
 	/// Initialize the database for a given [`Store`].
 	fn init(store: &Store<'pass, 'path, 'user>) -> Result<(), Box<dyn Error>>
 	{
-		return util::create_store_dir(store, PATH);
+		util::create_store_dir(&<TomlJob<TZone>>::path(store))?;
+		return Ok(());
 	}
 
 	/// # Summary
@@ -70,9 +71,9 @@ where
 #[cfg(test)]
 mod tests
 {
-	use super::{JobAdapter, PATH, TomlJob, util};
+	use super::{JobAdapter, TomlJob, util};
 	use clinvoice_data::chrono::offset::Local;
-	use std::{fs, io, path::Path};
+	use std::{fs, io};
 
 	#[test]
 	fn test_init() -> Result<(), io::Error>
@@ -81,19 +82,19 @@ mod tests
 			|store|
 			{
 				// Assert that the function can initialize the store.
-				assert!(<TomlJob<Local>>::init(&store).is_ok());
+				assert!(<TomlJob<Local>>::init(store).is_ok());
 
 				// Create filepath for temporary test file.
-				let filepath = Path::new(&store.path).join(PATH).join("testfile.txt");
+				let filepath = <TomlJob<Local>>::path(store).join("testfile.txt");
 
 				// Assert that creation of a file inside the initialized space is done
 				assert!(fs::write(&filepath, "").is_ok());
 
-				// Assert that the function won't re-initialize the store if it isn't empty.
-				assert!(<TomlJob<Local>>::init(&store).is_err());
+				// Assert that the function will still return OK with files in the directory.
+				assert!(<TomlJob<Local>>::init(store).is_ok());
 
 				// Assert cleanup
-				assert!(fs::remove_file(&filepath).is_ok());
+				assert!(fs::remove_file(filepath).is_ok());
 			}
 		);
 	}

@@ -1,5 +1,6 @@
 use clinvoice_adapter::{Adapters, Store};
-use std::{env, fs, io, path::Path};
+use clinvoice_data::Id;
+use std::{env, error::Error, fs, io, path::Path};
 
 /// # Summary
 ///
@@ -7,17 +8,47 @@ use std::{env, fs, io, path::Path};
 ///
 /// # Parameters
 ///
-/// * `store`, the store to reference location with.
+/// * `store_dir`, the directory in the [`Store`] to create.
 ///
 /// # Returns
 ///
-/// * `()`, if the directory was created successfully.
-/// * An `Error`, if something went wrong.
-pub fn create_store_dir(store_dir: &Path) -> Result<(), io::Error>
+/// * `true`, if the directory was created.
+/// * `false`, if the directory already existed.
+/// * An `Error`, if `store_dir` couldn't be created.
+pub fn create_store_dir(store_dir: &Path) -> Result<bool, io::Error>
 {
-	if !store_dir.is_dir() { fs::create_dir_all(store_dir)?; }
+	if !store_dir.is_dir()
+	{
+		fs::create_dir_all(store_dir)?;
+		return Ok(true);
+	}
 
-	return Ok(());
+	return Ok(false);
+}
+
+/// # Summary
+///
+/// Get the next [`Id`] number for an entity in the given `store_dir`.
+///
+/// # Parameters
+///
+/// * `store_dir`, the directory in a
+///
+/// # Returns
+///
+/// The next [`Id`] for an entity in `store_dir`.
+pub fn next_id(store_dir: &Path) -> Result<Id, Box<dyn Error>>
+{
+	let filename_conv_error = io::Error::new(
+		io::ErrorKind::InvalidInput,
+		"last file in `store_dir` has bad file name."
+	);
+
+	return Ok(match fs::read_dir(store_dir)?.last()
+	{
+		Some(node) => node?.file_name().to_str().ok_or(filename_conv_error)?.parse::<Id>()?,
+		None => 0,
+	});
 }
 
 /// # Summary

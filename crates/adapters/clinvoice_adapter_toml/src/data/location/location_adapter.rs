@@ -78,13 +78,13 @@ for TomlLocation<'name, 'pass, 'path, 'user>
 mod tests
 {
 	use super::{LocationAdapter, TomlLocation, util};
-	use std::{fs, io};
+	use std::fs;
 
 	#[test]
-	fn test_init() -> Result<(), io::Error>
+	fn test_init()
 	{
-		return util::test_temp_store(
-			|store|
+		assert!(
+			util::test_temp_store(|store|
 			{
 				// Assert that the function can initialize the store.
 				assert!(TomlLocation::init(store).is_ok());
@@ -100,7 +100,7 @@ mod tests
 
 				// Assert cleanup
 				assert!(fs::remove_file(filepath).is_ok());
-			},
+			}).is_ok()
 		);
 	}
 }

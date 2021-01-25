@@ -1,7 +1,7 @@
 #[macro_export]
 /// # Summary
 ///
-/// `Newtype!` is a marcro which allows quick generation of wrapper types necessary to implement
+/// `Adapt!` is a marcro which allows quick generation of wrapper types necessary to implement
 /// `Crud` traits on a CLInvoice adapter.
 ///
 /// # Parameters
@@ -17,32 +17,32 @@
 /// # Examples
 ///
 /// ```rust
-/// clinvoice_adapter::Newtype!(Employee => FooEmployee);
+/// clinvoice_adapter::Adapt!(Employee => FooEmployee);
 /// ```
-macro_rules! Newtype
+macro_rules! Adapt
 {
 	(Employee => $name: ident) =>
 	{
-		clinvoice_adapter::NewtypeEmployee!($name, 'contact_info 'email 'phone 'title, 'pass 'path 'user);
+		clinvoice_adapter::AdaptEmployee!($name, 'contact_info 'email 'phone 'title, 'pass 'path 'user);
 	};
 
 	(Job => $name: ident) =>
 	{
-		clinvoice_adapter::NewtypeJob!($name, 'objectives 'notes 'timesheets 'work_notes, 'pass 'path 'user, TZone);
+		clinvoice_adapter::AdaptJob!($name, 'objectives 'notes 'timesheets 'work_notes, 'pass 'path 'user, TZone);
 	};
 
 	(Location => $name: ident) =>
 	{
-		clinvoice_adapter::NewtypeLocation!($name, 'name, 'pass 'path 'user);
+		clinvoice_adapter::AdaptLocation!($name, 'name, 'pass 'path 'user);
 	};
 
 	(Organization => $name: ident) =>
 	{
-		clinvoice_adapter::NewtypeOrganization!($name, 'name, 'pass 'path 'user);
+		clinvoice_adapter::AdaptOrganization!($name, 'name, 'pass 'path 'user);
 	};
 
 	(Person => $name: ident) =>
 	{
-		clinvoice_adapter::NewtypePerson!($name, 'contact_info 'email 'name 'phone, 'pass 'path 'user);
+		clinvoice_adapter::AdaptPerson!($name, 'contact_info 'email 'name 'phone, 'pass 'path 'user);
 	};
 }

@@ -1,5 +1,5 @@
 #[macro_export]
-macro_rules! NewtypeEmployee
+macro_rules! AdaptEmployee
 {
 	($name: ident, $($life: lifetime)*, $($store_life: lifetime)*) =>
 	{

@@ -4,7 +4,7 @@ mod updatable;
 
 use std::path::PathBuf;
 
-clinvoice_adapter::Newtype!(Person => TomlPerson);
+clinvoice_adapter::Adapt!(Person => TomlPerson);
 
 impl<'path> TomlPerson<'_, '_, '_, '_, '_, 'path, '_>
 {

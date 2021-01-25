@@ -1,5 +1,5 @@
 #[macro_export]
-macro_rules! NewtypeJob
+macro_rules! AdaptJob
 {
 	($name: ident, $($life: lifetime)*, $($store_life: lifetime)*, $T: ident) =>
 	{

@@ -1,5 +1,5 @@
 #[macro_export]
-macro_rules! NewtypeOrganization
+macro_rules! AdaptOrganization
 {
 	($name: ident, $($life: lifetime)*, $($store_life: lifetime)*) =>
 	{

@@ -6,7 +6,7 @@ mod updatable;
 
 use std::path::PathBuf;
 
-clinvoice_adapter::Newtype!(Organization => TomlOrganization);
+clinvoice_adapter::Adapt!(Organization => TomlOrganization);
 
 impl<'path> TomlOrganization<'_, '_, 'path, '_>
 {

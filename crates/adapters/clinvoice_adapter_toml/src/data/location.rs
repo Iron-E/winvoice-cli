@@ -5,7 +5,7 @@ mod updatable;
 
 use std::path::PathBuf;
 
-clinvoice_adapter::Newtype!(Location => TomlLocation);
+clinvoice_adapter::Adapt!(Location => TomlLocation);
 
 impl<'path> TomlLocation<'_, '_, 'path, '_>
 {

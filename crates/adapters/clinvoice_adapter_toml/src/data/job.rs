@@ -5,7 +5,7 @@ mod updatable;
 
 use std::path::PathBuf;
 
-clinvoice_adapter::Newtype!(Job => TomlJob);
+clinvoice_adapter::Adapt!(Job => TomlJob);
 
 impl<'path, TZone> TomlJob<'_, '_, '_, '_, '_, 'path, '_, TZone> where TZone : TimeZone
 {

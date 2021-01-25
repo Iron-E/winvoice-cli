@@ -1,5 +1,5 @@
 #[macro_export]
-macro_rules! NewtypeLocation
+macro_rules! AdaptLocation
 {
 	($name: ident, $($life: lifetime)*, $($store_life: lifetime)*) =>
 	{

@@ -1,8 +1,8 @@
 #![macro_use]
 
-mod newtype;
-mod newtype_employee;
-mod newtype_job;
-mod newtype_location;
-mod newtype_organization;
-mod newtype_person;
+mod adapt;
+mod adapt_employee;
+mod adapt_job;
+mod adapt_location;
+mod adapt_organization;
+mod adapt_person;

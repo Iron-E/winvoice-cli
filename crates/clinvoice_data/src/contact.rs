@@ -1,9 +1,11 @@
 use crate::Id;
+use std::borrow::Cow;
+use serde::{Deserialize, Serialize};
 
 /// # Summary
 ///
 /// A method through which something can be communicated with.
-#[derive(Debug)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub enum Contact<'email, 'phone>
 {
 	/// # Summary
@@ -18,7 +20,7 @@ pub enum Contact<'email, 'phone>
 	/// # Example
 	///
 	/// * 'foo@bar.io'
-	Email(&'email str),
+	Email(Cow<'email, str>),
 
 	/// # Summary
 	///
@@ -37,5 +39,5 @@ pub enum Contact<'email, 'phone>
 	/// * '(603) 555-1234'
 	/// * '603-555-1234'
 	/// * '6035551234'
-	Phone(&'phone str),
+	Phone(Cow<'phone, str>),
 }

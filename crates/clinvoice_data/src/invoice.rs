@@ -1,11 +1,13 @@
-use chrono::{DateTime, TimeZone};
+mod ser_de;
+
+use chrono::{DateTime, Utc};
 use rusty_money::Money;
 
 /// # Summary
 ///
 /// An `Invoice` represents the accounts receivable for the user or their employer.
 #[derive(Debug)]
-pub struct Invoice<TZone> where TZone : TimeZone
+pub struct Invoice
 {
 	/// # Summary
 	///
@@ -18,7 +20,7 @@ pub struct Invoice<TZone> where TZone : TimeZone
 	///
 	/// When running `clinvoice export`, this field will be set automatically to the current date
 	/// and time.
-	pub date_issued: Option<DateTime<TZone>>,
+	pub date_issued: Option<DateTime<Utc>>,
 
 	/// # Summary
 	///
@@ -30,7 +32,7 @@ pub struct Invoice<TZone> where TZone : TimeZone
 	/// underlying [`Invoice`] has not paid by the client.
 	///
 	/// This field will be updated when running `clinvoice rec`/`receive`
-	pub date_paid: Option<DateTime<TZone>>,
+	pub date_paid: Option<DateTime<Utc>>,
 
 	/// # Summary
 	///

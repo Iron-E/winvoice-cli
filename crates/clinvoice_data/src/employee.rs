@@ -1,18 +1,17 @@
 use crate::{Contact, Id};
+use serde::{Deserialize, Serialize};
 
 /// # Summary
 ///
 /// An `Employee` is a [`Person`](super::person::Person) who completes [`Job`](super::job::Job)s
 /// for an [employer](crate::Organization).
-#[derive(Debug)]
-pub struct Employee<'contact_info, 'email, 'phone, 'title> where
-	'email : 'contact_info,
-	'phone : 'contact_info,
+#[derive(Debug, Deserialize, Serialize)]
+pub struct Employee<'email, 'phone, 'title>
 {
 	/// # Summary
 	///
 	/// Contact information specific to the [`Organization`] that the [`Employee`] does work for.
-	pub contact_info: &'contact_info [Contact<'email, 'phone>],
+	pub contact_info: Vec<Contact<'email, 'phone>>,
 
 	/// # Summary
 	///

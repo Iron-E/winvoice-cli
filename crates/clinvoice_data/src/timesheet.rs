@@ -1,5 +1,7 @@
 use crate::Id;
-use chrono::{DateTime, TimeZone};
+use std::borrow::Cow;
+use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
 
 /// # Summary
 ///
@@ -11,8 +13,8 @@ use chrono::{DateTime, TimeZone};
 /// It is likely that a given CLInvoice business object will contain multiple timesheets. As such,
 /// it is proposed that the container for business logic contain an array of `Timesheet`, rather
 /// than only one.
-#[derive(Debug)]
-pub struct Timesheet<'work_notes, TZone> where TZone : TimeZone
+#[derive(Debug, Deserialize, Serialize)]
+pub struct Timesheet<'work_notes>
 {
 	/// # Summary
 	///
@@ -22,7 +24,7 @@ pub struct Timesheet<'work_notes, TZone> where TZone : TimeZone
 	/// # Summary
 	///
 	/// The time at which this period of work began.
-	pub time_begin: DateTime<TZone>,
+	pub time_begin: DateTime<Utc>,
 
 	/// # Summary
 	///
@@ -31,7 +33,7 @@ pub struct Timesheet<'work_notes, TZone> where TZone : TimeZone
 	/// # Remarks
 	///
 	/// Is [`Option`] because the time that a work period ends is not known upon first creation.
-	pub time_end: Option<DateTime<TZone>>,
+	pub time_end: Option<DateTime<Utc>>,
 
 	/// # Summary
 	///
@@ -46,5 +48,5 @@ pub struct Timesheet<'work_notes, TZone> where TZone : TimeZone
 	/// * Implemented chosen solution.
 	/// * Created tests for chosen solution.
 	/// ```
-	pub work_notes: &'work_notes str,
+	pub work_notes: Cow<'work_notes, str>,
 }

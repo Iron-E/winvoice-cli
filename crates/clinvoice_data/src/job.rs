@@ -1,5 +1,6 @@
 use crate::{Id, Invoice, Timesheet};
-use chrono::{DateTime, TimeZone};
+use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
 
 /// # Summary
 ///
@@ -16,20 +17,18 @@ use chrono::{DateTime, TimeZone};
 /// structures may define [the method of payment](Invoice),
 /// [client](Organization) information, and [work periods](Timesheet)— this
 /// structure defines what work _may_ performed.
-#[derive(Debug)]
-pub struct Job<'objectives, 'notes, 'timesheets, 'work_notes, TZone> where
-	'work_notes : 'timesheets,
-	 TZone : 'timesheets + TimeZone,
+#[derive(Debug, Deserialize, Serialize)]
+pub struct Job<'objectives, 'notes, 'work_notes> where
 {
 	/// # Summary
 	///
 	/// The date upon which the client accepted the work as "complete".
-	pub date_close: Option<DateTime<TZone>>,
+	pub date_close: Option<DateTime<Utc>>,
 
 	/// # Summary
 	///
 	/// The [date](DateTime) upon which the client requested the work.
-	pub date_open: DateTime<TZone>,
+	pub date_open: DateTime<Utc>,
 
 	/// # Summary
 	///
@@ -48,7 +47,7 @@ pub struct Job<'objectives, 'notes, 'timesheets, 'work_notes, TZone> where
 	/// # Summary
 	///
 	/// The [`Invoice`] which will be sent to the [client](Organization) after the [`Job`] is done.
-	pub invoice: Invoice<TZone>,
+	pub invoice: Invoice,
 
 	/// # Summary
 	///
@@ -83,5 +82,5 @@ pub struct Job<'objectives, 'notes, 'timesheets, 'work_notes, TZone> where
 	/// # Summary
 	///
 	/// The periods of time during which work was performed for this [`Job`].
-	pub timesheets: &'timesheets [Timesheet<'work_notes, TZone>],
+	pub timesheets: Vec<Timesheet<'work_notes>>,
 }

@@ -2,7 +2,8 @@ use super::TomlPerson;
 use crate::util;
 use clinvoice_adapter::{data::{AnyValue, PersonAdapter}, Store};
 use clinvoice_data::{Contact, Id, Person};
-use std::error::Error;
+use std::{error::Error, fs};
+use toml;
 
 impl<'email, 'name, 'pass, 'path, 'phone, 'user> PersonAdapter<'email, 'name, 'pass, 'path, 'phone, 'user>
 for TomlPerson<'email, 'name, 'phone, 'pass, 'path, 'user>
@@ -24,6 +25,8 @@ for TomlPerson<'email, 'name, 'phone, 'pass, 'path, 'user>
 		store: Store<'pass, 'path, 'user>,
 	) -> Result<Self, Box<dyn Error>>
 	{
+		TomlPerson::init(&store)?;
+
 		let person = Person
 		{
 			contact_info: contact_info.into(),
@@ -31,7 +34,12 @@ for TomlPerson<'email, 'name, 'phone, 'pass, 'path, 'user>
 			name,
 		};
 
-		todo!()
+		fs::write(
+			TomlPerson::path(&store).join(person.id.to_string()),
+			toml::to_string(&person)?
+		)?;
+
+		return Ok(TomlPerson {person, store});
 	}
 
 	/// # Summary

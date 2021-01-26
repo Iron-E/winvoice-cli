@@ -78,29 +78,36 @@ for TomlPerson<'email, 'name, 'phone, 'pass, 'path, 'user>
 mod tests
 {
 	use super::{PersonAdapter, TomlPerson, util};
-	use std::fs;
+	use std::{fs, io};
 
 	#[test]
-	fn test_init()
+	fn test_create() -> Result<(), io::Error>
 	{
-		assert!(
-			util::test_temp_store(|store|
-			{
-				// Assert that the function can initialize the store.
-				assert!(TomlPerson::init(store).is_ok());
+		return util::test_temp_store(|store|
+		{
+			TomlPerson::create(&[], "", *store).unwrap();
+		});
+	}
 
-				// Create filepath for temporary test file.
-				let filepath = TomlPerson::path(store).join("testfile.txt");
+	#[test]
+	fn test_init() -> Result<(), io::Error>
+	{
+		return util::test_temp_store(|store|
+		{
+			// Assert that the function can initialize the store.
+			assert!(TomlPerson::init(store).is_ok());
 
-				// Assert that creation of a file inside the initialized space is done
-				assert!(fs::write(&filepath, "").is_ok());
+			// Create filepath for temporary test file.
+			let filepath = TomlPerson::path(store).join("testfile.txt");
 
-				// Assert that the function will still return OK with files in the directory.
-				assert!(TomlPerson::init(store).is_ok());
+			// Assert that creation of a file inside the initialized space is done
+			assert!(fs::write(&filepath, "").is_ok());
 
-				// Assert cleanup
-				assert!(fs::remove_file(filepath).is_ok());
-			}).is_ok()
-		);
+			// Assert that the function will still return OK with files in the directory.
+			assert!(TomlPerson::init(store).is_ok());
+
+			// Assert cleanup
+			assert!(fs::remove_file(filepath).is_ok());
+		});
 	}
 }

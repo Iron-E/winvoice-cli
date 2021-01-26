@@ -5,7 +5,7 @@ use crate::AdapterMismatchError;
 /// # Summary
 ///
 /// Currently supported file systems / DBMS.
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Adapters
 {
 	/// # Summary

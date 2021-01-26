@@ -69,29 +69,27 @@ for TomlJob<'objectives, 'notes, 'work_notes, 'pass, 'path, 'user>
 mod tests
 {
 	use super::{JobAdapter, TomlJob, util};
-	use std::fs;
+	use std::{fs, io};
 
 	#[test]
-	fn test_init()
+	fn test_init() -> Result<(), io::Error>
 	{
-		assert!(
-			util::test_temp_store(|store|
-			{
-				// Assert that the function can initialize the store.
-				assert!(TomlJob::init(store).is_ok());
+		return util::test_temp_store(|store|
+		{
+			// Assert that the function can initialize the store.
+			assert!(TomlJob::init(store).is_ok());
 
-				// Create filepath for temporary test file.
-				let filepath = TomlJob::path(store).join("testfile.txt");
+			// Create filepath for temporary test file.
+			let filepath = TomlJob::path(store).join("testfile.txt");
 
-				// Assert that creation of a file inside the initialized space is done
-				assert!(fs::write(&filepath, "").is_ok());
+			// Assert that creation of a file inside the initialized space is done
+			assert!(fs::write(&filepath, "").is_ok());
 
-				// Assert that the function will still return OK with files in the directory.
-				assert!(TomlJob::init(store).is_ok());
+			// Assert that the function will still return OK with files in the directory.
+			assert!(TomlJob::init(store).is_ok());
 
-				// Assert cleanup
-				assert!(fs::remove_file(filepath).is_ok());
-			}).is_ok()
-		);
+			// Assert cleanup
+			assert!(fs::remove_file(filepath).is_ok());
+		});
 	}
 }

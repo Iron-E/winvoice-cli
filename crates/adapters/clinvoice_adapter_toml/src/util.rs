@@ -83,22 +83,20 @@ pub fn test_temp_store(assertion: impl FnOnce(&Store<'_, '_, '_>)) -> Result<(),
 {
 	let temp_path = env::temp_dir().join("clinvoice_adapter_toml_data");
 
-	assertion(
-		&Store
+	assertion(&Store
+	{
+		adapter: Adapters::TOML,
+		password: None,
+		path: match temp_path.to_str()
 		{
-			adapter: Adapters::TOML,
-			password: None,
-			path: match temp_path.to_str()
-			{
-				Some(s) => s,
-				None => return Err(io::Error::new(
-					io::ErrorKind::InvalidInput,
-					"`env::temp_path` did not resolve to a valid path."
-				)),
-			},
-			username: None,
+			Some(s) => s,
+			None => return Err(io::Error::new(
+				io::ErrorKind::InvalidInput,
+				"`env::temp_path` did not resolve to a valid path."
+			)),
 		},
-	);
+		username: None,
+	});
 
 	return Ok(());
 }
@@ -106,34 +104,32 @@ pub fn test_temp_store(assertion: impl FnOnce(&Store<'_, '_, '_>)) -> Result<(),
 #[cfg(test)]
 mod tests
 {
-	use super::fs;
+	use super::{fs, io};
 	use std::path::PathBuf;
 
 	#[test]
-	fn test_next_id()
+	fn test_next_id() -> Result<(), io::Error>
 	{
-		assert!(
-			super::test_temp_store(|store|
+		return super::test_temp_store(|store|
+		{
+			let test_path = PathBuf::new().join(store.path).join("test_next_id");
+
+			if test_path.is_dir()
 			{
-				let test_path = PathBuf::new().join(store.path).join("test_next_id");
+				assert!(fs::remove_dir_all(&test_path).is_ok());
+			}
 
-				if test_path.is_dir()
-				{
-					assert!(fs::remove_dir_all(&test_path).is_ok());
-				}
+			// Create the `test_path`.
+			assert!(super::create_store_dir(&test_path).is_ok());
 
-				// Create the `test_path`.
-				assert!(super::create_store_dir(&test_path).is_ok());
+			for i in 0..100
+			{
+				// The `next_id` matched `i`.
+				assert_eq!(super::next_id(&test_path).ok(), Some(i));
 
-				for i in 0..100
-				{
-					// The `next_id` matched `i`.
-					assert_eq!(super::next_id(&test_path).ok(), Some(i));
-
-					// Creating the next file worked.
-					assert!(fs::write(&test_path.join(format!("{}.toml", i)), "").is_ok());
-				}
-			}).is_ok()
-		);
+				// Creating the next file worked.
+				assert!(fs::write(&test_path.join(format!("{}.toml", i)), "").is_ok());
+			}
+		});
 	}
 }

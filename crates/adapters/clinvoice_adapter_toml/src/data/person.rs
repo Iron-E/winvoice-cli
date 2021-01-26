@@ -6,7 +6,7 @@ use std::path::PathBuf;
 
 clinvoice_adapter::Adapt!(Person => TomlPerson);
 
-impl<'path> TomlPerson<'_, '_, '_, '_, '_, 'path, '_>
+impl<'path> TomlPerson<'_, '_, '_, '_, 'path, '_>
 {
 	/// # Summary
 	///

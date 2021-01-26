@@ -3,14 +3,11 @@ use crate::Store;
 use clinvoice_data::{Contact, Id, Person};
 use std::error::Error;
 
-pub trait PersonAdapter<'contact_info, 'email, 'name, 'pass, 'path, 'phone, 'user> :
+pub trait PersonAdapter<'email, 'name, 'pass, 'path, 'phone, 'user> :
 	Deletable<'pass, 'path, 'user> +
-	Into<Person<'contact_info, 'email, 'name, 'phone>> +
+	Into<Person<'email, 'name, 'phone>> +
 	Into<Store<'pass, 'path, 'user>> +
 	Updatable +
-where
-	'email : 'contact_info,
-	'phone : 'contact_info,
 {
 	/// # Summary
 	///
@@ -24,7 +21,7 @@ where
 	///
 	/// The newly created [`Person`].
 	fn create(
-		contact_info: &'contact_info [Contact<'email, 'phone>],
+		contact_info: &[Contact<'email, 'phone>],
 		name: &'name str,
 		store: Store<'pass, 'path, 'user>,
 	) -> Result<Self, Box<dyn Error>>;
@@ -47,7 +44,7 @@ where
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`Job`]s.
 	fn retrieve<'arr>(
-		contact_info: AnyValue<&'contact_info [Contact<'email, 'phone>]>,
+		contact_info: AnyValue<&[Contact<'email, 'phone>]>,
 		id: AnyValue<Id>,
 		name: AnyValue<&'name str>,
 		store: Store<'pass, 'path, 'user>,

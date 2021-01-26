@@ -10,17 +10,13 @@ macro_rules! AdaptEmployee
 		///
 		/// Wrapper around [`Employee`].
 		#[derive(Debug)]
-		pub struct $name<$($life),*, $($store_life),*> where
-			'email : 'contact_info,
-			'phone : 'contact_info,
+		pub struct $name<$($life),*, $($store_life),*>
 		{
 			pub employee: Employee<$($life),*>,
 			pub store: Store<$($store_life),*>,
 		}
 
-		impl<$($life),*, $($store_life),*> Into<Employee<$($life),*>> for $name<$($life),*, $($store_life),*> where
-			 'email : 'contact_info,
-			 'phone : 'contact_info,
+		impl<$($life),*, $($store_life),*> Into<Employee<$($life),*>> for $name<$($life),*, $($store_life),*>
 		{
 			fn into(self) -> Employee<$($life),*>
 			{
@@ -28,9 +24,7 @@ macro_rules! AdaptEmployee
 			}
 		}
 
-		impl<$($life),*, $($store_life),*> Into<Store<$($store_life),*>> for $name<$($life),*, $($store_life),*> where
-			 'email : 'contact_info,
-			 'phone : 'contact_info,
+		impl<$($life),*, $($store_life),*> Into<Store<$($store_life),*>> for $name<$($life),*, $($store_life),*>
 		{
 			fn into(self) -> Store<$($store_life),*>
 			{

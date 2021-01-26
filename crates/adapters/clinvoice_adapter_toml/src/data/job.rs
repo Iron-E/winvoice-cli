@@ -7,7 +7,7 @@ use std::path::PathBuf;
 
 clinvoice_adapter::Adapt!(Job => TomlJob);
 
-impl<'path, TZone> TomlJob<'_, '_, '_, '_, '_, 'path, '_, TZone> where TZone : TimeZone
+impl<'path> TomlJob<'_, '_, '_, '_, 'path, '_>
 {
 	/// # Summary
 	///

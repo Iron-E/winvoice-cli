@@ -4,11 +4,8 @@ use clinvoice_adapter::{data::{AnyValue, EmployeeAdapter}, Store};
 use clinvoice_data::{Contact, Id, Organization, Person};
 use std::error::Error;
 
-impl<'contact_info, 'email, 'name, 'pass, 'path, 'phone, 'title, 'user> EmployeeAdapter<'contact_info, 'email, 'name, 'pass, 'path, 'phone, 'title, 'user>
-for TomlEmployee<'contact_info, 'email, 'phone, 'title, 'pass, 'path, 'user>
-where
-	'email : 'contact_info,
-	'phone : 'contact_info,
+impl<'email, 'name, 'pass, 'path, 'phone, 'title, 'user> EmployeeAdapter<'email, 'name, 'pass, 'path, 'phone, 'title, 'user>
+for TomlEmployee<'email, 'phone, 'title, 'pass, 'path, 'user>
 {
 	/// # Summary
 	///
@@ -23,9 +20,9 @@ where
 	/// * The created [`Employee`], if there were no errors.
 	/// * An [`Error`], if something goes wrong.
 	fn create(
-		contact_info: &'contact_info [Contact<'email, 'phone>],
+		contact_info: &[Contact<'email, 'phone>],
 		organization: Organization<'name>,
-		person: Person<'contact_info, 'email, 'name, 'phone>,
+		person: Person<'email, 'name, 'phone>,
 		store: Store<'pass, 'path, 'user>,
 		title: &'title str,
 	) -> Result<Self, Box<dyn Error>>
@@ -55,10 +52,10 @@ where
 	/// * Any matching [`Employee`]s.
 	/// * An [`Error`], should something go wrong.
 	fn retrieve<'arr>(
-		contact_info: AnyValue<&'contact_info [Contact<'email, 'phone>]>,
+		contact_info: AnyValue<&[Contact<'email, 'phone>]>,
 		id: AnyValue<Id>,
 		organization: AnyValue<Organization<'name>>,
-		person: AnyValue<Person<'contact_info, 'email, 'name, 'phone>>,
+		person: AnyValue<Person<'email, 'name, 'phone>>,
 		store: Store<'pass, 'path, 'user>,
 		title: AnyValue<&'title str>,
 	) -> Result<&'arr [Self], Box<dyn Error>>

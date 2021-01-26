@@ -4,11 +4,8 @@ use clinvoice_adapter::{data::{AnyValue, OrganizationAdapter}, Store};
 use clinvoice_data::{Employee, Id, Location};
 use std::{collections::HashSet, error::Error};
 
-impl<'contact_info, 'email, 'name, 'pass, 'path, 'phone, 'title, 'user> OrganizationAdapter<'contact_info, 'email, 'name, 'pass, 'path, 'phone, 'title, 'user>
+impl<'email, 'name, 'pass, 'path, 'phone, 'title, 'user> OrganizationAdapter<'email, 'name, 'pass, 'path, 'phone, 'title, 'user>
 for TomlOrganization<'name, 'pass, 'path, 'user>
-where
-	'email : 'contact_info,
-	'phone : 'contact_info,
 {
 	/// # Summary
 	///

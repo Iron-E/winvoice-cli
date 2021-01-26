@@ -23,12 +23,12 @@ macro_rules! Adapt
 {
 	(Employee => $name: ident) =>
 	{
-		clinvoice_adapter::AdaptEmployee!($name, 'contact_info 'email 'phone 'title, 'pass 'path 'user);
+		clinvoice_adapter::AdaptEmployee!($name, 'email 'phone 'title, 'pass 'path 'user);
 	};
 
 	(Job => $name: ident) =>
 	{
-		clinvoice_adapter::AdaptJob!($name, 'objectives 'notes 'timesheets 'work_notes, 'pass 'path 'user, TZone);
+		clinvoice_adapter::AdaptJob!($name, 'objectives 'notes 'work_notes, 'pass 'path 'user);
 	};
 
 	(Location => $name: ident) =>
@@ -43,6 +43,6 @@ macro_rules! Adapt
 
 	(Person => $name: ident) =>
 	{
-		clinvoice_adapter::AdaptPerson!($name, 'contact_info 'email 'name 'phone, 'pass 'path 'user);
+		clinvoice_adapter::AdaptPerson!($name, 'email 'name 'phone, 'pass 'path 'user);
 	};
 }

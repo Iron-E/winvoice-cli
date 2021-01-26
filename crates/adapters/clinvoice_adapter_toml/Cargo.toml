@@ -16,5 +16,4 @@ clinvoice_adapter = {path="../clinvoice_adapter", version="0.1"}
 clinvoice_data = {path="../../clinvoice_data", version="0.1"}
 
 # Serialization
-serde = {version="1", features=["derive"]}
 toml = "0.5"

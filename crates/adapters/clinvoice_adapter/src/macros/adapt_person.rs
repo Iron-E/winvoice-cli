@@ -10,17 +10,13 @@ macro_rules! AdaptPerson
 		///
 		/// A wrapper around [`Person`] for use with TomlDB.
 		#[derive(Debug)]
-		pub struct $name<$($life),*, $($store_life),*> where
-			'email : 'contact_info,
-			'phone : 'contact_info,
+		pub struct $name<$($life),*, $($store_life),*>
 		{
 			pub person: Person<$($life),*>,
 			pub store: Store<$($store_life),*>,
 		}
 
-		impl<$($life),*, $($store_life),*> Into<Person<$($life),*>> for $name<$($life),*, $($store_life),*> where
-			'email : 'contact_info,
-			'phone : 'contact_info,
+		impl<$($life),*, $($store_life),*> Into<Person<$($life),*>> for $name<$($life),*, $($store_life),*>
 		{
 			fn into(self) -> Person<$($life),*>
 			{
@@ -28,9 +24,7 @@ macro_rules! AdaptPerson
 			}
 		}
 
-		impl<$($life),*, $($store_life),*> Into<Store<$($store_life),*>> for $name<$($life),*, $($store_life),*> where
-			'email : 'contact_info,
-			'phone : 'contact_info,
+		impl<$($life),*, $($store_life),*> Into<Store<$($store_life),*>> for $name<$($life),*, $($store_life),*>
 		{
 			fn into(self) -> Store<$($store_life),*>
 			{

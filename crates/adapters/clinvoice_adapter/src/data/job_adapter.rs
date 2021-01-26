@@ -1,17 +1,14 @@
 use super::{AnyValue, Deletable, Updatable};
 use crate::Store;
-use clinvoice_data::{chrono::{DateTime, TimeZone}, Id, Job, Organization, Timesheet};
+use clinvoice_data::{chrono::{DateTime, Utc}, Id, Job, Organization, Timesheet};
 use std::error::Error;
 
-pub trait JobAdapter<'objectives, 'name, 'notes, 'pass, 'path, 'timesheets, 'title, 'user, 'work_notes, TZone> :
+pub trait JobAdapter<'objectives, 'name, 'notes, 'pass, 'path, 'title, 'user, 'work_notes> :
 	Deletable<'pass, 'path, 'user> +
-	Into<Job<'objectives, 'notes, 'timesheets, 'work_notes, TZone>> +
+	Into<Job<'objectives, 'notes, 'work_notes>> +
 	Into<Result<Organization<'name>, Box<dyn Error>>> +
 	Into<Store<'pass, 'path, 'user>> +
 	Updatable +
-where
-	 'work_notes : 'timesheets,
-	  TZone : 'timesheets + TimeZone,
 {
 	/// # Summary
 	///
@@ -25,12 +22,12 @@ where
 	///
 	/// The newly created [`Person`].
 	fn create(
-		date_close: Option<DateTime<TZone>>,
-		date_open: DateTime<TZone>,
+		date_close: Option<DateTime<Utc>>,
+		date_open: DateTime<Utc>,
 		client: Organization<'name>,
 		notes: &'notes str,
 		store: Store<'pass, 'path, 'user>,
-		timesheets: &'timesheets [Timesheet<'work_notes, TZone>],
+		timesheets: &[Timesheet<'work_notes>],
 	) -> Result<Self, Box<dyn Error>>;
 
 	/// # Summary
@@ -51,12 +48,12 @@ where
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`Job`]s.
 	fn retrieve<'arr>(
-		date_close: AnyValue<Option<DateTime<TZone>>>,
-		date_open: AnyValue<DateTime<TZone>>,
+		date_close: AnyValue<Option<DateTime<Utc>>>,
+		date_open: AnyValue<DateTime<Utc>>,
 		client_id: AnyValue<Organization<'name>>,
 		id: AnyValue<Id>,
 		notes: AnyValue<&'notes str>,
 		store: Store<'pass, 'path, 'user>,
-		timesheets: AnyValue<&'timesheets [Timesheet<'work_notes, TZone>]>,
+		timesheets: AnyValue<&[Timesheet<'work_notes>]>,
 	) -> Result<Option<&'arr [Self]>, Box<dyn Error>>;
 }

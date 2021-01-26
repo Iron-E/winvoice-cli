@@ -4,11 +4,8 @@ use clinvoice_adapter::{data::{AnyValue, PersonAdapter}, Store};
 use clinvoice_data::{Contact, Id, Person};
 use std::error::Error;
 
-impl<'contact_info, 'email, 'name, 'pass, 'path, 'phone, 'user> PersonAdapter<'contact_info, 'email, 'name, 'pass, 'path, 'phone, 'user>
-for TomlPerson<'contact_info, 'email, 'name, 'phone, 'pass, 'path, 'user>
-where
-	'email : 'contact_info,
-	'phone : 'contact_info,
+impl<'email, 'name, 'pass, 'path, 'phone, 'user> PersonAdapter<'email, 'name, 'pass, 'path, 'phone, 'user>
+for TomlPerson<'email, 'name, 'phone, 'pass, 'path, 'user>
 {
 	/// # Summary
 	///
@@ -22,14 +19,14 @@ where
 	///
 	/// The newly created [`Person`].
 	fn create(
-		contact_info: &'contact_info [Contact<'email, 'phone>],
+		contact_info: &[Contact<'email, 'phone>],
 		name: &'name str,
 		store: Store<'pass, 'path, 'user>,
 	) -> Result<Self, Box<dyn Error>>
 	{
 		let person = Person
 		{
-			contact_info,
+			contact_info: contact_info.into(),
 			id: util::next_id(&TomlPerson::path(&store))?,
 			name,
 		};
@@ -59,7 +56,7 @@ where
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`Job`]s.
 	fn retrieve<'arr>(
-		contact_info: AnyValue<&'contact_info [Contact<'email, 'phone>]>,
+		contact_info: AnyValue<&[Contact<'email, 'phone>]>,
 		id: AnyValue<Id>,
 		name: AnyValue<&'name str>,
 		store: Store<'pass, 'path, 'user>,

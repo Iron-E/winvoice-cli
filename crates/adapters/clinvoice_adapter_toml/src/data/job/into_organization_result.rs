@@ -1,10 +1,8 @@
 use super::TomlJob;
-use clinvoice_data::{chrono::TimeZone, Organization};
+use clinvoice_data::Organization;
 use std::error::Error;
 
-impl<'name, TZone> Into<Result<Organization<'name>, Box<dyn Error>>>
-for TomlJob<'_, '_, '_, '_, '_, '_, '_, TZone>
-where TZone : TimeZone
+impl<'name> Into<Result<Organization<'name>, Box<dyn Error>>> for TomlJob<'_, '_, '_, '_, '_, '_>
 {
 	fn into(self) -> Result<Organization<'name>, Box<dyn Error>>
 	{

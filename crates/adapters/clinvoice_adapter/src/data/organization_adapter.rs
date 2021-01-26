@@ -3,16 +3,13 @@ use crate::Store;
 use clinvoice_data::{Employee, Id, Location, Organization};
 use std::{collections::HashSet, error::Error};
 
-pub trait OrganizationAdapter<'contact_info, 'email, 'name, 'pass, 'path, 'phone, 'title, 'user> :
+pub trait OrganizationAdapter<'email, 'name, 'pass, 'path, 'phone, 'title, 'user> :
 	Deletable<'pass, 'path, 'user> +
 	Into<Organization<'name>> +
-	Into<Result<HashSet<Employee<'contact_info, 'email, 'phone, 'title>>, Box<dyn Error>>> +
+	Into<Result<HashSet<Employee<'email, 'phone, 'title>>, Box<dyn Error>>> +
 	Into<Result<Location<'name>, Box<dyn Error>>> +
 	Into<Store<'pass, 'path, 'user>> +
 	Updatable +
-where
-	'email : 'contact_info,
-	'phone : 'contact_info,
 {
 	/// # Summary
 	///

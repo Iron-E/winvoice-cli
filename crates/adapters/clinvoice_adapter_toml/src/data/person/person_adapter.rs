@@ -77,7 +77,7 @@ for TomlPerson<'email, 'name, 'phone, 'pass, 'path, 'user>
 #[cfg(test)]
 mod tests
 {
-	use super::{PersonAdapter, toml, TomlPerson, util};
+	use super::{Contact, HashSet, PersonAdapter, toml, TomlPerson, util};
 	use std::{fs, io};
 
 	#[test]
@@ -92,13 +92,16 @@ mod tests
 			assert_eq!(toml_person.person, toml::from_slice(&read_result).unwrap());
 		}
 
+		let mut contact_info = HashSet::new();
+		contact_info.insert(Contact::Address(0));
+
 		return util::test_temp_store(|store|
 		{
-			assertion(TomlPerson::create(&[], "", *store).unwrap());
-			assertion(TomlPerson::create(&[], "", *store).unwrap());
-			assertion(TomlPerson::create(&[], "", *store).unwrap());
-			assertion(TomlPerson::create(&[], "", *store).unwrap());
-			assertion(TomlPerson::create(&[], "", *store).unwrap());
+			assertion(TomlPerson::create(contact_info.clone(), "", *store).unwrap());
+			assertion(TomlPerson::create(contact_info.clone(), "", *store).unwrap());
+			assertion(TomlPerson::create(contact_info.clone(), "", *store).unwrap());
+			assertion(TomlPerson::create(contact_info.clone(), "", *store).unwrap());
+			assertion(TomlPerson::create(contact_info, "", *store).unwrap());
 
 			assert!(fs::remove_dir_all(TomlPerson::path(&store)).is_ok());
 		});

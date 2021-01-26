@@ -19,4 +19,8 @@ rusty-money = "0.3"
 chrono = {version="0.4", features=["serde"]}
 
 # Serialization
-serde = {version="1", features=["derive"]}
+serde = {version="1", optional=true}
+
+[features]
+default = []
+serde_support = ["serde/derive"]

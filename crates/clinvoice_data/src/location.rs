@@ -1,11 +1,14 @@
 use crate::Id;
+
+#[cfg(feature="serde_support")]
 use serde::{Deserialize, Serialize};
 
 /// # Summary
 ///
 /// A physical space where other `Location`s or
 /// [`Organization`](super::organization::Organization)s exist.
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
 pub struct Location<'name>
 {
 	/// # Summary

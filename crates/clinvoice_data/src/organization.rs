@@ -1,5 +1,7 @@
 use crate::Id;
 use std::collections::HashSet;
+
+#[cfg(feature="serde_support")]
 use serde::{Deserialize, Serialize};
 
 /// # Summary
@@ -13,7 +15,8 @@ use serde::{Deserialize, Serialize};
 ///
 /// An `Organization` has no specific affitilation to the user, and as such can be both a
 /// Client and an Emlpoyer at the same time.
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
 pub struct Organization<'name>
 {
 	/// # Summary

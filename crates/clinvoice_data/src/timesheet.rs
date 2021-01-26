@@ -1,6 +1,8 @@
 use crate::Id;
 use std::borrow::Cow;
 use chrono::{DateTime, Utc};
+
+#[cfg(feature="serde_support")]
 use serde::{Deserialize, Serialize};
 
 /// # Summary
@@ -13,7 +15,8 @@ use serde::{Deserialize, Serialize};
 /// It is likely that a given CLInvoice business object will contain multiple timesheets. As such,
 /// it is proposed that the container for business logic contain an array of `Timesheet`, rather
 /// than only one.
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
 pub struct Timesheet<'work_notes>
 {
 	/// # Summary

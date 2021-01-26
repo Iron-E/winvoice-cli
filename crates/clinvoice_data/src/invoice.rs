@@ -1,4 +1,5 @@
-mod ser_de;
+#[cfg(feature="serde_support")]
+mod de_ser;
 
 use chrono::{DateTime, Utc};
 use rusty_money::Money;
@@ -6,7 +7,7 @@ use rusty_money::Money;
 /// # Summary
 ///
 /// An `Invoice` represents the accounts receivable for the user or their employer.
-#[derive(Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Invoice
 {
 	/// # Summary

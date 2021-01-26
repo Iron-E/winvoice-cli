@@ -1,5 +1,8 @@
 use crate::{Id, Invoice, Timesheet};
+use std::collections::BTreeSet;
 use chrono::{DateTime, Utc};
+
+#[cfg(feature="serde_support")]
 use serde::{Deserialize, Serialize};
 
 /// # Summary
@@ -17,7 +20,8 @@ use serde::{Deserialize, Serialize};
 /// structures may define [the method of payment](Invoice),
 /// [client](Organization) information, and [work periods](Timesheet)— this
 /// structure defines what work _may_ performed.
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
 pub struct Job<'objectives, 'notes, 'work_notes> where
 {
 	/// # Summary
@@ -82,5 +86,5 @@ pub struct Job<'objectives, 'notes, 'work_notes> where
 	/// # Summary
 	///
 	/// The periods of time during which work was performed for this [`Job`].
-	pub timesheets: Vec<Timesheet<'work_notes>>,
+	pub timesheets: BTreeSet<Timesheet<'work_notes>>,
 }

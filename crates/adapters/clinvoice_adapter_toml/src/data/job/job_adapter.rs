@@ -2,7 +2,7 @@ use super::TomlJob;
 use crate::util;
 use clinvoice_adapter::{data::{AnyValue, JobAdapter}, Store};
 use clinvoice_data::{chrono::{DateTime, Utc}, Id, Organization, Timesheet};
-use std::error::Error;
+use std::{collections::BTreeSet, error::Error};
 
 impl<'objectives, 'name, 'notes, 'pass, 'path, 'title, 'user, 'work_notes> JobAdapter<'objectives, 'name, 'notes, 'pass, 'path, 'title, 'user, 'work_notes>
 for TomlJob<'objectives, 'notes, 'work_notes, 'pass, 'path, 'user>
@@ -24,7 +24,7 @@ for TomlJob<'objectives, 'notes, 'work_notes, 'pass, 'path, 'user>
 		client: Organization<'name>,
 		notes: &'notes str,
 		store: Store<'pass, 'path, 'user>,
-		timesheets: &[Timesheet<'work_notes>],
+		timesheets: BTreeSet<Timesheet<'work_notes>>,
 	) -> Result<Self, Box<dyn Error>>
 	{
 		todo!()
@@ -58,7 +58,7 @@ for TomlJob<'objectives, 'notes, 'work_notes, 'pass, 'path, 'user>
 		id: AnyValue<Id>,
 		notes: AnyValue<&'notes str>,
 		store: Store<'pass, 'path, 'user>,
-		timesheets: AnyValue<&[Timesheet<'work_notes>]>,
+		timesheets: AnyValue<BTreeSet<Timesheet<'work_notes>>>,
 	) -> Result<Option<&'arr [Self]>, Box<dyn Error>>
 	{
 		todo!()

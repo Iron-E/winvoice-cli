@@ -2,7 +2,7 @@ use super::TomlEmployee;
 use crate::util;
 use clinvoice_adapter::{data::{AnyValue, EmployeeAdapter}, Store};
 use clinvoice_data::{Contact, Id, Organization, Person};
-use std::error::Error;
+use std::{collections::HashSet, error::Error};
 
 impl<'email, 'name, 'pass, 'path, 'phone, 'title, 'user> EmployeeAdapter<'email, 'name, 'pass, 'path, 'phone, 'title, 'user>
 for TomlEmployee<'email, 'phone, 'title, 'pass, 'path, 'user>
@@ -20,7 +20,7 @@ for TomlEmployee<'email, 'phone, 'title, 'pass, 'path, 'user>
 	/// * The created [`Employee`], if there were no errors.
 	/// * An [`Error`], if something goes wrong.
 	fn create(
-		contact_info: &[Contact<'email, 'phone>],
+		contact_info: HashSet<Contact<'email, 'phone>>,
 		organization: Organization<'name>,
 		person: Person<'email, 'name, 'phone>,
 		store: Store<'pass, 'path, 'user>,
@@ -52,7 +52,7 @@ for TomlEmployee<'email, 'phone, 'title, 'pass, 'path, 'user>
 	/// * Any matching [`Employee`]s.
 	/// * An [`Error`], should something go wrong.
 	fn retrieve<'arr>(
-		contact_info: AnyValue<&[Contact<'email, 'phone>]>,
+		contact_info: AnyValue<HashSet<Contact<'email, 'phone>>>,
 		id: AnyValue<Id>,
 		organization: AnyValue<Organization<'name>>,
 		person: AnyValue<Person<'email, 'name, 'phone>>,

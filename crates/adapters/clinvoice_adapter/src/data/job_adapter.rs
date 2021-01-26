@@ -1,7 +1,7 @@
 use super::{AnyValue, Deletable, Updatable};
 use crate::Store;
 use clinvoice_data::{chrono::{DateTime, Utc}, Id, Job, Organization, Timesheet};
-use std::error::Error;
+use std::{collections::BTreeSet, error::Error};
 
 pub trait JobAdapter<'objectives, 'name, 'notes, 'pass, 'path, 'title, 'user, 'work_notes> :
 	Deletable<'pass, 'path, 'user> +
@@ -27,7 +27,7 @@ pub trait JobAdapter<'objectives, 'name, 'notes, 'pass, 'path, 'title, 'user, 'w
 		client: Organization<'name>,
 		notes: &'notes str,
 		store: Store<'pass, 'path, 'user>,
-		timesheets: &[Timesheet<'work_notes>],
+		timesheets: BTreeSet<Timesheet<'work_notes>>,
 	) -> Result<Self, Box<dyn Error>>;
 
 	/// # Summary
@@ -54,6 +54,6 @@ pub trait JobAdapter<'objectives, 'name, 'notes, 'pass, 'path, 'title, 'user, 'w
 		id: AnyValue<Id>,
 		notes: AnyValue<&'notes str>,
 		store: Store<'pass, 'path, 'user>,
-		timesheets: AnyValue<&[Timesheet<'work_notes>]>,
+		timesheets: AnyValue<BTreeSet<Timesheet<'work_notes>>>,
 	) -> Result<Option<&'arr [Self]>, Box<dyn Error>>;
 }

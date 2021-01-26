@@ -2,7 +2,7 @@ use super::TomlPerson;
 use crate::util;
 use clinvoice_adapter::{data::{AnyValue, PersonAdapter}, Store};
 use clinvoice_data::{Contact, Id, Person};
-use std::{error::Error, fs};
+use std::{collections::HashSet, error::Error, fs};
 use toml;
 
 impl<'email, 'name, 'pass, 'path, 'phone, 'user> PersonAdapter<'email, 'name, 'pass, 'path, 'phone, 'user>
@@ -20,7 +20,7 @@ for TomlPerson<'email, 'name, 'phone, 'pass, 'path, 'user>
 	///
 	/// The newly created [`Person`].
 	fn create(
-		contact_info: &[Contact<'email, 'phone>],
+		contact_info: HashSet<Contact<'email, 'phone>>,
 		name: &'name str,
 		store: Store<'pass, 'path, 'user>,
 	) -> Result<Self, Box<dyn Error>>
@@ -29,7 +29,7 @@ for TomlPerson<'email, 'name, 'phone, 'pass, 'path, 'user>
 
 		let person = Person
 		{
-			contact_info: contact_info.into(),
+			contact_info,
 			id: util::next_id(&TomlPerson::path(&store))?,
 			name,
 		};
@@ -64,7 +64,7 @@ for TomlPerson<'email, 'name, 'phone, 'pass, 'path, 'user>
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`Job`]s.
 	fn retrieve<'arr>(
-		contact_info: AnyValue<&[Contact<'email, 'phone>]>,
+		contact_info: AnyValue<HashSet<Contact<'email, 'phone>>>,
 		id: AnyValue<Id>,
 		name: AnyValue<&'name str>,
 		store: Store<'pass, 'path, 'user>,
@@ -77,15 +77,30 @@ for TomlPerson<'email, 'name, 'phone, 'pass, 'path, 'user>
 #[cfg(test)]
 mod tests
 {
-	use super::{PersonAdapter, TomlPerson, util};
+	use super::{PersonAdapter, toml, TomlPerson, util};
 	use std::{fs, io};
 
 	#[test]
 	fn test_create() -> Result<(), io::Error>
 	{
+		fn assertion(toml_person: TomlPerson<'_, '_, '_, '_, '_, '_>)
+		{
+			let read_result = fs::read(TomlPerson::path(&toml_person.store).join(
+				toml_person.person.id.to_string()
+			)).unwrap();
+
+			assert_eq!(toml_person.person, toml::from_slice(&read_result).unwrap());
+		}
+
 		return util::test_temp_store(|store|
 		{
-			TomlPerson::create(&[], "", *store).unwrap();
+			assertion(TomlPerson::create(&[], "", *store).unwrap());
+			assertion(TomlPerson::create(&[], "", *store).unwrap());
+			assertion(TomlPerson::create(&[], "", *store).unwrap());
+			assertion(TomlPerson::create(&[], "", *store).unwrap());
+			assertion(TomlPerson::create(&[], "", *store).unwrap());
+
+			assert!(fs::remove_dir_all(TomlPerson::path(&store)).is_ok());
 		});
 	}
 

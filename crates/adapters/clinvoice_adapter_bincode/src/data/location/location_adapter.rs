@@ -2,7 +2,7 @@ use super::BincodeLocation;
 use crate::util;
 use clinvoice_adapter::{data::{AnyValue, LocationAdapter, Updatable}, Store};
 use clinvoice_data::{Id, Location};
-use std::{collections::HashSet, error::Error};
+use std::{collections::BTreeSet, error::Error};
 
 impl<'name, 'pass, 'path, 'user> LocationAdapter<'name, 'pass, 'path, 'user>
 for BincodeLocation<'name, 'pass, 'path, 'user>
@@ -97,7 +97,7 @@ for BincodeLocation<'name, 'pass, 'path, 'user>
 		name: AnyValue<&str>,
 		outer: AnyValue<Location>,
 		store: Store<'pass, 'path, 'user>,
-	) -> Result<HashSet<Self>, Box<dyn Error>>
+	) -> Result<BTreeSet<Self>, Box<dyn Error>>
 	{
 		todo!()
 	}

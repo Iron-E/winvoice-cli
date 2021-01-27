@@ -1,6 +1,7 @@
 /// # Summary
 ///
 /// A value in a retrieval operation.
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum AnyValue<T>
 {
 	/// # Summary

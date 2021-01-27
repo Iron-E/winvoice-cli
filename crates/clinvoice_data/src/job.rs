@@ -20,7 +20,7 @@ use serde::{Deserialize, Serialize};
 /// structures may define [the method of payment](Invoice),
 /// [client](Organization) information, and [work periods](Timesheet)— this
 /// structure defines what work _may_ performed.
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
 pub struct Job<'objectives, 'notes, 'work_notes> where
 {

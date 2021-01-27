@@ -2,7 +2,7 @@ use super::BincodeOrganization;
 use crate::util;
 use clinvoice_adapter::{data::{AnyValue, OrganizationAdapter, Updatable}, Store};
 use clinvoice_data::{Employee, Id, Location, Organization};
-use std::{collections::HashSet, error::Error};
+use std::{collections::BTreeSet, error::Error};
 
 impl<'email, 'name, 'pass, 'path, 'phone, 'title, 'user> OrganizationAdapter<'email, 'name, 'pass, 'path, 'phone, 'title, 'user>
 for BincodeOrganization<'name, 'pass, 'path, 'user>
@@ -21,7 +21,7 @@ for BincodeOrganization<'name, 'pass, 'path, 'user>
 	fn create(
 		location: Location<'name>,
 		name: &'name str,
-		representatives: HashSet<Employee>,
+		representatives: BTreeSet<Employee>,
 		store: Store<'pass, 'path, 'user>,
 	) -> Result<Self, Box<dyn Error>>
 	{
@@ -69,9 +69,9 @@ for BincodeOrganization<'name, 'pass, 'path, 'user>
 		id: AnyValue<Id>,
 		location: AnyValue<Location<'name>>,
 		name: AnyValue<&'name str>,
-		representatives: AnyValue<HashSet<Employee>>,
+		representatives: AnyValue<BTreeSet<Employee>>,
 		store: Store<'pass, 'path, 'user>,
-	) -> Result<HashSet<Self>, Box<dyn Error>>
+	) -> Result<BTreeSet<Self>, Box<dyn Error>>
 	{
 		todo!()
 	}

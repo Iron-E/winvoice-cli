@@ -2,7 +2,7 @@ use super::BincodeJob;
 use crate::util;
 use clinvoice_adapter::{data::{AnyValue, JobAdapter, Updatable}, Store};
 use clinvoice_data::{chrono::{DateTime, Utc}, Id, Invoice, Job, Organization, rusty_money::Money, Timesheet};
-use std::{collections::{BTreeSet, HashSet}, error::Error};
+use std::{collections::BTreeSet, error::Error};
 
 impl<'objectives, 'name, 'notes, 'pass, 'path, 'title, 'user, 'work_notes> JobAdapter<'objectives, 'name, 'notes, 'pass, 'path, 'title, 'user, 'work_notes>
 for BincodeJob<'objectives, 'notes, 'work_notes, 'pass, 'path, 'user>
@@ -86,7 +86,7 @@ for BincodeJob<'objectives, 'notes, 'work_notes, 'pass, 'path, 'user>
 		objectives: AnyValue<&'objectives str>,
 		notes: AnyValue<&'notes str>,
 		store: Store<'pass, 'path, 'user>,
-	) -> Result<HashSet<Self>, Box<dyn Error>>
+	) -> Result<BTreeSet<Self>, Box<dyn Error>>
 	{
 		todo!()
 	}

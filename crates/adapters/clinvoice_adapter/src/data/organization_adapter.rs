@@ -1,12 +1,12 @@
 use super::{AnyValue, Deletable, Updatable};
 use crate::Store;
 use clinvoice_data::{Employee, Id, Location, Organization};
-use std::{collections::HashSet, error::Error};
+use std::{collections::BTreeSet, error::Error};
 
 pub trait OrganizationAdapter<'email, 'name, 'pass, 'path, 'phone, 'title, 'user> :
 	Deletable<'pass, 'path, 'user> +
 	Into<Organization<'name>> +
-	Into<Result<HashSet<Employee<'email, 'phone, 'title>>, Box<dyn Error>>> +
+	Into<Result<BTreeSet<Employee<'email, 'phone, 'title>>, Box<dyn Error>>> +
 	Into<Result<Location<'name>, Box<dyn Error>>> +
 	Into<Store<'pass, 'path, 'user>> +
 	Updatable +
@@ -25,7 +25,7 @@ pub trait OrganizationAdapter<'email, 'name, 'pass, 'path, 'phone, 'title, 'user
 	fn create(
 		location: Location<'name>,
 		name: &'name str,
-		representatives: HashSet<Employee>,
+		representatives: BTreeSet<Employee>,
 		store: Store<'pass, 'path, 'user>,
 	) -> Result<Self, Box<dyn Error>>;
 
@@ -50,7 +50,7 @@ pub trait OrganizationAdapter<'email, 'name, 'pass, 'path, 'phone, 'title, 'user
 		id: AnyValue<Id>,
 		location: AnyValue<Location<'name>>,
 		name: AnyValue<&'name str>,
-		representatives: AnyValue<HashSet<Employee>>,
+		representatives: AnyValue<BTreeSet<Employee>>,
 		store: Store<'pass, 'path, 'user>,
-	) -> Result<HashSet<Self>, Box<dyn Error>>;
+	) -> Result<BTreeSet<Self>, Box<dyn Error>>;
 }

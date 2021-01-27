@@ -9,7 +9,7 @@ macro_rules! AdaptPerson
 		/// # Summary
 		///
 		/// A wrapper around [`Person`] with a [`Store`] that points to its location.
-		#[derive(Debug)]
+		#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 		pub struct $name<$($life),*, $($store_life),*>
 		{
 			pub person: Person<$($life),*>,

@@ -2,7 +2,7 @@ use super::BincodeEmployee;
 use crate::util;
 use clinvoice_adapter::{data::{AnyValue, EmployeeAdapter}, Store};
 use clinvoice_data::{Contact, Id, Organization, Person};
-use std::{collections::HashSet, error::Error};
+use std::{collections::BTreeSet, error::Error};
 
 impl<'email, 'name, 'pass, 'path, 'phone, 'title, 'user> EmployeeAdapter<'email, 'name, 'pass, 'path, 'phone, 'title, 'user>
 for BincodeEmployee<'email, 'phone, 'title, 'pass, 'path, 'user>
@@ -20,7 +20,7 @@ for BincodeEmployee<'email, 'phone, 'title, 'pass, 'path, 'user>
 	/// * The created [`Employee`], if there were no errors.
 	/// * An [`Error`], if something goes wrong.
 	fn create(
-		contact_info: HashSet<Contact<'email, 'phone>>,
+		contact_info: BTreeSet<Contact<'email, 'phone>>,
 		organization: Organization<'name>,
 		person: Person<'email, 'name, 'phone>,
 		store: Store<'pass, 'path, 'user>,
@@ -52,13 +52,13 @@ for BincodeEmployee<'email, 'phone, 'title, 'pass, 'path, 'user>
 	/// * Any matching [`Employee`]s.
 	/// * An [`Error`], should something go wrong.
 	fn retrieve(
-		contact_info: AnyValue<HashSet<Contact<'email, 'phone>>>,
+		contact_info: AnyValue<BTreeSet<Contact<'email, 'phone>>>,
 		id: AnyValue<Id>,
 		organization: AnyValue<Organization<'name>>,
 		person: AnyValue<Person<'email, 'name, 'phone>>,
 		store: Store<'pass, 'path, 'user>,
 		title: AnyValue<&'title str>,
-	) -> Result<HashSet<Self>, Box<dyn Error>>
+	) -> Result<BTreeSet<Self>, Box<dyn Error>>
 	{
 		todo!()
 	}

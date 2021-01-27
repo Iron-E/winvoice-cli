@@ -2,7 +2,7 @@ use super::BincodePerson;
 use crate::util;
 use clinvoice_adapter::{data::{AnyValue, PersonAdapter, Updatable}, Store};
 use clinvoice_data::{Contact, Id, Person};
-use std::{collections::HashSet, error::Error};
+use std::{collections::BTreeSet, error::Error};
 
 impl<'email, 'name, 'pass, 'path, 'phone, 'user> PersonAdapter<'email, 'name, 'pass, 'path, 'phone, 'user>
 for BincodePerson<'email, 'name, 'phone, 'pass, 'path, 'user>
@@ -19,7 +19,7 @@ for BincodePerson<'email, 'name, 'phone, 'pass, 'path, 'user>
 	///
 	/// The newly created [`Person`].
 	fn create(
-		contact_info: HashSet<Contact<'email, 'phone>>,
+		contact_info: BTreeSet<Contact<'email, 'phone>>,
 		name: &'name str,
 		store: Store<'pass, 'path, 'user>,
 	) -> Result<Self, Box<dyn Error>>
@@ -64,11 +64,11 @@ for BincodePerson<'email, 'name, 'phone, 'pass, 'path, 'user>
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`Job`]s.
 	fn retrieve(
-		contact_info: AnyValue<HashSet<Contact<'email, 'phone>>>,
+		contact_info: AnyValue<BTreeSet<Contact<'email, 'phone>>>,
 		id: AnyValue<Id>,
 		name: AnyValue<&'name str>,
 		store: Store<'pass, 'path, 'user>,
-	) -> Result<HashSet<Self>, Box<dyn Error>>
+	) -> Result<BTreeSet<Self>, Box<dyn Error>>
 	{
 		todo!()
 	}
@@ -77,7 +77,7 @@ for BincodePerson<'email, 'name, 'phone, 'pass, 'path, 'user>
 #[cfg(test)]
 mod tests
 {
-	use super::{Contact, HashSet, PersonAdapter, BincodePerson, util};
+	use super::{Contact, BTreeSet, PersonAdapter, BincodePerson, util};
 	use std::{fs, io};
 	use bincode;
 
@@ -91,7 +91,7 @@ mod tests
 			assert_eq!(toml_person.person, bincode::deserialize(&read_result).unwrap());
 		}
 
-		let mut contact_info = HashSet::new();
+		let mut contact_info = BTreeSet::new();
 		contact_info.insert(Contact::Address(0));
 
 		return util::test_temp_store(|store|

@@ -1,16 +1,8 @@
-use super::Invoice;
+use super::{Invoice, MockMoney};
 use std::borrow::Cow;
 use chrono::{DateTime, Utc};
-use rust_decimal::Decimal;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use rusty_money::{money, Money};
-
-#[derive(Deserialize, Serialize)]
-struct MockMoney<'currency>
-{
-	amount: Decimal,
-	currency: Cow<'currency, str>,
-}
 
 #[derive(Deserialize, Serialize)]
 struct MockInvoice<'currency>

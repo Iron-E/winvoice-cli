@@ -9,7 +9,7 @@ macro_rules! AdaptLocation
 		/// # Summary
 		///
 		/// A wrapper around [`Location`] with a [`Store`] that points to its location.
-		#[derive(Debug)]
+		#[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 		pub struct $name<$($life),*, $($store_life),*>
 		{
 			pub location: Location<$($life),*>,

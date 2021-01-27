@@ -1,13 +1,19 @@
 #[cfg(feature="serde_support")]
 mod de_ser;
+mod hash;
 
+use std::borrow::Cow;
 use chrono::{DateTime, Utc};
+use rust_decimal::Decimal;
 use rusty_money::Money;
+
+#[cfg(feature="serde_support")]
+use serde::{Deserialize, Serialize};
 
 /// # Summary
 ///
 /// An `Invoice` represents the accounts receivable for the user or their employer.
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub struct Invoice
 {
 	/// # Summary
@@ -53,4 +59,24 @@ pub struct Invoice
 	/// clinvoice config -c '\$'
 	/// ```
 	pub hourly_rate: Money,
+}
+
+#[derive(Hash)]
+#[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
+struct MockMoney<'currency>
+{
+	amount: Decimal,
+	currency: Cow<'currency, str>,
+}
+
+impl From<&Money> for MockMoney<'_>
+{
+	fn from(money: &Money) -> Self
+	{
+		return Self
+		{
+			amount: *money.amount(),
+			currency: Cow::Borrowed(money.currency().name),
+		};
+	}
 }

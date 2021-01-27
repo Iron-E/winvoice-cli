@@ -1,5 +1,5 @@
 use crate::Id;
-use std::collections::HashSet;
+use std::collections::BTreeSet;
 
 #[cfg(feature="serde_support")]
 use serde::{Deserialize, Serialize};
@@ -15,7 +15,7 @@ use serde::{Deserialize, Serialize};
 ///
 /// An `Organization` has no specific affitilation to the user, and as such can be both a
 /// Client and an Emlpoyer at the same time.
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
 pub struct Organization<'name>
 {
@@ -47,5 +47,5 @@ pub struct Organization<'name>
 	/// chief_operations_officer = 2
 	/// director_of_finance = 43
 	/// ```
-	pub representatives: HashSet<Id>,
+	pub representatives: BTreeSet<Id>,
 }

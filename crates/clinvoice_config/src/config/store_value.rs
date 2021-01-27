@@ -3,7 +3,7 @@ use clinvoice_adapter::Store;
 /// # Summary
 ///
 /// Possible values for the `[store]` field of the user config.
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum StoreValue<'alias, 'pass, 'path, 'user>
 {
 	/// # Summary

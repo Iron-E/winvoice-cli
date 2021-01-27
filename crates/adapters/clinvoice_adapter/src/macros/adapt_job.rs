@@ -9,7 +9,7 @@ macro_rules! AdaptJob
 		/// # Summary
 		///
 		/// A wrapper around [`Job`] with a [`Store`] that points to its location.
-		#[derive(Debug)]
+		#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 		pub struct $name<$($life),*, $($store_life),*>
 		{
 			pub job: Job<$($life),*>,

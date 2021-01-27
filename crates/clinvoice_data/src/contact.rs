@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 /// # Summary
 ///
 /// A method through which something can be communicated with.
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
 pub enum Contact<'email, 'phone>
 {

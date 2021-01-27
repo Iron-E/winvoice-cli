@@ -1,7 +1,7 @@
 use super::{AnyValue, Deletable, Updatable};
 use crate::Store;
 use clinvoice_data::{Contact, Id, Person};
-use std::{collections::HashSet, error::Error};
+use std::{collections::BTreeSet, error::Error};
 
 pub trait PersonAdapter<'email, 'name, 'pass, 'path, 'phone, 'user> :
 	Deletable<'pass, 'path, 'user> +
@@ -21,7 +21,7 @@ pub trait PersonAdapter<'email, 'name, 'pass, 'path, 'phone, 'user> :
 	///
 	/// The newly created [`Person`].
 	fn create(
-		contact_info: HashSet<Contact<'email, 'phone>>,
+		contact_info: BTreeSet<Contact<'email, 'phone>>,
 		name: &'name str,
 		store: Store<'pass, 'path, 'user>,
 	) -> Result<Self, Box<dyn Error>>;
@@ -44,9 +44,9 @@ pub trait PersonAdapter<'email, 'name, 'pass, 'path, 'phone, 'user> :
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`Job`]s.
 	fn retrieve(
-		contact_info: AnyValue<HashSet<Contact<'email, 'phone>>>,
+		contact_info: AnyValue<BTreeSet<Contact<'email, 'phone>>>,
 		id: AnyValue<Id>,
 		name: AnyValue<&'name str>,
 		store: Store<'pass, 'path, 'user>,
-	) -> Result<HashSet<Self>, Box<dyn Error>>;
+	) -> Result<BTreeSet<Self>, Box<dyn Error>>;
 }

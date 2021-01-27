@@ -1,7 +1,7 @@
 use super::{AnyValue, Deletable, Updatable};
 use crate::Store;
 use clinvoice_data::{chrono::{DateTime, Utc}, Id, Invoice, Job, Organization, rusty_money::Money, Timesheet};
-use std::{collections::{BTreeSet, HashSet}, error::Error};
+use std::{collections::BTreeSet, error::Error};
 
 pub trait JobAdapter<'objectives, 'name, 'notes, 'pass, 'path, 'title, 'user, 'work_notes> :
 	Deletable<'pass, 'path, 'user> +
@@ -57,5 +57,5 @@ pub trait JobAdapter<'objectives, 'name, 'notes, 'pass, 'path, 'title, 'user, 'w
 		objectives: AnyValue<&'objectives str>,
 		notes: AnyValue<&'notes str>,
 		store: Store<'pass, 'path, 'user>,
-	) -> Result<HashSet<Self>, Box<dyn Error>>;
+	) -> Result<BTreeSet<Self>, Box<dyn Error>>;
 }

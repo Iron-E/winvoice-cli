@@ -2,7 +2,7 @@ use super::{AnyValue, Deletable, Updatable};
 use crate::Store;
 use clinvoice_data::{Id, Location};
 use core::fmt::Display;
-use std::{collections::HashSet, error::Error};
+use std::{collections::BTreeSet, error::Error};
 
 pub trait LocationAdapter<'name, 'pass, 'path, 'user> :
 	Deletable<'pass, 'path, 'user> +
@@ -63,5 +63,5 @@ pub trait LocationAdapter<'name, 'pass, 'path, 'user> :
 		name: AnyValue<&'name str>,
 		outer: AnyValue<Location>,
 		store: Store<'pass, 'path, 'user>,
-	) -> Result<HashSet<Self>, Box<dyn Error>>;
+	) -> Result<BTreeSet<Self>, Box<dyn Error>>;
 }

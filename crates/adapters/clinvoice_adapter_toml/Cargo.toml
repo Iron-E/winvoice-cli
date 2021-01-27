@@ -16,4 +16,4 @@ clinvoice_adapter = {path="../clinvoice_adapter", version="0.1"}
 clinvoice_data = {path="../../clinvoice_data", features=["serde_support"], version="0.1"}
 
 # Serialization
-toml = "0.5"
+bincode = "1"

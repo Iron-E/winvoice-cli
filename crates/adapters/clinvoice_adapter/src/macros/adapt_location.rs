@@ -8,7 +8,7 @@ macro_rules! AdaptLocation
 
 		/// # Summary
 		///
-		/// A wrapper around [`Location`] for use with TomlDB.
+		/// A wrapper around [`Location`] with a [`Store`] that points to its location.
 		#[derive(Debug)]
 		pub struct $name<$($life),*, $($store_life),*>
 		{

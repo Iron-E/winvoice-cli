@@ -8,7 +8,7 @@ macro_rules! AdaptJob
 
 		/// # Summary
 		///
-		/// A wrapper around [`Job`] for use with TomlDB.
+		/// A wrapper around [`Job`] with a [`Store`] that points to its location.
 		#[derive(Debug)]
 		pub struct $name<$($life),*, $($store_life),*>
 		{

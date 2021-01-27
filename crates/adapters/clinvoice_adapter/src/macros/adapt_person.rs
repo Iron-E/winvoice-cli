@@ -8,7 +8,7 @@ macro_rules! AdaptPerson
 
 		/// # Summary
 		///
-		/// A wrapper around [`Person`] for use with TomlDB.
+		/// A wrapper around [`Person`] with a [`Store`] that points to its location.
 		#[derive(Debug)]
 		pub struct $name<$($life),*, $($store_life),*>
 		{

@@ -8,7 +8,7 @@ macro_rules! AdaptEmployee
 
 		/// # Summary
 		///
-		/// Wrapper around [`Employee`].
+		/// A wrapper around [`Employee`] with a [`Store`] that points to its location.
 		#[derive(Debug)]
 		pub struct $name<$($life),*, $($store_life),*>
 		{

@@ -8,7 +8,7 @@ macro_rules! AdaptOrganization
 
 		/// # Summary
 		///
-		/// A wrapper around [`Organization`] for use with TomlDB.
+		/// A wrapper around [`Organization`] with a [`Store`] that points to its location.
 		#[derive(Debug)]
 		pub struct $name<$($life),*, $($store_life),*>
 		{

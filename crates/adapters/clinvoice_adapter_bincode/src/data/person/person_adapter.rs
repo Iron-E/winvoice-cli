@@ -27,19 +27,20 @@ for BincodePerson<'email, 'name, 'phone, 'pass, 'path, 'user>
 	{
 		BincodePerson::init(&store)?;
 
-		let person = Person
+		let bincode_person = BincodePerson
 		{
-			contact_info,
-			id: util::next_id(&BincodePerson::path(&store))?,
-			name,
+			person: Person
+			{
+				contact_info,
+				id: util::next_id(&BincodePerson::path(&store))?,
+				name,
+			},
+			store,
 		};
 
-		fs::write(
-			BincodePerson::path(&store).join(person.id.to_string()),
-			bincode::serialize(&person)?,
-		)?;
+		fs::write(bincode_person.filepath(), bincode::serialize(&bincode_person.person)?)?;
 
-		return Ok(BincodePerson {person, store});
+		return Ok(bincode_person);
 	}
 
 	/// # Summary

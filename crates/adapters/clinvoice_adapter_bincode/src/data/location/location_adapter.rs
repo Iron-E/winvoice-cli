@@ -1,7 +1,7 @@
 use super::BincodeLocation;
 use crate::util;
-use clinvoice_adapter::{data::{AnyValue, LocationAdapter}, Store};
-use clinvoice_data::Id;
+use clinvoice_adapter::{data::{AnyValue, LocationAdapter, Updatable}, Store};
+use clinvoice_data::{Id, Location};
 use std::{collections::HashSet, error::Error};
 
 impl<'name, 'pass, 'path, 'user> LocationAdapter<'name, 'pass, 'path, 'user>
@@ -20,9 +20,24 @@ for BincodeLocation<'name, 'pass, 'path, 'user>
 	/// ```ignore
 	/// Location {name, id: /* generated */};
 	/// ```
-	fn create(name: &str, store: Store<'pass, 'path, 'user>) -> Result<Self, Box<dyn Error>>
+	fn create(name: &'name str, store: Store<'pass, 'path, 'user>) -> Result<Self, Box<dyn Error>>
 	{
-		todo!()
+		BincodeLocation::init(&store)?;
+
+		let bincode_person = BincodeLocation
+		{
+			location: Location
+			{
+				id: util::next_id(&BincodeLocation::path(&store))?,
+				name,
+				outer_id: None,
+			},
+			store,
+		};
+
+		bincode_person.update()?;
+
+		return Ok(bincode_person);
 	}
 
 	/// # Summary
@@ -38,9 +53,22 @@ for BincodeLocation<'name, 'pass, 'path, 'user>
 	/// ```ignore
 	/// Location {name, id: /* generated */, outside_id: self.unroll().id};
 	/// ```
-	fn create_inner(&self, name: &str) -> Result<Self, Box<dyn Error>>
+	fn create_inner(&self, name: &'name str) -> Result<Self, Box<dyn Error>>
 	{
-		todo!()
+		let inner_person = BincodeLocation
+		{
+			location: Location
+			{
+				id: util::next_id(&BincodeLocation::path(&self.store))?,
+				name,
+				outer_id: Some(self.location.id),
+			},
+			store: self.store,
+		};
+
+		inner_person.update()?;
+
+		return Ok(inner_person);
 	}
 
 	/// # Summary
@@ -67,6 +95,7 @@ for BincodeLocation<'name, 'pass, 'path, 'user>
 	fn retrieve(
 		id: AnyValue<Id>,
 		name: AnyValue<&str>,
+		outer: AnyValue<Location>,
 		store: Store<'pass, 'path, 'user>,
 	) -> Result<HashSet<Self>, Box<dyn Error>>
 	{

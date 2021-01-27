@@ -1,7 +1,7 @@
 use super::BincodeOrganization;
 use crate::util;
-use clinvoice_adapter::{data::{AnyValue, OrganizationAdapter}, Store};
-use clinvoice_data::{Employee, Id, Location};
+use clinvoice_adapter::{data::{AnyValue, OrganizationAdapter, Updatable}, Store};
+use clinvoice_data::{Employee, Id, Location, Organization};
 use std::{collections::HashSet, error::Error};
 
 impl<'email, 'name, 'pass, 'path, 'phone, 'title, 'user> OrganizationAdapter<'email, 'name, 'pass, 'path, 'phone, 'title, 'user>
@@ -25,7 +25,23 @@ for BincodeOrganization<'name, 'pass, 'path, 'user>
 		store: Store<'pass, 'path, 'user>,
 	) -> Result<Self, Box<dyn Error>>
 	{
-		todo!()
+		BincodeOrganization::init(&store)?;
+
+		let bincode_organization = BincodeOrganization
+		{
+			organization: Organization
+			{
+				id: util::next_id(&BincodeOrganization::path(&store))?,
+				location_id: location.id,
+				name,
+				representatives: representatives.iter().map(|rep| rep.id).collect(),
+			},
+			store,
+		};
+
+		bincode_organization.update()?;
+
+		return Ok(bincode_organization);
 	}
 
 	/// # Summary

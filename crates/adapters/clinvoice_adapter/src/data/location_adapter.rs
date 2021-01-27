@@ -24,7 +24,7 @@ pub trait LocationAdapter<'name, 'pass, 'path, 'user> :
 	/// ```ignore
 	/// Location {name, id: /* generated */};
 	/// ```
-	fn create(name: &str, store: Store<'pass, 'path, 'user>) -> Result<Self, Box<dyn Error>>;
+	fn create(name: &'name str, store: Store<'pass, 'path, 'user>) -> Result<Self, Box<dyn Error>>;
 
 	/// # Summary
 	///
@@ -39,7 +39,7 @@ pub trait LocationAdapter<'name, 'pass, 'path, 'user> :
 	/// ```ignore
 	/// Location {name, id: /* generated */, outside_id: self.unroll().id};
 	/// ```
-	fn create_inner(&self, name: &str) -> Result<Self, Box<dyn Error>>;
+	fn create_inner(&self, name: &'name str) -> Result<Self, Box<dyn Error>>;
 
 	/// # Summary
 	///
@@ -60,7 +60,8 @@ pub trait LocationAdapter<'name, 'pass, 'path, 'user> :
 	/// * A list of matches, if there are any.
 	fn retrieve(
 		id: AnyValue<Id>,
-		name: AnyValue<&str>,
+		name: AnyValue<&'name str>,
+		outer: AnyValue<Location>,
 		store: Store<'pass, 'path, 'user>,
 	) -> Result<HashSet<Self>, Box<dyn Error>>;
 }

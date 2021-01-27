@@ -1,7 +1,7 @@
 use super::BincodeJob;
 use crate::util;
-use clinvoice_adapter::{data::{AnyValue, JobAdapter}, Store};
-use clinvoice_data::{chrono::{DateTime, Utc}, Id, Organization, Timesheet};
+use clinvoice_adapter::{data::{AnyValue, JobAdapter, Updatable}, Store};
+use clinvoice_data::{chrono::{DateTime, Utc}, Id, Invoice, Job, Organization, rusty_money::Money, Timesheet};
 use std::{collections::{BTreeSet, HashSet}, error::Error};
 
 impl<'objectives, 'name, 'notes, 'pass, 'path, 'title, 'user, 'work_notes> JobAdapter<'objectives, 'name, 'notes, 'pass, 'path, 'title, 'user, 'work_notes>
@@ -19,15 +19,39 @@ for BincodeJob<'objectives, 'notes, 'work_notes, 'pass, 'path, 'user>
 	///
 	/// The newly created [`Person`].
 	fn create(
-		date_close: Option<DateTime<Utc>>,
-		date_open: DateTime<Utc>,
 		client: Organization<'name>,
-		notes: &'notes str,
+		date_open: DateTime<Utc>,
+		hourly_rate: Money,
+		objectives: &'objectives str,
 		store: Store<'pass, 'path, 'user>,
-		timesheets: BTreeSet<Timesheet<'work_notes>>,
 	) -> Result<Self, Box<dyn Error>>
 	{
-		todo!()
+		BincodeJob::init(&store)?;
+
+		let bincode_job = BincodeJob
+		{
+			job: Job
+			{
+				client_id: client.id,
+				date_close: None,
+				date_open,
+				id: util::next_id(&BincodeJob::path(&store))?,
+				invoice: Invoice
+				{
+					date_issued: None,
+					date_paid: None,
+					hourly_rate,
+				},
+				objectives,
+				notes: "",
+				timesheets: BTreeSet::new(),
+			},
+			store,
+		};
+
+		bincode_job.update()?;
+
+		return Ok(bincode_job);
 	}
 
 	/// # Summary
@@ -52,13 +76,16 @@ for BincodeJob<'objectives, 'notes, 'work_notes, 'pass, 'path, 'user>
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`Job`]s.
 	fn retrieve(
-		date_close: AnyValue<Option<DateTime<Utc>>>,
+		client: AnyValue<Organization<'name>>,
+		date_close: AnyValue<DateTime<Utc>>,
 		date_open: AnyValue<DateTime<Utc>>,
-		client_id: AnyValue<Organization<'name>>,
 		id: AnyValue<Id>,
+		invoice_date_issued: AnyValue<DateTime<Utc>>,
+		invoice_date_paid: AnyValue<DateTime<Utc>>,
+		invoice_hourly_rate: AnyValue<Money>,
+		objectives: AnyValue<&'objectives str>,
 		notes: AnyValue<&'notes str>,
 		store: Store<'pass, 'path, 'user>,
-		timesheets: AnyValue<BTreeSet<Timesheet<'work_notes>>>,
 	) -> Result<HashSet<Self>, Box<dyn Error>>
 	{
 		todo!()

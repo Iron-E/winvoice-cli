@@ -1,6 +1,6 @@
 use super::{AnyValue, Deletable, Updatable};
 use crate::Store;
-use clinvoice_data::{chrono::{DateTime, Utc}, Id, Job, Organization, Timesheet};
+use clinvoice_data::{chrono::{DateTime, Utc}, Id, Invoice, Job, Organization, rusty_money::Money, Timesheet};
 use std::{collections::{BTreeSet, HashSet}, error::Error};
 
 pub trait JobAdapter<'objectives, 'name, 'notes, 'pass, 'path, 'title, 'user, 'work_notes> :
@@ -22,12 +22,11 @@ pub trait JobAdapter<'objectives, 'name, 'notes, 'pass, 'path, 'title, 'user, 'w
 	///
 	/// The newly created [`Person`].
 	fn create(
-		date_close: Option<DateTime<Utc>>,
-		date_open: DateTime<Utc>,
 		client: Organization<'name>,
-		notes: &'notes str,
+		date_open: DateTime<Utc>,
+		hourly_rate: Money,
+		objectives: &'objectives str,
 		store: Store<'pass, 'path, 'user>,
-		timesheets: BTreeSet<Timesheet<'work_notes>>,
 	) -> Result<Self, Box<dyn Error>>;
 
 	/// # Summary
@@ -48,12 +47,15 @@ pub trait JobAdapter<'objectives, 'name, 'notes, 'pass, 'path, 'title, 'user, 'w
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`Job`]s.
 	fn retrieve(
-		date_close: AnyValue<Option<DateTime<Utc>>>,
+		client: AnyValue<Organization<'name>>,
+		date_close: AnyValue<DateTime<Utc>>,
 		date_open: AnyValue<DateTime<Utc>>,
-		client_id: AnyValue<Organization<'name>>,
 		id: AnyValue<Id>,
+		invoice_date_issued: AnyValue<DateTime<Utc>>,
+		invoice_date_paid: AnyValue<DateTime<Utc>>,
+		invoice_hourly_rate: AnyValue<Money>,
+		objectives: AnyValue<&'objectives str>,
 		notes: AnyValue<&'notes str>,
 		store: Store<'pass, 'path, 'user>,
-		timesheets: AnyValue<BTreeSet<Timesheet<'work_notes>>>,
 	) -> Result<HashSet<Self>, Box<dyn Error>>;
 }

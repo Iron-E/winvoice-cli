@@ -81,7 +81,7 @@ pub fn next_id(store_dir: &Path) -> Result<Id, Box<dyn Error>>
 /// [fn_temp_dir]: std::env::temp_dir
 pub fn test_temp_store(assertion: impl FnOnce(&Store<'_, '_, '_>)) -> Result<(), io::Error>
 {
-	let temp_path = env::temp_dir().join("clinvoice_adapter_toml_data");
+	let temp_path = env::temp_dir().join("clinvoice_adapter_bincode_data");
 
 	assertion(&Store
 	{

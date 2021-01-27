@@ -16,7 +16,7 @@ impl Display for BincodeLocation<'_, '_, '_, '_>
 	///
 	/// ```no_run
 	/// use clinvoice_adapter::{Adapters, data::LocationAdapter, Store};
-	/// use clinvoice_adapter_toml::data::BincodeLocation;
+	/// use clinvoice_adapter_bincode::data::BincodeLocation;
 	///
 	/// let store = Store
 	/// {

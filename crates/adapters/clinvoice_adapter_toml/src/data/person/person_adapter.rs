@@ -3,7 +3,7 @@ use crate::util;
 use clinvoice_adapter::{data::{AnyValue, PersonAdapter}, Store};
 use clinvoice_data::{Contact, Id, Person};
 use std::{collections::HashSet, error::Error, fs};
-use toml;
+use bincode;
 
 impl<'email, 'name, 'pass, 'path, 'phone, 'user> PersonAdapter<'email, 'name, 'pass, 'path, 'phone, 'user>
 for TomlPerson<'email, 'name, 'phone, 'pass, 'path, 'user>
@@ -36,7 +36,7 @@ for TomlPerson<'email, 'name, 'phone, 'pass, 'path, 'user>
 
 		fs::write(
 			TomlPerson::path(&store).join(person.id.to_string()),
-			toml::to_string(&person)?
+			bincode::serialize(&person)?,
 		)?;
 
 		return Ok(TomlPerson {person, store});
@@ -77,7 +77,7 @@ for TomlPerson<'email, 'name, 'phone, 'pass, 'path, 'user>
 #[cfg(test)]
 mod tests
 {
-	use super::{Contact, HashSet, PersonAdapter, toml, TomlPerson, util};
+	use super::{Contact, HashSet, PersonAdapter, bincode, TomlPerson, util};
 	use std::{fs, io};
 
 	#[test]
@@ -85,11 +85,9 @@ mod tests
 	{
 		fn assertion(toml_person: TomlPerson<'_, '_, '_, '_, '_, '_>)
 		{
-			let read_result = fs::read(TomlPerson::path(&toml_person.store).join(
-				toml_person.person.id.to_string()
-			)).unwrap();
+			let read_result = fs::read(toml_person.filepath()).unwrap();
 
-			assert_eq!(toml_person.person, toml::from_slice(&read_result).unwrap());
+			assert_eq!(toml_person.person, bincode::deserialize(&read_result).unwrap());
 		}
 
 		let mut contact_info = HashSet::new();
@@ -103,7 +101,7 @@ mod tests
 			assertion(TomlPerson::create(contact_info.clone(), "", *store).unwrap());
 			assertion(TomlPerson::create(contact_info, "", *store).unwrap());
 
-			assert!(fs::remove_dir_all(TomlPerson::path(&store)).is_ok());
+			// assert!(fs::remove_dir_all(TomlPerson::path(&store)).is_ok());
 		});
 	}
 

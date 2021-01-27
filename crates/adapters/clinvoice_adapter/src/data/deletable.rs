@@ -22,5 +22,5 @@ pub trait Deletable<'pass, 'path, 'user>
 	/// * An [`Error`] when:
 	///   * `self.id` had not already been `create`d.
 	///   * Something goes wrong.
-	fn delete(store: Store<'pass, 'path, 'user>, id: Id, cascade: bool) -> Result<(), Box<dyn Error>>;
+	fn delete(&self, cascade: bool) -> Result<(), Box<dyn Error>>;
 }

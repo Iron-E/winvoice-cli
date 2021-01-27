@@ -51,14 +51,14 @@ for BincodeEmployee<'email, 'phone, 'title, 'pass, 'path, 'user>
 	///
 	/// * Any matching [`Employee`]s.
 	/// * An [`Error`], should something go wrong.
-	fn retrieve<'arr>(
+	fn retrieve(
 		contact_info: AnyValue<HashSet<Contact<'email, 'phone>>>,
 		id: AnyValue<Id>,
 		organization: AnyValue<Organization<'name>>,
 		person: AnyValue<Person<'email, 'name, 'phone>>,
 		store: Store<'pass, 'path, 'user>,
 		title: AnyValue<&'title str>,
-	) -> Result<&'arr [Self], Box<dyn Error>>
+	) -> Result<HashSet<Self>, Box<dyn Error>>
 	{
 		todo!()
 	}

@@ -1,7 +1,7 @@
 use super::{AnyValue, Deletable, Updatable};
 use crate::Store;
 use clinvoice_data::{chrono::{DateTime, Utc}, Id, Job, Organization, Timesheet};
-use std::{collections::BTreeSet, error::Error};
+use std::{collections::{BTreeSet, HashSet}, error::Error};
 
 pub trait JobAdapter<'objectives, 'name, 'notes, 'pass, 'path, 'title, 'user, 'work_notes> :
 	Deletable<'pass, 'path, 'user> +
@@ -47,7 +47,7 @@ pub trait JobAdapter<'objectives, 'name, 'notes, 'pass, 'path, 'title, 'user, 'w
 	///
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`Job`]s.
-	fn retrieve<'arr>(
+	fn retrieve(
 		date_close: AnyValue<Option<DateTime<Utc>>>,
 		date_open: AnyValue<DateTime<Utc>>,
 		client_id: AnyValue<Organization<'name>>,
@@ -55,5 +55,5 @@ pub trait JobAdapter<'objectives, 'name, 'notes, 'pass, 'path, 'title, 'user, 'w
 		notes: AnyValue<&'notes str>,
 		store: Store<'pass, 'path, 'user>,
 		timesheets: AnyValue<BTreeSet<Timesheet<'work_notes>>>,
-	) -> Result<Option<&'arr [Self]>, Box<dyn Error>>;
+	) -> Result<HashSet<Self>, Box<dyn Error>>;
 }

@@ -1,9 +1,8 @@
 use super::BincodePerson;
 use crate::util;
-use clinvoice_adapter::{data::{AnyValue, PersonAdapter}, Store};
+use clinvoice_adapter::{data::{AnyValue, PersonAdapter, Updatable}, Store};
 use clinvoice_data::{Contact, Id, Person};
-use std::{collections::HashSet, error::Error, fs};
-use bincode;
+use std::{collections::HashSet, error::Error};
 
 impl<'email, 'name, 'pass, 'path, 'phone, 'user> PersonAdapter<'email, 'name, 'pass, 'path, 'phone, 'user>
 for BincodePerson<'email, 'name, 'phone, 'pass, 'path, 'user>
@@ -38,7 +37,7 @@ for BincodePerson<'email, 'name, 'phone, 'pass, 'path, 'user>
 			store,
 		};
 
-		fs::write(bincode_person.filepath(), bincode::serialize(&bincode_person.person)?)?;
+		bincode_person.update()?;
 
 		return Ok(bincode_person);
 	}
@@ -64,12 +63,12 @@ for BincodePerson<'email, 'name, 'phone, 'pass, 'path, 'user>
 	///
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`Job`]s.
-	fn retrieve<'arr>(
+	fn retrieve(
 		contact_info: AnyValue<HashSet<Contact<'email, 'phone>>>,
 		id: AnyValue<Id>,
 		name: AnyValue<&'name str>,
 		store: Store<'pass, 'path, 'user>,
-	) -> Result<Option<&'arr [Self]>, Box<dyn Error>>
+	) -> Result<HashSet<Self>, Box<dyn Error>>
 	{
 		todo!()
 	}
@@ -78,8 +77,9 @@ for BincodePerson<'email, 'name, 'phone, 'pass, 'path, 'user>
 #[cfg(test)]
 mod tests
 {
-	use super::{Contact, HashSet, PersonAdapter, bincode, BincodePerson, util};
+	use super::{Contact, HashSet, PersonAdapter, BincodePerson, util};
 	use std::{fs, io};
+	use bincode;
 
 	#[test]
 	fn test_create() -> Result<(), io::Error>

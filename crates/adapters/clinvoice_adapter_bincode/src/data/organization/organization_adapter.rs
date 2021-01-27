@@ -49,13 +49,13 @@ for BincodeOrganization<'name, 'pass, 'path, 'user>
 	///
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`Job`]s.
-	fn retrieve<'arr>(
+	fn retrieve(
 		id: AnyValue<Id>,
 		location: AnyValue<Location<'name>>,
 		name: AnyValue<&'name str>,
 		representatives: AnyValue<HashSet<Employee>>,
 		store: Store<'pass, 'path, 'user>,
-	) -> Result<Option<&'arr [Self]>, Box<dyn Error>>
+	) -> Result<HashSet<Self>, Box<dyn Error>>
 	{
 		todo!()
 	}

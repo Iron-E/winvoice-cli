@@ -2,7 +2,7 @@ use super::{AnyValue, Deletable, Updatable};
 use crate::Store;
 use clinvoice_data::{Id, Location};
 use core::fmt::Display;
-use std::error::Error;
+use std::{collections::HashSet, error::Error};
 
 pub trait LocationAdapter<'name, 'pass, 'path, 'user> :
 	Deletable<'pass, 'path, 'user> +
@@ -58,9 +58,9 @@ pub trait LocationAdapter<'name, 'pass, 'path, 'user> :
 	///
 	/// * An [`Error`], when something goes wrong.
 	/// * A list of matches, if there are any.
-	fn retrieve<'arr>(
+	fn retrieve(
 		id: AnyValue<Id>,
 		name: AnyValue<&str>,
 		store: Store<'pass, 'path, 'user>,
-	) -> Result<&'arr [Self], Box<dyn Error>>;
+	) -> Result<HashSet<Self>, Box<dyn Error>>;
 }

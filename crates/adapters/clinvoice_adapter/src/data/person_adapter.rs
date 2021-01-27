@@ -43,10 +43,10 @@ pub trait PersonAdapter<'email, 'name, 'pass, 'path, 'phone, 'user> :
 	///
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`Job`]s.
-	fn retrieve<'arr>(
+	fn retrieve(
 		contact_info: AnyValue<HashSet<Contact<'email, 'phone>>>,
 		id: AnyValue<Id>,
 		name: AnyValue<&'name str>,
 		store: Store<'pass, 'path, 'user>,
-	) -> Result<Option<&'arr [Self]>, Box<dyn Error>>;
+	) -> Result<HashSet<Self>, Box<dyn Error>>;
 }

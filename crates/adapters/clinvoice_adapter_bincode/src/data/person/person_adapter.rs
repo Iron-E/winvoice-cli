@@ -102,7 +102,7 @@ mod tests
 			assertion(BincodePerson::create(contact_info.clone(), "", *store).unwrap());
 			assertion(BincodePerson::create(contact_info, "", *store).unwrap());
 
-			// assert!(fs::remove_dir_all(BincodePerson::path(&store)).is_ok());
+			assert!(fs::remove_dir_all(BincodePerson::path(&store)).is_ok());
 		});
 	}
 

@@ -25,4 +25,16 @@ impl<'path> TomlJob<'_, '_, '_, '_, 'path, '_>
 	{
 		return PathBuf::new().join(store.path).join("Jobs");
 	}
+
+	/// # Summary
+	///
+	/// Get the [`PathBuf`] pointing to where this [`TomlJob`] is stored.
+	///
+	/// # Returns
+	///
+	/// A [`PathBuf`] pointing to where this [`TomlJob`] is stored.
+	pub fn filepath(&self) -> PathBuf
+	{
+		return TomlJob::path(&self.store).join(self.job.id.to_string());
+	}
 }

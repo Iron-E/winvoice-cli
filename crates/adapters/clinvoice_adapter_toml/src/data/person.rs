@@ -24,4 +24,16 @@ impl<'path> TomlPerson<'_, '_, '_, '_, 'path, '_>
 	{
 		return PathBuf::new().join(store.path).join("People");
 	}
+
+	/// # Summary
+	///
+	/// Get the [`PathBuf`] pointing to where this [`TomlPerson`] is stored.
+	///
+	/// # Returns
+	///
+	/// A [`PathBuf`] pointing to where this [`TomlPerson`] is stored.
+	pub fn filepath(&self) -> PathBuf
+	{
+		return TomlPerson::path(&self.store).join(self.person.id.to_string());
+	}
 }

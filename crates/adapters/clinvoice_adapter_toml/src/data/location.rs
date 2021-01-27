@@ -25,4 +25,16 @@ impl<'path> TomlLocation<'_, '_, 'path, '_>
 	{
 		return PathBuf::new().join(store.path).join("Locations");
 	}
+
+	/// # Summary
+	///
+	/// Get the [`PathBuf`] pointing to where this [`TomlLocation`] is stored.
+	///
+	/// # Returns
+	///
+	/// A [`PathBuf`] pointing to where this [`TomlLocation`] is stored.
+	pub fn filepath(&self) -> PathBuf
+	{
+		return TomlLocation::path(&self.store).join(self.location.id.to_string());
+	}
 }

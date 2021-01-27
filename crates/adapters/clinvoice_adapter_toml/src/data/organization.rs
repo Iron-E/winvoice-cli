@@ -26,4 +26,16 @@ impl<'path> TomlOrganization<'_, '_, 'path, '_>
 	{
 		return PathBuf::new().join(store.path).join("Organizations");
 	}
+
+	/// # Summary
+	///
+	/// Get the [`PathBuf`] pointing to where this [`TomlOrganization`] is stored.
+	///
+	/// # Returns
+	///
+	/// A [`PathBuf`] pointing to where this [`TomlOrganization`] is stored.
+	pub fn filepath(&self) -> PathBuf
+	{
+		return TomlOrganization::path(&self.store).join(self.organization.id.to_string());
+	}
 }

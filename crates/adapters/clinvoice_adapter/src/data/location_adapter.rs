@@ -1,8 +1,8 @@
 use super::{AnyValue, Deletable, Updatable};
 use crate::Store;
-use clinvoice_data::{Id, Location};
+use clinvoice_data::{Location, uuid::Uuid};
 use core::fmt::Display;
-use std::{collections::BTreeSet, error::Error};
+use std::{collections::HashSet, error::Error};
 
 pub trait LocationAdapter<'name, 'pass, 'path, 'user> :
 	Deletable<'pass, 'path, 'user> +
@@ -59,9 +59,9 @@ pub trait LocationAdapter<'name, 'pass, 'path, 'user> :
 	/// * An [`Error`], when something goes wrong.
 	/// * A list of matches, if there are any.
 	fn retrieve(
-		id: AnyValue<Id>,
+		id: AnyValue<Uuid>,
 		name: AnyValue<&'name str>,
 		outer: AnyValue<Location>,
 		store: Store<'pass, 'path, 'user>,
-	) -> Result<BTreeSet<Self>, Box<dyn Error>>;
+	) -> Result<HashSet<Self>, Box<dyn Error>>;
 }

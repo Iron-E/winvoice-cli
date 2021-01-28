@@ -1,8 +1,8 @@
 use super::BincodeEmployee;
 use crate::util;
 use clinvoice_adapter::{data::{AnyValue, EmployeeAdapter, Updatable}, Store};
-use clinvoice_data::{Contact, Employee, Id, Organization, Person};
-use std::{collections::BTreeSet, error::Error};
+use clinvoice_data::{Contact, Employee, Organization, Person, uuid::Uuid};
+use std::{collections::HashSet, error::Error};
 
 impl<'email, 'name, 'pass, 'path, 'phone, 'title, 'user> EmployeeAdapter<'email, 'name, 'pass, 'path, 'phone, 'title, 'user>
 for BincodeEmployee<'email, 'phone, 'title, 'pass, 'path, 'user>
@@ -20,7 +20,7 @@ for BincodeEmployee<'email, 'phone, 'title, 'pass, 'path, 'user>
 	/// * The created [`Employee`], if there were no errors.
 	/// * An [`Error`], if something goes wrong.
 	fn create(
-		contact_info: BTreeSet<Contact<'email, 'phone>>,
+		contact_info: HashSet<Contact<'email, 'phone>>,
 		organization: Organization<'name>,
 		person: Person<'email, 'name, 'phone>,
 		store: Store<'pass, 'path, 'user>,
@@ -34,7 +34,7 @@ for BincodeEmployee<'email, 'phone, 'title, 'pass, 'path, 'user>
 			employee: Employee
 			{
 				contact_info,
-				id: util::next_id(&Self::path(&store))?,
+				id: util::unique_id(&Self::path(&store))?,
 				organization_id: organization.id,
 				person_id: person.id,
 				title,
@@ -69,13 +69,13 @@ for BincodeEmployee<'email, 'phone, 'title, 'pass, 'path, 'user>
 	/// * Any matching [`Employee`]s.
 	/// * An [`Error`], should something go wrong.
 	fn retrieve(
-		contact_info: AnyValue<BTreeSet<Contact<'email, 'phone>>>,
-		id: AnyValue<Id>,
+		contact_info: AnyValue<HashSet<Contact<'email, 'phone>>>,
+		id: AnyValue<Uuid>,
 		organization: AnyValue<Organization<'name>>,
 		person: AnyValue<Person<'email, 'name, 'phone>>,
 		store: Store<'pass, 'path, 'user>,
 		title: AnyValue<&'title str>,
-	) -> Result<BTreeSet<Self>, Box<dyn Error>>
+	) -> Result<HashSet<Self>, Box<dyn Error>>
 	{
 		todo!()
 	}
@@ -84,7 +84,7 @@ for BincodeEmployee<'email, 'phone, 'title, 'pass, 'path, 'user>
 #[cfg(test)]
 mod tests
 {
-	use super::{EmployeeAdapter, BincodeEmployee, util};
+	use super::{BincodeEmployee, EmployeeAdapter, util};
 	use std::{fs, io};
 
 	#[test]

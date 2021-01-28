@@ -3,7 +3,7 @@ use clinvoice_adapter::data::Updatable;
 use std::{error::Error, fs};
 use bincode;
 
-impl Updatable for BincodeJob<'_, '_, '_, '_, '_, '_>
+impl Updatable for BincodeJob<'_, '_, '_, '_, '_, '_, '_>
 {
 	fn update(&self) -> Result<(), Box<dyn Error>>
 	{

@@ -1,11 +1,11 @@
 use super::BincodeJob;
 use crate::util;
 use clinvoice_adapter::{data::{AnyValue, JobAdapter, Updatable}, Store};
-use clinvoice_data::{chrono::{DateTime, Utc}, Id, Invoice, Job, Organization, rusty_money::Money, Timesheet};
-use std::{collections::BTreeSet, error::Error};
+use clinvoice_data::{chrono::{DateTime, Utc}, Invoice, Job, Money, Organization, uuid::Uuid};
+use std::{collections::{BTreeSet, HashSet}, error::Error};
 
-impl<'objectives, 'name, 'notes, 'pass, 'path, 'title, 'user, 'work_notes> JobAdapter<'objectives, 'name, 'notes, 'pass, 'path, 'title, 'user, 'work_notes>
-for BincodeJob<'objectives, 'notes, 'work_notes, 'pass, 'path, 'user>
+impl<'currency, 'objectives, 'name, 'notes, 'pass, 'path, 'title, 'user, 'work_notes> JobAdapter<'currency, 'objectives, 'name, 'notes, 'pass, 'path, 'title, 'user, 'work_notes>
+for BincodeJob<'currency, 'objectives, 'notes, 'work_notes, 'pass, 'path, 'user>
 {
 	/// # Summary
 	///
@@ -21,7 +21,7 @@ for BincodeJob<'objectives, 'notes, 'work_notes, 'pass, 'path, 'user>
 	fn create(
 		client: Organization<'name>,
 		date_open: DateTime<Utc>,
-		hourly_rate: Money,
+		hourly_rate: Money<'currency>,
 		objectives: &'objectives str,
 		store: Store<'pass, 'path, 'user>,
 	) -> Result<Self, Box<dyn Error>>
@@ -35,7 +35,7 @@ for BincodeJob<'objectives, 'notes, 'work_notes, 'pass, 'path, 'user>
 				client_id: client.id,
 				date_close: None,
 				date_open,
-				id: util::next_id(&Self::path(&store))?,
+				id: util::unique_id(&Self::path(&store))?,
 				invoice: Invoice
 				{
 					date_issued: None,
@@ -79,14 +79,14 @@ for BincodeJob<'objectives, 'notes, 'work_notes, 'pass, 'path, 'user>
 		client: AnyValue<Organization<'name>>,
 		date_close: AnyValue<DateTime<Utc>>,
 		date_open: AnyValue<DateTime<Utc>>,
-		id: AnyValue<Id>,
+		id: AnyValue<Uuid>,
 		invoice_date_issued: AnyValue<DateTime<Utc>>,
 		invoice_date_paid: AnyValue<DateTime<Utc>>,
-		invoice_hourly_rate: AnyValue<Money>,
-		objectives: AnyValue<&'objectives str>,
+		invoice_hourly_rate: AnyValue<Money<'currency>>,
 		notes: AnyValue<&'notes str>,
+		objectives: AnyValue<&'objectives str>,
 		store: Store<'pass, 'path, 'user>,
-	) -> Result<BTreeSet<Self>, Box<dyn Error>>
+	) -> Result<HashSet<Self>, Box<dyn Error>>
 	{
 		todo!()
 	}
@@ -95,7 +95,7 @@ for BincodeJob<'objectives, 'notes, 'work_notes, 'pass, 'path, 'user>
 #[cfg(test)]
 mod tests
 {
-	use super::{JobAdapter, BincodeJob, util};
+	use super::{BincodeJob, JobAdapter, util};
 	use std::{fs, io};
 
 	#[test]

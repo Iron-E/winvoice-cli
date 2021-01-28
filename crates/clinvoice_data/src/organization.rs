@@ -1,5 +1,7 @@
-use crate::Id;
-use std::collections::BTreeSet;
+mod hash;
+
+use std::collections::HashSet;
+use uuid::Uuid;
 
 #[cfg(feature="serde_support")]
 use serde::{Deserialize, Serialize};
@@ -15,20 +17,20 @@ use serde::{Deserialize, Serialize};
 ///
 /// An `Organization` has no specific affitilation to the user, and as such can be both a
 /// Client and an Emlpoyer at the same time.
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
 pub struct Organization<'name>
 {
 	/// # Summary
 	///
 	/// The unique reference number for this [`Organization`].
-	pub id: Id,
+	pub id: Uuid,
 
 	/// # Summary
 	///
 	/// The reference umber of the [`Location`](super::location::Location) where this
 	/// [`Organization`] resides.
-	pub location_id: Id,
+	pub location_id: Uuid,
 
 	/// # Summary
 	///
@@ -47,5 +49,5 @@ pub struct Organization<'name>
 	/// chief_operations_officer = 2
 	/// director_of_finance = 43
 	/// ```
-	pub representatives: BTreeSet<Id>,
+	pub representatives: HashSet<Uuid>,
 }

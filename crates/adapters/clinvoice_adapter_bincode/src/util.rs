@@ -1,5 +1,5 @@
 use clinvoice_adapter::{Adapters, Store};
-use clinvoice_data::Id;
+use clinvoice_data::{uuid::Uuid, UUID_NAMESPACE};
 use std::{env, error::Error, fs, io, path::Path};
 
 /// # Summary
@@ -24,40 +24,6 @@ pub fn create_store_dir(store_dir: &Path) -> Result<bool, io::Error>
 	}
 
 	return Ok(false);
-}
-
-/// # Summary
-///
-/// Get the next [`Id`] number for an entity in the given `store_dir`.
-///
-/// # Parameters
-///
-/// * `store_dir`, the directory in a
-///
-/// # Returns
-///
-/// The next [`Id`] for an entity in `store_dir`.
-pub fn next_id(store_dir: &Path) -> Result<Id, Box<dyn Error>>
-{
-	let mut highest = -1;
-
-	for node in fs::read_dir(store_dir)?
-	{
-		let node_path = node?.path();
-
-		if node_path.is_file()
-		{
-			if let Some(node_stem) = node_path.file_stem()
-			{
-				if let Ok(id) = node_stem.to_str().unwrap_or("-1").parse::<Id>()
-				{
-					if id > highest { highest = id; }
-				}
-			}
-		}
-	}
-
-	return Ok(highest + 1);
 }
 
 /// # Summary
@@ -101,6 +67,38 @@ pub fn test_temp_store(assertion: impl FnOnce(&Store<'_, '_, '_>)) -> Result<(),
 	return Ok(());
 }
 
+/// # Summary
+///
+/// Get the next [`Id`] number for an entity in the given `store_dir`.
+///
+/// # Parameters
+///
+/// * `store_dir`, the directory in a
+///
+/// # Returns
+///
+/// The next [`Id`] for an entity in `store_dir`.
+pub fn unique_id(store_dir: &Path) -> Result<Uuid, io::Error>
+{
+	'gen: loop
+	{
+		let id = Uuid::new_v5(&UUID_NAMESPACE, Uuid::new_v4().as_bytes());
+
+		for node in fs::read_dir(store_dir)?
+		{
+			let node_path = node?.path();
+			if match node_path.file_stem()
+			{
+				Some(stem) => stem.to_string_lossy(),
+				None => continue,
+			} == id.to_string()
+			{ continue 'gen; }
+		}
+
+		return Ok(id);
+	}
+}
+
 #[cfg(test)]
 mod tests
 {
@@ -108,7 +106,7 @@ mod tests
 	use std::path::PathBuf;
 
 	#[test]
-	fn test_next_id() -> Result<(), io::Error>
+	fn test_unique_id() -> Result<(), io::Error>
 	{
 		return super::test_temp_store(|store|
 		{
@@ -122,13 +120,12 @@ mod tests
 			// Create the `test_path`.
 			assert!(super::create_store_dir(&test_path).is_ok());
 
-			for i in 0..100
+			for _ in 0..100
 			{
-				// The `next_id` matched `i`.
-				assert_eq!(super::next_id(&test_path).ok(), Some(i));
+				let id = super::unique_id(&test_path).unwrap();
 
 				// Creating the next file worked.
-				assert!(fs::write(&test_path.join(format!("{}.toml", i)), "").is_ok());
+				assert!(fs::write(&test_path.join(id.to_string()), "TEST").is_ok());
 			}
 		});
 	}

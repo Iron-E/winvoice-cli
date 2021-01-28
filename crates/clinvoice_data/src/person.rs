@@ -1,5 +1,8 @@
-use crate::{Contact, Id};
-use std::collections::BTreeSet;
+mod hash;
+
+use crate::Contact;
+use std::collections::HashSet;
+use uuid::Uuid;
 
 #[cfg(feature="serde_support")]
 use serde::{Deserialize, Serialize};
@@ -7,7 +10,7 @@ use serde::{Deserialize, Serialize};
 /// # Summary
 //
 /// A person is a physical human being.
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
 pub struct Person<'email, 'name, 'phone>
 {
@@ -15,12 +18,12 @@ pub struct Person<'email, 'name, 'phone>
 	///
 	/// Contact information specific to the individual [`Person`], rather than a corporation they
 	/// work at.
-	pub contact_info: BTreeSet<Contact<'email, 'phone>>,
+	pub contact_info: HashSet<Contact<'email, 'phone>>,
 
 	/// # Summary
 	///
 	/// This is the unique reference number for the [`Person`].
-	pub id: Id,
+	pub id: Uuid,
 
 	/// # Summary
 	///

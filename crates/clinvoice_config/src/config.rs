@@ -11,7 +11,7 @@ use std::collections::HashMap;
 ///
 /// The `Config` contains settings that affect all areas of the application.
 #[derive(Debug)]
-pub struct Config<'alias, 'name, 'pass, 'path, 'user>
+pub struct Config<'alias, 'currency, 'name, 'pass, 'path, 'user>
 {
 	/// # Summary
 	///
@@ -21,7 +21,7 @@ pub struct Config<'alias, 'name, 'pass, 'path, 'user>
 	/// # Summary
 	///
 	/// Configurations for [`Invoice`](clinvoice_data::invoice::Invoice)s.
-	pub invoices: Invoices,
+	pub invoices: Invoices<'currency>,
 
 	/// # Summary
 	///
@@ -34,7 +34,7 @@ pub struct Config<'alias, 'name, 'pass, 'path, 'user>
 	pub timesheets: Timesheets,
 }
 
-impl Config<'_, '_, '_, '_, '_>
+impl Config<'_, '_, '_, '_, '_, '_>
 {
 	/// # Summary
 	///
@@ -64,7 +64,7 @@ impl Config<'_, '_, '_, '_, '_>
 #[cfg(test)]
 mod tests
 {
-	use clinvoice_data::{chrono::Duration, rusty_money::Iso};
+	use clinvoice_data::{chrono::Duration, uuid::Uuid};
 	use clinvoice_adapter::Adapters;
 	use super::{Config, Employees, HashMap, Invoices, Store, StoreValue, Timesheets};
 
@@ -91,8 +91,8 @@ mod tests
 
 		let conf = Config
 		{
-			employees: Employees {default_id: 0},
-			invoices: Invoices {default_currency: Iso::USD},
+			employees: Employees {default_id: Uuid::new_v4()},
+			invoices: Invoices {default_currency: "USD"},
 			stores,
 			timesheets: Timesheets {interval: Duration::minutes(1)},
 		};

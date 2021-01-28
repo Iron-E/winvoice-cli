@@ -1,7 +1,7 @@
 use super::{AnyValue, Deletable, Updatable};
 use crate::Store;
-use clinvoice_data::{Contact, Employee, Id, Organization, Person};
-use std::{collections::BTreeSet, error::Error};
+use clinvoice_data::{Contact, Employee, Organization, Person, uuid::Uuid};
+use std::{collections::HashSet, error::Error};
 
 pub trait EmployeeAdapter<'email, 'name, 'pass, 'path, 'phone, 'title, 'user> :
 	Deletable<'pass, 'path, 'user> +
@@ -24,7 +24,7 @@ pub trait EmployeeAdapter<'email, 'name, 'pass, 'path, 'phone, 'title, 'user> :
 	/// * The created [`Employee`], if there were no errors.
 	/// * An [`Error`], if something goes wrong.
 	fn create(
-		contact_info: BTreeSet<Contact<'email, 'phone>>,
+		contact_info: HashSet<Contact<'email, 'phone>>,
 		organization: Organization<'name>,
 		person: Person<'email, 'name, 'phone>,
 		store: Store<'pass, 'path, 'user>,
@@ -49,11 +49,11 @@ pub trait EmployeeAdapter<'email, 'name, 'pass, 'path, 'phone, 'title, 'user> :
 	/// * Any matching [`Employee`]s.
 	/// * An [`Error`], should something go wrong.
 	fn retrieve(
-		contact_info: AnyValue<BTreeSet<Contact<'email, 'phone>>>,
-		id: AnyValue<Id>,
+		contact_info: AnyValue<HashSet<Contact<'email, 'phone>>>,
+		id: AnyValue<Uuid>,
 		organization: AnyValue<Organization<'name>>,
 		person: AnyValue<Person<'email, 'name, 'phone>>,
 		store: Store<'pass, 'path, 'user>,
 		title: AnyValue<&'title str>,
-	) -> Result<BTreeSet<Self>, Box<dyn Error>>;
+	) -> Result<HashSet<Self>, Box<dyn Error>>;
 }

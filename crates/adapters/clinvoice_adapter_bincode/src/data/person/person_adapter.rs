@@ -1,8 +1,8 @@
 use super::BincodePerson;
 use crate::util;
 use clinvoice_adapter::{data::{AnyValue, PersonAdapter, Updatable}, Store};
-use clinvoice_data::{Contact, Id, Person};
-use std::{collections::BTreeSet, error::Error};
+use clinvoice_data::{Contact, Person, uuid::Uuid};
+use std::{collections::HashSet, error::Error};
 
 impl<'email, 'name, 'pass, 'path, 'phone, 'user> PersonAdapter<'email, 'name, 'pass, 'path, 'phone, 'user>
 for BincodePerson<'email, 'name, 'phone, 'pass, 'path, 'user>
@@ -19,7 +19,7 @@ for BincodePerson<'email, 'name, 'phone, 'pass, 'path, 'user>
 	///
 	/// The newly created [`Person`].
 	fn create(
-		contact_info: BTreeSet<Contact<'email, 'phone>>,
+		contact_info: HashSet<Contact<'email, 'phone>>,
 		name: &'name str,
 		store: Store<'pass, 'path, 'user>,
 	) -> Result<Self, Box<dyn Error>>
@@ -31,7 +31,7 @@ for BincodePerson<'email, 'name, 'phone, 'pass, 'path, 'user>
 			person: Person
 			{
 				contact_info,
-				id: util::next_id(&Self::path(&store))?,
+				id: util::unique_id(&Self::path(&store))?,
 				name,
 			},
 			store,
@@ -64,11 +64,11 @@ for BincodePerson<'email, 'name, 'phone, 'pass, 'path, 'user>
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`Job`]s.
 	fn retrieve(
-		contact_info: AnyValue<BTreeSet<Contact<'email, 'phone>>>,
-		id: AnyValue<Id>,
+		contact_info: AnyValue<HashSet<Contact<'email, 'phone>>>,
+		id: AnyValue<Uuid>,
 		name: AnyValue<&'name str>,
 		store: Store<'pass, 'path, 'user>,
-	) -> Result<BTreeSet<Self>, Box<dyn Error>>
+	) -> Result<HashSet<Self>, Box<dyn Error>>
 	{
 		todo!()
 	}
@@ -77,7 +77,7 @@ for BincodePerson<'email, 'name, 'phone, 'pass, 'path, 'user>
 #[cfg(test)]
 mod tests
 {
-	use super::{BincodePerson, BTreeSet, Contact, PersonAdapter, util};
+	use super::{BincodePerson, Contact, HashSet, PersonAdapter, util, Uuid};
 	use std::{fs, io};
 	use bincode;
 
@@ -93,9 +93,9 @@ mod tests
 
 		return util::test_temp_store(|store|
 		{
-			let mut contact_info = BTreeSet::new();
+			let mut contact_info = HashSet::new();
 
-			contact_info.insert(Contact::Address(0));
+			contact_info.insert(Contact::Address(Uuid::new_v4()));
 			assertion(BincodePerson::create(contact_info.clone(), "", *store).unwrap());
 
 			contact_info.insert(Contact::Email("foo@bar.io".into()));
@@ -104,7 +104,7 @@ mod tests
 			contact_info.insert(Contact::Phone("1-800-555-3600".into()));
 			assertion(BincodePerson::create(contact_info.clone(), "", *store).unwrap());
 
-			contact_info.insert(Contact::Address(1));
+			contact_info.insert(Contact::Address(Uuid::new_v4()));
 			assertion(BincodePerson::create(contact_info.clone(), "", *store).unwrap());
 
 			contact_info.insert(Contact::Email("obviousemail@server.com".into()));

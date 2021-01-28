@@ -1,4 +1,4 @@
-use crate::Id;
+use uuid::Uuid;
 
 #[cfg(feature="serde_support")]
 use serde::{Deserialize, Serialize};
@@ -14,7 +14,7 @@ pub struct Location<'name>
 	/// # Summary
 	///
 	/// The reference number of the [`Location`].
-	pub id: Id,
+	pub id: Uuid,
 
 	/// # Summary
 	///
@@ -26,7 +26,7 @@ pub struct Location<'name>
 	///   another.
 	/// * If there is [`None`] `outer_id`, it means that `this` [`Location`] is an outermost
 	///   residence.
-	pub outer_id: Option<Id>,
+	pub outer_id: Option<Uuid>,
 
 	/// # Summary
 	///

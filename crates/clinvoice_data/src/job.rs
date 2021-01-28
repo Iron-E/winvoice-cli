@@ -1,6 +1,7 @@
-use crate::{Id, Invoice, Timesheet};
+use crate::{Invoice, Timesheet};
 use std::collections::BTreeSet;
 use chrono::{DateTime, Utc};
+use uuid::Uuid;
 
 #[cfg(feature="serde_support")]
 use serde::{Deserialize, Serialize};
@@ -22,8 +23,13 @@ use serde::{Deserialize, Serialize};
 /// structure defines what work _may_ performed.
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
-pub struct Job<'objectives, 'notes, 'work_notes> where
+pub struct Job<'currency, 'objectives, 'notes, 'work_notes>
 {
+	/// # Summary
+	///
+	/// The [`Organization`](crate::Organization) who the work is being performed for.
+	pub client_id: Uuid,
+
 	/// # Summary
 	///
 	/// The date upon which the client accepted the work as "complete".
@@ -36,22 +42,17 @@ pub struct Job<'objectives, 'notes, 'work_notes> where
 
 	/// # Summary
 	///
-	/// The [`Organization`](crate::Organization) who the work is being performed for.
-	pub client_id: Id,
-
-	/// # Summary
-	///
 	/// The __unique__ number of the [`Job`].
 	///
 	/// # Remarks
 	///
 	/// Should be automatically generated.
-	pub id: Id,
+	pub id: Uuid,
 
 	/// # Summary
 	///
 	/// The [`Invoice`] which will be sent to the [client](Organization) after the [`Job`] is done.
-	pub invoice: Invoice,
+	pub invoice: Invoice<'currency>,
 
 	/// # Summary
 	///

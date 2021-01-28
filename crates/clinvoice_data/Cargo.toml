@@ -13,7 +13,6 @@ repository = "https://www.github.com/Iron-E/clinvoice"
 [dependencies]
 # Currency
 rust_decimal = "1"
-rusty-money = "0.3"
 
 # Date/Time
 chrono = {version="0.4", features=["serde"]}
@@ -21,6 +20,9 @@ chrono = {version="0.4", features=["serde"]}
 # Serialization
 serde = {version="1", optional=true}
 
+# Unique Identification
+uuid = {version="0.8", features=["v4", "v5"]}
+
 [features]
 default = []
-serde_support = ["serde/derive"]
+serde_support = ["serde/derive", "uuid/serde"]

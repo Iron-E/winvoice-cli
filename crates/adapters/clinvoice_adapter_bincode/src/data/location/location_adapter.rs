@@ -1,8 +1,8 @@
 use super::BincodeLocation;
 use crate::util;
 use clinvoice_adapter::{data::{AnyValue, LocationAdapter, Updatable}, Store};
-use clinvoice_data::{Id, Location};
-use std::{collections::BTreeSet, error::Error};
+use clinvoice_data::{Location, uuid::Uuid};
+use std::{collections::HashSet, error::Error};
 
 impl<'name, 'pass, 'path, 'user> LocationAdapter<'name, 'pass, 'path, 'user>
 for BincodeLocation<'name, 'pass, 'path, 'user>
@@ -28,7 +28,7 @@ for BincodeLocation<'name, 'pass, 'path, 'user>
 		{
 			location: Location
 			{
-				id: util::next_id(&Self::path(&store))?,
+				id: util::unique_id(&Self::path(&store))?,
 				name,
 				outer_id: None,
 			},
@@ -59,7 +59,7 @@ for BincodeLocation<'name, 'pass, 'path, 'user>
 		{
 			location: Location
 			{
-				id: util::next_id(&Self::path(&self.store))?,
+				id: util::unique_id(&Self::path(&self.store))?,
 				name,
 				outer_id: Some(self.location.id),
 			},
@@ -93,11 +93,11 @@ for BincodeLocation<'name, 'pass, 'path, 'user>
 	/// * An [`Error`], when something goes wrong.
 	/// * A list of matches, if there are any.
 	fn retrieve(
-		id: AnyValue<Id>,
-		name: AnyValue<&str>,
+		id: AnyValue<Uuid>,
+		name: AnyValue<&'name str>,
 		outer: AnyValue<Location>,
 		store: Store<'pass, 'path, 'user>,
-	) -> Result<BTreeSet<Self>, Box<dyn Error>>
+	) -> Result<HashSet<Self>, Box<dyn Error>>
 	{
 		todo!()
 	}
@@ -106,7 +106,7 @@ for BincodeLocation<'name, 'pass, 'path, 'user>
 #[cfg(test)]
 mod tests
 {
-	use super::{LocationAdapter, BincodeLocation, util};
+	use super::{BincodeLocation, LocationAdapter, util};
 	use std::{fs, io};
 
 	#[test]

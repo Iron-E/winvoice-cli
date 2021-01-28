@@ -2,6 +2,7 @@
 /// # Summary
 ///
 /// `Adapt!` is a marcro which allows quick generation of wrapper types necessary to implement
+/// kJ"
 /// `Crud` traits on a CLInvoice adapter.
 ///
 /// # Parameters
@@ -28,7 +29,7 @@ macro_rules! Adapt
 
 	(Job => $name: ident) =>
 	{
-		clinvoice_adapter::AdaptJob!($name, 'objectives 'notes 'work_notes, 'pass 'path 'user);
+		clinvoice_adapter::AdaptJob!($name, 'currency 'objectives 'notes 'work_notes, 'pass 'path 'user);
 	};
 
 	(Location => $name: ident) =>

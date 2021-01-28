@@ -1,8 +1,8 @@
 use super::BincodeOrganization;
 use crate::util;
 use clinvoice_adapter::{data::{AnyValue, OrganizationAdapter, Updatable}, Store};
-use clinvoice_data::{Employee, Id, Location, Organization};
-use std::{collections::BTreeSet, error::Error};
+use clinvoice_data::{Employee, Location, Organization, uuid::Uuid};
+use std::{collections::HashSet, error::Error};
 
 impl<'email, 'name, 'pass, 'path, 'phone, 'title, 'user> OrganizationAdapter<'email, 'name, 'pass, 'path, 'phone, 'title, 'user>
 for BincodeOrganization<'name, 'pass, 'path, 'user>
@@ -21,7 +21,7 @@ for BincodeOrganization<'name, 'pass, 'path, 'user>
 	fn create(
 		location: Location<'name>,
 		name: &'name str,
-		representatives: BTreeSet<Employee>,
+		representatives: HashSet<Employee>,
 		store: Store<'pass, 'path, 'user>,
 	) -> Result<Self, Box<dyn Error>>
 	{
@@ -31,7 +31,7 @@ for BincodeOrganization<'name, 'pass, 'path, 'user>
 		{
 			organization: Organization
 			{
-				id: util::next_id(&Self::path(&store))?,
+				id: util::unique_id(&Self::path(&store))?,
 				location_id: location.id,
 				name,
 				representatives: representatives.iter().map(|rep| rep.id).collect(),
@@ -66,12 +66,12 @@ for BincodeOrganization<'name, 'pass, 'path, 'user>
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`Job`]s.
 	fn retrieve(
-		id: AnyValue<Id>,
+		id: AnyValue<Uuid>,
 		location: AnyValue<Location<'name>>,
 		name: AnyValue<&'name str>,
-		representatives: AnyValue<BTreeSet<Employee>>,
+		representatives: AnyValue<HashSet<Employee>>,
 		store: Store<'pass, 'path, 'user>,
-	) -> Result<BTreeSet<Self>, Box<dyn Error>>
+	) -> Result<HashSet<Self>, Box<dyn Error>>
 	{
 		todo!()
 	}
@@ -80,7 +80,7 @@ for BincodeOrganization<'name, 'pass, 'path, 'user>
 #[cfg(test)]
 mod tests
 {
-	use super::{BincodeOrganization, BTreeSet, Location, OrganizationAdapter, util};
+	use super::{BincodeOrganization, HashSet, Location, OrganizationAdapter, util, Uuid};
 	use std::{fs, io};
 
 	#[test]
@@ -95,11 +95,35 @@ mod tests
 
 		return util::test_temp_store(|store|
 		{
-			assertion(BincodeOrganization::create(Location {name: "Earth", id: 0, outer_id: None}, "", BTreeSet::new(), *store).unwrap());
-			assertion(BincodeOrganization::create(Location {name: "USA", id: 1, outer_id: Some(0)}, "", BTreeSet::new(), *store).unwrap());
-			assertion(BincodeOrganization::create(Location {name: "Arizona", id: 2, outer_id: Some(1)}, "", BTreeSet::new(), *store).unwrap());
-			assertion(BincodeOrganization::create(Location {name: "Phoenix", id: 3, outer_id: Some(2)}, "", BTreeSet::new(), *store).unwrap());
-			assertion(BincodeOrganization::create(Location {name: "Some Road", id: 4, outer_id: Some(3)}, "", BTreeSet::new(), *store).unwrap());
+			let earth_id = Uuid::new_v4();
+			assertion(BincodeOrganization::create(
+				Location {name: "Earth", id: earth_id, outer_id: None},
+				"alsdkjaldkj", HashSet::new(), *store
+			).unwrap());
+
+			let usa_id = Uuid::new_v4();
+			assertion(BincodeOrganization::create(
+				Location {name: "USA", id: usa_id, outer_id: Some(earth_id)},
+				"alskdjalgkh  ladhkj EAL ISdh", HashSet::new(), *store
+			).unwrap());
+
+			let arizona_id = Uuid::new_v4();
+			assertion(BincodeOrganization::create(
+				Location {name: "Arizona", id: arizona_id, outer_id: Some(earth_id)},
+				" AAA – 44 %%", HashSet::new(), *store
+			).unwrap());
+
+			let phoenix_id = Uuid::new_v4();
+			assertion(BincodeOrganization::create(
+				Location {name: "Phoenix", id: phoenix_id, outer_id: Some(arizona_id)},
+				" ^^^ ADSLKJDLASKJD FOCJCI", HashSet::new(), *store
+			).unwrap());
+
+			let some_id = Uuid::new_v4();
+			assertion(BincodeOrganization::create(
+				Location {name: "Some Road", id: some_id, outer_id: Some(phoenix_id)},
+				"aldkj doiciuc giguy &&", HashSet::new(), *store
+			).unwrap());
 
 			assert!(fs::remove_dir_all(BincodeOrganization::path(&store)).is_ok());
 		});

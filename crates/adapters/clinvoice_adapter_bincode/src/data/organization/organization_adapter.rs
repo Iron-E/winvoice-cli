@@ -80,8 +80,30 @@ for BincodeOrganization<'name, 'pass, 'path, 'user>
 #[cfg(test)]
 mod tests
 {
-	use super::{OrganizationAdapter, BincodeOrganization, util};
+	use super::{BincodeOrganization, BTreeSet, Location, OrganizationAdapter, util};
 	use std::{fs, io};
+
+	#[test]
+	fn test_create() -> Result<(), io::Error>
+	{
+		fn assertion(bincode_organization: BincodeOrganization<'_, '_, '_, '_>)
+		{
+			let read_result = fs::read(bincode_organization.filepath()).unwrap();
+
+			assert_eq!(bincode_organization.organization, bincode::deserialize(&read_result).unwrap());
+		}
+
+		return util::test_temp_store(|store|
+		{
+			assertion(BincodeOrganization::create(Location {name: "Earth", id: 0, outer_id: None}, "", BTreeSet::new(), *store).unwrap());
+			assertion(BincodeOrganization::create(Location {name: "USA", id: 1, outer_id: Some(0)}, "", BTreeSet::new(), *store).unwrap());
+			assertion(BincodeOrganization::create(Location {name: "Arizona", id: 2, outer_id: Some(1)}, "", BTreeSet::new(), *store).unwrap());
+			assertion(BincodeOrganization::create(Location {name: "Phoenix", id: 3, outer_id: Some(2)}, "", BTreeSet::new(), *store).unwrap());
+			assertion(BincodeOrganization::create(Location {name: "Some Road", id: 4, outer_id: Some(3)}, "", BTreeSet::new(), *store).unwrap());
+
+			assert!(fs::remove_dir_all(BincodeOrganization::path(&store)).is_ok());
+		});
+	}
 
 	#[test]
 	fn test_init() -> Result<(), io::Error>

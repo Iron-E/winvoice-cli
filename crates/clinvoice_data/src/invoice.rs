@@ -61,7 +61,7 @@ pub struct Invoice
 	pub hourly_rate: Money,
 }
 
-#[derive(Hash)]
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
 struct MockMoney<'currency>
 {

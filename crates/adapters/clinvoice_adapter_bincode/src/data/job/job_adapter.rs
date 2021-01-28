@@ -26,16 +26,16 @@ for BincodeJob<'objectives, 'notes, 'work_notes, 'pass, 'path, 'user>
 		store: Store<'pass, 'path, 'user>,
 	) -> Result<Self, Box<dyn Error>>
 	{
-		BincodeJob::init(&store)?;
+		Self::init(&store)?;
 
-		let bincode_job = BincodeJob
+		let bincode_job = Self
 		{
 			job: Job
 			{
 				client_id: client.id,
 				date_close: None,
 				date_open,
-				id: util::next_id(&BincodeJob::path(&store))?,
+				id: util::next_id(&Self::path(&store))?,
 				invoice: Invoice
 				{
 					date_issued: None,
@@ -59,7 +59,7 @@ for BincodeJob<'objectives, 'notes, 'work_notes, 'pass, 'path, 'user>
 	/// Initialize the database for a given [`Store`].
 	fn init(store: &Store<'pass, 'path, 'user>) -> Result<(), Box<dyn Error>>
 	{
-		util::create_store_dir(&BincodeJob::path(store))?;
+		util::create_store_dir(&Self::path(store))?;
 		return Ok(());
 	}
 

@@ -36,6 +36,6 @@ impl<'path> BincodeOrganization<'_, '_, 'path, '_>
 	/// A [`PathBuf`] pointing to where this [`BincodeOrganization`] is stored.
 	pub fn filepath(&self) -> PathBuf
 	{
-		return BincodeOrganization::path(&self.store).join(self.organization.id.to_string());
+		return Self::path(&self.store).join(self.organization.id.to_string());
 	}
 }

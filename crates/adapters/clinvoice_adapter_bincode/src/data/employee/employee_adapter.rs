@@ -1,7 +1,7 @@
 use super::BincodeEmployee;
 use crate::util;
-use clinvoice_adapter::{data::{AnyValue, EmployeeAdapter}, Store};
-use clinvoice_data::{Contact, Id, Organization, Person};
+use clinvoice_adapter::{data::{AnyValue, EmployeeAdapter, Updatable}, Store};
+use clinvoice_data::{Contact, Employee, Id, Organization, Person};
 use std::{collections::BTreeSet, error::Error};
 
 impl<'email, 'name, 'pass, 'path, 'phone, 'title, 'user> EmployeeAdapter<'email, 'name, 'pass, 'path, 'phone, 'title, 'user>
@@ -27,7 +27,24 @@ for BincodeEmployee<'email, 'phone, 'title, 'pass, 'path, 'user>
 		title: &'title str,
 	) -> Result<Self, Box<dyn Error>>
 	{
-		todo!()
+		Self::init(&store)?;
+
+		let bincode_person = Self
+		{
+			employee: Employee
+			{
+				contact_info,
+				id: util::next_id(&Self::path(&store))?,
+				organization_id: organization.id,
+				person_id: person.id,
+				title,
+			},
+			store,
+		};
+
+		bincode_person.update()?;
+
+		return Ok(bincode_person);
 	}
 
 	/// # Summary
@@ -35,7 +52,7 @@ for BincodeEmployee<'email, 'phone, 'title, 'pass, 'path, 'user>
 	/// Initialize the database for a given [`Store`].
 	fn init(store: &Store<'pass, 'path, 'user>) -> Result<(), Box<dyn Error>>
 	{
-		util::create_store_dir(&BincodeEmployee::path(store))?;
+		util::create_store_dir(&Self::path(store))?;
 		return Ok(());
 	}
 

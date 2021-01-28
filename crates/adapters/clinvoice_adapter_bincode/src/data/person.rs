@@ -34,6 +34,6 @@ impl<'path> BincodePerson<'_, '_, '_, '_, 'path, '_>
 	/// A [`PathBuf`] pointing to where this [`BincodePerson`] is stored.
 	pub fn filepath(&self) -> PathBuf
 	{
-		return BincodePerson::path(&self.store).join(self.person.id.to_string());
+		return Self::path(&self.store).join(self.person.id.to_string());
 	}
 }

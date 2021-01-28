@@ -24,14 +24,14 @@ for BincodePerson<'email, 'name, 'phone, 'pass, 'path, 'user>
 		store: Store<'pass, 'path, 'user>,
 	) -> Result<Self, Box<dyn Error>>
 	{
-		BincodePerson::init(&store)?;
+		Self::init(&store)?;
 
-		let bincode_person = BincodePerson
+		let bincode_person = Self
 		{
 			person: Person
 			{
 				contact_info,
-				id: util::next_id(&BincodePerson::path(&store))?,
+				id: util::next_id(&Self::path(&store))?,
 				name,
 			},
 			store,
@@ -47,7 +47,7 @@ for BincodePerson<'email, 'name, 'phone, 'pass, 'path, 'user>
 	/// Initialize the database for a given [`Store`].
 	fn init(store: &Store<'pass, 'path, 'user>) -> Result<(), Box<dyn Error>>
 	{
-		util::create_store_dir(&BincodePerson::path(store))?;
+		util::create_store_dir(&Self::path(store))?;
 		return Ok(());
 	}
 

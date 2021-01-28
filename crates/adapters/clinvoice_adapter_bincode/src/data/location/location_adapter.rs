@@ -22,13 +22,13 @@ for BincodeLocation<'name, 'pass, 'path, 'user>
 	/// ```
 	fn create(name: &'name str, store: Store<'pass, 'path, 'user>) -> Result<Self, Box<dyn Error>>
 	{
-		BincodeLocation::init(&store)?;
+		Self::init(&store)?;
 
-		let bincode_person = BincodeLocation
+		let bincode_person = Self
 		{
 			location: Location
 			{
-				id: util::next_id(&BincodeLocation::path(&store))?,
+				id: util::next_id(&Self::path(&store))?,
 				name,
 				outer_id: None,
 			},
@@ -55,11 +55,11 @@ for BincodeLocation<'name, 'pass, 'path, 'user>
 	/// ```
 	fn create_inner(&self, name: &'name str) -> Result<Self, Box<dyn Error>>
 	{
-		let inner_person = BincodeLocation
+		let inner_person = Self
 		{
 			location: Location
 			{
-				id: util::next_id(&BincodeLocation::path(&self.store))?,
+				id: util::next_id(&Self::path(&self.store))?,
 				name,
 				outer_id: Some(self.location.id),
 			},
@@ -76,7 +76,7 @@ for BincodeLocation<'name, 'pass, 'path, 'user>
 	/// Initialize the database for a given [`Store`].
 	fn init(store: &Store<'pass, 'path, 'user>) -> Result<(), Box<dyn Error>>
 	{
-		util::create_store_dir(&BincodeLocation::path(store))?;
+		util::create_store_dir(&Self::path(store))?;
 		return Ok(());
 	}
 

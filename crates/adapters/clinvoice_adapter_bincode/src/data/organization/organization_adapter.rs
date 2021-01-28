@@ -25,13 +25,13 @@ for BincodeOrganization<'name, 'pass, 'path, 'user>
 		store: Store<'pass, 'path, 'user>,
 	) -> Result<Self, Box<dyn Error>>
 	{
-		BincodeOrganization::init(&store)?;
+		Self::init(&store)?;
 
-		let bincode_organization = BincodeOrganization
+		let bincode_organization = Self
 		{
 			organization: Organization
 			{
-				id: util::next_id(&BincodeOrganization::path(&store))?,
+				id: util::next_id(&Self::path(&store))?,
 				location_id: location.id,
 				name,
 				representatives: representatives.iter().map(|rep| rep.id).collect(),
@@ -49,7 +49,7 @@ for BincodeOrganization<'name, 'pass, 'path, 'user>
 	/// Initialize the database for a given [`Store`].
 	fn init(store: &Store<'pass, 'path, 'user>) -> Result<(), Box<dyn Error>>
 	{
-		util::create_store_dir(&BincodeOrganization::path(store))?;
+		util::create_store_dir(&Self::path(store))?;
 		return Ok(());
 	}
 

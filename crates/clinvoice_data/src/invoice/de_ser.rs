@@ -19,7 +19,7 @@ impl<'de> Deserialize<'de> for Invoice
 	{
 		let mock = MockInvoice::deserialize(deserializer)?;
 
-		return Ok(Invoice
+		return Ok(Self
 		{
 			date_issued: mock.date_issued,
 			date_paid: mock.date_paid,

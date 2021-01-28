@@ -77,29 +77,37 @@ for BincodePerson<'email, 'name, 'phone, 'pass, 'path, 'user>
 #[cfg(test)]
 mod tests
 {
-	use super::{Contact, BTreeSet, PersonAdapter, BincodePerson, util};
+	use super::{BincodePerson, BTreeSet, Contact, PersonAdapter, util};
 	use std::{fs, io};
 	use bincode;
 
 	#[test]
 	fn test_create() -> Result<(), io::Error>
 	{
-		fn assertion(toml_person: BincodePerson<'_, '_, '_, '_, '_, '_>)
+		fn assertion(bincode_person: BincodePerson<'_, '_, '_, '_, '_, '_>)
 		{
-			let read_result = fs::read(toml_person.filepath()).unwrap();
+			let read_result = fs::read(bincode_person.filepath()).unwrap();
 
-			assert_eq!(toml_person.person, bincode::deserialize(&read_result).unwrap());
+			assert_eq!(bincode_person.person, bincode::deserialize(&read_result).unwrap());
 		}
-
-		let mut contact_info = BTreeSet::new();
-		contact_info.insert(Contact::Address(0));
 
 		return util::test_temp_store(|store|
 		{
+			let mut contact_info = BTreeSet::new();
+
+			contact_info.insert(Contact::Address(0));
 			assertion(BincodePerson::create(contact_info.clone(), "", *store).unwrap());
+
+			contact_info.insert(Contact::Email("foo@bar.io".into()));
 			assertion(BincodePerson::create(contact_info.clone(), "", *store).unwrap());
+
+			contact_info.insert(Contact::Phone("1-800-555-3600".into()));
 			assertion(BincodePerson::create(contact_info.clone(), "", *store).unwrap());
+
+			contact_info.insert(Contact::Address(1));
 			assertion(BincodePerson::create(contact_info.clone(), "", *store).unwrap());
+
+			contact_info.insert(Contact::Email("obviousemail@server.com".into()));
 			assertion(BincodePerson::create(contact_info, "", *store).unwrap());
 
 			assert!(fs::remove_dir_all(BincodePerson::path(&store)).is_ok());

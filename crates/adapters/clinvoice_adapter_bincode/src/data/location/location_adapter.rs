@@ -110,6 +110,37 @@ mod tests
 	use std::{fs, io};
 
 	#[test]
+	fn test_create() -> Result<(), io::Error>
+	{
+		fn assertion(bincode_location: BincodeLocation<'_, '_, '_, '_>)
+		{
+			let read_result = fs::read(bincode_location.filepath()).unwrap();
+
+			assert_eq!(bincode_location.location, bincode::deserialize(&read_result).unwrap());
+		}
+
+		return util::test_temp_store(|store|
+		{
+			let earth = BincodeLocation::create("Earth", *store).unwrap();
+			assertion(earth);
+
+			let usa = earth.create_inner("USA").unwrap();
+			assert_eq!(usa.location.outer_id, Some(earth.location.id));
+			assertion(usa);
+
+			let arizona = usa.create_inner("Arizona").unwrap();
+			assert_eq!(arizona.location.outer_id, Some(usa.location.id));
+			assertion(arizona);
+
+			let phoenix = arizona.create_inner("Phoenix").unwrap();
+			assert_eq!(phoenix.location.outer_id, Some(arizona.location.id));
+			assertion(phoenix);
+
+			assert!(fs::remove_dir_all(BincodeLocation::path(&store)).is_ok());
+		});
+	}
+
+	#[test]
 	fn test_init() -> Result<(), io::Error>
 	{
 		return util::test_temp_store(|store|

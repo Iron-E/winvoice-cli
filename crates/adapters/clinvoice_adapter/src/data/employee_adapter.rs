@@ -49,7 +49,7 @@ pub trait EmployeeAdapter<'email, 'name, 'pass, 'path, 'phone, 'title, 'user> :
 	/// * Any matching [`Employee`]s.
 	/// * An [`Error`], should something go wrong.
 	fn retrieve(
-		contact_info: AnyValue<HashSet<Contact<'email, 'phone>>>,
+		contact_info: AnyValue<Contact<'email, 'phone>>,
 		id: AnyValue<Id>,
 		organization: AnyValue<Organization<'name>>,
 		person: AnyValue<Person<'email, 'name, 'phone>>,

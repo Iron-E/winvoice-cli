@@ -44,7 +44,7 @@ pub trait PersonAdapter<'email, 'name, 'pass, 'path, 'phone, 'user> :
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`Job`]s.
 	fn retrieve(
-		contact_info: AnyValue<HashSet<Contact<'email, 'phone>>>,
+		contact_info: AnyValue<Contact<'email, 'phone>>,
 		id: AnyValue<Id>,
 		name: AnyValue<&'name str>,
 		store: Store<'pass, 'path, 'user>,

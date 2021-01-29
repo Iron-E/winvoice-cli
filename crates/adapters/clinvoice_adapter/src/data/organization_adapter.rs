@@ -50,7 +50,7 @@ pub trait OrganizationAdapter<'email, 'name, 'pass, 'path, 'phone, 'title, 'user
 		id: AnyValue<Id>,
 		location: AnyValue<Location<'name>>,
 		name: AnyValue<&'name str>,
-		representatives: AnyValue<HashSet<Employee>>,
+		representatives: AnyValue<Employee>,
 		store: Store<'pass, 'path, 'user>,
 	) -> Result<HashSet<Self>, Box<dyn Error>>;
 }

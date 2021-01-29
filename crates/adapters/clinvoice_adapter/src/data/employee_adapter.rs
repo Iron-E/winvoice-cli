@@ -1,6 +1,6 @@
 use super::{AnyValue, Deletable, Updatable};
 use crate::Store;
-use clinvoice_data::{Contact, Employee, Organization, Person, uuid::Uuid};
+use clinvoice_data::{Contact, Employee, Organization, Person, Id};
 use std::{collections::HashSet, error::Error};
 
 pub trait EmployeeAdapter<'email, 'name, 'pass, 'path, 'phone, 'title, 'user> :
@@ -50,7 +50,7 @@ pub trait EmployeeAdapter<'email, 'name, 'pass, 'path, 'phone, 'title, 'user> :
 	/// * An [`Error`], should something go wrong.
 	fn retrieve(
 		contact_info: AnyValue<HashSet<Contact<'email, 'phone>>>,
-		id: AnyValue<Uuid>,
+		id: AnyValue<Id>,
 		organization: AnyValue<Organization<'name>>,
 		person: AnyValue<Person<'email, 'name, 'phone>>,
 		store: Store<'pass, 'path, 'user>,

@@ -1,7 +1,7 @@
 use super::BincodePerson;
 use crate::util;
 use clinvoice_adapter::{data::{AnyValue, PersonAdapter, Updatable}, Store};
-use clinvoice_data::{Contact, Person, uuid::Uuid};
+use clinvoice_data::{Contact, Person, Id};
 use std::{collections::HashSet, error::Error};
 
 impl<'email, 'name, 'pass, 'path, 'phone, 'user> PersonAdapter<'email, 'name, 'pass, 'path, 'phone, 'user>
@@ -65,7 +65,7 @@ for BincodePerson<'email, 'name, 'phone, 'pass, 'path, 'user>
 	/// * A list of matching [`Job`]s.
 	fn retrieve(
 		contact_info: AnyValue<HashSet<Contact<'email, 'phone>>>,
-		id: AnyValue<Uuid>,
+		id: AnyValue<Id>,
 		name: AnyValue<&'name str>,
 		store: Store<'pass, 'path, 'user>,
 	) -> Result<HashSet<Self>, Box<dyn Error>>
@@ -77,7 +77,7 @@ for BincodePerson<'email, 'name, 'phone, 'pass, 'path, 'user>
 #[cfg(test)]
 mod tests
 {
-	use super::{BincodePerson, Contact, HashSet, PersonAdapter, util, Uuid};
+	use super::{BincodePerson, Contact, HashSet, PersonAdapter, util, Id};
 	use std::{fs, io};
 	use bincode;
 
@@ -95,7 +95,7 @@ mod tests
 		{
 			let mut contact_info = HashSet::new();
 
-			contact_info.insert(Contact::Address(Uuid::new_v4()));
+			contact_info.insert(Contact::Address(Id::new_v4()));
 			assertion(BincodePerson::create(contact_info.clone(), "", *store).unwrap());
 
 			contact_info.insert(Contact::Email("foo@bar.io".into()));
@@ -104,7 +104,7 @@ mod tests
 			contact_info.insert(Contact::Phone("1-800-555-3600".into()));
 			assertion(BincodePerson::create(contact_info.clone(), "", *store).unwrap());
 
-			contact_info.insert(Contact::Address(Uuid::new_v4()));
+			contact_info.insert(Contact::Address(Id::new_v4()));
 			assertion(BincodePerson::create(contact_info.clone(), "", *store).unwrap());
 
 			contact_info.insert(Contact::Email("obviousemail@server.com".into()));

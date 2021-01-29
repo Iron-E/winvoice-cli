@@ -1,6 +1,6 @@
 use super::{AnyValue, Deletable, Updatable};
 use crate::Store;
-use clinvoice_data::{chrono::{DateTime, Utc}, Job, Money, Organization, uuid::Uuid};
+use clinvoice_data::{chrono::{DateTime, Utc}, Job, Money, Organization, Id};
 use std::{collections::HashSet, error::Error};
 
 pub trait JobAdapter<'currency, 'objectives, 'name, 'notes, 'pass, 'path, 'title, 'user, 'work_notes> :
@@ -50,7 +50,7 @@ pub trait JobAdapter<'currency, 'objectives, 'name, 'notes, 'pass, 'path, 'title
 		client: AnyValue<Organization<'name>>,
 		date_close: AnyValue<DateTime<Utc>>,
 		date_open: AnyValue<DateTime<Utc>>,
-		id: AnyValue<Uuid>,
+		id: AnyValue<Id>,
 		invoice_date_issued: AnyValue<DateTime<Utc>>,
 		invoice_date_paid: AnyValue<DateTime<Utc>>,
 		invoice_hourly_rate: AnyValue<Money<'currency>>,

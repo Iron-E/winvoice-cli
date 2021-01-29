@@ -1,7 +1,6 @@
-use crate::{Invoice, Timesheet};
+use crate::{Invoice, Timesheet, Id};
 use std::collections::BTreeSet;
 use chrono::{DateTime, Utc};
-use uuid::Uuid;
 
 #[cfg(feature="serde_support")]
 use serde::{Deserialize, Serialize};
@@ -28,7 +27,7 @@ pub struct Job<'currency, 'objectives, 'notes, 'work_notes>
 	/// # Summary
 	///
 	/// The [`Organization`](crate::Organization) who the work is being performed for.
-	pub client_id: Uuid,
+	pub client_id: Id,
 
 	/// # Summary
 	///
@@ -47,7 +46,7 @@ pub struct Job<'currency, 'objectives, 'notes, 'work_notes>
 	/// # Remarks
 	///
 	/// Should be automatically generated.
-	pub id: Uuid,
+	pub id: Id,
 
 	/// # Summary
 	///

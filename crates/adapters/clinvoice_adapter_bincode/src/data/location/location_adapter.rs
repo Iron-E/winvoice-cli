@@ -1,7 +1,7 @@
 use super::BincodeLocation;
 use crate::util;
 use clinvoice_adapter::{data::{AnyValue, LocationAdapter, Updatable}, Store};
-use clinvoice_data::{Location, uuid::Uuid};
+use clinvoice_data::{Location, Id};
 use std::{collections::HashSet, error::Error};
 
 impl<'name, 'pass, 'path, 'user> LocationAdapter<'name, 'pass, 'path, 'user>
@@ -93,7 +93,7 @@ for BincodeLocation<'name, 'pass, 'path, 'user>
 	/// * An [`Error`], when something goes wrong.
 	/// * A list of matches, if there are any.
 	fn retrieve(
-		id: AnyValue<Uuid>,
+		id: AnyValue<Id>,
 		name: AnyValue<&'name str>,
 		outer: AnyValue<Location>,
 		store: Store<'pass, 'path, 'user>,

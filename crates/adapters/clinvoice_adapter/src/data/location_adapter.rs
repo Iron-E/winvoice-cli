@@ -1,6 +1,6 @@
 use super::{AnyValue, Deletable, Updatable};
 use crate::Store;
-use clinvoice_data::{Location, uuid::Uuid};
+use clinvoice_data::{Location, Id};
 use core::fmt::Display;
 use std::{collections::HashSet, error::Error};
 
@@ -59,7 +59,7 @@ pub trait LocationAdapter<'name, 'pass, 'path, 'user> :
 	/// * An [`Error`], when something goes wrong.
 	/// * A list of matches, if there are any.
 	fn retrieve(
-		id: AnyValue<Uuid>,
+		id: AnyValue<Id>,
 		name: AnyValue<&'name str>,
 		outer: AnyValue<Location>,
 		store: Store<'pass, 'path, 'user>,

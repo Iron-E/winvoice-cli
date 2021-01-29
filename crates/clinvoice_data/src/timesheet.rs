@@ -1,6 +1,6 @@
+use crate::Id;
 use std::borrow::Cow;
 use chrono::{DateTime, Utc};
-use uuid::Uuid;
 
 #[cfg(feature="serde_support")]
 use serde::{Deserialize, Serialize};
@@ -22,7 +22,7 @@ pub struct Timesheet<'work_notes>
 	/// # Summary
 	///
 	/// The ID of the [`Employee`](crate::Employee) who performed this work.
-	pub employee_id: Uuid,
+	pub employee_id: Id,
 
 	/// # Summary
 	///

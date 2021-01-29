@@ -64,7 +64,7 @@ impl Config<'_, '_, '_, '_, '_, '_>
 #[cfg(test)]
 mod tests
 {
-	use clinvoice_data::{chrono::Duration, uuid::Uuid};
+	use clinvoice_data::{chrono::Duration, Id};
 	use clinvoice_adapter::Adapters;
 	use super::{Config, Employees, HashMap, Invoices, Store, StoreValue, Timesheets};
 
@@ -91,7 +91,7 @@ mod tests
 
 		let conf = Config
 		{
-			employees: Employees {default_id: Uuid::new_v4()},
+			employees: Employees {default_id: Id::new_v4()},
 			invoices: Invoices {default_currency: "USD"},
 			stores,
 			timesheets: Timesheets {interval: Duration::minutes(1)},

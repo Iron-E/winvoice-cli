@@ -1,7 +1,7 @@
 use super::BincodeJob;
 use crate::util;
 use clinvoice_adapter::{data::{AnyValue, JobAdapter, Updatable}, Store};
-use clinvoice_data::{chrono::{DateTime, Utc}, Invoice, Job, Money, Organization, uuid::Uuid};
+use clinvoice_data::{chrono::{DateTime, Utc}, Invoice, Job, Money, Organization, Id};
 use std::{collections::{BTreeSet, HashSet}, error::Error};
 
 impl<'currency, 'objectives, 'name, 'notes, 'pass, 'path, 'title, 'user, 'work_notes> JobAdapter<'currency, 'objectives, 'name, 'notes, 'pass, 'path, 'title, 'user, 'work_notes>
@@ -79,7 +79,7 @@ for BincodeJob<'currency, 'objectives, 'notes, 'work_notes, 'pass, 'path, 'user>
 		client: AnyValue<Organization<'name>>,
 		date_close: AnyValue<DateTime<Utc>>,
 		date_open: AnyValue<DateTime<Utc>>,
-		id: AnyValue<Uuid>,
+		id: AnyValue<Id>,
 		invoice_date_issued: AnyValue<DateTime<Utc>>,
 		invoice_date_paid: AnyValue<DateTime<Utc>>,
 		invoice_hourly_rate: AnyValue<Money<'currency>>,

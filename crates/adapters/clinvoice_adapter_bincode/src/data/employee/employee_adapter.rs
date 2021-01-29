@@ -1,7 +1,7 @@
 use super::BincodeEmployee;
 use crate::util;
 use clinvoice_adapter::{data::{AnyValue, EmployeeAdapter, Updatable}, Store};
-use clinvoice_data::{Contact, Employee, Organization, Person, uuid::Uuid};
+use clinvoice_data::{Contact, Employee, Organization, Person, Id};
 use std::{collections::HashSet, error::Error};
 
 impl<'email, 'name, 'pass, 'path, 'phone, 'title, 'user> EmployeeAdapter<'email, 'name, 'pass, 'path, 'phone, 'title, 'user>
@@ -70,7 +70,7 @@ for BincodeEmployee<'email, 'phone, 'title, 'pass, 'path, 'user>
 	/// * An [`Error`], should something go wrong.
 	fn retrieve(
 		contact_info: AnyValue<HashSet<Contact<'email, 'phone>>>,
-		id: AnyValue<Uuid>,
+		id: AnyValue<Id>,
 		organization: AnyValue<Organization<'name>>,
 		person: AnyValue<Person<'email, 'name, 'phone>>,
 		store: Store<'pass, 'path, 'user>,

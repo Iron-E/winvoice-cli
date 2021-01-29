@@ -1,7 +1,7 @@
 use super::BincodeOrganization;
 use crate::util;
 use clinvoice_adapter::{data::{AnyValue, OrganizationAdapter, Updatable}, Store};
-use clinvoice_data::{Employee, Location, Organization, uuid::Uuid};
+use clinvoice_data::{Employee, Location, Organization, Id};
 use std::{collections::HashSet, error::Error};
 
 impl<'email, 'name, 'pass, 'path, 'phone, 'title, 'user> OrganizationAdapter<'email, 'name, 'pass, 'path, 'phone, 'title, 'user>
@@ -66,7 +66,7 @@ for BincodeOrganization<'name, 'pass, 'path, 'user>
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`Job`]s.
 	fn retrieve(
-		id: AnyValue<Uuid>,
+		id: AnyValue<Id>,
 		location: AnyValue<Location<'name>>,
 		name: AnyValue<&'name str>,
 		representatives: AnyValue<HashSet<Employee>>,
@@ -80,7 +80,7 @@ for BincodeOrganization<'name, 'pass, 'path, 'user>
 #[cfg(test)]
 mod tests
 {
-	use super::{BincodeOrganization, HashSet, Location, OrganizationAdapter, util, Uuid};
+	use super::{BincodeOrganization, HashSet, Location, OrganizationAdapter, util, Id};
 	use std::{fs, io};
 
 	#[test]
@@ -95,31 +95,31 @@ mod tests
 
 		return util::test_temp_store(|store|
 		{
-			let earth_id = Uuid::new_v4();
+			let earth_id = Id::new_v4();
 			assertion(BincodeOrganization::create(
 				Location {name: "Earth", id: earth_id, outer_id: None},
 				"alsdkjaldkj", HashSet::new(), *store
 			).unwrap());
 
-			let usa_id = Uuid::new_v4();
+			let usa_id = Id::new_v4();
 			assertion(BincodeOrganization::create(
 				Location {name: "USA", id: usa_id, outer_id: Some(earth_id)},
 				"alskdjalgkh  ladhkj EAL ISdh", HashSet::new(), *store
 			).unwrap());
 
-			let arizona_id = Uuid::new_v4();
+			let arizona_id = Id::new_v4();
 			assertion(BincodeOrganization::create(
 				Location {name: "Arizona", id: arizona_id, outer_id: Some(earth_id)},
 				" AAA – 44 %%", HashSet::new(), *store
 			).unwrap());
 
-			let phoenix_id = Uuid::new_v4();
+			let phoenix_id = Id::new_v4();
 			assertion(BincodeOrganization::create(
 				Location {name: "Phoenix", id: phoenix_id, outer_id: Some(arizona_id)},
 				" ^^^ ADSLKJDLASKJD FOCJCI", HashSet::new(), *store
 			).unwrap());
 
-			let some_id = Uuid::new_v4();
+			let some_id = Id::new_v4();
 			assertion(BincodeOrganization::create(
 				Location {name: "Some Road", id: some_id, outer_id: Some(phoenix_id)},
 				"aldkj doiciuc giguy &&", HashSet::new(), *store

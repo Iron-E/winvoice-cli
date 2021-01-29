@@ -1,7 +1,7 @@
 mod hash;
 
+use crate::Id;
 use std::collections::HashSet;
-use uuid::Uuid;
 
 #[cfg(feature="serde_support")]
 use serde::{Deserialize, Serialize};
@@ -24,13 +24,13 @@ pub struct Organization<'name>
 	/// # Summary
 	///
 	/// The unique reference number for this [`Organization`].
-	pub id: Uuid,
+	pub id: Id,
 
 	/// # Summary
 	///
 	/// The reference umber of the [`Location`](super::location::Location) where this
 	/// [`Organization`] resides.
-	pub location_id: Uuid,
+	pub location_id: Id,
 
 	/// # Summary
 	///
@@ -49,5 +49,5 @@ pub struct Organization<'name>
 	/// chief_operations_officer = 2
 	/// director_of_finance = 43
 	/// ```
-	pub representatives: HashSet<Uuid>,
+	pub representatives: HashSet<Id>,
 }

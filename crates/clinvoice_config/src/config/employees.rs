@@ -1,4 +1,4 @@
-use clinvoice_data::uuid::Uuid;
+use clinvoice_data::Id;
 
 /// # Summary
 ///
@@ -8,6 +8,6 @@ pub struct Employees
 {
 	/// # Summary
 	///
-	/// The [`Uuid`] of the employee which should be defaulted to when attaching to a timesheet.
-	pub default_id: Uuid,
+	/// The [`Id`] of the employee which should be defaulted to when attaching to a timesheet.
+	pub default_id: Id,
 }

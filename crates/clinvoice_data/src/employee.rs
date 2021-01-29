@@ -1,8 +1,7 @@
 mod hash;
 
-use crate::Contact;
+use crate::{Contact, Id};
 use std::collections::HashSet;
-use uuid::Uuid;
 
 #[cfg(feature="serde_support")]
 use serde::{Deserialize, Serialize};
@@ -24,19 +23,19 @@ pub struct Employee<'email, 'phone, 'title>
 	///
 	/// The reference number of this [`Employee`], which can be used instead of the compound key
 	/// {`organization`, `person_id`}.
-	pub id: Uuid,
+	pub id: Id,
 
 	/// # Summary
 	///
 	/// The reference number of the [`Organization`](crate::Organization) which this
 	/// [`Employee`] is in reference to.
-	pub organization_id: Uuid,
+	pub organization_id: Id,
 
 	/// # Summary
 	///
 	/// The reference number of the [`Person`](super::person::Person) which this
 	/// [`Employee`] is in reference to.
-	pub person_id: Uuid,
+	pub person_id: Id,
 
 	/// # Summary
 	///

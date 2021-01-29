@@ -1,8 +1,7 @@
 mod hash;
 
-use crate::Contact;
+use crate::{Contact, Id};
 use std::collections::HashSet;
-use uuid::Uuid;
 
 #[cfg(feature="serde_support")]
 use serde::{Deserialize, Serialize};
@@ -23,7 +22,7 @@ pub struct Person<'email, 'name, 'phone>
 	/// # Summary
 	///
 	/// This is the unique reference number for the [`Person`].
-	pub id: Uuid,
+	pub id: Id,
 
 	/// # Summary
 	///

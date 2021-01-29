@@ -1,5 +1,6 @@
 mod contact;
 mod employee;
+mod id;
 mod invoice;
 mod job;
 mod location;
@@ -12,6 +13,7 @@ pub use
 {
 	contact::Contact,
 	employee::Employee,
+	id::Id,
 	invoice::Invoice,
 	job::Job,
 	location::Location,
@@ -22,12 +24,11 @@ pub use
 };
 
 pub use chrono;
-pub use uuid;
 
 /// # Summary
 ///
-/// The namespace for a V5 [`Uuid`](uuid::Uuid).
-pub const UUID_NAMESPACE: uuid::Uuid = uuid::Uuid::from_bytes([
+/// The namespace for a v5 [`Uuid`](uuid::Uuid) containing CLInvoice data.
+pub const UUID_NAMESPACE: Id = Id::from_bytes([
 	0x1a, 0x88, 0xb1, 0xde,
 	0xe8, 0x0d, 0x4e, 0xca,
 	0x92, 0x08, 0xe5, 0x6b,

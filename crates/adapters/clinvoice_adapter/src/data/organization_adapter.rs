@@ -1,6 +1,6 @@
 use super::{AnyValue, Deletable, Updatable};
 use crate::Store;
-use clinvoice_data::{Employee, Location, Organization, uuid::Uuid};
+use clinvoice_data::{Employee, Location, Organization, Id};
 use std::{collections::HashSet, error::Error};
 
 pub trait OrganizationAdapter<'email, 'name, 'pass, 'path, 'phone, 'title, 'user> :
@@ -47,7 +47,7 @@ pub trait OrganizationAdapter<'email, 'name, 'pass, 'path, 'phone, 'title, 'user
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`Job`]s.
 	fn retrieve(
-		id: AnyValue<Uuid>,
+		id: AnyValue<Id>,
 		location: AnyValue<Location<'name>>,
 		name: AnyValue<&'name str>,
 		representatives: AnyValue<HashSet<Employee>>,

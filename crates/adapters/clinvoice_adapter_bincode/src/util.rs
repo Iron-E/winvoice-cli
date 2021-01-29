@@ -1,5 +1,5 @@
 use clinvoice_adapter::{Adapters, Store};
-use clinvoice_data::{uuid::Uuid, UUID_NAMESPACE};
+use clinvoice_data::{Id, UUID_NAMESPACE};
 use std::{env, error::Error, fs, io, path::Path};
 
 /// # Summary
@@ -78,11 +78,11 @@ pub fn test_temp_store(assertion: impl FnOnce(&Store<'_, '_, '_>)) -> Result<(),
 /// # Returns
 ///
 /// The next [`Id`] for an entity in `store_dir`.
-pub fn unique_id(store_dir: &Path) -> Result<Uuid, io::Error>
+pub fn unique_id(store_dir: &Path) -> Result<Id, io::Error>
 {
 	'gen: loop
 	{
-		let id = Uuid::new_v5(&UUID_NAMESPACE, Uuid::new_v4().as_bytes());
+		let id = Id::new_v5(&UUID_NAMESPACE, Id::new_v4().as_bytes());
 
 		for node in fs::read_dir(store_dir)?
 		{

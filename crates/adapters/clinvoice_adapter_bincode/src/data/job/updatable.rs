@@ -1,7 +1,6 @@
 use super::BincodeJob;
 use clinvoice_adapter::data::Updatable;
 use std::{error::Error, fs};
-use bincode;
 
 impl Updatable for BincodeJob<'_, '_, '_, '_, '_, '_, '_>
 {

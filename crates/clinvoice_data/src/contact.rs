@@ -1,5 +1,5 @@
+use crate::Id;
 use std::borrow::Cow;
-use uuid::Uuid;
 
 #[cfg(feature="serde_support")]
 use serde::{Deserialize, Serialize};
@@ -14,7 +14,7 @@ pub enum Contact<'email, 'phone>
 	/// # Summary
 	///
 	/// A [`Location`](crate::Location).
-	Address(Uuid),
+	Address(Id),
 
 	/// # Summary
 	///

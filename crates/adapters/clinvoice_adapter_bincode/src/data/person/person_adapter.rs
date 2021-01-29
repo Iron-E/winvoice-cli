@@ -78,7 +78,7 @@ for BincodePerson<'email, 'name, 'phone, 'pass, 'path, 'user>
 mod tests
 {
 	use super::{BincodePerson, Contact, HashSet, PersonAdapter, util, Id};
-	use std::{fs, io};
+	use std::{fs, io, time::Instant};
 	use bincode;
 
 	#[test]
@@ -90,6 +90,8 @@ mod tests
 
 			assert_eq!(bincode_person.person, bincode::deserialize(&read_result).unwrap());
 		}
+
+		let start = Instant::now();
 
 		return util::test_temp_store(|store|
 		{
@@ -111,12 +113,16 @@ mod tests
 			assertion(BincodePerson::create(contact_info, "", *store).unwrap());
 
 			assert!(fs::remove_dir_all(BincodePerson::path(&store)).is_ok());
+
+			println!("\n>>>>> BincodePerson test_create {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 
 	#[test]
 	fn test_init() -> Result<(), io::Error>
 	{
+		let start = Instant::now();
+
 		return util::test_temp_store(|store|
 		{
 			// Assert that the function can initialize the store.
@@ -133,6 +139,8 @@ mod tests
 
 			// Assert cleanup
 			assert!(fs::remove_file(filepath).is_ok());
+
+			println!("\n>>>>> BincodePerson test_init {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 }

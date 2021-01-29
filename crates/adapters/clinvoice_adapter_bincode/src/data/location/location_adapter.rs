@@ -107,7 +107,7 @@ for BincodeLocation<'name, 'pass, 'path, 'user>
 mod tests
 {
 	use super::{BincodeLocation, LocationAdapter, util};
-	use std::{fs, io};
+	use std::{fs, io, time::Instant};
 
 	#[test]
 	fn test_create() -> Result<(), io::Error>
@@ -118,6 +118,8 @@ mod tests
 
 			assert_eq!(bincode_location.location, bincode::deserialize(&read_result).unwrap());
 		}
+
+		let start = Instant::now();
 
 		return util::test_temp_store(|store|
 		{
@@ -137,12 +139,16 @@ mod tests
 			assertion(phoenix);
 
 			assert!(fs::remove_dir_all(BincodeLocation::path(&store)).is_ok());
+
+			println!("\n>>>>> BincodeLocation test_start {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 
 	#[test]
 	fn test_init() -> Result<(), io::Error>
 	{
+		let start = Instant::now();
+
 		return util::test_temp_store(|store|
 		{
 			// Assert that the function can initialize the store.
@@ -159,6 +165,8 @@ mod tests
 
 			// Assert cleanup
 			assert!(fs::remove_file(filepath).is_ok());
+
+			println!("\n>>>>> BincodeLocation test_init {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 }

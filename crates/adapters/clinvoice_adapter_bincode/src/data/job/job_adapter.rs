@@ -163,13 +163,15 @@ mod tests
 
 			assert!(fs::remove_dir_all(BincodeJob::path(&store)).is_ok());
 
-			println!("\n>>>>> BincodeJob test_create :: {}us\n", Instant::now().duration_since(start).as_micros());
+			println!("\n>>>>> BincodeJob test_create {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 
 	#[test]
 	fn test_init() -> Result<(), io::Error>
 	{
+		let start = Instant::now();
+
 		return util::test_temp_store(|store|
 		{
 			// Assert that the function can initialize the store.
@@ -186,6 +188,8 @@ mod tests
 
 			// Assert cleanup
 			assert!(fs::remove_file(filepath).is_ok());
+
+			println!("\n>>>>> BincodeJob test_init {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 }

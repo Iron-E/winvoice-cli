@@ -129,7 +129,7 @@ mod tests
 				assert!(fs::write(&test_path.join(id.to_string()), "TEST").is_ok());
 			}
 
-			println!("\n>>>>> util test_inque_id :: {}us\n", Instant::now().duration_since(start).as_micros());
+			println!("\n>>>>> util test_inque_id {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 }

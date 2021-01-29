@@ -84,8 +84,104 @@ for BincodeEmployee<'email, 'phone, 'title, 'pass, 'path, 'user>
 #[cfg(test)]
 mod tests
 {
-	use super::{BincodeEmployee, EmployeeAdapter, util};
+	use super::{BincodeEmployee, Contact, EmployeeAdapter, HashSet, Id, Organization, Person, util};
 	use std::{fs, io};
+
+	#[test]
+	fn test_create() -> Result<(), io::Error>
+	{
+		fn assertion(bincode_employee: BincodeEmployee<'_, '_, '_, '_, '_, '_>)
+		{
+			let read_result = fs::read(bincode_employee.filepath()).unwrap();
+
+			assert_eq!(bincode_employee.employee, bincode::deserialize(&read_result).unwrap());
+		}
+
+		let organization = Organization
+		{
+			id: Id::new_v4(),
+			location_id: Id::new_v4(),
+			name: "Big Old Test Corporation",
+			representatives: HashSet::new(),
+		};
+
+		return util::test_temp_store(|store|
+		{
+			let mut contact_info = HashSet::new();
+
+			contact_info.insert(Contact::Address(Id::new_v4()));
+			assertion(BincodeEmployee::create(
+				contact_info.clone(),
+				organization.clone(),
+				Person
+				{
+					contact_info: contact_info.clone(),
+					id: Id::new_v4(),
+					name: "Testy Mćtesterson",
+				},
+				*store,
+				"CEO of Tests",
+			).unwrap());
+
+			contact_info.insert(Contact::Email("foo@bar.io".into()));
+			assertion(BincodeEmployee::create(
+				contact_info.clone(),
+				organization.clone(),
+				Person
+				{
+					contact_info: contact_info.clone(),
+					id: Id::new_v4(),
+					name: "Nimron MacBeaver",
+				},
+				*store,
+				"Oblong Shape Holder",
+			).unwrap());
+
+			contact_info.insert(Contact::Phone("1-800-555-3600".into()));
+			assertion(BincodeEmployee::create(
+				contact_info.clone(),
+				organization.clone(),
+				Person
+				{
+					contact_info: contact_info.clone(),
+					id: Id::new_v4(),
+					name: "An Actual «Tor♯tust",
+				},
+				*store,
+				"Mixer of Soups",
+			).unwrap());
+
+			contact_info.insert(Contact::Address(Id::new_v4()));
+			assertion(BincodeEmployee::create(
+				contact_info.clone(),
+				organization.clone(),
+				Person
+				{
+					contact_info: contact_info.clone(),
+					id: Id::new_v4(),
+					name: "Jimmy Neutron, Boy Genius' Dog 'Gottard'",
+				},
+				*store,
+				"Sidekick",
+			).unwrap());
+
+			contact_info.insert(Contact::Email("obviousemail@server.com".into()));
+			assertion(BincodeEmployee::create(
+				contact_info.clone(),
+				organization.clone(),
+				Person
+				{
+					contact_info: contact_info.clone(),
+					id: Id::new_v4(),
+					name: "Testy Mćtesterson",
+				},
+				*store,
+				"Lazy No-good Duplicate Name User",
+			).unwrap());
+
+			assert!(fs::remove_dir_all(BincodeEmployee::path(&store)).is_ok());
+		});
+	}
 
 	#[test]
 	fn test_init() -> Result<(), io::Error>

@@ -95,8 +95,73 @@ for BincodeJob<'currency, 'objectives, 'notes, 'work_notes, 'pass, 'path, 'user>
 #[cfg(test)]
 mod tests
 {
-	use super::{BincodeJob, JobAdapter, util};
+	use super::{BincodeJob, Id, HashSet, JobAdapter, Money, Organization, Utc, util};
+	use clinvoice_data::Decimal;
 	use std::{fs, io};
+
+	#[test]
+	fn test_create() -> Result<(), io::Error>
+	{
+		fn assertion(bincode_job: BincodeJob<'_, '_, '_, '_, '_, '_, '_>)
+		{
+			let read_result = fs::read(bincode_job.filepath()).unwrap();
+
+			assert_eq!(bincode_job.job, bincode::deserialize(&read_result).unwrap());
+		}
+
+		let organization = Organization
+		{
+			id: Id::new_v4(),
+			location_id: Id::new_v4(),
+			name: "Big Old Test Corporation",
+			representatives: HashSet::new(),
+		};
+
+		return util::test_temp_store(|store|
+		{
+			assertion(BincodeJob::create(
+				organization.clone(),
+				Utc::now(),
+				Money {amount: Decimal::new(200, 2), currency: "".into()},
+				"Test the job creation function.",
+				*store,
+			).unwrap());
+
+			assertion(BincodeJob::create(
+				organization.clone(),
+				Utc::now(),
+				Money::new(Decimal::new(200, 2), "USD"),
+				"Test the job creation function.",
+				*store,
+			).unwrap());
+
+			assertion(BincodeJob::create(
+				organization.clone(),
+				Utc::now(),
+				Money::new(Decimal::new(20000, 0), "YEN"),
+				"TEST THE JOB CREATION FUNCTION.",
+				*store,
+			).unwrap());
+
+			assertion(BincodeJob::create(
+				organization.clone(),
+				Utc::now(),
+				Money::new(Decimal::new(500, 2), "CDN"),
+				"test the job creation function.",
+				*store,
+			).unwrap());
+
+			assertion(BincodeJob::create(
+				organization.clone(),
+				Utc::now(),
+				Money::new(Decimal::new(1000, 2), "EUR"),
+				"TeSt ThE jOb CrEaTiOn FuNcTiOn.",
+				*store,
+			).unwrap());
+
+			assert!(fs::remove_dir_all(BincodeJob::path(&store)).is_ok());
+		});
+	}
 
 	#[test]
 	fn test_init() -> Result<(), io::Error>

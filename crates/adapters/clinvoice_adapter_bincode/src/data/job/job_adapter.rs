@@ -97,7 +97,7 @@ mod tests
 {
 	use super::{BincodeJob, Id, HashSet, JobAdapter, Money, Organization, Utc, util};
 	use clinvoice_data::Decimal;
-	use std::{fs, io};
+	use std::{fs, io, time::Instant};
 
 	#[test]
 	fn test_create() -> Result<(), io::Error>
@@ -108,6 +108,8 @@ mod tests
 
 			assert_eq!(bincode_job.job, bincode::deserialize(&read_result).unwrap());
 		}
+
+		let start = Instant::now();
 
 		let organization = Organization
 		{
@@ -160,6 +162,8 @@ mod tests
 			).unwrap());
 
 			assert!(fs::remove_dir_all(BincodeJob::path(&store)).is_ok());
+
+			println!("\n>>>>> BincodeJob test_create :: {}us\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 

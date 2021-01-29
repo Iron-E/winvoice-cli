@@ -64,13 +64,16 @@ impl Config<'_, '_, '_, '_, '_, '_>
 #[cfg(test)]
 mod tests
 {
-	use clinvoice_data::{chrono::Duration, Id};
-	use clinvoice_adapter::Adapters;
 	use super::{Config, Employees, HashMap, Invoices, Store, StoreValue, Timesheets};
+	use clinvoice_adapter::Adapters;
+	use clinvoice_data::{chrono::Duration, Id};
+	use std::time::Instant;
 
 	#[test]
 	fn test_get_store()
 	{
+		let start = Instant::now();
+
 		let mut stores = HashMap::new();
 
 		stores.insert("a", StoreValue::Alias("b"));
@@ -106,5 +109,7 @@ mod tests
 		// Should never be the same
 		assert_ne!(conf.get_store("c").as_deref(), conf.get_store("d").as_deref());
 		assert_ne!(conf.get_store("a").as_deref(), conf.get_store("e").as_deref());
+
+		println!("\n>>>>> config test_get_store() :: {}us\n", Instant::now().duration_since(start).as_micros());
 	}
 }

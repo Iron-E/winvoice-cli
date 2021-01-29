@@ -84,9 +84,8 @@ pub fn unique_id(store_dir: &Path) -> Result<Id, io::Error>
 	{
 		let id = Id::new_v5(&UUID_NAMESPACE, Id::new_v4().as_bytes());
 
-		for node in fs::read_dir(store_dir)?
+		for node_path in fs::read_dir(store_dir)?.filter_map(|node| match node {Ok(n) => Some(n.path()), Err(_) => None})
 		{
-			let node_path = node?.path();
 			if match node_path.file_stem()
 			{
 				Some(stem) => stem.to_string_lossy(),
@@ -103,11 +102,13 @@ pub fn unique_id(store_dir: &Path) -> Result<Id, io::Error>
 mod tests
 {
 	use super::{fs, io};
-	use std::path::PathBuf;
+	use std::{path::PathBuf, time::Instant};
 
 	#[test]
 	fn test_unique_id() -> Result<(), io::Error>
 	{
+		let start = Instant::now();
+
 		return super::test_temp_store(|store|
 		{
 			let test_path = PathBuf::new().join(store.path).join("test_next_id");
@@ -127,6 +128,8 @@ mod tests
 				// Creating the next file worked.
 				assert!(fs::write(&test_path.join(id.to_string()), "TEST").is_ok());
 			}
+
+			println!("\n>>>>> util test_inque_id :: {}us\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 }

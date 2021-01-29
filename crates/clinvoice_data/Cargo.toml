@@ -25,4 +25,4 @@ uuid = {version="0.8", features=["v4", "v5"]}
 
 [features]
 default = []
-serde_support = ["serde/derive", "uuid/serde"]
+serde_support = ["rust_decimal/serde-str", "serde/derive", "uuid/serde"]

@@ -24,6 +24,7 @@ pub use
 };
 
 pub use chrono;
+pub use rust_decimal::Decimal;
 
 /// # Summary
 ///

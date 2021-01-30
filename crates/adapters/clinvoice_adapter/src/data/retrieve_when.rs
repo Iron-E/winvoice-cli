@@ -111,3 +111,27 @@ impl<T> RetrieveWhen<T> where T : Eq + Hash
 		};
 	}
 }
+
+#[cfg(test)]
+mod tests
+{
+	use super::RetrieveWhen;
+
+	#[test]
+	fn test_all_match()
+	{
+	}
+
+	#[test]
+	fn test_is_match()
+	{
+		let test_value = 7;
+
+		// Test any
+		assert!(RetrieveWhen::Any.is_match(test_value));
+
+		// Test equal
+		assert!(RetrieveWhen::Equal(6).is_match(test_value));
+		assert!(RetrieveWhen::Equal(7).is_match(test_value));
+	}
+}

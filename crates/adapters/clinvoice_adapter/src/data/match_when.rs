@@ -3,7 +3,7 @@ use std::{cmp::Eq, collections::HashSet, hash::Hash};
 /// # Summary
 ///
 /// A value in a retrieval operation.
-pub enum MatchWhen<T> where T : Eq + Hash
+pub enum MatchWhen<'range, T> where T : 'range + Eq + Hash
 {
 	/// # Summary
 	///
@@ -54,12 +54,12 @@ pub enum MatchWhen<T> where T : Eq + Hash
 	/// ```rust
 	/// use clinvoice_adapter::data::MatchWhen;
 	///
-	/// println!("{}", MatchWhen::InRange(|v| v > 0 && v < 5).is_match(4));
+	/// println!("{}", MatchWhen::InRange(&|v| *v > 0 && *v < 5).is_match(4));
 	/// ```
-	InRange(Box<dyn Fn(&T) -> bool>),
+	InRange(&'range dyn Fn(&T) -> bool),
 }
 
-impl<T> MatchWhen<T> where T : Eq + Hash
+impl<'range, T> MatchWhen<'range, T> where T : 'range + Eq + Hash
 {
 	/// # Summary
 	///
@@ -115,7 +115,8 @@ impl<T> MatchWhen<T> where T : Eq + Hash
 #[cfg(test)]
 mod tests
 {
-	use super::MatchWhen;
+	use super::{HashSet, MatchWhen};
+	use std::time::Instant;
 
 	#[test]
 	fn test_all_match()
@@ -125,13 +126,47 @@ mod tests
 	#[test]
 	fn test_is_match()
 	{
+		let start = Instant::now();
+
 		let test_value = 7;
 
 		// Test any
 		assert!(MatchWhen::Any.is_match(test_value));
 
 		// Test equal
-		assert!(MatchWhen::Equal(6).is_match(test_value));
+		assert!(!MatchWhen::Equal(6).is_match(test_value));
 		assert!(MatchWhen::Equal(7).is_match(test_value));
+
+		// Test has all
+		let mut has_all = HashSet::new();
+		has_all.insert(4);
+		assert!(!MatchWhen::HasAll(has_all.clone()).is_match(test_value));
+		has_all.remove(&4);
+		has_all.insert(7);
+		assert!(MatchWhen::HasAll(has_all).is_match(test_value));
+
+		// Test has any
+		let mut has_any = HashSet::new();
+		has_any.insert(1);
+		has_any.insert(2);
+		has_any.insert(3);
+		assert!(!MatchWhen::HasAny(has_any.clone()).is_match(test_value));
+		has_any.insert(7);
+		assert!(MatchWhen::HasAny(has_any.clone()).is_match(test_value));
+
+		// Test has none
+		let mut has_none = HashSet::new();
+		has_none.insert(1);
+		has_none.insert(2);
+		has_none.insert(3);
+		assert!(MatchWhen::HasNone(has_none.clone()).is_match(test_value));
+		has_none.insert(7);
+		assert!(!MatchWhen::HasNone(has_none.clone()).is_match(test_value));
+
+		// Test in range
+		assert!(!MatchWhen::InRange(&|v| *v > 0 && *v < 3).is_match(test_value));
+		assert!(MatchWhen::InRange(&|v| *v > 0 && *v < 8).is_match(test_value));
+
+		println!("\n>>>>> MatchWhen test_is_match {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 	}
 }

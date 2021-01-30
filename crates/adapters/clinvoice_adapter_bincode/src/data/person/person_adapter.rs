@@ -86,9 +86,12 @@ mod tests
 	{
 		fn assertion(bincode_person: BincodePerson<'_, '_, '_, '_, '_, '_>)
 		{
-			let read_result = fs::read(bincode_person.filepath()).unwrap();
+			let start = Instant::now();
 
+			let read_result = fs::read(bincode_person.filepath()).unwrap();
 			assert_eq!(*bincode_person, bincode::deserialize(&read_result).unwrap());
+
+			println!("\t----- BincodePerson test_create (read+deserialized file) {}us -----", Instant::now().duration_since(start).as_micros());
 		}
 
 		let start = Instant::now();

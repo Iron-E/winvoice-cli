@@ -88,9 +88,12 @@ mod tests
 	{
 		fn assertion(bincode_organization: BincodeOrganization<'_, '_, '_, '_>)
 		{
-			let read_result = fs::read(bincode_organization.filepath()).unwrap();
+			let start = Instant::now();
 
+			let read_result = fs::read(bincode_organization.filepath()).unwrap();
 			assert_eq!(*bincode_organization, bincode::deserialize(&read_result).unwrap());
+
+			println!("\t----- BincodeOrganization test_create (read+deserialized file) {}us -----", Instant::now().duration_since(start).as_micros());
 		}
 
 		let start = Instant::now();

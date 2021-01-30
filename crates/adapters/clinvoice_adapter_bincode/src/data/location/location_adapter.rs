@@ -114,9 +114,12 @@ mod tests
 	{
 		fn assertion(bincode_location: BincodeLocation<'_, '_, '_, '_>)
 		{
-			let read_result = fs::read(bincode_location.filepath()).unwrap();
+			let start = Instant::now();
 
+			let read_result = fs::read(bincode_location.filepath()).unwrap();
 			assert_eq!(*bincode_location, bincode::deserialize(&read_result).unwrap());
+
+			println!("\t----- BincodeLocation test_create (read+deserialized file) {}us -----", Instant::now().duration_since(start).as_micros());
 		}
 
 		let start = Instant::now();

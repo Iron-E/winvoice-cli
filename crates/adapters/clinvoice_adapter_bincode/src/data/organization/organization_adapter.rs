@@ -1,6 +1,6 @@
 use super::BincodeOrganization;
 use crate::util;
-use clinvoice_adapter::{data::{RetrieveWhen, OrganizationAdapter, Updatable}, Store};
+use clinvoice_adapter::{data::{MatchWhen, OrganizationAdapter, Updatable}, Store};
 use clinvoice_data::{Employee, Location, Organization, Id};
 use std::{collections::HashSet, error::Error};
 
@@ -66,10 +66,10 @@ for BincodeOrganization<'name, 'pass, 'path, 'user>
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`Job`]s.
 	fn retrieve(
-		id: RetrieveWhen<Id>,
-		location: RetrieveWhen<Location<'name>>,
-		name: RetrieveWhen<&'name str>,
-		representatives: RetrieveWhen<Employee>,
+		id: MatchWhen<Id>,
+		location: MatchWhen<Location<'name>>,
+		name: MatchWhen<&'name str>,
+		representatives: MatchWhen<Employee>,
 		store: Store<'pass, 'path, 'user>,
 	) -> Result<HashSet<Self>, Box<dyn Error>>
 	{

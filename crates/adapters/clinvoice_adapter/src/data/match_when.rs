@@ -3,7 +3,7 @@ use std::{cmp::Eq, collections::HashSet, hash::Hash};
 /// # Summary
 ///
 /// A value in a retrieval operation.
-pub enum RetrieveWhen<T> where T : Eq + Hash
+pub enum MatchWhen<T> where T : Eq + Hash
 {
 	/// # Summary
 	///
@@ -52,14 +52,14 @@ pub enum RetrieveWhen<T> where T : Eq + Hash
 	/// # Example
 	///
 	/// ```rust
-	/// use clinvoice_adapter::data::RetrieveWhen;
+	/// use clinvoice_adapter::data::MatchWhen;
 	///
-	/// println!("{}", RetrieveWhen::InRange(|v| v > 0 && v < 5).is_match(4));
+	/// println!("{}", MatchWhen::InRange(|v| v > 0 && v < 5).is_match(4));
 	/// ```
 	InRange(Box<dyn Fn(&T) -> bool>),
 }
 
-impl<T> RetrieveWhen<T> where T : Eq + Hash
+impl<T> MatchWhen<T> where T : Eq + Hash
 {
 	/// # Summary
 	///
@@ -71,18 +71,18 @@ impl<T> RetrieveWhen<T> where T : Eq + Hash
 	///
 	/// # Returns
 	///
-	/// * `true`, if the `values` match the passed [`RetrieveWhen`].
+	/// * `true`, if the `values` match the passed [`MatchWhen`].
 	/// * `false`, if the `values` do not match.
 	pub fn all_match(&self, values: HashSet<T>) -> bool
 	{
 		return match self
 		{
-			RetrieveWhen::Any => true,
-			RetrieveWhen::Equal(equal_value) => values.len() == 1 && values.contains(equal_value),
-			RetrieveWhen::HasAll(required_values) => required_values.is_subset(&values),
-			RetrieveWhen::HasAny(accepted_values) => !accepted_values.is_disjoint(&values),
-			RetrieveWhen::HasNone(denied_values) => denied_values.is_disjoint(&values),
-			RetrieveWhen::InRange(in_range) => values.iter().all(|v| in_range(v)),
+			MatchWhen::Any => true,
+			MatchWhen::Equal(equal_value) => values.len() == 1 && values.contains(equal_value),
+			MatchWhen::HasAll(required_values) => required_values.is_subset(&values),
+			MatchWhen::HasAny(accepted_values) => !accepted_values.is_disjoint(&values),
+			MatchWhen::HasNone(denied_values) => denied_values.is_disjoint(&values),
+			MatchWhen::InRange(in_range) => values.iter().all(|v| in_range(v)),
 		};
 	}
 
@@ -96,18 +96,18 @@ impl<T> RetrieveWhen<T> where T : Eq + Hash
 	///
 	/// # Returns
 	///
-	/// * `true`, if the `value` matches the passed [`RetrieveWhen`].
+	/// * `true`, if the `value` matches the passed [`MatchWhen`].
 	/// * `false`, if the `value` does not match.
 	pub fn is_match(&self, value: T) -> bool
 	{
 		return match self
 		{
-			RetrieveWhen::Any => true,
-			RetrieveWhen::Equal(equal_value) => equal_value == &value,
-			RetrieveWhen::HasAll(required_values) => required_values.len() == 1 && required_values.contains(&value),
-			RetrieveWhen::HasAny(accepted_values) => accepted_values.contains(&value),
-			RetrieveWhen::HasNone(denied_values) => !denied_values.contains(&value),
-			RetrieveWhen::InRange(in_range) => in_range(&value),
+			MatchWhen::Any => true,
+			MatchWhen::Equal(equal_value) => equal_value == &value,
+			MatchWhen::HasAll(required_values) => required_values.len() == 1 && required_values.contains(&value),
+			MatchWhen::HasAny(accepted_values) => accepted_values.contains(&value),
+			MatchWhen::HasNone(denied_values) => !denied_values.contains(&value),
+			MatchWhen::InRange(in_range) => in_range(&value),
 		};
 	}
 }
@@ -115,7 +115,7 @@ impl<T> RetrieveWhen<T> where T : Eq + Hash
 #[cfg(test)]
 mod tests
 {
-	use super::RetrieveWhen;
+	use super::MatchWhen;
 
 	#[test]
 	fn test_all_match()
@@ -128,10 +128,10 @@ mod tests
 		let test_value = 7;
 
 		// Test any
-		assert!(RetrieveWhen::Any.is_match(test_value));
+		assert!(MatchWhen::Any.is_match(test_value));
 
 		// Test equal
-		assert!(RetrieveWhen::Equal(6).is_match(test_value));
-		assert!(RetrieveWhen::Equal(7).is_match(test_value));
+		assert!(MatchWhen::Equal(6).is_match(test_value));
+		assert!(MatchWhen::Equal(7).is_match(test_value));
 	}
 }

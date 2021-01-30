@@ -1,4 +1,4 @@
-use super::{RetrieveWhen, Deletable, Updatable};
+use super::{MatchWhen, Deletable, Updatable};
 use crate::Store;
 use clinvoice_data::{Location, Id};
 use core::fmt::Display;
@@ -59,9 +59,9 @@ pub trait LocationAdapter<'name, 'pass, 'path, 'user> :
 	/// * An [`Error`], when something goes wrong.
 	/// * A list of matches, if there are any.
 	fn retrieve(
-		id: RetrieveWhen<Id>,
-		name: RetrieveWhen<&'name str>,
-		outer: RetrieveWhen<Option<Location>>,
+		id: MatchWhen<Id>,
+		name: MatchWhen<&'name str>,
+		outer: MatchWhen<Option<Location>>,
 		store: Store<'pass, 'path, 'user>,
 	) -> Result<HashSet<Self>, Box<dyn Error>>;
 }

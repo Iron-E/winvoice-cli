@@ -1,6 +1,6 @@
 use super::BincodePerson;
 use crate::util;
-use clinvoice_adapter::{data::{RetrieveWhen, PersonAdapter, Updatable}, Store};
+use clinvoice_adapter::{data::{MatchWhen, PersonAdapter, Updatable}, Store};
 use clinvoice_data::{Contact, Person, Id};
 use std::{collections::HashSet, error::Error};
 
@@ -64,9 +64,9 @@ for BincodePerson<'email, 'name, 'phone, 'pass, 'path, 'user>
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`Job`]s.
 	fn retrieve(
-		contact_info: RetrieveWhen<Contact<'email, 'phone>>,
-		id: RetrieveWhen<Id>,
-		name: RetrieveWhen<&'name str>,
+		contact_info: MatchWhen<Contact<'email, 'phone>>,
+		id: MatchWhen<Id>,
+		name: MatchWhen<&'name str>,
 		store: Store<'pass, 'path, 'user>,
 	) -> Result<HashSet<Self>, Box<dyn Error>>
 	{

@@ -1,4 +1,4 @@
-use super::{Deletable, RetrieveWhen, Updatable};
+use super::{Deletable, MatchWhen, Updatable};
 use crate::Store;
 use clinvoice_data::{Employee, Location, Organization, Id};
 use std::{collections::HashSet, error::Error};
@@ -47,10 +47,10 @@ pub trait OrganizationAdapter<'email, 'name, 'pass, 'path, 'phone, 'title, 'user
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`Job`]s.
 	fn retrieve(
-		id: RetrieveWhen<Id>,
-		location: RetrieveWhen<Location<'name>>,
-		name: RetrieveWhen<&'name str>,
-		representatives: RetrieveWhen<Employee>,
+		id: MatchWhen<Id>,
+		location: MatchWhen<Location<'name>>,
+		name: MatchWhen<&'name str>,
+		representatives: MatchWhen<Employee>,
 		store: Store<'pass, 'path, 'user>,
 	) -> Result<HashSet<Self>, Box<dyn Error>>;
 }

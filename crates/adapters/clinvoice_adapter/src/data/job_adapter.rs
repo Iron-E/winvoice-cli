@@ -1,4 +1,4 @@
-use super::{Deletable, RetrieveWhen, Updatable};
+use super::{Deletable, MatchWhen, Updatable};
 use crate::Store;
 use clinvoice_data::{chrono::{DateTime, Utc}, Job, Money, Organization, Id};
 use std::{collections::HashSet, error::Error};
@@ -47,15 +47,15 @@ pub trait JobAdapter<'currency, 'objectives, 'name, 'notes, 'pass, 'path, 'title
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`Job`]s.
 	fn retrieve(
-		client: RetrieveWhen<Organization<'name>>,
-		date_close: RetrieveWhen<Option<DateTime<Utc>>>,
-		date_open: RetrieveWhen<DateTime<Utc>>,
-		id: RetrieveWhen<Id>,
-		invoice_date_issued: RetrieveWhen<DateTime<Utc>>,
-		invoice_date_paid: RetrieveWhen<DateTime<Utc>>,
-		invoice_hourly_rate: RetrieveWhen<Money<'currency>>,
-		notes: RetrieveWhen<&'notes str>,
-		objectives: RetrieveWhen<&'objectives str>,
+		client: MatchWhen<Organization<'name>>,
+		date_close: MatchWhen<Option<DateTime<Utc>>>,
+		date_open: MatchWhen<DateTime<Utc>>,
+		id: MatchWhen<Id>,
+		invoice_date_issued: MatchWhen<DateTime<Utc>>,
+		invoice_date_paid: MatchWhen<DateTime<Utc>>,
+		invoice_hourly_rate: MatchWhen<Money<'currency>>,
+		notes: MatchWhen<&'notes str>,
+		objectives: MatchWhen<&'objectives str>,
 		store: Store<'pass, 'path, 'user>,
 	) -> Result<HashSet<Self>, Box<dyn Error>>;
 }

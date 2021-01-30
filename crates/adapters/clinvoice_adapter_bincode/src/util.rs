@@ -1,6 +1,6 @@
 use clinvoice_adapter::{Adapters, Store};
 use clinvoice_data::{Id, UUID_NAMESPACE};
-use std::{env, error::Error, fs, io, path::Path};
+use std::{env, fs, io, path::Path};
 
 /// # Summary
 ///

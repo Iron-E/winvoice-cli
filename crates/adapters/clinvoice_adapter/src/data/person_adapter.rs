@@ -1,4 +1,4 @@
-use super::{AnyValue, Deletable, Updatable};
+use super::{Deletable, RetrieveWhen, Updatable};
 use crate::Store;
 use clinvoice_data::{Contact, Person, Id};
 use std::{collections::HashSet, error::Error};
@@ -44,9 +44,9 @@ pub trait PersonAdapter<'email, 'name, 'pass, 'path, 'phone, 'user> :
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`Job`]s.
 	fn retrieve(
-		contact_info: AnyValue<Contact<'email, 'phone>>,
-		id: AnyValue<Id>,
-		name: AnyValue<&'name str>,
+		contact_info: RetrieveWhen<Contact<'email, 'phone>>,
+		id: RetrieveWhen<Id>,
+		name: RetrieveWhen<&'name str>,
 		store: Store<'pass, 'path, 'user>,
 	) -> Result<HashSet<Self>, Box<dyn Error>>;
 }

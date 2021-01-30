@@ -1,6 +1,6 @@
 use super::BincodeJob;
 use crate::util;
-use clinvoice_adapter::{data::{AnyValue, JobAdapter, Updatable}, Store};
+use clinvoice_adapter::{data::{RetrieveWhen, JobAdapter, Updatable}, Store};
 use clinvoice_data::{chrono::{DateTime, Utc}, Invoice, Job, Money, Organization, Id};
 use std::{collections::{BTreeSet, HashSet}, error::Error};
 
@@ -76,15 +76,15 @@ for BincodeJob<'currency, 'objectives, 'notes, 'work_notes, 'pass, 'path, 'user>
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`Job`]s.
 	fn retrieve(
-		client: AnyValue<Organization<'name>>,
-		date_close: AnyValue<DateTime<Utc>>,
-		date_open: AnyValue<DateTime<Utc>>,
-		id: AnyValue<Id>,
-		invoice_date_issued: AnyValue<DateTime<Utc>>,
-		invoice_date_paid: AnyValue<DateTime<Utc>>,
-		invoice_hourly_rate: AnyValue<Money<'currency>>,
-		notes: AnyValue<&'notes str>,
-		objectives: AnyValue<&'objectives str>,
+		client: RetrieveWhen<Organization<'name>>,
+		date_close: RetrieveWhen<Option<DateTime<Utc>>>,
+		date_open: RetrieveWhen<DateTime<Utc>>,
+		id: RetrieveWhen<Id>,
+		invoice_date_issued: RetrieveWhen<DateTime<Utc>>,
+		invoice_date_paid: RetrieveWhen<DateTime<Utc>>,
+		invoice_hourly_rate: RetrieveWhen<Money<'currency>>,
+		notes: RetrieveWhen<&'notes str>,
+		objectives: RetrieveWhen<&'objectives str>,
 		store: Store<'pass, 'path, 'user>,
 	) -> Result<HashSet<Self>, Box<dyn Error>>
 	{

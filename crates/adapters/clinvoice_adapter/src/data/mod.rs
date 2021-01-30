@@ -1,21 +1,21 @@
 // LOCAL
-mod any_value;
+mod deletable;
 mod employee_adapter;
 mod job_adapter;
 mod location_adapter;
 mod organization_adapter;
 mod person_adapter;
-mod deletable;
+mod retrieve_when;
 mod updatable;
 
 pub use
 {
-	any_value::AnyValue,
+	deletable::Deletable,
 	employee_adapter::EmployeeAdapter,
 	job_adapter::JobAdapter,
 	location_adapter::LocationAdapter,
 	organization_adapter::OrganizationAdapter,
 	person_adapter::PersonAdapter,
-	deletable::Deletable,
+	retrieve_when::RetrieveWhen,
 	updatable::Updatable,
 };

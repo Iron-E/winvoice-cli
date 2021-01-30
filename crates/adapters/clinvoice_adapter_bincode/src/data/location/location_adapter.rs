@@ -1,6 +1,6 @@
 use super::BincodeLocation;
 use crate::util;
-use clinvoice_adapter::{data::{AnyValue, LocationAdapter, Updatable}, Store};
+use clinvoice_adapter::{data::{RetrieveWhen, LocationAdapter, Updatable}, Store};
 use clinvoice_data::{Location, Id};
 use std::{collections::HashSet, error::Error};
 
@@ -93,9 +93,9 @@ for BincodeLocation<'name, 'pass, 'path, 'user>
 	/// * An [`Error`], when something goes wrong.
 	/// * A list of matches, if there are any.
 	fn retrieve(
-		id: AnyValue<Id>,
-		name: AnyValue<&'name str>,
-		outer: AnyValue<Location>,
+		id: RetrieveWhen<Id>,
+		name: RetrieveWhen<&'name str>,
+		outer: RetrieveWhen<Option<Location>>,
 		store: Store<'pass, 'path, 'user>,
 	) -> Result<HashSet<Self>, Box<dyn Error>>
 	{

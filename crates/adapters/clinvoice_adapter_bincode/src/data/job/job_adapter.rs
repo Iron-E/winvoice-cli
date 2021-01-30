@@ -106,7 +106,7 @@ mod tests
 		{
 			let read_result = fs::read(bincode_job.filepath()).unwrap();
 
-			assert_eq!(bincode_job.job, bincode::deserialize(&read_result).unwrap());
+			assert_eq!(*bincode_job, bincode::deserialize(&read_result).unwrap());
 		}
 
 		let start = Instant::now();

@@ -90,7 +90,7 @@ mod tests
 		{
 			let read_result = fs::read(bincode_organization.filepath()).unwrap();
 
-			assert_eq!(bincode_organization.organization, bincode::deserialize(&read_result).unwrap());
+			assert_eq!(*bincode_organization, bincode::deserialize(&read_result).unwrap());
 		}
 
 		let start = Instant::now();
@@ -129,7 +129,7 @@ mod tests
 
 			assert!(fs::remove_dir_all(BincodeOrganization::path(&store)).is_ok());
 
-			println!("\n>>>>> BincodeOrganization test_create {}ns <<<<<\n", Instant::now().duration_since(start).as_micros());
+			println!("\n>>>>> BincodeOrganization test_create {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 
@@ -155,7 +155,7 @@ mod tests
 			// Assert cleanup
 			assert!(fs::remove_file(filepath).is_ok());
 
-			println!("\n>>>>> BincodeOrganization test_init {}ns <<<<<\n", Instant::now().duration_since(start).as_micros());
+			println!("\n>>>>> BincodeOrganization test_init {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 }

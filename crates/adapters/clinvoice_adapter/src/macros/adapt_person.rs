@@ -5,6 +5,7 @@ macro_rules! AdaptPerson
 	{
 		use clinvoice_adapter::Store;
 		use clinvoice_data::Person;
+		use core::ops::Deref;
 
 		/// # Summary
 		///
@@ -12,8 +13,18 @@ macro_rules! AdaptPerson
 		#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 		pub struct $name<$($life),*, $($store_life),*>
 		{
-			pub person: Person<$($life),*>,
+			person: Person<$($life),*>,
 			pub store: Store<$($store_life),*>,
+		}
+
+		impl<$($life),*, $($store_life),*> Deref for $name<$($life),*, $($store_life),*>
+		{
+			type Target = Person<$($life),*>;
+
+			fn deref(&self) -> &Self::Target
+			{
+				return &self.person;
+			}
 		}
 
 		impl<$($life),*, $($store_life),*> Into<Person<$($life),*>> for $name<$($life),*, $($store_life),*>

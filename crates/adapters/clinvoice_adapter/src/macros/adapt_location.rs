@@ -5,6 +5,7 @@ macro_rules! AdaptLocation
 	{
 		use clinvoice_adapter::Store;
 		use clinvoice_data::Location;
+		use core::ops::Deref;
 
 		/// # Summary
 		///
@@ -14,6 +15,16 @@ macro_rules! AdaptLocation
 		{
 			pub location: Location<$($life),*>,
 			pub store: Store<$($store_life),*>,
+		}
+
+		impl<$($life),*, $($store_life),*> Deref for $name<$($life),*, $($store_life),*>
+		{
+			type Target = Location<$($life),*>;
+
+			fn deref(&self) -> &Self::Target
+			{
+				return &self.location;
+			}
 		}
 
 		impl<$($life),*, $($store_life),*> Into<Location<$($life),*>> for $name<$($life),*, $($store_life),*>

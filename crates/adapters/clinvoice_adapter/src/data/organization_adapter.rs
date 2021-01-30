@@ -1,10 +1,12 @@
 use super::{Deletable, MatchWhen, Updatable};
 use crate::Store;
 use clinvoice_data::{Employee, Location, Organization, Id};
+use core::ops::Deref;
 use std::{collections::HashSet, error::Error};
 
 pub trait OrganizationAdapter<'email, 'name, 'pass, 'path, 'phone, 'title, 'user> :
 	Deletable<'pass, 'path, 'user> +
+	Deref<Target=Organization<'name>> +
 	Into<Organization<'name>> +
 	Into<Result<HashSet<Employee<'email, 'phone, 'title>>, Box<dyn Error>>> +
 	Into<Result<Location<'name>, Box<dyn Error>>> +

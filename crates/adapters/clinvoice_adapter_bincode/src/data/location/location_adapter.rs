@@ -61,7 +61,7 @@ for BincodeLocation<'name, 'pass, 'path, 'user>
 			{
 				id: util::unique_id(&Self::path(&self.store))?,
 				name,
-				outer_id: Some(self.location.id),
+				outer_id: Some(self.id),
 			},
 			store: self.store,
 		};
@@ -116,7 +116,7 @@ mod tests
 		{
 			let read_result = fs::read(bincode_location.filepath()).unwrap();
 
-			assert_eq!(bincode_location.location, bincode::deserialize(&read_result).unwrap());
+			assert_eq!(*bincode_location, bincode::deserialize(&read_result).unwrap());
 		}
 
 		let start = Instant::now();
@@ -127,15 +127,15 @@ mod tests
 			assertion(earth);
 
 			let usa = earth.create_inner("USA").unwrap();
-			assert_eq!(usa.location.outer_id, Some(earth.location.id));
+			assert_eq!(usa.outer_id, Some(earth.id));
 			assertion(usa);
 
 			let arizona = usa.create_inner("Arizona").unwrap();
-			assert_eq!(arizona.location.outer_id, Some(usa.location.id));
+			assert_eq!(arizona.outer_id, Some(usa.id));
 			assertion(arizona);
 
 			let phoenix = arizona.create_inner("Phoenix").unwrap();
-			assert_eq!(phoenix.location.outer_id, Some(arizona.location.id));
+			assert_eq!(phoenix.outer_id, Some(arizona.id));
 			assertion(phoenix);
 
 			assert!(fs::remove_dir_all(BincodeLocation::path(&store)).is_ok());

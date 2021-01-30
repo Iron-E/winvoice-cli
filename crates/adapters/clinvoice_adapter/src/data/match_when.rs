@@ -1,4 +1,5 @@
-use std::{cmp::Eq, collections::HashSet, hash::Hash};
+use core::{cmp::Eq, hash::Hash};
+use std::collections::HashSet;
 
 /// # Summary
 ///

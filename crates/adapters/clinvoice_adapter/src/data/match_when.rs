@@ -54,7 +54,7 @@ pub enum MatchWhen<'range, T> where T : 'range + Eq + Hash
 	/// ```rust
 	/// use clinvoice_adapter::data::MatchWhen;
 	///
-	/// println!("{}", MatchWhen::InRange(&|v| *v > 0 && *v < 5).is_match(4));
+	/// println!("{}", MatchWhen::InRange(&|v| *v > 0 && *v < 5).is_match(&4));
 	/// ```
 	InRange(&'range dyn Fn(&T) -> bool),
 }
@@ -73,15 +73,15 @@ impl<'range, T> MatchWhen<'range, T> where T : 'range + Eq + Hash
 	///
 	/// * `true`, if the `values` match the passed [`MatchWhen`].
 	/// * `false`, if the `values` do not match.
-	pub fn all_match(&self, values: HashSet<T>) -> bool
+	pub fn set_match(&self, values: &HashSet<T>) -> bool
 	{
 		return match self
 		{
 			MatchWhen::Any => true,
 			MatchWhen::Equal(equal_value) => values.len() == 1 && values.contains(equal_value),
-			MatchWhen::HasAll(required_values) => required_values.is_subset(&values),
-			MatchWhen::HasAny(accepted_values) => !accepted_values.is_disjoint(&values),
-			MatchWhen::HasNone(denied_values) => denied_values.is_disjoint(&values),
+			MatchWhen::HasAll(required_values) => required_values.is_subset(values),
+			MatchWhen::HasAny(accepted_values) => !accepted_values.is_disjoint(values),
+			MatchWhen::HasNone(denied_values) => denied_values.is_disjoint(values),
 			MatchWhen::InRange(in_range) => values.iter().all(|v| in_range(v)),
 		};
 	}
@@ -98,16 +98,16 @@ impl<'range, T> MatchWhen<'range, T> where T : 'range + Eq + Hash
 	///
 	/// * `true`, if the `value` matches the passed [`MatchWhen`].
 	/// * `false`, if the `value` does not match.
-	pub fn is_match(&self, value: T) -> bool
+	pub fn is_match(&self, value: &T) -> bool
 	{
 		return match self
 		{
 			MatchWhen::Any => true,
-			MatchWhen::Equal(equal_value) => equal_value == &value,
-			MatchWhen::HasAll(required_values) => required_values.len() == 1 && required_values.contains(&value),
-			MatchWhen::HasAny(accepted_values) => accepted_values.contains(&value),
-			MatchWhen::HasNone(denied_values) => !denied_values.contains(&value),
-			MatchWhen::InRange(in_range) => in_range(&value),
+			MatchWhen::Equal(equal_value) => equal_value == value,
+			MatchWhen::HasAll(required_values) => required_values.len() == 1 && required_values.contains(value),
+			MatchWhen::HasAny(accepted_values) => accepted_values.contains(value),
+			MatchWhen::HasNone(denied_values) => !denied_values.contains(value),
+			MatchWhen::InRange(in_range) => in_range(value),
 		};
 	}
 }
@@ -119,8 +119,51 @@ mod tests
 	use std::time::Instant;
 
 	#[test]
-	fn test_all_match()
+	fn test_set_match()
 	{
+		let start = Instant::now();
+
+		let mut test_set = HashSet::new();
+		test_set.insert(4);
+
+		// Test any
+		assert!(MatchWhen::Any.set_match(&test_set));
+
+		// Test equal
+		assert!(!MatchWhen::Equal(6).set_match(&test_set));
+		assert!(MatchWhen::Equal(4).set_match(&test_set));
+
+		// Insert more values
+		test_set.insert(7);
+		test_set.insert(17);
+
+		// Test has all
+		let mut has_all = HashSet::new();
+		has_all.insert(4);
+		assert!(MatchWhen::HasAll(has_all.clone()).set_match(&test_set));
+		has_all.insert(6);
+		assert!(!MatchWhen::HasAll(has_all).set_match(&test_set));
+
+		// Test has any
+		let mut has_any = HashSet::new();
+		has_any.insert(1);
+		assert!(!MatchWhen::HasAny(has_any.clone()).set_match(&test_set));
+		has_any.insert(7);
+		assert!(MatchWhen::HasAny(has_any).set_match(&test_set));
+
+		// Test has none
+		let mut has_none = HashSet::new();
+		has_none.insert(1);
+		has_none.insert(2);
+		assert!(MatchWhen::HasNone(has_none.clone()).set_match(&test_set));
+		has_none.insert(7);
+		assert!(!MatchWhen::HasNone(has_none).set_match(&test_set));
+
+		// Test in range
+		assert!(!MatchWhen::InRange(&|v| *v > 0 && *v < 3).set_match(&test_set));
+		assert!(MatchWhen::InRange(&|v| *v > 0 && *v < 18).set_match(&test_set));
+
+		println!("\n>>>>> MatchWhen test_set_match {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 	}
 
 	#[test]
@@ -128,7 +171,7 @@ mod tests
 	{
 		let start = Instant::now();
 
-		let test_value = 7;
+		let test_value = &7;
 
 		// Test any
 		assert!(MatchWhen::Any.is_match(test_value));

@@ -1,7 +1,7 @@
 mod hash;
 
 use crate::{Contact, Id};
-use std::{borrow::Cow, collections::HashSet};
+use std::collections::HashSet;
 
 #[cfg(feature="serde_support")]
 use serde::{Deserialize, Serialize};
@@ -11,13 +11,13 @@ use serde::{Deserialize, Serialize};
 /// A person is a physical human being.
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
-pub struct Person<'email, 'name, 'phone>
+pub struct Person
 {
 	/// # Summary
 	///
 	/// Contact information specific to the individual [`Person`], rather than a corporation they
 	/// work at.
-	pub contact_info: HashSet<Contact<'email, 'phone>>,
+	pub contact_info: HashSet<Contact>,
 
 	/// # Summary
 	///
@@ -27,5 +27,5 @@ pub struct Person<'email, 'name, 'phone>
 	/// # Summary
 	///
 	/// This is the name of the [`Person`].
-	pub name: Cow<'name, str>,
+	pub name: String,
 }

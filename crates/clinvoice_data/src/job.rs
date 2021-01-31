@@ -1,5 +1,5 @@
 use crate::{Invoice, Timesheet, Id};
-use std::{borrow::Cow, collections::BTreeSet};
+use std::collections::BTreeSet;
 use chrono::{DateTime, Utc};
 
 #[cfg(feature="serde_support")]
@@ -22,7 +22,7 @@ use serde::{Deserialize, Serialize};
 /// structure defines what work _may_ performed.
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
-pub struct Job<'currency, 'objectives, 'notes, 'work_notes>
+pub struct Job
 {
 	/// # Summary
 	///
@@ -51,7 +51,7 @@ pub struct Job<'currency, 'objectives, 'notes, 'work_notes>
 	/// # Summary
 	///
 	/// The [`Invoice`] which will be sent to the [client](Organization) after the [`Job`] is done.
-	pub invoice: Invoice<'currency>,
+	pub invoice: Invoice,
 
 	/// # Summary
 	///
@@ -66,7 +66,7 @@ pub struct Job<'currency, 'objectives, 'notes, 'work_notes>
 	/// * The PDF application has been replaced with a Google Form.
 	/// * Customer support has been contacted and will reach out to you within X days.
 	/// ```
-	pub notes: Cow<'notes, str>,
+	pub notes: String,
 
 	/// # Summary
 	///
@@ -81,10 +81,10 @@ pub struct Job<'currency, 'objectives, 'notes, 'work_notes>
 	/// * Replace PDF with Google Form.
 	/// * Contact customer support for X hardware device.
 	/// ```
-	pub objectives: Cow<'objectives, str>,
+	pub objectives: String,
 
 	/// # Summary
 	///
 	/// The periods of time during which work was performed for this [`Job`].
-	pub timesheets: BTreeSet<Timesheet<'work_notes>>,
+	pub timesheets: BTreeSet<Timesheet>,
 }

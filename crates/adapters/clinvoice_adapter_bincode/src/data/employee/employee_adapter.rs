@@ -2,10 +2,9 @@ use super::BincodeEmployee;
 use crate::util;
 use clinvoice_adapter::{data::{EmployeeAdapter, MatchWhen, Updatable}, Store};
 use clinvoice_data::{Contact, Employee, Organization, Person, Id};
-use std::{collections::HashSet, error::Error};
+use std::{collections::HashSet, error::Error, fs, io::BufReader};
 
-impl<'email, 'name, 'pass, 'path, 'phone, 'title, 'user> EmployeeAdapter<'email, 'name, 'pass, 'path, 'phone, 'title, 'user>
-for BincodeEmployee<'email, 'phone, 'title, 'pass, 'path, 'user>
+impl<'pass, 'path, 'user> EmployeeAdapter<'pass, 'path, 'user> for BincodeEmployee<'pass, 'path, 'user>
 {
 	/// # Summary
 	///
@@ -19,10 +18,10 @@ for BincodeEmployee<'email, 'phone, 'title, 'pass, 'path, 'user>
 	///
 	/// * The created [`Employee`], if there were no errors.
 	/// * An [`Error`], if something goes wrong.
-	fn create(
-		contact_info: HashSet<Contact<'email, 'phone>>,
-		organization: Organization<'name>,
-		person: Person<'email, 'name, 'phone>,
+	fn create<'title>(
+		contact_info: HashSet<Contact>,
+		organization: Organization,
+		person: Person,
 		store: Store<'pass, 'path, 'user>,
 		title: &'title str,
 	) -> Result<Self, Box<dyn Error>>
@@ -37,7 +36,7 @@ for BincodeEmployee<'email, 'phone, 'title, 'pass, 'path, 'user>
 				id: util::unique_id(&Self::path(&store))?,
 				organization_id: organization.id,
 				person_id: person.id,
-				title,
+				title: title.into(),
 			},
 			store,
 		};
@@ -69,15 +68,35 @@ for BincodeEmployee<'email, 'phone, 'title, 'pass, 'path, 'user>
 	/// * Any matching [`Employee`]s.
 	/// * An [`Error`], should something go wrong.
 	fn retrieve(
-		contact_info: MatchWhen<Contact<'email, 'phone>>,
+		contact_info: MatchWhen<Contact>,
 		id: MatchWhen<Id>,
-		organization: MatchWhen<Organization<'name>>,
-		person: MatchWhen<Person<'email, 'name, 'phone>>,
+		organization: MatchWhen<Id>,
+		person: MatchWhen<Id>,
 		store: Store<'pass, 'path, 'user>,
-		title: MatchWhen<&'title str>,
+		title: MatchWhen<String>,
 	) -> Result<HashSet<Self>, Box<dyn Error>>
 	{
-		todo!()
+		let mut results = HashSet::new();
+
+		for node_path in fs::read_dir(BincodeEmployee::path(&store))?.filter_map(
+			|node| match node {Ok(n) => Some(n.path()), Err(_) => None}
+		)
+		{
+			let employee: Employee = bincode::deserialize_from(
+				BufReader::new(fs::File::open(node_path)?
+			))?;
+
+			if contact_info.set_matches(&employee.contact_info) &&
+				id.is_match(&employee.id) &&
+				organization.is_match(&employee.organization_id) &&
+				person.is_match(&employee.person_id) &&
+				title.is_match(&employee.title)
+			{
+				results.insert(BincodeEmployee {employee, store});
+			}
+		}
+
+		return Ok(results);
 	}
 }
 
@@ -90,7 +109,7 @@ mod tests
 	#[test]
 	fn test_create() -> Result<(), io::Error>
 	{
-		fn assertion(bincode_employee: BincodeEmployee<'_, '_, '_, '_, '_, '_>)
+		fn assertion(bincode_employee: BincodeEmployee<'_, '_, '_>)
 		{
 			let start = Instant::now();
 
@@ -106,7 +125,7 @@ mod tests
 		{
 			id: Id::new_v4(),
 			location_id: Id::new_v4(),
-			name: "Big Old Test Corporation",
+			name: "Big Old Test Corporation".into(),
 			representatives: HashSet::new(),
 		};
 
@@ -122,7 +141,7 @@ mod tests
 				{
 					contact_info: contact_info.clone(),
 					id: Id::new_v4(),
-					name: "Testy Mćtesterson",
+					name: "Testy Mćtesterson".into(),
 				},
 				*store,
 				"CEO of Tests",
@@ -136,7 +155,7 @@ mod tests
 				{
 					contact_info: contact_info.clone(),
 					id: Id::new_v4(),
-					name: "Nimron MacBeaver",
+					name: "Nimron MacBeaver".into(),
 				},
 				*store,
 				"Oblong Shape Holder",
@@ -150,7 +169,7 @@ mod tests
 				{
 					contact_info: contact_info.clone(),
 					id: Id::new_v4(),
-					name: "An Actual «Tor♯tust",
+					name: "An Actual «Tor♯tust".into(),
 				},
 				*store,
 				"Mixer of Soups",
@@ -164,7 +183,7 @@ mod tests
 				{
 					contact_info: contact_info.clone(),
 					id: Id::new_v4(),
-					name: "Jimmy Neutron, Boy Genius' Dog 'Gottard'",
+					name: "Jimmy Neutron, Boy Genius' Dog 'Gottard'".into(),
 				},
 				*store,
 				"Sidekick",
@@ -178,7 +197,7 @@ mod tests
 				{
 					contact_info: contact_info.clone(),
 					id: Id::new_v4(),
-					name: "Testy Mćtesterson",
+					name: "Testy Mćtesterson".into(),
 				},
 				*store,
 				"Lazy No-good Duplicate Name User",

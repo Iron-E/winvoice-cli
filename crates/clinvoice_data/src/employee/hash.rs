@@ -1,7 +1,7 @@
 use super::Employee;
 use core::hash::{Hash, Hasher};
 
-impl Hash for Employee<'_, '_, '_>
+impl Hash for Employee
 {
 	fn hash<H>(&self, state: &mut H) where H : Hasher
 	{

@@ -2,10 +2,9 @@ use super::BincodePerson;
 use crate::util;
 use clinvoice_adapter::{data::{MatchWhen, PersonAdapter, Updatable}, Store};
 use clinvoice_data::{Contact, Person, Id};
-use std::{collections::HashSet, error::Error};
+use std::{collections::HashSet, error::Error, fs, io::BufReader};
 
-impl<'email, 'name, 'pass, 'path, 'phone, 'user> PersonAdapter<'email, 'name, 'pass, 'path, 'phone, 'user>
-for BincodePerson<'email, 'name, 'phone, 'pass, 'path, 'user>
+impl<'pass, 'path, 'user> PersonAdapter<'pass, 'path, 'user> for BincodePerson<'pass, 'path, 'user>
 {
 	/// # Summary
 	///
@@ -18,8 +17,8 @@ for BincodePerson<'email, 'name, 'phone, 'pass, 'path, 'user>
 	/// # Returns
 	///
 	/// The newly created [`Person`].
-	fn create(
-		contact_info: HashSet<Contact<'email, 'phone>>,
+	fn create<'name>(
+		contact_info: HashSet<Contact>,
 		name: &'name str,
 		store: Store<'pass, 'path, 'user>,
 	) -> Result<Self, Box<dyn Error>>
@@ -32,7 +31,7 @@ for BincodePerson<'email, 'name, 'phone, 'pass, 'path, 'user>
 			{
 				contact_info,
 				id: util::unique_id(&Self::path(&store))?,
-				name,
+				name: name.into(),
 			},
 			store,
 		};
@@ -64,13 +63,31 @@ for BincodePerson<'email, 'name, 'phone, 'pass, 'path, 'user>
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`Job`]s.
 	fn retrieve(
-		contact_info: MatchWhen<Contact<'email, 'phone>>,
+		contact_info: MatchWhen<Contact>,
 		id: MatchWhen<Id>,
-		name: MatchWhen<&'name str>,
+		name: MatchWhen<String>,
 		store: Store<'pass, 'path, 'user>,
 	) -> Result<HashSet<Self>, Box<dyn Error>>
 	{
-		todo!()
+		let mut results = HashSet::new();
+
+		for node_path in fs::read_dir(BincodePerson::path(&store))?.filter_map(
+			|node| match node {Ok(n) => Some(n.path()), Err(_) => None}
+		)
+		{
+			let person: Person = bincode::deserialize_from(
+				BufReader::new(fs::File::open(node_path)?
+			))?;
+
+			if contact_info.set_matches(&person.contact_info) &&
+				id.is_match(&person.id) &&
+				name.is_match(&person.name)
+			{
+				results.insert(BincodePerson {person, store});
+			}
+		}
+
+		return Ok(results);
 	}
 }
 
@@ -84,7 +101,7 @@ mod tests
 	#[test]
 	fn test_create() -> Result<(), io::Error>
 	{
-		fn assertion(bincode_person: BincodePerson<'_, '_, '_, '_, '_, '_>)
+		fn assertion(bincode_person: BincodePerson<'_, '_, '_>)
 		{
 			let start = Instant::now();
 

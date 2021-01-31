@@ -4,12 +4,12 @@ use clinvoice_data::{Employee, Location, Organization, Id};
 use core::ops::Deref;
 use std::{collections::HashSet, error::Error};
 
-pub trait OrganizationAdapter<'email, 'name, 'pass, 'path, 'phone, 'title, 'user> :
-	Deletable<'pass, 'path, 'user> +
-	Deref<Target=Organization<'name>> +
-	Into<Organization<'name>> +
-	Into<Result<HashSet<Employee<'email, 'phone, 'title>>, Box<dyn Error>>> +
-	Into<Result<Location<'name>, Box<dyn Error>>> +
+pub trait OrganizationAdapter<'pass, 'path, 'user> :
+	Deletable +
+	Deref<Target=Organization> +
+	Into<Organization> +
+	Into<Result<HashSet<Employee>, Box<dyn Error>>> +
+	Into<Result<Location, Box<dyn Error>>> +
 	Into<Store<'pass, 'path, 'user>> +
 	Updatable +
 {
@@ -24,8 +24,8 @@ pub trait OrganizationAdapter<'email, 'name, 'pass, 'path, 'phone, 'title, 'user
 	/// # Returns
 	///
 	/// The newly created [`Organization`].
-	fn create(
-		location: Location<'name>,
+	fn create<'name>(
+		location: Location,
 		name: &'name str,
 		representatives: HashSet<Employee>,
 		store: Store<'pass, 'path, 'user>,
@@ -50,9 +50,9 @@ pub trait OrganizationAdapter<'email, 'name, 'pass, 'path, 'phone, 'title, 'user
 	/// * A list of matching [`Job`]s.
 	fn retrieve(
 		id: MatchWhen<Id>,
-		location: MatchWhen<Location<'name>>,
-		name: MatchWhen<&'name str>,
-		representatives: MatchWhen<Employee>,
+		location: MatchWhen<Id>,
+		name: MatchWhen<String>,
+		representatives: MatchWhen<Id>,
 		store: Store<'pass, 'path, 'user>,
 	) -> Result<HashSet<Self>, Box<dyn Error>>;
 }

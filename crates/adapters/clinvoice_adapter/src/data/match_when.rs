@@ -68,27 +68,6 @@ pub enum MatchWhen<'range, T> where T : 'range + Hash
 	InRange(&'range dyn Fn(&T) -> bool),
 }
 
-impl<'range, T> MatchWhen<'range, T> where T : 'range + Clone + Hash
-{
-	/// # Summary
-	///
-	/// Map the contained data to another type before comparison.
-	///
-	/// #
-	pub fn map<U>(self, mapper: impl Fn(T) -> U) -> Result<MatchWhen<'range, U>, Error> where U : 'range + Eq + Hash
-	{
-		return match self
-		{
-			MatchWhen::Any => Ok(MatchWhen::<U>::Any),
-			MatchWhen::EqualTo(value) => Ok(MatchWhen::EqualTo(mapper(value))),
-			MatchWhen::InRange(_) => Err(Error::UnecessaryConversion),
-			MatchWhen::HasAll(values) => Ok(MatchWhen::HasAll(values.iter().map(|v| mapper(v.clone())).collect())),
-			MatchWhen::HasAny(values) => Ok(MatchWhen::HasAny(values.iter().map(|v| mapper(v.clone())).collect())),
-			MatchWhen::HasNone(values) => Ok(MatchWhen::HasNone(values.iter().map(|v| mapper(v.clone())).collect())),
-		};
-	}
-}
-
 impl<'range, T> MatchWhen<'range, T> where T : 'range + Eq + Hash
 {
 	/// # Summary

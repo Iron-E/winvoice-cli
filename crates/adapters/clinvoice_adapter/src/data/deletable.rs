@@ -3,7 +3,7 @@ use std::error::Error;
 /// # Summary
 ///
 /// A structure which can be deleted from a remote [`Store`](crate::Store).
-pub trait Deletable<'pass, 'path, 'user>
+pub trait Deletable
 {
 	/// # Summary
 	///

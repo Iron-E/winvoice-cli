@@ -1,7 +1,7 @@
 use super::BincodeLocation;
 use core::fmt::{Display, Formatter, Result as FmtResult};
 
-impl Display for BincodeLocation<'_, '_, '_, '_>
+impl Display for BincodeLocation<'_, '_, '_>
 {
 	/// # Summary
 	///
@@ -33,7 +33,7 @@ impl Display for BincodeLocation<'_, '_, '_, '_>
 	/// ```
 	fn fmt(&self, formatter: &mut Formatter<'_>) -> FmtResult
 	{
-		let output = String::from(self.location.name);
+		let output = self.location.name.clone();
 
 		loop
 		{

@@ -2,10 +2,9 @@ use super::BincodeJob;
 use crate::util;
 use clinvoice_adapter::{data::{MatchWhen, JobAdapter, Updatable}, Store};
 use clinvoice_data::{chrono::{DateTime, Utc}, Invoice, Job, Money, Organization, Id};
-use std::{collections::{BTreeSet, HashSet}, error::Error};
+use std::{collections::{BTreeSet, HashSet}, error::Error, fs, io::BufReader};
 
-impl<'currency, 'objectives, 'name, 'notes, 'pass, 'path, 'title, 'user, 'work_notes> JobAdapter<'currency, 'objectives, 'name, 'notes, 'pass, 'path, 'title, 'user, 'work_notes>
-for BincodeJob<'currency, 'objectives, 'notes, 'work_notes, 'pass, 'path, 'user>
+impl<'pass, 'path, 'user> JobAdapter<'pass, 'path, 'user> for BincodeJob<'pass, 'path, 'user>
 {
 	/// # Summary
 	///
@@ -18,10 +17,10 @@ for BincodeJob<'currency, 'objectives, 'notes, 'work_notes, 'pass, 'path, 'user>
 	/// # Returns
 	///
 	/// The newly created [`Person`].
-	fn create(
-		client: Organization<'name>,
+	fn create<'objectives>(
+		client: Organization,
 		date_open: DateTime<Utc>,
-		hourly_rate: Money<'currency>,
+		hourly_rate: Money,
 		objectives: &'objectives str,
 		store: Store<'pass, 'path, 'user>,
 	) -> Result<Self, Box<dyn Error>>
@@ -42,8 +41,8 @@ for BincodeJob<'currency, 'objectives, 'notes, 'work_notes, 'pass, 'path, 'user>
 					date_paid: None,
 					hourly_rate,
 				},
-				objectives,
-				notes: "",
+				objectives: objectives.into(),
+				notes: "".into(),
 				timesheets: BTreeSet::new(),
 			},
 			store,
@@ -76,19 +75,43 @@ for BincodeJob<'currency, 'objectives, 'notes, 'work_notes, 'pass, 'path, 'user>
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`Job`]s.
 	fn retrieve(
-		client: MatchWhen<Organization<'name>>,
+		client: MatchWhen<Id>,
 		date_close: MatchWhen<Option<DateTime<Utc>>>,
 		date_open: MatchWhen<DateTime<Utc>>,
 		id: MatchWhen<Id>,
-		invoice_date_issued: MatchWhen<DateTime<Utc>>,
-		invoice_date_paid: MatchWhen<DateTime<Utc>>,
-		invoice_hourly_rate: MatchWhen<Money<'currency>>,
-		notes: MatchWhen<&'notes str>,
-		objectives: MatchWhen<&'objectives str>,
+		invoice_date_issued: MatchWhen<Option<DateTime<Utc>>>,
+		invoice_date_paid: MatchWhen<Option<DateTime<Utc>>>,
+		invoice_hourly_rate: MatchWhen<Money>,
+		notes: MatchWhen<String>,
+		objectives: MatchWhen<String>,
 		store: Store<'pass, 'path, 'user>,
 	) -> Result<HashSet<Self>, Box<dyn Error>>
 	{
-		todo!()
+		let mut results = HashSet::new();
+
+		for node_path in fs::read_dir(BincodeJob::path(&store))?.filter_map(
+			|node| match node {Ok(n) => Some(n.path()), Err(_) => None}
+		)
+		{
+			let job: Job = bincode::deserialize_from(
+				BufReader::new(fs::File::open(node_path)?
+			))?;
+
+			if client.is_match(&job.client_id) &&
+				date_close.is_match(&job.date_close) &&
+				date_open.is_match(&job.date_open) &&
+				id.is_match(&job.id) &&
+				invoice_date_issued.is_match(&job.invoice.date_issued) &&
+				invoice_date_paid.is_match(&job.invoice.date_paid) &&
+				invoice_hourly_rate.is_match(&job.invoice.hourly_rate) &&
+				notes.is_match(&job.notes) &&
+				objectives.is_match(&job.objectives)
+			{
+				results.insert(BincodeJob {job, store});
+			}
+		}
+
+		return Ok(results);
 	}
 }
 
@@ -102,7 +125,7 @@ mod tests
 	#[test]
 	fn test_create() -> Result<(), io::Error>
 	{
-		fn assertion(bincode_job: BincodeJob<'_, '_, '_, '_, '_, '_, '_>)
+		fn assertion(bincode_job: BincodeJob<'_, '_, '_>)
 		{
 			let start = Instant::now();
 
@@ -118,7 +141,7 @@ mod tests
 		{
 			id: Id::new_v4(),
 			location_id: Id::new_v4(),
-			name: "Big Old Test Corporation",
+			name: "Big Old Test Corporation".into(),
 			representatives: HashSet::new(),
 		};
 

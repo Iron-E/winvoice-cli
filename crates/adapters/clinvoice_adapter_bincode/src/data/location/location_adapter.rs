@@ -2,10 +2,9 @@ use super::BincodeLocation;
 use crate::util;
 use clinvoice_adapter::{data::{MatchWhen, LocationAdapter, Updatable}, Store};
 use clinvoice_data::{Location, Id};
-use std::{collections::HashSet, error::Error};
+use std::{collections::HashSet, error::Error, fs, io::BufReader};
 
-impl<'name, 'pass, 'path, 'user> LocationAdapter<'name, 'pass, 'path, 'user>
-for BincodeLocation<'name, 'pass, 'path, 'user>
+impl<'pass, 'path, 'user> LocationAdapter<'pass, 'path, 'user> for BincodeLocation<'pass, 'path, 'user>
 {
 	/// # Summary
 	///
@@ -20,7 +19,7 @@ for BincodeLocation<'name, 'pass, 'path, 'user>
 	/// ```ignore
 	/// Location {name, id: /* generated */};
 	/// ```
-	fn create(name: &'name str, store: Store<'pass, 'path, 'user>) -> Result<Self, Box<dyn Error>>
+	fn create<'name>(name: &'name str, store: Store<'pass, 'path, 'user>) -> Result<Self, Box<dyn Error>>
 	{
 		Self::init(&store)?;
 
@@ -29,7 +28,7 @@ for BincodeLocation<'name, 'pass, 'path, 'user>
 			location: Location
 			{
 				id: util::unique_id(&Self::path(&store))?,
-				name,
+				name: name.into(),
 				outer_id: None,
 			},
 			store,
@@ -53,14 +52,14 @@ for BincodeLocation<'name, 'pass, 'path, 'user>
 	/// ```ignore
 	/// Location {name, id: /* generated */, outside_id: self.unroll().id};
 	/// ```
-	fn create_inner(&self, name: &'name str) -> Result<Self, Box<dyn Error>>
+	fn create_inner<'name>(&self, name: &'name str) -> Result<Self, Box<dyn Error>>
 	{
 		let inner_person = Self
 		{
 			location: Location
 			{
 				id: util::unique_id(&Self::path(&self.store))?,
-				name,
+				name: name.into(),
 				outer_id: Some(self.id),
 			},
 			store: self.store,
@@ -94,12 +93,30 @@ for BincodeLocation<'name, 'pass, 'path, 'user>
 	/// * A list of matches, if there are any.
 	fn retrieve(
 		id: MatchWhen<Id>,
-		name: MatchWhen<&'name str>,
-		outer: MatchWhen<Option<Location>>,
+		name: MatchWhen<String>,
+		outer: MatchWhen<Option<Id>>,
 		store: Store<'pass, 'path, 'user>,
 	) -> Result<HashSet<Self>, Box<dyn Error>>
 	{
-		todo!()
+		let mut results = HashSet::new();
+
+		for node_path in fs::read_dir(BincodeLocation::path(&store))?.filter_map(
+			|node| match node {Ok(n) => Some(n.path()), Err(_) => None}
+		)
+		{
+			let location: Location = bincode::deserialize_from(
+				BufReader::new(fs::File::open(node_path)?
+			))?;
+
+			if id.is_match(&location.id) &&
+				name.is_match(&location.name) &&
+				outer.is_match(&location.outer_id)
+			{
+				results.insert(BincodeLocation {location, store});
+			}
+		}
+
+		return Ok(results);
 	}
 }
 
@@ -112,7 +129,7 @@ mod tests
 	#[test]
 	fn test_create() -> Result<(), io::Error>
 	{
-		fn assertion(bincode_location: BincodeLocation<'_, '_, '_, '_>)
+		fn assertion(bincode_location: BincodeLocation<'_, '_, '_>)
 		{
 			let start = Instant::now();
 

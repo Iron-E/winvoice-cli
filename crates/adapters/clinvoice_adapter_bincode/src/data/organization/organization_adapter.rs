@@ -2,10 +2,9 @@ use super::BincodeOrganization;
 use crate::util;
 use clinvoice_adapter::{data::{MatchWhen, OrganizationAdapter, Updatable}, Store};
 use clinvoice_data::{Employee, Location, Organization, Id};
-use std::{collections::HashSet, error::Error};
+use std::{collections::HashSet, error::Error, fs, io::BufReader};
 
-impl<'email, 'name, 'pass, 'path, 'phone, 'title, 'user> OrganizationAdapter<'email, 'name, 'pass, 'path, 'phone, 'title, 'user>
-for BincodeOrganization<'name, 'pass, 'path, 'user>
+impl<'pass, 'path, 'user> OrganizationAdapter<'pass, 'path, 'user> for BincodeOrganization<'pass, 'path, 'user>
 {
 	/// # Summary
 	///
@@ -18,8 +17,8 @@ for BincodeOrganization<'name, 'pass, 'path, 'user>
 	/// # Returns
 	///
 	/// The newly created [`Organization`].
-	fn create(
-		location: Location<'name>,
+	fn create<'name>(
+		location: Location,
 		name: &'name str,
 		representatives: HashSet<Employee>,
 		store: Store<'pass, 'path, 'user>,
@@ -33,7 +32,7 @@ for BincodeOrganization<'name, 'pass, 'path, 'user>
 			{
 				id: util::unique_id(&Self::path(&store))?,
 				location_id: location.id,
-				name,
+				name: name.into(),
 				representatives: representatives.iter().map(|rep| rep.id).collect(),
 			},
 			store,
@@ -67,13 +66,32 @@ for BincodeOrganization<'name, 'pass, 'path, 'user>
 	/// * A list of matching [`Job`]s.
 	fn retrieve(
 		id: MatchWhen<Id>,
-		location: MatchWhen<Location<'name>>,
-		name: MatchWhen<&'name str>,
-		representatives: MatchWhen<Employee>,
+		location: MatchWhen<Id>,
+		name: MatchWhen<String>,
+		representatives: MatchWhen<Id>,
 		store: Store<'pass, 'path, 'user>,
 	) -> Result<HashSet<Self>, Box<dyn Error>>
 	{
-		todo!()
+		let mut results = HashSet::new();
+
+		for node_path in fs::read_dir(BincodeOrganization::path(&store))?.filter_map(
+			|node| match node {Ok(n) => Some(n.path()), Err(_) => None}
+		)
+		{
+			let organization: Organization = bincode::deserialize_from(
+				BufReader::new(fs::File::open(node_path)?
+			))?;
+
+			if id.is_match(&organization.id) &&
+				location.is_match(&organization.location_id) &&
+				name.is_match(&organization.name) &&
+				representatives.set_matches(&organization.representatives)
+			{
+				results.insert(BincodeOrganization {organization, store});
+			}
+		}
+
+		return Ok(results);
 	}
 }
 
@@ -86,7 +104,7 @@ mod tests
 	#[test]
 	fn test_create() -> Result<(), io::Error>
 	{
-		fn assertion(bincode_organization: BincodeOrganization<'_, '_, '_, '_>)
+		fn assertion(bincode_organization: BincodeOrganization<'_, '_, '_>)
 		{
 			let start = Instant::now();
 
@@ -102,31 +120,31 @@ mod tests
 		{
 			let earth_id = Id::new_v4();
 			assertion(BincodeOrganization::create(
-				Location {name: "Earth", id: earth_id, outer_id: None},
+				Location {name: "Earth".into(), id: earth_id, outer_id: None},
 				"alsdkjaldkj", HashSet::new(), *store
 			).unwrap());
 
 			let usa_id = Id::new_v4();
 			assertion(BincodeOrganization::create(
-				Location {name: "USA", id: usa_id, outer_id: Some(earth_id)},
+				Location {name: "USA".into(), id: usa_id, outer_id: Some(earth_id)},
 				"alskdjalgkh  ladhkj EAL ISdh", HashSet::new(), *store
 			).unwrap());
 
 			let arizona_id = Id::new_v4();
 			assertion(BincodeOrganization::create(
-				Location {name: "Arizona", id: arizona_id, outer_id: Some(earth_id)},
+				Location {name: "Arizona".into(), id: arizona_id, outer_id: Some(earth_id)},
 				" AAA – 44 %%", HashSet::new(), *store
 			).unwrap());
 
 			let phoenix_id = Id::new_v4();
 			assertion(BincodeOrganization::create(
-				Location {name: "Phoenix", id: phoenix_id, outer_id: Some(arizona_id)},
+				Location {name: "Phoenix".into(), id: phoenix_id, outer_id: Some(arizona_id)},
 				" ^^^ ADSLKJDLASKJD FOCJCI", HashSet::new(), *store
 			).unwrap());
 
 			let some_id = Id::new_v4();
 			assertion(BincodeOrganization::create(
-				Location {name: "Some Road", id: some_id, outer_id: Some(phoenix_id)},
+				Location {name: "Some Road".into(), id: some_id, outer_id: Some(phoenix_id)},
 				"aldkj doiciuc giguy &&", HashSet::new(), *store
 			).unwrap());
 

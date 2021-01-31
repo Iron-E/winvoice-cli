@@ -1,7 +1,7 @@
 #[macro_export]
 macro_rules! AdaptOrganization
 {
-	($name: ident, $($life: lifetime)*, $($store_life: lifetime)*) =>
+	($name: ident, $($store_life: lifetime)*) =>
 	{
 		use clinvoice_adapter::Store;
 		use clinvoice_data::Organization;
@@ -11,15 +11,15 @@ macro_rules! AdaptOrganization
 		///
 		/// A wrapper around [`Organization`] with a [`Store`] that points to its location.
 		#[derive(Clone, Debug, Eq, Hash, PartialEq)]
-		pub struct $name<$($life),*, $($store_life),*>
+		pub struct $name<$($store_life),*>
 		{
-			organization: Organization<$($life),*>,
+			organization: Organization,
 			pub store: Store<$($store_life),*>,
 		}
 
-		impl<$($life),*, $($store_life),*> Deref for $name<$($life),*, $($store_life),*>
+		impl<$($store_life),*> Deref for $name<$($store_life),*>
 		{
-			type Target = Organization<$($life),*>;
+			type Target = Organization;
 
 			fn deref(&self) -> &Self::Target
 			{
@@ -27,15 +27,15 @@ macro_rules! AdaptOrganization
 			}
 		}
 
-		impl<$($life),*, $($store_life),*> Into<Organization<$($life),*>> for $name<$($life),*, $($store_life),*>
+		impl<$($store_life),*> Into<Organization> for $name<$($store_life),*>
 		{
-			fn into(self) -> Organization<$($life),*>
+			fn into(self) -> Organization
 			{
 				return self.organization;
 			}
 		}
 
-		impl<$($life),*, $($store_life),*> Into<Store<$($store_life),*>> for $name<$($life),*, $($store_life),*>
+		impl<$($store_life),*> Into<Store<$($store_life),*>> for $name<$($store_life),*>
 		{
 			fn into(self) -> Store<$($store_life),*>
 			{

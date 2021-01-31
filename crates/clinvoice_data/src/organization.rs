@@ -1,7 +1,7 @@
 mod hash;
 
 use crate::Id;
-use std::{borrow::Cow, collections::HashSet};
+use std::collections::HashSet;
 
 #[cfg(feature="serde_support")]
 use serde::{Deserialize, Serialize};
@@ -19,7 +19,7 @@ use serde::{Deserialize, Serialize};
 /// Client and an Emlpoyer at the same time.
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
-pub struct Organization<'name>
+pub struct Organization
 {
 	/// # Summary
 	///
@@ -35,7 +35,7 @@ pub struct Organization<'name>
 	/// # Summary
 	///
 	/// The name of the [`Organization`].
-	pub name: Cow<'name, str>,
+	pub name: String,
 
 	/// # Summary
 	///

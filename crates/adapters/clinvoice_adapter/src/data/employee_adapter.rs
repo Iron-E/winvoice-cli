@@ -4,12 +4,12 @@ use clinvoice_data::{Contact, Employee, Organization, Person, Id};
 use core::ops::Deref;
 use std::{collections::HashSet, error::Error};
 
-pub trait EmployeeAdapter<'email, 'name, 'pass, 'path, 'phone, 'title, 'user> :
-	Deletable<'pass, 'path, 'user> +
-	Deref<Target=Employee<'email, 'phone, 'title>> +
-	Into<Employee<'email, 'phone, 'title>> +
-	Into<Result<Organization<'name>, Box<dyn Error>>> +
-	Into<Result<Person<'email, 'name, 'phone>, Box<dyn Error>>> +
+pub trait EmployeeAdapter<'pass, 'path, 'user> :
+	Deletable +
+	Deref<Target=Employee> +
+	Into<Employee> +
+	Into<Result<Organization, Box<dyn Error>>> +
+	Into<Result<Person, Box<dyn Error>>> +
 	Into<Store<'pass, 'path, 'user>> +
 	Updatable +
 {
@@ -25,10 +25,10 @@ pub trait EmployeeAdapter<'email, 'name, 'pass, 'path, 'phone, 'title, 'user> :
 	///
 	/// * The created [`Employee`], if there were no errors.
 	/// * An [`Error`], if something goes wrong.
-	fn create(
-		contact_info: HashSet<Contact<'email, 'phone>>,
-		organization: Organization<'name>,
-		person: Person<'email, 'name, 'phone>,
+	fn create<'title>(
+		contact_info: HashSet<Contact>,
+		organization: Organization,
+		person: Person,
 		store: Store<'pass, 'path, 'user>,
 		title: &'title str,
 	) -> Result<Self, Box<dyn Error>>;
@@ -51,11 +51,11 @@ pub trait EmployeeAdapter<'email, 'name, 'pass, 'path, 'phone, 'title, 'user> :
 	/// * Any matching [`Employee`]s.
 	/// * An [`Error`], should something go wrong.
 	fn retrieve(
-		contact_info: MatchWhen<Contact<'email, 'phone>>,
+		contact_info: MatchWhen<Contact>,
 		id: MatchWhen<Id>,
-		organization: MatchWhen<Organization<'name>>,
-		person: MatchWhen<Person<'email, 'name, 'phone>>,
+		organization: MatchWhen<Id>,
+		person: MatchWhen<Id>,
 		store: Store<'pass, 'path, 'user>,
-		title: MatchWhen<&'title str>,
+		title: MatchWhen<String>,
 	) -> Result<HashSet<Self>, Box<dyn Error>>;
 }

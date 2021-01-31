@@ -2,9 +2,9 @@ use super::BincodeJob;
 use clinvoice_data::Organization;
 use std::error::Error;
 
-impl<'name> Into<Result<Organization<'name>, Box<dyn Error>>> for BincodeJob<'_, '_, '_, '_, '_, '_, '_>
+impl Into<Result<Organization, Box<dyn Error>>> for BincodeJob<'_, '_, '_>
 {
-	fn into(self) -> Result<Organization<'name>, Box<dyn Error>>
+	fn into(self) -> Result<Organization, Box<dyn Error>>
 	{
 		todo!()
 	}

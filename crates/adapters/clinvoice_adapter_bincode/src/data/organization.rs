@@ -8,7 +8,7 @@ use std::path::PathBuf;
 
 clinvoice_adapter::Adapt!(Organization => BincodeOrganization);
 
-impl<'path> BincodeOrganization<'_, '_, 'path, '_>
+impl<'path> BincodeOrganization<'_, 'path, '_>
 {
 	/// # Summary
 	///

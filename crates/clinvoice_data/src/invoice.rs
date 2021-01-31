@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 /// An `Invoice` represents the accounts receivable for the user or their employer.
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
-pub struct Invoice<'currency>
+pub struct Invoice
 {
 	/// # Summary
 	///
@@ -53,5 +53,5 @@ pub struct Invoice<'currency>
 	/// ```sh
 	/// clinvoice config -c '\$'
 	/// ```
-	pub hourly_rate: Money<'currency>,
+	pub hourly_rate: Money,
 }

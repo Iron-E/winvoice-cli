@@ -4,11 +4,11 @@ use clinvoice_data::{Location, Id};
 use core::{fmt::Display, ops::Deref};
 use std::{collections::HashSet, error::Error};
 
-pub trait LocationAdapter<'name, 'pass, 'path, 'user> :
-	Deletable<'pass, 'path, 'user> +
-	Deref<Target=Location<'name>> +
+pub trait LocationAdapter<'pass, 'path, 'user> :
+	Deletable +
+	Deref<Target=Location> +
 	Display +
-	Into<Location<'name>> +
+	Into<Location> +
 	Into<Store<'pass, 'path, 'user>> +
 	Updatable +
 {
@@ -25,7 +25,7 @@ pub trait LocationAdapter<'name, 'pass, 'path, 'user> :
 	/// ```ignore
 	/// Location {name, id: /* generated */};
 	/// ```
-	fn create(name: &'name str, store: Store<'pass, 'path, 'user>) -> Result<Self, Box<dyn Error>>;
+	fn create<'name>(name: &'name str, store: Store<'pass, 'path, 'user>) -> Result<Self, Box<dyn Error>>;
 
 	/// # Summary
 	///
@@ -40,7 +40,7 @@ pub trait LocationAdapter<'name, 'pass, 'path, 'user> :
 	/// ```ignore
 	/// Location {name, id: /* generated */, outside_id: self.unroll().id};
 	/// ```
-	fn create_inner(&self, name: &'name str) -> Result<Self, Box<dyn Error>>;
+	fn create_inner<'name>(&self, name: &'name str) -> Result<Self, Box<dyn Error>>;
 
 	/// # Summary
 	///
@@ -61,8 +61,8 @@ pub trait LocationAdapter<'name, 'pass, 'path, 'user> :
 	/// * A list of matches, if there are any.
 	fn retrieve(
 		id: MatchWhen<Id>,
-		name: MatchWhen<&'name str>,
-		outer: MatchWhen<Option<Location>>,
+		name: MatchWhen<String>,
+		outer: MatchWhen<Option<Id>>,
 		store: Store<'pass, 'path, 'user>,
 	) -> Result<HashSet<Self>, Box<dyn Error>>;
 }

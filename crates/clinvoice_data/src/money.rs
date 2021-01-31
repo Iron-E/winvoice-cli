@@ -1,4 +1,3 @@
-use std::borrow::Cow;
 use rust_decimal::Decimal;
 
 #[cfg(feature="serde_support")]
@@ -9,7 +8,7 @@ use serde::{Deserialize, Serialize};
 /// Some `amount` of `currency`.
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
-pub struct Money<'currency>
+pub struct Money
 {
 	/// # Summary
 	///
@@ -19,10 +18,10 @@ pub struct Money<'currency>
 	/// # Summary
 	///
 	/// The `currency` that this [`Money`] is in.
-	pub currency: Cow<'currency, str>,
+	pub currency: String,
 }
 
-impl<'currency> Money<'currency>
+impl Money
 {
 	/// # Summary
 	///
@@ -35,7 +34,7 @@ impl<'currency> Money<'currency>
 	/// # Returns
 	///
 	/// A new [`Money`].
-	pub fn new(amount: Decimal, currency: &'currency str) -> Self
+	pub fn new<'currency>(amount: Decimal, currency: &'currency str) -> Self
 	{
 		return Self {amount, currency: currency.into()};
 	}

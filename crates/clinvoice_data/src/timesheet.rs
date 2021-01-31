@@ -1,5 +1,4 @@
 use crate::Id;
-use std::borrow::Cow;
 use chrono::{DateTime, Utc};
 
 #[cfg(feature="serde_support")]
@@ -17,7 +16,7 @@ use serde::{Deserialize, Serialize};
 /// than only one.
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
-pub struct Timesheet<'work_notes>
+pub struct Timesheet
 {
 	/// # Summary
 	///
@@ -51,5 +50,5 @@ pub struct Timesheet<'work_notes>
 	/// * Implemented chosen solution.
 	/// * Created tests for chosen solution.
 	/// ```
-	pub work_notes: Cow<'work_notes, str>,
+	pub work_notes: String,
 }

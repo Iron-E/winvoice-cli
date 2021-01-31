@@ -4,10 +4,10 @@ use clinvoice_data::{Contact, Person, Id};
 use core::ops::Deref;
 use std::{collections::HashSet, error::Error};
 
-pub trait PersonAdapter<'email, 'name, 'pass, 'path, 'phone, 'user> :
-	Deletable<'pass, 'path, 'user> +
-	Deref<Target=Person<'email, 'name, 'phone>> +
-	Into<Person<'email, 'name, 'phone>> +
+pub trait PersonAdapter<'pass, 'path, 'user> :
+	Deletable +
+	Deref<Target=Person> +
+	Into<Person> +
 	Into<Store<'pass, 'path, 'user>> +
 	Updatable +
 {
@@ -22,8 +22,8 @@ pub trait PersonAdapter<'email, 'name, 'pass, 'path, 'phone, 'user> :
 	/// # Returns
 	///
 	/// The newly created [`Person`].
-	fn create(
-		contact_info: HashSet<Contact<'email, 'phone>>,
+	fn create<'name>(
+		contact_info: HashSet<Contact>,
 		name: &'name str,
 		store: Store<'pass, 'path, 'user>,
 	) -> Result<Self, Box<dyn Error>>;
@@ -46,9 +46,9 @@ pub trait PersonAdapter<'email, 'name, 'pass, 'path, 'phone, 'user> :
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`Job`]s.
 	fn retrieve(
-		contact_info: MatchWhen<Contact<'email, 'phone>>,
+		contact_info: MatchWhen<Contact>,
 		id: MatchWhen<Id>,
-		name: MatchWhen<&'name str>,
+		name: MatchWhen<String>,
 		store: Store<'pass, 'path, 'user>,
 	) -> Result<HashSet<Self>, Box<dyn Error>>;
 }

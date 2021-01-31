@@ -129,12 +129,12 @@ mod tests
 	#[test]
 	fn test_create() -> Result<(), io::Error>
 	{
-		fn assertion(bincode_location: BincodeLocation<'_, '_, '_>)
+		fn assertion(bincode_location: &BincodeLocation<'_, '_, '_>)
 		{
 			let start = Instant::now();
 
 			let read_result = fs::read(bincode_location.filepath()).unwrap();
-			assert_eq!(*bincode_location, bincode::deserialize(&read_result).unwrap());
+			assert_eq!(**bincode_location, bincode::deserialize(&read_result).unwrap());
 
 			println!("\t----- BincodeLocation test_create (read+deserialized file) {}us -----", Instant::now().duration_since(start).as_micros());
 		}
@@ -144,19 +144,19 @@ mod tests
 		return util::test_temp_store(|store|
 		{
 			let earth = BincodeLocation::create("Earth", *store).unwrap();
-			assertion(earth);
+			assertion(&earth);
 
 			let usa = earth.create_inner("USA").unwrap();
 			assert_eq!(usa.outer_id, Some(earth.id));
-			assertion(usa);
+			assertion(&usa);
 
 			let arizona = usa.create_inner("Arizona").unwrap();
 			assert_eq!(arizona.outer_id, Some(usa.id));
-			assertion(arizona);
+			assertion(&arizona);
 
 			let phoenix = arizona.create_inner("Phoenix").unwrap();
 			assert_eq!(phoenix.outer_id, Some(arizona.id));
-			assertion(phoenix);
+			assertion(&phoenix);
 
 			assert!(fs::remove_dir_all(BincodeLocation::path(&store)).is_ok());
 

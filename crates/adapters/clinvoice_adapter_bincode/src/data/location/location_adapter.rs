@@ -123,7 +123,8 @@ impl<'pass, 'path, 'user> LocationAdapter<'pass, 'path, 'user> for BincodeLocati
 #[cfg(test)]
 mod tests
 {
-	use super::{BincodeLocation, LocationAdapter, util};
+	use super::{BincodeLocation, HashSet, Id, LocationAdapter, MatchWhen, util};
+	use core::hash::Hash;
 	use std::{fs, io, time::Instant};
 
 	#[test]
@@ -187,6 +188,62 @@ mod tests
 			assert!(fs::remove_file(filepath).is_ok());
 
 			println!("\n>>>>> BincodeLocation test_init {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+		});
+	}
+
+	#[test]
+	fn test_retrieve() -> Result<(), io::Error>
+	{
+		fn to_hashset<T>(slice: &[T]) -> HashSet<T> where T : Clone + Eq + Hash
+		{
+			return slice.iter().fold(HashSet::new(),
+				|set, e|
+				{
+					let mut s = set;
+					s.insert(e.clone());
+					return s;
+				}
+			);
+		}
+
+		let start = Instant::now();
+
+		return util::test_temp_store(|store|
+		{
+			let earth = BincodeLocation::create("Earth", *store).unwrap();
+			let usa = earth.create_inner("USA").unwrap();
+			let arizona = usa.create_inner("Arizona").unwrap();
+			let phoenix = arizona.create_inner("Phoenix").unwrap();
+
+			// Retrieve everything.
+			let mut results = BincodeLocation::retrieve(
+				MatchWhen::Any,
+				MatchWhen::Any,
+				MatchWhen::Any,
+				*store,
+			).unwrap();
+
+			// Assert the results contains all values
+			assert!(results.contains(&earth));
+			assert!(results.contains(&usa));
+			assert!(results.contains(&arizona));
+			assert!(results.contains(&phoenix));
+
+			// Retrieve Arizona
+			results = BincodeLocation::retrieve(
+				MatchWhen::HasAny(to_hashset(&[earth.id, arizona.id])),
+				MatchWhen::Any,
+				MatchWhen::HasNone(to_hashset(&[Option::<Id>::None])),
+				*store,
+			).unwrap();
+
+			// Assert the results contains all values
+			assert!(!results.contains(&earth));
+			assert!(!results.contains(&usa));
+			assert!(results.contains(&arizona));
+			assert!(!results.contains(&phoenix));
+
+			println!("\n>>>>> BincodeLocation test_retrieve {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 }

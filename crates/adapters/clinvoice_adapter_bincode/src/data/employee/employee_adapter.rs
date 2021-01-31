@@ -204,35 +204,7 @@ mod tests
 				"Lazy No-good Duplicate Name User",
 			).unwrap());
 
-			assert!(fs::remove_dir_all(BincodeEmployee::path(&store)).is_ok());
-
 			println!("\n>>>>> BincodeEmployee test_create {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
-		});
-	}
-
-	#[test]
-	fn test_init() -> Result<(), io::Error>
-	{
-		let start = Instant::now();
-
-		return util::test_temp_store(|store|
-		{
-			// Assert that the function can initialize the store.
-			assert!(BincodeEmployee::init(store).is_ok());
-
-			// Create filepath for temporary test file.
-			let filepath = BincodeEmployee::path(store).join("testfile.txt");
-
-			// Assert that creation of a file inside the initialized space is done
-			assert!(fs::write(&filepath, "").is_ok());
-
-			// Assert that the function will still return OK with files in the directory.
-			assert!(BincodeEmployee::init(store).is_ok());
-
-			// Assert cleanup
-			assert!(fs::remove_file(filepath).is_ok());
-
-			println!("\n>>>>> BincodeEmployee test_init {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 
@@ -241,14 +213,7 @@ mod tests
 	{
 		fn to_hashset<T>(slice: &[T]) -> HashSet<T> where T : Clone + Eq + Hash
 		{
-			return slice.iter().fold(HashSet::new(),
-				|set, e|
-				{
-					let mut s = set;
-					s.insert(e.clone());
-					return s;
-				}
-			);
+			return slice.into_iter().cloned().collect();
 		}
 
 		let start = Instant::now();
@@ -369,8 +334,6 @@ mod tests
 			assert!(!results.contains(&an_actual_tortust));
 			assert!(results.contains(&gottard));
 			assert!(!results.contains(&duplicate_name));
-
-			assert!(fs::remove_dir_all(BincodeEmployee::path(&store)).is_ok());
 
 			println!("\n>>>>> BincodeEmployee test_retrieve {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});

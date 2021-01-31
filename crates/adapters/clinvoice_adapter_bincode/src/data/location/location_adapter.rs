@@ -159,35 +159,7 @@ mod tests
 			assert_eq!(phoenix.outer_id, Some(arizona.id));
 			assertion(&phoenix);
 
-			assert!(fs::remove_dir_all(BincodeLocation::path(&store)).is_ok());
-
 			println!("\n>>>>> BincodeLocation test_start {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
-		});
-	}
-
-	#[test]
-	fn test_init() -> Result<(), io::Error>
-	{
-		let start = Instant::now();
-
-		return util::test_temp_store(|store|
-		{
-			// Assert that the function can initialize the store.
-			assert!(BincodeLocation::init(store).is_ok());
-
-			// Create filepath for temporary test file.
-			let filepath = BincodeLocation::path(store).join("testfile.txt");
-
-			// Assert that creation of a file inside the initialized space is done
-			assert!(fs::write(&filepath, "").is_ok());
-
-			// Assert that the function will still return OK with files in the directory.
-			assert!(BincodeLocation::init(store).is_ok());
-
-			// Assert cleanup
-			assert!(fs::remove_file(filepath).is_ok());
-
-			println!("\n>>>>> BincodeLocation test_init {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 
@@ -196,14 +168,7 @@ mod tests
 	{
 		fn to_hashset<T>(slice: &[T]) -> HashSet<T> where T : Clone + Eq + Hash
 		{
-			return slice.iter().fold(HashSet::new(),
-				|set, e|
-				{
-					let mut s = set;
-					s.insert(e.clone());
-					return s;
-				}
-			);
+			return slice.into_iter().cloned().collect();
 		}
 
 		let start = Instant::now();
@@ -242,8 +207,6 @@ mod tests
 			assert!(!results.contains(&usa));
 			assert!(results.contains(&arizona));
 			assert!(!results.contains(&phoenix));
-
-			assert!(fs::remove_dir_all(BincodeLocation::path(&store)).is_ok());
 
 			println!("\n>>>>> BincodeLocation test_retrieve {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});

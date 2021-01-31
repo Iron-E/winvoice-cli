@@ -148,35 +148,7 @@ mod tests
 				"aldkj doiciuc giguy &&", HashSet::new(), *store
 			).unwrap());
 
-			assert!(fs::remove_dir_all(BincodeOrganization::path(&store)).is_ok());
-
 			println!("\n>>>>> BincodeOrganization test_create {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
-		});
-	}
-
-	#[test]
-	fn test_init() -> Result<(), io::Error>
-	{
-		let start = Instant::now();
-
-		return util::test_temp_store(|store|
-		{
-			// Assert that the function can initialize the store.
-			assert!(BincodeOrganization::init(store).is_ok());
-
-			// Create filepath for temporary test file.
-			let filepath = BincodeOrganization::path(store).join("testfile.txt");
-
-			// Assert that creation of a file inside the initialized space is done
-			assert!(fs::write(&filepath, "").is_ok());
-
-			// Assert that the function will still return OK with files in the directory.
-			assert!(BincodeOrganization::init(store).is_ok());
-
-			// Assert cleanup
-			assert!(fs::remove_file(filepath).is_ok());
-
-			println!("\n>>>>> BincodeOrganization test_init {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 }

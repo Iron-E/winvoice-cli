@@ -149,7 +149,59 @@ mod tests
 
 		return util::test_temp_store(|store|
 		{
-			println!("\n>>>>> BincodeJob test_retrieve {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+			let flingo = BincodePerson::create(
+				to_hashset(&[Contact::Address(Id::new_v4())]),
+				"flingo",
+				*store
+			).unwrap();
+
+			let bob = BincodePerson::create(
+				to_hashset(&[Contact::Email("foo@bar.io".into())]),
+				"bob",
+				*store
+			).unwrap();
+
+			let slimdi = BincodePerson::create(
+				to_hashset(&[Contact::Phone("1-800-555-3600".into())]),
+				"slimdi",
+				*store
+			).unwrap();
+
+			let longone = BincodePerson::create(
+				to_hashset(&[Contact::Address(Id::new_v4())]),
+				"longone",
+				*store
+			).unwrap();
+
+			// Retrieve bob
+			let mut results = BincodePerson::retrieve(
+				MatchWhen::HasAll(bob.contact_info.clone()),
+				MatchWhen::Any,
+				MatchWhen::Any,
+				*store,
+			).unwrap();
+
+			// Assert bob is the only one retrieved
+			assert!(!results.contains(&flingo));
+			assert!(results.contains(&bob));
+			assert!(!results.contains(&slimdi));
+			assert!(!results.contains(&longone));
+
+			// Retrieve longone and slimdi
+			results = BincodePerson::retrieve(
+				MatchWhen::Any,
+				MatchWhen::Any,
+				MatchWhen::HasAny(to_hashset(&[slimdi.name.clone(), longone.name.clone()])),
+				*store,
+			).unwrap();
+
+			// Assert bob is the only one retrieved
+			assert!(!results.contains(&flingo));
+			assert!(!results.contains(&bob));
+			assert!(results.contains(&slimdi));
+			assert!(results.contains(&longone));
+
+			println!("\n>>>>> BincodePerson test_retrieve {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 }

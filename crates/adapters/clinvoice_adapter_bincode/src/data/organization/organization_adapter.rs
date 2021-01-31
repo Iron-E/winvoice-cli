@@ -98,7 +98,8 @@ impl<'pass, 'path, 'user> OrganizationAdapter<'pass, 'path, 'user> for BincodeOr
 #[cfg(test)]
 mod tests
 {
-	use super::{BincodeOrganization, HashSet, Location, OrganizationAdapter, util, Id};
+	use super::{BincodeOrganization, HashSet, Id, Location, MatchWhen, OrganizationAdapter, util};
+	use core::hash::Hash;
 	use std::{fs, io, time::Instant};
 
 	#[test]
@@ -149,6 +150,22 @@ mod tests
 			).unwrap());
 
 			println!("\n>>>>> BincodeOrganization test_create {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+		});
+	}
+
+	#[test]
+	fn test_retrieve() -> Result<(), io::Error>
+	{
+		fn to_hashset<T>(slice: &[T]) -> HashSet<T> where T : Clone + Eq + Hash
+		{
+			return slice.into_iter().cloned().collect();
+		}
+
+		let start = Instant::now();
+
+		return util::test_temp_store(|store|
+		{
+			println!("\n>>>>> BincodeJob test_retrieve {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 }

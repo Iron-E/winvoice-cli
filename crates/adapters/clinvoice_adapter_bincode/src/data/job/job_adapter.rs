@@ -118,8 +118,9 @@ impl<'pass, 'path, 'user> JobAdapter<'pass, 'path, 'user> for BincodeJob<'pass, 
 #[cfg(test)]
 mod tests
 {
-	use super::{BincodeJob, Id, HashSet, JobAdapter, Money, Organization, Utc, util};
+	use super::{BincodeJob, Id, HashSet, JobAdapter, MatchWhen, Money, Organization, Utc, util};
 	use clinvoice_data::Decimal;
+	use core::hash::Hash;
 	use std::{fs, io, time::Instant};
 
 	#[test]
@@ -188,6 +189,22 @@ mod tests
 			).unwrap());
 
 			println!("\n>>>>> BincodeJob test_create {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+		});
+	}
+
+	#[test]
+	fn test_retrieve() -> Result<(), io::Error>
+	{
+		fn to_hashset<T>(slice: &[T]) -> HashSet<T> where T : Clone + Eq + Hash
+		{
+			return slice.into_iter().cloned().collect();
+		}
+
+		let start = Instant::now();
+
+		return util::test_temp_store(|store|
+		{
+			println!("\n>>>>> BincodeJob test_retrieve {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 }

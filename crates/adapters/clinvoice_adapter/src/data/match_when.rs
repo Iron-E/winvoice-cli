@@ -1,13 +1,5 @@
 use core::{cmp::Eq, hash::Hash, iter::Iterator};
 use std::collections::HashSet;
-use snafu::Snafu;
-
-#[derive(Debug, Snafu)]
-pub enum Error
-{
-	#[snafu(display("Cannot map InRange with a function. Make that InRange function map the input instead."))]
-	UnecessaryConversion,
-}
 
 /// # Summary
 ///

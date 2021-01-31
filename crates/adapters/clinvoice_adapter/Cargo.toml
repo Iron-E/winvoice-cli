@@ -13,5 +13,3 @@ repository = "https://www.github.com/Iron-E/clinvoice"
 [dependencies]
 # CLInvoice
 clinvoice_data = {path="../../clinvoice_data", version="0.1"}
-# Easy errors
-snafu = "0.6"

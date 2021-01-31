@@ -1,5 +1,5 @@
 use crate::{Invoice, Timesheet, Id};
-use std::collections::BTreeSet;
+use std::{borrow::Cow, collections::BTreeSet};
 use chrono::{DateTime, Utc};
 
 #[cfg(feature="serde_support")]
@@ -66,7 +66,7 @@ pub struct Job<'currency, 'objectives, 'notes, 'work_notes>
 	/// * The PDF application has been replaced with a Google Form.
 	/// * Customer support has been contacted and will reach out to you within X days.
 	/// ```
-	pub notes: &'notes str,
+	pub notes: Cow<'notes, str>,
 
 	/// # Summary
 	///
@@ -81,7 +81,7 @@ pub struct Job<'currency, 'objectives, 'notes, 'work_notes>
 	/// * Replace PDF with Google Form.
 	/// * Contact customer support for X hardware device.
 	/// ```
-	pub objectives: &'objectives str,
+	pub objectives: Cow<'objectives, str>,
 
 	/// # Summary
 	///

@@ -1,7 +1,7 @@
 mod hash;
 
 use crate::Id;
-use std::collections::HashSet;
+use std::{borrow::Cow, collections::HashSet};
 
 #[cfg(feature="serde_support")]
 use serde::{Deserialize, Serialize};
@@ -35,7 +35,7 @@ pub struct Organization<'name>
 	/// # Summary
 	///
 	/// The name of the [`Organization`].
-	pub name: &'name str,
+	pub name: Cow<'name, str>,
 
 	/// # Summary
 	///

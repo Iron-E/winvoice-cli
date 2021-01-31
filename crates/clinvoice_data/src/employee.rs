@@ -1,7 +1,7 @@
 mod hash;
 
 use crate::{Contact, Id};
-use std::collections::HashSet;
+use std::{borrow::Cow, collections::HashSet};
 
 #[cfg(feature="serde_support")]
 use serde::{Deserialize, Serialize};
@@ -45,5 +45,5 @@ pub struct Employee<'email, 'phone, 'title>
 	///
 	/// * CEO
 	/// * Media Manager
-	pub title: &'title str,
+	pub title: Cow<'title, str>,
 }

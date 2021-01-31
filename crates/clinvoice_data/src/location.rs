@@ -1,4 +1,5 @@
 use crate::Id;
+use std::borrow::Cow;
 
 #[cfg(feature="serde_support")]
 use serde::{Deserialize, Serialize};
@@ -7,7 +8,7 @@ use serde::{Deserialize, Serialize};
 ///
 /// A physical space where other `Location`s or
 /// [`Organization`](super::organization::Organization)s exist.
-#[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
 pub struct Location<'name>
 {
@@ -31,5 +32,5 @@ pub struct Location<'name>
 	/// # Summary
 	///
 	/// The name of the [`Location`].
-	pub name: &'name str,
+	pub name: Cow<'name, str>,
 }

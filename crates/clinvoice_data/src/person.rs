@@ -1,7 +1,7 @@
 mod hash;
 
 use crate::{Contact, Id};
-use std::collections::HashSet;
+use std::{borrow::Cow, collections::HashSet};
 
 #[cfg(feature="serde_support")]
 use serde::{Deserialize, Serialize};
@@ -27,5 +27,5 @@ pub struct Person<'email, 'name, 'phone>
 	/// # Summary
 	///
 	/// This is the name of the [`Person`].
-	pub name: &'name str,
+	pub name: Cow<'name, str>,
 }

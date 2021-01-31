@@ -103,7 +103,8 @@ impl<'pass, 'path, 'user> EmployeeAdapter<'pass, 'path, 'user> for BincodeEmploy
 #[cfg(test)]
 mod tests
 {
-	use super::{BincodeEmployee, Contact, EmployeeAdapter, HashSet, Id, Organization, Person, util};
+	use super::{BincodeEmployee, Contact, EmployeeAdapter, HashSet, Id, MatchWhen, Organization, Person, util};
+	use core::hash::Hash;
 	use std::{fs, io, time::Instant};
 
 	#[test]
@@ -232,6 +233,146 @@ mod tests
 			assert!(fs::remove_file(filepath).is_ok());
 
 			println!("\n>>>>> BincodeEmployee test_init {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+		});
+	}
+
+	#[test]
+	fn test_retrieve() -> Result<(), io::Error>
+	{
+		fn to_hashset<T>(slice: &[T]) -> HashSet<T> where T : Clone + Eq + Hash
+		{
+			return slice.iter().fold(HashSet::new(),
+				|set, e|
+				{
+					let mut s = set;
+					s.insert(e.clone());
+					return s;
+				}
+			);
+		}
+
+		let start = Instant::now();
+
+		let organization = Organization
+		{
+			id: Id::new_v4(),
+			location_id: Id::new_v4(),
+			name: "Big Old Test Corporation".into(),
+			representatives: HashSet::new(),
+		};
+
+		return util::test_temp_store(|store|
+		{
+			let mut contact_info = HashSet::new();
+
+			contact_info.insert(Contact::Address(Id::new_v4()));
+			let testy_mctesterson = BincodeEmployee::create(
+				contact_info.clone(),
+				organization.clone(),
+				Person
+				{
+					contact_info: contact_info.clone(),
+					id: Id::new_v4(),
+					name: "Testy Mćtesterson".into(),
+				},
+				*store,
+				"CEO of Tests",
+			).unwrap();
+
+			contact_info.insert(Contact::Email("foo@bar.io".into()));
+			let nimron_macbeaver = BincodeEmployee::create(
+				contact_info.clone(),
+				organization.clone(),
+				Person
+				{
+					contact_info: contact_info.clone(),
+					id: Id::new_v4(),
+					name: "Nimron MacBeaver".into(),
+				},
+				*store,
+				"Oblong Shape Holder",
+			).unwrap();
+
+			contact_info.insert(Contact::Phone("1-800-555-3600".into()));
+			let an_actual_tortust = BincodeEmployee::create(
+				contact_info.clone(),
+				organization.clone(),
+				Person
+				{
+					contact_info: contact_info.clone(),
+					id: Id::new_v4(),
+					name: "An Actual «Tor♯tust".into(),
+				},
+				*store,
+				"Mixer of Soups",
+			).unwrap();
+
+			contact_info.insert(Contact::Address(Id::new_v4()));
+			let gottard = BincodeEmployee::create(
+				contact_info.clone(),
+				organization.clone(),
+				Person
+				{
+					contact_info: contact_info.clone(),
+					id: Id::new_v4(),
+					name: "Jimmy Neutron, Boy Genius' Dog 'Gottard'".into(),
+				},
+				*store,
+				"Sidekick",
+			).unwrap();
+
+			contact_info.insert(Contact::Email("obviousemail@server.com".into()));
+			let duplicate_name = BincodeEmployee::create(
+				contact_info.clone(),
+				organization.clone(),
+				Person
+				{
+					contact_info: contact_info.clone(),
+					id: Id::new_v4(),
+					name: "Testy Mćtesterson".into(),
+				},
+				*store,
+				"Lazy No-good Duplicate Name User",
+			).unwrap();
+
+
+			// Retrieve everything.
+			let mut results = BincodeEmployee::retrieve(
+				MatchWhen::Any,
+				MatchWhen::Any,
+				MatchWhen::Any,
+				MatchWhen::Any,
+				*store,
+				MatchWhen::Any,
+			).unwrap();
+
+			// Assert the results contains all values
+			assert!(results.contains(&testy_mctesterson));
+			assert!(results.contains(&nimron_macbeaver));
+			assert!(results.contains(&an_actual_tortust));
+			assert!(results.contains(&gottard));
+			assert!(results.contains(&duplicate_name));
+
+			// Retrieve Arizona
+			results = BincodeEmployee::retrieve(
+				MatchWhen::Any,
+				MatchWhen::HasAny(to_hashset(&[testy_mctesterson.id, gottard.id])),
+				MatchWhen::Any,
+				MatchWhen::Any,
+				*store,
+				MatchWhen::Any,
+			).unwrap();
+
+			// Assert the results contains all values
+			assert!(results.contains(&testy_mctesterson));
+			assert!(!results.contains(&nimron_macbeaver));
+			assert!(!results.contains(&an_actual_tortust));
+			assert!(results.contains(&gottard));
+			assert!(!results.contains(&duplicate_name));
+
+			assert!(fs::remove_dir_all(BincodeEmployee::path(&store)).is_ok());
+
+			println!("\n>>>>> BincodeEmployee test_retrieve {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 }

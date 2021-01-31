@@ -243,6 +243,8 @@ mod tests
 			assert!(results.contains(&arizona));
 			assert!(!results.contains(&phoenix));
 
+			assert!(fs::remove_dir_all(BincodeLocation::path(&store)).is_ok());
+
 			println!("\n>>>>> BincodeLocation test_retrieve {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}

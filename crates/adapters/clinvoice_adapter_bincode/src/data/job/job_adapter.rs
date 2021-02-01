@@ -202,9 +202,62 @@ mod tests
 
 		let start = Instant::now();
 
+		let organization = Organization
+		{
+			id: Id::new_v4(),
+			location_id: Id::new_v4(),
+			name: "Big Old Test Corporation".into(),
+			representatives: HashSet::new(),
+		};
+
 		return util::test_temp_store(|store|
 		{
-			println!("\n>>>>> BincodeJob test_retrieve {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+			let creation = BincodeJob::create(
+				organization.clone(),
+				Utc::now(),
+				Money::new(Decimal::new(200, 2), "USD"),
+				"Test the job creation function.",
+				*store,
+			).unwrap();
+
+			let retrieval = BincodeJob::create(
+				organization.clone(),
+				Utc::now(),
+				Money::new(Decimal::new(200, 2), "USD"),
+				"Test the job retrieval function.",
+				*store,
+			).unwrap();
+
+			let assertion = BincodeJob::create(
+				organization.clone(),
+				Utc::now(),
+				Money::new(Decimal::new(20000, 0), "YEN"),
+				"Assert something",
+				*store,
+			).unwrap();
+
+			// retrieve everything
+			let mut results = BincodeJob::retrieve(
+				MatchWhen::EqualTo(organization.id),
+				MatchWhen::Any,
+				MatchWhen::Any,
+				MatchWhen::Any,
+				MatchWhen::Any,
+				MatchWhen::Any,
+				MatchWhen::Any,
+				MatchWhen::Any,
+				MatchWhen::Any,
+				*store,
+			).unwrap();
+
+			// assert the results are as expected
+			assert!(results.contains(&creation));
+			assert!(results.contains(&retrieval));
+			assert!(results.contains(&assertion));
+
+			// TODO: write more results fetching
+
+			println!("\n>>>>> BincodeJob test_create {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 }

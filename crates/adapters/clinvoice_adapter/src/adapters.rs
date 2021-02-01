@@ -1,6 +1,6 @@
 mod display;
 
-use crate::AdapterMismatchError;
+use crate::Error;
 
 /// # Summary
 ///
@@ -27,11 +27,13 @@ impl Adapters
 	/// # Returns
 	///
 	/// An [`AdapterMismatchException`] with a descriptive error message.
-	pub fn mismatch<'msg>(&self, actual: &Self) -> AdapterMismatchError<'msg>
+	pub fn mismatch(&self, actual: &Self) -> Result<(), Error>
 	{
-		return AdapterMismatchError
+		if self != actual
 		{
-			message: format!("Expected the {} adapter, but got the {} adapter.", self, actual).into(),
-		};
+			return Err(Error::AdapterMismatch {expected: *self, actual: *actual});
+		}
+
+		return Ok(());
 	}
 }

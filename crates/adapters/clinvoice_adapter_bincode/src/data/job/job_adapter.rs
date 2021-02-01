@@ -147,7 +147,7 @@ mod tests
 			assertion(BincodeJob::create(
 				organization.clone(),
 				Utc::now(),
-				Money {amount: Decimal::new(200, 2), currency: "".into()},
+				Money::new(Decimal::new(200, 2), ""),
 				"Test the job creation function.",
 				*store,
 			).unwrap());

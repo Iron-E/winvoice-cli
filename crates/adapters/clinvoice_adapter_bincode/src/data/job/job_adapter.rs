@@ -255,9 +255,26 @@ mod tests
 			assert!(results.contains(&retrieval));
 			assert!(results.contains(&assertion));
 
-			// TODO: write more results fetching
+			// retrieve retrieval and assertion
+			results = BincodeJob::retrieve(
+				MatchWhen::Any,
+				MatchWhen::Any,
+				MatchWhen::HasNone(to_hashset(&[creation.date_open])),
+				MatchWhen::HasAny(to_hashset(&[retrieval.id, assertion.id])),
+				MatchWhen::Any,
+				MatchWhen::Any,
+				MatchWhen::Any,
+				MatchWhen::Any,
+				MatchWhen::Any,
+				*store,
+			).unwrap();
 
-			println!("\n>>>>> BincodeJob test_create {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+			// assert the results are as expected
+			assert!(!results.contains(&creation));
+			assert!(results.contains(&retrieval));
+			assert!(results.contains(&assertion));
+
+			println!("\n>>>>> BincodeJob test_retrieve {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 }

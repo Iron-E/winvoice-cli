@@ -165,6 +165,38 @@ mod tests
 
 		return util::test_temp_store(|store|
 		{
+			let earth_id = Id::new_v4();
+			let packing = BincodeOrganization::create(
+				Location {name: "Earth".into(), id: earth_id, outer_id: None},
+				"Packing Co", HashSet::new(), *store
+			).unwrap();
+
+			let usa_id = Id::new_v4();
+			let eal = BincodeOrganization::create(
+				Location {name: "USA".into(), id: usa_id, outer_id: Some(earth_id)},
+				"alskdjalgkh  ladhkj EAL ISdh", HashSet::new(), *store
+			).unwrap();
+
+			let arizona_id = Id::new_v4();
+			let aaa = BincodeOrganization::create(
+				Location {name: "Arizona".into(), id: arizona_id, outer_id: Some(usa_id)},
+				" AAA – 44 %%", HashSet::new(), *store
+			).unwrap();
+
+			// retrieve `packing` and `eal`
+			let results = BincodeOrganization::retrieve(
+				MatchWhen::Any,
+				MatchWhen::InRange(&|id| id == &earth_id || id == &usa_id),
+				MatchWhen::HasNone(to_hashset(&[aaa.name.clone()])),
+				MatchWhen::Any,
+				*store,
+			).unwrap();
+
+			// test if `packing` and `eal` were retrieved
+			assert!(results.contains(&packing));
+			assert!(results.contains(&eal));
+			assert!(!results.contains(&aaa));
+
 			println!("\n>>>>> BincodeOrganization test_retrieve {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}

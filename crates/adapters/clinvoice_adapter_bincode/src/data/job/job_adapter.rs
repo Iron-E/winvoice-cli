@@ -131,7 +131,7 @@ mod tests
 			let start = Instant::now();
 
 			let read_result = fs::read(bincode_job.filepath()).unwrap();
-			assert_eq!(*bincode_job, bincode::deserialize(&read_result).unwrap());
+			assert_eq!(bincode_job.job, bincode::deserialize(&read_result).unwrap());
 
 			println!("\t----- BincodeJob test_create (read+deserialized file) {}us -----", Instant::now().duration_since(start).as_micros());
 		}
@@ -259,8 +259,8 @@ mod tests
 			results = BincodeJob::retrieve(
 				MatchWhen::Any,
 				MatchWhen::Any,
-				MatchWhen::HasNone(to_hashset(&[creation.date_open])),
-				MatchWhen::HasAny(to_hashset(&[retrieval.id, assertion.id])),
+				MatchWhen::HasNone(to_hashset(&[creation.job.date_open])),
+				MatchWhen::HasAny(to_hashset(&[retrieval.job.id, assertion.job.id])),
 				MatchWhen::Any,
 				MatchWhen::Any,
 				MatchWhen::Any,

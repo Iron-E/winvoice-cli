@@ -110,7 +110,7 @@ mod tests
 			let start = Instant::now();
 
 			let read_result = fs::read(bincode_organization.filepath()).unwrap();
-			assert_eq!(*bincode_organization, bincode::deserialize(&read_result).unwrap());
+			assert_eq!(bincode_organization.organization, bincode::deserialize(&read_result).unwrap());
 
 			println!("\t----- BincodeOrganization test_create (read+deserialized file) {}us -----", Instant::now().duration_since(start).as_micros());
 		}
@@ -187,7 +187,7 @@ mod tests
 			let results = BincodeOrganization::retrieve(
 				MatchWhen::Any,
 				MatchWhen::InRange(&|id| id == &earth_id || id == &usa_id),
-				MatchWhen::HasNone(to_hashset(&[aaa.name.clone()])),
+				MatchWhen::HasNone(to_hashset(&[aaa.organization.name.clone()])),
 				MatchWhen::Any,
 				*store,
 			).unwrap();

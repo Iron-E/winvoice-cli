@@ -115,7 +115,7 @@ mod tests
 			let start = Instant::now();
 
 			let read_result = fs::read(bincode_employee.filepath()).unwrap();
-			assert_eq!(*bincode_employee, bincode::deserialize(&read_result).unwrap());
+			assert_eq!(bincode_employee.employee, bincode::deserialize(&read_result).unwrap());
 
 			println!("\t----- BincodeEmployee test_create (read+deserialized file) {}us -----", Instant::now().duration_since(start).as_micros());
 		}
@@ -321,7 +321,7 @@ mod tests
 			// Retrieve Arizona
 			results = BincodeEmployee::retrieve(
 				MatchWhen::Any,
-				MatchWhen::HasAny(to_hashset(&[testy_mctesterson.id, gottard.id])),
+				MatchWhen::HasAny(to_hashset(&[testy_mctesterson.employee.id, gottard.employee.id])),
 				MatchWhen::Any,
 				MatchWhen::Any,
 				*store,

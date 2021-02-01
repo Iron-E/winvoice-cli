@@ -5,7 +5,6 @@ macro_rules! AdaptJob
 	{
 		use clinvoice_adapter::Store;
 		use clinvoice_data::Job;
-		use core::ops::Deref;
 
 		/// # Summary
 		///
@@ -13,18 +12,8 @@ macro_rules! AdaptJob
 		#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 		pub struct $name<$($store_life),*>
 		{
-			job: Job,
+			pub job: Job,
 			pub store: Store<$($store_life),*>,
-		}
-
-		impl<$($store_life),*> Deref for $name<$($store_life),*>
-		{
-			type Target = Job;
-
-			fn deref(&self) -> &Self::Target
-			{
-				return &self.job;
-			}
 		}
 
 		impl<$($store_life),*> Into<Job> for $name<$($store_life),*>

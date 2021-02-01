@@ -107,7 +107,7 @@ mod tests
 			let start = Instant::now();
 
 			let read_result = fs::read(bincode_person.filepath()).unwrap();
-			assert_eq!(*bincode_person, bincode::deserialize(&read_result).unwrap());
+			assert_eq!(bincode_person.person, bincode::deserialize(&read_result).unwrap());
 
 			println!("\t----- BincodePerson test_create (read+deserialized file) {}us -----", Instant::now().duration_since(start).as_micros());
 		}
@@ -175,7 +175,7 @@ mod tests
 
 			// Retrieve bob
 			let mut results = BincodePerson::retrieve(
-				MatchWhen::HasAll(bob.contact_info.clone()),
+				MatchWhen::HasAll(bob.person.contact_info.clone()),
 				MatchWhen::Any,
 				MatchWhen::Any,
 				*store,
@@ -191,7 +191,7 @@ mod tests
 			results = BincodePerson::retrieve(
 				MatchWhen::Any,
 				MatchWhen::Any,
-				MatchWhen::HasAny(to_hashset(&[slimdi.name.clone(), longone.name.clone()])),
+				MatchWhen::HasAny(to_hashset(&[slimdi.person.name.clone(), longone.person.name.clone()])),
 				*store,
 			).unwrap();
 

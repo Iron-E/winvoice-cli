@@ -1,12 +1,10 @@
 use super::{Deletable, MatchWhen, Updatable};
 use crate::Store;
 use clinvoice_data::{chrono::{DateTime, Utc}, Job, Money, Organization, Id};
-use core::ops::Deref;
 use std::{collections::HashSet, error::Error};
 
 pub trait JobAdapter<'pass, 'path, 'user> :
 	Deletable +
-	Deref<Target=Job> +
 	Into<Job> +
 	Into<Result<Organization, Box<dyn Error>>> +
 	Into<Store<'pass, 'path, 'user>> +

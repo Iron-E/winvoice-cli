@@ -1,12 +1,11 @@
 use super::{MatchWhen, Deletable, Updatable};
 use crate::Store;
 use clinvoice_data::{Location, Id};
-use core::{fmt::Display, ops::Deref};
+use core::fmt::Display;
 use std::{collections::HashSet, error::Error};
 
 pub trait LocationAdapter<'pass, 'path, 'user> :
 	Deletable +
-	Deref<Target=Location> +
 	Display +
 	Into<Location> +
 	Into<Store<'pass, 'path, 'user>> +

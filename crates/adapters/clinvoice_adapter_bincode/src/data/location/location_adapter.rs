@@ -60,7 +60,7 @@ impl<'pass, 'path, 'user> LocationAdapter<'pass, 'path, 'user> for BincodeLocati
 			{
 				id: util::unique_id(&Self::path(&self.store))?,
 				name: name.into(),
-				outer_id: Some(self.id),
+				outer_id: Some(self.location.id),
 			},
 			store: self.store,
 		};
@@ -135,7 +135,7 @@ mod tests
 			let start = Instant::now();
 
 			let read_result = fs::read(bincode_location.filepath()).unwrap();
-			assert_eq!(**bincode_location, bincode::deserialize(&read_result).unwrap());
+			assert_eq!(bincode_location.location, bincode::deserialize(&read_result).unwrap());
 
 			println!("\t----- BincodeLocation test_create (read+deserialized file) {}us -----", Instant::now().duration_since(start).as_micros());
 		}
@@ -148,15 +148,15 @@ mod tests
 			assertion(&earth);
 
 			let usa = earth.create_inner("USA").unwrap();
-			assert_eq!(usa.outer_id, Some(earth.id));
+			assert_eq!(usa.location.outer_id, Some(earth.location.id));
 			assertion(&usa);
 
 			let arizona = usa.create_inner("Arizona").unwrap();
-			assert_eq!(arizona.outer_id, Some(usa.id));
+			assert_eq!(arizona.location.outer_id, Some(usa.location.id));
 			assertion(&arizona);
 
 			let phoenix = arizona.create_inner("Phoenix").unwrap();
-			assert_eq!(phoenix.outer_id, Some(arizona.id));
+			assert_eq!(phoenix.location.outer_id, Some(arizona.location.id));
 			assertion(&phoenix);
 
 			println!("\n>>>>> BincodeLocation test_start {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
@@ -196,7 +196,7 @@ mod tests
 
 			// Retrieve Arizona
 			results = BincodeLocation::retrieve(
-				MatchWhen::HasAny(to_hashset(&[earth.id, arizona.id])),
+				MatchWhen::HasAny(to_hashset(&[earth.location.id, arizona.location.id])),
 				MatchWhen::Any,
 				MatchWhen::HasNone(to_hashset(&[Option::<Id>::None])),
 				*store,

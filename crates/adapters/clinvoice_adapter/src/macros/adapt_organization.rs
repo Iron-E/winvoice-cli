@@ -5,7 +5,6 @@ macro_rules! AdaptOrganization
 	{
 		use clinvoice_adapter::Store;
 		use clinvoice_data::Organization;
-		use core::ops::Deref;
 
 		/// # Summary
 		///
@@ -13,18 +12,8 @@ macro_rules! AdaptOrganization
 		#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 		pub struct $name<$($store_life),*>
 		{
-			organization: Organization,
+			pub organization: Organization,
 			pub store: Store<$($store_life),*>,
-		}
-
-		impl<$($store_life),*> Deref for $name<$($store_life),*>
-		{
-			type Target = Organization;
-
-			fn deref(&self) -> &Self::Target
-			{
-				return &self.organization;
-			}
 		}
 
 		impl<$($store_life),*> Into<Organization> for $name<$($store_life),*>

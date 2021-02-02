@@ -50,6 +50,7 @@ pub trait EmployeeAdapter<'pass, 'path, 'user> :
 	/// * An [`Error`], should something go wrong.
 	fn retrieve(
 		contact_info: MatchWhen<Contact>,
+		employed: MatchWhen<bool>,
 		id: MatchWhen<Id>,
 		organization: MatchWhen<Id>,
 		person: MatchWhen<Id>,

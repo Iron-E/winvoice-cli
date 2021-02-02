@@ -33,6 +33,7 @@ impl<'pass, 'path, 'user> EmployeeAdapter<'pass, 'path, 'user> for BincodeEmploy
 			employee: Employee
 			{
 				contact_info,
+				employed: true,
 				id: util::unique_id(&Self::path(&store))?,
 				organization_id: organization.id,
 				person_id: person.id,
@@ -69,6 +70,7 @@ impl<'pass, 'path, 'user> EmployeeAdapter<'pass, 'path, 'user> for BincodeEmploy
 	/// * An [`Error`], should something go wrong.
 	fn retrieve(
 		contact_info: MatchWhen<Contact>,
+		employed: MatchWhen<bool>,
 		id: MatchWhen<Id>,
 		organization: MatchWhen<Id>,
 		person: MatchWhen<Id>,
@@ -87,6 +89,7 @@ impl<'pass, 'path, 'user> EmployeeAdapter<'pass, 'path, 'user> for BincodeEmploy
 			))?;
 
 			if contact_info.set_matches(&employee.contact_info) &&
+				employed.is_match(&employee.employed) &&
 				id.is_match(&employee.id) &&
 				organization.is_match(&employee.organization_id) &&
 				person.is_match(&employee.person_id) &&
@@ -303,6 +306,7 @@ mod tests
 				MatchWhen::Any,
 				MatchWhen::Any,
 				MatchWhen::Any,
+				MatchWhen::Any,
 				*store,
 				MatchWhen::Any,
 			).unwrap();
@@ -316,6 +320,7 @@ mod tests
 
 			// Retrieve Arizona
 			results = BincodeEmployee::retrieve(
+				MatchWhen::Any,
 				MatchWhen::Any,
 				MatchWhen::HasAny(to_hashset(&[testy_mctesterson.employee.id, gottard.employee.id])),
 				MatchWhen::Any,

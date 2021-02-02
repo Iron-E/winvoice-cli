@@ -21,6 +21,17 @@ pub struct Employee
 
 	/// # Summary
 	///
+	/// Whether or not this employee is still at the company.
+	///
+	/// If `true`, the employee is still employed.
+	///
+	/// # Remarks
+	///
+	/// Flagging this field as `false` is a viable alternative to deletion.
+	pub employed: bool,
+
+	/// # Summary
+	///
 	/// The reference number of this [`Employee`], which can be used instead of the compound key
 	/// {`organization`, `person_id`}.
 	pub id: Id,

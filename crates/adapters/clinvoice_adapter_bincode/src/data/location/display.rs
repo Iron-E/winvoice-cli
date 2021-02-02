@@ -1,5 +1,6 @@
 use super::BincodeLocation;
-use core::fmt::{Display, Formatter, Result as FmtResult};
+use clinvoice_adapter::data::{LocationAdapter, MatchWhen};
+use core::fmt::{Display, Formatter, Error, Result as FmtResult};
 
 impl Display for BincodeLocation<'_, '_, '_>
 {
@@ -7,51 +8,60 @@ impl Display for BincodeLocation<'_, '_, '_>
 	///
 	/// Format some given [`Location`] so that all of its [containing outer
 	/// `Location`](Location::outer_id)s come before it.
-	///
-	/// # Example
-	///
-	/// The below outputs:
-	///
-	/// > Earth, USA, Arizona
-	///
-	/// ```no_run
-	/// use clinvoice_adapter::{Adapters, data::LocationAdapter, Store};
-	/// use clinvoice_adapter_bincode::data::BincodeLocation;
-	///
-	/// let store = Store
-	/// {
-	/// 	adapter: Adapters::TOML,
-	/// 	password: None,
-	/// 	path: "/some/path",
-	/// 	username: None,
-	/// };
-	///
-	/// let earth = BincodeLocation::create("Earth", store).unwrap();
-	/// let usa = earth.create_inner("USA").unwrap();
-	/// let arizona = usa.create_inner("Arizona").unwrap();
-	/// println!("{}", arizona);
-	/// ```
 	fn fmt(&self, formatter: &mut Formatter<'_>) -> FmtResult
 	{
-		let output = self.location.name.clone();
+		let mut output = String::from(&self.location.name);
 
-		loop
+		let mut outer_id = self.location.outer_id;
+		while let Some(id) = outer_id
 		{
-			// TODO
-			//
-			//	let outer = (
-			//		SELECT O
-			//		FROM Location L
-			//		JOIN Location O ON L.outer_id = O.id;
-			//	);
-			//
-			//	output::push(outer.0.name)
-			//
-			//	if outer.0.outer_id.is_none() { break; }
+			output += ", ";
 
-			break;
+			if let Ok(results) = BincodeLocation::retrieve(
+				MatchWhen::EqualTo(id),
+				MatchWhen::Any,
+				MatchWhen::Any,
+				self.store,
+			)
+			{
+				if let Some(bincode_location) = results.iter().next()
+				{
+					output += &bincode_location.location.name;
+
+					outer_id = bincode_location.location.outer_id;
+					continue;
+				}
+			}
+
+			return Err(Error);
 		}
 
 		write!(formatter, "{}", output)
+	}
+}
+
+#[cfg(test)]
+mod tests
+{
+	use super::{BincodeLocation, LocationAdapter};
+	use crate::util;
+	use std::time::Instant;
+
+	#[test]
+	fn test_display()
+	{
+		let start = Instant::now();
+
+		util::test_temp_store(|store|
+		{
+			let earth = BincodeLocation::create("Earth", *store).unwrap();
+			let usa = earth.create_inner("USA").unwrap();
+			let arizona = usa.create_inner("Arizona").unwrap();
+			let phoenix = arizona.create_inner("Phoenix").unwrap();
+
+			assert_eq!(phoenix.to_string(), "Phoenix, Arizona, USA, Earth");
+
+			println!("\n>>>>> BincodeLocation test_display {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+		}).unwrap();
 	}
 }

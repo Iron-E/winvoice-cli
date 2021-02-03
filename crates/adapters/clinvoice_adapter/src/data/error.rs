@@ -1,5 +1,8 @@
-use clinvoice_data::Id;
-use snafu::Snafu;
+use
+{
+	clinvoice_data::Id,
+	snafu::Snafu,
+};
 
 /// # Summary
 ///

@@ -1,6 +1,9 @@
-use super::BincodeEmployee;
-use clinvoice_adapter::data::Updatable;
-use std::{error::Error, fs};
+use
+{
+	super::BincodeEmployee,
+	clinvoice_adapter::data::Updatable,
+	std::{error::Error, fs},
+};
 
 impl Updatable for BincodeEmployee<'_, '_, '_>
 {

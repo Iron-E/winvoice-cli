@@ -1,7 +1,10 @@
-use crate::data::{BincodeLocation, BincodeOrganization};
-use clinvoice_adapter::data::{Error as DataError, LocationAdapter, MatchWhen};
-use clinvoice_data::Location;
-use std::error::Error;
+use
+{
+	crate::data::{BincodeLocation, BincodeOrganization},
+	clinvoice_adapter::data::{Error as DataError, LocationAdapter, MatchWhen},
+	clinvoice_data::Location,
+	std::error::Error,
+};
 
 impl Into<Result<Location, Box<dyn Error>>> for BincodeOrganization<'_, '_, '_>
 {
@@ -27,11 +30,14 @@ impl Into<Result<Location, Box<dyn Error>>> for BincodeOrganization<'_, '_, '_>
 #[cfg(test)]
 mod tests
 {
-	use super::{BincodeLocation, BincodeOrganization, LocationAdapter};
-	use crate::util;
-	use clinvoice_adapter::data::OrganizationAdapter;
-	use clinvoice_data::Location;
-	use std::{collections::HashSet, error::Error, time::Instant};
+	use
+	{
+		super::{BincodeLocation, BincodeOrganization, LocationAdapter},
+		crate::util,
+		clinvoice_adapter::data::OrganizationAdapter,
+		clinvoice_data::Location,
+		std::{collections::HashSet, error::Error, time::Instant},
+	};
 
 	#[test]
 	fn test_into_hashset_employee()

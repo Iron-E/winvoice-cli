@@ -3,8 +3,11 @@ macro_rules! AdaptPerson
 {
 	($name: ident, $($store_life: lifetime)*) =>
 	{
-		use clinvoice_adapter::Store;
-		use clinvoice_data::Person;
+		use
+		{
+			clinvoice_adapter::Store,
+			clinvoice_data::Person,
+		};
 
 		/// # Summary
 		///

@@ -1,7 +1,10 @@
-use super::BincodePerson;
-use crate::data::BincodeEmployee;
-use clinvoice_adapter::data::{Deletable, EmployeeAdapter, MatchWhen};
-use std::{error::Error, fs, io::ErrorKind};
+use
+{
+	super::BincodePerson,
+	crate::data::BincodeEmployee,
+	clinvoice_adapter::data::{Deletable, EmployeeAdapter, MatchWhen},
+	std::{error::Error, fs, io::ErrorKind},
+};
 
 impl Deletable for BincodePerson<'_, '_, '_>
 {
@@ -36,10 +39,13 @@ impl Deletable for BincodePerson<'_, '_, '_>
 #[cfg(test)]
 mod tests
 {
-	use super::{BincodePerson, Deletable, EmployeeAdapter};
-	use crate::{data::BincodeEmployee, util};
-	use clinvoice_adapter::data::PersonAdapter;
-	use std::{collections::HashSet, time::Instant};
+	use
+	{
+		super::{BincodePerson, Deletable, EmployeeAdapter},
+		crate::{data::BincodeEmployee, util},
+		clinvoice_adapter::data::PersonAdapter,
+		std::{collections::HashSet, time::Instant},
+	};
 
 	#[test]
 	fn test_delete()

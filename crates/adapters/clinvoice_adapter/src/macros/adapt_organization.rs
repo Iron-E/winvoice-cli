@@ -3,8 +3,11 @@ macro_rules! AdaptOrganization
 {
 	($name: ident, $($store_life: lifetime)*) =>
 	{
-		use clinvoice_adapter::Store;
-		use clinvoice_data::Organization;
+		use
+		{
+			clinvoice_adapter::Store,
+			clinvoice_data::Organization,
+		};
 
 		/// # Summary
 		///

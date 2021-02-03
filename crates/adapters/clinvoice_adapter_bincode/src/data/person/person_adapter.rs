@@ -1,8 +1,15 @@
-use super::BincodePerson;
-use crate::util;
-use clinvoice_adapter::{data::{MatchWhen, PersonAdapter, Updatable}, Store};
-use clinvoice_data::{Contact, Person, Id};
-use std::{collections::HashSet, error::Error, fs, io::BufReader};
+use
+{
+	super::BincodePerson,
+	crate::util,
+	clinvoice_adapter::
+	{
+		data::{MatchWhen, PersonAdapter, Updatable},
+		Store
+	},
+	clinvoice_data::{Contact, Person, Id},
+	std::{collections::HashSet, error::Error, fs, io::BufReader},
+};
 
 impl<'pass, 'path, 'user> PersonAdapter<'pass, 'path, 'user> for BincodePerson<'pass, 'path, 'user>
 {
@@ -94,10 +101,13 @@ impl<'pass, 'path, 'user> PersonAdapter<'pass, 'path, 'user> for BincodePerson<'
 #[cfg(test)]
 mod tests
 {
-	use super::{BincodePerson, Contact, HashSet, Id, MatchWhen, PersonAdapter, util};
-	use core::hash::Hash;
-	use std::{fs, io, time::Instant};
-	use bincode;
+	use
+	{
+		super::{BincodePerson, Contact, HashSet, Id, MatchWhen, PersonAdapter, util},
+		core::hash::Hash,
+		std::{fs, io, time::Instant},
+		bincode,
+	};
 
 	#[test]
 	fn test_create() -> Result<(), io::Error>

@@ -1,6 +1,9 @@
-use super::BincodeLocation;
-use clinvoice_adapter::data::{LocationAdapter, MatchWhen};
-use core::fmt::{Display, Formatter, Error, Result as FmtResult};
+use
+{
+	super::BincodeLocation,
+	clinvoice_adapter::data::{LocationAdapter, MatchWhen},
+	core::fmt::{Display, Formatter, Error, Result as FmtResult},
+};
 
 impl Display for BincodeLocation<'_, '_, '_>
 {
@@ -43,9 +46,12 @@ impl Display for BincodeLocation<'_, '_, '_>
 #[cfg(test)]
 mod tests
 {
-	use super::{BincodeLocation, LocationAdapter};
-	use crate::util;
-	use std::time::Instant;
+	use
+	{
+		super::{BincodeLocation, LocationAdapter},
+		crate::util,
+		std::time::Instant,
+	};
 
 	#[test]
 	fn test_display()

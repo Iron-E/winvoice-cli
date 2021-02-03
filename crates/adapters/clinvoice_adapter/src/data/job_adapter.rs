@@ -1,7 +1,14 @@
-use super::{Deletable, MatchWhen, Updatable};
-use crate::Store;
-use clinvoice_data::{chrono::{DateTime, Utc}, Job, Money, Organization, Id};
-use std::{collections::HashSet, error::Error};
+use
+{
+	super::{Deletable, MatchWhen, Updatable},
+	crate::Store,
+	clinvoice_data::
+	{
+		chrono::{DateTime, Utc},
+		Id, Job, Money, Organization
+	},
+	std::{collections::HashSet, error::Error},
+};
 
 pub trait JobAdapter<'pass, 'path, 'user> :
 	Deletable +

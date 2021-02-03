@@ -1,5 +1,8 @@
-use super::Organization;
-use core::hash::{Hash, Hasher};
+use
+{
+	super::Organization,
+	core::hash::{Hash, Hasher},
+};
 
 impl Hash for Organization
 {

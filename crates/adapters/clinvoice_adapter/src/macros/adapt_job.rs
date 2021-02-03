@@ -3,8 +3,11 @@ macro_rules! AdaptJob
 {
 	($name: ident, $($store_life: lifetime)*) =>
 	{
-		use clinvoice_adapter::Store;
-		use clinvoice_data::Job;
+		use
+		{
+			clinvoice_adapter::Store,
+			clinvoice_data::Job,
+		};
 
 		/// # Summary
 		///

@@ -1,5 +1,8 @@
-use crate::Adapters;
-use snafu::Snafu;
+use
+{
+	crate::Adapters,
+	snafu::Snafu,
+};
 
 /// # Summary
 ///

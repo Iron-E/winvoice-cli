@@ -3,8 +3,11 @@ macro_rules! AdaptLocation
 {
 	($name: ident, $($store_life: lifetime)*) =>
 	{
-		use clinvoice_adapter::Store;
-		use clinvoice_data::Location;
+		use
+		{
+			clinvoice_adapter::Store,
+			clinvoice_data::Location,
+		};
 
 		/// # Summary
 		///

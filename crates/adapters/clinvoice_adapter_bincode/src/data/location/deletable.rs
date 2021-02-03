@@ -1,7 +1,10 @@
-use super::BincodeLocation;
-use crate::data::BincodeOrganization;
-use clinvoice_adapter::data::{Deletable, LocationAdapter, MatchWhen, OrganizationAdapter};
-use std::{error::Error, fs, io::ErrorKind};
+use
+{
+	super::BincodeLocation,
+	crate::data::BincodeOrganization,
+	clinvoice_adapter::data::{Deletable, LocationAdapter, MatchWhen, OrganizationAdapter},
+	std::{error::Error, fs, io::ErrorKind},
+};
 
 impl Deletable for BincodeLocation<'_, '_, '_>
 {
@@ -41,10 +44,13 @@ impl Deletable for BincodeLocation<'_, '_, '_>
 #[cfg(test)]
 mod tests
 {
-	use super::{BincodeLocation, Deletable, LocationAdapter};
-	use crate::{data::BincodeOrganization, util};
-	use clinvoice_adapter::data::OrganizationAdapter;
-	use std::{collections::HashSet, time::Instant};
+	use
+	{
+		super::{BincodeLocation, Deletable, LocationAdapter},
+		crate::{data::BincodeOrganization, util},
+		clinvoice_adapter::data::OrganizationAdapter,
+		std::{collections::HashSet, time::Instant},
+	};
 
 	#[test]
 	fn test_delete()

@@ -1,5 +1,8 @@
-use core::{cmp::Eq, hash::Hash, iter::Iterator};
-use std::collections::HashSet;
+use
+{
+	core::{cmp::Eq, hash::Hash, iter::Iterator},
+	std::collections::HashSet,
+};
 
 /// # Summary
 ///
@@ -116,8 +119,11 @@ impl<'range, T> MatchWhen<'range, T> where T : 'range + Eq + Hash
 #[cfg(test)]
 mod tests
 {
-	use super::{HashSet, MatchWhen};
-	use std::time::Instant;
+	use
+	{
+		super::{HashSet, MatchWhen},
+		std::time::Instant,
+	};
 
 	#[test]
 	fn test_is_match()

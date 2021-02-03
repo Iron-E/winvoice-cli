@@ -1,7 +1,10 @@
 mod hash;
 
-use crate::{Contact, Id};
-use std::collections::HashSet;
+use
+{
+	crate::{Contact, Id},
+	std::collections::HashSet,
+};
 
 #[cfg(feature="serde_support")]
 use serde::{Deserialize, Serialize};

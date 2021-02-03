@@ -1,5 +1,8 @@
-use clinvoice_data::{Id, UUID_NAMESPACE};
-use std::{fs, io, path::Path};
+use
+{
+	clinvoice_data::{Id, UUID_NAMESPACE},
+	std::{fs, io, path::Path},
+};
 
 #[cfg(test)]
 use
@@ -108,8 +111,11 @@ pub fn unique_id(store_dir: &Path) -> Result<Id, io::Error>
 #[cfg(test)]
 mod tests
 {
-	use super::{fs, io};
-	use std::{path::PathBuf, time::Instant};
+	use
+	{
+		super::{fs, io},
+		std::{path::PathBuf, time::Instant},
+	};
 
 	#[test]
 	fn test_unique_id() -> Result<(), io::Error>

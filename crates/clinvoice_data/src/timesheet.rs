@@ -1,5 +1,8 @@
-use crate::Id;
-use chrono::{DateTime, Utc};
+use
+{
+	crate::Id,
+	chrono::{DateTime, Utc},
+};
 
 #[cfg(feature="serde_support")]
 use serde::{Deserialize, Serialize};

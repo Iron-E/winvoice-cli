@@ -1,6 +1,9 @@
-use super::BincodeJob;
-use clinvoice_adapter::data::Deletable;
-use std::{error::Error, fs, io::ErrorKind};
+use
+{
+	super::BincodeJob,
+	clinvoice_adapter::data::Deletable,
+	std::{error::Error, fs, io::ErrorKind},
+};
 
 impl Deletable for BincodeJob<'_, '_, '_>
 {
@@ -22,11 +25,14 @@ impl Deletable for BincodeJob<'_, '_, '_>
 #[cfg(test)]
 mod tests
 {
-	use super::{BincodeJob, Deletable};
-	use crate::{data::BincodeOrganization, util};
-	use clinvoice_adapter::data::{JobAdapter, OrganizationAdapter};
-	use clinvoice_data::{chrono::Utc, Decimal, Id, Location, Money};
-	use std::{collections::HashSet, time::Instant};
+	use
+	{
+		super::{BincodeJob, Deletable},
+		crate::{data::BincodeOrganization, util},
+		clinvoice_adapter::data::{JobAdapter, OrganizationAdapter},
+		clinvoice_data::{chrono::Utc, Decimal, Id, Location, Money},
+		std::{collections::HashSet, time::Instant},
+	};
 
 	#[test]
 	fn test_delete()

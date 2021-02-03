@@ -1,7 +1,10 @@
-use super::{Deletable, MatchWhen, Updatable};
-use crate::Store;
-use clinvoice_data::{Employee, Location, Organization, Id};
-use std::{collections::HashSet, error::Error};
+use
+{
+	super::{Deletable, MatchWhen, Updatable},
+	crate::Store,
+	clinvoice_data::{Employee, Location, Organization, Id},
+	std::{collections::HashSet, error::Error},
+};
 
 pub trait OrganizationAdapter<'pass, 'path, 'user> :
 	Deletable +

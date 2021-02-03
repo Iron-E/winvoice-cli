@@ -1,5 +1,8 @@
-use crate::Money;
-use chrono::{DateTime, Utc};
+use
+{
+	crate::Money,
+	chrono::{DateTime, Utc},
+};
 
 #[cfg(feature="serde_support")]
 use serde::{Deserialize, Serialize};

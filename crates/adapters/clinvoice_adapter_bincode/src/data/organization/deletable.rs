@@ -1,6 +1,9 @@
-use super::BincodeOrganization;
-use clinvoice_adapter::data::Deletable;
-use std::error::Error;
+use
+{
+	super::BincodeOrganization,
+	clinvoice_adapter::data::Deletable,
+	std::error::Error,
+};
 
 impl Deletable for BincodeOrganization<'_, '_, '_>
 {

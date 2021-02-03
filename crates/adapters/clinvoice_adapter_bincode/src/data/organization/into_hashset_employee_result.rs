@@ -1,7 +1,10 @@
-use crate::data::{BincodeEmployee, BincodeOrganization};
-use clinvoice_adapter::data::{EmployeeAdapter, MatchWhen};
-use clinvoice_data::Employee;
-use std::{collections::HashSet, error::Error};
+use
+{
+	crate::data::{BincodeEmployee, BincodeOrganization},
+	clinvoice_adapter::data::{EmployeeAdapter, MatchWhen},
+	clinvoice_data::Employee,
+	std::{collections::HashSet, error::Error},
+};
 
 impl Into<Result<HashSet<Employee>, Box<dyn Error>>> for BincodeOrganization<'_, '_, '_>
 {
@@ -24,11 +27,14 @@ impl Into<Result<HashSet<Employee>, Box<dyn Error>>> for BincodeOrganization<'_,
 #[cfg(test)]
 mod tests
 {
-	use super::{BincodeEmployee, BincodeOrganization, EmployeeAdapter};
-	use crate::util;
-	use clinvoice_adapter::data::{OrganizationAdapter, Updatable};
-	use clinvoice_data::{Contact, Employee, Id, Location, Person};
-	use std::{collections::HashSet, error::Error, time::Instant};
+	use
+	{
+		super::{BincodeEmployee, BincodeOrganization, EmployeeAdapter},
+		crate::util,
+		clinvoice_adapter::data::{OrganizationAdapter, Updatable},
+		clinvoice_data::{Contact, Employee, Id, Location, Person},
+		std::{collections::HashSet, error::Error, time::Instant},
+	};
 
 	#[test]
 	fn test_into_hashset_employee()

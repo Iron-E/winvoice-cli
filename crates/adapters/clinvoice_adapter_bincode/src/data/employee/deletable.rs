@@ -1,6 +1,9 @@
-use super::BincodeEmployee;
-use clinvoice_adapter::data::Deletable;
-use std::error::Error;
+use
+{
+	super::BincodeEmployee,
+	clinvoice_adapter::data::Deletable,
+	std::error::Error,
+};
 
 impl Deletable for BincodeEmployee<'_, '_, '_>
 {

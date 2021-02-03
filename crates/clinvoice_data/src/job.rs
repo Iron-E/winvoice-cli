@@ -1,6 +1,9 @@
-use crate::{Invoice, Timesheet, Id};
-use std::collections::BTreeSet;
-use chrono::{DateTime, Utc};
+use
+{
+	crate::{Invoice, Timesheet, Id},
+	std::collections::BTreeSet,
+	chrono::{DateTime, Utc},
+};
 
 #[cfg(feature="serde_support")]
 use serde::{Deserialize, Serialize};

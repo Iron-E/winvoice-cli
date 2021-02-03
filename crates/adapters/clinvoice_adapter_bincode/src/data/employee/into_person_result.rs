@@ -1,7 +1,10 @@
-use crate::data::{BincodeEmployee, BincodePerson};
-use clinvoice_adapter::data::{Error as DataError, MatchWhen, PersonAdapter};
-use clinvoice_data::Person;
-use std::error::Error;
+use
+{
+	crate::data::{BincodeEmployee, BincodePerson},
+	clinvoice_adapter::data::{Error as DataError, MatchWhen, PersonAdapter},
+	clinvoice_data::Person,
+	std::error::Error,
+};
 
 impl Into<Result<Person, Box<dyn Error>>> for BincodeEmployee<'_, '_, '_>
 {
@@ -27,11 +30,14 @@ impl Into<Result<Person, Box<dyn Error>>> for BincodeEmployee<'_, '_, '_>
 #[cfg(test)]
 mod tests
 {
-	use super::{BincodeEmployee, BincodePerson, PersonAdapter};
-	use crate::util;
-	use clinvoice_adapter::data::EmployeeAdapter;
-	use clinvoice_data::{Contact, Id, Organization, Person};
-	use std::{collections::HashSet, error::Error, time::Instant};
+	use
+	{
+		super::{BincodeEmployee, BincodePerson, PersonAdapter},
+		crate::util,
+		clinvoice_adapter::data::EmployeeAdapter,
+		clinvoice_data::{Contact, Id, Organization, Person},
+		std::{collections::HashSet, error::Error, time::Instant},
+	};
 
 	#[test]
 	fn test_into_organization()

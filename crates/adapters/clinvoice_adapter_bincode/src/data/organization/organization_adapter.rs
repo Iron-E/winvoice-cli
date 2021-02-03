@@ -1,8 +1,15 @@
-use super::BincodeOrganization;
-use crate::util;
-use clinvoice_adapter::{data::{MatchWhen, OrganizationAdapter, Updatable}, Store};
-use clinvoice_data::{Employee, Location, Organization, Id};
-use std::{collections::HashSet, error::Error, fs, io::BufReader};
+use
+{
+	super::BincodeOrganization,
+	crate::util,
+	clinvoice_adapter::
+	{
+		data::{MatchWhen, OrganizationAdapter, Updatable},
+		Store
+	},
+	clinvoice_data::{Employee, Location, Organization, Id},
+	std::{collections::HashSet, error::Error, fs, io::BufReader},
+};
 
 impl<'pass, 'path, 'user> OrganizationAdapter<'pass, 'path, 'user> for BincodeOrganization<'pass, 'path, 'user>
 {
@@ -98,9 +105,12 @@ impl<'pass, 'path, 'user> OrganizationAdapter<'pass, 'path, 'user> for BincodeOr
 #[cfg(test)]
 mod tests
 {
-	use super::{BincodeOrganization, HashSet, Id, Location, MatchWhen, OrganizationAdapter, util};
-	use core::hash::Hash;
-	use std::{fs, io, time::Instant};
+	use
+	{
+		super::{BincodeOrganization, HashSet, Id, Location, MatchWhen, OrganizationAdapter, util},
+		core::hash::Hash,
+		std::{fs, io, time::Instant},
+	};
 
 	#[test]
 	fn test_create() -> Result<(), io::Error>

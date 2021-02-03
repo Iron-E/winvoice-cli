@@ -1,8 +1,23 @@
-use super::BincodeJob;
-use crate::util;
-use clinvoice_adapter::{data::{MatchWhen, JobAdapter, Updatable}, Store};
-use clinvoice_data::{chrono::{DateTime, Utc}, Invoice, Job, Money, Organization, Id};
-use std::{collections::{BTreeSet, HashSet}, error::Error, fs, io::BufReader};
+use
+{
+	super::BincodeJob,
+	crate::util,
+	clinvoice_adapter::
+	{
+		data::{MatchWhen, JobAdapter, Updatable},
+		Store
+	},
+	clinvoice_data::
+	{
+		chrono::{DateTime, Utc},
+		Invoice, Job, Money, Organization, Id
+	},
+	std::
+	{
+		collections::{BTreeSet, HashSet},
+		error::Error, fs, io::BufReader
+	},
+};
 
 impl<'pass, 'path, 'user> JobAdapter<'pass, 'path, 'user> for BincodeJob<'pass, 'path, 'user>
 {
@@ -118,10 +133,13 @@ impl<'pass, 'path, 'user> JobAdapter<'pass, 'path, 'user> for BincodeJob<'pass, 
 #[cfg(test)]
 mod tests
 {
-	use super::{BincodeJob, Id, HashSet, JobAdapter, MatchWhen, Money, Organization, Utc, util};
-	use clinvoice_data::Decimal;
-	use core::hash::Hash;
-	use std::{fs, io, time::Instant};
+	use
+	{
+		super::{BincodeJob, Id, HashSet, JobAdapter, MatchWhen, Money, Organization, Utc, util},
+		clinvoice_data::Decimal,
+		core::hash::Hash,
+		std::{fs, io, time::Instant},
+	};
 
 	#[test]
 	fn test_create() -> Result<(), io::Error>

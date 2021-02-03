@@ -1,8 +1,15 @@
-use super::BincodeLocation;
-use crate::util;
-use clinvoice_adapter::{data::{MatchWhen, LocationAdapter, Updatable}, Store};
-use clinvoice_data::{Location, Id};
-use std::{collections::HashSet, error::Error, fs, io::BufReader};
+use
+{
+	super::BincodeLocation,
+	crate::util,
+	clinvoice_adapter::
+	{
+		data::{MatchWhen, LocationAdapter, Updatable},
+		Store
+	},
+	clinvoice_data::{Location, Id},
+	std::{collections::HashSet, error::Error, fs, io::BufReader},
+};
 
 impl<'pass, 'path, 'user> LocationAdapter<'pass, 'path, 'user> for BincodeLocation<'pass, 'path, 'user>
 {
@@ -123,9 +130,12 @@ impl<'pass, 'path, 'user> LocationAdapter<'pass, 'path, 'user> for BincodeLocati
 #[cfg(test)]
 mod tests
 {
-	use super::{BincodeLocation, HashSet, Id, LocationAdapter, MatchWhen, util};
-	use core::hash::Hash;
-	use std::{fs, io, time::Instant};
+	use
+	{
+		super::{BincodeLocation, HashSet, Id, LocationAdapter, MatchWhen, util},
+		core::hash::Hash,
+		std::{fs, io, time::Instant},
+	};
 
 	#[test]
 	fn test_create() -> Result<(), io::Error>

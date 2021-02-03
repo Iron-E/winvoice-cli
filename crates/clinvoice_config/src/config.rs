@@ -4,8 +4,12 @@ mod store_value;
 mod timesheets;
 
 pub use {employees::Employees, invoices::Invoices, store_value::StoreValue, timesheets::Timesheets};
-use clinvoice_adapter::Store;
-use std::collections::HashMap;
+
+use
+{
+	clinvoice_adapter::Store,
+	std::collections::HashMap,
+};
 
 /// # Summary
 ///
@@ -64,10 +68,13 @@ impl Config<'_, '_, '_, '_, '_, '_>
 #[cfg(test)]
 mod tests
 {
-	use super::{Config, Employees, HashMap, Invoices, Store, StoreValue, Timesheets};
-	use clinvoice_adapter::Adapters;
-	use clinvoice_data::{chrono::Duration, Id};
-	use std::time::Instant;
+	use
+	{
+		super::{Config, Employees, HashMap, Invoices, Store, StoreValue, Timesheets},
+		clinvoice_adapter::Adapters,
+		clinvoice_data::{chrono::Duration, Id},
+		std::time::Instant,
+	};
 
 	#[test]
 	fn test_get_store()

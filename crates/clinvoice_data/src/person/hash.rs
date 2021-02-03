@@ -1,5 +1,8 @@
-use super::Person;
-use core::hash::{Hash, Hasher};
+use
+{
+	super::Person,
+	core::hash::{Hash, Hasher},
+};
 
 impl Hash for Person
 {

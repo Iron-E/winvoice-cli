@@ -1,6 +1,12 @@
-use clinvoice_adapter::{Adapters, Store};
 use clinvoice_data::{Id, UUID_NAMESPACE};
-use std::{env, fs, io, path::Path};
+use std::{fs, io, path::Path};
+
+#[cfg(test)]
+use
+{
+	clinvoice_adapter::{Adapters, Store},
+	std::env,
+};
 
 /// # Summary
 ///
@@ -45,6 +51,7 @@ pub fn create_store_dir(store_dir: &Path) -> Result<bool, io::Error>
 /// If the `assertion` failed.
 ///
 /// [fn_temp_dir]: std::env::temp_dir
+#[cfg(test)]
 pub fn test_temp_store(assertion: impl FnOnce(&Store<'_, '_, '_>)) -> Result<(), io::Error>
 {
 	let temp_path = env::temp_dir().join("clinvoice_adapter_bincode_data");

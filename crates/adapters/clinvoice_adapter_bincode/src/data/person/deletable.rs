@@ -36,9 +36,9 @@ impl Deletable for BincodePerson<'_, '_, '_>
 #[cfg(test)]
 mod tests
 {
-	use super::{BincodePerson, Deletable, PersonAdapter};
+	use super::{BincodePerson, Deletable, EmployeeAdapter};
 	use crate::{data::BincodeEmployee, util};
-	use clinvoice_adapter::data::EmployeeAdapter;
+	use clinvoice_adapter::data::PersonAdapter;
 	use std::{collections::HashSet, time::Instant};
 
 	#[test]

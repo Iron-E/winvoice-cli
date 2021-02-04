@@ -77,7 +77,7 @@ mod tests
 			// assert that phoenix is gone.
 			assert!(!&phoenix.filepath().is_file());
 
-			// delete earth and everything in it.
+			// delete the usa and everything in it.
 			usa.delete(true).unwrap();
 
 			// Assert that every location inside the USA is gone

@@ -63,6 +63,9 @@ pub trait JobAdapter<'pass, 'path, 'user> :
 		invoice_hourly_rate: MatchWhen<Money>,
 		notes: MatchWhen<String>,
 		objectives: MatchWhen<String>,
+		timesheet_employee: MatchWhen<Id>,
+		timesheet_begin: MatchWhen<DateTime<Utc>>,
+		timesheet_end: MatchWhen<Option<DateTime<Utc>>>,
 		store: Store<'pass, 'path, 'user>,
 	) -> Result<HashSet<Self>, Box<dyn Error>>;
 }

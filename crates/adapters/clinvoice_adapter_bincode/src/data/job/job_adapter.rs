@@ -99,6 +99,9 @@ impl<'pass, 'path, 'user> JobAdapter<'pass, 'path, 'user> for BincodeJob<'pass, 
 		invoice_hourly_rate: MatchWhen<Money>,
 		notes: MatchWhen<String>,
 		objectives: MatchWhen<String>,
+		timesheet_employee: MatchWhen<Id>,
+		timesheet_begin: MatchWhen<DateTime<Utc>>,
+		timesheet_end: MatchWhen<Option<DateTime<Utc>>>,
 		store: Store<'pass, 'path, 'user>,
 	) -> Result<HashSet<Self>, Box<dyn Error>>
 	{
@@ -120,7 +123,10 @@ impl<'pass, 'path, 'user> JobAdapter<'pass, 'path, 'user> for BincodeJob<'pass, 
 				invoice_date_paid.is_match(&job.invoice.date_paid) &&
 				invoice_hourly_rate.is_match(&job.invoice.hourly_rate) &&
 				notes.is_match(&job.notes) &&
-				objectives.is_match(&job.objectives)
+				objectives.is_match(&job.objectives) &&
+				timesheet_employee.set_matches(&job.timesheets.iter().map(|t| t.employee_id).collect()) &&
+				timesheet_begin.set_matches(&job.timesheets.iter().map(|t| t.time_begin).collect()) &&
+				timesheet_end.set_matches(&job.timesheets.iter().map(|t| t.time_end).collect())
 			{
 				results.insert(BincodeJob {job, store});
 			}
@@ -252,15 +258,18 @@ mod tests
 
 			// retrieve everything
 			let mut results = BincodeJob::retrieve(
-				MatchWhen::EqualTo(organization.id),
-				MatchWhen::Any,
-				MatchWhen::Any,
-				MatchWhen::Any,
-				MatchWhen::Any,
-				MatchWhen::Any,
-				MatchWhen::Any,
-				MatchWhen::Any,
-				MatchWhen::Any,
+				MatchWhen::EqualTo(organization.id), // client
+				MatchWhen::Any, // date close
+				MatchWhen::Any, // date open
+				MatchWhen::Any, // id
+				MatchWhen::Any, // invoice date issued
+				MatchWhen::Any, // invoice date paid
+				MatchWhen::Any, // invoice hourly rate
+				MatchWhen::Any, // notes
+				MatchWhen::Any, // objectives
+				MatchWhen::Any, // timesheet employee
+				MatchWhen::Any, // timesheet time begin
+				MatchWhen::Any, // timesheet time end
 				*store,
 			).unwrap();
 
@@ -271,15 +280,18 @@ mod tests
 
 			// retrieve retrieval and assertion
 			results = BincodeJob::retrieve(
-				MatchWhen::Any,
-				MatchWhen::Any,
-				MatchWhen::HasNone(to_hashset(&[creation.job.date_open])),
-				MatchWhen::HasAny(to_hashset(&[retrieval.job.id, assertion.job.id])),
-				MatchWhen::Any,
-				MatchWhen::Any,
-				MatchWhen::Any,
-				MatchWhen::Any,
-				MatchWhen::Any,
+				MatchWhen::Any, // client
+				MatchWhen::Any, // date close
+				MatchWhen::HasNone(to_hashset(&[creation.job.date_open])), // date open
+				MatchWhen::HasAny(to_hashset(&[retrieval.job.id, assertion.job.id])), // id
+				MatchWhen::Any, // invoice date issued
+				MatchWhen::Any, // invoice date paid
+				MatchWhen::Any, // invoice hourly rate
+				MatchWhen::Any, // notes
+				MatchWhen::Any, // objectives
+				MatchWhen::Any, // timesheet employee
+				MatchWhen::Any, // timesheet time begin
+				MatchWhen::Any, // timesheet time end
 				*store,
 			).unwrap();
 

@@ -57,7 +57,7 @@ pub trait EmployeeAdapter<'pass, 'path, 'user> :
 		id: MatchWhen<Id>,
 		organization: MatchWhen<Id>,
 		person: MatchWhen<Id>,
-		store: Store<'pass, 'path, 'user>,
 		title: MatchWhen<String>,
+		store: Store<'pass, 'path, 'user>,
 	) -> Result<HashSet<Self>, Box<dyn Error>>;
 }

@@ -81,8 +81,8 @@ impl<'pass, 'path, 'user> EmployeeAdapter<'pass, 'path, 'user> for BincodeEmploy
 		id: MatchWhen<Id>,
 		organization: MatchWhen<Id>,
 		person: MatchWhen<Id>,
-		store: Store<'pass, 'path, 'user>,
 		title: MatchWhen<String>,
+		store: Store<'pass, 'path, 'user>,
 	) -> Result<HashSet<Self>, Box<dyn Error>>
 	{
 		let mut results = HashSet::new();
@@ -312,13 +312,13 @@ mod tests
 
 			// Retrieve everything.
 			let mut results = BincodeEmployee::retrieve(
-				MatchWhen::Any,
-				MatchWhen::Any,
-				MatchWhen::Any,
-				MatchWhen::Any,
-				MatchWhen::Any,
+				MatchWhen::Any, // contact info
+				MatchWhen::Any, // employed
+				MatchWhen::Any, // id
+				MatchWhen::Any, // organization
+				MatchWhen::Any, // person
+				MatchWhen::Any, // title
 				*store,
-				MatchWhen::Any,
 			).unwrap();
 
 			// Assert the results contains all values
@@ -330,13 +330,13 @@ mod tests
 
 			// Retrieve Arizona
 			results = BincodeEmployee::retrieve(
-				MatchWhen::Any,
-				MatchWhen::Any,
-				MatchWhen::HasAny(to_hashset(&[testy_mctesterson.employee.id, gottard.employee.id])),
-				MatchWhen::Any,
-				MatchWhen::Any,
+				MatchWhen::Any, // contact info
+				MatchWhen::Any, // employed
+				MatchWhen::HasAny(to_hashset(&[testy_mctesterson.employee.id, gottard.employee.id])), // id
+				MatchWhen::Any, // organization
+				MatchWhen::Any, // person
+				MatchWhen::Any, // title
 				*store,
-				MatchWhen::Any,
 			).unwrap();
 
 			// Assert the results contains all values

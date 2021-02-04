@@ -191,10 +191,10 @@ mod tests
 
 			// retrieve `packing` and `eal`
 			let results = BincodeOrganization::retrieve(
-				MatchWhen::Any,
-				MatchWhen::InRange(&|id| id == &earth_id || id == &usa_id),
-				MatchWhen::HasNone(to_hashset(&[aaa.organization.name.clone()])),
-				MatchWhen::Any,
+				MatchWhen::Any, // id
+				MatchWhen::InRange(&|id| id == &earth_id || id == &usa_id), // location
+				MatchWhen::HasNone(to_hashset(&[aaa.organization.name.clone()])), // name
+				MatchWhen::Any, // representatives
 				*store,
 			).unwrap();
 

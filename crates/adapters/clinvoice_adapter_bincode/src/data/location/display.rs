@@ -21,9 +21,9 @@ impl Display for BincodeLocation<'_, '_, '_>
 			output += ", ";
 
 			if let Ok(results) = BincodeLocation::retrieve(
-				MatchWhen::EqualTo(id),
-				MatchWhen::Any,
-				MatchWhen::Any,
+				MatchWhen::EqualTo(id), // id
+				MatchWhen::Any, // name
+				MatchWhen::Any, // outer id
 				self.store,
 			)
 			{

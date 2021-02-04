@@ -22,29 +22,52 @@ impl Deletable for BincodeOrganization<'_, '_, '_>
 		if cascade
 		{
 			for result in BincodeJob::retrieve(
-				MatchWhen::EqualTo(self.organization.id),
-				MatchWhen::Any,
-				MatchWhen::Any,
-				MatchWhen::Any,
-				MatchWhen::Any,
-				MatchWhen::Any,
-				MatchWhen::Any,
-				MatchWhen::Any,
-				MatchWhen::Any,
+				MatchWhen::EqualTo(self.organization.id), // client
+				MatchWhen::Any, // date close
+				MatchWhen::Any, // date open
+				MatchWhen::Any, // id
+				MatchWhen::Any, // invoice date issued
+				MatchWhen::Any, // invoice date paid
+				MatchWhen::Any, // invoice hourly rate
+				MatchWhen::Any, // notes
+				MatchWhen::Any, // objectives
+				MatchWhen::Any, // timesheet employee
+				MatchWhen::Any, // timesheet time begin
+				MatchWhen::Any, // timesheet time end
 				self.store,
 			)? { result.delete(true)?; }
 
 			for result in BincodeEmployee::retrieve(
-				MatchWhen::Any,
-				MatchWhen::Any,
-				MatchWhen::Any,
-				MatchWhen::EqualTo(self.organization.id),
-				MatchWhen::Any,
+				MatchWhen::Any, // contact info
+				MatchWhen::Any, // employed
+				MatchWhen::Any, // id
+				MatchWhen::EqualTo(self.organization.id), // organization
+				MatchWhen::Any, // person
+				MatchWhen::Any, // title
 				self.store,
-				MatchWhen::Any,
 			)? { result.delete(true)?; }
 		}
 
 		return Ok(());
+	}
+}
+
+#[cfg(test)]
+mod tests
+{
+	use crate::util;
+	use std::time::Instant;
+
+	#[test]
+	fn test_delete()
+	{
+		let start = Instant::now();
+
+		util::test_temp_store(|store|
+		{
+			// TODO
+
+			println!("\n>>>>> BincodeOrganiztaion test_delete {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+		}).unwrap();
 	}
 }

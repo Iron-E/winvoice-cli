@@ -181,9 +181,9 @@ mod tests
 
 			// Retrieve bob
 			let mut results = BincodePerson::retrieve(
-				MatchWhen::HasAll(bob.person.contact_info.clone()),
-				MatchWhen::Any,
-				MatchWhen::Any,
+				MatchWhen::HasAll(bob.person.contact_info.clone()), // contact info
+				MatchWhen::Any, // id
+				MatchWhen::Any, // name
 				*store,
 			).unwrap();
 
@@ -195,9 +195,9 @@ mod tests
 
 			// Retrieve longone and slimdi
 			results = BincodePerson::retrieve(
-				MatchWhen::Any,
-				MatchWhen::Any,
-				MatchWhen::HasAny(to_hashset(&[slimdi.person.name.clone(), longone.person.name.clone()])),
+				MatchWhen::Any, // contact info
+				MatchWhen::Any, // id
+				MatchWhen::HasAny(to_hashset(&[slimdi.person.name.clone(), longone.person.name.clone()])), // name
 				*store,
 			).unwrap();
 

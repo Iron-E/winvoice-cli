@@ -11,9 +11,9 @@ impl Into<Result<Location, Box<dyn Error>>> for BincodeOrganization<'_, '_, '_>
 	fn into(self) -> Result<Location, Box<dyn Error>>
 	{
 		let results = BincodeLocation::retrieve(
-			MatchWhen::EqualTo(self.organization.location_id),
-			MatchWhen::Any,
-			MatchWhen::Any,
+			MatchWhen::EqualTo(self.organization.location_id), // id
+			MatchWhen::Any, // name
+			MatchWhen::Any, // outer id
 			self.store,
 		)?;
 

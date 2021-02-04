@@ -188,9 +188,9 @@ mod tests
 
 			// Retrieve everything.
 			let mut results = BincodeLocation::retrieve(
-				MatchWhen::Any,
-				MatchWhen::Any,
-				MatchWhen::Any,
+				MatchWhen::Any, // id
+				MatchWhen::Any, // name
+				MatchWhen::Any, // outer id
 				*store,
 			).unwrap();
 
@@ -202,9 +202,9 @@ mod tests
 
 			// Retrieve Arizona
 			results = BincodeLocation::retrieve(
-				MatchWhen::HasAny(to_hashset(&[earth.location.id, arizona.location.id])),
-				MatchWhen::Any,
-				MatchWhen::HasNone(to_hashset(&[Option::<Id>::None])),
+				MatchWhen::HasAny(to_hashset(&[earth.location.id, arizona.location.id])), // id
+				MatchWhen::Any, // name
+				MatchWhen::HasNone(to_hashset(&[Option::<Id>::None])), // outer id
 				*store,
 			).unwrap();
 

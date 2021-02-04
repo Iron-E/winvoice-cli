@@ -11,9 +11,9 @@ impl Into<Result<Person, Box<dyn Error>>> for BincodeEmployee<'_, '_, '_>
 	fn into(self) -> Result<Person, Box<dyn Error>>
 	{
 		let results = BincodePerson::retrieve(
-			MatchWhen::Any,
-			MatchWhen::EqualTo(self.employee.person_id),
-			MatchWhen::Any,
+			MatchWhen::Any, // contact into
+			MatchWhen::EqualTo(self.employee.person_id), // id
+			MatchWhen::Any, // name
 			self.store,
 		)?;
 

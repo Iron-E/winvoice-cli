@@ -22,13 +22,13 @@ impl Deletable for BincodePerson<'_, '_, '_>
 		if cascade
 		{
 			for result in BincodeEmployee::retrieve(
-				MatchWhen::Any,
-				MatchWhen::Any,
-				MatchWhen::Any,
-				MatchWhen::Any,
-				MatchWhen::EqualTo(self.person.id),
+				MatchWhen::Any, // contact info
+				MatchWhen::Any, // employed
+				MatchWhen::Any, // id
+				MatchWhen::Any, // organization
+				MatchWhen::EqualTo(self.person.id), // person
+				MatchWhen::Any, // title
 				self.store,
-				MatchWhen::Any,
 			)? { result.delete(true)?; }
 		}
 

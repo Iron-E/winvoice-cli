@@ -11,13 +11,13 @@ impl Into<Result<HashSet<Employee>, Box<dyn Error>>> for BincodeOrganization<'_,
 	fn into(self) -> Result<HashSet<Employee>, Box<dyn Error>>
 	{
 		let results = BincodeEmployee::retrieve(
-			MatchWhen::Any,
-			MatchWhen::Any,
-			MatchWhen::Any,
-			MatchWhen::EqualTo(self.organization.id),
-			MatchWhen::Any,
+			MatchWhen::Any, // contact info
+			MatchWhen::Any, // employed
+			MatchWhen::Any, // id
+			MatchWhen::EqualTo(self.organization.id), // organization
+			MatchWhen::Any, // person
+			MatchWhen::Any, // title
 			self.store,
-			MatchWhen::Any,
 		)?;
 
 		return Ok(results.iter().map(|result| result.employee.clone()).collect());

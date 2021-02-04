@@ -11,10 +11,10 @@ impl Into<Result<Organization, Box<dyn Error>>> for BincodeJob<'_, '_, '_>
 	fn into(self) -> Result<Organization, Box<dyn Error>>
 	{
 		let results = BincodeOrganization::retrieve(
-			MatchWhen::EqualTo(self.job.client_id),
-			MatchWhen::Any,
-			MatchWhen::Any,
-			MatchWhen::Any,
+			MatchWhen::EqualTo(self.job.client_id), // id
+			MatchWhen::Any, // location
+			MatchWhen::Any, // name
+			MatchWhen::Any, // representatives
 			self.store,
 		)?;
 

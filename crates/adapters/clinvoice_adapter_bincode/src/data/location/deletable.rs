@@ -22,17 +22,17 @@ impl Deletable for BincodeLocation<'_, '_, '_>
 		if cascade
 		{
 			for result in BincodeLocation::retrieve(
-				MatchWhen::Any,
-				MatchWhen::Any,
-				MatchWhen::EqualTo(Some(self.location.id)),
+				MatchWhen::Any, // id
+				MatchWhen::Any, // name
+				MatchWhen::EqualTo(Some(self.location.id)), // outer id
 				self.store,
 			)? { result.delete(true)?; }
 
 			for result in BincodeOrganization::retrieve(
-				MatchWhen::Any,
-				MatchWhen::EqualTo(self.location.id),
-				MatchWhen::Any,
-				MatchWhen::Any,
+				MatchWhen::Any, // id
+				MatchWhen::EqualTo(self.location.id), // location
+				MatchWhen::Any, // name
+				MatchWhen::Any, // representatives
 				self.store,
 			)? { result.delete(true)?; }
 		}

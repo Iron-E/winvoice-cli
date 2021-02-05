@@ -62,8 +62,8 @@ mod tests
 					representatives: HashSet::new(),
 				},
 				testy.person.clone(),
-				*store,
 				"CEO of Tests",
+				*store,
 			).unwrap();
 
 			let testy_person: Result<Person, Box<dyn Error>> = testy_employed.into();

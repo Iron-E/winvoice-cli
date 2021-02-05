@@ -63,8 +63,8 @@ mod tests
 					id: Id::new_v4(),
 					name: "Testy Mćtesterson".into(),
 				},
-				*store,
 				"CEO of Tests",
+				*store,
 			).unwrap();
 
 			let testy_org: Result<Organization, Box<dyn Error>> = testy.into();

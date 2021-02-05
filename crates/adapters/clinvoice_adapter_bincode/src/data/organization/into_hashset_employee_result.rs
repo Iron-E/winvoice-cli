@@ -59,8 +59,8 @@ mod tests
 					id: Id::new_v4(),
 					name: "Testy Mćtesterson".into(),
 				},
-				*store,
 				"CEO of Tests",
+				*store,
 			).unwrap();
 
 			let mr_flu = BincodeEmployee::create(
@@ -72,8 +72,8 @@ mod tests
 					id: Id::new_v4(),
 					name: "Mr. Flu".into(),
 				},
-				*store,
 				"Janitor",
+				*store,
 			).unwrap();
 
 			// Insert the new hired employees

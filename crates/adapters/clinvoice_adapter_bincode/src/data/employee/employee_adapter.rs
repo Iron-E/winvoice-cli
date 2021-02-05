@@ -153,8 +153,8 @@ mod tests
 					id: Id::new_v4(),
 					name: "Testy Mćtesterson".into(),
 				},
-				*store,
 				"CEO of Tests",
+				*store,
 			).unwrap());
 
 			contact_info.insert(Contact::Email("foo@bar.io".into()));
@@ -167,8 +167,8 @@ mod tests
 					id: Id::new_v4(),
 					name: "Nimron MacBeaver".into(),
 				},
-				*store,
 				"Oblong Shape Holder",
+				*store,
 			).unwrap());
 
 			contact_info.insert(Contact::Phone("1-800-555-3600".into()));
@@ -181,8 +181,8 @@ mod tests
 					id: Id::new_v4(),
 					name: "An Actual «Tor♯tust".into(),
 				},
-				*store,
 				"Mixer of Soups",
+				*store,
 			).unwrap());
 
 			contact_info.insert(Contact::Address(Id::new_v4()));
@@ -195,8 +195,8 @@ mod tests
 					id: Id::new_v4(),
 					name: "Jimmy Neutron, Boy Genius' Dog 'Gottard'".into(),
 				},
-				*store,
 				"Sidekick",
+				*store,
 			).unwrap());
 
 			contact_info.insert(Contact::Email("obviousemail@server.com".into()));
@@ -209,8 +209,8 @@ mod tests
 					id: Id::new_v4(),
 					name: "Testy Mćtesterson".into(),
 				},
-				*store,
 				"Lazy No-good Duplicate Name User",
+				*store,
 			).unwrap());
 
 			println!("\n>>>>> BincodeEmployee test_create {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
@@ -249,8 +249,8 @@ mod tests
 					id: Id::new_v4(),
 					name: "Testy Mćtesterson".into(),
 				},
-				*store,
 				"CEO of Tests",
+				*store,
 			).unwrap();
 
 			contact_info.insert(Contact::Email("foo@bar.io".into()));
@@ -263,8 +263,8 @@ mod tests
 					id: Id::new_v4(),
 					name: "Nimron MacBeaver".into(),
 				},
-				*store,
 				"Oblong Shape Holder",
+				*store,
 			).unwrap();
 
 			contact_info.insert(Contact::Phone("1-800-555-3600".into()));
@@ -277,8 +277,8 @@ mod tests
 					id: Id::new_v4(),
 					name: "An Actual «Tor♯tust".into(),
 				},
-				*store,
 				"Mixer of Soups",
+				*store,
 			).unwrap();
 
 			contact_info.insert(Contact::Address(Id::new_v4()));
@@ -291,8 +291,8 @@ mod tests
 					id: Id::new_v4(),
 					name: "Jimmy Neutron, Boy Genius' Dog 'Gottard'".into(),
 				},
-				*store,
 				"Sidekick",
+				*store,
 			).unwrap();
 
 			contact_info.insert(Contact::Email("obviousemail@server.com".into()));
@@ -305,8 +305,8 @@ mod tests
 					id: Id::new_v4(),
 					name: "Testy Mćtesterson".into(),
 				},
-				*store,
 				"Lazy No-good Duplicate Name User",
+				*store,
 			).unwrap();
 
 

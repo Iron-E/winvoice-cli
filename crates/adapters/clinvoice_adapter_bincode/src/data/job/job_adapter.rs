@@ -144,11 +144,11 @@ mod tests
 		super::{BincodeJob, Id, HashSet, JobAdapter, MatchWhen, Money, Organization, Utc, util},
 		clinvoice_data::Decimal,
 		core::hash::Hash,
-		std::{fs, io, time::Instant},
+		std::{fs, time::Instant},
 	};
 
 	#[test]
-	fn test_create() -> Result<(), io::Error>
+	fn test_create()
 	{
 		fn assertion(bincode_job: BincodeJob<'_, '_, '_>)
 		{
@@ -166,7 +166,7 @@ mod tests
 			representatives: HashSet::new(),
 		};
 
-		return util::test_temp_store(|store|
+		util::test_temp_store(|store|
 		{
 			assertion(BincodeJob::create(
 				organization.clone(),
@@ -213,7 +213,7 @@ mod tests
 	}
 
 	#[test]
-	fn test_retrieve() -> Result<(), io::Error>
+	fn test_retrieve()
 	{
 		fn to_hashset<T>(slice: &[T]) -> HashSet<T> where T : Clone + Eq + Hash
 		{
@@ -230,7 +230,7 @@ mod tests
 			representatives: HashSet::new(),
 		};
 
-		return util::test_temp_store(|store|
+		util::test_temp_store(|store|
 		{
 			let creation = BincodeJob::create(
 				organization.clone(),

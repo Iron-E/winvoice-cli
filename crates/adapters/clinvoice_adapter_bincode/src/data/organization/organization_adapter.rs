@@ -109,11 +109,11 @@ mod tests
 	{
 		super::{BincodeOrganization, HashSet, Id, Location, MatchWhen, OrganizationAdapter, util},
 		core::hash::Hash,
-		std::{fs, io, time::Instant},
+		std::{fs, time::Instant},
 	};
 
 	#[test]
-	fn test_create() -> Result<(), io::Error>
+	fn test_create()
 	{
 		fn assertion(bincode_organization: BincodeOrganization<'_, '_, '_>)
 		{
@@ -123,7 +123,7 @@ mod tests
 
 		let start = Instant::now();
 
-		return util::test_temp_store(|store|
+		util::test_temp_store(|store|
 		{
 			let earth_id = Id::new_v4();
 			assertion(BincodeOrganization::create(
@@ -160,7 +160,7 @@ mod tests
 	}
 
 	#[test]
-	fn test_retrieve() -> Result<(), io::Error>
+	fn test_retrieve()
 	{
 		fn to_hashset<T>(slice: &[T]) -> HashSet<T> where T : Clone + Eq + Hash
 		{
@@ -169,7 +169,7 @@ mod tests
 
 		let start = Instant::now();
 
-		return util::test_temp_store(|store|
+		util::test_temp_store(|store|
 		{
 			let earth_id = Id::new_v4();
 			let packing = BincodeOrganization::create(

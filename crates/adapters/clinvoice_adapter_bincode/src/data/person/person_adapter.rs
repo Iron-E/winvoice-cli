@@ -105,12 +105,12 @@ mod tests
 	{
 		super::{BincodePerson, Contact, HashSet, Id, MatchWhen, PersonAdapter, util},
 		core::hash::Hash,
-		std::{fs, io, time::Instant},
+		std::{fs, time::Instant},
 		bincode,
 	};
 
 	#[test]
-	fn test_create() -> Result<(), io::Error>
+	fn test_create()
 	{
 		fn assertion(bincode_person: BincodePerson<'_, '_, '_>)
 		{
@@ -120,7 +120,7 @@ mod tests
 
 		let start = Instant::now();
 
-		return util::test_temp_store(|store|
+		util::test_temp_store(|store|
 		{
 			let mut contact_info = HashSet::new();
 
@@ -144,7 +144,7 @@ mod tests
 	}
 
 	#[test]
-	fn test_retrieve() -> Result<(), io::Error>
+	fn test_retrieve()
 	{
 		fn to_hashset<T>(slice: &[T]) -> HashSet<T> where T : Clone + Eq + Hash
 		{
@@ -153,7 +153,7 @@ mod tests
 
 		let start = Instant::now();
 
-		return util::test_temp_store(|store|
+		util::test_temp_store(|store|
 		{
 			let flingo = BincodePerson::create(
 				to_hashset(&[Contact::Address(Id::new_v4())]),

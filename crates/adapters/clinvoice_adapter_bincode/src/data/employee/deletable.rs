@@ -66,6 +66,6 @@ mod tests
 			// TODO
 
 			println!("\n>>>>> BincodeEmployee test_delete {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
-		}).unwrap();
+		});
 	}
 }

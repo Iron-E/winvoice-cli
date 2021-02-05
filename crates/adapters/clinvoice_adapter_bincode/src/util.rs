@@ -55,7 +55,7 @@ pub fn create_store_dir(store_dir: &Path) -> Result<bool, io::Error>
 ///
 /// [fn_temp_dir]: std::env::temp_dir
 #[cfg(test)]
-pub fn test_temp_store(assertion: impl FnOnce(&Store<'_, '_, '_>)) -> Result<(), io::Error>
+pub fn test_temp_store(assertion: impl FnOnce(&Store<'_, '_, '_>))
 {
 	let temp_path = env::temp_dir().join("clinvoice_adapter_bincode_data");
 
@@ -66,15 +66,13 @@ pub fn test_temp_store(assertion: impl FnOnce(&Store<'_, '_, '_>)) -> Result<(),
 		path: match temp_path.to_str()
 		{
 			Some(s) => s,
-			None => return Err(io::Error::new(
+			None => Err(io::Error::new(
 				io::ErrorKind::InvalidInput,
 				"`env::temp_path` did not resolve to a valid path."
-			)),
+			)).unwrap(),
 		},
 		username: None,
 	});
-
-	return Ok(());
 }
 
 /// # Summary
@@ -113,12 +111,12 @@ mod tests
 {
 	use
 	{
-		super::{fs, io},
-		std::{path::PathBuf, time::Instant},
+		super::fs,
+		std::{collections::HashSet, path::PathBuf, time::Instant},
 	};
 
 	#[test]
-	fn test_unique_id() -> Result<(), io::Error>
+	fn test_unique_id()
 	{
 		let start = Instant::now();
 
@@ -128,19 +126,24 @@ mod tests
 
 			if test_path.is_dir()
 			{
-				assert!(fs::remove_dir_all(&test_path).is_ok());
+				fs::remove_dir_all(&test_path).unwrap();
 			}
 
 			// Create the `test_path`.
-			assert!(super::create_store_dir(&test_path).is_ok());
+			super::create_store_dir(&test_path).unwrap();
 
+			let ids = HashSet::new();
 			for _ in 0..100
 			{
 				let id = super::unique_id(&test_path).unwrap();
+				ids.insert(id);
 
 				// Creating the next file worked.
 				assert!(fs::write(&test_path.join(id.to_string()), "TEST").is_ok());
 			}
+
+			// Assert that the number of unique IDs created is equal to the number of times looped.
+			assert_eq!(ids.len(), 100);
 
 			println!("\n>>>>> util test_inque_id {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});

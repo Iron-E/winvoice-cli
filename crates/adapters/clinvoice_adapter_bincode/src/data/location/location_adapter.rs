@@ -134,11 +134,11 @@ mod tests
 	{
 		super::{BincodeLocation, HashSet, Id, LocationAdapter, MatchWhen, util},
 		core::hash::Hash,
-		std::{fs, io, time::Instant},
+		std::{fs, time::Instant},
 	};
 
 	#[test]
-	fn test_create() -> Result<(), io::Error>
+	fn test_create()
 	{
 		fn assertion(bincode_location: &BincodeLocation<'_, '_, '_>)
 		{
@@ -148,7 +148,7 @@ mod tests
 
 		let start = Instant::now();
 
-		return util::test_temp_store(|store|
+		util::test_temp_store(|store|
 		{
 			let earth = BincodeLocation::create("Earth", *store).unwrap();
 			assertion(&earth);
@@ -170,7 +170,7 @@ mod tests
 	}
 
 	#[test]
-	fn test_retrieve() -> Result<(), io::Error>
+	fn test_retrieve()
 	{
 		fn to_hashset<T>(slice: &[T]) -> HashSet<T> where T : Clone + Eq + Hash
 		{

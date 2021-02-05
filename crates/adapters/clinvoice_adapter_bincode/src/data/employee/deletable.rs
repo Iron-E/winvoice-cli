@@ -66,11 +66,11 @@ mod tests
 		super::BincodeEmployee,
 		crate::
 		{
-			data::{BincodeLocation, BincodeOrganization, BincodePerson},
+			data::{BincodeJob, BincodeLocation, BincodeOrganization, BincodePerson},
 			util
 		},
-		clinvoice_adapter::data::{Deletable, EmployeeAdapter, LocationAdapter, OrganizationAdapter, PersonAdapter},
-		clinvoice_data::{Contact, Id},
+		clinvoice_adapter::data::{Deletable, EmployeeAdapter, JobAdapter, LocationAdapter, OrganizationAdapter, PersonAdapter, Updatable},
+		clinvoice_data::{chrono::Utc, Contact, Decimal, Id, Money},
 		std::{collections::HashSet, time::Instant},
 	};
 
@@ -84,7 +84,7 @@ mod tests
 			let earth = BincodeLocation::create("Earth", *store).unwrap();
 
 			let big_old_test = BincodeOrganization::create(
-				earth.location,
+				earth.location.clone(),
 				"Big Old Test Corporation",
 				HashSet::new(),
 				*store,
@@ -101,15 +101,38 @@ mod tests
 
 			let ceo_testy = BincodeEmployee::create(
 				contact_info.clone(),
-				big_old_test.organization,
-				testy.person,
+				big_old_test.organization.clone(),
+				testy.person.clone(),
 				"CEO of Tests",
 				*store,
 			).unwrap();
 
+			let mut creation = BincodeJob::create(
+				big_old_test.organization.clone(),
+				Utc::now(),
+				Money::new(Decimal::new(200, 2), "USD"),
+				"Test the job creation function.",
+				*store,
+			).unwrap();
+
+			creation.job.start_timesheet(ceo_testy.employee.id);
+			creation.update().unwrap();
+
+			// Assert that the deletion works
 			assert!(ceo_testy.delete(true).is_ok());
 
-			// TODO: add assertions for whether or not the created jobs and orgs exist.
+			// Assert the deleted file is gone.
+			assert!(!ceo_testy.filepath().is_file());
+
+			// Assert that the relevant files still exist
+			assert!(big_old_test.filepath().is_file());
+			assert!(creation.filepath().is_file());
+			assert!(earth.filepath().is_file());
+			assert!(testy.filepath().is_file());
+
+			// Assert that no references to the deleted entity remain.
+			assert!(big_old_test.organization.representatives.iter().filter(|id| *id != &ceo_testy.employee.id).count() == 0);
+			assert!(creation.job.timesheets.iter().filter(|t| t.employee_id != ceo_testy.employee.id).count() == 0);
 
 			println!("\n>>>>> BincodeEmployee test_delete {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});

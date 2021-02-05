@@ -41,10 +41,8 @@ mod tests
 {
 	use
 	{
-		super::{BincodePerson, Deletable, EmployeeAdapter},
-		crate::{data::BincodeEmployee, util},
-		clinvoice_adapter::data::PersonAdapter,
-		std::{collections::HashSet, time::Instant},
+		crate::util,
+		std::time::Instant,
 	};
 
 	#[test]

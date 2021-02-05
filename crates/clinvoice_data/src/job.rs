@@ -91,3 +91,44 @@ pub struct Job
 	/// The periods of time during which work was performed for this [`Job`].
 	pub timesheets: BTreeSet<Timesheet>,
 }
+
+impl Job
+{
+	/// # Summary
+	///
+	/// Create a new [`Timesheet`] and attach it to the list of [`timesheets`](Self::timesheets).
+	///
+	/// # Remarks
+	///
+	/// * This is intended to be used for reporting work which was done previously.
+	pub fn attach_timesheet(&mut self, employee: Id, time_begin: DateTime<Utc>, time_end: Option<DateTime<Utc>>, work_notes: &str)
+	{
+		self.timesheets.insert(
+			Timesheet
+			{
+				employee_id: employee,
+				time_begin,
+				time_end,
+				work_notes: work_notes.into()
+			}
+		);
+	}
+
+	/// # Summary
+	///
+	/// Create a new [`Timesheet`] with the starting time set to the current time.
+	///
+	/// # Remarks
+	///
+	/// * This is a synonym for [`attach_timesheet`](Self::attach_timesheet) but with the `time_start`
+	///   parameter defaulted to [`Utc::now`](chrono::Utc::now).
+	/// * This is intended to be used for reporting work which is about to be done.
+	///
+	/// # Parameters
+	///
+	/// * `employee`, the [`Id`] of the [`Employee`] who is working on this timesheet.
+	pub fn start_timesheet(&mut self, employee: Id)
+	{
+		self.attach_timesheet(employee, Utc::now(), None, "* Work which was done goes here.\n* Supports markdown formatting.");
+	}
+}

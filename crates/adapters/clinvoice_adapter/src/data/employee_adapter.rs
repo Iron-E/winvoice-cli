@@ -30,8 +30,8 @@ pub trait EmployeeAdapter<'pass, 'path, 'user> :
 		contact_info: HashSet<Contact>,
 		organization: Organization,
 		person: Person,
-		store: Store<'pass, 'path, 'user>,
 		title: &'title str,
+		store: Store<'pass, 'path, 'user>,
 	) -> Result<Self, Box<dyn Error>>;
 
 	/// # Summary

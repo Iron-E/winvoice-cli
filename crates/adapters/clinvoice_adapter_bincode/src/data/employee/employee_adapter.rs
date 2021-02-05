@@ -29,8 +29,8 @@ impl<'pass, 'path, 'user> EmployeeAdapter<'pass, 'path, 'user> for BincodeEmploy
 		contact_info: HashSet<Contact>,
 		organization: Organization,
 		person: Person,
-		store: Store<'pass, 'path, 'user>,
 		title: &'title str,
+		store: Store<'pass, 'path, 'user>,
 	) -> Result<Self, Box<dyn Error>>
 	{
 		Self::init(&store)?;
@@ -129,8 +129,6 @@ mod tests
 			assert_eq!(bincode_employee.employee, bincode::deserialize(&read_result).unwrap());
 		}
 
-		let start = Instant::now();
-
 		let organization = Organization
 		{
 			id: Id::new_v4(),
@@ -138,6 +136,8 @@ mod tests
 			name: "Big Old Test Corporation".into(),
 			representatives: HashSet::new(),
 		};
+
+		let start = Instant::now();
 
 		util::test_temp_store(|store|
 		{
@@ -222,7 +222,7 @@ mod tests
 	{
 		fn to_hashset<T>(slice: &[T]) -> HashSet<T> where T : Clone + Eq + Hash
 		{
-			return slice.into_iter().cloned().collect();
+			return slice.iter().cloned().collect();
 		}
 
 		let start = Instant::now();

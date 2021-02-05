@@ -217,7 +217,7 @@ mod tests
 	{
 		fn to_hashset<T>(slice: &[T]) -> HashSet<T> where T : Clone + Eq + Hash
 		{
-			return slice.into_iter().cloned().collect();
+			return slice.iter().cloned().collect();
 		}
 
 		let start = Instant::now();

@@ -87,6 +87,6 @@ mod tests
 			assert_eq!(reps.unwrap(), [testy.employee, mr_flu.employee].iter().cloned().collect());
 
 			println!("\n>>>>> BincodeOrganization test_into_hashset_employee {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
-		}).unwrap();
+		});
 	}
 }

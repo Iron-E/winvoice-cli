@@ -71,6 +71,6 @@ mod tests
 			// TODO
 
 			println!("\n>>>>> BincodeOrganiztaion test_delete {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
-		}).unwrap();
+		});
 	}
 }

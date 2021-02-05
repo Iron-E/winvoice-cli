@@ -89,6 +89,6 @@ mod tests
 			assert!(!&dogood.filepath().is_file());
 
 			println!("\n>>>>> BincodeLocation test_delete {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
-		}).unwrap();
+		});
 	}
 }

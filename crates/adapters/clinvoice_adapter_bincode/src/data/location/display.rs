@@ -68,6 +68,6 @@ mod tests
 			assert_eq!(phoenix.to_string(), "Phoenix, Arizona, USA, Earth");
 
 			println!("\n>>>>> BincodeLocation test_display {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
-		}).unwrap();
+		});
 	}
 }

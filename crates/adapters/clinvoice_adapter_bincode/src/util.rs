@@ -132,7 +132,7 @@ mod tests
 			// Create the `test_path`.
 			super::create_store_dir(&test_path).unwrap();
 
-			let ids = HashSet::new();
+			let mut ids = HashSet::new();
 			for _ in 0..100
 			{
 				let id = super::unique_id(&test_path).unwrap();

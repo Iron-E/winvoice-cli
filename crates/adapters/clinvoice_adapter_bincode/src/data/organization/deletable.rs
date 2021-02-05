@@ -55,8 +55,11 @@ impl Deletable for BincodeOrganization<'_, '_, '_>
 #[cfg(test)]
 mod tests
 {
-	use crate::util;
-	use std::time::Instant;
+	use
+	{
+		crate::util,
+		std::time::Instant,
+	};
 
 	#[test]
 	fn test_delete()

@@ -2,7 +2,7 @@ use
 {
 	super::BincodeEmployee,
 	crate::data::{BincodeJob, BincodeOrganization},
-	clinvoice_adapter::data::{Deletable, JobAdapter, MatchWhen, OrganizationAdapter},
+	clinvoice_adapter::data::{Deletable, JobAdapter, MatchWhen, OrganizationAdapter, Updatable},
 	std::{error::Error, fs, io::ErrorKind},
 };
 
@@ -21,7 +21,7 @@ impl Deletable for BincodeEmployee<'_, '_, '_>
 
 		if cascade
 		{
-			for result in BincodeJob::retrieve(
+			for mut result in BincodeJob::retrieve(
 				MatchWhen::Any, // client
 				MatchWhen::Any, // date close
 				MatchWhen::Any, // date open
@@ -35,15 +35,23 @@ impl Deletable for BincodeEmployee<'_, '_, '_>
 				MatchWhen::Any, // timesheet time begin
 				MatchWhen::Any, // timesheet time end
 				self.store,
-			)? { result.delete(true)?; }
+			)?
+			{
+				result.job.timesheets = result.job.timesheets.into_iter().filter(|t| t.employee_id != self.employee.id).collect();
+				result.update()?;
+			}
 
-			for result in BincodeOrganization::retrieve(
+			for mut result in BincodeOrganization::retrieve(
 				MatchWhen::Any, // id
 				MatchWhen::Any, // location
 				MatchWhen::Any, // name
 				MatchWhen::HasAll([self.employee.id].iter().cloned().collect()), // representatives
 				self.store,
-			)? { result.delete(true)?; }
+			)?
+			{
+				result.organization.representatives.remove(&self.employee.id);
+				result.update()?;
+			}
 		}
 
 		return Ok(());
@@ -53,8 +61,18 @@ impl Deletable for BincodeEmployee<'_, '_, '_>
 #[cfg(test)]
 mod tests
 {
-	use crate::util;
-	use std::time::Instant;
+	use
+	{
+		super::BincodeEmployee,
+		crate::
+		{
+			data::{BincodeLocation, BincodeOrganization, BincodePerson},
+			util
+		},
+		clinvoice_adapter::data::{Deletable, EmployeeAdapter, LocationAdapter, OrganizationAdapter, PersonAdapter},
+		clinvoice_data::{Contact, Id},
+		std::{collections::HashSet, time::Instant},
+	};
 
 	#[test]
 	fn test_delete()
@@ -63,7 +81,35 @@ mod tests
 
 		util::test_temp_store(|store|
 		{
-			// TODO
+			let earth = BincodeLocation::create("Earth", *store).unwrap();
+
+			let big_old_test = BincodeOrganization::create(
+				earth.location,
+				"Big Old Test Corporation",
+				HashSet::new(),
+				*store,
+			).unwrap();
+
+			let mut contact_info = HashSet::new();
+			contact_info.insert(Contact::Address(Id::new_v4()));
+
+			let testy = BincodePerson::create(
+				contact_info.clone(),
+				"Testy Mćtesterson",
+				*store,
+			).unwrap();
+
+			let ceo_testy = BincodeEmployee::create(
+				contact_info.clone(),
+				big_old_test.organization,
+				testy.person,
+				"CEO of Tests",
+				*store,
+			).unwrap();
+
+			assert!(ceo_testy.delete(true).is_ok());
+
+			// TODO: add assertions for whether or not the created jobs and orgs exist.
 
 			println!("\n>>>>> BincodeEmployee test_delete {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});

@@ -63,13 +63,13 @@ mod tests
 {
 	use
 	{
-		super::BincodeEmployee,
+		super::{BincodeEmployee, BincodeJob, BincodeOrganization, Deletable, JobAdapter, OrganizationAdapter, Updatable},
 		crate::
 		{
-			data::{BincodeJob, BincodeLocation, BincodeOrganization, BincodePerson},
+			data::{BincodeLocation, BincodePerson},
 			util
 		},
-		clinvoice_adapter::data::{Deletable, EmployeeAdapter, JobAdapter, LocationAdapter, OrganizationAdapter, PersonAdapter, Updatable},
+		clinvoice_adapter::data::{EmployeeAdapter, LocationAdapter, PersonAdapter},
 		clinvoice_data::{chrono::Utc, Contact, Decimal, Id, Money},
 		std::{collections::HashSet, time::Instant},
 	};

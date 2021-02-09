@@ -1,7 +1,5 @@
 # clinvoice -s|--store "name_one" new <client> ## NEW
 
-# TODO: rewrite `connection` class into `store` class that either has a connection or a path.
-
 [store]
 default = "name_one"
 name_one = {adapter="JSON", path="/home/user/Documents/foo"}

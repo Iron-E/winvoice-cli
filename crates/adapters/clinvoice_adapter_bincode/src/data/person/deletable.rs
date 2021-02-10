@@ -41,8 +41,15 @@ mod tests
 {
 	use
 	{
-		crate::util,
-		std::time::Instant,
+		super::{BincodeEmployee, BincodePerson, Deletable, EmployeeAdapter},
+		crate::
+		{
+			data::{BincodeLocation, BincodeOrganization},
+			util,
+		},
+		clinvoice_adapter::data::{LocationAdapter, OrganizationAdapter, PersonAdapter},
+		clinvoice_data::Contact,
+		std::{collections::HashSet, time::Instant},
 	};
 
 	#[test]
@@ -52,7 +59,42 @@ mod tests
 
 		util::test_temp_store(|store|
 		{
-			// TODO
+			let earth = BincodeLocation::create("Earth", *store).unwrap();
+
+			let big_old_test = BincodeOrganization::create(
+				earth.location.clone(),
+				"Big Old Test Corporation",
+				HashSet::new(),
+				*store,
+			).unwrap();
+
+			let mut contact_info = HashSet::new();
+			contact_info.insert(Contact::Address(earth.location.id));
+
+			let testy = BincodePerson::create(
+				contact_info.clone(),
+				"Testy Mćtesterson",
+				*store,
+			).unwrap();
+
+			let ceo_testy = BincodeEmployee::create(
+				contact_info.clone(),
+				big_old_test.organization.clone(),
+				testy.person.clone(),
+				"CEO of Tests",
+				*store,
+			).unwrap();
+
+			// Assert that the deletion works
+			assert!(testy.delete(true).is_ok());
+
+			// Assert that `testy` and its referencing employee is gone.
+			assert!(!testy.filepath().is_file());
+			assert!(!ceo_testy.filepath().is_file());
+
+			// Assert that the independent files still exist.
+			assert!(big_old_test.filepath().is_file());
+			assert!(earth.filepath().is_file());
 
 			println!("\n>>>>> BincodePerson test_delete {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});

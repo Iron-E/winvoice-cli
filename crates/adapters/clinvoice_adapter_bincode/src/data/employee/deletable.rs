@@ -67,7 +67,7 @@ mod tests
 		crate::
 		{
 			data::{BincodeLocation, BincodePerson},
-			util
+			util,
 		},
 		clinvoice_adapter::data::{EmployeeAdapter, LocationAdapter, PersonAdapter},
 		clinvoice_data::{chrono::Utc, Contact, Decimal, Id, Money},
@@ -91,7 +91,7 @@ mod tests
 			).unwrap();
 
 			let mut contact_info = HashSet::new();
-			contact_info.insert(Contact::Address(Id::new_v4()));
+			contact_info.insert(Contact::Address(earth.location.id));
 
 			let testy = BincodePerson::create(
 				contact_info.clone(),
@@ -131,8 +131,8 @@ mod tests
 			assert!(testy.filepath().is_file());
 
 			// Assert that no references to the deleted entity remain.
-			assert!(big_old_test.organization.representatives.iter().filter(|id| *id != &ceo_testy.employee.id).count() == 0);
-			assert!(creation.job.timesheets.iter().filter(|t| t.employee_id != ceo_testy.employee.id).count() == 0);
+			assert!(big_old_test.organization.representatives.iter().all(|id| *id != ceo_testy.employee.id));
+			assert!(creation.job.timesheets.iter().all(|t| t.employee_id != ceo_testy.employee.id));
 
 			println!("\n>>>>> BincodeEmployee test_delete {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});

@@ -87,12 +87,10 @@ impl<'pass, 'path, 'user> EmployeeAdapter<'pass, 'path, 'user> for BincodeEmploy
 	{
 		let mut results = HashSet::new();
 
-		for node_path in fs::read_dir(BincodeEmployee::path(&store))?.filter_map(
-			|node| match node {Ok(n) => Some(n.path()), Err(_) => None}
-		)
+		for node_path in util::read_files(BincodeEmployee::path(&store))?
 		{
-			let employee: Employee = bincode::deserialize_from(
-				BufReader::new(fs::File::open(node_path)?
+			let employee: Employee = bincode::deserialize_from(BufReader::new(
+				fs::File::open(node_path)?
 			))?;
 
 			if contact_info.set_matches(&employee.contact_info) &&
@@ -116,7 +114,6 @@ mod tests
 	use
 	{
 		super::{BincodeEmployee, Contact, EmployeeAdapter, HashSet, Id, MatchWhen, Organization, Person, util},
-		core::hash::Hash,
 		std::{fs, time::Instant},
 	};
 
@@ -220,11 +217,6 @@ mod tests
 	#[test]
 	fn test_retrieve()
 	{
-		fn to_hashset<T>(slice: &[T]) -> HashSet<T> where T : Clone + Eq + Hash
-		{
-			return slice.iter().cloned().collect();
-		}
-
 		let start = Instant::now();
 
 		let organization = Organization

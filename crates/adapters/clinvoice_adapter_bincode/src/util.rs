@@ -1,7 +1,7 @@
 use
 {
 	clinvoice_data::{Id, UUID_NAMESPACE},
-	std::{fs, io, path::Path},
+	std::{fs, io, iter::FilterMap, path::{Path, PathBuf}},
 };
 
 #[cfg(test)]
@@ -33,6 +33,24 @@ pub fn create_store_dir(store_dir: &Path) -> Result<bool, io::Error>
 	}
 
 	return Ok(false);
+}
+
+/// # Summary
+///
+/// Return a [`FilterMap`] iterating over all valid [`File`](fs::File)s in some `path`.
+///
+/// # Errors
+///
+/// Will error whenever [`fs::read_dir`] does.
+pub fn read_files<P: AsRef<Path>>(path: P) -> Result<FilterMap<fs::ReadDir, impl FnMut(io::Result<fs::DirEntry>) -> Option<PathBuf>>, io::Error>
+{
+	return Ok(fs::read_dir(path)?.filter_map(
+		|node| match node
+		{
+			Ok(n) if n.path().is_file() => Some(n.path()),
+			_ => None,
+		}
+	));
 }
 
 /// # Summary
@@ -92,7 +110,7 @@ pub fn unique_id(store_dir: &Path) -> Result<Id, io::Error>
 	{
 		let id = Id::new_v5(&UUID_NAMESPACE, Id::new_v4().as_bytes());
 
-		for node_path in fs::read_dir(store_dir)?.filter_map(|node| match node {Ok(n) => Some(n.path()), Err(_) => None})
+		for node_path in read_files(store_dir)?
 		{
 			if match node_path.file_stem()
 			{
@@ -120,7 +138,7 @@ mod tests
 	{
 		let start = Instant::now();
 
-		return super::test_temp_store(|store|
+		super::test_temp_store(|store|
 		{
 			let test_path = PathBuf::new().join(store.path).join("test_next_id");
 

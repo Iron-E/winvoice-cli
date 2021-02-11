@@ -81,12 +81,10 @@ impl<'pass, 'path, 'user> OrganizationAdapter<'pass, 'path, 'user> for BincodeOr
 	{
 		let mut results = HashSet::new();
 
-		for node_path in fs::read_dir(BincodeOrganization::path(&store))?.filter_map(
-			|node| match node {Ok(n) => Some(n.path()), Err(_) => None}
-		)
+		for node_path in util::read_files(BincodeOrganization::path(&store))?
 		{
-			let organization: Organization = bincode::deserialize_from(
-				BufReader::new(fs::File::open(node_path)?
+			let organization: Organization = bincode::deserialize_from(BufReader::new(
+				fs::File::open(node_path)?
 			))?;
 
 			if id.is_match(&organization.id) &&

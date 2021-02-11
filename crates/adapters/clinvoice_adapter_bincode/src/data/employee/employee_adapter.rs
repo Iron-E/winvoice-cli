@@ -120,12 +120,6 @@ mod tests
 	#[test]
 	fn test_create()
 	{
-		fn assertion(bincode_employee: BincodeEmployee<'_, '_, '_>)
-		{
-			let read_result = fs::read(bincode_employee.filepath()).unwrap();
-			assert_eq!(bincode_employee.employee, bincode::deserialize(&read_result).unwrap());
-		}
-
 		let organization = Organization
 		{
 			id: Id::new_v4(),
@@ -141,7 +135,7 @@ mod tests
 			let mut contact_info = HashSet::new();
 
 			contact_info.insert(Contact::Address(Id::new_v4()));
-			assertion(BincodeEmployee::create(
+			test_create_assertion(BincodeEmployee::create(
 				contact_info.clone(),
 				organization.clone(),
 				Person
@@ -155,7 +149,7 @@ mod tests
 			).unwrap());
 
 			contact_info.insert(Contact::Email("foo@bar.io".into()));
-			assertion(BincodeEmployee::create(
+			test_create_assertion(BincodeEmployee::create(
 				contact_info.clone(),
 				organization.clone(),
 				Person
@@ -169,7 +163,7 @@ mod tests
 			).unwrap());
 
 			contact_info.insert(Contact::Phone("1-800-555-3600".into()));
-			assertion(BincodeEmployee::create(
+			test_create_assertion(BincodeEmployee::create(
 				contact_info.clone(),
 				organization.clone(),
 				Person
@@ -183,7 +177,7 @@ mod tests
 			).unwrap());
 
 			contact_info.insert(Contact::Address(Id::new_v4()));
-			assertion(BincodeEmployee::create(
+			test_create_assertion(BincodeEmployee::create(
 				contact_info.clone(),
 				organization.clone(),
 				Person
@@ -197,7 +191,7 @@ mod tests
 			).unwrap());
 
 			contact_info.insert(Contact::Email("obviousemail@server.com".into()));
-			assertion(BincodeEmployee::create(
+			test_create_assertion(BincodeEmployee::create(
 				contact_info.clone(),
 				organization.clone(),
 				Person
@@ -212,6 +206,12 @@ mod tests
 
 			println!("\n>>>>> BincodeEmployee test_create {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
+	}
+
+	fn test_create_assertion(bincode_employee: BincodeEmployee<'_, '_, '_>)
+	{
+		let read_result = fs::read(bincode_employee.filepath()).unwrap();
+		assert_eq!(bincode_employee.employee, bincode::deserialize(&read_result).unwrap());
 	}
 
 	#[test]
@@ -324,7 +324,7 @@ mod tests
 			results = BincodeEmployee::retrieve(
 				MatchWhen::Any, // contact info
 				MatchWhen::Any, // employed
-				MatchWhen::HasAny(to_hashset(&[testy_mctesterson.employee.id, gottard.employee.id])), // id
+				MatchWhen::HasAny([testy_mctesterson.employee.id, gottard.employee.id].iter().cloned().collect()), // id
 				MatchWhen::Any, // organization
 				MatchWhen::Any, // person
 				MatchWhen::Any, // title

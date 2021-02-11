@@ -70,7 +70,7 @@ mod tests
 			util,
 		},
 		clinvoice_adapter::data::{EmployeeAdapter, LocationAdapter, PersonAdapter},
-		clinvoice_data::{chrono::Utc, Contact, Decimal, Id, Money},
+		clinvoice_data::{chrono::Utc, Contact, Decimal, Money},
 		std::{collections::HashSet, time::Instant},
 	};
 

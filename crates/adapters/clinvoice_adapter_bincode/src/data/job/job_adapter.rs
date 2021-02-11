@@ -147,12 +147,6 @@ mod tests
 	#[test]
 	fn test_create()
 	{
-		fn assertion(bincode_job: BincodeJob<'_, '_, '_>)
-		{
-			let read_result = fs::read(bincode_job.filepath()).unwrap();
-			assert_eq!(bincode_job.job, bincode::deserialize(&read_result).unwrap());
-		}
-
 		let start = Instant::now();
 
 		let organization = Organization
@@ -165,7 +159,7 @@ mod tests
 
 		util::test_temp_store(|store|
 		{
-			assertion(BincodeJob::create(
+			test_create_assertion(BincodeJob::create(
 				organization.clone(),
 				Utc::now(),
 				Money::new(Decimal::new(200, 2), ""),
@@ -173,7 +167,7 @@ mod tests
 				*store,
 			).unwrap());
 
-			assertion(BincodeJob::create(
+			test_create_assertion(BincodeJob::create(
 				organization.clone(),
 				Utc::now(),
 				Money::new(Decimal::new(200, 2), "USD"),
@@ -181,7 +175,7 @@ mod tests
 				*store,
 			).unwrap());
 
-			assertion(BincodeJob::create(
+			test_create_assertion(BincodeJob::create(
 				organization.clone(),
 				Utc::now(),
 				Money::new(Decimal::new(20000, 0), "YEN"),
@@ -189,7 +183,7 @@ mod tests
 				*store,
 			).unwrap());
 
-			assertion(BincodeJob::create(
+			test_create_assertion(BincodeJob::create(
 				organization.clone(),
 				Utc::now(),
 				Money::new(Decimal::new(500, 2), "CDN"),
@@ -197,7 +191,7 @@ mod tests
 				*store,
 			).unwrap());
 
-			assertion(BincodeJob::create(
+			test_create_assertion(BincodeJob::create(
 				organization.clone(),
 				Utc::now(),
 				Money::new(Decimal::new(1000, 2), "EUR"),
@@ -207,6 +201,12 @@ mod tests
 
 			println!("\n>>>>> BincodeJob test_create {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
+	}
+
+	fn test_create_assertion(bincode_job: BincodeJob<'_, '_, '_>)
+	{
+		let read_result = fs::read(bincode_job.filepath()).unwrap();
+		assert_eq!(bincode_job.job, bincode::deserialize(&read_result).unwrap());
 	}
 
 	#[test]
@@ -274,8 +274,8 @@ mod tests
 			results = BincodeJob::retrieve(
 				MatchWhen::Any, // client
 				MatchWhen::Any, // date close
-				MatchWhen::HasNone(to_hashset(&[creation.job.date_open])), // date open
-				MatchWhen::HasAny(to_hashset(&[retrieval.job.id, assertion.job.id])), // id
+				MatchWhen::HasNone([creation.job.date_open].iter().cloned().collect()), // date open
+				MatchWhen::HasAny([retrieval.job.id, assertion.job.id].iter().cloned().collect()), // id
 				MatchWhen::Any, // invoice date issued
 				MatchWhen::Any, // invoice date paid
 				MatchWhen::Any, // invoice hourly rate

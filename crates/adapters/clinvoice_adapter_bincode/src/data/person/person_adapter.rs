@@ -102,7 +102,6 @@ mod tests
 	use
 	{
 		super::{BincodePerson, Contact, HashSet, Id, MatchWhen, PersonAdapter, util},
-		core::hash::Hash,
 		std::{fs, time::Instant},
 		bincode,
 	};
@@ -110,12 +109,6 @@ mod tests
 	#[test]
 	fn test_create()
 	{
-		fn assertion(bincode_person: BincodePerson<'_, '_, '_>)
-		{
-			let read_result = fs::read(bincode_person.filepath()).unwrap();
-			assert_eq!(bincode_person.person, bincode::deserialize(&read_result).unwrap());
-		}
-
 		let start = Instant::now();
 
 		util::test_temp_store(|store|
@@ -123,56 +116,57 @@ mod tests
 			let mut contact_info = HashSet::new();
 
 			contact_info.insert(Contact::Address(Id::new_v4()));
-			assertion(BincodePerson::create(contact_info.clone(), "", *store).unwrap());
+			test_create_assertion(BincodePerson::create(contact_info.clone(), "", *store).unwrap());
 
 			contact_info.insert(Contact::Email("foo@bar.io".into()));
-			assertion(BincodePerson::create(contact_info.clone(), "", *store).unwrap());
+			test_create_assertion(BincodePerson::create(contact_info.clone(), "", *store).unwrap());
 
 			contact_info.insert(Contact::Phone("1-800-555-3600".into()));
-			assertion(BincodePerson::create(contact_info.clone(), "", *store).unwrap());
+			test_create_assertion(BincodePerson::create(contact_info.clone(), "", *store).unwrap());
 
 			contact_info.insert(Contact::Address(Id::new_v4()));
-			assertion(BincodePerson::create(contact_info.clone(), "", *store).unwrap());
+			test_create_assertion(BincodePerson::create(contact_info.clone(), "", *store).unwrap());
 
 			contact_info.insert(Contact::Email("obviousemail@server.com".into()));
-			assertion(BincodePerson::create(contact_info, "", *store).unwrap());
+			test_create_assertion(BincodePerson::create(contact_info, "", *store).unwrap());
 
 			println!("\n>>>>> BincodePerson test_create {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 
+	fn test_create_assertion(bincode_person: BincodePerson<'_, '_, '_>)
+	{
+		let read_result = fs::read(bincode_person.filepath()).unwrap();
+		assert_eq!(bincode_person.person, bincode::deserialize(&read_result).unwrap());
+	}
+
 	#[test]
 	fn test_retrieve()
 	{
-		fn to_hashset<T>(slice: &[T]) -> HashSet<T> where T : Clone + Eq + Hash
-		{
-			return slice.iter().cloned().collect();
-		}
-
 		let start = Instant::now();
 
 		util::test_temp_store(|store|
 		{
 			let flingo = BincodePerson::create(
-				to_hashset(&[Contact::Address(Id::new_v4())]),
+				[Contact::Address(Id::new_v4())].iter().cloned().collect(),
 				"flingo",
 				*store
 			).unwrap();
 
 			let bob = BincodePerson::create(
-				to_hashset(&[Contact::Email("foo@bar.io".into())]),
+				[Contact::Email("foo@bar.io".into())].iter().cloned().collect(),
 				"bob",
 				*store
 			).unwrap();
 
 			let slimdi = BincodePerson::create(
-				to_hashset(&[Contact::Phone("1-800-555-3600".into())]),
+				[Contact::Phone("1-800-555-3600".into())].iter().cloned().collect(),
 				"slimdi",
 				*store
 			).unwrap();
 
 			let longone = BincodePerson::create(
-				to_hashset(&[Contact::Address(Id::new_v4())]),
+				[Contact::Address(Id::new_v4())].iter().cloned().collect(),
 				"longone",
 				*store
 			).unwrap();
@@ -195,7 +189,7 @@ mod tests
 			results = BincodePerson::retrieve(
 				MatchWhen::Any, // contact info
 				MatchWhen::Any, // id
-				MatchWhen::HasAny(to_hashset(&[slimdi.person.name.clone(), longone.person.name.clone()])), // name
+				MatchWhen::HasAny([slimdi.person.name.clone(), longone.person.name.clone()].iter().cloned().collect()), // name
 				*store,
 			).unwrap();
 

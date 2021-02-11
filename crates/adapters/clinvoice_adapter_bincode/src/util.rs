@@ -57,19 +57,14 @@ pub fn read_files<P: AsRef<Path>>(path: P) -> Result<FilterMap<fs::ReadDir, impl
 ///
 /// Test some `assertion` using a `root` directory within the OS's [temp dir][fn_temp_dir].
 ///
-/// # Parameters
+/// # Remarks
 ///
-/// * `root`, the directory within the [temp dir][fn_temp_dir] to use.
-///     * e.g. "foo" -> "%temp%/foo"
-/// * `assertion`, the test to run.
+/// `root` is joined with the [temp dir][fn_temp_dir] (e.g. "foo" -> "%temp%/foo").
 ///
 /// # Returns
 ///
 /// * Nothing, if the `assertion` passed.
 /// * An [`Error`](io::Error), if [temp dir][fn_temp_dir] could not be read.
-///
-/// # Panics
-/// If the `assertion` failed.
 ///
 /// [fn_temp_dir]: std::env::temp_dir
 #[cfg(test)]

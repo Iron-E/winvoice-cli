@@ -106,49 +106,42 @@ mod tests
 	use
 	{
 		super::{BincodeOrganization, HashSet, Id, Location, MatchWhen, OrganizationAdapter, util},
-		core::hash::Hash,
 		std::{fs, time::Instant},
 	};
 
 	#[test]
 	fn test_create()
 	{
-		fn assertion(bincode_organization: BincodeOrganization<'_, '_, '_>)
-		{
-			let read_result = fs::read(bincode_organization.filepath()).unwrap();
-			assert_eq!(bincode_organization.organization, bincode::deserialize(&read_result).unwrap());
-		}
-
 		let start = Instant::now();
 
 		util::test_temp_store(|store|
 		{
 			let earth_id = Id::new_v4();
-			assertion(BincodeOrganization::create(
+			test_create_assertion(BincodeOrganization::create(
 				Location {name: "Earth".into(), id: earth_id, outer_id: None},
 				"alsdkjaldkj", HashSet::new(), *store
 			).unwrap());
 
 			let usa_id = Id::new_v4();
-			assertion(BincodeOrganization::create(
+			test_create_assertion(BincodeOrganization::create(
 				Location {name: "USA".into(), id: usa_id, outer_id: Some(earth_id)},
 				"alskdjalgkh  ladhkj EAL ISdh", HashSet::new(), *store
 			).unwrap());
 
 			let arizona_id = Id::new_v4();
-			assertion(BincodeOrganization::create(
+			test_create_assertion(BincodeOrganization::create(
 				Location {name: "Arizona".into(), id: arizona_id, outer_id: Some(earth_id)},
 				" AAA – 44 %%", HashSet::new(), *store
 			).unwrap());
 
 			let phoenix_id = Id::new_v4();
-			assertion(BincodeOrganization::create(
+			test_create_assertion(BincodeOrganization::create(
 				Location {name: "Phoenix".into(), id: phoenix_id, outer_id: Some(arizona_id)},
 				" ^^^ ADSLKJDLASKJD FOCJCI", HashSet::new(), *store
 			).unwrap());
 
 			let some_id = Id::new_v4();
-			assertion(BincodeOrganization::create(
+			test_create_assertion(BincodeOrganization::create(
 				Location {name: "Some Road".into(), id: some_id, outer_id: Some(phoenix_id)},
 				"aldkj doiciuc giguy &&", HashSet::new(), *store
 			).unwrap());
@@ -157,14 +150,15 @@ mod tests
 		});
 	}
 
+	fn test_create_assertion(bincode_organization: BincodeOrganization<'_, '_, '_>)
+	{
+		let read_result = fs::read(bincode_organization.filepath()).unwrap();
+		assert_eq!(bincode_organization.organization, bincode::deserialize(&read_result).unwrap());
+	}
+
 	#[test]
 	fn test_retrieve()
 	{
-		fn to_hashset<T>(slice: &[T]) -> HashSet<T> where T : Clone + Eq + Hash
-		{
-			return slice.iter().cloned().collect();
-		}
-
 		let start = Instant::now();
 
 		util::test_temp_store(|store|
@@ -191,7 +185,7 @@ mod tests
 			let results = BincodeOrganization::retrieve(
 				MatchWhen::Any, // id
 				MatchWhen::InRange(&|id| id == &earth_id || id == &usa_id), // location
-				MatchWhen::HasNone(to_hashset(&[aaa.organization.name.clone()])), // name
+				MatchWhen::HasNone([aaa.organization.name.clone()].iter().cloned().collect()), // name
 				MatchWhen::Any, // representatives
 				*store,
 			).unwrap();

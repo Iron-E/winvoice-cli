@@ -131,50 +131,45 @@ mod tests
 	use
 	{
 		super::{BincodeLocation, Id, LocationAdapter, MatchWhen, util},
-		core::hash::Hash,
-		std::{collections::HashSet, fs, time::Instant},
+		std::{fs, time::Instant},
 	};
 
 	#[test]
 	fn test_create()
 	{
-		fn assertion(bincode_location: &BincodeLocation<'_, '_, '_>)
-		{
-			let read_result = fs::read(bincode_location.filepath()).unwrap();
-			assert_eq!(bincode_location.location, bincode::deserialize(&read_result).unwrap());
-		}
-
 		let start = Instant::now();
 
 		util::test_temp_store(|store|
 		{
 			let earth = BincodeLocation::create("Earth", *store).unwrap();
-			assertion(&earth);
+			test_create_assertion(&earth);
 
 			let usa = earth.create_inner("USA").unwrap();
 			assert_eq!(usa.location.outer_id, Some(earth.location.id));
-			assertion(&usa);
+			test_create_assertion(&usa);
 
 			let arizona = usa.create_inner("Arizona").unwrap();
 			assert_eq!(arizona.location.outer_id, Some(usa.location.id));
-			assertion(&arizona);
+			test_create_assertion(&arizona);
 
 			let phoenix = arizona.create_inner("Phoenix").unwrap();
 			assert_eq!(phoenix.location.outer_id, Some(arizona.location.id));
-			assertion(&phoenix);
+			test_create_assertion(&phoenix);
 
 			println!("\n>>>>> BincodeLocation test_start {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 
+	/// The assertion most commonly used for the [`create` test](test_create).
+	fn test_create_assertion(bincode_location: &BincodeLocation<'_, '_, '_>)
+	{
+		let read_result = fs::read(bincode_location.filepath()).unwrap();
+		assert_eq!(bincode_location.location, bincode::deserialize(&read_result).unwrap());
+	}
+
 	#[test]
 	fn test_retrieve()
 	{
-		fn to_hashset<T>(slice: &[T]) -> HashSet<T> where T : Clone + Eq + Hash
-		{
-			return slice.iter().cloned().collect();
-		}
-
 		let start = Instant::now();
 
 		return util::test_temp_store(|store|
@@ -200,9 +195,9 @@ mod tests
 
 			// Retrieve Arizona
 			results = BincodeLocation::retrieve(
-				MatchWhen::HasAny(to_hashset(&[earth.location.id, arizona.location.id])), // id
+				MatchWhen::HasAny([earth.location.id, arizona.location.id].iter().cloned().collect()), // id
 				MatchWhen::Any, // name
-				MatchWhen::HasNone(to_hashset(&[Option::<Id>::None])), // outer id
+				MatchWhen::HasNone([Option::<Id>::None].iter().cloned().collect()), // outer id
 				*store,
 			).unwrap();
 

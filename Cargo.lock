@@ -50,11 +50,11 @@ dependencies = [
 
 [[package]]
 name = "clinvoice"
-version = "0.1.0"
+version = "0.2.0"
 
 [[package]]
 name = "clinvoice_adapter"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "clinvoice_data",
  "snafu",
@@ -62,7 +62,7 @@ dependencies = [
 
 [[package]]
 name = "clinvoice_adapter_bincode"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "bincode",
  "clinvoice_adapter",
@@ -89,7 +89,7 @@ dependencies = [
 
 [[package]]
 name = "clinvoice_data"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "chrono",
  "rust_decimal",
@@ -116,9 +116,9 @@ dependencies = [
 
 [[package]]
 name = "libc"
-version = "0.2.84"
+version = "0.2.86"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1cca32fa0182e8c0989459524dc356b8f2b5c10f1b9eb521b7d182c03cf8c5ff"
+checksum = "b7282d924be3275cec7f6756ff4121987bc6481325397dde6ba3e7802b1a8b1c"
 
 [[package]]
 name = "num-integer"
@@ -159,9 +159,9 @@ dependencies = [
 
 [[package]]
 name = "rust_decimal"
-version = "1.10.1"
+version = "1.10.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "04d1fde955d206c00af1eb529d8ebfca3b505921820a0436566dbcc6c4d4ffb3"
+checksum = "e3e5a94e2006dd60c603d8481c65b665b4b6694f78d23e15869ad10eb883e36e"
 dependencies = [
  "arrayvec",
  "num-traits",

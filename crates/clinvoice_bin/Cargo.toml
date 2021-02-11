@@ -12,5 +12,9 @@ repository = "https://www.github.com/Iron-E/clinvoice"
 
 [dependencies]
 # CLInvoice
-clinvoice_adapter_bincode = {path='../adapters/clinvoice_adapter_bincode', version="0.1"}
+clinvoice_adapter_bincode = {path='../adapters/clinvoice_adapter_bincode', optional=true, version="0.2"}
 clinvoice_config = {path='../clinvoice_config', version="0.1"}
+
+[features]
+default = ["bincode"]
+bincode = ["clinvoice_adapter_bincode"]

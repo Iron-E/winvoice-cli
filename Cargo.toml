@@ -1,7 +1,7 @@
 # See https://doc.rust-lang.org/cargo/reference/manifest.html
 [package]
 name = "clinvoice"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Iron-E <code.iron.e@gmail.com>"]
 description = "Invoice from the command line."
 

@@ -12,8 +12,8 @@ repository = "https://www.github.com/Iron-E/clinvoice"
 
 [dependencies]
 # CLInvoice
-clinvoice_adapter = {path="../adapters/clinvoice_adapter", version="0.1"}
-clinvoice_data = {path="../clinvoice_data", version="0.1"}
+clinvoice_adapter = {path="../adapters/clinvoice_adapter", version="0.2"}
+clinvoice_data = {path="../clinvoice_data", version="0.2"}
 
 # Serialization
 serde = {version="1", features=["derive"]}

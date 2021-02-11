@@ -1,7 +1,7 @@
 # See https://doc.rust-lang.org/cargo/reference/manifest.html
 [package]
 name = "clinvoice_adapter"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Iron-E <code.iron.e@gmail.com>"]
 description = "Shared adapter definitions for CLInvoice."
 
@@ -12,7 +12,7 @@ repository = "https://www.github.com/Iron-E/clinvoice"
 
 [dependencies]
 # CLInvoice
-clinvoice_data = {path="../../clinvoice_data", version="0.1"}
+clinvoice_data = {path="../../clinvoice_data", version="0.2"}
 
 # Errors
 snafu = "0.6"

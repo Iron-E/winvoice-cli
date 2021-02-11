@@ -63,7 +63,7 @@ mod tests
 {
 	use
 	{
-		super::{BincodeEmployee, BincodeJob, BincodeOrganization, Deletable, JobAdapter, OrganizationAdapter, Updatable},
+		super::{BincodeEmployee, BincodeJob, BincodeOrganization, Deletable, JobAdapter, MatchWhen, OrganizationAdapter, Updatable},
 		crate::
 		{
 			data::{BincodeLocation, BincodePerson},
@@ -83,7 +83,7 @@ mod tests
 		{
 			let earth = BincodeLocation::create("Earth", *store).unwrap();
 
-			let big_old_test = BincodeOrganization::create(
+			let mut big_old_test = BincodeOrganization::create(
 				earth.location.clone(),
 				"Big Old Test Corporation",
 				HashSet::new(),
@@ -129,6 +129,30 @@ mod tests
 			assert!(creation.filepath().is_file());
 			assert!(earth.filepath().is_file());
 			assert!(testy.filepath().is_file());
+
+			big_old_test = BincodeOrganization::retrieve(
+				MatchWhen::EqualTo(big_old_test.organization.id), // id
+				MatchWhen::Any, // location
+				MatchWhen::Any, // name
+				MatchWhen::Any, // representatives
+				*store,
+			).unwrap().iter().next().unwrap().clone();
+
+			creation = BincodeJob::retrieve(
+				MatchWhen::EqualTo(big_old_test.organization.id), // client
+				MatchWhen::Any, // date close
+				MatchWhen::Any, // date open
+				MatchWhen::EqualTo(creation.job.id), // id
+				MatchWhen::Any, // invoice date issued
+				MatchWhen::Any, // invoice date paid
+				MatchWhen::Any, // invoice hourly rate
+				MatchWhen::Any, // notes
+				MatchWhen::Any, // objectives
+				MatchWhen::Any, // timesheet employee
+				MatchWhen::Any, // timesheet time begin
+				MatchWhen::Any, // timesheet time end
+				*store,
+			).unwrap().iter().next().unwrap().clone();
 
 			// Assert that no references to the deleted entity remain.
 			assert!(big_old_test.organization.representatives.iter().all(|id| *id != ceo_testy.employee.id));

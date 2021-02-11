@@ -57,8 +57,15 @@ mod tests
 {
 	use
 	{
-		crate::util,
-		std::time::Instant,
+		super::{BincodeEmployee, BincodeJob, BincodeOrganization, Deletable, JobAdapter},
+		crate::
+		{
+			data::{BincodeLocation, BincodePerson},
+			util,
+		},
+		clinvoice_adapter::data::{EmployeeAdapter, LocationAdapter, OrganizationAdapter, PersonAdapter, Updatable},
+		clinvoice_data::{chrono::Utc, Contact, Decimal, Money},
+		std::{collections::HashSet, time::Instant},
 	};
 
 	#[test]
@@ -68,9 +75,56 @@ mod tests
 
 		util::test_temp_store(|store|
 		{
-			// TODO
+			let earth = BincodeLocation::create("Earth", *store).unwrap();
 
-			println!("\n>>>>> BincodeOrganiztaion test_delete {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+			let big_old_test = BincodeOrganization::create(
+				earth.location.clone(),
+				"Big Old Test Corporation",
+				HashSet::new(),
+				*store,
+			).unwrap();
+
+			let mut contact_info = HashSet::new();
+			contact_info.insert(Contact::Address(earth.location.id));
+
+			let testy = BincodePerson::create(
+				contact_info.clone(),
+				"Testy Mćtesterson",
+				*store,
+			).unwrap();
+
+			let ceo_testy = BincodeEmployee::create(
+				contact_info.clone(),
+				big_old_test.organization.clone(),
+				testy.person.clone(),
+				"CEO of Tests",
+				*store,
+			).unwrap();
+
+			let mut creation = BincodeJob::create(
+				big_old_test.organization.clone(),
+				Utc::now(),
+				Money::new(Decimal::new(200, 2), "USD"),
+				"Test the job creation function.",
+				*store,
+			).unwrap();
+
+			creation.job.start_timesheet(ceo_testy.employee.id);
+			creation.update().unwrap();
+
+			// Assert that the deletion works
+			assert!(big_old_test.delete(true).is_ok());
+
+			// Assert that the dependent files are gone
+			assert!(!big_old_test.filepath().is_file());
+			assert!(!ceo_testy.filepath().is_file());
+			assert!(!creation.filepath().is_file());
+
+			// Assert that the independent files are present
+			assert!(earth.filepath().is_file());
+			assert!(testy.filepath().is_file());
+
+			println!("\n>>>>> BincodeEmployee test_delete {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 }

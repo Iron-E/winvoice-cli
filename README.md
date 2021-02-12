@@ -10,79 +10,56 @@ There is a lack of programs for CLI invoice maintenance, especially those which 
 
 ## Installation
 
-1. __TODO__
+### Cargo
 
-### Requirements
+1. Run the following command in a terminal:
+	```sh
+	cargo install clinvoice --features=<adapters>
+	```
+	* Any desired storage implementations (e.g. Bincode, PostreSQL) should be listed in place of `<adapters>`.
 
-* Rust (__TODO__)
+
+> NOTE: This application has not yet been uploaded to [crates.io](crates.io)!
+
+#### Requirements
+
+* `cargo`
+
+### Source
+
+1. Download this repository from GitHub:
+	```sh
+	git clone https://github.com/Iron-E/clinvoice
+	```
+2. Use `cargo` to build and install the cloned repo:
+	```sh
+	cargo install --path=./clinvoice
+	```
+
+#### Requirements
+
+* `cargo`
+
+## Supported Storage Adapters
+
+Below is a list of supported storage adapters. If the adapter has a check next to it, the implementation is complete. If it has no check next to it, the implementation is either a WIP or planned.
+
+* [x] Bincode File System
+* [ ] PostgreSQL DB
 
 ## Usage
 
-* [ ] Help
-	```sh
-	clinvoice help <command>
-	```
-* [ ] Export / issue invoice:
-	```sh
-	clinvoice export <job_id> [-c|--currency <currency>] [-o|--output <output_file>]
-	```
-* [ ] List
-	```sh
-	clinvoice list [-c|--client <client_name>] [-i|--issued|--no-issued] [-o|--outstanding|--no-outstanding] [-s|--sort <sort_by>]
-	```
-* [ ] New
-	```sh
-	clinvoice new <client_name> [-r|--rate <currency_symbol><job_rate>]
-	```
-* [ ] Manipulate timesheets:
-	```sh
-	clinvoice time [start|stop] <job_number>
-	```
-* [ ] Receive invoice payment:
-	```sh
-	clinvoice rec|receive <job_id>
-	```
-* [ ] Manipulate jobs:
-	```sh
-	clinvoice job <job_id> [-c|--client <client_id>]
-	clinvoice job <job_id> [-e|--employer <employer_id>]
-	```
+For more information, run `clinvoice help` from the command line.
 
-## Configuration
+# Roadmap
 
-* [ ] List configuration:
-	```sh
-	clinvoice config
-	```
-* [ ] Reset to defaults:
-	```sh
-	clinvoice config -r|--reset
-	```
-* [ ] Invoice directory:
-	```sh
-	clinvoice config -d|--directory <invoice_directory>
-	```
-* [ ] Default company street address:
-	```sh
-	clinvoice config -a|--address <company_address>
-	```
-* [ ] Default company email:
-	```sh
-	clinvoice config -m|--email <company_email>
-	```
-* [ ] Default company name:
-	```sh
-	clinvoice config -n|--name <company_name>
-	```
-* [ ] Default technician name:
-	```sh
-	clinvoice config -t|--technician <technician_name>
-	```
-* [ ] Track time in specific intervals (`0` to disable):
-	```sh
-	clinvoice config -i|--interval <integer>
-	```
-* [ ] Specify default currency for hourly rates:
-	```sh
-	clinvoice config -c|--currency '$'
-	```
+Below is a list of objectives which have been identified as necessary before this application's 1.0 release. Any item which is crossed out has been completed.
+
+1. ~~Define the data model as `clinvoice_data`.~~
+2. ~~Create adapter traits as `clinovice_adapter`.~~
+3. ~~Implement `clinvoice_adapter` traits for bincode filesystem as `clinvoice_adapter_bincode`.~~
+4. Write `clinvoice` application logic as `clinvoice_bin`.
+5. Generate more boilerplate with `Adapt!` macro.
+6. Write PostgreSQL statements for `clinvoice_data` entities.
+7. Implement `clinovice_adapter` traits for PostgreSQL as `clinvoice_adapter_postgres`.
+8. GUI as `guinvoice`?

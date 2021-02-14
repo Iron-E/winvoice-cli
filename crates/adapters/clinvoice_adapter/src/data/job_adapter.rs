@@ -1,6 +1,6 @@
 use
 {
-	super::{Deletable, MatchWhen, Updatable},
+	super::{Deletable, Initializable, MatchWhen, Updatable},
 	crate::Store,
 	clinvoice_data::
 	{
@@ -12,6 +12,7 @@ use
 
 pub trait JobAdapter<'pass, 'path, 'user> :
 	Deletable +
+	Initializable<'pass, 'path, 'user> +
 	Into<Job> +
 	Into<Result<Organization, Box<dyn Error>>> +
 	Into<Store<'pass, 'path, 'user>> +
@@ -35,11 +36,6 @@ pub trait JobAdapter<'pass, 'path, 'user> :
 		objectives: &'objectives str,
 		store: Store<'pass, 'path, 'user>,
 	) -> Result<Self, Box<dyn Error>>;
-
-	/// # Summary
-	///
-	/// Initialize the database for a given [`Store`].
-	fn init(store: &Store<'pass, 'path, 'user>) -> Result<(), Box<dyn Error>>;
 
 	/// # Summary
 	///

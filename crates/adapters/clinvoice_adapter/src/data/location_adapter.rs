@@ -1,6 +1,6 @@
 use
 {
-	super::{MatchWhen, Deletable, Updatable},
+	super::{MatchWhen, Deletable, Initializable, Updatable},
 	crate::Store,
 	clinvoice_data::{Location, Id},
 	core::fmt::Display,
@@ -10,6 +10,7 @@ use
 pub trait LocationAdapter<'pass, 'path, 'user> :
 	Deletable +
 	Display +
+	Initializable<'pass, 'path, 'user> +
 	Into<Location> +
 	Into<Store<'pass, 'path, 'user>> +
 	Updatable +
@@ -43,11 +44,6 @@ pub trait LocationAdapter<'pass, 'path, 'user> :
 	/// Location {name, id: /* generated */, outside_id: self.unroll().id};
 	/// ```
 	fn create_inner<'name>(&self, name: &'name str) -> Result<Self, Box<dyn Error>>;
-
-	/// # Summary
-	///
-	/// Initialize the database for a given [`Store`].
-	fn init(store: &Store<'pass, 'path, 'user>) -> Result<(), Box<dyn Error>>;
 
 	/// # Summary
 	///

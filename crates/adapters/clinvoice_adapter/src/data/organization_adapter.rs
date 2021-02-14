@@ -1,6 +1,6 @@
 use
 {
-	super::{Deletable, MatchWhen, Updatable},
+	super::{Deletable, Initializable, MatchWhen, Updatable},
 	crate::Store,
 	clinvoice_data::{Employee, Location, Organization, Id},
 	std::{collections::HashSet, error::Error},
@@ -8,6 +8,7 @@ use
 
 pub trait OrganizationAdapter<'pass, 'path, 'user> :
 	Deletable +
+	Initializable<'pass, 'path, 'user> +
 	Into<Organization> +
 	Into<Result<HashSet<Employee>, Box<dyn Error>>> +
 	Into<Result<Location, Box<dyn Error>>> +
@@ -31,11 +32,6 @@ pub trait OrganizationAdapter<'pass, 'path, 'user> :
 		representatives: HashSet<Employee>,
 		store: Store<'pass, 'path, 'user>,
 	) -> Result<Self, Box<dyn Error>>;
-
-	/// # Summary
-	///
-	/// Initialize the database for a given [`Store`].
-	fn init(store: &Store<'pass, 'path, 'user>) -> Result<(), Box<dyn Error>>;
 
 	/// # Summary
 	///

@@ -1,4 +1,5 @@
 mod deletable;
+mod initializable;
 mod into_hashset_employee_result;
 mod into_location_result;
 mod organization_adapter;

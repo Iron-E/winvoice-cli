@@ -4,7 +4,7 @@ use
 	crate::util,
 	clinvoice_adapter::
 	{
-		data::{MatchWhen, OrganizationAdapter, Updatable},
+		data::{Initializable, MatchWhen, OrganizationAdapter, Updatable},
 		Store
 	},
 	clinvoice_data::{Employee, Location, Organization, Id},
@@ -48,15 +48,6 @@ impl<'pass, 'path, 'user> OrganizationAdapter<'pass, 'path, 'user> for BincodeOr
 		bincode_organization.update()?;
 
 		return Ok(bincode_organization);
-	}
-
-	/// # Summary
-	///
-	/// Initialize the database for a given [`Store`].
-	fn init(store: &Store<'pass, 'path, 'user>) -> Result<(), Box<dyn Error>>
-	{
-		util::create_store_dir(&Self::path(store))?;
-		return Ok(());
 	}
 
 	/// # Summary

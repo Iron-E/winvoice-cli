@@ -1,4 +1,5 @@
 mod deletable;
+mod initializable;
 mod person_adapter;
 mod updatable;
 

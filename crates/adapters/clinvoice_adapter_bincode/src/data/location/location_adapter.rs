@@ -4,7 +4,7 @@ use
 	crate::util,
 	clinvoice_adapter::
 	{
-		data::{MatchWhen, LocationAdapter, Updatable},
+		data::{Initializable, LocationAdapter, MatchWhen, Updatable},
 		Store
 	},
 	clinvoice_data::{Location, Id},
@@ -75,15 +75,6 @@ impl<'pass, 'path, 'user> LocationAdapter<'pass, 'path, 'user> for BincodeLocati
 		inner_person.update()?;
 
 		return Ok(inner_person);
-	}
-
-	/// # Summary
-	///
-	/// Initialize the database for a given [`Store`].
-	fn init(store: &Store<'pass, 'path, 'user>) -> Result<(), Box<dyn Error>>
-	{
-		util::create_store_dir(&Self::path(store))?;
-		return Ok(());
 	}
 
 	/// # Summary

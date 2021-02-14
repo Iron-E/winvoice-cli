@@ -1,5 +1,6 @@
 mod deletable;
 mod display;
+mod initializable;
 mod location_adapter;
 mod updatable;
 

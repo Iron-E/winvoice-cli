@@ -1,3 +1,5 @@
+use structopt::StructOpt;
+
 /// # Summary
 ///
 /// The `clinvoice retrieve` subcommand.
@@ -15,6 +17,8 @@
 /// To update and update an entity, the `--update` flag must be passed. This will present a menu to
 /// select which entities should be updateed, and then after a confirmation dialogue will be
 /// presented to confirm the changes before update.
+#[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, StructOpt)]
+#[structopt(name="retrieve", about="Retrieve information that was recorded with CLInvoice.")]
 pub struct Retrieve
 {
 	/// # Summary
@@ -24,6 +28,7 @@ pub struct Retrieve
 	/// # Remarks
 	///
 	/// Takes precedence over `--update`.
+	#[structopt(short, long)]
 	pub delete: bool,
 
 	/// # Summary
@@ -33,11 +38,13 @@ pub struct Retrieve
 	/// # Remarks
 	///
 	/// `--delete` take precedence.
+	#[structopt(short, long)]
 	pub update: bool,
 
 	/// # Summary
 	///
 	/// The retrieval command to perform.
+	#[structopt(subcommand)]
 	pub command: RetrieveCommand,
 }
 
@@ -45,11 +52,13 @@ pub struct Retrieve
 ///
 /// The subcommand of the [`Retrieve`] command. Either `employee`, `job`, `location`,
 /// `organization`, `person`.
+#[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, StructOpt)]
 pub enum RetrieveCommand
 {
 	/// # Summary
 	///
 	/// The `clinvoice retrieve employee` subcommand.
+	#[structopt(name="employee", about="Retrieve existing records about employees.")]
 	Employee
 	{
 	},
@@ -57,6 +66,7 @@ pub enum RetrieveCommand
 	/// # Summary
 	///
 	/// The `clinvoice retrieve job` subcommand.
+	#[structopt(name="job", about="Retrieve existing records about job.")]
 	Job
 	{
 	},
@@ -64,6 +74,7 @@ pub enum RetrieveCommand
 	/// # Summary
 	///
 	/// The `clinvoice retrieve location` subcommand.
+	#[structopt(name="location", about="Retrieve existing records about locations.")]
 	Location
 	{
 	},
@@ -71,6 +82,7 @@ pub enum RetrieveCommand
 	/// # Summary
 	///
 	/// The `clinvoice retrieve organization` subcommand.
+	#[structopt(name="organization", about="Retrieve existing records about organizations.")]
 	Organization
 	{
 	},
@@ -78,6 +90,7 @@ pub enum RetrieveCommand
 	/// # Summary
 	///
 	/// The `clinvoice retrieve person` subcommand.
+	#[structopt(name="person", about="Retrieve existing records about people.")]
 	Person
 	{
 	},

@@ -127,7 +127,7 @@ mod tests
 {
 	use
 	{
-		super::{BincodeJob, Id, HashSet, JobAdapter, MatchWhen, Money, Organization, Utc, util},
+		super::{BincodeJob, Id, JobAdapter, MatchWhen, Money, Organization, Utc, util},
 		clinvoice_data::Decimal,
 		std::{fs, time::Instant},
 	};
@@ -142,7 +142,6 @@ mod tests
 			id: Id::new_v4(),
 			location_id: Id::new_v4(),
 			name: "Big Old Test Corporation".into(),
-			representatives: HashSet::new(),
 		};
 
 		util::test_temp_store(|store|
@@ -207,7 +206,6 @@ mod tests
 			id: Id::new_v4(),
 			location_id: Id::new_v4(),
 			name: "Big Old Test Corporation".into(),
-			representatives: HashSet::new(),
 		};
 
 		util::test_temp_store(|store|

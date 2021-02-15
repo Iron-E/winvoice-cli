@@ -36,7 +36,7 @@ mod tests
 		crate::util,
 		clinvoice_adapter::data::OrganizationAdapter,
 		clinvoice_data::Location,
-		std::{collections::HashSet, error::Error, time::Instant},
+		std::{error::Error, time::Instant},
 	};
 
 	#[test]
@@ -50,7 +50,6 @@ mod tests
 			let dogood = BincodeOrganization::create(
 				arizona.location.clone(),
 				"DoGood Inc",
-				HashSet::new(),
 				*store
 			).unwrap();
 

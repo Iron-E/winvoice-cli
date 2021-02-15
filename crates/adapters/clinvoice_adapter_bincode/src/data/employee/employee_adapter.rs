@@ -7,7 +7,7 @@ use
 		data::{EmployeeAdapter, Initializable, MatchWhen, Updatable},
 		Store
 	},
-	clinvoice_data::{Contact, Employee, Organization, Person, Id},
+	clinvoice_data::{Contact, Employee, EmployeeStatus, Organization, Person, Id},
 	std::{collections::HashSet, error::Error, fs, io::BufReader},
 };
 
@@ -30,6 +30,7 @@ impl<'pass, 'path, 'user> EmployeeAdapter<'pass, 'path, 'user> for BincodeEmploy
 		organization: Organization,
 		person: Person,
 		title: &'title str,
+		status: EmployeeStatus,
 		store: Store<'pass, 'path, 'user>,
 	) -> Result<Self, Box<dyn Error>>
 	{
@@ -40,11 +41,11 @@ impl<'pass, 'path, 'user> EmployeeAdapter<'pass, 'path, 'user> for BincodeEmploy
 			employee: Employee
 			{
 				contact_info,
-				employed: true,
 				id: util::unique_id(&Self::path(&store))?,
 				organization_id: organization.id,
 				person_id: person.id,
 				title: title.into(),
+				status,
 			},
 			store,
 		};
@@ -68,11 +69,11 @@ impl<'pass, 'path, 'user> EmployeeAdapter<'pass, 'path, 'user> for BincodeEmploy
 	/// * An [`Error`], should something go wrong.
 	fn retrieve(
 		contact_info: MatchWhen<Contact>,
-		employed: MatchWhen<bool>,
 		id: MatchWhen<Id>,
 		organization: MatchWhen<Id>,
 		person: MatchWhen<Id>,
 		title: MatchWhen<String>,
+		status: MatchWhen<EmployeeStatus>,
 		store: Store<'pass, 'path, 'user>,
 	) -> Result<HashSet<Self>, Box<dyn Error>>
 	{
@@ -85,11 +86,11 @@ impl<'pass, 'path, 'user> EmployeeAdapter<'pass, 'path, 'user> for BincodeEmploy
 			))?;
 
 			if contact_info.set_matches(&employee.contact_info) &&
-				employed.is_match(&employee.employed) &&
 				id.is_match(&employee.id) &&
 				organization.is_match(&employee.organization_id) &&
 				person.is_match(&employee.person_id) &&
-				title.is_match(&employee.title)
+				title.is_match(&employee.title) &&
+				status.is_match(&employee.status)
 			{
 				results.insert(BincodeEmployee {employee, store});
 			}
@@ -104,7 +105,7 @@ mod tests
 {
 	use
 	{
-		super::{BincodeEmployee, Contact, EmployeeAdapter, HashSet, Id, MatchWhen, Organization, Person, util},
+		super::{BincodeEmployee, Contact, EmployeeAdapter, EmployeeStatus, HashSet, Id, MatchWhen, Organization, Person, util},
 		std::{fs, time::Instant},
 	};
 
@@ -116,7 +117,6 @@ mod tests
 			id: Id::new_v4(),
 			location_id: Id::new_v4(),
 			name: "Big Old Test Corporation".into(),
-			representatives: HashSet::new(),
 		};
 
 		let start = Instant::now();
@@ -136,6 +136,7 @@ mod tests
 					name: "Testy Mćtesterson".into(),
 				},
 				"CEO of Tests",
+				EmployeeStatus::Employed,
 				*store,
 			).unwrap());
 
@@ -150,6 +151,7 @@ mod tests
 					name: "Nimron MacBeaver".into(),
 				},
 				"Oblong Shape Holder",
+				EmployeeStatus::NotEmployed,
 				*store,
 			).unwrap());
 
@@ -164,6 +166,7 @@ mod tests
 					name: "An Actual «Tor♯tust".into(),
 				},
 				"Mixer of Soups",
+				EmployeeStatus::Representative,
 				*store,
 			).unwrap());
 
@@ -178,6 +181,7 @@ mod tests
 					name: "Jimmy Neutron, Boy Genius' Dog 'Gottard'".into(),
 				},
 				"Sidekick",
+				EmployeeStatus::Employed,
 				*store,
 			).unwrap());
 
@@ -192,6 +196,7 @@ mod tests
 					name: "Testy Mćtesterson".into(),
 				},
 				"Lazy No-good Duplicate Name User",
+				EmployeeStatus::NotEmployed,
 				*store,
 			).unwrap());
 
@@ -215,7 +220,6 @@ mod tests
 			id: Id::new_v4(),
 			location_id: Id::new_v4(),
 			name: "Big Old Test Corporation".into(),
-			representatives: HashSet::new(),
 		};
 
 		util::test_temp_store(|store|
@@ -233,6 +237,7 @@ mod tests
 					name: "Testy Mćtesterson".into(),
 				},
 				"CEO of Tests",
+				EmployeeStatus::NotEmployed,
 				*store,
 			).unwrap();
 
@@ -247,6 +252,7 @@ mod tests
 					name: "Nimron MacBeaver".into(),
 				},
 				"Oblong Shape Holder",
+				EmployeeStatus::Employed,
 				*store,
 			).unwrap();
 
@@ -261,6 +267,7 @@ mod tests
 					name: "An Actual «Tor♯tust".into(),
 				},
 				"Mixer of Soups",
+				EmployeeStatus::Representative,
 				*store,
 			).unwrap();
 
@@ -275,6 +282,7 @@ mod tests
 					name: "Jimmy Neutron, Boy Genius' Dog 'Gottard'".into(),
 				},
 				"Sidekick",
+				EmployeeStatus::Employed,
 				*store,
 			).unwrap();
 
@@ -289,6 +297,7 @@ mod tests
 					name: "Testy Mćtesterson".into(),
 				},
 				"Lazy No-good Duplicate Name User",
+				EmployeeStatus::NotEmployed,
 				*store,
 			).unwrap();
 
@@ -296,11 +305,11 @@ mod tests
 			// Retrieve everything.
 			let mut results = BincodeEmployee::retrieve(
 				MatchWhen::Any, // contact info
-				MatchWhen::Any, // employed
 				MatchWhen::Any, // id
 				MatchWhen::Any, // organization
 				MatchWhen::Any, // person
 				MatchWhen::Any, // title
+				MatchWhen::Any, // status
 				*store,
 			).unwrap();
 
@@ -314,11 +323,11 @@ mod tests
 			// Retrieve Arizona
 			results = BincodeEmployee::retrieve(
 				MatchWhen::Any, // contact info
-				MatchWhen::Any, // employed
 				MatchWhen::HasAny([testy_mctesterson.employee.id, gottard.employee.id].iter().cloned().collect()), // id
 				MatchWhen::Any, // organization
 				MatchWhen::Any, // person
 				MatchWhen::Any, // title
+				MatchWhen::Any, // status
 				*store,
 			).unwrap();
 

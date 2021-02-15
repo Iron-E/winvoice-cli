@@ -14,7 +14,6 @@ impl Into<Result<Organization, Box<dyn Error>>> for BincodeEmployee<'_, '_, '_>
 			MatchWhen::EqualTo(self.employee.organization_id), // id
 			MatchWhen::Any, // location
 			MatchWhen::Any, // name
-			MatchWhen::Any, // representatives
 			self.store,
 		)?;
 
@@ -36,8 +35,8 @@ mod tests
 		super::{BincodeEmployee, BincodeOrganization, OrganizationAdapter},
 		crate::util,
 		clinvoice_adapter::data::EmployeeAdapter,
-		clinvoice_data::{Contact, Id, Location, Organization, Person},
-		std::{collections::HashSet, error::Error, time::Instant},
+		clinvoice_data::{Contact, EmployeeStatus, Id, Location, Organization, Person},
+		std::{error::Error, time::Instant},
 	};
 
 	#[test]
@@ -50,7 +49,6 @@ mod tests
 			let dogood = BincodeOrganization::create(
 				Location {name: "Earth".into(), id: Id::new_v4(), outer_id: None},
 				"DoGood Inc",
-				HashSet::new(),
 				*store
 			).unwrap();
 
@@ -64,6 +62,7 @@ mod tests
 					name: "Testy Mćtesterson".into(),
 				},
 				"CEO of Tests",
+				EmployeeStatus::Employed,
 				*store,
 			).unwrap();
 

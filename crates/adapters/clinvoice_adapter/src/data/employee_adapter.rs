@@ -2,7 +2,7 @@ use
 {
 	super::{MatchWhen, Deletable, Initializable, Updatable},
 	crate::Store,
-	clinvoice_data::{Contact, Employee, Organization, Person, Id},
+	clinvoice_data::{Contact, Employee, EmployeeStatus, Organization, Person, Id},
 	std::{collections::HashSet, error::Error},
 };
 
@@ -32,6 +32,7 @@ pub trait EmployeeAdapter<'pass, 'path, 'user> :
 		organization: Organization,
 		person: Person,
 		title: &'title str,
+		status: EmployeeStatus,
 		store: Store<'pass, 'path, 'user>,
 	) -> Result<Self, Box<dyn Error>>;
 
@@ -49,11 +50,11 @@ pub trait EmployeeAdapter<'pass, 'path, 'user> :
 	/// * An [`Error`], should something go wrong.
 	fn retrieve(
 		contact_info: MatchWhen<Contact>,
-		employed: MatchWhen<bool>,
 		id: MatchWhen<Id>,
 		organization: MatchWhen<Id>,
 		person: MatchWhen<Id>,
 		title: MatchWhen<String>,
+		status: MatchWhen<EmployeeStatus>,
 		store: Store<'pass, 'path, 'user>,
 	) -> Result<HashSet<Self>, Box<dyn Error>>;
 }

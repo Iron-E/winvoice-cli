@@ -1,10 +1,6 @@
 mod hash;
 
-use
-{
-	crate::Id,
-	std::collections::HashSet,
-};
+use crate::Id;
 
 #[cfg(feature="serde_support")]
 use serde::{Deserialize, Serialize};
@@ -39,18 +35,4 @@ pub struct Organization
 	///
 	/// The name of the [`Organization`].
 	pub name: String,
-
-	/// # Summary
-	///
-	/// The [`Employee`](crate::Employee)s who represent the [`Organization`].
-	///
-	/// # Example
-	///
-	/// ```toml
-	/// [representatives]
-	/// chief_executive_officer = 1
-	/// chief_operations_officer = 2
-	/// director_of_finance = 43
-	/// ```
-	pub representatives: HashSet<Id>,
 }

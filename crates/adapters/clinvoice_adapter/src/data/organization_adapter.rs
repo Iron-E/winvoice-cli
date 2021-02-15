@@ -29,7 +29,6 @@ pub trait OrganizationAdapter<'pass, 'path, 'user> :
 	fn create<'name>(
 		location: Location,
 		name: &'name str,
-		representatives: HashSet<Employee>,
 		store: Store<'pass, 'path, 'user>,
 	) -> Result<Self, Box<dyn Error>>;
 
@@ -49,7 +48,6 @@ pub trait OrganizationAdapter<'pass, 'path, 'user> :
 		id: MatchWhen<Id>,
 		location: MatchWhen<Id>,
 		name: MatchWhen<String>,
-		representatives: MatchWhen<Id>,
 		store: Store<'pass, 'path, 'user>,
 	) -> Result<HashSet<Self>, Box<dyn Error>>;
 }

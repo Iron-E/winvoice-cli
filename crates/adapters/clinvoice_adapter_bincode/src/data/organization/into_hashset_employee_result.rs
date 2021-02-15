@@ -12,10 +12,10 @@ impl Into<Result<HashSet<Employee>, Box<dyn Error>>> for BincodeOrganization<'_,
 	{
 		let results = BincodeEmployee::retrieve(
 			MatchWhen::Any, // contact info
-			MatchWhen::Any, // employed
 			MatchWhen::Any, // id
 			MatchWhen::EqualTo(self.organization.id), // organization
 			MatchWhen::Any, // person
+			MatchWhen::Any, // status
 			MatchWhen::Any, // title
 			self.store,
 		)?;
@@ -31,8 +31,8 @@ mod tests
 	{
 		super::{BincodeEmployee, BincodeOrganization, EmployeeAdapter},
 		crate::util,
-		clinvoice_adapter::data::{OrganizationAdapter, Updatable},
-		clinvoice_data::{Contact, Employee, Id, Location, Person},
+		clinvoice_adapter::data::OrganizationAdapter,
+		clinvoice_data::{Contact, Employee, EmployeeStatus, Id, Location, Person},
 		std::{collections::HashSet, error::Error, time::Instant},
 	};
 
@@ -43,10 +43,9 @@ mod tests
 
 		util::test_temp_store(|store|
 		{
-			let mut dogood = BincodeOrganization::create(
+			let dogood = BincodeOrganization::create(
 				Location {name: "Earth".into(), id: Id::new_v4(), outer_id: None},
 				"DoGood Inc",
-				HashSet::new(),
 				*store
 			).unwrap();
 
@@ -60,6 +59,7 @@ mod tests
 					name: "Testy Mćtesterson".into(),
 				},
 				"CEO of Tests",
+				EmployeeStatus::Representative,
 				*store,
 			).unwrap();
 
@@ -73,13 +73,9 @@ mod tests
 					name: "Mr. Flu".into(),
 				},
 				"Janitor",
+				EmployeeStatus::Employed,
 				*store,
 			).unwrap();
-
-			// Insert the new hired employees
-			dogood.organization.representatives.insert(testy.employee.id);
-			dogood.organization.representatives.insert(mr_flu.employee.id);
-			dogood.update().unwrap();
 
 			// Retrieve the written employees back into the `Employee` structure.
 			let reps: Result<HashSet<Employee>, Box<dyn Error>> = dogood.into();

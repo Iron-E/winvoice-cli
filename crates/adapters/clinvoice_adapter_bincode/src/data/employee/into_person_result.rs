@@ -35,8 +35,8 @@ mod tests
 		super::{BincodeEmployee, BincodePerson, PersonAdapter},
 		crate::util,
 		clinvoice_adapter::data::EmployeeAdapter,
-		clinvoice_data::{Contact, Id, Organization, Person},
-		std::{collections::HashSet, error::Error, time::Instant},
+		clinvoice_data::{Contact, EmployeeStatus, Id, Organization, Person},
+		std::{error::Error, time::Instant},
 	};
 
 	#[test]
@@ -59,10 +59,10 @@ mod tests
 					id: Id::new_v4(),
 					location_id: Id::new_v4(),
 					name: "DoGood Inc".into(),
-					representatives: HashSet::new(),
 				},
 				testy.person.clone(),
 				"CEO of Tests",
+				EmployeeStatus::NotEmployed,
 				*store,
 			).unwrap();
 

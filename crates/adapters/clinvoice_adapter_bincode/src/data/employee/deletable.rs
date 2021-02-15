@@ -1,8 +1,8 @@
 use
 {
 	super::BincodeEmployee,
-	crate::data::{BincodeJob, BincodeOrganization},
-	clinvoice_adapter::data::{Deletable, JobAdapter, MatchWhen, OrganizationAdapter, Updatable},
+	crate::data::BincodeJob,
+	clinvoice_adapter::data::{Deletable, JobAdapter, MatchWhen, Updatable},
 	std::{error::Error, fs, io::ErrorKind},
 };
 
@@ -39,18 +39,6 @@ impl Deletable for BincodeEmployee<'_, '_, '_>
 				result.job.timesheets = result.job.timesheets.into_iter().filter(|t| t.employee_id != self.employee.id).collect();
 				result.update()?;
 			}
-
-			for mut result in BincodeOrganization::retrieve(
-				MatchWhen::Any, // id
-				MatchWhen::Any, // location
-				MatchWhen::Any, // name
-				MatchWhen::HasAll([self.employee.id].iter().cloned().collect()), // representatives
-				self.store,
-			)?
-			{
-				result.organization.representatives.remove(&self.employee.id);
-				result.update()?;
-			}
 		}
 
 		return Ok(());
@@ -62,14 +50,14 @@ mod tests
 {
 	use
 	{
-		super::{BincodeEmployee, BincodeJob, BincodeOrganization, Deletable, JobAdapter, MatchWhen, OrganizationAdapter, Updatable},
+		super::{BincodeEmployee, BincodeJob, Deletable, JobAdapter, MatchWhen, Updatable},
 		crate::
 		{
-			data::{BincodeLocation, BincodePerson},
+			data::{BincodeLocation, BincodeOrganization, BincodePerson},
 			util,
 		},
-		clinvoice_adapter::data::{EmployeeAdapter, LocationAdapter, PersonAdapter},
-		clinvoice_data::{chrono::Utc, Contact, Decimal, Money},
+		clinvoice_adapter::data::{EmployeeAdapter, LocationAdapter, OrganizationAdapter, PersonAdapter},
+		clinvoice_data::{chrono::Utc, Contact, Decimal, EmployeeStatus, Money},
 		std::{collections::HashSet, time::Instant},
 	};
 
@@ -85,7 +73,6 @@ mod tests
 			let mut big_old_test = BincodeOrganization::create(
 				earth.location.clone(),
 				"Big Old Test Corporation",
-				HashSet::new(),
 				*store,
 			).unwrap();
 
@@ -103,6 +90,7 @@ mod tests
 				big_old_test.organization.clone(),
 				testy.person.clone(),
 				"CEO of Tests",
+				EmployeeStatus::Employed,
 				*store,
 			).unwrap();
 
@@ -133,7 +121,6 @@ mod tests
 				MatchWhen::EqualTo(big_old_test.organization.id), // id
 				MatchWhen::Any, // location
 				MatchWhen::Any, // name
-				MatchWhen::Any, // representatives
 				*store,
 			).unwrap().iter().next().unwrap().clone();
 
@@ -153,7 +140,6 @@ mod tests
 			).unwrap().iter().next().unwrap().clone();
 
 			// Assert that no references to the deleted entity remain.
-			assert!(big_old_test.organization.representatives.iter().all(|id| *id != ceo_testy.employee.id));
 			assert!(creation.job.timesheets.iter().all(|t| t.employee_id != ceo_testy.employee.id));
 
 			println!("\n>>>>> BincodeEmployee test_delete {}us <<<<<\n", Instant::now().duration_since(start).as_micros());

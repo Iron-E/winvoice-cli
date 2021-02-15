@@ -2,7 +2,7 @@ mod hash;
 
 use
 {
-	crate::{Contact, Id},
+	crate::{Contact, EmployeeStatus, Id},
 	std::collections::HashSet,
 };
 
@@ -24,17 +24,6 @@ pub struct Employee
 
 	/// # Summary
 	///
-	/// Whether or not this employee is still at the company.
-	///
-	/// If `true`, the employee is still employed.
-	///
-	/// # Remarks
-	///
-	/// Flagging this field as `false` is a viable alternative to deletion.
-	pub employed: bool,
-
-	/// # Summary
-	///
 	/// The reference number of this [`Employee`], which can be used instead of the compound key
 	/// {`organization`, `person_id`}.
 	pub id: Id,
@@ -50,6 +39,15 @@ pub struct Employee
 	/// The reference number of the [`Person`](super::person::Person) which this
 	/// [`Employee`] is in reference to.
 	pub person_id: Id,
+
+	/// # Summary
+	///
+	/// The status of the employee.
+	///
+	/// # Remarks
+	///
+	/// Flagging this field as [`NotEmployed`](EmployeeStatus::NOT_EMPLOYED) is a viable alternative to deletion.
+	pub status: EmployeeStatus,
 
 	/// # Summary
 	///

@@ -1,5 +1,6 @@
 mod contact;
 mod employee;
+mod employee_status;
 mod id;
 mod invoice;
 mod invoice_date;
@@ -14,6 +15,7 @@ pub use
 {
 	contact::Contact,
 	employee::Employee,
+	employee_status::EmployeeStatus,
 	id::Id,
 	invoice::Invoice,
 	invoice_date::InvoiceDate,

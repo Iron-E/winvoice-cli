@@ -31,7 +31,7 @@ mod tests
 		crate::{data::BincodeOrganization, util},
 		clinvoice_adapter::data::{JobAdapter, OrganizationAdapter},
 		clinvoice_data::{chrono::Utc, Decimal, Id, Location, Money},
-		std::{collections::HashSet, time::Instant},
+		std::time::Instant,
 	};
 
 	#[test]
@@ -44,7 +44,6 @@ mod tests
 			let big_test = BincodeOrganization::create(
 				Location {id: Id::new_v4(), name: "".into(), outer_id: None},
 				"Big Old Test Corporation".into(),
-				HashSet::new(),
 				*store,
 			).unwrap();
 

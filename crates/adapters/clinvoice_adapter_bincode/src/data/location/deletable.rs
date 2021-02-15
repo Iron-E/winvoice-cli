@@ -32,7 +32,6 @@ impl Deletable for BincodeLocation<'_, '_, '_>
 				MatchWhen::Any, // id
 				MatchWhen::EqualTo(self.location.id), // location
 				MatchWhen::Any, // name
-				MatchWhen::Any, // representatives
 				self.store,
 			)? { result.delete(true)?; }
 		}
@@ -49,7 +48,7 @@ mod tests
 		super::{BincodeLocation, Deletable, LocationAdapter},
 		crate::{data::BincodeOrganization, util},
 		clinvoice_adapter::data::OrganizationAdapter,
-		std::{collections::HashSet, time::Instant},
+		std::time::Instant,
 	};
 
 	#[test]
@@ -67,7 +66,6 @@ mod tests
 			let dogood = BincodeOrganization::create(
 				arizona.location.clone(),
 				"DoGood Inc",
-				HashSet::new(),
 				*store
 			).unwrap();
 

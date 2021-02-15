@@ -23,11 +23,11 @@ impl Deletable for BincodePerson<'_, '_, '_>
 		{
 			for result in BincodeEmployee::retrieve(
 				MatchWhen::Any, // contact info
-				MatchWhen::Any, // employed
 				MatchWhen::Any, // id
 				MatchWhen::Any, // organization
 				MatchWhen::EqualTo(self.person.id), // person
 				MatchWhen::Any, // title
+				MatchWhen::Any, // status
 				self.store,
 			)? { result.delete(true)?; }
 		}
@@ -48,7 +48,7 @@ mod tests
 			util,
 		},
 		clinvoice_adapter::data::{LocationAdapter, OrganizationAdapter, PersonAdapter},
-		clinvoice_data::Contact,
+		clinvoice_data::{Contact, EmployeeStatus},
 		std::{collections::HashSet, time::Instant},
 	};
 
@@ -64,7 +64,6 @@ mod tests
 			let big_old_test = BincodeOrganization::create(
 				earth.location.clone(),
 				"Big Old Test Corporation",
-				HashSet::new(),
 				*store,
 			).unwrap();
 
@@ -82,6 +81,7 @@ mod tests
 				big_old_test.organization.clone(),
 				testy.person.clone(),
 				"CEO of Tests",
+				EmployeeStatus::Employed,
 				*store,
 			).unwrap();
 

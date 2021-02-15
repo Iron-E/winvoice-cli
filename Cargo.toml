@@ -15,7 +15,7 @@ repository = "https://www.github.com/Iron-E/clinvoice"
 [[bin]]
 bench = false
 path = "crates/clinvoice_bin/src/main.rs"
-name = "invoice"
+name = "clinvoice"
 
 [workspace]
 members = ["crates/clinvoice_bin"]

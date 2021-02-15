@@ -5,7 +5,7 @@ use
 	clinvoice_data::
 	{
 		chrono::{DateTime, Utc},
-		Id, Job, Money, Organization
+		Id, InvoiceDate, Job, Money, Organization
 	},
 	std::{collections::HashSet, error::Error},
 };
@@ -54,8 +54,7 @@ pub trait JobAdapter<'pass, 'path, 'user> :
 		date_close: MatchWhen<Option<DateTime<Utc>>>,
 		date_open: MatchWhen<DateTime<Utc>>,
 		id: MatchWhen<Id>,
-		invoice_date_issued: MatchWhen<Option<DateTime<Utc>>>,
-		invoice_date_paid: MatchWhen<Option<DateTime<Utc>>>,
+		invoice_date: MatchWhen<Option<InvoiceDate>>,
 		invoice_hourly_rate: MatchWhen<Money>,
 		notes: MatchWhen<String>,
 		objectives: MatchWhen<String>,

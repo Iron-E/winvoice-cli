@@ -10,7 +10,7 @@ use
 	clinvoice_data::
 	{
 		chrono::{DateTime, Utc},
-		Invoice, Job, Money, Organization, Id
+		Invoice, InvoiceDate, Job, Money, Organization, Id
 	},
 	std::
 	{
@@ -52,8 +52,7 @@ impl<'pass, 'path, 'user> JobAdapter<'pass, 'path, 'user> for BincodeJob<'pass, 
 				id: util::unique_id(&Self::path(&store))?,
 				invoice: Invoice
 				{
-					date_issued: None,
-					date_paid: None,
+					date: None,
 					hourly_rate,
 				},
 				objectives: objectives.into(),
@@ -85,8 +84,7 @@ impl<'pass, 'path, 'user> JobAdapter<'pass, 'path, 'user> for BincodeJob<'pass, 
 		date_close: MatchWhen<Option<DateTime<Utc>>>,
 		date_open: MatchWhen<DateTime<Utc>>,
 		id: MatchWhen<Id>,
-		invoice_date_issued: MatchWhen<Option<DateTime<Utc>>>,
-		invoice_date_paid: MatchWhen<Option<DateTime<Utc>>>,
+		invoice_date: MatchWhen<Option<InvoiceDate>>,
 		invoice_hourly_rate: MatchWhen<Money>,
 		notes: MatchWhen<String>,
 		objectives: MatchWhen<String>,
@@ -108,8 +106,7 @@ impl<'pass, 'path, 'user> JobAdapter<'pass, 'path, 'user> for BincodeJob<'pass, 
 				date_close.is_match(&job.date_close) &&
 				date_open.is_match(&job.date_open) &&
 				id.is_match(&job.id) &&
-				invoice_date_issued.is_match(&job.invoice.date_issued) &&
-				invoice_date_paid.is_match(&job.invoice.date_paid) &&
+				invoice_date.is_match(&job.invoice.date) &&
 				invoice_hourly_rate.is_match(&job.invoice.hourly_rate) &&
 				notes.is_match(&job.notes) &&
 				objectives.is_match(&job.objectives) &&
@@ -245,8 +242,7 @@ mod tests
 				MatchWhen::Any, // date close
 				MatchWhen::Any, // date open
 				MatchWhen::Any, // id
-				MatchWhen::Any, // invoice date issued
-				MatchWhen::Any, // invoice date paid
+				MatchWhen::Any, // invoice date
 				MatchWhen::Any, // invoice hourly rate
 				MatchWhen::Any, // notes
 				MatchWhen::Any, // objectives
@@ -267,8 +263,7 @@ mod tests
 				MatchWhen::Any, // date close
 				MatchWhen::HasNone([creation.job.date_open].iter().cloned().collect()), // date open
 				MatchWhen::HasAny([retrieval.job.id, assertion.job.id].iter().cloned().collect()), // id
-				MatchWhen::Any, // invoice date issued
-				MatchWhen::Any, // invoice date paid
+				MatchWhen::Any, // invoice date
 				MatchWhen::Any, // invoice hourly rate
 				MatchWhen::Any, // notes
 				MatchWhen::Any, // objectives

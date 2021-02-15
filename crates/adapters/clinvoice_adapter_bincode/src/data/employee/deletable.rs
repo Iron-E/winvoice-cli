@@ -26,8 +26,7 @@ impl Deletable for BincodeEmployee<'_, '_, '_>
 				MatchWhen::Any, // date close
 				MatchWhen::Any, // date open
 				MatchWhen::Any, // id
-				MatchWhen::Any, // invoice date issued
-				MatchWhen::Any, // invoice date paid
+				MatchWhen::Any, // invoice date
 				MatchWhen::Any, // invoice hourly rate
 				MatchWhen::Any, // notes
 				MatchWhen::Any, // objectives
@@ -143,8 +142,7 @@ mod tests
 				MatchWhen::Any, // date close
 				MatchWhen::Any, // date open
 				MatchWhen::EqualTo(creation.job.id), // id
-				MatchWhen::Any, // invoice date issued
-				MatchWhen::Any, // invoice date paid
+				MatchWhen::Any, // invoice date
 				MatchWhen::Any, // invoice hourly rate
 				MatchWhen::Any, // notes
 				MatchWhen::Any, // objectives

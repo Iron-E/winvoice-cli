@@ -2,6 +2,7 @@ mod contact;
 mod employee;
 mod id;
 mod invoice;
+mod invoice_date;
 mod job;
 mod location;
 mod money;
@@ -15,6 +16,7 @@ pub use
 	employee::Employee,
 	id::Id,
 	invoice::Invoice,
+	invoice_date::InvoiceDate,
 	job::Job,
 	location::Location,
 	money::Money,

@@ -1,8 +1,4 @@
-use
-{
-	crate::Money,
-	chrono::{DateTime, Utc},
-};
+use crate::{InvoiceDate, Money};
 
 #[cfg(feature="serde_support")]
 use serde::{Deserialize, Serialize};
@@ -16,28 +12,8 @@ pub struct Invoice
 {
 	/// # Summary
 	///
-	/// The date upon which the [`Invoice`] was sent to the client.
-	///
-	/// # Remarks
-	///
-	/// Upon running `clinvoice new`, this field is left blank. This is to signify that the
-	/// underlying [`Invoice`] has not been sent to the client.
-	///
-	/// When running `clinvoice export`, this field will be set automatically to the current date
-	/// and time.
-	pub date_issued: Option<DateTime<Utc>>,
-
-	/// # Summary
-	///
-	/// The date upon which the client paid the [`Invoice`].
-	///
-	/// # Remarks
-	///
-	/// Upon running `clinvoice new`, this field is left blank. This is to signify that the
-	/// underlying [`Invoice`] has not paid by the client.
-	///
-	/// This field will be updated when running `clinvoice rec`/`receive`
-	pub date_paid: Option<DateTime<Utc>>,
+	/// The date upon which the [`Invoice`] was sent to and paid by the client.
+	pub date: Option<InvoiceDate>,
 
 	/// # Summary
 	///

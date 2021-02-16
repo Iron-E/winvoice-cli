@@ -17,8 +17,17 @@ repository = "https://www.github.com/Iron-E/clinvoice"
 structopt = "0.3"
 
 # CLInvoice
+clinvoice_adapter = {path='crates/adapters/clinvoice_adapter', version="0.3"}
 clinvoice_adapter_bincode = {path='crates/adapters/clinvoice_adapter_bincode', optional=true, version="0.3"}
 clinvoice_config = {path='crates/clinvoice_config', version="0.1"}
+clinvoice_data = {path='crates/clinvoice_data', version="0.2"}
+
+# Serialization
+serde = "1"
+toml = "0.5"
+
+# Text Editors
+edit = "0.1"
 
 [features]
 default = ["bincode"]
@@ -26,6 +35,8 @@ bincode = ["clinvoice_adapter_bincode"]
 
 [workspace]
 members = [
+	"crates/adapters/clinvoice_adapter",
 	"crates/adapters/clinvoice_adapter_bincode",
 	"crates/clinvoice_config",
+	"crates/clinvoice_data",
 ]

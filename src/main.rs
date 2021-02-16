@@ -8,5 +8,6 @@ use structopt::StructOpt;
 /// The main method.
 fn main()
 {
-	println!("{:#?}", CLInvoice::from_args());
+	let args: CLInvoice = CLInvoice::from_args();
+	println!("{:#?}", args);
 }

@@ -8,16 +8,11 @@ use
 	structopt::StructOpt,
 };
 
-/// # Summary
-///
-/// The entry-point for the `clinvoice` program.
 #[derive(Debug, StructOpt)]
-#[structopt(name="clinvoice", about="Invoice from the command line!")]
+#[structopt(name="clinvoice", about="CLInvoice is a tool to help with invoicing from the command line!")]
 pub enum CLInvoice
 {
-	#[structopt(flatten)]
 	Create(Create),
 
-	#[structopt(flatten)]
 	Retrieve(Retrieve),
 }

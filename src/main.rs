@@ -1,11 +1,12 @@
 mod clinvoice;
 
-use clinvoice::{CLInvoice, create::Create};
+use clinvoice::CLInvoice;
+use structopt::StructOpt;
 
 /// # Summary
 ///
 /// The main method.
 fn main()
 {
-	println!("{:#?}", CLInvoice::Create(Create::Employee {}));
+	println!("{:#?}", CLInvoice::from_args());
 }

@@ -1,7 +1,11 @@
 mod clinvoice;
+mod io;
 
-use clinvoice::CLInvoice;
-use structopt::StructOpt;
+use
+{
+	clinvoice::CLInvoice,
+	structopt::StructOpt,
+};
 
 /// # Summary
 ///

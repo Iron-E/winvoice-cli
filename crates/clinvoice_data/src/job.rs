@@ -1,12 +1,14 @@
 use
 {
-	crate::{Invoice, Timesheet, Id},
+	crate::{Decimal, Expense, Id, Invoice, Money, Timesheet},
 	std::collections::BTreeSet,
 	chrono::{DateTime, Utc},
 };
 
 #[cfg(feature="serde_support")]
 use serde::{Deserialize, Serialize};
+
+const MINUTES_PER_HOUR: i8 = 60;
 
 /// # Summary
 ///
@@ -101,12 +103,13 @@ impl Job
 	/// # Remarks
 	///
 	/// * This is intended to be used for reporting work which was done previously.
-	pub fn attach_timesheet(&mut self, employee: Id, time_begin: DateTime<Utc>, time_end: Option<DateTime<Utc>>, work_notes: &str)
+	pub fn attach_timesheet(&mut self, employee: Id, expenses: Option<BTreeSet<Expense>>, time_begin: DateTime<Utc>, time_end: Option<DateTime<Utc>>, work_notes: &str)
 	{
 		self.timesheets.insert(
 			Timesheet
 			{
 				employee_id: employee,
+				expenses,
 				time_begin,
 				time_end,
 				work_notes: work_notes.into()
@@ -129,6 +132,47 @@ impl Job
 	/// * `employee`, the [`Id`] of the [`Employee`] who is working on this timesheet.
 	pub fn start_timesheet(&mut self, employee: Id)
 	{
-		self.attach_timesheet(employee, Utc::now(), None, "* Work which was done goes here.\n* Supports markdown formatting.");
+		self.attach_timesheet(employee, None, Utc::now(), None, "* Work which was done goes here.\n* Supports markdown formatting.");
+	}
+
+	/// # Summary
+	///
+	/// Get the amount of [`Money`] which is owed by the client on the [`Inovice`].
+	///
+	/// # Panics
+	///
+	/// * When not all [`Money`] amounts are in the same currency.
+	///     * TODO: add currency conversion method.
+	pub fn total(&self) -> Money
+	{
+		let minutes_per_hour = Decimal::from(MINUTES_PER_HOUR);
+		let seconds_per_minute = minutes_per_hour;
+
+		let mut total = Money
+		{
+			amount: Decimal::new(0, 2),
+			currency: self.invoice.hourly_rate.currency.clone(),
+		};
+
+		for timesheet in self.timesheets.iter().filter(|t| t.time_end.is_some())
+		{
+			let duration_seconds = Decimal::from(timesheet.time_end.unwrap().signed_duration_since(timesheet.time_begin).num_seconds());
+			total.amount += (duration_seconds / seconds_per_minute / minutes_per_hour) * self.invoice.hourly_rate.amount;
+
+			if let Some(expenses) = &timesheet.expenses
+			{
+				for expense in expenses
+				{
+					if expense.cost.currency == total.currency
+					{
+						panic!("Not all expenses were recorded in the same currency! There is currently no automatic currency conversion.");
+					}
+
+					total.amount += expense.cost.amount;
+				}
+			}
+		}
+
+		return total;
 	}
 }

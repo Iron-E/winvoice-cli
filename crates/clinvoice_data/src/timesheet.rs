@@ -1,7 +1,8 @@
 use
 {
-	crate::Id,
 	chrono::{DateTime, Utc},
+	crate::{Expense, Id},
+	std::collections::BTreeSet,
 };
 
 #[cfg(feature="serde_support")]
@@ -25,6 +26,11 @@ pub struct Timesheet
 	///
 	/// The ID of the [`Employee`](crate::Employee) who performed this work.
 	pub employee_id: Id,
+
+	/// # Summary
+	///
+	/// [`Expense`]s which were incurred during this time.
+	pub expenses: Option<BTreeSet<Expense>>,
 
 	/// # Summary
 	///

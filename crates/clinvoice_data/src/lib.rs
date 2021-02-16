@@ -1,6 +1,8 @@
 mod contact;
 mod employee;
 mod employee_status;
+mod expense;
+mod expense_category;
 mod id;
 mod invoice;
 mod invoice_date;
@@ -16,6 +18,8 @@ pub use
 	contact::Contact,
 	employee::Employee,
 	employee_status::EmployeeStatus,
+	expense::Expense,
+	expense_category::ExpenseCategory,
 	id::Id,
 	invoice::Invoice,
 	invoice_date::InvoiceDate,

@@ -94,6 +94,11 @@ dependencies = [
 [[package]]
 name = "clinvoice"
 version = "0.2.0"
+dependencies = [
+ "clinvoice_adapter_bincode",
+ "clinvoice_config",
+ "structopt",
+]
 
 [[package]]
 name = "clinvoice_adapter"
@@ -110,15 +115,6 @@ dependencies = [
  "bincode",
  "clinvoice_adapter",
  "clinvoice_data",
-]
-
-[[package]]
-name = "clinvoice_bin"
-version = "0.1.0"
-dependencies = [
- "clinvoice_adapter_bincode",
- "clinvoice_config",
- "structopt",
 ]
 
 [[package]]

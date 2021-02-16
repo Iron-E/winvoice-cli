@@ -1,2 +1,0 @@
-mod clinvoice;
-mod main;

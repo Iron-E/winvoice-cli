@@ -12,6 +12,7 @@ mod money;
 mod organization;
 mod person;
 mod timesheet;
+pub mod views;
 
 pub use
 {

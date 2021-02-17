@@ -2,7 +2,7 @@ use
 {
 	super::{Deletable, Initializable, MatchWhen, Updatable},
 	crate::Store,
-	clinvoice_data::{Contact, Person, Id},
+	clinvoice_data::{Contact, Person, Id, views::PersonView},
 	std::{collections::HashSet, error::Error},
 };
 
@@ -10,6 +10,7 @@ pub trait PersonAdapter<'pass, 'path, 'user> :
 	Deletable +
 	Initializable<'pass, 'path, 'user> +
 	Into<Person> +
+	Into<Result<PersonView, Box<dyn Error>>> +
 	Into<Store<'pass, 'path, 'user>> +
 	Updatable +
 {

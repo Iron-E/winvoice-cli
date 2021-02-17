@@ -5,7 +5,7 @@ use
 	clinvoice_data::
 	{
 		chrono::{DateTime, Utc},
-		Id, InvoiceDate, Job, Money, Organization
+		Id, InvoiceDate, Job, Money, Organization, views::JobView
 	},
 	std::{collections::HashSet, error::Error},
 };
@@ -14,6 +14,7 @@ pub trait JobAdapter<'pass, 'path, 'user> :
 	Deletable +
 	Initializable<'pass, 'path, 'user> +
 	Into<Job> +
+	Into<Result<JobView, Box<dyn Error>>> +
 	Into<Result<Organization, Box<dyn Error>>> +
 	Into<Store<'pass, 'path, 'user>> +
 	Updatable +

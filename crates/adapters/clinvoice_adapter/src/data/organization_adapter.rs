@@ -2,7 +2,7 @@ use
 {
 	super::{Deletable, Initializable, MatchWhen, Updatable},
 	crate::Store,
-	clinvoice_data::{Employee, Location, Organization, Id},
+	clinvoice_data::{Employee, Location, Organization, Id, views::OrganizationView},
 	std::{collections::HashSet, error::Error},
 };
 
@@ -12,6 +12,7 @@ pub trait OrganizationAdapter<'pass, 'path, 'user> :
 	Into<Organization> +
 	Into<Result<HashSet<Employee>, Box<dyn Error>>> +
 	Into<Result<Location, Box<dyn Error>>> +
+	Into<Result<OrganizationView, Box<dyn Error>>> +
 	Into<Store<'pass, 'path, 'user>> +
 	Updatable +
 {

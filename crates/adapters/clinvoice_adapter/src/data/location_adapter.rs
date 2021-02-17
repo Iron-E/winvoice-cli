@@ -2,7 +2,7 @@ use
 {
 	super::{MatchWhen, Deletable, Initializable, Updatable},
 	crate::Store,
-	clinvoice_data::{Location, Id},
+	clinvoice_data::{Location, Id, views::LocationView},
 	core::fmt::Display,
 	std::{collections::HashSet, error::Error},
 };
@@ -12,6 +12,7 @@ pub trait LocationAdapter<'pass, 'path, 'user> :
 	Display +
 	Initializable<'pass, 'path, 'user> +
 	Into<Location> +
+	Into<Result<LocationView, Box<dyn Error>>> +
 	Into<Store<'pass, 'path, 'user>> +
 	Updatable +
 {

@@ -1,7 +1,8 @@
 use
 {
+	dialoguer::Editor,
 	serde::{de::DeserializeOwned, Serialize},
-	std::{fs, error::Error, path::Path},
+	std::error::Error,
 };
 
 /// # Summary
@@ -20,18 +21,20 @@ use
 pub fn from_editor<T>(entity: T) -> Result<T, Box<dyn Error>> where
 	T : DeserializeOwned + Serialize
 {
-	// Create the temp path for the editor to edit.
-	let temp_file_stem = edit::Builder::new().tempfile()?;
-	let temp_path_str = format!("{}.toml", temp_file_stem.path().to_string_lossy());
-	let temp_path = Path::new(&temp_path_str);
-
 	// Write the entity to the `temp_path` and then edit that file.
-	fs::write(temp_path, toml::to_string_pretty(&entity)?)?;
-	edit::edit_file(&temp_path)?;
+	return Ok(match toml_editor().edit(&toml::to_string_pretty(&entity)?)?
+	{
+		Some(edited) => toml::from_str(&edited)?,
+		None => entity,
+	});
+}
 
-	// Retrieve the input from the user and then remove the temp file.
-	let input: T = toml::from_slice(&fs::read(&temp_path)?)?;
-	fs::remove_file(temp_path)?;
-
-	return Ok(input);
+/// # Summary
+///
+/// Creates an instance of [`Editor`] which is configured to edit [`toml`] files.
+fn toml_editor() -> Editor
+{
+	let mut editor = Editor::new();
+	editor.extension(".toml");
+	return editor;
 }

@@ -24,7 +24,7 @@ use
 /// * `true`, if the directory was created.
 /// * `false`, if the directory already existed.
 /// * An `Error`, if `store_dir` couldn't be created.
-pub fn create_store_dir(store_dir: &Path) -> Result<bool, io::Error>
+pub fn create_store_dir(store_dir: &Path) -> io::Result<bool>
 {
 	if !store_dir.is_dir()
 	{
@@ -42,7 +42,7 @@ pub fn create_store_dir(store_dir: &Path) -> Result<bool, io::Error>
 /// # Errors
 ///
 /// Will error whenever [`fs::read_dir`] does.
-pub fn read_files<P: AsRef<Path>>(path: P) -> Result<FilterMap<fs::ReadDir, impl FnMut(io::Result<fs::DirEntry>) -> Option<PathBuf>>, io::Error>
+pub fn read_files<P: AsRef<Path>>(path: P) -> io::Result<FilterMap<fs::ReadDir, impl FnMut(io::Result<fs::DirEntry>) -> Option<PathBuf>>>
 {
 	return Ok(fs::read_dir(path)?.filter_map(
 		|node| match node
@@ -99,7 +99,7 @@ pub fn test_temp_store(assertion: impl FnOnce(&Store<'_, '_, '_>))
 /// # Returns
 ///
 /// The next [`Id`] for an entity in `store_dir`.
-pub fn unique_id(store_dir: &Path) -> Result<Id, io::Error>
+pub fn unique_id(store_dir: &Path) -> io::Result<Id>
 {
 	'gen: loop
 	{

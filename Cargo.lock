@@ -107,7 +107,7 @@ dependencies = [
 
 [[package]]
 name = "clinvoice_adapter"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "clinvoice_data",
  "snafu",
@@ -134,7 +134,7 @@ dependencies = [
 
 [[package]]
 name = "clinvoice_data"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "chrono",
  "rust_decimal",

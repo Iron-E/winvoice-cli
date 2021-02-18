@@ -50,7 +50,7 @@ mod tests
 		super::{BincodeEmployee, EmployeeView, OrganizationView, PersonView},
 		crate::
 		{
-			data::{BincodeLocation, BincodeOrganization, BincodePerson, contact},
+			data::{BincodeLocation, BincodeOrganization, BincodePerson},
 			util,
 		},
 		clinvoice_adapter::
@@ -67,7 +67,7 @@ mod tests
 	};
 
 	#[test]
-	fn test_info_employee_view_result()
+	fn test_into_view()
 	{
 		let start = Instant::now();
 
@@ -99,20 +99,30 @@ mod tests
 				*store,
 			).unwrap();
 
-			let big_old_test_view_result: DynamicResult<OrganizationView> = big_old_test.into();
-			let testy_view_result: DynamicResult<PersonView> = testy.into();
+			let earth_view = LocationView
+			{
+				name: earth.location.name,
+				outer: None,
+			};
+
+			let contact_info_view: HashSet<ContactView> = [
+				ContactView::Address(earth_view.clone())
+			].iter().cloned().collect();
 
 			let ceo_testy_view = EmployeeView
 			{
-				contact_info: [ContactView::Address(
-					LocationView
-					{
-						name: earth.location.name,
-						outer: None,
-					}
-				)].iter().cloned().collect(),
-				organization: big_old_test_view_result.unwrap(),
-				person: testy_view_result.unwrap(),
+				contact_info: contact_info_view.clone(),
+				organization: OrganizationView
+				{
+					location: earth_view,
+					name: big_old_test.organization.name,
+				},
+				person: PersonView
+				{
+					contact_info: contact_info_view,
+					id: testy.person.id,
+					name: testy.person.name,
+				},
 				title: ceo_testy.employee.title.clone(),
 				status: ceo_testy.employee.status,
 			};

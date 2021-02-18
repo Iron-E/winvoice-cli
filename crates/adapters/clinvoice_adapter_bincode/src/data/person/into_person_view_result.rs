@@ -6,6 +6,7 @@ use
 	clinvoice_data::views::PersonView,
 };
 
+// NOTE: tests not needed because this is called in `Into<EmployeeView>`
 impl Into<DynamicResult<PersonView>> for BincodePerson<'_, '_, '_>
 {
 	fn into(self) -> DynamicResult<PersonView>

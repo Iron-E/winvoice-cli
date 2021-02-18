@@ -51,7 +51,7 @@ mod tests
 	};
 
 	#[test]
-	fn test_delete()
+	fn test_into_view()
 	{
 		let start = Instant::now();
 

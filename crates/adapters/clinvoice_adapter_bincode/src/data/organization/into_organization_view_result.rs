@@ -10,6 +10,7 @@ use
 	},
 };
 
+// NOTE: tests not needed because this is called in `Into<EmployeeView>`
 impl Into<DynamicResult<OrganizationView>> for BincodeOrganization<'_, '_, '_>
 {
 	fn into(self) -> DynamicResult<OrganizationView>

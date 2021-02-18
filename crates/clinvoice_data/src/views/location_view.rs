@@ -15,10 +15,29 @@ pub struct LocationView
 	/// * In order of innermost to outermost.
 	///
 	/// [location]: crate::Location
-	pub outer: Option<Vec<Self>>,
+	pub outer: Option<Box<Self>>,
 
 	/// # Summary
 	///
 	/// The name of the [`Location`].
 	pub name: String,
+}
+
+impl LocationView
+{
+	/// # Summary
+	///
+	/// Create a new [`LocationView`].
+	pub fn new(name: String, outer: Option<&Self>) -> Self
+	{
+		return Self
+		{
+			name,
+			outer: match outer
+			{
+				Some(location) => Some(location.clone().into()),
+				_ => None,
+			},
+		};
+	}
 }

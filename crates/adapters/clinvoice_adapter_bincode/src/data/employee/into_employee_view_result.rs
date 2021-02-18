@@ -58,7 +58,11 @@ mod tests
 			DynamicResult,
 			data::{EmployeeAdapter, LocationAdapter, OrganizationAdapter, PersonAdapter}
 		},
-		clinvoice_data::{Contact, EmployeeStatus},
+		clinvoice_data::
+		{
+			Contact, EmployeeStatus,
+			views::{ContactView, LocationView},
+		},
 		std::{collections::HashSet, time::Instant},
 	};
 
@@ -71,7 +75,7 @@ mod tests
 		{
 			let earth = BincodeLocation::create("Earth", *store).unwrap();
 
-			let mut big_old_test = BincodeOrganization::create(
+			let big_old_test = BincodeOrganization::create(
 				earth.location.clone(),
 				"Big Old Test Corporation",
 				*store,
@@ -100,10 +104,16 @@ mod tests
 
 			let ceo_testy_view = EmployeeView
 			{
-				contact_info: contact::into_views(contact_info, *store).unwrap(),
+				contact_info: [ContactView::Address(
+					LocationView
+					{
+						name: earth.location.name,
+						outer: None,
+					}
+				)].iter().cloned().collect(),
 				organization: big_old_test_view_result.unwrap(),
 				person: testy_view_result.unwrap(),
-				title: ceo_testy.employee.title,
+				title: ceo_testy.employee.title.clone(),
 				status: ceo_testy.employee.status,
 			};
 
@@ -112,7 +122,7 @@ mod tests
 			// Asser that the synthetic view is the same as the view which was created naturally.
 			assert_eq!(ceo_testy_view, ceo_testy_view_result.unwrap());
 
-			println!("\n>>>>> BincodeEmployee test_delete {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+			println!("\n>>>>> BincodeEmployee test_into_view {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 }

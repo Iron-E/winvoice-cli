@@ -35,11 +35,11 @@ mod tests
 {
 	use
 	{
-		super::{BincodeEmployee, BincodeOrganization, OrganizationAdapter},
+		super::{BincodeEmployee, BincodeOrganization, DynamicResult, OrganizationAdapter},
 		crate::util,
 		clinvoice_adapter::data::EmployeeAdapter,
 		clinvoice_data::{Contact, EmployeeStatus, Id, Location, Organization, Person},
-		std::{error::Error, time::Instant},
+		std::time::Instant,
 	};
 
 	#[test]

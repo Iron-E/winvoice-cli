@@ -20,7 +20,7 @@ structopt = "0.3"
 clinvoice_adapter = {path='crates/adapters/clinvoice_adapter', version="0.3"}
 clinvoice_adapter_bincode = {path='crates/adapters/clinvoice_adapter_bincode', optional=true, version="0.3"}
 clinvoice_config = {path='crates/clinvoice_config', version="0.1"}
-clinvoice_data = {path='crates/clinvoice_data', version="0.2"}
+clinvoice_data = {path='crates/clinvoice_data', version="0.3"}
 
 # Dialogues
 dialoguer = "0.7"

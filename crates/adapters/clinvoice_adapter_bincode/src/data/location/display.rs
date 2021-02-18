@@ -1,7 +1,7 @@
 use
 {
 	super::BincodeLocation,
-	clinvoice_adapter::data::{LocationAdapter, MatchWhen},
+	clinvoice_adapter::data::LocationAdapter,
 	core::fmt::{Display, Formatter, Error, Result as FmtResult},
 };
 
@@ -13,33 +13,16 @@ impl Display for BincodeLocation<'_, '_, '_>
 	/// `Location`](Location::outer_id)s come before it.
 	fn fmt(&self, formatter: &mut Formatter<'_>) -> FmtResult
 	{
-		let mut output = String::from(&self.location.name);
-
-		let mut outer_id = self.location.outer_id;
-		while let Some(id) = outer_id
+		let outer_locations = match self.outer_locations()
 		{
-			output += ", ";
+			Err(_) => Err(Error)?,
+			Ok(locations) => locations,
+		};
 
-			if let Ok(results) = BincodeLocation::retrieve(
-				MatchWhen::EqualTo(id), // id
-				MatchWhen::Any, // name
-				MatchWhen::Any, // outer id
-				self.store,
-			)
-			{
-				if let Some(bincode_location) = results.iter().next()
-				{
-					output += &bincode_location.location.name;
-
-					outer_id = bincode_location.location.outer_id;
-					continue;
-				}
-			}
-
-			return Err(Error);
-		}
-
-		write!(formatter, "{}", output)
+		return write!(formatter, "{}", outer_locations.iter().fold(
+			String::from(&self.location.name),
+			|out, loc| out + ", " + &loc.name
+		));
 	}
 }
 

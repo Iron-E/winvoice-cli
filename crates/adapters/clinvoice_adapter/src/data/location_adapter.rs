@@ -1,6 +1,6 @@
 use
 {
-	super::{MatchWhen, Deletable, Initializable, Updatable},
+	super::{MatchWhen, Deletable, Error, Initializable, Updatable},
 	crate::{DynamicResult, Store},
 	clinvoice_data::{Location, Id, views::LocationView},
 	core::fmt::Display,
@@ -8,6 +8,7 @@ use
 };
 
 pub trait LocationAdapter<'pass, 'path, 'user> :
+	Clone +
 	Deletable +
 	Display +
 	Initializable<'pass, 'path, 'user> +
@@ -45,6 +46,42 @@ pub trait LocationAdapter<'pass, 'path, 'user> :
 	/// Location {name, id: /* generated */, outside_id: self.unroll().id};
 	/// ```
 	fn create_inner<'name>(&self, name: &'name str) -> DynamicResult<Self>;
+
+	/// # Summary
+	///
+	/// Get the [`Location`]s which contain this [`Location`].
+	fn outer_locations(&self) -> Result<Vec<Location>, Error>
+	{
+		let mut outer_locations = Vec::<Location>::new();
+
+		let location: Location = self.clone().into();
+		let store: Store = self.clone().into();
+
+		let mut outer_id = location.outer_id;
+		while let Some(id) = outer_id
+		{
+			if let Ok(results) = Self::retrieve(
+				MatchWhen::EqualTo(id), // id
+				MatchWhen::Any, // name
+				MatchWhen::Any, // outer id
+				store,
+			)
+			{
+				if let Some(adapted_location) = results.into_iter().next()
+				{
+					let loc: Location = adapted_location.into();
+
+					outer_id = loc.outer_id;
+					outer_locations.push(loc);
+					continue;
+				}
+			}
+
+			Err(Error::DataIntegrity {id})?;
+		}
+
+		return Ok(outer_locations);
+	}
 
 	/// # Summary
 	///

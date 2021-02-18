@@ -1,3 +1,4 @@
+pub mod contact;
 mod employee;
 mod job;
 mod location;

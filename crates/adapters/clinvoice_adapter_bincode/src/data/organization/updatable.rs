@@ -1,13 +1,13 @@
 use
 {
 	super::BincodeOrganization,
-	clinvoice_adapter::data::Updatable,
-	std::{error::Error, fs},
+	clinvoice_adapter::{data::Updatable, DynamicResult},
+	std::fs,
 };
 
 impl Updatable for BincodeOrganization<'_, '_, '_>
 {
-	fn update(&self) -> Result<(), Box<dyn Error>>
+	fn update(&self) -> DynamicResult<()>
 	{
 		fs::write(self.filepath(), bincode::serialize(&self.organization)?)?;
 		return Ok(());

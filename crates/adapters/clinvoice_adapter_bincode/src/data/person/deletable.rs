@@ -2,13 +2,17 @@ use
 {
 	super::BincodePerson,
 	crate::data::BincodeEmployee,
-	clinvoice_adapter::data::{Deletable, EmployeeAdapter, MatchWhen},
-	std::{error::Error, fs, io::ErrorKind},
+	clinvoice_adapter::
+	{
+		DynamicResult,
+		data::{Deletable, EmployeeAdapter, MatchWhen},
+	},
+	std::{fs, io::ErrorKind},
 };
 
 impl Deletable for BincodePerson<'_, '_, '_>
 {
-	fn delete(&self, cascade: bool) -> Result<(), Box<dyn Error>>
+	fn delete(&self, cascade: bool) -> DynamicResult<()>
 	{
 		if let Err(e) = fs::remove_file(self.filepath())
 		{

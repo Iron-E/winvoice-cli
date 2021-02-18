@@ -5,10 +5,10 @@ use
 	clinvoice_adapter::
 	{
 		data::{Initializable, LocationAdapter, MatchWhen, Updatable},
-		Store
+		DynamicResult, Store,
 	},
 	clinvoice_data::{Location, Id},
-	std::{collections::HashSet, error::Error, fs, io::BufReader},
+	std::{collections::HashSet, fs, io::BufReader},
 };
 
 impl<'pass, 'path, 'user> LocationAdapter<'pass, 'path, 'user> for BincodeLocation<'pass, 'path, 'user>
@@ -26,7 +26,7 @@ impl<'pass, 'path, 'user> LocationAdapter<'pass, 'path, 'user> for BincodeLocati
 	/// ```ignore
 	/// Location {name, id: /* generated */};
 	/// ```
-	fn create<'name>(name: &'name str, store: Store<'pass, 'path, 'user>) -> Result<Self, Box<dyn Error>>
+	fn create<'name>(name: &'name str, store: Store<'pass, 'path, 'user>) -> DynamicResult<Self>
 	{
 		Self::init(&store)?;
 
@@ -59,7 +59,7 @@ impl<'pass, 'path, 'user> LocationAdapter<'pass, 'path, 'user> for BincodeLocati
 	/// ```ignore
 	/// Location {name, id: /* generated */, outside_id: self.unroll().id};
 	/// ```
-	fn create_inner<'name>(&self, name: &'name str) -> Result<Self, Box<dyn Error>>
+	fn create_inner<'name>(&self, name: &'name str) -> DynamicResult<Self>
 	{
 		let inner_person = Self
 		{
@@ -94,7 +94,7 @@ impl<'pass, 'path, 'user> LocationAdapter<'pass, 'path, 'user> for BincodeLocati
 		name: MatchWhen<String>,
 		outer: MatchWhen<Option<Id>>,
 		store: Store<'pass, 'path, 'user>,
-	) -> Result<HashSet<Self>, Box<dyn Error>>
+	) -> DynamicResult<HashSet<Self>>
 	{
 		let mut results = HashSet::new();
 

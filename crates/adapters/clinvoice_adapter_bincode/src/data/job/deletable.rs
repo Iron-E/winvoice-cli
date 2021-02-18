@@ -1,13 +1,13 @@
 use
 {
 	super::BincodeJob,
-	clinvoice_adapter::data::Deletable,
-	std::{error::Error, fs, io::ErrorKind},
+	clinvoice_adapter::{DynamicResult, data::Deletable},
+	std::{fs, io::ErrorKind},
 };
 
 impl Deletable for BincodeJob<'_, '_, '_>
 {
-	fn delete(&self, _cascade: bool) -> Result<(), Box<dyn Error>>
+	fn delete(&self, _cascade: bool) -> DynamicResult<()>
 	{
 		if let Err(e) = fs::remove_file(self.filepath())
 		{

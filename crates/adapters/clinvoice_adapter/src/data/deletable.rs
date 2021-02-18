@@ -1,4 +1,4 @@
-use std::error::Error;
+use crate::DynamicResult;
 
 /// # Summary
 ///
@@ -20,5 +20,5 @@ pub trait Deletable
 	/// * An [`Error`] when:
 	///   * `self.id` had not already been `create`d.
 	///   * Something goes wrong.
-	fn delete(&self, cascade: bool) -> Result<(), Box<dyn Error>>;
+	fn delete(&self, cascade: bool) -> DynamicResult<()>;
 }

@@ -1,14 +1,17 @@
 use
 {
 	crate::data::{BincodeEmployee, BincodePerson},
-	clinvoice_adapter::data::{Error as DataError, MatchWhen, PersonAdapter},
+	clinvoice_adapter::
+	{
+		data::{Error as DataError, MatchWhen, PersonAdapter},
+		DynamicResult,
+	},
 	clinvoice_data::Person,
-	std::error::Error,
 };
 
-impl Into<Result<Person, Box<dyn Error>>> for BincodeEmployee<'_, '_, '_>
+impl Into<DynamicResult<Person>> for BincodeEmployee<'_, '_, '_>
 {
-	fn into(self) -> Result<Person, Box<dyn Error>>
+	fn into(self) -> DynamicResult<Person>
 	{
 		let results = BincodePerson::retrieve(
 			MatchWhen::Any, // contact into
@@ -32,11 +35,11 @@ mod tests
 {
 	use
 	{
-		super::{BincodeEmployee, BincodePerson, PersonAdapter},
+		super::{BincodeEmployee, BincodePerson, DynamicResult, PersonAdapter},
 		crate::util,
 		clinvoice_adapter::data::EmployeeAdapter,
 		clinvoice_data::{Contact, EmployeeStatus, Id, Organization, Person},
-		std::{error::Error, time::Instant},
+		std::time::Instant,
 	};
 
 	#[test]
@@ -66,7 +69,7 @@ mod tests
 				*store,
 			).unwrap();
 
-			let testy_person: Result<Person, Box<dyn Error>> = testy_employed.into();
+			let testy_person: DynamicResult<Person> = testy_employed.into();
 
 			assert_eq!(testy.person, testy_person.unwrap());
 

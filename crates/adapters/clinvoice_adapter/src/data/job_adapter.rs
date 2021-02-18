@@ -1,21 +1,21 @@
 use
 {
 	super::{Deletable, Initializable, MatchWhen, Updatable},
-	crate::Store,
+	crate::{DynamicResult, Store},
 	clinvoice_data::
 	{
 		chrono::{DateTime, Utc},
 		Id, InvoiceDate, Job, Money, Organization, views::JobView
 	},
-	std::{collections::HashSet, error::Error},
+	std::collections::HashSet,
 };
 
 pub trait JobAdapter<'pass, 'path, 'user> :
 	Deletable +
 	Initializable<'pass, 'path, 'user> +
 	Into<Job> +
-	Into<Result<JobView, Box<dyn Error>>> +
-	Into<Result<Organization, Box<dyn Error>>> +
+	Into<DynamicResult<JobView>> +
+	Into<DynamicResult<Organization>> +
 	Into<Store<'pass, 'path, 'user>> +
 	Updatable +
 {
@@ -36,7 +36,7 @@ pub trait JobAdapter<'pass, 'path, 'user> :
 		hourly_rate: Money,
 		objectives: &'objectives str,
 		store: Store<'pass, 'path, 'user>,
-	) -> Result<Self, Box<dyn Error>>;
+	) -> DynamicResult<Self>;
 
 	/// # Summary
 	///
@@ -63,5 +63,5 @@ pub trait JobAdapter<'pass, 'path, 'user> :
 		timesheet_begin: MatchWhen<DateTime<Utc>>,
 		timesheet_end: MatchWhen<Option<DateTime<Utc>>>,
 		store: Store<'pass, 'path, 'user>,
-	) -> Result<HashSet<Self>, Box<dyn Error>>;
+	) -> DynamicResult<HashSet<Self>>;
 }

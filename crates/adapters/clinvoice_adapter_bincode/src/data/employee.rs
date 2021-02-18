@@ -1,6 +1,7 @@
 mod deletable;
 mod employee_adapter;
 mod initializable;
+mod into_employee_view_result;
 mod into_organization_result;
 mod into_person_result;
 mod updatable;

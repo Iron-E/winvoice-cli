@@ -2,8 +2,12 @@ use
 {
 	super::BincodePerson,
 	crate::util,
-	clinvoice_adapter::{data::Initializable, Store},
-	std::error::Error,
+	clinvoice_adapter::
+	{
+		DynamicResult,
+		data::Initializable,
+		Store,
+	},
 };
 
 impl<'pass, 'path, 'user> Initializable<'pass, 'path, 'user> for BincodePerson<'pass, 'path, 'user>
@@ -11,7 +15,7 @@ impl<'pass, 'path, 'user> Initializable<'pass, 'path, 'user> for BincodePerson<'
 	/// # Summary
 	///
 	/// Initialize the database for a given [`Store`].
-	fn init(store: &Store<'pass, 'path, 'user>) -> Result<(), Box<dyn Error>>
+	fn init(store: &Store<'pass, 'path, 'user>) -> DynamicResult<()>
 	{
 		util::create_store_dir(&Self::path(store))?;
 		return Ok(());

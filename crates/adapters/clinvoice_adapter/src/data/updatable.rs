@@ -1,4 +1,4 @@
-use std::error::Error;
+use crate::DynamicResult;
 
 /// # Summary
 ///
@@ -23,5 +23,5 @@ pub trait Updatable
 	/// * An `Error`, when something goes wrong.
 	///
 	/// [store]: crate::Store
-	fn update(&self) -> Result<(), Box<dyn Error>>;
+	fn update(&self) -> DynamicResult<()>;
 }

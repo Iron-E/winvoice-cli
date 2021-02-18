@@ -1,18 +1,18 @@
 use
 {
 	super::{Deletable, Initializable, MatchWhen, Updatable},
-	crate::Store,
+	crate::{DynamicResult, Store},
 	clinvoice_data::{Employee, Location, Organization, Id, views::OrganizationView},
-	std::{collections::HashSet, error::Error},
+	std::collections::HashSet,
 };
 
 pub trait OrganizationAdapter<'pass, 'path, 'user> :
 	Deletable +
 	Initializable<'pass, 'path, 'user> +
 	Into<Organization> +
-	Into<Result<HashSet<Employee>, Box<dyn Error>>> +
-	Into<Result<Location, Box<dyn Error>>> +
-	Into<Result<OrganizationView, Box<dyn Error>>> +
+	Into<DynamicResult<HashSet<Employee>>> +
+	Into<DynamicResult<Location>> +
+	Into<DynamicResult<OrganizationView>> +
 	Into<Store<'pass, 'path, 'user>> +
 	Updatable +
 {
@@ -31,7 +31,7 @@ pub trait OrganizationAdapter<'pass, 'path, 'user> :
 		location: Location,
 		name: &'name str,
 		store: Store<'pass, 'path, 'user>,
-	) -> Result<Self, Box<dyn Error>>;
+	) -> DynamicResult<Self>;
 
 	/// # Summary
 	///
@@ -50,5 +50,5 @@ pub trait OrganizationAdapter<'pass, 'path, 'user> :
 		location: MatchWhen<Id>,
 		name: MatchWhen<String>,
 		store: Store<'pass, 'path, 'user>,
-	) -> Result<HashSet<Self>, Box<dyn Error>>;
+	) -> DynamicResult<HashSet<Self>>;
 }

@@ -1,18 +1,18 @@
 use
 {
 	super::{MatchWhen, Deletable, Initializable, Updatable},
-	crate::Store,
+	crate::{DynamicResult, Store},
 	clinvoice_data::{Contact, Employee, EmployeeStatus, Id, Organization, Person, views::EmployeeView},
-	std::{collections::HashSet, error::Error},
+	std::collections::HashSet,
 };
 
 pub trait EmployeeAdapter<'pass, 'path, 'user> :
 	Deletable +
 	Initializable<'pass, 'path, 'user> +
 	Into<Employee> +
-	Into<Result<EmployeeView, Box<dyn Error>>> +
-	Into<Result<Organization, Box<dyn Error>>> +
-	Into<Result<Person, Box<dyn Error>>> +
+	Into<DynamicResult<EmployeeView>> +
+	Into<DynamicResult<Organization>> +
+	Into<DynamicResult<Person>> +
 	Into<Store<'pass, 'path, 'user>> +
 	Updatable +
 {
@@ -35,7 +35,7 @@ pub trait EmployeeAdapter<'pass, 'path, 'user> :
 		title: &'title str,
 		status: EmployeeStatus,
 		store: Store<'pass, 'path, 'user>,
-	) -> Result<Self, Box<dyn Error>>;
+	) -> DynamicResult<Self>;
 
 	/// # Summary
 	///
@@ -57,5 +57,5 @@ pub trait EmployeeAdapter<'pass, 'path, 'user> :
 		title: MatchWhen<String>,
 		status: MatchWhen<EmployeeStatus>,
 		store: Store<'pass, 'path, 'user>,
-	) -> Result<HashSet<Self>, Box<dyn Error>>;
+	) -> DynamicResult<HashSet<Self>>;
 }

@@ -4,11 +4,12 @@ use
 	crate::util,
 	clinvoice_adapter::
 	{
+		DynamicResult,
 		data::{MatchWhen, Initializable, PersonAdapter, Updatable},
-		Store
+		Store,
 	},
 	clinvoice_data::{Contact, Person, Id},
-	std::{collections::HashSet, error::Error, fs, io::BufReader},
+	std::{collections::HashSet, fs, io::BufReader},
 };
 
 impl<'pass, 'path, 'user> PersonAdapter<'pass, 'path, 'user> for BincodePerson<'pass, 'path, 'user>
@@ -28,7 +29,7 @@ impl<'pass, 'path, 'user> PersonAdapter<'pass, 'path, 'user> for BincodePerson<'
 		contact_info: HashSet<Contact>,
 		name: &'name str,
 		store: Store<'pass, 'path, 'user>,
-	) -> Result<Self, Box<dyn Error>>
+	) -> DynamicResult<Self>
 	{
 		Self::init(&store)?;
 
@@ -65,7 +66,7 @@ impl<'pass, 'path, 'user> PersonAdapter<'pass, 'path, 'user> for BincodePerson<'
 		id: MatchWhen<Id>,
 		name: MatchWhen<String>,
 		store: Store<'pass, 'path, 'user>,
-	) -> Result<HashSet<Self>, Box<dyn Error>>
+	) -> DynamicResult<HashSet<Self>>
 	{
 		let mut results = HashSet::new();
 

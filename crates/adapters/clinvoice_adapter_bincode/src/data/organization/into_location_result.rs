@@ -1,14 +1,17 @@
 use
 {
 	crate::data::{BincodeLocation, BincodeOrganization},
-	clinvoice_adapter::data::{Error as DataError, LocationAdapter, MatchWhen},
+	clinvoice_adapter::
+	{
+		data::{Error as DataError, LocationAdapter, MatchWhen},
+		DynamicResult,
+	},
 	clinvoice_data::Location,
-	std::error::Error,
 };
 
-impl Into<Result<Location, Box<dyn Error>>> for BincodeOrganization<'_, '_, '_>
+impl Into<DynamicResult<Location>> for BincodeOrganization<'_, '_, '_>
 {
-	fn into(self) -> Result<Location, Box<dyn Error>>
+	fn into(self) -> DynamicResult<Location>
 	{
 		let results = BincodeLocation::retrieve(
 			MatchWhen::EqualTo(self.organization.location_id), // id
@@ -32,11 +35,11 @@ mod tests
 {
 	use
 	{
-		super::{BincodeLocation, BincodeOrganization, LocationAdapter},
+		super::{BincodeLocation, BincodeOrganization, DynamicResult, LocationAdapter},
 		crate::util,
 		clinvoice_adapter::data::OrganizationAdapter,
 		clinvoice_data::Location,
-		std::{error::Error, time::Instant},
+		std::time::Instant,
 	};
 
 	#[test]
@@ -54,7 +57,7 @@ mod tests
 			).unwrap();
 
 			// Retrieve the written employees back into the `Employee` structure.
-			let dogood_location: Result<Location, Box<dyn Error>> = dogood.into();
+			let dogood_location: DynamicResult<Location> = dogood.into();
 
 			// Assert that the location retrieved is the location expected
 			assert_eq!(arizona.location, dogood_location.unwrap());

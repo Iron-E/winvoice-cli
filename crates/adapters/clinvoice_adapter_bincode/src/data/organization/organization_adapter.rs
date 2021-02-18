@@ -5,10 +5,10 @@ use
 	clinvoice_adapter::
 	{
 		data::{Initializable, MatchWhen, OrganizationAdapter, Updatable},
-		Store
+		DynamicResult, Store,
 	},
 	clinvoice_data::{Location, Organization, Id},
-	std::{collections::HashSet, error::Error, fs, io::BufReader},
+	std::{collections::HashSet, fs, io::BufReader},
 };
 
 impl<'pass, 'path, 'user> OrganizationAdapter<'pass, 'path, 'user> for BincodeOrganization<'pass, 'path, 'user>
@@ -28,7 +28,7 @@ impl<'pass, 'path, 'user> OrganizationAdapter<'pass, 'path, 'user> for BincodeOr
 		location: Location,
 		name: &'name str,
 		store: Store<'pass, 'path, 'user>,
-	) -> Result<Self, Box<dyn Error>>
+	) -> DynamicResult<Self>
 	{
 		Self::init(&store)?;
 
@@ -65,7 +65,7 @@ impl<'pass, 'path, 'user> OrganizationAdapter<'pass, 'path, 'user> for BincodeOr
 		location: MatchWhen<Id>,
 		name: MatchWhen<String>,
 		store: Store<'pass, 'path, 'user>,
-	) -> Result<HashSet<Self>, Box<dyn Error>>
+	) -> DynamicResult<HashSet<Self>>
 	{
 		let mut results = HashSet::new();
 

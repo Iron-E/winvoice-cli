@@ -1,14 +1,18 @@
 use
 {
 	crate::data::{BincodeEmployee, BincodeOrganization},
-	clinvoice_adapter::data::{EmployeeAdapter, MatchWhen},
+	clinvoice_adapter::
+	{
+		data::{EmployeeAdapter, MatchWhen},
+		DynamicResult,
+	},
 	clinvoice_data::Employee,
-	std::{collections::HashSet, error::Error},
+	std::collections::HashSet,
 };
 
-impl Into<Result<HashSet<Employee>, Box<dyn Error>>> for BincodeOrganization<'_, '_, '_>
+impl Into<DynamicResult<HashSet<Employee>>> for BincodeOrganization<'_, '_, '_>
 {
-	fn into(self) -> Result<HashSet<Employee>, Box<dyn Error>>
+	fn into(self) -> DynamicResult<HashSet<Employee>>
 	{
 		let results = BincodeEmployee::retrieve(
 			MatchWhen::Any, // contact info
@@ -31,9 +35,9 @@ mod tests
 	{
 		super::{BincodeEmployee, BincodeOrganization, EmployeeAdapter},
 		crate::util,
-		clinvoice_adapter::data::OrganizationAdapter,
+		clinvoice_adapter::{data::OrganizationAdapter, DynamicResult},
 		clinvoice_data::{Contact, Employee, EmployeeStatus, Id, Location, Person},
-		std::{collections::HashSet, error::Error, time::Instant},
+		std::{collections::HashSet, time::Instant},
 	};
 
 	#[test]
@@ -78,7 +82,7 @@ mod tests
 			).unwrap();
 
 			// Retrieve the written employees back into the `Employee` structure.
-			let reps: Result<HashSet<Employee>, Box<dyn Error>> = dogood.into();
+			let reps: DynamicResult<HashSet<Employee>> = dogood.into();
 
 			assert_eq!(reps.unwrap(), [testy.employee, mr_flu.employee].iter().cloned().collect());
 

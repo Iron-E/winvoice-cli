@@ -1,14 +1,17 @@
 use
 {
 	crate::data::{BincodeJob, BincodeOrganization},
-	clinvoice_adapter::data::{Error as DataError, MatchWhen, OrganizationAdapter},
+	clinvoice_adapter::
+	{
+		data::{Error as DataError, MatchWhen, OrganizationAdapter},
+		DynamicResult,
+	},
 	clinvoice_data::Organization,
-	std::error::Error,
 };
 
-impl Into<Result<Organization, Box<dyn Error>>> for BincodeJob<'_, '_, '_>
+impl Into<DynamicResult<Organization>> for BincodeJob<'_, '_, '_>
 {
-	fn into(self) -> Result<Organization, Box<dyn Error>>
+	fn into(self) -> DynamicResult<Organization>
 	{
 		let results = BincodeOrganization::retrieve(
 			MatchWhen::EqualTo(self.job.client_id), // id
@@ -34,9 +37,9 @@ mod tests
 	{
 		super::{BincodeJob, BincodeOrganization, OrganizationAdapter},
 		crate::util,
-		clinvoice_adapter::data::JobAdapter,
+		clinvoice_adapter::{DynamicResult, data::JobAdapter},
 		clinvoice_data::{chrono::Utc, Decimal, Id, Location, Money, Organization},
-		std::{error::Error, time::Instant},
+		std::time::Instant,
 	};
 
 	#[test]
@@ -60,7 +63,7 @@ mod tests
 				*store,
 			).unwrap();
 
-			let test_org: Result<Organization, Box<dyn Error>> = test_job.into();
+			let test_org: DynamicResult<Organization> = test_job.into();
 
 			assert_eq!(dogood.organization, test_org.unwrap());
 

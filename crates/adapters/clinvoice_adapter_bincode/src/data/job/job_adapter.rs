@@ -5,7 +5,7 @@ use
 	clinvoice_adapter::
 	{
 		data::{Initializable, JobAdapter, MatchWhen, Updatable},
-		Store
+		DynamicResult, Store
 	},
 	clinvoice_data::
 	{
@@ -15,7 +15,7 @@ use
 	std::
 	{
 		collections::{BTreeSet, HashSet},
-		error::Error, fs, io::BufReader
+		fs, io::BufReader
 	},
 };
 
@@ -38,7 +38,7 @@ impl<'pass, 'path, 'user> JobAdapter<'pass, 'path, 'user> for BincodeJob<'pass, 
 		hourly_rate: Money,
 		objectives: &'objectives str,
 		store: Store<'pass, 'path, 'user>,
-	) -> Result<Self, Box<dyn Error>>
+	) -> DynamicResult<Self>
 	{
 		Self::init(&store)?;
 
@@ -92,7 +92,7 @@ impl<'pass, 'path, 'user> JobAdapter<'pass, 'path, 'user> for BincodeJob<'pass, 
 		timesheet_begin: MatchWhen<DateTime<Utc>>,
 		timesheet_end: MatchWhen<Option<DateTime<Utc>>>,
 		store: Store<'pass, 'path, 'user>,
-	) -> Result<HashSet<Self>, Box<dyn Error>>
+	) -> DynamicResult<HashSet<Self>>
 	{
 		let mut results = HashSet::new();
 

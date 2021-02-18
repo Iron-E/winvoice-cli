@@ -1,10 +1,10 @@
 use
 {
 	super::{MatchWhen, Deletable, Initializable, Updatable},
-	crate::Store,
+	crate::{DynamicResult, Store},
 	clinvoice_data::{Location, Id, views::LocationView},
 	core::fmt::Display,
-	std::{collections::HashSet, error::Error},
+	std::collections::HashSet,
 };
 
 pub trait LocationAdapter<'pass, 'path, 'user> :
@@ -12,7 +12,7 @@ pub trait LocationAdapter<'pass, 'path, 'user> :
 	Display +
 	Initializable<'pass, 'path, 'user> +
 	Into<Location> +
-	Into<Result<LocationView, Box<dyn Error>>> +
+	Into<DynamicResult<LocationView>> +
 	Into<Store<'pass, 'path, 'user>> +
 	Updatable +
 {
@@ -29,7 +29,7 @@ pub trait LocationAdapter<'pass, 'path, 'user> :
 	/// ```ignore
 	/// Location {name, id: /* generated */};
 	/// ```
-	fn create<'name>(name: &'name str, store: Store<'pass, 'path, 'user>) -> Result<Self, Box<dyn Error>>;
+	fn create<'name>(name: &'name str, store: Store<'pass, 'path, 'user>) -> DynamicResult<Self>;
 
 	/// # Summary
 	///
@@ -44,7 +44,7 @@ pub trait LocationAdapter<'pass, 'path, 'user> :
 	/// ```ignore
 	/// Location {name, id: /* generated */, outside_id: self.unroll().id};
 	/// ```
-	fn create_inner<'name>(&self, name: &'name str) -> Result<Self, Box<dyn Error>>;
+	fn create_inner<'name>(&self, name: &'name str) -> DynamicResult<Self>;
 
 	/// # Summary
 	///
@@ -63,5 +63,5 @@ pub trait LocationAdapter<'pass, 'path, 'user> :
 		name: MatchWhen<String>,
 		outer: MatchWhen<Option<Id>>,
 		store: Store<'pass, 'path, 'user>,
-	) -> Result<HashSet<Self>, Box<dyn Error>>;
+	) -> DynamicResult<HashSet<Self>>;
 }

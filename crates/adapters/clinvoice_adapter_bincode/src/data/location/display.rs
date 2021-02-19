@@ -19,7 +19,7 @@ impl Display for BincodeLocation<'_, '_, '_>
 			_ => Err(Error)?,
 		};
 
-		return write!(formatter, "{}", outer_locations.iter().fold(
+		return writeln!(formatter, "{}", outer_locations.iter().fold(
 			String::from(&self.location.name),
 			|out, loc| out + ", " + &loc.name
 		));

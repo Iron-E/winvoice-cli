@@ -8,7 +8,7 @@ impl Display for JobView
 {
 	fn fmt(&self, formatter: &mut Formatter<'_>) -> Result
 	{
-		return write!(formatter, "{:?}", self);
+		return writeln!(formatter, "{:?}", self);
 	}
 }
 

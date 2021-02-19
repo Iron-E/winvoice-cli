@@ -8,6 +8,6 @@ impl Display for OrganizationView
 {
 	fn fmt(&self, formatter: &mut Formatter<'_>) -> Result
 	{
-		return write!(formatter, "{:?}", self);
+		return writeln!(formatter, "{:?}", self);
 	}
 }

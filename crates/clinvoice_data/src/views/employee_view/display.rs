@@ -14,8 +14,8 @@ impl Display for EmployeeView
 		writeln!(formatter, "Contact Info:")?;
 		sorted_contact_info.iter().try_for_each(|c| writeln!(formatter, "\t- {}", c))?;
 
-		writeln!(formatter, "\nOrganization:\n\t{}", self.organization.to_string().replace("\n", "\n\t"))?;
-		writeln!(formatter, "\nPerson:\n\t{}", self.person.to_string().replace("\n", "\n\t"))?;
+		writeln!(formatter, "\nOrganization:\n\t{}", self.organization.to_string().replace('\n', "\n\t"))?;
+		writeln!(formatter, "\nPerson:\n\t{}", self.person.to_string().replace('\n', "\n\t"))?;
 		writeln!(formatter, "\nStatus: {}", self.status)?;
 		return write!(formatter, "\nTitle: {}", self.title);
 	}

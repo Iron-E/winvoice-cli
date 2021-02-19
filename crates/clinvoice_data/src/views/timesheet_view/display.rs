@@ -8,7 +8,7 @@ impl Display for TimesheetView
 {
 	fn fmt(&self, formatter: &mut Formatter<'_>) -> Result
 	{
-		return writeln!(formatter, "{:?}", self);
+		return write!(formatter, "{:?}", self);
 	}
 }
 

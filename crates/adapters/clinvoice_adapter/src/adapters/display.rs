@@ -8,7 +8,7 @@ impl Display for Adapters
 {
 	fn fmt(&self, formatter: &mut Formatter<'_>) -> FmtResult
 	{
-		writeln!(formatter, "{}", match self {
+		write!(formatter, "{}", match self {
 			Adapters::TOML => "TOML"
 		})
 	}

@@ -1,22 +1,20 @@
 use
 {
-	super::{ContactView, PersonView},
-	std::
-	{
-		collections::BTreeSet,
-		fmt::{Display, Formatter, Result}
-	},
+	super::PersonView,
+	std::fmt::{Display, Formatter, Result},
 };
 
 impl Display for PersonView
 {
 	fn fmt(&self, formatter: &mut Formatter<'_>) -> Result
 	{
-		writeln!(formatter, "Contact Info:")?;
-		let sorted_contact_info: BTreeSet<ContactView> = self.contact_info.iter().cloned().collect();
-		sorted_contact_info.iter().try_for_each(|c| writeln!(formatter, "\t{}", c))?;
+		let mut sorted_contact_info = self.contact_info.clone();
+		sorted_contact_info.sort();
 
-		return writeln!(formatter, "\nName: {}", self.name);
+		writeln!(formatter, "Contact Info:")?;
+		sorted_contact_info.iter().try_for_each(|c| writeln!(formatter, "\t- {}", c))?;
+
+		return write!(formatter, "\nName: {}", self.name);
 	}
 }
 

@@ -79,7 +79,7 @@ pub fn test_temp_store(assertion: impl FnOnce(&Store<'_, '_, '_>))
 		path: match temp_path.to_str()
 		{
 			Some(s) => s,
-			None => Err(io::Error::new(
+			_ => Err(io::Error::new(
 				io::ErrorKind::InvalidInput,
 				"`env::temp_path` did not resolve to a valid path."
 			)).unwrap(),
@@ -110,7 +110,7 @@ pub fn unique_id(store_dir: &Path) -> io::Result<Id>
 			if match node_path.file_stem()
 			{
 				Some(stem) => stem.to_string_lossy(),
-				None => continue,
+				_ => continue,
 			} == id.to_string()
 			{ continue 'gen; }
 		}

@@ -55,12 +55,12 @@ impl Config<'_, '_, '_, '_, '_, '_>
 	{
 		return match self.stores.get(name)
 		{
-			None => None,
 			Some(value) => match value
 			{
 				StoreValue::Alias(alias) => self.get_store(alias),
 				StoreValue::Storage(store) => Some(store),
 			},
+			_ => None,
 		};
 	}
 }

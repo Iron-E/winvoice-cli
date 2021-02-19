@@ -23,7 +23,7 @@ impl Into<DynamicResult<Organization>> for BincodeJob<'_, '_, '_>
 		let bincode_organization = match results.iter().next()
 		{
 			Some(bin_org) => bin_org,
-			None => Err(DataError::DataIntegrity {id: self.job.client_id})?,
+			_ => Err(DataError::DataIntegrity {id: self.job.client_id})?,
 		};
 
 		return Ok(bincode_organization.organization.clone());

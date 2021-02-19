@@ -15,8 +15,8 @@ impl Display for BincodeLocation<'_, '_, '_>
 	{
 		let outer_locations = match self.outer_locations()
 		{
-			Err(_) => Err(Error)?,
 			Ok(locations) => locations,
+			_ => Err(Error)?,
 		};
 
 		return write!(formatter, "{}", outer_locations.iter().fold(

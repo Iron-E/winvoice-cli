@@ -1,5 +1,7 @@
 mod display;
 
+use crate::Id;
+
 #[cfg(feature="serde_support")]
 use serde::{Deserialize, Serialize};
 
@@ -10,6 +12,11 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
 pub struct LocationView
 {
+	/// # Summary
+	///
+	/// The reference number of the [`Location`].
+	pub id: Id,
+
 	/// # Summary
 	///
 	/// The [`Location`][location]s which this [`Location`][location] is inside of.
@@ -30,10 +37,11 @@ impl LocationView
 	/// # Summary
 	///
 	/// Create a new [`LocationView`].
-	pub fn new(name: String, outer: Option<&Self>) -> Self
+	pub fn new(id: Id, name: String, outer: Option<&Self>) -> Self
 	{
 		return Self
 		{
+			id,
 			name,
 			outer: match outer
 			{

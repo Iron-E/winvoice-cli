@@ -1,3 +1,5 @@
+mod display;
+
 use super::LocationView;
 
 #[cfg(feature="serde_support")]

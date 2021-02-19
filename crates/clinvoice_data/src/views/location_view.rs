@@ -1,3 +1,5 @@
+mod display;
+
 #[cfg(feature="serde_support")]
 use serde::{Deserialize, Serialize};
 

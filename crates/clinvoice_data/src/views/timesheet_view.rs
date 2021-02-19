@@ -1,3 +1,5 @@
+mod display;
+
 use
 {
 	chrono::{DateTime, Utc},

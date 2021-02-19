@@ -16,8 +16,10 @@ impl Into<DynamicResult<LocationView>> for BincodeLocation<'_, '_, '_>
 
 		for i in 0..outer_locations.len()
 		{
+			let outer_location = &outer_locations[i];
 			outer_location_views.push(LocationView::new(
-				outer_locations[i].name.clone(),
+				outer_location.id,
+				outer_location.name.clone(),
 				match i
 				{
 					0 => None,
@@ -27,6 +29,7 @@ impl Into<DynamicResult<LocationView>> for BincodeLocation<'_, '_, '_>
 		}
 
 		return Ok(LocationView::new(
+			self.location.id,
 			self.location.name,
 			outer_location_views.last(),
 		));
@@ -62,15 +65,19 @@ mod tests
 
 			let phoenix_view = LocationView
 			{
+				id: phoenix.location.id,
 				name: phoenix.location.name.clone(),
 				outer: Some(LocationView
 				{
+					id: arizona.location.id,
 					name: arizona.location.name,
 					outer: Some(LocationView
 					{
+						id: usa.location.id,
 						name: usa.location.name,
 						outer: Some(LocationView
 						{
+							id: earth.location.id,
 							name: earth.location.name,
 							outer: None,
 						}.into()),

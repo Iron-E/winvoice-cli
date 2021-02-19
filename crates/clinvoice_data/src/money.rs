@@ -1,3 +1,5 @@
+mod display;
+
 use rust_decimal::Decimal;
 
 #[cfg(feature="serde_support")]

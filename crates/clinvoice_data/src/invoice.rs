@@ -1,3 +1,5 @@
+mod display;
+
 use crate::{InvoiceDate, Money};
 
 #[cfg(feature="serde_support")]

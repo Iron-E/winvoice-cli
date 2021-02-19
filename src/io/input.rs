@@ -1,8 +1,9 @@
 use
 {
-	dialoguer::Editor,
+	clinvoice_adapter::DynamicResult,
+	dialoguer::{Editor, MultiSelect},
 	serde::{de::DeserializeOwned, Serialize},
-	std::error::Error,
+	std::{fmt::Display, io::Result as IoResult},
 };
 
 /// # Summary
@@ -18,7 +19,7 @@ use
 ///
 /// * The deserialized entity with values filled in by the user.
 /// * An [`Error`] encountered while creating, editing, or removing the temporary file.
-pub fn from_editor<T>(entity: T) -> Result<T, Box<dyn Error>> where
+pub fn edit<T>(entity: T) -> DynamicResult<T> where
 	T : DeserializeOwned + Serialize
 {
 	// Write the entity to the `temp_path` and then edit that file.
@@ -27,6 +28,30 @@ pub fn from_editor<T>(entity: T) -> Result<T, Box<dyn Error>> where
 		Some(edited) => toml::from_str(&edited)?,
 		None => entity,
 	});
+}
+
+/// # Summary
+///
+/// Get a selecion from a list of elements.
+///
+/// # Remarks
+///
+/// The user's specified `$selection` environment variable will be opened first, followed by whichever
+/// selection is discovered by the [`edit_file`](edit::edit_file) function.
+///
+/// # Returns
+///
+/// * The deserialized entity with values filled in by the user.
+/// * An [`Error`] encountered while creating, editing, or removing the temporary file.
+pub fn select<T>(entities: &[T], prompt: impl Into<String>) -> IoResult<Vec<T>> where
+	T : Clone + DeserializeOwned + Display + Serialize
+{
+
+	let selection = MultiSelect::new().items(entities).paged(true).with_prompt(prompt).interact()?;
+
+	return Ok(entities.iter().enumerate().filter_map(
+		|(i, entity)| selection.binary_search(&i).and(Ok(entity.clone())).ok()
+	).collect());
 }
 
 /// # Summary

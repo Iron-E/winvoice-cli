@@ -30,16 +30,7 @@ pub enum Contact
 	///
 	/// # Example
 	///
-	/// The following are valid for numbers with country code:
-	///
-	/// * '+1 (603) 555-1234'
 	/// * '1-603-555-1234'
-	/// * '16035551234'
-	///
-	/// The following are valid for numbers without country code:
-	///
-	/// * '(603) 555-1234'
 	/// * '603-555-1234'
-	/// * '6035551234'
 	Phone(String),
 }

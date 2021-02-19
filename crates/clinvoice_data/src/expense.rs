@@ -1,3 +1,5 @@
+mod display;
+
 use crate::{ExpenseCategory, Money};
 
 #[cfg(feature="serde_support")]

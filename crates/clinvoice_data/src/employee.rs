@@ -1,10 +1,6 @@
 mod hash;
 
-use
-{
-	crate::{Contact, EmployeeStatus, Id},
-	std::collections::HashSet,
-};
+use crate::{Contact, EmployeeStatus, Id};
 
 #[cfg(feature="serde_support")]
 use serde::{Deserialize, Serialize};
@@ -13,14 +9,14 @@ use serde::{Deserialize, Serialize};
 ///
 /// An `Employee` is a [`Person`](super::person::Person) who completes [`Job`](super::job::Job)s
 /// for an [employer](crate::Organization).
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
 pub struct Employee
 {
 	/// # Summary
 	///
 	/// Contact information specific to the [`Organization`] that the [`Employee`] does work for.
-	pub contact_info: HashSet<Contact>,
+	pub contact_info: Vec<Contact>,
 
 	/// # Summary
 	///

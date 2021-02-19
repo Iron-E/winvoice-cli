@@ -56,11 +56,11 @@ mod tests
 			).unwrap();
 
 			let testy = BincodeEmployee::create(
-				[Contact::Email("foo".into())].iter().cloned().collect(),
+				vec![Contact::Email("foo".into())],
 				dogood.organization.clone(),
 				Person
 				{
-					contact_info: [Contact::Email("yum".into())].iter().cloned().collect(),
+					contact_info: vec![Contact::Email("yum".into())],
 					id: Id::new_v4(),
 					name: "Testy Mćtesterson".into(),
 				},

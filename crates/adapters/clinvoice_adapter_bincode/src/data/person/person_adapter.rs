@@ -9,7 +9,7 @@ use
 		Store,
 	},
 	clinvoice_data::{Contact, Person, Id},
-	std::{collections::HashSet, fs, io::BufReader},
+	std::{fs, io::BufReader},
 };
 
 impl<'pass, 'path, 'user> PersonAdapter<'pass, 'path, 'user> for BincodePerson<'pass, 'path, 'user>
@@ -26,7 +26,7 @@ impl<'pass, 'path, 'user> PersonAdapter<'pass, 'path, 'user> for BincodePerson<'
 	///
 	/// The newly created [`Person`].
 	fn create<'name>(
-		contact_info: HashSet<Contact>,
+		contact_info: Vec<Contact>,
 		name: &'name str,
 		store: Store<'pass, 'path, 'user>,
 	) -> DynamicResult<Self>
@@ -66,9 +66,9 @@ impl<'pass, 'path, 'user> PersonAdapter<'pass, 'path, 'user> for BincodePerson<'
 		id: MatchWhen<Id>,
 		name: MatchWhen<String>,
 		store: Store<'pass, 'path, 'user>,
-	) -> DynamicResult<HashSet<Self>>
+	) -> DynamicResult<Vec<Self>>
 	{
-		let mut results = HashSet::new();
+		let mut results = Vec::new();
 
 		for node_path in util::read_files(BincodePerson::path(&store))?
 		{
@@ -76,11 +76,11 @@ impl<'pass, 'path, 'user> PersonAdapter<'pass, 'path, 'user> for BincodePerson<'
 				fs::File::open(node_path)?
 			))?;
 
-			if contact_info.set_matches(&person.contact_info) &&
+			if contact_info.set_matches(&person.contact_info.iter().cloned().collect()) &&
 				id.is_match(&person.id) &&
 				name.is_match(&person.name)
 			{
-				results.insert(BincodePerson {person, store});
+				results.push(BincodePerson {person, store});
 			}
 		}
 
@@ -93,7 +93,7 @@ mod tests
 {
 	use
 	{
-		super::{BincodePerson, Contact, HashSet, Id, MatchWhen, PersonAdapter, util},
+		super::{BincodePerson, Contact, Id, MatchWhen, PersonAdapter, util},
 		std::{fs, time::Instant},
 		bincode,
 	};
@@ -105,21 +105,21 @@ mod tests
 
 		util::test_temp_store(|store|
 		{
-			let mut contact_info = HashSet::new();
+			let mut contact_info = Vec::new();
 
-			contact_info.insert(Contact::Address(Id::new_v4()));
+			contact_info.push(Contact::Address(Id::new_v4()));
 			test_create_assertion(BincodePerson::create(contact_info.clone(), "", *store).unwrap());
 
-			contact_info.insert(Contact::Email("foo@bar.io".into()));
+			contact_info.push(Contact::Email("foo@bar.io".into()));
 			test_create_assertion(BincodePerson::create(contact_info.clone(), "", *store).unwrap());
 
-			contact_info.insert(Contact::Phone("1-800-555-3600".into()));
+			contact_info.push(Contact::Phone("1-800-555-3600".into()));
 			test_create_assertion(BincodePerson::create(contact_info.clone(), "", *store).unwrap());
 
-			contact_info.insert(Contact::Address(Id::new_v4()));
+			contact_info.push(Contact::Address(Id::new_v4()));
 			test_create_assertion(BincodePerson::create(contact_info.clone(), "", *store).unwrap());
 
-			contact_info.insert(Contact::Email("obviousemail@server.com".into()));
+			contact_info.push(Contact::Email("obviousemail@server.com".into()));
 			test_create_assertion(BincodePerson::create(contact_info, "", *store).unwrap());
 
 			println!("\n>>>>> BincodePerson test_create {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
@@ -140,32 +140,32 @@ mod tests
 		util::test_temp_store(|store|
 		{
 			let flingo = BincodePerson::create(
-				[Contact::Address(Id::new_v4())].iter().cloned().collect(),
+				vec![Contact::Address(Id::new_v4())],
 				"flingo",
 				*store
 			).unwrap();
 
 			let bob = BincodePerson::create(
-				[Contact::Email("foo@bar.io".into())].iter().cloned().collect(),
+				vec![Contact::Email("foo@bar.io".into())],
 				"bob",
 				*store
 			).unwrap();
 
 			let slimdi = BincodePerson::create(
-				[Contact::Phone("1-800-555-3600".into())].iter().cloned().collect(),
+				vec![Contact::Phone("1-800-555-3600".into())],
 				"slimdi",
 				*store
 			).unwrap();
 
 			let longone = BincodePerson::create(
-				[Contact::Address(Id::new_v4())].iter().cloned().collect(),
+				vec![Contact::Address(Id::new_v4())],
 				"longone",
 				*store
 			).unwrap();
 
 			// Retrieve bob
 			let mut results = BincodePerson::retrieve(
-				MatchWhen::HasAll(bob.person.contact_info.clone()), // contact info
+				MatchWhen::HasAll(bob.person.contact_info.iter().cloned().collect()), // contact info
 				MatchWhen::Any, // id
 				MatchWhen::Any, // name
 				*store,

@@ -8,7 +8,7 @@ use
 		DynamicResult, Store,
 	},
 	clinvoice_data::{Location, Organization, Id},
-	std::{collections::HashSet, fs, io::BufReader},
+	std::{fs, io::BufReader},
 };
 
 impl<'pass, 'path, 'user> OrganizationAdapter<'pass, 'path, 'user> for BincodeOrganization<'pass, 'path, 'user>
@@ -65,9 +65,9 @@ impl<'pass, 'path, 'user> OrganizationAdapter<'pass, 'path, 'user> for BincodeOr
 		location: MatchWhen<Id>,
 		name: MatchWhen<String>,
 		store: Store<'pass, 'path, 'user>,
-	) -> DynamicResult<HashSet<Self>>
+	) -> DynamicResult<Vec<Self>>
 	{
-		let mut results = HashSet::new();
+		let mut results = Vec::new();
 
 		for node_path in util::read_files(BincodeOrganization::path(&store))?
 		{
@@ -79,7 +79,7 @@ impl<'pass, 'path, 'user> OrganizationAdapter<'pass, 'path, 'user> for BincodeOr
 				location.is_match(&organization.location_id) &&
 				name.is_match(&organization.name)
 			{
-				results.insert(BincodeOrganization {organization, store});
+				results.push(BincodeOrganization {organization, store});
 			}
 		}
 

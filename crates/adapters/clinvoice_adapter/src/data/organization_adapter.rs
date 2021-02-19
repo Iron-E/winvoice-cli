@@ -3,14 +3,13 @@ use
 	super::{Deletable, Initializable, MatchWhen, Updatable},
 	crate::{DynamicResult, Store},
 	clinvoice_data::{Employee, Location, Organization, Id, views::OrganizationView},
-	std::collections::HashSet,
 };
 
 pub trait OrganizationAdapter<'pass, 'path, 'user> :
 	Deletable +
 	Initializable<'pass, 'path, 'user> +
 	Into<Organization> +
-	Into<DynamicResult<HashSet<Employee>>> +
+	Into<DynamicResult<Vec<Employee>>> +
 	Into<DynamicResult<Location>> +
 	Into<DynamicResult<OrganizationView>> +
 	Into<Store<'pass, 'path, 'user>> +
@@ -50,5 +49,5 @@ pub trait OrganizationAdapter<'pass, 'path, 'user> :
 		location: MatchWhen<Id>,
 		name: MatchWhen<String>,
 		store: Store<'pass, 'path, 'user>,
-	) -> DynamicResult<HashSet<Self>>;
+	) -> DynamicResult<Vec<Self>>;
 }

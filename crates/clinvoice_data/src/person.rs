@@ -1,18 +1,14 @@
 mod hash;
 
-use
-{
-	crate::{Contact, Id},
-	std::collections::HashSet,
-};
+use crate::{Contact, Id};
 
 #[cfg(feature="serde_support")]
 use serde::{Deserialize, Serialize};
 
 /// # Summary
-//
+///
 /// A person is a physical human being.
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
 pub struct Person
 {
@@ -20,7 +16,7 @@ pub struct Person
 	///
 	/// Contact information specific to the individual [`Person`], rather than a corporation they
 	/// work at.
-	pub contact_info: HashSet<Contact>,
+	pub contact_info: Vec<Contact>,
 
 	/// # Summary
 	///

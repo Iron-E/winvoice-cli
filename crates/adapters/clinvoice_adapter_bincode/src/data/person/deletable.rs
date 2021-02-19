@@ -53,7 +53,7 @@ mod tests
 		},
 		clinvoice_adapter::data::{LocationAdapter, OrganizationAdapter, PersonAdapter},
 		clinvoice_data::{Contact, EmployeeStatus},
-		std::{collections::HashSet, time::Instant},
+		std::time::Instant,
 	};
 
 	#[test]
@@ -71,8 +71,8 @@ mod tests
 				*store,
 			).unwrap();
 
-			let mut contact_info = HashSet::new();
-			contact_info.insert(Contact::Address(earth.location.id));
+			let mut contact_info = Vec::new();
+			contact_info.push(Contact::Address(earth.location.id));
 
 			let testy = BincodePerson::create(
 				contact_info.clone(),

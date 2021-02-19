@@ -2,7 +2,6 @@ use
 {
 	chrono::{DateTime, Utc},
 	crate::{Expense, Id},
-	std::collections::BTreeSet,
 };
 
 #[cfg(feature="serde_support")]
@@ -30,7 +29,7 @@ pub struct Timesheet
 	/// # Summary
 	///
 	/// [`Expense`]s which were incurred during this time.
-	pub expenses: Option<BTreeSet<Expense>>,
+	pub expenses: Option<Vec<Expense>>,
 
 	/// # Summary
 	///

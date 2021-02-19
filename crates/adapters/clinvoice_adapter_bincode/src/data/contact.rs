@@ -7,7 +7,6 @@ use
 		DynamicResult, Store,
 	},
 	clinvoice_data::{Contact, views::{ContactView, LocationView}},
-	std::collections::HashSet,
 };
 
 /// # Summary
@@ -39,16 +38,16 @@ pub fn into_view(contact: Contact, store: Store) -> DynamicResult<ContactView>
 /// # Summary
 ///
 /// Convert some [`Contact`] into a [`ContactView`].
-pub fn into_views<I>(contact_info: I, store: Store) -> DynamicResult<HashSet<ContactView>> where I : IntoIterator<Item = Contact>
+pub fn into_views<I>(contact_info: I, store: Store) -> DynamicResult<Vec<ContactView>> where I : IntoIterator<Item = Contact>
 {
 	let contact_info_view_result = contact_info.into_iter().map(|c| into_view(c, store));
-	let mut contact_info_view = HashSet::new();
+	let mut contact_info_view = Vec::new();
 
 	for result in contact_info_view_result
 	{
 		match result
 		{
-			Ok(contact) => contact_info_view.insert(contact),
+			Ok(contact) => contact_info_view.push(contact),
 			Err(e) => return Err(e),
 		};
 	}

@@ -2,9 +2,9 @@ mod display;
 
 use
 {
+	super::EmployeeView,
+	crate::Expense,
 	chrono::{DateTime, Utc},
-	crate::{Expense, Id},
-	std::collections::BTreeSet,
 };
 
 #[cfg(feature="serde_support")]
@@ -27,12 +27,12 @@ pub struct TimesheetView
 	/// # Summary
 	///
 	/// The ID of the [`Employee`](crate::Employee) who performed this work.
-	pub employee_id: Id,
+	pub employee: EmployeeView,
 
 	/// # Summary
 	///
 	/// [`Expense`]s which were incurred during this time.
-	pub expenses: Option<BTreeSet<Expense>>,
+	pub expenses: Option<Vec<Expense>>,
 
 	/// # Summary
 	///

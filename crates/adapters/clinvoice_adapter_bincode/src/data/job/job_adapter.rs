@@ -12,11 +12,7 @@ use
 		chrono::{DateTime, Utc},
 		Invoice, InvoiceDate, Job, Money, Organization, Id
 	},
-	std::
-	{
-		collections::{BTreeSet, HashSet},
-		fs, io::BufReader
-	},
+	std::{fs, io::BufReader},
 };
 
 impl<'pass, 'path, 'user> JobAdapter<'pass, 'path, 'user> for BincodeJob<'pass, 'path, 'user>
@@ -57,7 +53,7 @@ impl<'pass, 'path, 'user> JobAdapter<'pass, 'path, 'user> for BincodeJob<'pass, 
 				},
 				objectives: objectives.into(),
 				notes: "".into(),
-				timesheets: BTreeSet::new(),
+				timesheets: Vec::new(),
 			},
 			store,
 		};
@@ -92,9 +88,9 @@ impl<'pass, 'path, 'user> JobAdapter<'pass, 'path, 'user> for BincodeJob<'pass, 
 		timesheet_begin: MatchWhen<DateTime<Utc>>,
 		timesheet_end: MatchWhen<Option<DateTime<Utc>>>,
 		store: Store<'pass, 'path, 'user>,
-	) -> DynamicResult<HashSet<Self>>
+	) -> DynamicResult<Vec<Self>>
 	{
-		let mut results = HashSet::new();
+		let mut results = Vec::new();
 
 		for node_path in util::read_files(BincodeJob::path(&store))?
 		{
@@ -114,7 +110,7 @@ impl<'pass, 'path, 'user> JobAdapter<'pass, 'path, 'user> for BincodeJob<'pass, 
 				timesheet_begin.set_matches(&job.timesheets.iter().map(|t| t.time_begin).collect()) &&
 				timesheet_end.set_matches(&job.timesheets.iter().map(|t| t.time_end).collect())
 			{
-				results.insert(BincodeJob {job, store});
+				results.push(BincodeJob {job, store});
 			}
 		}
 

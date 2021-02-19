@@ -2,9 +2,8 @@ mod display;
 
 use
 {
-	crate::{Invoice, Timesheet},
-	super::OrganizationView,
-	std::collections::BTreeSet,
+	crate::Invoice,
+	super::{OrganizationView, TimesheetView},
 	chrono::{DateTime, Utc},
 };
 
@@ -71,5 +70,5 @@ pub struct JobView
 	/// # Summary
 	///
 	/// The periods of time during which work was performed for this [`Job`].
-	pub timesheets: BTreeSet<Timesheet>,
+	pub timesheets: Vec<TimesheetView>,
 }

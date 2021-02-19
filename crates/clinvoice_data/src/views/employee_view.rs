@@ -5,7 +5,6 @@ use
 {
 	crate::EmployeeStatus,
 	super::{ContactView, OrganizationView, PersonView},
-	std::collections::HashSet,
 };
 
 #[cfg(feature="serde_support")]
@@ -14,14 +13,14 @@ use serde::{Deserialize, Serialize};
 /// # Summary
 ///
 /// A view of [`Employee`](crate::Employee).
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
 pub struct EmployeeView
 {
 	/// # Summary
 	///
 	/// Contact information specific to the [`Organization`] that the [`Employee`] does work for.
-	pub contact_info: HashSet<ContactView>,
+	pub contact_info: Vec<ContactView>,
 
 	/// # Summary
 	///

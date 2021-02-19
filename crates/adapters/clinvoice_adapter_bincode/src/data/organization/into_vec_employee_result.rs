@@ -7,12 +7,11 @@ use
 		DynamicResult,
 	},
 	clinvoice_data::Employee,
-	std::collections::HashSet,
 };
 
-impl Into<DynamicResult<HashSet<Employee>>> for BincodeOrganization<'_, '_, '_>
+impl Into<DynamicResult<Vec<Employee>>> for BincodeOrganization<'_, '_, '_>
 {
-	fn into(self) -> DynamicResult<HashSet<Employee>>
+	fn into(self) -> DynamicResult<Vec<Employee>>
 	{
 		let results = BincodeEmployee::retrieve(
 			MatchWhen::Any, // contact info
@@ -37,11 +36,11 @@ mod tests
 		crate::util,
 		clinvoice_adapter::{data::OrganizationAdapter, DynamicResult},
 		clinvoice_data::{Contact, Employee, EmployeeStatus, Id, Location, Person},
-		std::{collections::HashSet, time::Instant},
+		std::time::Instant,
 	};
 
 	#[test]
-	fn test_into_hashset_employee()
+	fn test_into_vec_employee()
 	{
 		let start = Instant::now();
 
@@ -54,11 +53,11 @@ mod tests
 			).unwrap();
 
 			let testy = BincodeEmployee::create(
-				[Contact::Email("foo@bar.io".into())].iter().cloned().collect(),
+				vec![Contact::Email("foo@bar.io".into())],
 				dogood.organization.clone(),
 				Person
 				{
-					contact_info: [Contact::Email("yum@bar.io".into())].iter().cloned().collect(),
+					contact_info: vec![Contact::Email("yum@bar.io".into())],
 					id: Id::new_v4(),
 					name: "Testy Mćtesterson".into(),
 				},
@@ -68,11 +67,11 @@ mod tests
 			).unwrap();
 
 			let mr_flu = BincodeEmployee::create(
-				[Contact::Email("flu@bar.io".into())].iter().cloned().collect(),
+				vec![Contact::Email("flu@bar.io".into())],
 				dogood.organization.clone(),
 				Person
 				{
-					contact_info: [Contact::Email("sig@bar.io".into())].iter().cloned().collect(),
+					contact_info: vec![Contact::Email("sig@bar.io".into())],
 					id: Id::new_v4(),
 					name: "Mr. Flu".into(),
 				},
@@ -82,11 +81,11 @@ mod tests
 			).unwrap();
 
 			// Retrieve the written employees back into the `Employee` structure.
-			let reps: DynamicResult<HashSet<Employee>> = dogood.into();
+			let reps: DynamicResult<Vec<Employee>> = dogood.into();
 
-			assert_eq!(reps.unwrap(), [testy.employee, mr_flu.employee].iter().cloned().collect());
+			assert_eq!(reps.unwrap(), [mr_flu.employee, testy.employee]);
 
-			println!("\n>>>>> BincodeOrganization test_into_hashset_employee {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+			println!("\n>>>>> BincodeOrganization test_into_vec_employee {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 }

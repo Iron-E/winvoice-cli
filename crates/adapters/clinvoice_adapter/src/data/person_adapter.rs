@@ -3,7 +3,6 @@ use
 	super::{Deletable, Initializable, MatchWhen, Updatable},
 	crate::{DynamicResult, Store},
 	clinvoice_data::{Contact, Person, Id, views::PersonView},
-	std::collections::HashSet,
 };
 
 pub trait PersonAdapter<'pass, 'path, 'user> :
@@ -26,7 +25,7 @@ pub trait PersonAdapter<'pass, 'path, 'user> :
 	///
 	/// The newly created [`Person`].
 	fn create<'name>(
-		contact_info: HashSet<Contact>,
+		contact_info: Vec<Contact>,
 		name: &'name str,
 		store: Store<'pass, 'path, 'user>,
 	) -> DynamicResult<Self>;
@@ -48,5 +47,5 @@ pub trait PersonAdapter<'pass, 'path, 'user> :
 		id: MatchWhen<Id>,
 		name: MatchWhen<String>,
 		store: Store<'pass, 'path, 'user>,
-	) -> DynamicResult<HashSet<Self>>;
+	) -> DynamicResult<Vec<Self>>;
 }

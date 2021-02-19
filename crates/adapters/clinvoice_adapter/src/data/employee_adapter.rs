@@ -3,7 +3,6 @@ use
 	super::{MatchWhen, Deletable, Initializable, Updatable},
 	crate::{DynamicResult, Store},
 	clinvoice_data::{Contact, Employee, EmployeeStatus, Id, Organization, Person, views::EmployeeView},
-	std::collections::HashSet,
 };
 
 pub trait EmployeeAdapter<'pass, 'path, 'user> :
@@ -29,7 +28,7 @@ pub trait EmployeeAdapter<'pass, 'path, 'user> :
 	/// * The created [`Employee`], if there were no errors.
 	/// * An [`Error`], if something goes wrong.
 	fn create<'title>(
-		contact_info: HashSet<Contact>,
+		contact_info: Vec<Contact>,
 		organization: Organization,
 		person: Person,
 		title: &'title str,
@@ -57,5 +56,5 @@ pub trait EmployeeAdapter<'pass, 'path, 'user> :
 		title: MatchWhen<String>,
 		status: MatchWhen<EmployeeStatus>,
 		store: Store<'pass, 'path, 'user>,
-	) -> DynamicResult<HashSet<Self>>;
+	) -> DynamicResult<Vec<Self>>;
 }

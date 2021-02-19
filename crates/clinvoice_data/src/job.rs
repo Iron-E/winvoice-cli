@@ -1,7 +1,8 @@
+mod hash;
+
 use
 {
 	crate::{Decimal, Expense, Id, Invoice, Money, Timesheet},
-	std::collections::BTreeSet,
 	chrono::{DateTime, Utc},
 };
 
@@ -25,7 +26,7 @@ const MINUTES_PER_HOUR: i8 = 60;
 /// structures may define [the method of payment](Invoice),
 /// [client](Organization) information, and [work periods](Timesheet)— this
 /// structure defines what work _may_ performed.
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
 pub struct Job
 {
@@ -91,7 +92,7 @@ pub struct Job
 	/// # Summary
 	///
 	/// The periods of time during which work was performed for this [`Job`].
-	pub timesheets: BTreeSet<Timesheet>,
+	pub timesheets: Vec<Timesheet>,
 }
 
 impl Job
@@ -103,9 +104,9 @@ impl Job
 	/// # Remarks
 	///
 	/// * This is intended to be used for reporting work which was done previously.
-	pub fn attach_timesheet(&mut self, employee: Id, expenses: Option<BTreeSet<Expense>>, time_begin: DateTime<Utc>, time_end: Option<DateTime<Utc>>, work_notes: &str)
+	pub fn attach_timesheet(&mut self, employee: Id, expenses: Option<Vec<Expense>>, time_begin: DateTime<Utc>, time_end: Option<DateTime<Utc>>, work_notes: &str)
 	{
-		self.timesheets.insert(
+		self.timesheets.push(
 			Timesheet
 			{
 				employee_id: employee,

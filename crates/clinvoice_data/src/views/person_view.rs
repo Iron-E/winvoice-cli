@@ -5,7 +5,6 @@ use
 {
 	super::ContactView,
 	crate::Id,
-	std::collections::HashSet,
 };
 
 #[cfg(feature="serde_support")]
@@ -14,7 +13,7 @@ use serde::{Deserialize, Serialize};
 /// # Summary
 //
 /// A view of [`Person`](crate::Person).
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
 pub struct PersonView
 {
@@ -22,7 +21,7 @@ pub struct PersonView
 	///
 	/// Contact information specific to the individual [`Person`], rather than a corporation they
 	/// work at.
-	pub contact_info: HashSet<ContactView>,
+	pub contact_info: Vec<ContactView>,
 
 	/// # Summary
 	///

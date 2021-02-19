@@ -7,7 +7,6 @@ use
 		chrono::{DateTime, Utc},
 		Id, InvoiceDate, Job, Money, Organization, views::JobView
 	},
-	std::collections::HashSet,
 };
 
 pub trait JobAdapter<'pass, 'path, 'user> :
@@ -63,5 +62,5 @@ pub trait JobAdapter<'pass, 'path, 'user> :
 		timesheet_begin: MatchWhen<DateTime<Utc>>,
 		timesheet_end: MatchWhen<Option<DateTime<Utc>>>,
 		store: Store<'pass, 'path, 'user>,
-	) -> DynamicResult<HashSet<Self>>;
+	) -> DynamicResult<Vec<Self>>;
 }

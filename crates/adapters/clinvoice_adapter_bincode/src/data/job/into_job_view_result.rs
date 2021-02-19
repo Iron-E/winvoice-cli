@@ -1,12 +1,16 @@
 use
 {
 	super::BincodeJob,
-	crate::data::BincodeOrganization,
-	clinvoice_adapter::DynamicResult,
+	crate::data::{BincodeEmployee, BincodeOrganization},
+	clinvoice_adapter::
+	{
+		data::{EmployeeAdapter, Error, MatchWhen},
+		DynamicResult,
+	},
 	clinvoice_data::
 	{
 		Organization,
-		views::{JobView, OrganizationView},
+		views::{EmployeeView, JobView, OrganizationView, TimesheetView},
 	},
 };
 
@@ -21,6 +25,34 @@ impl Into<DynamicResult<JobView>> for BincodeJob<'_, '_, '_>
 			store: self.store,
 		}.into();
 
+		let mut timesheet_views = Vec::<TimesheetView>::with_capacity(self.job.timesheets.len());
+
+		for timesheet in self.job.timesheets
+		{
+			let employee_view_result: DynamicResult<EmployeeView> = match BincodeEmployee::retrieve(
+				MatchWhen::Any, // contact_info
+				MatchWhen::EqualTo(timesheet.employee_id), // id
+				MatchWhen::Any, // organization
+				MatchWhen::Any, // person
+				MatchWhen::Any, // title
+				MatchWhen::Any, // status
+				self.store,
+			)?.first()
+			{
+				Some(first) => first.clone().into(),
+				_ => Err(Error::DataIntegrity {id: timesheet.employee_id}.into()),
+			};
+
+			timesheet_views.push(TimesheetView
+			{
+				employee: employee_view_result?,
+				expenses: timesheet.expenses,
+				time_begin: timesheet.time_begin,
+				time_end: timesheet.time_end,
+				work_notes: timesheet.work_notes,
+			});
+		}
+
 		return Ok(JobView
 		{
 			client: organization_view_result?,
@@ -29,7 +61,7 @@ impl Into<DynamicResult<JobView>> for BincodeJob<'_, '_, '_>
 			invoice: self.job.invoice,
 			notes: self.job.notes,
 			objectives: self.job.objectives,
-			timesheets: self.job.timesheets,
+			timesheets: timesheet_views,
 		});
 	}
 }
@@ -39,14 +71,18 @@ mod tests
 {
 	use
 	{
-		super::{BincodeJob, DynamicResult, JobView, OrganizationView},
+		super::{BincodeJob, DynamicResult, JobView, OrganizationView, TimesheetView},
 		crate::
 		{
-			data::{BincodeLocation, BincodeOrganization},
+			data::{BincodeEmployee, BincodeLocation, BincodeOrganization, BincodePerson},
 			util,
 		},
-		clinvoice_adapter::data::{JobAdapter, LocationAdapter, OrganizationAdapter},
-		clinvoice_data::{chrono::Utc, Decimal, Money, views::LocationView},
+		clinvoice_adapter::data::{EmployeeAdapter, JobAdapter, LocationAdapter, OrganizationAdapter, PersonAdapter},
+		clinvoice_data::
+		{
+			chrono::Utc, Contact, Decimal, EmployeeStatus, Money,
+			views::{ContactView, EmployeeView, LocationView, PersonView},
+		},
 		std::time::Instant,
 	};
 
@@ -68,7 +104,7 @@ mod tests
 				*store,
 			).unwrap();
 
-			let create_job = BincodeJob::create(
+			let mut create_job = BincodeJob::create(
 				big_test.organization.clone(),
 				Utc::now(),
 				Money::new(Decimal::new(200, 2), ""),
@@ -76,23 +112,75 @@ mod tests
 				*store,
 			).unwrap();
 
-			let create_job_view = JobView
+			let contact_info = vec![Contact::Address(earth.location.id)];
+
+			let testy = BincodePerson::create(
+				contact_info.clone(),
+				"Testy Mćtesterson",
+				*store,
+			).unwrap();
+
+			let ceo_testy = BincodeEmployee::create(
+				contact_info.clone(),
+				big_test.organization.clone(),
+				testy.person.clone(),
+				"CEO of Tests",
+				EmployeeStatus::Employed,
+				*store,
+			).unwrap();
+
+			let earth_view = LocationView
 			{
-				client: OrganizationView
+				name: earth.location.name,
+				outer: None,
+			};
+
+			let contact_info_view = vec![ContactView::Address(earth_view.clone())];
+
+			let ceo_testy_view = EmployeeView
+			{
+				contact_info: contact_info_view.clone(),
+				organization: OrganizationView
 				{
-					location: LocationView
-					{
-						name: earth.location.name,
-						outer: None,
-					},
+					location: earth_view,
 					name: big_test.organization.name,
 				},
+				person: PersonView
+				{
+					contact_info: contact_info_view,
+					id: testy.person.id,
+					name: testy.person.name,
+				},
+				title: ceo_testy.employee.title.clone(),
+				status: ceo_testy.employee.status,
+			};
+
+			create_job.job.start_timesheet(ceo_testy.employee.id);
+
+			let create_job_view = JobView
+			{
+				client: ceo_testy_view.organization.clone(),
 				date_close: create_job.job.date_close,
 				date_open: create_job.job.date_open,
 				invoice: create_job.job.invoice.clone(),
 				notes: create_job.job.notes.clone(),
 				objectives: create_job.job.objectives.clone(),
-				timesheets: create_job.job.timesheets.clone(),
+				timesheets: vec![TimesheetView
+				{
+					employee: ceo_testy_view,
+					expenses: None,
+					time_begin: match create_job.job.timesheets.first()
+					{
+						Some(t) => t.time_begin,
+						_ => panic!("Timesheet did not attach!"),
+					},
+					time_end: None,
+					work_notes: match create_job.job.timesheets.first()
+					{
+						Some(t) => t.work_notes.clone(),
+						_ => panic!("Timesheet did not attach!"),
+					},
+				}],
 			};
 
 			let create_job_view_result: DynamicResult<JobView> = create_job.into();

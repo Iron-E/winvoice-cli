@@ -50,13 +50,13 @@ mod tests
 		util::test_temp_store(|store|
 		{
 			let testy = BincodePerson::create(
-				[Contact::Email("yum".into())].iter().cloned().collect(),
+				vec![Contact::Email("yum".into())],
 				"Testy Mćtesterson".into(),
 				*store,
 			).unwrap();
 
 			let testy_employed = BincodeEmployee::create(
-				[Contact::Email("foo".into())].iter().cloned().collect(),
+				vec![Contact::Email("foo".into())],
 				Organization
 				{
 					id: Id::new_v4(),

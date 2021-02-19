@@ -8,7 +8,7 @@ use
 		DynamicResult, Store,
 	},
 	clinvoice_data::{Contact, Employee, EmployeeStatus, Organization, Person, Id},
-	std::{collections::HashSet, fs, io::BufReader},
+	std::{fs, io::BufReader},
 };
 
 impl<'pass, 'path, 'user> EmployeeAdapter<'pass, 'path, 'user> for BincodeEmployee<'pass, 'path, 'user>
@@ -26,7 +26,7 @@ impl<'pass, 'path, 'user> EmployeeAdapter<'pass, 'path, 'user> for BincodeEmploy
 	/// * The created [`Employee`], if there were no errors.
 	/// * An [`Error`], if something goes wrong.
 	fn create<'title>(
-		contact_info: HashSet<Contact>,
+		contact_info: Vec<Contact>,
 		organization: Organization,
 		person: Person,
 		title: &'title str,
@@ -75,9 +75,9 @@ impl<'pass, 'path, 'user> EmployeeAdapter<'pass, 'path, 'user> for BincodeEmploy
 		title: MatchWhen<String>,
 		status: MatchWhen<EmployeeStatus>,
 		store: Store<'pass, 'path, 'user>,
-	) -> DynamicResult<HashSet<Self>>
+	) -> DynamicResult<Vec<Self>>
 	{
-		let mut results = HashSet::new();
+		let mut results = Vec::new();
 
 		for node_path in util::read_files(BincodeEmployee::path(&store))?
 		{
@@ -85,14 +85,14 @@ impl<'pass, 'path, 'user> EmployeeAdapter<'pass, 'path, 'user> for BincodeEmploy
 				fs::File::open(node_path)?
 			))?;
 
-			if contact_info.set_matches(&employee.contact_info) &&
+			if contact_info.set_matches(&employee.contact_info.iter().cloned().collect()) &&
 				id.is_match(&employee.id) &&
 				organization.is_match(&employee.organization_id) &&
 				person.is_match(&employee.person_id) &&
 				title.is_match(&employee.title) &&
 				status.is_match(&employee.status)
 			{
-				results.insert(BincodeEmployee {employee, store});
+				results.push(BincodeEmployee {employee, store});
 			}
 		}
 
@@ -105,7 +105,7 @@ mod tests
 {
 	use
 	{
-		super::{BincodeEmployee, Contact, EmployeeAdapter, EmployeeStatus, HashSet, Id, MatchWhen, Organization, Person, util},
+		super::{BincodeEmployee, Contact, EmployeeAdapter, EmployeeStatus, Id, MatchWhen, Organization, Person, util},
 		std::{fs, time::Instant},
 	};
 
@@ -123,9 +123,9 @@ mod tests
 
 		util::test_temp_store(|store|
 		{
-			let mut contact_info = HashSet::new();
+			let mut contact_info = Vec::new();
 
-			contact_info.insert(Contact::Address(Id::new_v4()));
+			contact_info.push(Contact::Address(Id::new_v4()));
 			test_create_assertion(BincodeEmployee::create(
 				contact_info.clone(),
 				organization.clone(),
@@ -140,7 +140,7 @@ mod tests
 				*store,
 			).unwrap());
 
-			contact_info.insert(Contact::Email("foo@bar.io".into()));
+			contact_info.push(Contact::Email("foo@bar.io".into()));
 			test_create_assertion(BincodeEmployee::create(
 				contact_info.clone(),
 				organization.clone(),
@@ -155,7 +155,7 @@ mod tests
 				*store,
 			).unwrap());
 
-			contact_info.insert(Contact::Phone("1-800-555-3600".into()));
+			contact_info.push(Contact::Phone("1-800-555-3600".into()));
 			test_create_assertion(BincodeEmployee::create(
 				contact_info.clone(),
 				organization.clone(),
@@ -170,7 +170,7 @@ mod tests
 				*store,
 			).unwrap());
 
-			contact_info.insert(Contact::Address(Id::new_v4()));
+			contact_info.push(Contact::Address(Id::new_v4()));
 			test_create_assertion(BincodeEmployee::create(
 				contact_info.clone(),
 				organization.clone(),
@@ -185,7 +185,7 @@ mod tests
 				*store,
 			).unwrap());
 
-			contact_info.insert(Contact::Email("obviousemail@server.com".into()));
+			contact_info.push(Contact::Email("obviousemail@server.com".into()));
 			test_create_assertion(BincodeEmployee::create(
 				contact_info.clone(),
 				organization.clone(),
@@ -224,9 +224,9 @@ mod tests
 
 		util::test_temp_store(|store|
 		{
-			let mut contact_info = HashSet::new();
+			let mut contact_info = Vec::new();
 
-			contact_info.insert(Contact::Address(Id::new_v4()));
+			contact_info.push(Contact::Address(Id::new_v4()));
 			let testy_mctesterson = BincodeEmployee::create(
 				contact_info.clone(),
 				organization.clone(),
@@ -241,7 +241,7 @@ mod tests
 				*store,
 			).unwrap();
 
-			contact_info.insert(Contact::Email("foo@bar.io".into()));
+			contact_info.push(Contact::Email("foo@bar.io".into()));
 			let nimron_macbeaver = BincodeEmployee::create(
 				contact_info.clone(),
 				organization.clone(),
@@ -256,7 +256,7 @@ mod tests
 				*store,
 			).unwrap();
 
-			contact_info.insert(Contact::Phone("1-800-555-3600".into()));
+			contact_info.push(Contact::Phone("1-800-555-3600".into()));
 			let an_actual_tortust = BincodeEmployee::create(
 				contact_info.clone(),
 				organization.clone(),
@@ -271,7 +271,7 @@ mod tests
 				*store,
 			).unwrap();
 
-			contact_info.insert(Contact::Address(Id::new_v4()));
+			contact_info.push(Contact::Address(Id::new_v4()));
 			let gottard = BincodeEmployee::create(
 				contact_info.clone(),
 				organization.clone(),
@@ -286,7 +286,7 @@ mod tests
 				*store,
 			).unwrap();
 
-			contact_info.insert(Contact::Email("obviousemail@server.com".into()));
+			contact_info.push(Contact::Email("obviousemail@server.com".into()));
 			let duplicate_name = BincodeEmployee::create(
 				contact_info.clone(),
 				organization.clone(),

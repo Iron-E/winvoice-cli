@@ -4,7 +4,6 @@ use
 	crate::{DynamicResult, Store},
 	clinvoice_data::{Location, Id, views::LocationView},
 	core::fmt::Display,
-	std::collections::HashSet,
 };
 
 pub trait LocationAdapter<'pass, 'path, 'user> :
@@ -100,5 +99,5 @@ pub trait LocationAdapter<'pass, 'path, 'user> :
 		name: MatchWhen<String>,
 		outer: MatchWhen<Option<Id>>,
 		store: Store<'pass, 'path, 'user>,
-	) -> DynamicResult<HashSet<Self>>;
+	) -> DynamicResult<Vec<Self>>;
 }

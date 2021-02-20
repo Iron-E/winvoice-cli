@@ -1,6 +1,7 @@
 use
 {
 	super::JobView,
+	crate::Job,
 	std::fmt::{Display, Formatter, Result},
 };
 
@@ -25,8 +26,6 @@ impl Display for JobView
 		writeln!(formatter, "Timesheets:")?;
 		self.timesheets.iter().try_for_each(|t| writeln!(formatter, "{}", t.to_string().replace('\n', "\n\t")))?;
 
-		return write!(formatter, "Total Amount Owed: {}", self.total());
+		return write!(formatter, "Total Amount Owed: {}", Job::from(self.clone()).total());
 	}
 }
-
-

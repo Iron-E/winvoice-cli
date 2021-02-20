@@ -3,7 +3,7 @@ mod display;
 use
 {
 	super::{OrganizationView, TimesheetView},
-	crate::{Id, Invoice, Money},
+	crate::{Id, Invoice},
 	chrono::{DateTime, Utc},
 };
 
@@ -77,19 +77,4 @@ pub struct JobView
 	///
 	/// The periods of time during which work was performed for this [`Job`].
 	pub timesheets: Vec<TimesheetView>,
-}
-
-impl JobView
-{
-	/// # Summary
-	///
-	/// Get the [total](Job::total).
-	///
-	/// # Panics
-	///
-	/// * When [`Job::total`] does.
-	pub fn total(&self) -> Money
-	{
-		todo!()
-	}
 }

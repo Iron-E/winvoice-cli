@@ -1,4 +1,5 @@
 mod hash;
+mod from_view;
 
 use crate::{Contact, EmployeeStatus, Id};
 

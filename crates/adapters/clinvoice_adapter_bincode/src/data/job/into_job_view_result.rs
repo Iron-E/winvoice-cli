@@ -132,6 +132,7 @@ mod tests
 
 			let earth_view = LocationView
 			{
+				id: earth.location.id,
 				name: earth.location.name,
 				outer: None,
 			};
@@ -141,8 +142,10 @@ mod tests
 			let ceo_testy_view = EmployeeView
 			{
 				contact_info: contact_info_view.clone(),
+				id: ceo_testy.employee.id,
 				organization: OrganizationView
 				{
+					id: big_test.organization.id,
 					location: earth_view,
 					name: big_test.organization.name,
 				},

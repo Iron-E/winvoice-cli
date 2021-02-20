@@ -117,7 +117,7 @@ mod tests
 				id: ceo_testy.employee.id,
 				organization: OrganizationView
 				{
-					id: ceo_testy.employee.id,
+					id: big_old_test.organization.id,
 					location: earth_view,
 					name: big_old_test.organization.name,
 				},

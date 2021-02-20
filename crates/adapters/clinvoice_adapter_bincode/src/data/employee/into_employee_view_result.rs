@@ -34,6 +34,7 @@ impl Into<DynamicResult<EmployeeView>> for BincodeEmployee<'_, '_, '_>
 		return Ok(EmployeeView
 		{
 			contact_info: contact_info_view,
+			id: self.employee.id,
 			organization: organization_view_result?,
 			person: person_view_result?,
 			status: self.employee.status,
@@ -101,6 +102,7 @@ mod tests
 
 			let earth_view = LocationView
 			{
+				id: earth.location.id,
 				name: earth.location.name,
 				outer: None,
 			};
@@ -112,8 +114,10 @@ mod tests
 			let ceo_testy_view = EmployeeView
 			{
 				contact_info: contact_info_view.clone(),
+				id: ceo_testy.employee.id,
 				organization: OrganizationView
 				{
+					id: ceo_testy.employee.id,
 					location: earth_view,
 					name: big_old_test.organization.name,
 				},

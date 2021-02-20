@@ -1,3 +1,5 @@
+mod from_view;
+
 use crate::Id;
 
 #[cfg(feature="serde_support")]

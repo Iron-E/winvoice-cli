@@ -1,3 +1,5 @@
+mod from_view;
+
 use
 {
 	chrono::{DateTime, Utc},

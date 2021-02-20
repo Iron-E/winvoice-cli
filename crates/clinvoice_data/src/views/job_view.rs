@@ -3,7 +3,7 @@ mod display;
 use
 {
 	super::{OrganizationView, TimesheetView},
-	crate::{Decimal, Id, Invoice, Money},
+	crate::{Id, Invoice, Money},
 	chrono::{DateTime, Utc},
 };
 
@@ -35,6 +35,7 @@ pub struct JobView
 	/// # Summary
 	///
 	/// The [`Job`] number.
+	#[cfg_attr(feature="serde_support", serde(skip_serializing))]
 	pub id: Id,
 
 	/// # Summary

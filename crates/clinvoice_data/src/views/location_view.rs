@@ -15,6 +15,7 @@ pub struct LocationView
 	/// # Summary
 	///
 	/// The reference number of the [`Location`].
+	#[cfg_attr(feature="serde_support", serde(skip_serializing))]
 	pub id: Id,
 
 	/// # Summary

@@ -22,6 +22,12 @@ pub struct OrganizationView
 {
 	/// # Summary
 	///
+	/// The unique reference number for this [`Organization`].
+	#[cfg_attr(feature="serde_support", serde(skip_serializing))]
+	pub id: Id,
+
+	/// # Summary
+	///
 	/// The reference umber of the [`Location`](super::location::Location) where this
 	/// [`Organization`] resides.
 	pub location: LocationView,

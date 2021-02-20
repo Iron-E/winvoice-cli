@@ -3,7 +3,7 @@ mod hash;
 
 use
 {
-	crate::EmployeeStatus,
+	crate::{EmployeeStatus, Id},
 	super::{ContactView, OrganizationView, PersonView},
 };
 
@@ -21,6 +21,13 @@ pub struct EmployeeView
 	///
 	/// Contact information specific to the [`Organization`] that the [`Employee`] does work for.
 	pub contact_info: Vec<ContactView>,
+
+	/// # Summary
+	///
+	/// The reference number of this [`Employee`], which can be used instead of the compound key
+	/// {`organization`, `person_id`}.
+	#[cfg_attr(feature="serde_support", serde(skip_serializing))]
+	pub id: Id,
 
 	/// # Summary
 	///

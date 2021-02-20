@@ -24,6 +24,7 @@ impl Into<DynamicResult<OrganizationView>> for BincodeOrganization<'_, '_, '_>
 
 		return Ok(OrganizationView
 		{
+			id: self.organization.id,
 			location: location_view_result?,
 			name: self.organization.name,
 		});

@@ -1,6 +1,10 @@
 mod display;
 
-use super::LocationView;
+use
+{
+	super::LocationView,
+	crate::Id,
+};
 
 #[cfg(feature="serde_support")]
 use serde::{Deserialize, Serialize};

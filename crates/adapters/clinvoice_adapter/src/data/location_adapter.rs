@@ -9,7 +9,6 @@ use
 pub trait LocationAdapter<'pass, 'path, 'user> :
 	Clone +
 	Deletable +
-	Display +
 	Initializable<'pass, 'path, 'user> +
 	Into<Location> +
 	Into<DynamicResult<LocationView>> +

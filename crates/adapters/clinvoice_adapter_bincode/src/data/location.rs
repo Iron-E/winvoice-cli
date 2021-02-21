@@ -1,5 +1,4 @@
 mod deletable;
-mod display;
 mod initializable;
 mod into_location_view_result;
 mod location_adapter;

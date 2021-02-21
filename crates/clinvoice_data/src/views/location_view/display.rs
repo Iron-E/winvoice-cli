@@ -22,3 +22,62 @@ impl Display for LocationView
 		return write!(formatter, "{}", output);
 	}
 }
+
+#[cfg(test)]
+mod tests
+{
+	use
+	{
+		super::LocationView,
+		crate::Id,
+		std::time::Instant,
+	};
+
+	/// # Summary
+	///
+	/// The main method.
+	#[test]
+	fn test_display()
+	{
+		let start = Instant::now();
+
+		let earth_view = LocationView
+		{
+			name: "Earth".into(),
+			id: Id::new_v4(),
+			outer: None,
+		};
+
+		let usa_view = LocationView
+		{
+			name: "USA".into(),
+			id: Id::new_v4(),
+			outer: Some(earth_view.into()),
+		};
+
+		let arizona_view = LocationView
+		{
+			name: "Arizona".into(),
+			id: Id::new_v4(),
+			outer: Some(usa_view.into())
+		};
+
+		let phoenix_view = LocationView
+		{
+			name: "Phoenix".into(),
+			id: Id::new_v4(),
+			outer: Some(arizona_view.into()),
+		};
+
+		let street_view = LocationView
+		{
+			name: "1337 Some Street".into(),
+			id: Id::new_v4(),
+			outer: Some(phoenix_view.into()),
+		};
+
+		assert_eq!(format!("{}", street_view), "1337 Some Street, Phoenix, Arizona, USA, Earth");
+
+		println!("\n>>>>> LocationView test_display {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+	}
+}

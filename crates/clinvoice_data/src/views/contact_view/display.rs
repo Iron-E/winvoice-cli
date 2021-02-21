@@ -11,8 +11,8 @@ impl Display for ContactView
 		return match self
 		{
 			ContactView::Address(location) => location.fmt(formatter),
-			ContactView::Email(email) => writeln!(formatter, "{}", email),
-			ContactView::Phone(phone) => writeln!(formatter, "{}", phone),
+			ContactView::Email(email) => write!(formatter, "{}", email),
+			ContactView::Phone(phone) => write!(formatter, "{}", phone),
 		};
 	}
 }

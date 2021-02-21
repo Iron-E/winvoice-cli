@@ -36,7 +36,7 @@ mod tests
 		crate::util,
 		clinvoice_adapter::{data::OrganizationAdapter, DynamicResult},
 		clinvoice_data::{Contact, Employee, EmployeeStatus, Id, Location, Person},
-		std::time::Instant,
+		std::{collections::HashSet, time::Instant},
 	};
 
 	#[test]
@@ -83,7 +83,10 @@ mod tests
 			// Retrieve the written employees back into the `Employee` structure.
 			let reps: DynamicResult<Vec<Employee>> = dogood.into();
 
-			assert_eq!(reps.unwrap(), [mr_flu.employee, testy.employee]);
+			assert_eq!(
+				reps.unwrap().into_iter().collect::<HashSet<Employee>>(),
+				[mr_flu.employee, testy.employee].iter().cloned().collect::<HashSet<Employee>>()
+			);
 
 			println!("\n>>>>> BincodeOrganization test_into_vec_employee {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});

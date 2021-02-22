@@ -3,7 +3,6 @@ use
 	super::{MatchWhen, Deletable, Error, Initializable, Updatable},
 	crate::{DynamicResult, Store},
 	clinvoice_data::{Location, Id, views::LocationView},
-	core::fmt::Display,
 };
 
 pub trait LocationAdapter<'pass, 'path, 'user> :

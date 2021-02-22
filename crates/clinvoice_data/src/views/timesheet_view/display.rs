@@ -8,7 +8,8 @@ impl Display for TimesheetView
 {
 	fn fmt(&self, formatter: &mut Formatter<'_>) -> Result
 	{
-		writeln!(formatter, "{} from {}: {} – {}",
+		writeln!(formatter, "{} {} from {}: {} – {}",
+			self.employee.title,
 			self.employee.person.name,
 			self.employee.organization.name,
 			self.time_begin,
@@ -21,11 +22,11 @@ impl Display for TimesheetView
 
 		if let Some(expenses) = &self.expenses
 		{
-			writeln!(formatter, "\nExpenses:")?;
-			expenses.iter().try_for_each(|e| writeln!(formatter, "\t{}", e.to_string().replace('\n', "\n\t")))?;
+			writeln!(formatter, "\tExpenses:")?;
+			expenses.iter().try_for_each(|e| writeln!(formatter, "\t\t{}", e.to_string().replace('\n', "\n\t\t")))?;
 		}
 
-		return write!(formatter, "\nWork Notes:\n\t{}", self.work_notes.replace('\n', "\n\t"));
+		return write!(formatter, "\tWork Notes:\n\t\t{}", self.work_notes.replace('\n', "\n\t\t"));
 	}
 }
 
@@ -132,16 +133,14 @@ mod tests
 		assert_eq!(
 			format!("{}", timesheet),
 			format!(
-"Testy McTesterson from Big Test Organization: {} – {}
-
-Expenses:
-	Food – 20.50 USD
-		Fast Food™
-	Travel – 10.00 USD
-		Gas
-
-Work Notes:
-	Went to non-corporate fast food restaurant for business meeting.",
+"CEO of Tests Testy McTesterson from Big Test Organization: {} – {}
+	Expenses:
+		Food – 20.50 USD
+			Fast Food™
+		Travel – 10.00 USD
+			Gas
+	Work Notes:
+		Went to non-corporate fast food restaurant for business meeting.",
 				timesheet.time_begin,
 				timesheet.time_end.unwrap()
 			),

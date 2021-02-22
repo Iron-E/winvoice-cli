@@ -16,3 +16,16 @@ impl From<View> for Organization
 		};
 	}
 }
+
+impl From<&View> for Organization
+{
+	fn from(view: &View) -> Self
+	{
+		return Self
+		{
+			id: view.id,
+			location_id: view.location.id,
+			name: view.name.clone(),
+		};
+	}
+}

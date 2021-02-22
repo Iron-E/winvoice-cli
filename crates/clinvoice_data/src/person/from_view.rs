@@ -16,3 +16,16 @@ impl From<View> for Person
 		};
 	}
 }
+
+impl From<&View> for Person
+{
+	fn from(view: &View) -> Self
+	{
+		return Self
+		{
+			contact_info: view.contact_info.iter().cloned().map(|c| c.into()).collect(),
+			id: view.id,
+			name: view.name.clone(),
+		};
+	}
+}

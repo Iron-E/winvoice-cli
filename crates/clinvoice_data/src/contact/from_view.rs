@@ -16,3 +16,16 @@ impl From<View> for Contact
 		};
 	}
 }
+
+impl From<&View> for Contact
+{
+	fn from(view: &View) -> Self
+	{
+		return match view
+		{
+			View::Address(location) => Self::Address(location.id),
+			View::Email(email) => Self::Email(email.clone()),
+			View::Phone(phone) => Self::Phone(phone.clone()),
+		};
+	}
+}

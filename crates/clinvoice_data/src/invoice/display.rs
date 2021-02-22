@@ -10,20 +10,39 @@ impl Display for Invoice
 	{
 		writeln!(formatter, "Hourly Rate: {}", self.hourly_rate)?;
 
-		if let Some(d) = &self.date
+		return write!(formatter, "Invoice Status: {}", match &self.date
 		{
-			return write!(formatter, "Invoice Status: Issued on {}, {}",
-				d.issued, match d.paid
-				{
-					Some(p) => format!("Paid on {}", p),
-					_ => "Outstanding".into(),
-				},
-			);
-		}
-
-		return write!(formatter, "Invoice Status: Not sent");
+			Some(date) => date.to_string(),
+			_ => "Not sent".into(),
+		});
 	}
 }
 
+#[cfg(test)]
+mod tests
+{
+	use
+	{
+		super::Invoice,
+		crate::{chrono::Utc, Decimal, InvoiceDate, Money},
+	};
 
+	#[test]
+	fn test_display()
+	{
+		let invoice = Invoice
+		{
+			date: Some(InvoiceDate
+			{
+				issued: Utc::now(),
+				paid: None,
+			}),
+			hourly_rate: Money::new(Decimal::new(1000, 2), "USD"),
+		};
 
+		assert_eq!(
+			format!("{}", invoice),
+			format!("Hourly Rate: 10.00 USD\nInvoice Status: Issued on {}, Outstanding", invoice.date.unwrap().issued)
+		);
+	}
+}

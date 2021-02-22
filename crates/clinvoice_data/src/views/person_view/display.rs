@@ -87,7 +87,12 @@ mod tests
 
 		assert_eq!(
 			format!("{}", person_view),
-			"Contact Info:\n\t- 1337 Some Street, Phoenix, Arizona, USA, Earth\n\t- foo@bar.io\n\t- 1-800-555-5555\n\nName: Someone"
+"Contact Info:
+	- 1337 Some Street, Phoenix, Arizona, USA, Earth
+	- foo@bar.io
+	- 1-800-555-5555
+
+Name: Someone",
 		);
 
 		println!("\n>>>>> PersonView test_display {}us <<<<<\n", Instant::now().duration_since(start).as_micros());

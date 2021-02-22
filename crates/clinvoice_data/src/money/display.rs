@@ -26,11 +26,9 @@ mod tests
 	fn test_display()
 	{
 		let start = Instant::now();
-
 		assert_eq!(format!("{}", Money::new(Decimal::new(5000, 2), "USD")), "50.00 USD");
 		assert_eq!(format!("{}", Money::new(Decimal::new(9000, 2), "EUR")), "90.00 EUR");
 		assert_eq!(format!("{}", Money::new(Decimal::new(20000, 0), "JPY")), "20000 JPY");
-
-		println!("\n>>>>> Money test_display {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+		println!("\n>>>>> Money::fmt {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 	}
 }

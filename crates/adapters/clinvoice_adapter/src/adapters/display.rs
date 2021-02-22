@@ -27,9 +27,7 @@ mod tests
 	fn test_display()
 	{
 		let start = Instant::now();
-
 		assert_eq!(format!("{}", Adapters::Bincode), "Bincode");
-
 		println!("\n>>>>> Adapters test_display {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 	}
 }

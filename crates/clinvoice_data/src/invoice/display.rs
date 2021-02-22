@@ -31,8 +31,6 @@ mod tests
 	#[test]
 	fn test_display()
 	{
-		let start = Instant::now();
-
 		let invoice = Invoice
 		{
 			date: Some(InvoiceDate
@@ -43,6 +41,7 @@ mod tests
 			hourly_rate: Money::new(Decimal::new(1000, 2), "USD"),
 		};
 
+		let start = Instant::now();
 		assert_eq!(
 			format!("{}", invoice),
 			format!(
@@ -51,7 +50,6 @@ Invoice Status: Issued on {}, Outstanding",
 				invoice.date.unwrap().issued
 			),
 		);
-
 		println!("\n>>>>> Invoice test_display {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 	}
 }

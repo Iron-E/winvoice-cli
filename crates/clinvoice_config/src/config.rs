@@ -79,8 +79,6 @@ mod tests
 	#[test]
 	fn test_get_store()
 	{
-		let start = Instant::now();
-
 		let mut stores = HashMap::new();
 
 		stores.insert("a", StoreValue::Alias("b"));
@@ -107,6 +105,7 @@ mod tests
 			timesheets: Timesheets {interval: Duration::minutes(1)},
 		};
 
+		let start = Instant::now();
 		// Reflexivity
 		assert_eq!(conf.get_store("a").as_deref(), conf.get_store("b").as_deref());
 		assert_eq!(conf.get_store("b").as_deref(), conf.get_store("c").as_deref());
@@ -117,6 +116,6 @@ mod tests
 		assert_ne!(conf.get_store("c").as_deref(), conf.get_store("d").as_deref());
 		assert_ne!(conf.get_store("a").as_deref(), conf.get_store("e").as_deref());
 
-		println!("\n>>>>> config test_get_store {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+		println!("\n>>>>> Config::get_store {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 	}
 }

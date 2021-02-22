@@ -39,8 +39,6 @@ mod tests
 	#[test]
 	fn test_display()
 	{
-		let start = Instant::now();
-
 		let earth_view = LocationView
 		{
 			name: "Earth".into(),
@@ -76,8 +74,8 @@ mod tests
 			outer: Some(phoenix_view.into()),
 		};
 
+		let start = Instant::now();
 		assert_eq!(format!("{}", street_view), "1337 Some Street, Phoenix, Arizona, USA, Earth");
-
 		println!("\n>>>>> LocationView test_display {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 	}
 }

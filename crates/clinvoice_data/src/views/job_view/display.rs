@@ -47,8 +47,6 @@ mod tests
 	#[test]
 	fn test_display()
 	{
-		let start = Instant::now();
-
 		let earth_view = LocationView
 		{
 			id: Id::new_v4(),
@@ -101,6 +99,7 @@ mod tests
 			}],
 		};
 
+		let start = Instant::now();
 		assert_eq!(
 			format!("{}", create_job_view),
 			format!(
@@ -124,7 +123,6 @@ mod tests
 				Job::from(&create_job_view).total(),
 			),
 		);
-
-		println!("\n>>>>> JobView test_display {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+		println!("\n>>>>> JobView::fmt {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 	}
 }

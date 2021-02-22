@@ -47,8 +47,6 @@ mod tests
 	#[test]
 	fn test_display()
 	{
-		let start = Instant::now();
-
 		let earth_view = LocationView
 		{
 			name: "Earth".into(),
@@ -130,6 +128,7 @@ mod tests
 			work_notes: "Went to non-corporate fast food restaurant for business meeting.".into(),
 		};
 
+		let start = Instant::now();
 		assert_eq!(
 			format!("{}", timesheet),
 			format!(
@@ -145,7 +144,6 @@ mod tests
 				timesheet.time_end.unwrap()
 			),
 		);
-
-		println!("\n>>>>> TimesheetView test_display {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+		println!("\n>>>>> TimesheetView::fmt {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 	}
 }

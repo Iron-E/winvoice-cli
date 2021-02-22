@@ -26,8 +26,6 @@ mod tests
 	#[test]
 	fn test_display()
 	{
-		let start = Instant::now();
-
 		let expense = Expense
 		{
 			category: ExpenseCategory::Food,
@@ -35,12 +33,12 @@ mod tests
 			description: "Take-out for 2.".into(),
 		};
 
+		let start = Instant::now();
 		assert_eq!(
 			format!("{}", expense),
 "Food – 20.00 USD
 	Take-out for 2.",
 		);
-
-		println!("\n>>>>> Expense test_display {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+		println!("\n>>>>> Expense::fmt {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 	}
 }

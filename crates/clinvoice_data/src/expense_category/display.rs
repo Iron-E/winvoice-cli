@@ -33,14 +33,12 @@ mod tests
 	fn test_display()
 	{
 		let start = Instant::now();
-
 		assert_eq!(format!("{}", ExpenseCategory::Food), "Food");
 		assert_eq!(format!("{}", ExpenseCategory::Hosting), "Hosting");
 		assert_eq!(format!("{}", ExpenseCategory::Item), "Item");
 		assert_eq!(format!("{}", ExpenseCategory::Other), "Other");
 		assert_eq!(format!("{}", ExpenseCategory::Software), "Software");
 		assert_eq!(format!("{}", ExpenseCategory::Travel), "Travel");
-
-		println!("\n>>>>> ExpenseCategory test_display {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+		println!("\n>>>>> ExpenseCategory::fmt {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 	}
 }

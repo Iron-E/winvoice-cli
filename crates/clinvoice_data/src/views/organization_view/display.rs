@@ -25,8 +25,6 @@ mod tests
 	#[test]
 	fn test_display()
 	{
-		let start = Instant::now();
-
 		let organization = OrganizationView
 		{
 			id: Id::new_v4(),
@@ -49,8 +47,8 @@ mod tests
 			name: "Big Old Test".into(),
 		};
 
+		let start = Instant::now();
 		assert_eq!(format!("{}", organization), "Big Old Test @ Arizona, USA, Earth");
-
-		println!("\n>>>>> OrganizationView test_display {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+		println!("\n>>>>> OrganizationView::fmt {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 	}
 }

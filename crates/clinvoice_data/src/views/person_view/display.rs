@@ -35,8 +35,6 @@ mod tests
 	#[test]
 	fn test_display()
 	{
-		let start = Instant::now();
-
 		let earth_view = LocationView
 		{
 			name: "Earth".into(),
@@ -85,6 +83,7 @@ mod tests
 			name: "Someone".into(),
 		};
 
+		let start = Instant::now();
 		assert_eq!(
 			format!("{}", person_view),
 "Name: Someone
@@ -93,7 +92,6 @@ Contact Info:
 	- foo@bar.io
 	- 1-800-555-5555",
 		);
-
 		println!("\n>>>>> PersonView test_display {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 	}
 }

@@ -128,9 +128,15 @@ mod tests
 	#[test]
 	fn test_is_match()
 	{
-		let start = Instant::now();
-
 		let test_value = &7;
+		let has_all: HashSet<i32> = [*test_value].iter().cloned().collect();
+		let has_any: HashSet<i32> = [1, 2, 3, *test_value].iter().cloned().collect();
+		let has_none: HashSet<i32> = [1, 2, 3].iter().cloned().collect();
+		let not_has_all: HashSet<i32> = [3].iter().cloned().collect();
+		let not_has_any = has_none.clone();
+		let not_has_none = has_any.clone();
+
+		let start = Instant::now();
 
 		// Test any
 		assert!(MatchWhen::Any.is_match(test_value));
@@ -140,36 +146,22 @@ mod tests
 		assert!(MatchWhen::EqualTo(7).is_match(test_value));
 
 		// Test has all
-		let mut has_all = HashSet::new();
-		has_all.insert(4);
-		assert!(!MatchWhen::HasAll(has_all.clone()).is_match(test_value));
-		has_all.remove(&4);
-		has_all.insert(7);
+		assert!(!MatchWhen::HasAll(not_has_all).is_match(test_value));
 		assert!(MatchWhen::HasAll(has_all).is_match(test_value));
 
 		// Test has any
-		let mut has_any = HashSet::new();
-		has_any.insert(1);
-		has_any.insert(2);
-		has_any.insert(3);
-		assert!(!MatchWhen::HasAny(has_any.clone()).is_match(test_value));
-		has_any.insert(7);
-		assert!(MatchWhen::HasAny(has_any.clone()).is_match(test_value));
+		assert!(!MatchWhen::HasAny(not_has_any).is_match(test_value));
+		assert!(MatchWhen::HasAny(has_any).is_match(test_value));
 
 		// Test has none
-		let mut has_none = HashSet::new();
-		has_none.insert(1);
-		has_none.insert(2);
-		has_none.insert(3);
-		assert!(MatchWhen::HasNone(has_none.clone()).is_match(test_value));
-		has_none.insert(7);
-		assert!(!MatchWhen::HasNone(has_none.clone()).is_match(test_value));
+		assert!(!MatchWhen::HasNone(not_has_none).is_match(test_value));
+		assert!(MatchWhen::HasNone(has_none).is_match(test_value));
 
 		// Test in range
 		assert!(!MatchWhen::InRange(&|v| *v > 0 && *v < 3).is_match(test_value));
 		assert!(MatchWhen::InRange(&|v| *v > 0 && *v < 8).is_match(test_value));
 
-		println!("\n>>>>> MatchWhen test_is_match {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+		println!("\n>>>>> MatchWhen::is_match {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 	}
 
 	#[test]

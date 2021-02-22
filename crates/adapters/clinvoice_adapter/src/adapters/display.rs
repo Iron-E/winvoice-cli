@@ -9,7 +9,19 @@ impl Display for Adapters
 	fn fmt(&self, formatter: &mut Formatter<'_>) -> FmtResult
 	{
 		write!(formatter, "{}", match self {
-			Adapters::TOML => "TOML"
+			Adapters::Bincode => "Bincode"
 		})
+	}
+}
+
+#[cfg(test)]
+mod tests
+{
+	use super::Adapters;
+
+	#[test]
+	fn test_display()
+	{
+		assert_eq!(format!("{}", Adapters::Bincode), "Bincode");
 	}
 }

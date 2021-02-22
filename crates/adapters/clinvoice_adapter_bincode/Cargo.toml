@@ -3,7 +3,7 @@
 name = "clinvoice_adapter_bincode"
 version = "0.4.0"
 authors = ["Iron-E <code.iron.e@gmail.com>"]
-description = "TOML filesystem adapter for CLInvoice."
+description = "Bincode filesystem adapter for CLInvoice."
 
 edition = "2018"
 license = "GPL3"

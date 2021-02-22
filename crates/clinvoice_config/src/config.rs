@@ -86,13 +86,13 @@ mod tests
 		stores.insert("a", StoreValue::Alias("b"));
 		stores.insert("b", StoreValue::Alias("c"));
 		stores.insert("c", StoreValue::Storage(Store {
-			adapter: Adapters::TOML,
+			adapter: Adapters::Bincode,
 			password: None,
 			path: "c/path",
 			username: None,
 		}));
 		stores.insert("d", StoreValue::Storage(Store {
-			adapter: Adapters::TOML,
+			adapter: Adapters::Bincode,
 			password: Some("asldkj"),
 			path: "d/path",
 			username: None,

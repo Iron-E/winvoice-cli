@@ -74,7 +74,7 @@ pub fn test_temp_store(assertion: impl FnOnce(&Store<'_, '_, '_>))
 
 	assertion(&Store
 	{
-		adapter: Adapters::TOML,
+		adapter: Adapters::Bincode,
 		password: None,
 		path: match temp_path.to_str()
 		{

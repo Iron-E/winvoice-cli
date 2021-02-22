@@ -10,8 +10,8 @@ pub enum Adapters
 {
 	/// # Summary
 	///
-	/// A TOML filesystem.
-	TOML,
+	/// A bincode filesystem.
+	Bincode,
 }
 
 impl Adapters

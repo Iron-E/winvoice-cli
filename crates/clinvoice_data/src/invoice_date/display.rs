@@ -25,11 +25,14 @@ mod tests
 	{
 		super::InvoiceDate,
 		crate::chrono::Utc,
+		std::time::Instant,
 	};
 
 	#[test]
 	fn test_display()
 	{
+		let start = Instant::now();
+
 		let mut date = InvoiceDate
 		{
 			issued: Utc::now(),
@@ -45,5 +48,7 @@ mod tests
 		};
 
 		assert_eq!(format!("{}", date), format!("Issued on {}, Paid on {}", date.issued, date.paid.unwrap()));
+
+		println!("\n>>>>> InvoiceDate test_display {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 	}
 }

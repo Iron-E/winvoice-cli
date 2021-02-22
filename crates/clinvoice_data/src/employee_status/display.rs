@@ -17,4 +17,24 @@ impl Display for EmployeeStatus
 	}
 }
 
+#[cfg(test)]
+mod tests
+{
+	use
+	{
+		super::EmployeeStatus,
+		std::time::Instant,
+	};
 
+	#[test]
+	fn test_display()
+	{
+		let start = Instant::now();
+
+		assert_eq!(format!("{}", EmployeeStatus::Employed), "Employed");
+		assert_eq!(format!("{}", EmployeeStatus::NotEmployed), "Not employed");
+		assert_eq!(format!("{}", EmployeeStatus::Representative), "Representative");
+
+		println!("\n>>>>> EmployeeStatus test_display {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+	}
+}

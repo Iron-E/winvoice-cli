@@ -9,7 +9,7 @@ impl Display for Expense
 	fn fmt(&self, formatter: &mut Formatter<'_>) -> Result
 	{
 		writeln!(formatter, "{} – {}", self.category, self.cost)?;
-		return write!(formatter, "{}", self.description);
+		return write!(formatter, "\t{}", self.description.replace('\n', "\n\t"));
 	}
 }
 
@@ -35,7 +35,11 @@ mod tests
 			description: "Take-out for 2.".into(),
 		};
 
-		assert_eq!(format!("{}", expense), "Food – 20.00 USD\nTake-out for 2.");
+		assert_eq!(
+			format!("{}", expense),
+"Food – 20.00 USD
+	Take-out for 2.",
+		);
 
 		println!("\n>>>>> Expense test_display {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 	}

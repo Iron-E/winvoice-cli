@@ -25,11 +25,14 @@ mod tests
 	{
 		super::Invoice,
 		crate::{chrono::Utc, Decimal, InvoiceDate, Money},
+		std::time::Instant,
 	};
 
 	#[test]
 	fn test_display()
 	{
+		let start = Instant::now();
+
 		let invoice = Invoice
 		{
 			date: Some(InvoiceDate
@@ -44,5 +47,7 @@ mod tests
 			format!("{}", invoice),
 			format!("Hourly Rate: 10.00 USD\nInvoice Status: Issued on {}, Outstanding", invoice.date.unwrap().issued)
 		);
+
+		println!("\n>>>>> Invoice test_display {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 	}
 }

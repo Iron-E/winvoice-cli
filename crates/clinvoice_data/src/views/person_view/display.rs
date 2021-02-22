@@ -8,13 +8,13 @@ impl Display for PersonView
 {
 	fn fmt(&self, formatter: &mut Formatter<'_>) -> Result
 	{
+		writeln!(formatter, "Name: {}", self.name)?;
+
 		let mut sorted_contact_info = self.contact_info.clone();
 		sorted_contact_info.sort();
 
-		writeln!(formatter, "Contact Info:")?;
-		sorted_contact_info.iter().try_for_each(|c| writeln!(formatter, "\t- {}", c))?;
-
-		return write!(formatter, "\nName: {}", self.name);
+		write!(formatter, "Contact Info:")?;
+		return sorted_contact_info.iter().try_for_each(|c| write!(formatter, "\n\t- {}", c));
 	}
 }
 
@@ -87,12 +87,11 @@ mod tests
 
 		assert_eq!(
 			format!("{}", person_view),
-"Contact Info:
+"Name: Someone
+Contact Info:
 	- 1337 Some Street, Phoenix, Arizona, USA, Earth
 	- foo@bar.io
-	- 1-800-555-5555
-
-Name: Someone",
+	- 1-800-555-5555",
 		);
 
 		println!("\n>>>>> PersonView test_display {}us <<<<<\n", Instant::now().duration_since(start).as_micros());

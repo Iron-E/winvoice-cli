@@ -42,8 +42,6 @@ mod tests
 	#[test]
 	fn test_into_vec_employee()
 	{
-		let start = Instant::now();
-
 		util::test_temp_store(|store|
 		{
 			let dogood = BincodeOrganization::create(
@@ -80,15 +78,15 @@ mod tests
 				*store,
 			).unwrap();
 
+			let start = Instant::now();
 			// Retrieve the written employees back into the `Employee` structure.
 			let reps: DynamicResult<Vec<Employee>> = dogood.into();
+			println!("\n>>>>> BincodeOrganization::into_vec_employee {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 
 			assert_eq!(
 				reps.unwrap().into_iter().collect::<HashSet<Employee>>(),
 				[mr_flu.employee, testy.employee].iter().cloned().collect::<HashSet<Employee>>()
 			);
-
-			println!("\n>>>>> BincodeOrganization::into_vec_employee {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 }

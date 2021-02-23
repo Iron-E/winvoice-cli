@@ -68,8 +68,6 @@ mod tests
 	#[test]
 	fn test_delete()
 	{
-		let start = Instant::now();
-
 		util::test_temp_store(|store|
 		{
 			let earth = BincodeLocation::create("Earth", *store).unwrap();
@@ -109,8 +107,10 @@ mod tests
 			creation.job.start_timesheet(ceo_testy.employee.id);
 			creation.update().unwrap();
 
+			let start = Instant::now();
 			// Assert that the deletion works
 			assert!(ceo_testy.delete(true).is_ok());
+			println!("\n>>>>> BincodeEmployee::delete {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 
 			// Assert the deleted file is gone.
 			assert!(!ceo_testy.filepath().is_file());
@@ -145,8 +145,6 @@ mod tests
 
 			// Assert that no references to the deleted entity remain.
 			assert!(creation.job.timesheets.iter().all(|t| t.employee_id != ceo_testy.employee.id));
-
-			println!("\n>>>>> BincodeEmployee::delete {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 }

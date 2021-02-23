@@ -131,8 +131,6 @@ mod tests
 	#[test]
 	fn test_unique_id()
 	{
-		let start = Instant::now();
-
 		super::test_temp_store(|store|
 		{
 			let test_path = PathBuf::new().join(store.path).join("test_next_id");
@@ -146,6 +144,7 @@ mod tests
 			super::create_store_dir(&test_path).unwrap();
 
 			let mut ids = HashSet::new();
+			let start = Instant::now();
 			for _ in 0..100
 			{
 				let id = super::unique_id(&test_path).unwrap();
@@ -154,11 +153,10 @@ mod tests
 				// Creating the next file worked.
 				assert!(fs::write(&test_path.join(id.to_string()), "TEST").is_ok());
 			}
+			println!("\n>>>>> util::uinque_id {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 
 			// Assert that the number of unique IDs created is equal to the number of times looped.
 			assert_eq!(ids.len(), 100);
-
-			println!("\n>>>>> util::uinque_id {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 }

@@ -119,19 +119,16 @@ mod tests
 			name: "Big Old Test Corporation".into(),
 		};
 
-		let start = Instant::now();
-
 		util::test_temp_store(|store|
 		{
-			let mut contact_info = Vec::new();
+			let start = Instant::now();
 
-			contact_info.push(Contact::Address(Id::new_v4()));
 			test_create_assertion(BincodeEmployee::create(
-				contact_info.clone(),
+				vec![Contact::Address(Id::new_v4())],
 				organization.clone(),
 				Person
 				{
-					contact_info: contact_info.clone(),
+					contact_info: vec![Contact::Address(Id::new_v4())],
 					id: Id::new_v4(),
 					name: "Testy Mćtesterson".into(),
 				},
@@ -140,13 +137,12 @@ mod tests
 				*store,
 			).unwrap());
 
-			contact_info.push(Contact::Email("foo@bar.io".into()));
 			test_create_assertion(BincodeEmployee::create(
-				contact_info.clone(),
+				vec![Contact::Email("foo@bar.io".into())],
 				organization.clone(),
 				Person
 				{
-					contact_info: contact_info.clone(),
+					contact_info: vec![Contact::Email("foo2@bar.io".into())],
 					id: Id::new_v4(),
 					name: "Nimron MacBeaver".into(),
 				},
@@ -155,13 +151,12 @@ mod tests
 				*store,
 			).unwrap());
 
-			contact_info.push(Contact::Phone("1-800-555-3600".into()));
 			test_create_assertion(BincodeEmployee::create(
-				contact_info.clone(),
+				vec![Contact::Phone("1-800-555-3600".into())],
 				organization.clone(),
 				Person
 				{
-					contact_info: contact_info.clone(),
+					contact_info: vec![Contact::Phone("1-800-555-3601".into())],
 					id: Id::new_v4(),
 					name: "An Actual «Tor♯tust".into(),
 				},
@@ -170,13 +165,12 @@ mod tests
 				*store,
 			).unwrap());
 
-			contact_info.push(Contact::Address(Id::new_v4()));
 			test_create_assertion(BincodeEmployee::create(
-				contact_info.clone(),
+				vec![Contact::Address(Id::new_v4())],
 				organization.clone(),
 				Person
 				{
-					contact_info: contact_info.clone(),
+					contact_info: vec![Contact::Address(Id::new_v4())],
 					id: Id::new_v4(),
 					name: "Jimmy Neutron, Boy Genius' Dog 'Gottard'".into(),
 				},
@@ -185,13 +179,12 @@ mod tests
 				*store,
 			).unwrap());
 
-			contact_info.push(Contact::Email("obviousemail@server.com".into()));
 			test_create_assertion(BincodeEmployee::create(
-				contact_info.clone(),
+				vec![Contact::Email("obviousemail@server.com".into())],
 				organization.clone(),
 				Person
 				{
-					contact_info: contact_info.clone(),
+					contact_info: vec![Contact::Email("obviousemail2@server.com".into())],
 					id: Id::new_v4(),
 					name: "Testy Mćtesterson".into(),
 				},
@@ -213,8 +206,6 @@ mod tests
 	#[test]
 	fn test_retrieve()
 	{
-		let start = Instant::now();
-
 		let organization = Organization
 		{
 			id: Id::new_v4(),
@@ -301,9 +292,9 @@ mod tests
 				*store,
 			).unwrap();
 
+			let start = Instant::now();
 
-			// Retrieve everything.
-			let mut results = BincodeEmployee::retrieve(
+			let everything = BincodeEmployee::retrieve(
 				MatchWhen::Any, // contact info
 				MatchWhen::Any, // id
 				MatchWhen::Any, // organization
@@ -313,15 +304,8 @@ mod tests
 				*store,
 			).unwrap();
 
-			// Assert the results contains all values
-			assert!(results.contains(&testy_mctesterson));
-			assert!(results.contains(&nimron_macbeaver));
-			assert!(results.contains(&an_actual_tortust));
-			assert!(results.contains(&gottard));
-			assert!(results.contains(&duplicate_name));
-
-			// Retrieve Arizona
-			results = BincodeEmployee::retrieve(
+			// Retrieve testy and gottard
+			let testy_gottard = BincodeEmployee::retrieve(
 				MatchWhen::Any, // contact info
 				MatchWhen::HasAny([testy_mctesterson.employee.id, gottard.employee.id].iter().cloned().collect()), // id
 				MatchWhen::Any, // organization
@@ -331,14 +315,21 @@ mod tests
 				*store,
 			).unwrap();
 
-			// Assert the results contains all values
-			assert!(results.contains(&testy_mctesterson));
-			assert!(!results.contains(&nimron_macbeaver));
-			assert!(!results.contains(&an_actual_tortust));
-			assert!(results.contains(&gottard));
-			assert!(!results.contains(&duplicate_name));
-
 			println!("\n>>>>> BincodeEmployee::retrieve {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+
+			// Assert the results contains all values
+			assert!(everything.contains(&an_actual_tortust));
+			assert!(everything.contains(&duplicate_name));
+			assert!(everything.contains(&gottard));
+			assert!(everything.contains(&nimron_macbeaver));
+			assert!(everything.contains(&testy_mctesterson));
+
+			// Assert the results contains all expected values
+			assert!(!testy_gottard.contains(&an_actual_tortust));
+			assert!(!testy_gottard.contains(&duplicate_name));
+			assert!(testy_gottard.contains(&gottard));
+			assert!(!testy_gottard.contains(&nimron_macbeaver));
+			assert!(testy_gottard.contains(&testy_mctesterson));
 		});
 	}
 }

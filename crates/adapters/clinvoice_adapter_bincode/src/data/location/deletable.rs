@@ -58,8 +58,6 @@ mod tests
 	#[test]
 	fn test_delete()
 	{
-		let start = Instant::now();
-
 		util::test_temp_store(|store|
 		{
 			let earth = BincodeLocation::create("Earth", *store).unwrap();
@@ -73,6 +71,8 @@ mod tests
 				*store
 			).unwrap();
 
+			let start = Instant::now();
+
 			// delete just phoenix.
 			phoenix.delete(false).unwrap();
 
@@ -82,6 +82,8 @@ mod tests
 			// delete the usa and everything in it.
 			usa.delete(true).unwrap();
 
+			println!("\n>>>>> BincodeLocation::delete {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+
 			// Assert that every location inside the USA is gone
 			assert!(&earth.filepath().is_file());
 			assert!(!&usa.filepath().is_file());
@@ -89,8 +91,6 @@ mod tests
 
 			// assert that `dogood`, located in arizona, is gone.
 			assert!(!&dogood.filepath().is_file());
-
-			println!("\n>>>>> BincodeLocation::delete {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 }

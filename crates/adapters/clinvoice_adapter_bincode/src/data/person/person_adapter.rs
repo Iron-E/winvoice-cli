@@ -101,27 +101,14 @@ mod tests
 	#[test]
 	fn test_create()
 	{
-		let start = Instant::now();
-
 		util::test_temp_store(|store|
 		{
-			let mut contact_info = Vec::new();
-
-			contact_info.push(Contact::Address(Id::new_v4()));
-			test_create_assertion(BincodePerson::create(contact_info.clone(), "", *store).unwrap());
-
-			contact_info.push(Contact::Email("foo@bar.io".into()));
-			test_create_assertion(BincodePerson::create(contact_info.clone(), "", *store).unwrap());
-
-			contact_info.push(Contact::Phone("1-800-555-3600".into()));
-			test_create_assertion(BincodePerson::create(contact_info.clone(), "", *store).unwrap());
-
-			contact_info.push(Contact::Address(Id::new_v4()));
-			test_create_assertion(BincodePerson::create(contact_info.clone(), "", *store).unwrap());
-
-			contact_info.push(Contact::Email("obviousemail@server.com".into()));
-			test_create_assertion(BincodePerson::create(contact_info, "", *store).unwrap());
-
+			let start = Instant::now();
+			test_create_assertion(BincodePerson::create(vec![Contact::Address(Id::new_v4())], "", *store).unwrap());
+			test_create_assertion(BincodePerson::create(vec![Contact::Email("foo@bar.io".into())], "", *store).unwrap());
+			test_create_assertion(BincodePerson::create(vec![Contact::Phone("1-800-555-3600".into())], "", *store).unwrap());
+			test_create_assertion(BincodePerson::create(vec![Contact::Address(Id::new_v4())], "", *store).unwrap());
+			test_create_assertion(BincodePerson::create(vec![Contact::Email("obviousemail@server.com".into())], "", *store).unwrap());
 			println!("\n>>>>> BincodePerson::create {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
@@ -135,8 +122,6 @@ mod tests
 	#[test]
 	fn test_retrieve()
 	{
-		let start = Instant::now();
-
 		util::test_temp_store(|store|
 		{
 			let flingo = BincodePerson::create(
@@ -163,35 +148,37 @@ mod tests
 				*store
 			).unwrap();
 
+			let start = Instant::now();
+
 			// Retrieve bob
-			let mut results = BincodePerson::retrieve(
+			let only_bob = BincodePerson::retrieve(
 				MatchWhen::HasAll(bob.person.contact_info.iter().cloned().collect()), // contact info
 				MatchWhen::Any, // id
 				MatchWhen::Any, // name
 				*store,
 			).unwrap();
 
-			// Assert bob is the only one retrieved
-			assert!(!results.contains(&flingo));
-			assert!(results.contains(&bob));
-			assert!(!results.contains(&slimdi));
-			assert!(!results.contains(&longone));
-
 			// Retrieve longone and slimdi
-			results = BincodePerson::retrieve(
+			let longone_slimdi = BincodePerson::retrieve(
 				MatchWhen::Any, // contact info
 				MatchWhen::Any, // id
 				MatchWhen::HasAny([slimdi.person.name.clone(), longone.person.name.clone()].iter().cloned().collect()), // name
 				*store,
 			).unwrap();
 
-			// Assert bob is the only one retrieved
-			assert!(!results.contains(&flingo));
-			assert!(!results.contains(&bob));
-			assert!(results.contains(&slimdi));
-			assert!(results.contains(&longone));
-
 			println!("\n>>>>> BincodePerson::retrieve {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+
+			// Assert bob is the only one retrieved
+			assert!(!only_bob.contains(&flingo));
+			assert!(only_bob.contains(&bob));
+			assert!(!only_bob.contains(&slimdi));
+			assert!(!only_bob.contains(&longone));
+
+			// Assert bob is the only one retrieved
+			assert!(!longone_slimdi.contains(&flingo));
+			assert!(!longone_slimdi.contains(&bob));
+			assert!(longone_slimdi.contains(&slimdi));
+			assert!(longone_slimdi.contains(&longone));
 		});
 	}
 }

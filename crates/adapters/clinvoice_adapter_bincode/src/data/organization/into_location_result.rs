@@ -45,8 +45,6 @@ mod tests
 	#[test]
 	fn test_into_hashset_employee()
 	{
-		let start = Instant::now();
-
 		util::test_temp_store(|store|
 		{
 			let arizona = BincodeLocation::create("Arizona", *store).unwrap();
@@ -56,13 +54,13 @@ mod tests
 				*store
 			).unwrap();
 
+			let start = Instant::now();
 			// Retrieve the written employees back into the `Employee` structure.
 			let dogood_location: DynamicResult<Location> = dogood.into();
+			println!("\n>>>>> BincodeOrganization::into_location {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 
 			// Assert that the location retrieved is the location expected
 			assert_eq!(arizona.location, dogood_location.unwrap());
-
-			println!("\n>>>>> BincodeOrganization::into_location {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 }

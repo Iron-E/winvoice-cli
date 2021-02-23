@@ -37,8 +37,6 @@ mod tests
 	#[test]
 	fn test_delete()
 	{
-		let start = Instant::now();
-
 		util::test_temp_store(|store|
 		{
 			let big_test = BincodeOrganization::create(
@@ -63,16 +61,16 @@ mod tests
 				*store,
 			).unwrap();
 
+			let start = Instant::now();
 			// Delete both jobs
 			create_job.delete(true).unwrap();
 			assert_job.delete(true).unwrap();
+			println!("\n>>>>> BincodeJob::delete {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 
 			// Assert that all jobs are gone but the organization exists
 			assert!(!&assert_job.filepath().is_file());
 			assert!(&big_test.filepath().is_file());
 			assert!(!&create_job.filepath().is_file());
-
-			println!("\n>>>>> BincodeJob::delete {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 }

@@ -131,8 +131,6 @@ mod tests
 	#[test]
 	fn test_create()
 	{
-		let start = Instant::now();
-
 		let organization = Organization
 		{
 			id: Id::new_v4(),
@@ -142,6 +140,8 @@ mod tests
 
 		util::test_temp_store(|store|
 		{
+			let start = Instant::now();
+
 			test_create_assertion(BincodeJob::create(
 				organization.clone(),
 				Utc::now(),
@@ -195,8 +195,6 @@ mod tests
 	#[test]
 	fn test_retrieve()
 	{
-		let start = Instant::now();
-
 		let organization = Organization
 		{
 			id: Id::new_v4(),
@@ -230,8 +228,10 @@ mod tests
 				*store,
 			).unwrap();
 
+			let start = Instant::now();
+
 			// retrieve everything
-			let mut results = BincodeJob::retrieve(
+			let everything = BincodeJob::retrieve(
 				MatchWhen::EqualTo(organization.id), // client
 				MatchWhen::Any, // date close
 				MatchWhen::Any, // date open
@@ -246,13 +246,8 @@ mod tests
 				*store,
 			).unwrap();
 
-			// assert the results are as expected
-			assert!(results.contains(&creation));
-			assert!(results.contains(&retrieval));
-			assert!(results.contains(&assertion));
-
 			// retrieve retrieval and assertion
-			results = BincodeJob::retrieve(
+			let not_creation = BincodeJob::retrieve(
 				MatchWhen::Any, // client
 				MatchWhen::Any, // date close
 				MatchWhen::HasNone([creation.job.date_open].iter().cloned().collect()), // date open
@@ -267,12 +262,17 @@ mod tests
 				*store,
 			).unwrap();
 
-			// assert the results are as expected
-			assert!(!results.contains(&creation));
-			assert!(results.contains(&retrieval));
-			assert!(results.contains(&assertion));
-
 			println!("\n>>>>> BincodeJob::retrieve {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+
+			// assert the results are as expected
+			assert!(everything.contains(&assertion));
+			assert!(everything.contains(&creation));
+			assert!(everything.contains(&retrieval));
+
+			// assert the results are as expected
+			assert!(not_creation.contains(&assertion));
+			assert!(!not_creation.contains(&creation));
+			assert!(not_creation.contains(&retrieval));
 		});
 	}
 }

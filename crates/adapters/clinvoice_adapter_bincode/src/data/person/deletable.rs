@@ -59,8 +59,6 @@ mod tests
 	#[test]
 	fn test_delete()
 	{
-		let start = Instant::now();
-
 		util::test_temp_store(|store|
 		{
 			let earth = BincodeLocation::create("Earth", *store).unwrap();
@@ -89,8 +87,10 @@ mod tests
 				*store,
 			).unwrap();
 
+			let start = Instant::now();
 			// Assert that the deletion works
 			assert!(testy.delete(true).is_ok());
+			println!("\n>>>>> BincodePerson::delete {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 
 			// Assert that `testy` and its referencing employee is gone.
 			assert!(!testy.filepath().is_file());
@@ -99,8 +99,6 @@ mod tests
 			// Assert that the independent files still exist.
 			assert!(big_old_test.filepath().is_file());
 			assert!(earth.filepath().is_file());
-
-			println!("\n>>>>> BincodePerson::delete {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 }

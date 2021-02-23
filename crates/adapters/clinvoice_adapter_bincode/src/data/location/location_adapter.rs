@@ -128,26 +128,22 @@ mod tests
 	#[test]
 	fn test_create()
 	{
-		let start = Instant::now();
-
 		util::test_temp_store(|store|
 		{
+			let start = Instant::now();
 			let earth = BincodeLocation::create("Earth", *store).unwrap();
-			test_create_assertion(&earth);
-
 			let usa = earth.create_inner("USA").unwrap();
-			assert_eq!(usa.location.outer_id, Some(earth.location.id));
-			test_create_assertion(&usa);
-
 			let arizona = usa.create_inner("Arizona").unwrap();
-			assert_eq!(arizona.location.outer_id, Some(usa.location.id));
-			test_create_assertion(&arizona);
-
 			let phoenix = arizona.create_inner("Phoenix").unwrap();
-			assert_eq!(phoenix.location.outer_id, Some(arizona.location.id));
-			test_create_assertion(&phoenix);
-
 			println!("\n>>>>> BincodeLocation::start {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+
+			assert_eq!(usa.location.outer_id, Some(earth.location.id));
+			assert_eq!(arizona.location.outer_id, Some(usa.location.id));
+			assert_eq!(phoenix.location.outer_id, Some(arizona.location.id));
+			test_create_assertion(&earth);
+			test_create_assertion(&usa);
+			test_create_assertion(&arizona);
+			test_create_assertion(&phoenix);
 		});
 	}
 
@@ -161,8 +157,6 @@ mod tests
 	#[test]
 	fn test_retrieve()
 	{
-		let start = Instant::now();
-
 		return util::test_temp_store(|store|
 		{
 			let earth = BincodeLocation::create("Earth", *store).unwrap();
@@ -170,35 +164,37 @@ mod tests
 			let arizona = usa.create_inner("Arizona").unwrap();
 			let phoenix = arizona.create_inner("Phoenix").unwrap();
 
+			let start = Instant::now();
+
 			// Retrieve everything.
-			let mut results = BincodeLocation::retrieve(
+			let everything = BincodeLocation::retrieve(
 				MatchWhen::Any, // id
 				MatchWhen::Any, // name
 				MatchWhen::Any, // outer id
 				*store,
 			).unwrap();
 
-			// Assert the results contains all values
-			assert!(results.contains(&earth));
-			assert!(results.contains(&usa));
-			assert!(results.contains(&arizona));
-			assert!(results.contains(&phoenix));
-
 			// Retrieve Arizona
-			results = BincodeLocation::retrieve(
+			let only_arizona = BincodeLocation::retrieve(
 				MatchWhen::HasAny([earth.location.id, arizona.location.id].iter().cloned().collect()), // id
 				MatchWhen::Any, // name
 				MatchWhen::HasNone([Option::<Id>::None].iter().cloned().collect()), // outer id
 				*store,
 			).unwrap();
 
-			// Assert the results contains all values
-			assert!(!results.contains(&earth));
-			assert!(!results.contains(&usa));
-			assert!(results.contains(&arizona));
-			assert!(!results.contains(&phoenix));
-
 			println!("\n>>>>> BincodeLocation::retrieve {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+
+			// Assert the results contains all values
+			assert!(everything.contains(&earth));
+			assert!(everything.contains(&usa));
+			assert!(everything.contains(&arizona));
+			assert!(everything.contains(&phoenix));
+
+			// Assert the results contains all values
+			assert!(!only_arizona.contains(&earth));
+			assert!(!only_arizona.contains(&usa));
+			assert!(only_arizona.contains(&arizona));
+			assert!(!only_arizona.contains(&phoenix));
 		});
 	}
 }

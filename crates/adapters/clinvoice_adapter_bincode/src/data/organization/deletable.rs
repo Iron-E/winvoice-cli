@@ -74,8 +74,6 @@ mod tests
 	#[test]
 	fn test_delete()
 	{
-		let start = Instant::now();
-
 		util::test_temp_store(|store|
 		{
 			let earth = BincodeLocation::create("Earth", *store).unwrap();
@@ -115,8 +113,10 @@ mod tests
 			creation.job.start_timesheet(ceo_testy.employee.id);
 			creation.update().unwrap();
 
+			let start = Instant::now();
 			// Assert that the deletion works
 			assert!(big_old_test.delete(true).is_ok());
+			println!("\n>>>>> BincodeEmployee::delete {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 
 			// Assert that the dependent files are gone
 			assert!(!big_old_test.filepath().is_file());
@@ -126,8 +126,6 @@ mod tests
 			// Assert that the independent files are present
 			assert!(earth.filepath().is_file());
 			assert!(testy.filepath().is_file());
-
-			println!("\n>>>>> BincodeEmployee::delete {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 }

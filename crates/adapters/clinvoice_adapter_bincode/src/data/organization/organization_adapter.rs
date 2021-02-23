@@ -99,35 +99,36 @@ mod tests
 	#[test]
 	fn test_create()
 	{
-		let start = Instant::now();
-
 		util::test_temp_store(|store|
 		{
 			let earth_id = Id::new_v4();
+			let usa_id = Id::new_v4();
+			let arizona_id = Id::new_v4();
+			let phoenix_id = Id::new_v4();
+			let some_id = Id::new_v4();
+
+			let start = Instant::now();
+
 			test_create_assertion(BincodeOrganization::create(
-				Location {name: "Earth".into(), id: earth_id, outer_id: None},
+				Location {name: "Earth".into(), id: Id::new_v4(), outer_id: None},
 				"alsdkjaldkj", *store
 			).unwrap());
 
-			let usa_id = Id::new_v4();
 			test_create_assertion(BincodeOrganization::create(
 				Location {name: "USA".into(), id: usa_id, outer_id: Some(earth_id)},
 				"alskdjalgkh  ladhkj EAL ISdh", *store
 			).unwrap());
 
-			let arizona_id = Id::new_v4();
 			test_create_assertion(BincodeOrganization::create(
 				Location {name: "Arizona".into(), id: arizona_id, outer_id: Some(earth_id)},
 				" AAA – 44 %%", *store
 			).unwrap());
 
-			let phoenix_id = Id::new_v4();
 			test_create_assertion(BincodeOrganization::create(
 				Location {name: "Phoenix".into(), id: phoenix_id, outer_id: Some(arizona_id)},
 				" ^^^ ADSLKJDLASKJD FOCJCI", *store
 			).unwrap());
 
-			let some_id = Id::new_v4();
 			test_create_assertion(BincodeOrganization::create(
 				Location {name: "Some Road".into(), id: some_id, outer_id: Some(phoenix_id)},
 				"aldkj doiciuc giguy &&", *store
@@ -146,8 +147,6 @@ mod tests
 	#[test]
 	fn test_retrieve()
 	{
-		let start = Instant::now();
-
 		util::test_temp_store(|store|
 		{
 			let earth_id = Id::new_v4();
@@ -168,6 +167,7 @@ mod tests
 				" AAA – 44 %%", *store
 			).unwrap();
 
+			let start = Instant::now();
 			// retrieve `packing` and `eal`
 			let results = BincodeOrganization::retrieve(
 				MatchWhen::Any, // id
@@ -175,13 +175,12 @@ mod tests
 				MatchWhen::HasNone([aaa.organization.name.clone()].iter().cloned().collect()), // name
 				*store,
 			).unwrap();
+			println!("\n>>>>> BincodeOrganization::retrieve {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 
 			// test if `packing` and `eal` were retrieved
 			assert!(results.contains(&packing));
 			assert!(results.contains(&eal));
 			assert!(!results.contains(&aaa));
-
-			println!("\n>>>>> BincodeOrganization::retrieve {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 }

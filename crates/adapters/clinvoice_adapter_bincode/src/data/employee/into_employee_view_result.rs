@@ -70,8 +70,6 @@ mod tests
 	#[test]
 	fn test_into_view()
 	{
-		let start = Instant::now();
-
 		util::test_temp_store(|store|
 		{
 			let earth = BincodeLocation::create("Earth", *store).unwrap();
@@ -131,12 +129,12 @@ mod tests
 				status: ceo_testy.employee.status,
 			};
 
+			let start = Instant::now();
 			let ceo_testy_view_result: DynamicResult<EmployeeView> = ceo_testy.into();
+			println!("\n>>>>> BincodeEmployee::into_view {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 
 			// Asser that the synthetic view is the same as the view which was created naturally.
 			assert_eq!(ceo_testy_view, ceo_testy_view_result.unwrap());
-
-			println!("\n>>>>> BincodeEmployee::into_view {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 }

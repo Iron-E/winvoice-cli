@@ -90,8 +90,6 @@ mod tests
 	#[test]
 	fn test_into_view()
 	{
-		let start = Instant::now();
-
 		util::test_temp_store(|store|
 		{
 			let earth = BincodeLocation::create(
@@ -188,11 +186,11 @@ mod tests
 				}],
 			};
 
+			let start = Instant::now();
 			let create_job_view_result: DynamicResult<JobView> = create_job.into();
+			println!("\n>>>>> BincodeJob::into_view {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 
 			assert_eq!(create_job_view, create_job_view_result.unwrap());
-
-			println!("\n>>>>> BincodeJob::into_view {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 }

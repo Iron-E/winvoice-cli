@@ -54,8 +54,6 @@ mod tests
 	#[test]
 	fn test_into_view()
 	{
-		let start = Instant::now();
-
 		util::test_temp_store(|store|
 		{
 			let earth = BincodeLocation::create("Earth", *store).unwrap();
@@ -85,11 +83,11 @@ mod tests
 				}.into()),
 			};
 
+			let start = Instant::now();
 			let phoenix_view_result: DynamicResult<LocationView> = phoenix.into();
+			println!("\n>>>>> BincodeLocation::into_view {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 
 			assert_eq!(phoenix_view, phoenix_view_result.unwrap());
-
-			println!("\n>>>>> BincodeLocation::into_view {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 }

@@ -45,8 +45,6 @@ mod tests
 	#[test]
 	fn test_into_organization()
 	{
-		let start = Instant::now();
-
 		util::test_temp_store(|store|
 		{
 			let testy = BincodePerson::create(
@@ -69,11 +67,11 @@ mod tests
 				*store,
 			).unwrap();
 
+			let start = Instant::now();
 			let testy_person: DynamicResult<Person> = testy_employed.into();
+			println!("\n>>>>> BincodeEmployee::into_person {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 
 			assert_eq!(testy.person, testy_person.unwrap());
-
-			println!("\n>>>>> BincodeEmployee::into_person {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 }

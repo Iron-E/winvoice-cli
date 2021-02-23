@@ -129,9 +129,11 @@ mod tests
 	fn test_is_match()
 	{
 		let test_value = &7;
+
 		let has_all: HashSet<i32> = [*test_value].iter().cloned().collect();
 		let has_any: HashSet<i32> = [1, 2, 3, *test_value].iter().cloned().collect();
 		let has_none: HashSet<i32> = [1, 2, 3].iter().cloned().collect();
+
 		let not_has_all: HashSet<i32> = [3].iter().cloned().collect();
 		let not_has_any = has_none.clone();
 		let not_has_none = has_any.clone();
@@ -142,24 +144,24 @@ mod tests
 		assert!(MatchWhen::Any.is_match(test_value));
 
 		// Test equal
-		assert!(!MatchWhen::EqualTo(6).is_match(test_value));
 		assert!(MatchWhen::EqualTo(7).is_match(test_value));
+		assert!(!MatchWhen::EqualTo(6).is_match(test_value));
 
 		// Test has all
-		assert!(!MatchWhen::HasAll(not_has_all).is_match(test_value));
 		assert!(MatchWhen::HasAll(has_all).is_match(test_value));
+		assert!(!MatchWhen::HasAll(not_has_all).is_match(test_value));
 
 		// Test has any
-		assert!(!MatchWhen::HasAny(not_has_any).is_match(test_value));
 		assert!(MatchWhen::HasAny(has_any).is_match(test_value));
+		assert!(!MatchWhen::HasAny(not_has_any).is_match(test_value));
 
 		// Test has none
-		assert!(!MatchWhen::HasNone(not_has_none).is_match(test_value));
 		assert!(MatchWhen::HasNone(has_none).is_match(test_value));
+		assert!(!MatchWhen::HasNone(not_has_none).is_match(test_value));
 
 		// Test in range
-		assert!(!MatchWhen::InRange(&|v| *v > 0 && *v < 3).is_match(test_value));
 		assert!(MatchWhen::InRange(&|v| *v > 0 && *v < 8).is_match(test_value));
+		assert!(!MatchWhen::InRange(&|v| *v > 0 && *v < 3).is_match(test_value));
 
 		println!("\n>>>>> MatchWhen::is_match {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 	}
@@ -167,47 +169,54 @@ mod tests
 	#[test]
 	fn test_set_matches()
 	{
-		let start = Instant::now();
+		let test_set: HashSet<i32> = [4, 7, 17].iter().cloned().collect();
+		let test_set_single_element: HashSet<i32> = [4].iter().cloned().collect();
 
-		let mut test_set = HashSet::new();
-		test_set.insert(4);
+		let has_all: HashSet<i32> = [4].iter().cloned().collect();
+		let has_any: HashSet<i32> = [1, 4].iter().cloned().collect();
+		let has_none: HashSet<i32> = [1].iter().cloned().collect();
+		let in_range = |v: &i32| *v > 0 && *v < 18;
+
+		let not_has_all: HashSet<i32> = [4, 6].iter().cloned().collect();
+		let not_has_any = has_none.clone();
+		let not_has_none = has_any.clone();
+		let not_in_range = |v: &i32| *v > 0 && *v < 3;
+
+		let start = Instant::now();
 
 		// Test any
 		assert!(MatchWhen::Any.set_matches(&test_set));
+		assert!(MatchWhen::Any.set_matches(&test_set_single_element));
 
 		// Test equal
+		assert!(!MatchWhen::EqualTo(4).set_matches(&test_set));
+		assert!(MatchWhen::EqualTo(4).set_matches(&test_set_single_element));
 		assert!(!MatchWhen::EqualTo(6).set_matches(&test_set));
-		assert!(MatchWhen::EqualTo(4).set_matches(&test_set));
-
-		// Insert more values
-		test_set.insert(7);
-		test_set.insert(17);
+		assert!(!MatchWhen::EqualTo(6).set_matches(&test_set_single_element));
 
 		// Test has all
-		let mut has_all = HashSet::new();
-		has_all.insert(4);
 		assert!(MatchWhen::HasAll(has_all.clone()).set_matches(&test_set));
-		has_all.insert(6);
-		assert!(!MatchWhen::HasAll(has_all).set_matches(&test_set));
+		assert!(MatchWhen::HasAll(has_all).set_matches(&test_set_single_element));
+		assert!(!MatchWhen::HasAll(not_has_all.clone()).set_matches(&test_set));
+		assert!(!MatchWhen::HasAll(not_has_all).set_matches(&test_set_single_element));
 
 		// Test has any
-		let mut has_any = HashSet::new();
-		has_any.insert(1);
-		assert!(!MatchWhen::HasAny(has_any.clone()).set_matches(&test_set));
-		has_any.insert(7);
-		assert!(MatchWhen::HasAny(has_any).set_matches(&test_set));
+		assert!(MatchWhen::HasAny(has_any.clone()).set_matches(&test_set));
+		assert!(MatchWhen::HasAny(has_any).set_matches(&test_set_single_element));
+		assert!(!MatchWhen::HasAny(not_has_any.clone()).set_matches(&test_set));
+		assert!(!MatchWhen::HasAny(not_has_any).set_matches(&test_set_single_element));
 
 		// Test has none
-		let mut has_none = HashSet::new();
-		has_none.insert(1);
-		has_none.insert(2);
 		assert!(MatchWhen::HasNone(has_none.clone()).set_matches(&test_set));
-		has_none.insert(7);
-		assert!(!MatchWhen::HasNone(has_none).set_matches(&test_set));
+		assert!(MatchWhen::HasNone(has_none).set_matches(&test_set_single_element));
+		assert!(!MatchWhen::HasNone(not_has_none.clone()).set_matches(&test_set));
+		assert!(!MatchWhen::HasNone(not_has_none).set_matches(&test_set_single_element));
 
 		// Test in range
-		assert!(!MatchWhen::InRange(&|v| *v > 0 && *v < 3).set_matches(&test_set));
-		assert!(MatchWhen::InRange(&|v| *v > 0 && *v < 18).set_matches(&test_set));
+		assert!(MatchWhen::InRange(&in_range).set_matches(&test_set));
+		assert!(MatchWhen::InRange(&in_range).set_matches(&test_set_single_element));
+		assert!(!MatchWhen::InRange(&not_in_range).set_matches(&test_set));
+		assert!(!MatchWhen::InRange(&not_in_range).set_matches(&test_set_single_element));
 
 		println!("\n>>>>> MatchWhen::set_match {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 	}

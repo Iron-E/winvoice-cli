@@ -89,7 +89,7 @@ mod tests
 
 			assert_eq!(phoenix_view, phoenix_view_result.unwrap());
 
-			println!("\n>>>>> BincodeLocation test_into_view {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+			println!("\n>>>>> BincodeLocation::into_view {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 }

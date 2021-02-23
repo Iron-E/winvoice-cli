@@ -90,7 +90,7 @@ mod tests
 			// assert that `dogood`, located in arizona, is gone.
 			assert!(!&dogood.filepath().is_file());
 
-			println!("\n>>>>> BincodeLocation test_delete {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+			println!("\n>>>>> BincodeLocation::delete {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 }

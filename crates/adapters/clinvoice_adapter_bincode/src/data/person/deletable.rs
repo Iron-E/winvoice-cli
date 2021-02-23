@@ -100,7 +100,7 @@ mod tests
 			assert!(big_old_test.filepath().is_file());
 			assert!(earth.filepath().is_file());
 
-			println!("\n>>>>> BincodePerson test_delete {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+			println!("\n>>>>> BincodePerson::delete {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 }

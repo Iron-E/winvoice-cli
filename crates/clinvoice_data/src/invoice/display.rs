@@ -50,6 +50,6 @@ Invoice Status: Issued on {}, Outstanding",
 				invoice.date.unwrap().issued
 			),
 		);
-		println!("\n>>>>> Invoice test_display {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+		println!("\n>>>>> Invoice::fmt {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 	}
 }

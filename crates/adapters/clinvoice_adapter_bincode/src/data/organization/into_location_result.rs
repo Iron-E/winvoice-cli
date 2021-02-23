@@ -62,7 +62,7 @@ mod tests
 			// Assert that the location retrieved is the location expected
 			assert_eq!(arizona.location, dogood_location.unwrap());
 
-			println!("\n>>>>> BincodeOrganization test_into_location {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+			println!("\n>>>>> BincodeOrganization::into_location {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 }

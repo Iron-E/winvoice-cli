@@ -127,7 +127,7 @@ mod tests
 			assert!(earth.filepath().is_file());
 			assert!(testy.filepath().is_file());
 
-			println!("\n>>>>> BincodeEmployee test_delete {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+			println!("\n>>>>> BincodeEmployee::delete {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 }

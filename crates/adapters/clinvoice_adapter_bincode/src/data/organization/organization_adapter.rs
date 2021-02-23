@@ -133,7 +133,7 @@ mod tests
 				"aldkj doiciuc giguy &&", *store
 			).unwrap());
 
-			println!("\n>>>>> BincodeOrganization test_create {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+			println!("\n>>>>> BincodeOrganization::create {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 
@@ -181,7 +181,7 @@ mod tests
 			assert!(results.contains(&eal));
 			assert!(!results.contains(&aaa));
 
-			println!("\n>>>>> BincodeOrganization test_retrieve {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+			println!("\n>>>>> BincodeOrganization::retrieve {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 }

@@ -136,7 +136,7 @@ mod tests
 			// Asser that the synthetic view is the same as the view which was created naturally.
 			assert_eq!(ceo_testy_view, ceo_testy_view_result.unwrap());
 
-			println!("\n>>>>> BincodeEmployee test_into_view {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+			println!("\n>>>>> BincodeEmployee::into_view {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 }

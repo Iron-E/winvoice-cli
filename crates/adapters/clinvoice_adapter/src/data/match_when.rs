@@ -209,6 +209,6 @@ mod tests
 		assert!(!MatchWhen::InRange(&|v| *v > 0 && *v < 3).set_matches(&test_set));
 		assert!(MatchWhen::InRange(&|v| *v > 0 && *v < 18).set_matches(&test_set));
 
-		println!("\n>>>>> MatchWhen test_set_match {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+		println!("\n>>>>> MatchWhen::set_match {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 	}
 }

@@ -76,6 +76,6 @@ mod tests
 
 		let start = Instant::now();
 		assert_eq!(format!("{}", street_view), "1337 Some Street, Phoenix, Arizona, USA, Earth");
-		println!("\n>>>>> LocationView test_display {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+		println!("\n>>>>> LocationView::fmt {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 	}
 }

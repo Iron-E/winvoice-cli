@@ -158,7 +158,7 @@ mod tests
 			// Assert that the number of unique IDs created is equal to the number of times looped.
 			assert_eq!(ids.len(), 100);
 
-			println!("\n>>>>> util test_inque_id {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+			println!("\n>>>>> util::uinque_id {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 }

@@ -72,7 +72,7 @@ mod tests
 			assert!(&big_test.filepath().is_file());
 			assert!(!&create_job.filepath().is_file());
 
-			println!("\n>>>>> BincodeJob test_delete {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+			println!("\n>>>>> BincodeJob::delete {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 }

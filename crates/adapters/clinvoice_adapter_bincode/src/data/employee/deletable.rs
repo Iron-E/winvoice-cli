@@ -146,7 +146,7 @@ mod tests
 			// Assert that no references to the deleted entity remain.
 			assert!(creation.job.timesheets.iter().all(|t| t.employee_id != ceo_testy.employee.id));
 
-			println!("\n>>>>> BincodeEmployee test_delete {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+			println!("\n>>>>> BincodeEmployee::delete {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 }

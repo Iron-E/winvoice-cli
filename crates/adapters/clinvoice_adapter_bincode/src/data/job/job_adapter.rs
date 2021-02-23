@@ -182,7 +182,7 @@ mod tests
 				*store,
 			).unwrap());
 
-			println!("\n>>>>> BincodeJob test_create {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+			println!("\n>>>>> BincodeJob::create {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 
@@ -272,7 +272,7 @@ mod tests
 			assert!(results.contains(&retrieval));
 			assert!(results.contains(&assertion));
 
-			println!("\n>>>>> BincodeJob test_retrieve {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+			println!("\n>>>>> BincodeJob::retrieve {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 }

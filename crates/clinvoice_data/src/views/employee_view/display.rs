@@ -124,6 +124,6 @@ mod tests
 		- bar@foo.io
 	Status: Representative",
 		);
-		println!("\n>>>>> EmployeeView test_display {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+		println!("\n>>>>> EmployeeView::fmt {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 	}
 }

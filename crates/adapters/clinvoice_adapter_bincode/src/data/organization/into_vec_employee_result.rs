@@ -88,7 +88,7 @@ mod tests
 				[mr_flu.employee, testy.employee].iter().cloned().collect::<HashSet<Employee>>()
 			);
 
-			println!("\n>>>>> BincodeOrganization test_into_vec_employee {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+			println!("\n>>>>> BincodeOrganization::into_vec_employee {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 }

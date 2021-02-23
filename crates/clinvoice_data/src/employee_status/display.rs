@@ -35,6 +35,6 @@ mod tests
 		assert_eq!(format!("{}", EmployeeStatus::NotEmployed), "Not employed");
 		assert_eq!(format!("{}", EmployeeStatus::Representative), "Representative");
 
-		println!("\n>>>>> EmployeeStatus test_display {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+		println!("\n>>>>> EmployeeStatus::fmt {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 	}
 }

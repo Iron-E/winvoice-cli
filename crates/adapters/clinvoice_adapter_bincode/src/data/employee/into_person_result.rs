@@ -73,7 +73,7 @@ mod tests
 
 			assert_eq!(testy.person, testy_person.unwrap());
 
-			println!("\n>>>>> BincodeEmployee test_into_person {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+			println!("\n>>>>> BincodeEmployee::into_person {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 }

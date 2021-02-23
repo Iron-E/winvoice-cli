@@ -122,7 +122,7 @@ mod tests
 			contact_info.push(Contact::Email("obviousemail@server.com".into()));
 			test_create_assertion(BincodePerson::create(contact_info, "", *store).unwrap());
 
-			println!("\n>>>>> BincodePerson test_create {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+			println!("\n>>>>> BincodePerson::create {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 
@@ -191,7 +191,7 @@ mod tests
 			assert!(results.contains(&slimdi));
 			assert!(results.contains(&longone));
 
-			println!("\n>>>>> BincodePerson test_retrieve {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+			println!("\n>>>>> BincodePerson::retrieve {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 }

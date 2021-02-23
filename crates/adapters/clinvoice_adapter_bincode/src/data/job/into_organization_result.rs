@@ -67,7 +67,7 @@ mod tests
 
 			assert_eq!(dogood.organization, test_org.unwrap());
 
-			println!("\n>>>>> BincodeJob test_into_organization {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+			println!("\n>>>>> BincodeJob::into_organization {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 }

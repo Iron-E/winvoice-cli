@@ -92,6 +92,6 @@ Contact Info:
 	- foo@bar.io
 	- 1-800-555-5555",
 		);
-		println!("\n>>>>> PersonView test_display {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+		println!("\n>>>>> PersonView::fmt {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 	}
 }

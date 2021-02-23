@@ -147,7 +147,7 @@ mod tests
 			assert_eq!(phoenix.location.outer_id, Some(arizona.location.id));
 			test_create_assertion(&phoenix);
 
-			println!("\n>>>>> BincodeLocation test_start {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+			println!("\n>>>>> BincodeLocation::start {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 
@@ -198,7 +198,7 @@ mod tests
 			assert!(results.contains(&arizona));
 			assert!(!results.contains(&phoenix));
 
-			println!("\n>>>>> BincodeLocation test_retrieve {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+			println!("\n>>>>> BincodeLocation::retrieve {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 }

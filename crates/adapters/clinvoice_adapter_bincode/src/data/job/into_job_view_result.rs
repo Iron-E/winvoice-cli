@@ -192,7 +192,7 @@ mod tests
 
 			assert_eq!(create_job_view, create_job_view_result.unwrap());
 
-			println!("\n>>>>> BincodeJob test_into_view {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+			println!("\n>>>>> BincodeJob::into_view {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 		});
 	}
 }

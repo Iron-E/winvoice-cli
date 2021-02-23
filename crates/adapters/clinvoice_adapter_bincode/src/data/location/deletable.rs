@@ -82,7 +82,7 @@ mod tests
 			// delete the usa and everything in it.
 			usa.delete(true).unwrap();
 
-			println!("\n>>>>> BincodeLocation::delete {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+			println!("\n>>>>> BincodeLocation::delete {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 2);
 
 			// Assert that every location inside the USA is gone
 			assert!(&earth.filepath().is_file());

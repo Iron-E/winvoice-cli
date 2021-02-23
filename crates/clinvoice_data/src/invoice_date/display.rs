@@ -45,7 +45,7 @@ mod tests
 
 		let start = Instant::now();
 		assert_eq!(format!("{}", date), format!("Issued on {}, Outstanding", date.issued));
-		assert_eq!(format!("{}", other_date), format!("Issued on {}, Paid on {}", date.issued, date.paid.unwrap()));
-		println!("\n>>>>> InvoiceDate::fmt {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+		assert_eq!(format!("{}", other_date), format!("Issued on {}, Paid on {}", other_date.issued, other_date.paid.unwrap()));
+		println!("\n>>>>> InvoiceDate::fmt {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 2);
 	}
 }

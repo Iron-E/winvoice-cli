@@ -39,6 +39,6 @@ mod tests
 		assert_eq!(format!("{}", ExpenseCategory::Other), "Other");
 		assert_eq!(format!("{}", ExpenseCategory::Software), "Software");
 		assert_eq!(format!("{}", ExpenseCategory::Travel), "Travel");
-		println!("\n>>>>> ExpenseCategory::fmt {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+		println!("\n>>>>> ExpenseCategory::fmt {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 6);
 	}
 }

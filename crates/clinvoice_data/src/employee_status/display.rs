@@ -30,11 +30,9 @@ mod tests
 	fn test_display()
 	{
 		let start = Instant::now();
-
 		assert_eq!(format!("{}", EmployeeStatus::Employed), "Employed");
 		assert_eq!(format!("{}", EmployeeStatus::NotEmployed), "Not employed");
 		assert_eq!(format!("{}", EmployeeStatus::Representative), "Representative");
-
-		println!("\n>>>>> EmployeeStatus::fmt {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+		println!("\n>>>>> EmployeeStatus::fmt {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 3);
 	}
 }

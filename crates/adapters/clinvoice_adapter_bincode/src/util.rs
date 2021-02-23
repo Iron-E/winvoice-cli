@@ -153,7 +153,7 @@ mod tests
 				// Creating the next file worked.
 				assert!(fs::write(&test_path.join(id.to_string()), "TEST").is_ok());
 			}
-			println!("\n>>>>> util::uinque_id {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+			println!("\n>>>>> util::uinque_id {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 100);
 
 			// Assert that the number of unique IDs created is equal to the number of times looped.
 			assert_eq!(ids.len(), 100);

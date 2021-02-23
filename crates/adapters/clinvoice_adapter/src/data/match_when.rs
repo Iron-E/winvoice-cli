@@ -163,7 +163,7 @@ mod tests
 		assert!(MatchWhen::InRange(&|v| *v > 0 && *v < 8).is_match(test_value));
 		assert!(!MatchWhen::InRange(&|v| *v > 0 && *v < 3).is_match(test_value));
 
-		println!("\n>>>>> MatchWhen::is_match {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+		println!("\n>>>>> MatchWhen::is_match {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 11);
 	}
 
 	#[test]
@@ -218,6 +218,6 @@ mod tests
 		assert!(!MatchWhen::InRange(&not_in_range).set_matches(&test_set));
 		assert!(!MatchWhen::InRange(&not_in_range).set_matches(&test_set_single_element));
 
-		println!("\n>>>>> MatchWhen::set_match {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+		println!("\n>>>>> MatchWhen::set_match {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 22);
 	}
 }

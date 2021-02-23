@@ -65,7 +65,7 @@ mod tests
 			// Delete both jobs
 			create_job.delete(true).unwrap();
 			assert_job.delete(true).unwrap();
-			println!("\n>>>>> BincodeJob::delete {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+			println!("\n>>>>> BincodeJob::delete {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 2);
 
 			// Assert that all jobs are gone but the organization exists
 			assert!(!&assert_job.filepath().is_file());

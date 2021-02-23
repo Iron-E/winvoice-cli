@@ -134,7 +134,7 @@ mod tests
 				"aldkj doiciuc giguy &&", *store
 			).unwrap());
 
-			println!("\n>>>>> BincodeOrganization::create {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+			println!("\n>>>>> BincodeOrganization::create {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 5);
 		});
 	}
 

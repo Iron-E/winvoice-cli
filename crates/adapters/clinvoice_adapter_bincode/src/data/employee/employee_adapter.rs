@@ -193,7 +193,7 @@ mod tests
 				*store,
 			).unwrap());
 
-			println!("\n>>>>> BincodeEmployee::create {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+			println!("\n>>>>> BincodeEmployee::create {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 5);
 		});
 	}
 
@@ -315,7 +315,7 @@ mod tests
 				*store,
 			).unwrap();
 
-			println!("\n>>>>> BincodeEmployee::retrieve {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+			println!("\n>>>>> BincodeEmployee::retrieve {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 2);
 
 			// Assert the results contains all values
 			assert!(everything.contains(&an_actual_tortust));

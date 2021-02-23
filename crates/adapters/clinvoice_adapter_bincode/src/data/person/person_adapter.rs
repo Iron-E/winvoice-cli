@@ -109,7 +109,7 @@ mod tests
 			test_create_assertion(BincodePerson::create(vec![Contact::Phone("1-800-555-3600".into())], "", *store).unwrap());
 			test_create_assertion(BincodePerson::create(vec![Contact::Address(Id::new_v4())], "", *store).unwrap());
 			test_create_assertion(BincodePerson::create(vec![Contact::Email("obviousemail@server.com".into())], "", *store).unwrap());
-			println!("\n>>>>> BincodePerson::create {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+			println!("\n>>>>> BincodePerson::create {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 5);
 		});
 	}
 
@@ -166,7 +166,7 @@ mod tests
 				*store,
 			).unwrap();
 
-			println!("\n>>>>> BincodePerson::retrieve {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+			println!("\n>>>>> BincodePerson::retrieve {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 2);
 
 			// Assert bob is the only one retrieved
 			assert!(!only_bob.contains(&flingo));

@@ -135,7 +135,7 @@ mod tests
 			let usa = earth.create_inner("USA").unwrap();
 			let arizona = usa.create_inner("Arizona").unwrap();
 			let phoenix = arizona.create_inner("Phoenix").unwrap();
-			println!("\n>>>>> BincodeLocation::start {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+			println!("\n>>>>> BincodeLocation::start {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 4);
 
 			assert_eq!(usa.location.outer_id, Some(earth.location.id));
 			assert_eq!(arizona.location.outer_id, Some(usa.location.id));
@@ -182,7 +182,7 @@ mod tests
 				*store,
 			).unwrap();
 
-			println!("\n>>>>> BincodeLocation::retrieve {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+			println!("\n>>>>> BincodeLocation::retrieve {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 2);
 
 			// Assert the results contains all values
 			assert!(everything.contains(&earth));

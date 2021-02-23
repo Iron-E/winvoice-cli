@@ -1,9 +1,10 @@
-mod clinvoice;
+mod app;
 mod io;
+mod runnable;
 
 use
 {
-	clinvoice::CLInvoice,
+	app::App,
 	structopt::StructOpt,
 };
 
@@ -12,6 +13,6 @@ use
 /// The main method.
 fn main()
 {
-	let args: CLInvoice = CLInvoice::from_args();
-	println!("{:#?}", args);
+	let clinvoice: App = App::from_args();
+	println!("{:#?}", clinvoice);
 }

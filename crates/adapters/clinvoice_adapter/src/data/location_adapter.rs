@@ -8,7 +8,7 @@ use
 pub trait LocationAdapter<'pass, 'path, 'user> :
 	Clone +
 	Deletable +
-	Initializable<'pass, 'path, 'user> +
+	Initializable +
 	Into<Location> +
 	Into<DynamicResult<LocationView>> +
 	Into<Store<'pass, 'path, 'user>> +
@@ -27,7 +27,7 @@ pub trait LocationAdapter<'pass, 'path, 'user> :
 	/// ```ignore
 	/// Location {name, id: /* generated */};
 	/// ```
-	fn create<'name>(name: &'name str, store: Store<'pass, 'path, 'user>) -> DynamicResult<Self>;
+	fn create(name: &str, store: Store<'pass, 'path, 'user>) -> DynamicResult<Self>;
 
 	/// # Summary
 	///
@@ -42,7 +42,7 @@ pub trait LocationAdapter<'pass, 'path, 'user> :
 	/// ```ignore
 	/// Location {name, id: /* generated */, outside_id: self.unroll().id};
 	/// ```
-	fn create_inner<'name>(&self, name: &'name str) -> DynamicResult<Self>;
+	fn create_inner(&self, name: &str) -> DynamicResult<Self>;
 
 	/// # Summary
 	///

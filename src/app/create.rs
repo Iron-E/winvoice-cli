@@ -1,7 +1,7 @@
 use
 {
 	crate::{Config, StructOpt},
-	clinvoice_adapter::DynamicResult,
+	clinvoice_adapter::{DynamicResult, Store},
 };
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, StructOpt)]
@@ -21,7 +21,6 @@ pub(super) enum Create
 	#[structopt(about="Create a new location record")]
 	Location
 	{
-		name: String,
 	},
 
 	#[structopt(about="Create a new organization record")]
@@ -37,6 +36,31 @@ pub(super) enum Create
 
 impl Create
 {
+	fn create_employee() -> DynamicResult<()>
+	{
+		todo!()
+	}
+
+	fn create_job() -> DynamicResult<()>
+	{
+		todo!()
+	}
+
+	fn create_location() -> DynamicResult<()>
+	{
+		todo!()
+	}
+
+	fn create_organization() -> DynamicResult<()>
+	{
+		todo!()
+	}
+
+	fn create_person(store: Store) -> DynamicResult<()>
+	{
+		todo!()
+	}
+
 	pub(super) fn run(self, config: Config<'_, '_, '_, '_, '_, '_>, store_name: &str) -> DynamicResult<()>
 	{
 		todo!()

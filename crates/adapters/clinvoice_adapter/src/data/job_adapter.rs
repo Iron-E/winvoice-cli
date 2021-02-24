@@ -11,7 +11,7 @@ use
 
 pub trait JobAdapter<'pass, 'path, 'user> :
 	Deletable +
-	Initializable<'pass, 'path, 'user> +
+	Initializable +
 	Into<Job> +
 	Into<DynamicResult<JobView>> +
 	Into<DynamicResult<Organization>> +

@@ -7,7 +7,7 @@ use
 
 pub trait EmployeeAdapter<'pass, 'path, 'user> :
 	Deletable +
-	Initializable<'pass, 'path, 'user> +
+	Initializable +
 	Into<Employee> +
 	Into<DynamicResult<EmployeeView>> +
 	Into<DynamicResult<Organization>> +
@@ -27,11 +27,11 @@ pub trait EmployeeAdapter<'pass, 'path, 'user> :
 	///
 	/// * The created [`Employee`], if there were no errors.
 	/// * An [`Error`], if something goes wrong.
-	fn create<'title>(
+	fn create(
 		contact_info: Vec<Contact>,
 		organization: Organization,
 		person: Person,
-		title: &'title str,
+		title: &str,
 		status: EmployeeStatus,
 		store: Store<'pass, 'path, 'user>,
 	) -> DynamicResult<Self>;

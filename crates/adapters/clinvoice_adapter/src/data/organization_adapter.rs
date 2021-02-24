@@ -7,7 +7,7 @@ use
 
 pub trait OrganizationAdapter<'pass, 'path, 'user> :
 	Deletable +
-	Initializable<'pass, 'path, 'user> +
+	Initializable +
 	Into<Organization> +
 	Into<DynamicResult<Vec<Employee>>> +
 	Into<DynamicResult<Location>> +

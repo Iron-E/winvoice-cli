@@ -24,9 +24,9 @@ impl<'pass, 'path, 'user> OrganizationAdapter<'pass, 'path, 'user> for BincodeOr
 	/// # Returns
 	///
 	/// The newly created [`Organization`].
-	fn create<'name>(
+	fn create(
 		location: Location,
-		name: &'name str,
+		name: &str,
 		store: Store<'pass, 'path, 'user>,
 	) -> DynamicResult<Self>
 	{

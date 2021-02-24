@@ -7,7 +7,7 @@ use
 
 pub trait PersonAdapter<'pass, 'path, 'user> :
 	Deletable +
-	Initializable<'pass, 'path, 'user> +
+	Initializable +
 	Into<Person> +
 	Into<DynamicResult<PersonView>> +
 	Into<Store<'pass, 'path, 'user>> +
@@ -24,9 +24,9 @@ pub trait PersonAdapter<'pass, 'path, 'user> :
 	/// # Returns
 	///
 	/// The newly created [`Person`].
-	fn create<'name>(
+	fn create(
 		contact_info: Vec<Contact>,
-		name: &'name str,
+		name: &str,
 		store: Store<'pass, 'path, 'user>,
 	) -> DynamicResult<Self>;
 

@@ -86,7 +86,7 @@ impl Config<'_, '_, '_, '_, '_, '_>
 	/// # Returns
 	///
 	/// The [`Store`] which corresponds to `name`.
-	pub fn get_store(&self, name: &str) -> Option<&Store<'_, '_, '_>>
+	pub fn get_store(&self, name: &str) -> Option<&Store>
 	{
 		return match self.stores.get(name)
 		{

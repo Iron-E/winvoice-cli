@@ -25,11 +25,11 @@ impl<'pass, 'path, 'user> EmployeeAdapter<'pass, 'path, 'user> for BincodeEmploy
 	///
 	/// * The created [`Employee`], if there were no errors.
 	/// * An [`Error`], if something goes wrong.
-	fn create<'title>(
+	fn create(
 		contact_info: Vec<Contact>,
 		organization: Organization,
 		person: Person,
-		title: &'title str,
+		title: &str,
 		status: EmployeeStatus,
 		store: Store<'pass, 'path, 'user>,
 	) -> DynamicResult<Self>

@@ -68,7 +68,7 @@ pub fn read_files<P: AsRef<Path>>(path: P) -> io::Result<FilterMap<fs::ReadDir, 
 ///
 /// [fn_temp_dir]: std::env::temp_dir
 #[cfg(test)]
-pub fn test_temp_store(assertion: impl FnOnce(&Store<'_, '_, '_>))
+pub fn test_temp_store(assertion: impl FnOnce(&Store))
 {
 	let temp_path = env::temp_dir().join("clinvoice_adapter_bincode_data");
 

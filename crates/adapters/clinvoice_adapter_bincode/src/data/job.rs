@@ -9,7 +9,7 @@ use std::path::PathBuf;
 
 clinvoice_adapter::Adapt!(Job => BincodeJob);
 
-impl<'path> BincodeJob<'_, 'path, '_>
+impl BincodeJob<'_, '_, '_>
 {
 	/// # Summary
 	///
@@ -23,7 +23,7 @@ impl<'path> BincodeJob<'_, 'path, '_>
 	/// # Returns
 	///
 	/// The [`Path`] leading to where [`BincodeEmployee`]s are in `store`.
-	pub fn path(store: &Store<'_, 'path, '_>) -> PathBuf
+	pub fn path(store: &Store) -> PathBuf
 	{
 		return PathBuf::new().join(store.path).join("Jobs");
 	}

@@ -47,6 +47,58 @@ Below is a list of supported storage adapters. If the adapter has a check next t
 * [x] Bincode File System
 * [ ] PostgreSQL DB
 
+## Configuration
+
+The first time that you run `clinvoice`, a configuration file will be created according to the table below:
+
+| Platform | Value                                                                                     |
+|:---------|:------------------------------------------------------------------------------------------|
+| Linux    | `$XDG_CONFIG_HOME`__/clinvoice/config.toml__ or `$HOME`__/.config/clinvoice/config.toml__ |
+| macOS    | `$HOME`__/Library/Application Support/clinvoice.toml__                                    |
+| Windows  | `{FOLDERID_RoamingAppData}`__/clinvoice/config.toml__                                     |
+
+This configuration file's supported options are:
+
+```toml
+[employees]
+default_id = <your employee ID. this value should not be set manually, instead use: clinvoice retrieve employee --select-default>
+
+[invoices]
+default_currency = an ISO-4217 currency code, e.g. 'USD'
+
+[stores]
+default = an alias to a different adapter; e.g. 'foo'
+foo = {
+	adapter = a supported storage adapter; e.g. 'Bincode',
+	password = Optional password. May or may not be accompanied by a username,
+	path = Place where data can be found. Depends on the adapter— may be a path to a folder on a filesystem, or a schema on a database.,
+	username = Optional username. May or may not be accompanied by a password,
+}
+
+[timesheets]
+interval = amount of time; e.g. '5m', '3h', '10d 2s', etc
+```
+
+### Example
+
+```toml
+[employees]
+default_id = '006c3a15-d8c9-4e9e-ba7f-c14846374101'
+
+[invoices]
+default_currency = 'USD'
+
+[stores]
+default = 'foo'
+foo = {
+	adapter = 'Bincode',
+	path = '/home/Iron-E/Documents/CLInvoice',
+}
+
+[timesheets]
+interval = '15m'
+```
+
 ## Usage
 
 For more information, run `clinvoice help` from the command line.

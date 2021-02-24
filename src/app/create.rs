@@ -4,7 +4,7 @@ use
 	clinvoice_adapter::DynamicResult,
 };
 
-#[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, StructOpt)]
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, StructOpt)]
 #[structopt(about="Record information information with CLInvoice")]
 pub(super) enum Create
 {
@@ -21,6 +21,7 @@ pub(super) enum Create
 	#[structopt(about="Create a new location record")]
 	Location
 	{
+		name: String,
 	},
 
 	#[structopt(about="Create a new organization record")]

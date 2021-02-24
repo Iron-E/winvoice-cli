@@ -7,8 +7,8 @@ pub use {employees::Employees, invoices::Invoices, store_value::StoreValue, time
 
 use
 {
-	clinvoice_adapter::Store,
-	std::collections::HashMap,
+	clinvoice_adapter::{DynamicResult, Store},
+	std::collections::BTreeMap,
 };
 
 /// # Summary
@@ -30,7 +30,7 @@ pub struct Config<'alias, 'currency, 'name, 'pass, 'path, 'user>
 	/// # Summary
 	///
 	/// Configurations for data storages.
-	stores: HashMap<&'name str, StoreValue<'alias, 'pass, 'path, 'user>>,
+	stores: BTreeMap<&'name str, StoreValue<'alias, 'pass, 'path, 'user>>,
 
 	/// # Summary
 	///
@@ -40,6 +40,14 @@ pub struct Config<'alias, 'currency, 'name, 'pass, 'path, 'user>
 
 impl Config<'_, '_, '_, '_, '_, '_>
 {
+	/// # Summary
+	///
+	/// Get the user's configuration.
+	pub fn from_user() -> DynamicResult<Box<Self>>
+	{
+		todo!()
+	}
+
 	/// # Summary
 	///
 	/// Get the [`Store`] from `name`, resolving any [`StoreValue::Alias`] which `name` may point to.
@@ -70,16 +78,16 @@ mod tests
 {
 	use
 	{
-		super::{Config, Employees, HashMap, Invoices, Store, StoreValue, Timesheets},
+		super::{Config, Employees, BTreeMap, Invoices, Store, StoreValue, Timesheets},
 		clinvoice_adapter::Adapters,
-		clinvoice_data::{chrono::Duration, Id},
-		std::time::Instant,
+		clinvoice_data::Id,
+		std::time::{Duration, Instant},
 	};
 
 	#[test]
 	fn test_get_store()
 	{
-		let mut stores = HashMap::new();
+		let mut stores = BTreeMap::new();
 
 		stores.insert("a", StoreValue::Alias("b"));
 		stores.insert("b", StoreValue::Alias("c"));
@@ -102,7 +110,7 @@ mod tests
 			employees: Employees {default_id: Id::new_v4()},
 			invoices: Invoices {default_currency: "USD"},
 			stores,
-			timesheets: Timesheets {interval: Duration::minutes(1)},
+			timesheets: Timesheets {interval: Duration::new(100, 0)},
 		};
 
 		let start = Instant::now();

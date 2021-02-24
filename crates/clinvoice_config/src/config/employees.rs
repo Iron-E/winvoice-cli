@@ -1,9 +1,13 @@
-use clinvoice_data::Id;
+use
+{
+	clinvoice_data::Id,
+	serde::{Deserialize, Serialize},
+};
 
 /// # Summary
 ///
 /// Configurations for [`Employee`](clinvoice_data::employee::Employee)s.
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Employees
 {
 	/// # Summary

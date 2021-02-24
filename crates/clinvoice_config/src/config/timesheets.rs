@@ -1,9 +1,13 @@
-use clinvoice_data::chrono::Duration;
+use
+{
+	std::time::Duration,
+	serde::{Deserialize, Serialize},
+};
 
 /// # Summary
 ///
 /// Configurations for [`Timesheet`](clinvoice_data::timesheet:Timesheet)s.
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Timesheets
 {
 	/// # Summary
@@ -14,9 +18,11 @@ pub struct Timesheets
 	///
 	/// ```rust
 	/// use clinvoice_config::Timesheets;
-	/// use clinvoice_data::chrono::Duration;
+	/// use std::time::Duration;
 	///
-	/// Timesheets {interval: Duration::minutes(5)};
+	/// // 5 minute interval
+	/// Timesheets {interval: Duration::new(300, 0)};
 	/// ```
+	#[serde(with="humantime_serde")]
 	pub interval: Duration,
 }

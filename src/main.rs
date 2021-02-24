@@ -4,7 +4,6 @@ mod io;
 use
 {
 	app::App,
-	clinvoice_adapter::DynamicResult,
 	clinvoice_config::Config,
 	std::fs,
 	structopt::StructOpt,
@@ -13,16 +12,15 @@ use
 /// # Summary
 ///
 /// The main method.
-fn main() -> DynamicResult<()>
+fn main()
 {
+	// Create a default user configuration if not already present.
+	Config::init().unwrap();
+
 	// Get the user configuration.
-	Config::init()?;
-	let config_bytes = fs::read(Config::path())?;
-	let config = toml::from_slice(&config_bytes)?;
+	let config_bytes = fs::read(Config::path()).unwrap();
+	let config: Config = toml::from_slice(&config_bytes).unwrap();
 
 	// Run the CLInvoice application.
-	App::from_args().run(config)?;
-
-	// Return OK if the app hasn't died yet.
-	return Ok(());
+	App::from_args().run(config).unwrap();
 }

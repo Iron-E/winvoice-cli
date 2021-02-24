@@ -24,6 +24,8 @@ pub(super) enum RetrieveCommand
 	#[structopt(about="Retrieve existing records about employees")]
 	Employee
 	{
+		#[structopt(about="Select one of the employees as the default in your configuration.", long, short)]
+		select_default: bool,
 	},
 
 	#[structopt(about="Retrieve existing records about job")]
@@ -34,6 +36,8 @@ pub(super) enum RetrieveCommand
 	#[structopt(about="Retrieve existing records about locations")]
 	Location
 	{
+		#[structopt(about="Create a new location inside of some selected location.", long, short)]
+		create_inner: bool,
 	},
 
 	#[structopt(about="Retrieve existing records about organizations")]

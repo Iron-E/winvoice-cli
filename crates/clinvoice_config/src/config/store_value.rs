@@ -1,9 +1,13 @@
-use clinvoice_adapter::Store;
+use
+{
+	clinvoice_adapter::Store,
+	serde::{Deserialize, Serialize},
+};
 
 /// # Summary
 ///
 /// Possible values for the `[store]` field of the user config.
-#[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Copy, Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub enum StoreValue<'alias, 'pass, 'path, 'user>
 {
 	/// # Summary
@@ -14,5 +18,6 @@ pub enum StoreValue<'alias, 'pass, 'path, 'user>
 	/// # Summary
 	///
 	/// A specification of storage.
+	#[serde(borrow)]
 	Storage(Store<'pass, 'path, 'user>),
 }

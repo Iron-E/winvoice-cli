@@ -2,19 +2,22 @@ mod employees;
 mod invoices;
 mod store_value;
 mod timesheets;
+mod updatable;
 
 pub use {employees::Employees, invoices::Invoices, store_value::StoreValue, timesheets::Timesheets};
 
 use
 {
-	clinvoice_adapter::{DynamicResult, Store},
-	std::collections::BTreeMap,
+	clinvoice_adapter::{DynamicResult, data::Updatable, Store},
+	clinvoice_data::Id,
+	std::{collections::BTreeMap, path::PathBuf, time::Duration},
+	serde::{Deserialize, Serialize},
 };
 
 /// # Summary
 ///
 /// The `Config` contains settings that affect all areas of the application.
-#[derive(Debug)]
+#[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Config<'alias, 'currency, 'name, 'pass, 'path, 'user>
 {
 	/// # Summary
@@ -25,11 +28,13 @@ pub struct Config<'alias, 'currency, 'name, 'pass, 'path, 'user>
 	/// # Summary
 	///
 	/// Configurations for [`Invoice`](clinvoice_data::invoice::Invoice)s.
+	#[serde(borrow)]
 	pub invoices: Invoices<'currency>,
 
 	/// # Summary
 	///
 	/// Configurations for data storages.
+	#[serde(borrow)]
 	stores: BTreeMap<&'name str, StoreValue<'alias, 'pass, 'path, 'user>>,
 
 	/// # Summary
@@ -42,10 +47,23 @@ impl Config<'_, '_, '_, '_, '_, '_>
 {
 	/// # Summary
 	///
-	/// Get the user's configuration.
-	pub fn from_user() -> DynamicResult<Box<Self>>
+	/// Create a configuration file with some defaults.
+	pub fn init() -> DynamicResult<()>
 	{
-		todo!()
+		if !Self::path().is_file()
+		{
+			let config = Self
+			{
+				employees: Employees {default_id: Id::default()},
+				invoices: Invoices {default_currency: "USD"},
+				stores: BTreeMap::new(),
+				timesheets: Timesheets {interval: Duration::from_secs(300)},
+			};
+
+			config.update()?;
+		}
+
+		return Ok(());
 	}
 
 	/// # Summary
@@ -70,6 +88,11 @@ impl Config<'_, '_, '_, '_, '_, '_>
 			},
 			_ => None,
 		};
+	}
+
+	pub fn path() -> PathBuf
+	{
+		return dirs::config_dir().expect("Operating System is not supported.").join("clinvoice").join("config.toml");
 	}
 }
 

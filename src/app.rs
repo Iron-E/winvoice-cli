@@ -5,7 +5,8 @@ use
 {
 	create::Create,
 	retrieve::Retrieve,
-	clinvoice_adapter::{DynamicResult, Store},
+	clinvoice_adapter::DynamicResult,
+	clinvoice_config::Config,
 	structopt::StructOpt,
 };
 
@@ -30,12 +31,12 @@ enum AppCommand
 
 impl App
 {
-	pub fn run(self, store: Store<'_, '_, '_>) -> DynamicResult<()>
+	pub fn run(self, config: Config<'_, '_, '_, '_, '_, '_>) -> DynamicResult<()>
 	{
 		return Ok(match self.command
 		{
-			AppCommand::Create(cmd) => cmd.run(store)?,
-			AppCommand::Retrieve(cmd) => cmd.run(store)?,
+			AppCommand::Create(cmd) => cmd.run(config, &self.store)?,
+			AppCommand::Retrieve(cmd) => cmd.run(config, &self.store)?,
 		});
 	}
 }

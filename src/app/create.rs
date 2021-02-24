@@ -1,6 +1,7 @@
 use
 {
-	clinvoice_adapter::{DynamicResult, Store},
+	clinvoice_adapter::DynamicResult,
+	clinvoice_config::Config,
 	structopt::StructOpt,
 };
 
@@ -36,7 +37,7 @@ pub(super) enum Create
 
 impl Create
 {
-	pub(super) fn run(self, store: Store<'_, '_, '_>) -> DynamicResult<()>
+	pub(super) fn run(self, config: Config<'_, '_, '_, '_, '_, '_>, store_name: &str) -> DynamicResult<()>
 	{
 		todo!()
 	}

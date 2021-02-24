@@ -8,7 +8,7 @@ pub use {employees::Employees, invoices::Invoices, store_value::StoreValue, time
 
 use
 {
-	clinvoice_adapter::{DynamicResult, data::Updatable, Store},
+	clinvoice_adapter::{Adapters, DynamicResult, data::Updatable, Store},
 	clinvoice_data::Id,
 	std::{collections::BTreeMap, path::PathBuf, time::Duration},
 	serde::{Deserialize, Serialize},
@@ -56,7 +56,16 @@ impl Config<'_, '_, '_, '_, '_, '_>
 			{
 				employees: Employees {default_id: Id::default()},
 				invoices: Invoices {default_currency: "USD"},
-				stores: BTreeMap::new(),
+				stores: [
+					("default", StoreValue::Alias("foo")),
+					("foo", StoreValue::Storage(Store
+					{
+						adapter: Adapters::Bincode,
+						password: Some("Optional password. May or may not be accompanied by a username."),
+						username: Some("Optional username. May or may not be accompanied by a password."),
+						path: "Place where data can be found. Depends on the adapter— may be a path to a folder on a filesystem, or a schema on a database.",
+					})),
+				].iter().cloned().collect(),
 				timesheets: Timesheets {interval: Duration::from_secs(300)},
 			};
 

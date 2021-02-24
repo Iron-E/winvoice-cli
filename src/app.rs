@@ -5,8 +5,7 @@ use
 {
 	create::Create,
 	retrieve::Retrieve,
-	crate::runnable::Runnable,
-	clinvoice_adapter::Store,
+	clinvoice_adapter::{DynamicResult, Store},
 	structopt::StructOpt,
 };
 
@@ -15,28 +14,28 @@ use
 pub struct App
 {
 	#[structopt(about="Select retrieved entities for deletion", default_value="default", long, short)]
-	pub store: String,
+	store: String,
 
 	#[structopt(subcommand)]
-	pub command: AppCommand,
+	command: AppCommand,
 }
 
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, StructOpt)]
-pub enum AppCommand
+enum AppCommand
 {
 	Create(Create),
 
 	Retrieve(Retrieve),
 }
 
-impl<'pass, 'path, 'user> Runnable<'pass, 'path, 'user> for App
+impl App
 {
-	fn run(self, store: Store<'pass, 'path, 'user>)
+	pub fn run(self, store: Store<'_, '_, '_>) -> DynamicResult<()>
 	{
-		match self.command
+		return Ok(match self.command
 		{
-			AppCommand::Create(cmd) => cmd.run(store),
-			AppCommand::Retrieve(cmd) => cmd.run(store),
-		};
+			AppCommand::Create(cmd) => cmd.run(store)?,
+			AppCommand::Retrieve(cmd) => cmd.run(store)?,
+		});
 	}
 }

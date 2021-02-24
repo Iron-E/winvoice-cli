@@ -1,13 +1,12 @@
 use
 {
-	crate::runnable::Runnable,
-	clinvoice_adapter::Store,
+	clinvoice_adapter::{DynamicResult, Store},
 	structopt::StructOpt,
 };
 
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, StructOpt)]
 #[structopt(about="Retrieve information that was recorded with CLInvoice")]
-pub struct Retrieve
+pub(super) struct Retrieve
 {
 	#[structopt(about="Select retrieved entities for deletion", long, short)]
 	pub delete: bool,
@@ -20,7 +19,7 @@ pub struct Retrieve
 }
 
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, StructOpt)]
-pub enum RetrieveCommand
+pub(super) enum RetrieveCommand
 {
 	#[structopt(about="Retrieve existing records about employees")]
 	Employee
@@ -48,9 +47,10 @@ pub enum RetrieveCommand
 	},
 }
 
-impl<'pass, 'path, 'user> Runnable<'pass, 'path, 'user> for Retrieve
+impl Retrieve
 {
-	fn run(self, store: Store<'pass, 'path, 'user>)
+	pub(super) fn run(self, store: Store<'_, '_, '_>) -> DynamicResult<()>
 	{
+		todo!()
 	}
 }

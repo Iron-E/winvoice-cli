@@ -1,13 +1,12 @@
 use
 {
-	crate::runnable::Runnable,
-	clinvoice_adapter::Store,
+	clinvoice_adapter::{DynamicResult, Store},
 	structopt::StructOpt,
 };
 
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, StructOpt)]
 #[structopt(about="Record information information with CLInvoice")]
-pub enum Create
+pub(super) enum Create
 {
 	#[structopt(about="Create a new employee record")]
 	Employee
@@ -35,9 +34,10 @@ pub enum Create
 	},
 }
 
-impl<'pass, 'path, 'user> Runnable<'pass, 'path, 'user> for Create
+impl Create
 {
-	fn run(self, store: Store<'pass, 'path, 'user>)
+	pub(super) fn run(self, store: Store<'_, '_, '_>) -> DynamicResult<()>
 	{
+		todo!()
 	}
 }

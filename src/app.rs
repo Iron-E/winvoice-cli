@@ -20,7 +20,7 @@ pub struct App
 	command: AppCommand,
 }
 
-#[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, StructOpt)]
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, StructOpt)]
 enum AppCommand
 {
 	Config,

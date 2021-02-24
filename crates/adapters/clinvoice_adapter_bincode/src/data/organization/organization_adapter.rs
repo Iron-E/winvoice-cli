@@ -172,7 +172,7 @@ mod tests
 			let results = BincodeOrganization::retrieve(
 				MatchWhen::Any, // id
 				MatchWhen::InRange(&|id| id == &earth_id || id == &usa_id), // location
-				MatchWhen::HasNone([aaa.organization.name.clone()].iter().cloned().collect()), // name
+				MatchWhen::HasNone([aaa.organization.name.clone()].iter().collect()), // name
 				*store,
 			).unwrap();
 			println!("\n>>>>> BincodeOrganization::retrieve {}us <<<<<\n", Instant::now().duration_since(start).as_micros());

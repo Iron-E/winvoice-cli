@@ -34,7 +34,7 @@ impl Deletable for BincodeEmployee<'_, '_, '_>
 				MatchWhen::Any, // invoice hourly rate
 				MatchWhen::Any, // notes
 				MatchWhen::Any, // objectives
-				MatchWhen::HasAny([self.employee.id].iter().cloned().collect()), // timesheet employee
+				MatchWhen::HasAny([self.employee.id].iter().collect()), // timesheet employee
 				MatchWhen::Any, // timesheet time begin
 				MatchWhen::Any, // timesheet time end
 				self.store,

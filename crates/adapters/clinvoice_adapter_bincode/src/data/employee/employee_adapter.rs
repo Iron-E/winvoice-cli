@@ -85,7 +85,7 @@ impl<'pass, 'path, 'user> EmployeeAdapter<'pass, 'path, 'user> for BincodeEmploy
 				fs::File::open(node_path)?
 			))?;
 
-			if contact_info.set_matches(&employee.contact_info.iter().cloned().collect()) &&
+			if contact_info.set_matches(&employee.contact_info.iter().collect()) &&
 				id.is_match(&employee.id) &&
 				organization.is_match(&employee.organization_id) &&
 				person.is_match(&employee.person_id) &&
@@ -307,7 +307,7 @@ mod tests
 			// Retrieve testy and gottard
 			let testy_gottard = BincodeEmployee::retrieve(
 				MatchWhen::Any, // contact info
-				MatchWhen::HasAny([testy_mctesterson.employee.id, gottard.employee.id].iter().cloned().collect()), // id
+				MatchWhen::HasAny([testy_mctesterson.employee.id, gottard.employee.id].iter().collect()), // id
 				MatchWhen::Any, // organization
 				MatchWhen::Any, // person
 				MatchWhen::Any, // title

@@ -176,9 +176,9 @@ mod tests
 
 			// Retrieve Arizona
 			let only_arizona = BincodeLocation::retrieve(
-				MatchWhen::HasAny([earth.location.id, arizona.location.id].iter().cloned().collect()), // id
+				MatchWhen::HasAny([earth.location.id, arizona.location.id].iter().collect()), // id
 				MatchWhen::Any, // name
-				MatchWhen::HasNone([Option::<Id>::None].iter().cloned().collect()), // outer id
+				MatchWhen::HasNone([Option::<Id>::None].iter().collect()), // outer id
 				*store,
 			).unwrap();
 

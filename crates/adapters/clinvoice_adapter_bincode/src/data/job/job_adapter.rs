@@ -106,9 +106,9 @@ impl<'pass, 'path, 'user> JobAdapter<'pass, 'path, 'user> for BincodeJob<'pass, 
 				invoice_hourly_rate.is_match(&job.invoice.hourly_rate) &&
 				notes.is_match(&job.notes) &&
 				objectives.is_match(&job.objectives) &&
-				timesheet_employee.set_matches(&job.timesheets.iter().map(|t| t.employee_id).collect()) &&
-				timesheet_begin.set_matches(&job.timesheets.iter().map(|t| t.time_begin).collect()) &&
-				timesheet_end.set_matches(&job.timesheets.iter().map(|t| t.time_end).collect())
+				timesheet_employee.set_matches(&job.timesheets.iter().map(|t| &t.employee_id).collect()) &&
+				timesheet_begin.set_matches(&job.timesheets.iter().map(|t| &t.time_begin).collect()) &&
+				timesheet_end.set_matches(&job.timesheets.iter().map(|t| &t.time_end).collect())
 			{
 				results.push(BincodeJob {job, store});
 			}
@@ -250,8 +250,8 @@ mod tests
 			let not_creation = BincodeJob::retrieve(
 				MatchWhen::Any, // client
 				MatchWhen::Any, // date close
-				MatchWhen::HasNone([creation.job.date_open].iter().cloned().collect()), // date open
-				MatchWhen::HasAny([retrieval.job.id, assertion.job.id].iter().cloned().collect()), // id
+				MatchWhen::HasNone([creation.job.date_open].iter().collect()), // date open
+				MatchWhen::HasAny([retrieval.job.id, assertion.job.id].iter().collect()), // id
 				MatchWhen::Any, // invoice date
 				MatchWhen::Any, // invoice hourly rate
 				MatchWhen::Any, // notes

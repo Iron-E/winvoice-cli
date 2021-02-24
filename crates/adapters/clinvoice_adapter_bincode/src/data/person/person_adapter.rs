@@ -76,7 +76,7 @@ impl<'pass, 'path, 'user> PersonAdapter<'pass, 'path, 'user> for BincodePerson<'
 				fs::File::open(node_path)?
 			))?;
 
-			if contact_info.set_matches(&person.contact_info.iter().cloned().collect()) &&
+			if contact_info.set_matches(&person.contact_info.iter().collect()) &&
 				id.is_match(&person.id) &&
 				name.is_match(&person.name)
 			{
@@ -152,7 +152,7 @@ mod tests
 
 			// Retrieve bob
 			let only_bob = BincodePerson::retrieve(
-				MatchWhen::HasAll(bob.person.contact_info.iter().cloned().collect()), // contact info
+				MatchWhen::HasAll(bob.person.contact_info.iter().collect()), // contact info
 				MatchWhen::Any, // id
 				MatchWhen::Any, // name
 				*store,
@@ -162,7 +162,7 @@ mod tests
 			let longone_slimdi = BincodePerson::retrieve(
 				MatchWhen::Any, // contact info
 				MatchWhen::Any, // id
-				MatchWhen::HasAny([slimdi.person.name.clone(), longone.person.name.clone()].iter().cloned().collect()), // name
+				MatchWhen::HasAny([slimdi.person.name.clone(), longone.person.name.clone()].iter().collect()), // name
 				*store,
 			).unwrap();
 

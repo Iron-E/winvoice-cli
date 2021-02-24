@@ -8,6 +8,7 @@ use
 ///
 /// Possible values for the `[store]` field of the user config.
 #[derive(Copy, Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[serde(untagged)]
 pub enum StoreValue<'alias, 'pass, 'path, 'user>
 {
 	/// # Summary

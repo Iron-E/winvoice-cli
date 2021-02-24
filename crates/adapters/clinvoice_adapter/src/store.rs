@@ -1,5 +1,8 @@
 use crate::Adapters;
 
+#[cfg(feature="serde_support")]
+use serde::{Deserialize, Serialize};
+
 /// # Summary
 ///
 /// A place for CLInvoice to store information.
@@ -9,6 +12,7 @@ use crate::Adapters;
 /// A `Store` can be either on a local or remote filesystem. This filesystem may or may not be a
 /// database.
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
 pub struct Store<'pass, 'path, 'user>
 {
 	/// # Summary

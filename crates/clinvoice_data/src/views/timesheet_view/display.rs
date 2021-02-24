@@ -6,7 +6,7 @@ use
 
 impl Display for TimesheetView
 {
-	fn fmt(&self, formatter: &mut Formatter<'_>) -> Result
+	fn fmt(&self, formatter: &mut Formatter) -> Result
 	{
 		writeln!(formatter, "{} {} from {}: {} – {}",
 			self.employee.title,

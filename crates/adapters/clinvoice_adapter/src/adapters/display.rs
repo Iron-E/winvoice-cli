@@ -6,7 +6,7 @@ use
 
 impl Display for Adapters
 {
-	fn fmt(&self, formatter: &mut Formatter<'_>) -> FmtResult
+	fn fmt(&self, formatter: &mut Formatter) -> FmtResult
 	{
 		write!(formatter, "{}", match self {
 			Adapters::Bincode => "Bincode"

@@ -36,7 +36,7 @@ impl Money
 	/// # Returns
 	///
 	/// A new [`Money`].
-	pub fn new<'currency>(amount: Decimal, currency: &'currency str) -> Self
+	pub fn new(amount: Decimal, currency: &str) -> Self
 	{
 		return Self {amount, currency: currency.into()};
 	}

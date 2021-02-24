@@ -197,7 +197,7 @@ mod tests
 		});
 	}
 
-	fn test_create_assertion(bincode_employee: BincodeEmployee<'_, '_, '_>)
+	fn test_create_assertion(bincode_employee: BincodeEmployee)
 	{
 		let read_result = fs::read(bincode_employee.filepath()).unwrap();
 		assert_eq!(bincode_employee.employee, bincode::deserialize(&read_result).unwrap());

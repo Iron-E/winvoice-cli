@@ -6,7 +6,7 @@ use
 
 impl Display for PersonView
 {
-	fn fmt(&self, formatter: &mut Formatter<'_>) -> Result
+	fn fmt(&self, formatter: &mut Formatter) -> Result
 	{
 		writeln!(formatter, "Name: {}", self.name)?;
 

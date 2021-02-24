@@ -29,11 +29,11 @@ pub trait JobAdapter<'pass, 'path, 'user> :
 	/// # Returns
 	///
 	/// The newly created [`Person`].
-	fn create<'objectives>(
+	fn create(
 		client: Organization,
 		date_open: DateTime<Utc>,
 		hourly_rate: Money,
-		objectives: &'objectives str,
+		objectives: &str,
 		store: Store<'pass, 'path, 'user>,
 	) -> DynamicResult<Self>;
 

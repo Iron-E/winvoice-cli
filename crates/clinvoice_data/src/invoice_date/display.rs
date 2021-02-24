@@ -6,7 +6,7 @@ use
 
 impl Display for InvoiceDate
 {
-	fn fmt(&self, formatter: &mut Formatter<'_>) -> Result
+	fn fmt(&self, formatter: &mut Formatter) -> Result
 	{
 		return write!(formatter, "Issued on {}, {}",
 			self.issued, match self.paid

@@ -53,7 +53,7 @@ pub(super) enum RetrieveCommand
 
 impl Retrieve
 {
-	pub(super) fn run(self, config: Config<'_, '_, '_, '_, '_, '_>, store_name: &str) -> DynamicResult<()>
+	pub(super) fn run(self, config: Config, store_name: &str) -> DynamicResult<()>
 	{
 		todo!()
 	}

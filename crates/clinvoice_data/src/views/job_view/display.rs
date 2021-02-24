@@ -7,7 +7,7 @@ use
 
 impl Display for JobView
 {
-	fn fmt(&self, formatter: &mut Formatter<'_>) -> Result
+	fn fmt(&self, formatter: &mut Formatter) -> Result
 	{
 		writeln!(formatter, "Job #{} for {}: {} – {}",
 			self.id,

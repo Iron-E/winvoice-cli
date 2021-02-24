@@ -6,7 +6,7 @@ use
 
 impl Display for ContactView
 {
-	fn fmt(&self, formatter: &mut Formatter<'_>) -> Result
+	fn fmt(&self, formatter: &mut Formatter) -> Result
 	{
 		return match self
 		{

@@ -148,7 +148,7 @@ mod tests
 	}
 
 	/// The assertion most commonly used for the [`create` test](test_create).
-	fn test_create_assertion(bincode_location: &BincodeLocation<'_, '_, '_>)
+	fn test_create_assertion(bincode_location: &BincodeLocation)
 	{
 		let read_result = fs::read(bincode_location.filepath()).unwrap();
 		assert_eq!(bincode_location.location, bincode::deserialize(&read_result).unwrap());

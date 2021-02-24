@@ -6,7 +6,7 @@ use
 
 impl Display for LocationView
 {
-	fn fmt(&self, formatter: &mut Formatter<'_>) -> Result
+	fn fmt(&self, formatter: &mut Formatter) -> Result
 	{
 		let mut output = self.name.clone();
 		let mut outer = &self.outer;

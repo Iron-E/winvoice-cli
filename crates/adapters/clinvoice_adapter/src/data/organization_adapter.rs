@@ -26,9 +26,9 @@ pub trait OrganizationAdapter<'pass, 'path, 'user> :
 	/// # Returns
 	///
 	/// The newly created [`Organization`].
-	fn create<'name>(
+	fn create(
 		location: Location,
-		name: &'name str,
+		name: &str,
 		store: Store<'pass, 'path, 'user>,
 	) -> DynamicResult<Self>;
 

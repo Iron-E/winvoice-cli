@@ -6,7 +6,7 @@ use
 
 impl Display for ExpenseCategory
 {
-	fn fmt(&self, formatter: &mut Formatter<'_>) -> Result
+	fn fmt(&self, formatter: &mut Formatter) -> Result
 	{
 		return write!(formatter, "{}", match self
 		{

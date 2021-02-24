@@ -35,7 +35,7 @@ impl App
 	/// # Summary
 	///
 	/// Edit the user's configuration file.
-	fn edit_config(config: Config<'_, '_, '_, '_, '_, '_>) -> DynamicResult<()>
+	fn edit_config(config: Config) -> DynamicResult<()>
 	{
 		if let Some(edited) = io::input::toml_editor().edit(&toml::to_string_pretty(&config)?)?
 		{
@@ -48,7 +48,7 @@ impl App
 	/// # Summary
 	///
 	/// Run the application and parse its provided arguments / flags.
-	pub fn run(self, config: Config<'_, '_, '_, '_, '_, '_>) -> DynamicResult<()>
+	pub fn run(self, config: Config) -> DynamicResult<()>
 	{
 		return Ok(match self.command
 		{

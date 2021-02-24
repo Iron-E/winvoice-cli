@@ -6,7 +6,7 @@ use
 
 impl Display for Invoice
 {
-	fn fmt(&self, formatter: &mut Formatter<'_>) -> Result
+	fn fmt(&self, formatter: &mut Formatter) -> Result
 	{
 		writeln!(formatter, "Hourly Rate: {}", self.hourly_rate)?;
 

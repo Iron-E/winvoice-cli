@@ -6,7 +6,7 @@ use
 
 impl Display for EmployeeView
 {
-	fn fmt(&self, formatter: &mut Formatter<'_>) -> Result
+	fn fmt(&self, formatter: &mut Formatter) -> Result
 	{
 		writeln!(formatter, "{} {}", self.title, self.person.name)?;
 		writeln!(formatter, "\tEmployer: {}", self.organization)?;

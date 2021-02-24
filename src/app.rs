@@ -5,9 +5,8 @@ use
 {
 	create::Create,
 	retrieve::Retrieve,
-	clinvoice_adapter::DynamicResult,
-	clinvoice_config::Config,
-	structopt::StructOpt,
+	crate::{Config, io, StructOpt},
+	clinvoice_adapter::{DynamicResult, data::Updatable},
 };
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, StructOpt)]
@@ -24,6 +23,8 @@ pub struct App
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, StructOpt)]
 enum AppCommand
 {
+	Config,
+
 	Create(Create),
 
 	Retrieve(Retrieve),
@@ -31,12 +32,29 @@ enum AppCommand
 
 impl App
 {
+	/// # Summary
+	///
+	/// Edit the user's configuration file.
+	fn edit_config(config: Config<'_, '_, '_, '_, '_, '_>) -> DynamicResult<()>
+	{
+		if let Some(edited) = io::input::toml_editor().edit(&toml::to_string_pretty(&config)?)?
+		{
+			toml::from_str::<Config>(&edited)?.update()?;
+		};
+
+		return Ok(());
+	}
+
+	/// # Summary
+	///
+	/// Run the application and parse its provided arguments / flags.
 	pub fn run(self, config: Config<'_, '_, '_, '_, '_, '_>) -> DynamicResult<()>
 	{
 		return Ok(match self.command
 		{
-			AppCommand::Create(cmd) => cmd.run(config, &self.store)?,
-			AppCommand::Retrieve(cmd) => cmd.run(config, &self.store)?,
-		});
+			AppCommand::Config => Self::edit_config(config),
+			AppCommand::Create(cmd) => cmd.run(config, &self.store),
+			AppCommand::Retrieve(cmd) => cmd.run(config, &self.store),
+		}?);
 	}
 }

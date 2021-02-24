@@ -57,7 +57,7 @@ pub fn select<T>(entities: &[T], prompt: impl Into<String>) -> IoResult<Vec<T>> 
 /// # Summary
 ///
 /// Creates an instance of [`Editor`] which is configured to edit [`toml`] files.
-fn toml_editor() -> Editor
+pub fn toml_editor() -> Editor
 {
 	let mut editor = Editor::new();
 	editor.extension(".toml");

@@ -7,7 +7,7 @@ use
 /// # Summary
 ///
 /// A value in a retrieval operation.
-pub enum MatchWhen<'range, T> where T : 'range + Hash
+pub enum MatchWhen<'element, T> where T : 'element + Hash
 {
 	/// # Summary
 	///
@@ -28,7 +28,7 @@ pub enum MatchWhen<'range, T> where T : 'range + Hash
 	///
 	/// * A set of `v` is made up of elements which are contained in this set.
 	/// * This set has one element, and `v` is equivalent.
-	HasAll(HashSet<T>),
+	HasAll(HashSet<&'element T>),
 
 	/// # Summary
 	///
@@ -36,7 +36,7 @@ pub enum MatchWhen<'range, T> where T : 'range + Hash
 	///
 	/// * A set of `v`'s type has any value contained in this set.
 	/// * `v` is contained within this set.
-	HasAny(HashSet<T>),
+	HasAny(HashSet<&'element T>),
 
 	/// # Summary
 	///
@@ -44,7 +44,7 @@ pub enum MatchWhen<'range, T> where T : 'range + Hash
 	///
 	/// * A set of `v`'s type has no values contained in this set.
 	/// * `v` is not contained within this set.
-	HasNone(HashSet<T>),
+	HasNone(HashSet<&'element T>),
 
 	/// # Summary
 	///
@@ -60,10 +60,10 @@ pub enum MatchWhen<'range, T> where T : 'range + Hash
 	///
 	/// println!("{}", MatchWhen::InRange(&|v| *v > 0 && *v < 5).is_match(&4));
 	/// ```
-	InRange(&'range dyn Fn(&T) -> bool),
+	InRange(&'element dyn Fn(&T) -> bool),
 }
 
-impl<'range, T> MatchWhen<'range, T> where T : 'range + Eq + Hash
+impl<'element, T> MatchWhen<'element, T> where T : 'element + Eq + Hash
 {
 	/// # Summary
 	///
@@ -102,7 +102,7 @@ impl<'range, T> MatchWhen<'range, T> where T : 'range + Eq + Hash
 	///
 	/// * `true`, if the `values` match the passed [`MatchWhen`].
 	/// * `false`, if the `values` do not match.
-	pub fn set_matches(&self, values: &HashSet<T>) -> bool
+	pub fn set_matches(&self, values: &HashSet<&T>) -> bool
 	{
 		return match self
 		{
@@ -130,11 +130,11 @@ mod tests
 	{
 		let test_value = &7;
 
-		let has_all: HashSet<i32> = [*test_value].iter().cloned().collect();
-		let has_any: HashSet<i32> = [1, 2, 3, *test_value].iter().cloned().collect();
-		let has_none: HashSet<i32> = [1, 2, 3].iter().cloned().collect();
+		let has_all: HashSet<&i32> = [7].iter().collect();
+		let has_any: HashSet<&i32> = [1, 2, 3, 7].iter().collect();
+		let has_none: HashSet<&i32> = [1, 2, 3].iter().collect();
 
-		let not_has_all: HashSet<i32> = [3].iter().cloned().collect();
+		let not_has_all: HashSet<&i32> = [3].iter().collect();
 		let not_has_any = has_none.clone();
 		let not_has_none = has_any.clone();
 
@@ -169,15 +169,15 @@ mod tests
 	#[test]
 	fn test_set_matches()
 	{
-		let test_set: HashSet<i32> = [4, 7, 17].iter().cloned().collect();
-		let test_set_single_element: HashSet<i32> = [4].iter().cloned().collect();
+		let test_set: HashSet<&i32> = [4, 7, 17].iter().collect();
+		let test_set_single_element: HashSet<&i32> = [4].iter().collect();
 
-		let has_all: HashSet<i32> = [4].iter().cloned().collect();
-		let has_any: HashSet<i32> = [1, 4].iter().cloned().collect();
-		let has_none: HashSet<i32> = [1].iter().cloned().collect();
+		let has_all: HashSet<&i32> = [4].iter().collect();
+		let has_any: HashSet<&i32> = [1, 4].iter().collect();
+		let has_none: HashSet<&i32> = [1].iter().collect();
 		let in_range = |v: &i32| *v > 0 && *v < 18;
 
-		let not_has_all: HashSet<i32> = [4, 6].iter().cloned().collect();
+		let not_has_all: HashSet<&i32> = [4, 6].iter().collect();
 		let not_has_any = has_none.clone();
 		let not_has_none = has_any.clone();
 		let not_in_range = |v: &i32| *v > 0 && *v < 3;

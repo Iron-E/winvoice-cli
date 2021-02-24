@@ -1,8 +1,7 @@
 use
 {
+	crate::{Config, StructOpt},
 	clinvoice_adapter::DynamicResult,
-	clinvoice_config::Config,
-	structopt::StructOpt,
 };
 
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, StructOpt)]

@@ -74,7 +74,7 @@ pub trait LocationAdapter<'pass, 'path, 'user> :
 				}
 			}
 
-			Err(Error::DataIntegrity {id})?;
+			return Err(Error::DataIntegrity {id}.into());
 		}
 
 		return Ok(outer_locations);

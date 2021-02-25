@@ -6,7 +6,11 @@ mod into_organization_result;
 mod into_person_result;
 mod updatable;
 
-use std::path::PathBuf;
+use
+{
+	crate::util,
+	std::path::PathBuf,
+};
 
 clinvoice_adapter::Adapt!(Employee => BincodeEmployee);
 
@@ -26,7 +30,7 @@ impl BincodeEmployee<'_, '_, '_>
 	/// The [`Path`] leading to where [`BincodeEmployee`]s are in `store`.
 	pub fn path(store: &Store) -> PathBuf
 	{
-		return PathBuf::new().join(store.path).join("Employees");
+		return util::expand_store_path(store).join("Employees");
 	}
 
 	/// # Summary

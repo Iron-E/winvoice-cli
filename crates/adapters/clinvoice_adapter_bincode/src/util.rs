@@ -1,5 +1,6 @@
 use
 {
+	clinvoice_adapter::Store,
 	clinvoice_data::{Id, UUID_NAMESPACE},
 	std::{fs, io, iter::FilterMap, path::{Path, PathBuf}},
 };
@@ -7,7 +8,7 @@ use
 #[cfg(test)]
 use
 {
-	clinvoice_adapter::{Adapters, Store},
+	clinvoice_adapter::Adapters,
 	std::env,
 };
 
@@ -33,6 +34,18 @@ pub fn create_store_dir(store_dir: &Path) -> io::Result<bool>
 	}
 
 	return Ok(false);
+}
+
+/// # Summary
+///
+/// Expand the `store`'s specified path and join the provided `subdir`.
+pub fn expand_store_path(store: &Store) -> PathBuf
+{
+	return match shellexpand::full(store.path)
+	{
+		Ok(p) => PathBuf::from(p.as_ref()),
+		_ => PathBuf::from(store.path),
+	};
 }
 
 /// # Summary

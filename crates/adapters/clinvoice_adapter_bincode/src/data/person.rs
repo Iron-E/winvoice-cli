@@ -4,7 +4,11 @@ mod into_person_view_result;
 mod person_adapter;
 mod updatable;
 
-use std::path::PathBuf;
+use
+{
+	crate::util,
+	std::path::PathBuf,
+};
 
 clinvoice_adapter::Adapt!(Person => BincodePerson);
 
@@ -24,7 +28,7 @@ impl BincodePerson<'_, '_, '_>
 	/// The [`Path`] leading to where [`BincodeEmployee`]s are in `store`.
 	pub fn path(store: &Store) -> PathBuf
 	{
-		return PathBuf::new().join(store.path).join("People");
+		return util::expand_store_path(store).join("People");
 	}
 
 	/// # Summary

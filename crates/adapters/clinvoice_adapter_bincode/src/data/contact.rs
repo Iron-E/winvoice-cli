@@ -28,7 +28,7 @@ pub fn into_view(contact: Contact, store: Store) -> DynamicResult<ContactView>
 					let view: DynamicResult<LocationView> = result.into();
 					ContactView::Address(view?)
 				},
-				_ => Err(DataError::DataIntegrity {id: address})?,
+				_ => return Err(DataError::DataIntegrity {id: address}.into()),
 			},
 		Contact::Email(email) => ContactView::Email(email),
 		Contact::Phone(phone) => ContactView::Phone(phone),

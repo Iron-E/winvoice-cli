@@ -18,4 +18,13 @@ pub enum Error
 	/// [adapter]: crate::Adapters
 	#[snafu(display("Expected the {} adapter, but got the {} adapter.", expected, actual))]
 	AdapterMismatch {expected: Adapters, actual: Adapters},
+
+	/// # Summary
+	///
+	/// The [specified adapter][adapter] type for a [`Store`](crate::Store) was not compiled with
+	/// the application.
+	///
+	/// [adapter]: crate::Adapters
+	#[snafu(display("Using this adapter requires the {} feature.", adapter))]
+	FeatureNotFound {adapter: Adapters},
 }

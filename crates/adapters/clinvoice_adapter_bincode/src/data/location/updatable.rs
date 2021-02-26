@@ -10,6 +10,6 @@ impl Updatable for BincodeLocation<'_, '_, '_>
 	fn update(&self) -> DynamicResult<()>
 	{
 		fs::write(self.filepath(), bincode::serialize(&self.location)?)?;
-		return Ok(());
+		Ok(())
 	}
 }

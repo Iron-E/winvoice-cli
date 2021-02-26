@@ -40,7 +40,7 @@ impl LocationView
 	/// Create a new [`LocationView`].
 	pub fn new(id: Id, name: String, outer: Option<&Self>) -> Self
 	{
-		return Self
+		Self
 		{
 			id,
 			name,
@@ -49,6 +49,6 @@ impl LocationView
 				Some(location) => Some(location.clone().into()),
 				_ => None,
 			},
-		};
+		}
 	}
 }

@@ -8,12 +8,12 @@ impl Display for EmployeeStatus
 {
 	fn fmt(&self, formatter: &mut Formatter) -> Result
 	{
-		return write!(formatter, "{}", match self
+		write!(formatter, "{}", match self
 		{
 			EmployeeStatus::Employed => "Employed",
 			EmployeeStatus::NotEmployed => "Not employed",
 			EmployeeStatus::Representative => "Representative",
-		});
+		})
 	}
 }
 

@@ -38,6 +38,6 @@ impl Money
 	/// A new [`Money`].
 	pub fn new(amount: Decimal, currency: &str) -> Self
 	{
-		return Self {amount, currency: currency.into()};
+		Self {amount, currency: currency.into()}
 	}
 }

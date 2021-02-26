@@ -23,7 +23,7 @@ macro_rules! AdaptPerson
 		{
 			fn into(self) -> Person
 			{
-				return self.person;
+				self.person
 			}
 		}
 
@@ -31,7 +31,7 @@ macro_rules! AdaptPerson
 		{
 			fn into(self) -> Store<$($store_life),*>
 			{
-				return self.store;
+				self.store
 			}
 		}
 	}

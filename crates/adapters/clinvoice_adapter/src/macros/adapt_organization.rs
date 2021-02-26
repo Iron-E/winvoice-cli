@@ -23,7 +23,7 @@ macro_rules! AdaptOrganization
 		{
 			fn into(self) -> Organization
 			{
-				return self.organization;
+				self.organization
 			}
 		}
 
@@ -31,7 +31,7 @@ macro_rules! AdaptOrganization
 		{
 			fn into(self) -> Store<$($store_life),*>
 			{
-				return self.store;
+				self.store
 			}
 		}
 	}

@@ -8,13 +8,13 @@ impl Display for InvoiceDate
 {
 	fn fmt(&self, formatter: &mut Formatter) -> Result
 	{
-		return write!(formatter, "Issued on {}, {}",
+		write!(formatter, "Issued on {}, {}",
 			self.issued, match self.paid
 			{
 				Some(p) => format!("Paid on {}", p),
 				_ => "Outstanding".into(),
 			},
-		);
+		)
 	}
 }
 

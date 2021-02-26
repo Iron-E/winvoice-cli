@@ -25,11 +25,11 @@ pub fn edit<T>(entity: T) -> DynamicResult<T> where
 	T : DeserializeOwned + Serialize
 {
 	// Write the entity to the `temp_path` and then edit that file.
-	return Ok(match toml_editor().edit(&toml::to_string_pretty(&entity)?)?
+	Ok(match toml_editor().edit(&toml::to_string_pretty(&entity)?)?
 	{
 		Some(edited) => toml::from_str(&edited)?,
 		None => entity,
-	});
+	})
 }
 
 /// # Summary
@@ -51,9 +51,9 @@ pub fn select<T>(entities: &[T], prompt: impl Into<String>) -> IoResult<Vec<T>> 
 
 	let selection = MultiSelect::new().items(entities).paged(true).with_prompt(prompt).interact()?;
 
-	return Ok(entities.iter().enumerate().filter_map(
+	Ok(entities.iter().enumerate().filter_map(
 		|(i, entity)| selection.binary_search(&i).and(Ok(entity.clone())).ok()
-	).collect());
+	).collect())
 }
 
 /// # Summary
@@ -63,5 +63,5 @@ pub fn toml_editor() -> Editor
 {
 	let mut editor = Editor::new();
 	editor.extension(".toml");
-	return editor;
+	editor
 }

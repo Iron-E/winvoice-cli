@@ -26,7 +26,7 @@ impl Into<DynamicResult<Person>> for BincodeEmployee<'_, '_, '_>
 			_ => return Err(DataError::DataIntegrity {id: self.employee.person_id}.into()),
 		};
 
-		return Ok(bincode_person.person.clone());
+		Ok(bincode_person.person.clone())
 	}
 }
 

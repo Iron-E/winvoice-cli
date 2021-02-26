@@ -40,7 +40,7 @@ impl Deletable for BincodeLocation<'_, '_, '_>
 			)? { result.delete(true)?; }
 		}
 
-		return Ok(());
+		Ok(())
 	}
 }
 

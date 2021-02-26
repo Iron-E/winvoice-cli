@@ -36,7 +36,7 @@ impl Deletable for BincodePerson<'_, '_, '_>
 			)? { result.delete(true)?; }
 		}
 
-		return Ok(());
+		Ok(())
 	}
 }
 

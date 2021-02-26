@@ -22,7 +22,7 @@ impl Display for EmployeeView
 		sorted_person_contact_info .sort();
 		sorted_person_contact_info.iter().try_for_each(|c| writeln!(formatter, "\t\t- {}", c))?;
 
-		return write!(formatter, "\tStatus: {}", self.status);
+		write!(formatter, "\tStatus: {}", self.status)
 	}
 }
 

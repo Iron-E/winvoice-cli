@@ -32,5 +32,5 @@ pub fn contact_info<'pass, 'path, 'user, L>(store: Store<'pass, 'path, 'user>) -
 		"Select locations to be a part of the contact info.",
 	)?;
 
-	return Ok(super::edit(contact_info)?.into_iter().map(|c| c.into()).collect());
+	Ok(super::edit(contact_info)?.into_iter().map(|c| c.into()).collect())
 }

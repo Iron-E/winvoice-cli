@@ -26,7 +26,7 @@ impl Into<DynamicResult<Location>> for BincodeOrganization<'_, '_, '_>
 			_ => return Err(DataError::DataIntegrity {id: self.organization.location_id}.into()),
 		};
 
-		return Ok(bincode_location.location.clone());
+		Ok(bincode_location.location.clone())
 	}
 }
 

@@ -43,7 +43,7 @@ impl<'pass, 'path, 'user> LocationAdapter<'pass, 'path, 'user> for BincodeLocati
 
 		bincode_person.update()?;
 
-		return Ok(bincode_person);
+		Ok(bincode_person)
 	}
 
 	/// # Summary
@@ -74,7 +74,7 @@ impl<'pass, 'path, 'user> LocationAdapter<'pass, 'path, 'user> for BincodeLocati
 
 		inner_person.update()?;
 
-		return Ok(inner_person);
+		Ok(inner_person)
 	}
 
 	/// # Summary
@@ -112,7 +112,7 @@ impl<'pass, 'path, 'user> LocationAdapter<'pass, 'path, 'user> for BincodeLocati
 			}
 		}
 
-		return Ok(results);
+		Ok(results)
 	}
 }
 
@@ -157,7 +157,7 @@ mod tests
 	#[test]
 	fn test_retrieve()
 	{
-		return util::test_temp_store(|store|
+		util::test_temp_store(|store|
 		{
 			let earth = BincodeLocation::create("Earth", *store).unwrap();
 			let usa = earth.create_inner("USA").unwrap();
@@ -195,6 +195,6 @@ mod tests
 			assert!(!only_arizona.contains(&usa));
 			assert!(only_arizona.contains(&arizona));
 			assert!(!only_arizona.contains(&phoenix));
-		});
+		})
 	}
 }

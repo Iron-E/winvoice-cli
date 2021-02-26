@@ -45,7 +45,7 @@ impl<'pass, 'path, 'user> OrganizationAdapter<'pass, 'path, 'user> for BincodeOr
 
 		bincode_organization.update()?;
 
-		return Ok(bincode_organization);
+		Ok(bincode_organization)
 	}
 
 	/// # Summary
@@ -83,7 +83,7 @@ impl<'pass, 'path, 'user> OrganizationAdapter<'pass, 'path, 'user> for BincodeOr
 			}
 		}
 
-		return Ok(results);
+		Ok(results)
 	}
 }
 

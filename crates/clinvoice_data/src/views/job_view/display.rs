@@ -26,7 +26,7 @@ impl Display for JobView
 		writeln!(formatter, "\tTimesheets:")?;
 		self.timesheets.iter().try_for_each(|t| writeln!(formatter, "\t\t{}", t.to_string().replace('\n', "\n\t\t")))?;
 
-		return write!(formatter, "\tTotal Amount Owed: {}", Job::from(self).total());
+		write!(formatter, "\tTotal Amount Owed: {}", Job::from(self).total())
 	}
 }
 

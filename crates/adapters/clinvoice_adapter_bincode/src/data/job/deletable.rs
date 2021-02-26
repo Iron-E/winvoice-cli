@@ -18,7 +18,7 @@ impl Deletable for BincodeJob<'_, '_, '_>
 			}
 		}
 
-		return Ok(());
+		Ok(())
 	}
 }
 

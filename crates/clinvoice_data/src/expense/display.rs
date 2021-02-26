@@ -9,7 +9,7 @@ impl Display for Expense
 	fn fmt(&self, formatter: &mut Formatter) -> Result
 	{
 		writeln!(formatter, "{} – {}", self.category, self.cost)?;
-		return write!(formatter, "\t{}", self.description.replace('\n', "\n\t"));
+		write!(formatter, "\t{}", self.description.replace('\n', "\n\t"))
 	}
 }
 

@@ -79,7 +79,7 @@ impl<'element, T> MatchWhen<'element, T> where T : 'element + Eq + Hash
 	/// * `false`, if the `value` does not match.
 	pub fn is_match(&self, value: &T) -> bool
 	{
-		return match self
+		match self
 		{
 			MatchWhen::Any => true,
 			MatchWhen::EqualTo(equal_value) => equal_value == value,
@@ -87,7 +87,7 @@ impl<'element, T> MatchWhen<'element, T> where T : 'element + Eq + Hash
 			MatchWhen::HasAny(accepted_values) => accepted_values.contains(value),
 			MatchWhen::HasNone(denied_values) => !denied_values.contains(value),
 			MatchWhen::InRange(in_range) => in_range(value),
-		};
+		}
 	}
 
 	/// # Summary
@@ -104,7 +104,7 @@ impl<'element, T> MatchWhen<'element, T> where T : 'element + Eq + Hash
 	/// * `false`, if the `values` do not match.
 	pub fn set_matches(&self, values: &HashSet<&T>) -> bool
 	{
-		return match self
+		match self
 		{
 			MatchWhen::Any => true,
 			MatchWhen::EqualTo(equal_value) => values.len() == 1 && values.contains(equal_value),
@@ -112,7 +112,7 @@ impl<'element, T> MatchWhen<'element, T> where T : 'element + Eq + Hash
 			MatchWhen::HasAny(accepted_values) => !accepted_values.is_disjoint(values),
 			MatchWhen::HasNone(denied_values) => denied_values.is_disjoint(values),
 			MatchWhen::InRange(in_range) => values.iter().all(|v| in_range(v)),
-		};
+		}
 	}
 }
 

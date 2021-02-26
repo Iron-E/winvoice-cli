@@ -33,7 +33,7 @@ pub fn create_store_dir(store_dir: &Path) -> io::Result<bool>
 		return Ok(true);
 	}
 
-	return Ok(false);
+	Ok(false)
 }
 
 /// # Summary
@@ -41,11 +41,11 @@ pub fn create_store_dir(store_dir: &Path) -> io::Result<bool>
 /// Expand the `store`'s specified path and join the provided `subdir`.
 pub fn expand_store_path(store: &Store) -> PathBuf
 {
-	return match shellexpand::full(store.path)
+	match shellexpand::full(store.path)
 	{
 		Ok(p) => PathBuf::from(p.as_ref()),
 		_ => PathBuf::from(store.path),
-	};
+	}
 }
 
 /// # Summary
@@ -57,13 +57,13 @@ pub fn expand_store_path(store: &Store) -> PathBuf
 /// Will error whenever [`fs::read_dir`] does.
 pub fn read_files<P: AsRef<Path>>(path: P) -> io::Result<FilterMap<fs::ReadDir, impl FnMut(io::Result<fs::DirEntry>) -> Option<PathBuf>>>
 {
-	return Ok(fs::read_dir(path)?.filter_map(
+	Ok(fs::read_dir(path)?.filter_map(
 		|node| match node
 		{
 			Ok(n) if n.path().is_file() => Some(n.path()),
 			_ => None,
 		}
-	));
+	))
 }
 
 /// # Summary

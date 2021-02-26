@@ -60,7 +60,7 @@ impl<'pass, 'path, 'user> JobAdapter<'pass, 'path, 'user> for BincodeJob<'pass, 
 
 		bincode_job.update()?;
 
-		return Ok(bincode_job);
+		Ok(bincode_job)
 	}
 
 	/// # Summary
@@ -114,7 +114,7 @@ impl<'pass, 'path, 'user> JobAdapter<'pass, 'path, 'user> for BincodeJob<'pass, 
 			}
 		}
 
-		return Ok(results);
+		Ok(results)
 	}
 }
 

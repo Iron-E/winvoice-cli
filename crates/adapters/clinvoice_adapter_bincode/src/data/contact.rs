@@ -14,7 +14,7 @@ use
 /// Convert some [`Contact`] into a [`ContactView`].
 pub fn into_view(contact: Contact, store: Store) -> DynamicResult<ContactView>
 {
-	return Ok(match contact
+	Ok(match contact
 	{
 		Contact::Address(address) => match BincodeLocation::retrieve(
 				MatchWhen::EqualTo(address), // id
@@ -32,7 +32,7 @@ pub fn into_view(contact: Contact, store: Store) -> DynamicResult<ContactView>
 			},
 		Contact::Email(email) => ContactView::Email(email),
 		Contact::Phone(phone) => ContactView::Phone(phone),
-	});
+	})
 }
 
 /// # Summary
@@ -52,5 +52,5 @@ pub fn into_views<I>(contact_info: I, store: Store) -> DynamicResult<Vec<Contact
 		};
 	}
 
-	return Ok(contact_info_view);
+	Ok(contact_info_view)
 }

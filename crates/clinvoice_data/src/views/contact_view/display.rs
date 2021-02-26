@@ -8,12 +8,12 @@ impl Display for ContactView
 {
 	fn fmt(&self, formatter: &mut Formatter) -> Result
 	{
-		return match self
+		match self
 		{
 			ContactView::Address(location) => location.fmt(formatter),
 			ContactView::Email(email) => write!(formatter, "{}", email),
 			ContactView::Phone(phone) => write!(formatter, "{}", phone),
-		};
+		}
 	}
 }
 

@@ -52,7 +52,7 @@ impl<'pass, 'path, 'user> EmployeeAdapter<'pass, 'path, 'user> for BincodeEmploy
 
 		bincode_person.update()?;
 
-		return Ok(bincode_person);
+		Ok(bincode_person)
 	}
 
 	/// # Summary
@@ -96,7 +96,7 @@ impl<'pass, 'path, 'user> EmployeeAdapter<'pass, 'path, 'user> for BincodeEmploy
 			}
 		}
 
-		return Ok(results);
+		Ok(results)
 	}
 }
 

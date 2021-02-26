@@ -23,7 +23,7 @@ macro_rules! AdaptLocation
 		{
 			fn into(self) -> Location
 			{
-				return self.location;
+				self.location
 			}
 		}
 
@@ -31,7 +31,7 @@ macro_rules! AdaptLocation
 		{
 			fn into(self) -> Store<$($store_life),*>
 			{
-				return self.store;
+				self.store
 			}
 		}
 	}

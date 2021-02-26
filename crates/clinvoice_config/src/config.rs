@@ -72,7 +72,7 @@ impl Config<'_, '_, '_, '_, '_, '_>
 			config.update()?;
 		}
 
-		return Ok(());
+		Ok(())
 	}
 
 	/// # Summary
@@ -88,7 +88,7 @@ impl Config<'_, '_, '_, '_, '_, '_>
 	/// The [`Store`] which corresponds to `name`.
 	pub fn get_store(&self, name: &str) -> Option<&Store>
 	{
-		return match self.stores.get(name)
+		match self.stores.get(name)
 		{
 			Some(value) => match value
 			{
@@ -96,12 +96,12 @@ impl Config<'_, '_, '_, '_, '_, '_>
 				StoreValue::Storage(store) => Some(store),
 			},
 			_ => None,
-		};
+		}
 	}
 
 	pub fn path() -> PathBuf
 	{
-		return dirs::config_dir().expect("Operating System is not supported.").join("clinvoice").join("config.toml");
+		dirs::config_dir().expect("Operating System is not supported.").join("clinvoice").join("config.toml")
 	}
 }
 

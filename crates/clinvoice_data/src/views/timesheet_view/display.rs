@@ -26,7 +26,7 @@ impl Display for TimesheetView
 			expenses.iter().try_for_each(|e| writeln!(formatter, "\t\t{}", e.to_string().replace('\n', "\n\t\t")))?;
 		}
 
-		return write!(formatter, "\tWork Notes:\n\t\t{}", self.work_notes.replace('\n', "\n\t\t"));
+		write!(formatter, "\tWork Notes:\n\t\t{}", self.work_notes.replace('\n', "\n\t\t"))
 	}
 }
 

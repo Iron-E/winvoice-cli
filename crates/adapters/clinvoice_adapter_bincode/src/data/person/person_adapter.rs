@@ -46,7 +46,7 @@ impl<'pass, 'path, 'user> PersonAdapter<'pass, 'path, 'user> for BincodePerson<'
 
 		bincode_person.update()?;
 
-		return Ok(bincode_person);
+		Ok(bincode_person)
 	}
 
 	/// # Summary
@@ -84,7 +84,7 @@ impl<'pass, 'path, 'user> PersonAdapter<'pass, 'path, 'user> for BincodePerson<'
 			}
 		}
 
-		return Ok(results);
+		Ok(results)
 	}
 }
 

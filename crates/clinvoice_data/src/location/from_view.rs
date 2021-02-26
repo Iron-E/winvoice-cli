@@ -8,7 +8,7 @@ impl From<View> for Location
 {
 	fn from(view: View) -> Self
 	{
-		return Self
+		Self
 		{
 			id: view.id,
 			outer_id: match view.outer
@@ -17,7 +17,7 @@ impl From<View> for Location
 				_ => None,
 			},
 			name: view.name,
-		};
+		}
 	}
 }
 
@@ -25,7 +25,7 @@ impl From<&View> for Location
 {
 	fn from(view: &View) -> Self
 	{
-		return Self
+		Self
 		{
 			id: view.id,
 			outer_id: match &view.outer
@@ -34,6 +34,6 @@ impl From<&View> for Location
 				_ => None,
 			},
 			name: view.name.clone(),
-		};
+		}
 	}
 }

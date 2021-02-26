@@ -11,11 +11,11 @@ impl Into<DynamicResult<PersonView>> for BincodePerson<'_, '_, '_>
 {
 	fn into(self) -> DynamicResult<PersonView>
 	{
-		return Ok(PersonView
+		Ok(PersonView
 		{
 			contact_info: contact::into_views(self.person.contact_info, self.store)?,
 			id: self.person.id,
 			name: self.person.name,
-		});
+		})
 	}
 }

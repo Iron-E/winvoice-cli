@@ -38,6 +38,6 @@ impl Adapters
 			return Err(Error::AdapterMismatch {expected: *self, actual: *actual});
 		}
 
-		return Ok(());
+		Ok(())
 	}
 }

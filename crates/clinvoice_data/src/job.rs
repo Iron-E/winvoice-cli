@@ -175,6 +175,6 @@ impl Job
 			}
 		}
 
-		return total;
+		total
 	}
 }

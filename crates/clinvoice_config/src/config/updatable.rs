@@ -18,6 +18,6 @@ impl Updatable for Config<'_, '_, '_, '_, '_, '_>
 
 		fs::write(path, toml::to_string_pretty(self)?)?;
 
-		return Ok(());
+		Ok(())
 	}
 }

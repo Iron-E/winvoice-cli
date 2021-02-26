@@ -53,7 +53,7 @@ impl Into<DynamicResult<JobView>> for BincodeJob<'_, '_, '_>
 			});
 		}
 
-		return Ok(JobView
+		Ok(JobView
 		{
 			client: organization_view_result?,
 			date_close: self.job.date_close,
@@ -63,7 +63,7 @@ impl Into<DynamicResult<JobView>> for BincodeJob<'_, '_, '_>
 			notes: self.job.notes,
 			objectives: self.job.objectives,
 			timesheets: timesheet_views,
-		});
+		})
 	}
 }
 

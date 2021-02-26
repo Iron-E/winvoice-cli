@@ -74,6 +74,6 @@ impl<'pass, 'path, 'user> Create
 			_ => return Err(Error::FeatureNotFound {adapter: store.adapter}.into()),
 		}?;
 
-		return Ok(());
+		Ok(())
 	}
 }

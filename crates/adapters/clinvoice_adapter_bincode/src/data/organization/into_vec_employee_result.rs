@@ -23,7 +23,7 @@ impl Into<DynamicResult<Vec<Employee>>> for BincodeOrganization<'_, '_, '_>
 			self.store,
 		)?;
 
-		return Ok(results.iter().map(|result| result.employee.clone()).collect());
+		Ok(results.iter().map(|result| result.employee.clone()).collect())
 	}
 }
 

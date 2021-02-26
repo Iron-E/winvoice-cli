@@ -42,7 +42,7 @@ impl App
 			toml::from_str::<Config>(&edited)?.update()?;
 		};
 
-		return Ok(());
+		Ok(())
 	}
 
 	/// # Summary
@@ -50,11 +50,11 @@ impl App
 	/// Run the application and parse its provided arguments / flags.
 	pub fn run(self, config: Config) -> DynamicResult<()>
 	{
-		return Ok(match self.command
+		Ok(match self.command
 		{
 			AppCommand::Config => Self::edit_config(config),
 			AppCommand::Create(cmd) => cmd.run(config, &self.store),
 			AppCommand::Retrieve(cmd) => cmd.run(config, &self.store),
-		}?);
+		}?)
 	}
 }

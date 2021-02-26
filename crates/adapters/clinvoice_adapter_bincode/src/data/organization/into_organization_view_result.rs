@@ -22,11 +22,11 @@ impl Into<DynamicResult<OrganizationView>> for BincodeOrganization<'_, '_, '_>
 			store: self.store,
 		}.into();
 
-		return Ok(OrganizationView
+		Ok(OrganizationView
 		{
 			id: self.organization.id,
 			location: location_view_result?,
 			name: self.organization.name,
-		});
+		})
 	}
 }

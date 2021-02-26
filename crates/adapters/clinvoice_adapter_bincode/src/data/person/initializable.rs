@@ -18,6 +18,6 @@ impl Initializable for BincodePerson<'_, '_, '_>
 	fn init(store: &Store) -> DynamicResult<()>
 	{
 		util::create_store_dir(&Self::path(store))?;
-		return Ok(());
+		Ok(())
 	}
 }

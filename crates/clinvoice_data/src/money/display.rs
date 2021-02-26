@@ -8,7 +8,7 @@ impl Display for Money
 {
 	fn fmt(&self, formatter: &mut Formatter) -> Result
 	{
-		return write!(formatter, "{} {}", self.amount, self.currency);
+		write!(formatter, "{} {}", self.amount, self.currency)
 	}
 }
 

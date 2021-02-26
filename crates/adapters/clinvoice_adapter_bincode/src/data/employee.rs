@@ -30,7 +30,7 @@ impl BincodeEmployee<'_, '_, '_>
 	/// The [`Path`] leading to where [`BincodeEmployee`]s are in `store`.
 	pub fn path(store: &Store) -> PathBuf
 	{
-		return util::expand_store_path(store).join("Employees");
+		util::expand_store_path(store).join("Employees")
 	}
 
 	/// # Summary
@@ -42,6 +42,6 @@ impl BincodeEmployee<'_, '_, '_>
 	/// A [`PathBuf`] pointing to where this [`BincodeEmployee`] is stored.
 	pub fn filepath(&self) -> PathBuf
 	{
-		return Self::path(&self.store).join(self.employee.id.to_string());
+		Self::path(&self.store).join(self.employee.id.to_string())
 	}
 }

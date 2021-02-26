@@ -19,7 +19,7 @@ impl Display for LocationView
 			outer = &o.outer;
 		}
 
-		return write!(formatter, "{}", output);
+		write!(formatter, "{}", output)
 	}
 }
 

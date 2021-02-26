@@ -14,7 +14,7 @@ impl Display for PersonView
 		sorted_contact_info.sort();
 
 		write!(formatter, "Contact Info:")?;
-		return sorted_contact_info.iter().try_for_each(|c| write!(formatter, "\n\t- {}", c));
+		sorted_contact_info.iter().try_for_each(|c| write!(formatter, "\n\t- {}", c))
 	}
 }
 

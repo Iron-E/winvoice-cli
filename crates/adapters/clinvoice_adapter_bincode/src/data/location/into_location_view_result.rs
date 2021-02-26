@@ -28,11 +28,11 @@ impl Into<DynamicResult<LocationView>> for BincodeLocation<'_, '_, '_>
 			));
 		}
 
-		return Ok(LocationView::new(
+		Ok(LocationView::new(
 			self.location.id,
 			self.location.name,
 			outer_location_views.last(),
-		));
+		))
 	}
 }
 

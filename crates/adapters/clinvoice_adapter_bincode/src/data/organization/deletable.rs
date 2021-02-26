@@ -51,7 +51,7 @@ impl Deletable for BincodeOrganization<'_, '_, '_>
 			)? { result.delete(true)?; }
 		}
 
-		return Ok(());
+		Ok(())
 	}
 }
 

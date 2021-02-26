@@ -8,7 +8,7 @@ impl Display for ExpenseCategory
 {
 	fn fmt(&self, formatter: &mut Formatter) -> Result
 	{
-		return write!(formatter, "{}", match self
+		write!(formatter, "{}", match self
 		{
 			ExpenseCategory::Food => "Food",
 			ExpenseCategory::Hosting => "Hosting",
@@ -16,7 +16,7 @@ impl Display for ExpenseCategory
 			ExpenseCategory::Other => "Other",
 			ExpenseCategory::Software => "Software",
 			ExpenseCategory::Travel => "Travel",
-		});
+		})
 	}
 }
 

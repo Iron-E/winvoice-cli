@@ -31,7 +31,7 @@ impl Into<DynamicResult<EmployeeView>> for BincodeEmployee<'_, '_, '_>
 			store: self.store,
 		}.into();
 
-		return Ok(EmployeeView
+		Ok(EmployeeView
 		{
 			contact_info: contact_info_view,
 			id: self.employee.id,
@@ -39,7 +39,7 @@ impl Into<DynamicResult<EmployeeView>> for BincodeEmployee<'_, '_, '_>
 			person: person_view_result?,
 			status: self.employee.status,
 			title: self.employee.title,
-		});
+		})
 	}
 }
 

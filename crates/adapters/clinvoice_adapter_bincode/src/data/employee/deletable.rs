@@ -45,7 +45,7 @@ impl Deletable for BincodeEmployee<'_, '_, '_>
 			}
 		}
 
-		return Ok(());
+		Ok(())
 	}
 }
 

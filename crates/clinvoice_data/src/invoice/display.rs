@@ -10,11 +10,11 @@ impl Display for Invoice
 	{
 		writeln!(formatter, "Hourly Rate: {}", self.hourly_rate)?;
 
-		return write!(formatter, "Invoice Status: {}", match &self.date
+		write!(formatter, "Invoice Status: {}", match &self.date
 		{
 			Some(date) => date.to_string(),
 			_ => "Not issued.".into(),
-		});
+		})
 	}
 }
 

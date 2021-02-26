@@ -23,7 +23,7 @@ macro_rules! AdaptJob
 		{
 			fn into(self) -> Job
 			{
-				return self.job;
+				self.job
 			}
 		}
 
@@ -31,7 +31,7 @@ macro_rules! AdaptJob
 		{
 			fn into(self) -> Store<$($store_life),*>
 			{
-				return self.store;
+				self.store
 			}
 		}
 	};

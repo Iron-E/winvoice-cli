@@ -1,9 +1,10 @@
+pub mod error;
 pub mod util;
 
 use
 {
 	clinvoice_adapter::DynamicResult,
-	std::{fmt::Display, io::Result as IoResult},
+	std::{fmt::Display, io},
 	dialoguer::{Editor, MultiSelect},
 	serde::{de::DeserializeOwned, Serialize},
 };
@@ -45,7 +46,7 @@ pub fn edit<T>(entity: T) -> DynamicResult<T> where
 ///
 /// * The deserialized entity with values filled in by the user.
 /// * An [`Error`] encountered while creating, editing, or removing the temporary file.
-pub fn select<T>(entities: &[T], prompt: impl Into<String>) -> IoResult<Vec<T>> where
+pub fn select<T>(entities: &[T], prompt: impl Into<String>) -> io::Result<Vec<T>> where
 	T : Clone + DeserializeOwned + Display + Serialize
 {
 

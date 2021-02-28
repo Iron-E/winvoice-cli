@@ -7,7 +7,7 @@ use
 /// # Summary
 ///
 /// [`Error`](std::error::Error)s referencing [`Store`](crate::Store)s and [`Adapters`].
-#[derive(Debug, Snafu)]
+#[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Snafu)]
 pub enum Error
 {
 	/// # Summary

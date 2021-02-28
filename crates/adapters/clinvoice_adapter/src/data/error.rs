@@ -7,7 +7,7 @@ use
 /// # Summary
 ///
 /// Errors for the data
-#[derive(Debug, Snafu)]
+#[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Snafu)]
 pub enum Error
 {
 	/// # Summary

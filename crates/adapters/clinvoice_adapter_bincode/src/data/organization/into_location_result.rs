@@ -20,7 +20,7 @@ impl Into<DynamicResult<Location>> for BincodeOrganization<'_, '_, '_>
 			self.store,
 		)?;
 
-		let bincode_location = match results.iter().next()
+		let bincode_location = match results.get(0)
 		{
 			Some(bin_org) => bin_org,
 			_ => return Err(DataError::DataIntegrity {id: self.organization.location_id}.into()),

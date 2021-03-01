@@ -20,7 +20,7 @@ impl Into<DynamicResult<Person>> for BincodeEmployee<'_, '_, '_>
 			self.store,
 		)?;
 
-		let bincode_person = match results.iter().next()
+		let bincode_person = match results.get(0)
 		{
 			Some(bin_org) => bin_org,
 			_ => return Err(DataError::DataIntegrity {id: self.employee.person_id}.into()),

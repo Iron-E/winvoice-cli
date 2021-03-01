@@ -5,7 +5,7 @@ use
 {
 	create::Create,
 	retrieve::Retrieve,
-	crate::{Config, io, StructOpt},
+	crate::{Config, io::input, StructOpt},
 	clinvoice_adapter::{DynamicResult, data::Updatable},
 };
 
@@ -37,7 +37,7 @@ impl App
 	/// Edit the user's configuration file.
 	fn edit_config(config: Config) -> DynamicResult<()>
 	{
-		if let Some(edited) = io::input::toml_editor().edit(&toml::to_string_pretty(&config)?)?
+		if let Some(edited) = input::toml_editor().edit(&toml::to_string_pretty(&config)?)?
 		{
 			toml::from_str::<Config>(&edited)?.update()?;
 		};

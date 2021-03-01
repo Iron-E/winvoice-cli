@@ -1,6 +1,6 @@
 use
 {
-	crate::{Config, io, StructOpt},
+	crate::{Config, io::input, StructOpt},
 	clinvoice_adapter::
 	{
 		Adapters, DynamicResult, Error,
@@ -65,7 +65,7 @@ impl<'pass, 'path, 'user> Create
 				Self::Organization {} => todo!() /*BincodeOrganization::create(*store).and(Ok(()))*/,
 
 				Self::Person {name} => BincodePerson::create(
-					io::input::util::contact_info::<BincodeLocation>(*store)?,
+					input::util::contact_info::<BincodeLocation>(*store)?,
 					&name,
 					*store,
 				).and(Ok(())),

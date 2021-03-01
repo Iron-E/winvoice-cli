@@ -36,5 +36,5 @@ pub fn contact_info<'pass, 'path, 'user, L>(store: Store<'pass, 'path, 'user>) -
 	contact_info.push(ContactView::Email("An email address. E.g. `foo@gmail.com`".into()));
 	contact_info.push(ContactView::Phone("A phone number. E.g. `600-555-5555`".into()));
 
-	Ok(super::edit(SerdeWrapper{value: contact_info})?.value.into_iter().map(|c| c.into()).collect())
+	Ok(super::edit(SerdeWrapper {value: contact_info})?.value.into_iter().map(|c| c.into()).collect())
 }

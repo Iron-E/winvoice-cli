@@ -44,11 +44,7 @@ impl LocationView
 		{
 			id,
 			name,
-			outer: match outer
-			{
-				Some(location) => Some(location.clone().into()),
-				_ => None,
-			},
+			outer: outer.map(|l| l.clone().into()),
 		}
 	}
 }

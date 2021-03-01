@@ -90,6 +90,8 @@ impl<'pass, 'path, 'user> JobAdapter<'pass, 'path, 'user> for BincodeJob<'pass, 
 		store: Store<'pass, 'path, 'user>,
 	) -> DynamicResult<Vec<Self>>
 	{
+		Self::init(&store)?;
+
 		let mut results = Vec::new();
 
 		for node_path in util::read_files(BincodeJob::path(&store))?

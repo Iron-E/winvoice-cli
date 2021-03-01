@@ -77,6 +77,8 @@ impl<'pass, 'path, 'user> EmployeeAdapter<'pass, 'path, 'user> for BincodeEmploy
 		store: Store<'pass, 'path, 'user>,
 	) -> DynamicResult<Vec<Self>>
 	{
+		Self::init(&store)?;
+
 		let mut results = Vec::new();
 
 		for node_path in util::read_files(BincodeEmployee::path(&store))?

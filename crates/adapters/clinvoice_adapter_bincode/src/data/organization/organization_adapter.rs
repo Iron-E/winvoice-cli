@@ -67,6 +67,8 @@ impl<'pass, 'path, 'user> OrganizationAdapter<'pass, 'path, 'user> for BincodeOr
 		store: Store<'pass, 'path, 'user>,
 	) -> DynamicResult<Vec<Self>>
 	{
+		Self::init(&store)?;
+
 		let mut results = Vec::new();
 
 		for node_path in util::read_files(BincodeOrganization::path(&store))?

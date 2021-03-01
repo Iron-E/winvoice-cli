@@ -50,11 +50,11 @@ impl App
 	/// Run the application and parse its provided arguments / flags.
 	pub fn run(self, config: Config) -> DynamicResult<()>
 	{
-		Ok(match self.command
+		match self.command
 		{
 			AppCommand::Config => Self::edit_config(config),
 			AppCommand::Create(cmd) => cmd.run(config, &self.store),
 			AppCommand::Retrieve(cmd) => cmd.run(config, &self.store),
-		}?)
+		}
 	}
 }

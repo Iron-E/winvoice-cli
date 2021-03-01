@@ -116,7 +116,7 @@ mod tests
 			let start = Instant::now();
 			// Assert that the deletion works
 			assert!(big_old_test.delete(true).is_ok());
-			println!("\n>>>>> BincodeEmployee::delete {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+			println!("\n>>>>> BincodeOrganization::delete {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 
 			// Assert that the dependent files are gone
 			assert!(!big_old_test.filepath().is_file());

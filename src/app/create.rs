@@ -35,6 +35,8 @@ pub(super) enum Create
 	#[structopt(about="Create a new organization record")]
 	Organization
 	{
+		#[structopt(about="The name of the organization to create.")]
+		name: String,
 	},
 
 	#[structopt(about="Create a new organization record")]
@@ -62,7 +64,7 @@ impl<'pass, 'path, 'user> Create
 
 				Self::Location {name} => BincodeLocation::create(&name, *store).and(Ok(())),
 
-				Self::Organization {} => todo!() /*BincodeOrganization::create(*store).and(Ok(()))*/,
+				Self::Organization {name} => todo!() /*BincodeOrganization::create(*store).and(Ok(()))*/,
 
 				Self::Person {name} => BincodePerson::create(
 					input::util::contact_info::<BincodeLocation>(*store)?,

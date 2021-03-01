@@ -1,5 +1,6 @@
 mod from_view;
 mod hash;
+mod partial_eq;
 
 use crate::Id;
 
@@ -10,7 +11,7 @@ use serde::{Deserialize, Serialize};
 ///
 /// A physical space where other `Location`s or
 /// [`Organization`](super::organization::Organization)s exist.
-#[derive(Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Eq, Ord, PartialOrd)]
 #[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
 pub struct Location
 {

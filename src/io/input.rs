@@ -28,11 +28,11 @@ pub fn edit<T>(entity: T) -> DynamicResult<T> where
 	T : DeserializeOwned + Serialize
 {
 	// Write the entity to the `temp_path` and then edit that file.
-	Ok(match toml_editor().edit(&toml::to_string_pretty(&entity)?)?
+	match toml_editor().edit(&toml::to_string_pretty(&entity)?)?
 	{
-		Some(edited) => toml::from_str(&edited)?,
-		None => Error::NotEdited,
-	})
+		Some(edited) => Ok(toml::from_str(&edited)?),
+		_ => Err(Error::NotEdited.into()),
+	}
 }
 
 /// # Summary

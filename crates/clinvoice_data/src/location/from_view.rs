@@ -11,11 +11,7 @@ impl From<View> for Location
 		Self
 		{
 			id: view.id,
-			outer_id: match view.outer
-			{
-				Some(location) => Some(location.id),
-				_ => None,
-			},
+			outer_id: view.outer.map(|l| l.id),
 			name: view.name,
 		}
 	}
@@ -28,11 +24,7 @@ impl From<&View> for Location
 		Self
 		{
 			id: view.id,
-			outer_id: match &view.outer
-			{
-				Some(location) => Some(location.id),
-				_ => None,
-			},
+			outer_id: view.outer.as_ref().map(|l| l.id),
 			name: view.name.clone(),
 		}
 	}

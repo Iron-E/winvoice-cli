@@ -1,5 +1,6 @@
 mod display;
 mod hash;
+mod partial_eq;
 
 use
 {
@@ -13,7 +14,7 @@ use serde::{Deserialize, Serialize};
 /// # Summary
 ///
 /// A view of [`Employee`](crate::Employee).
-#[derive(Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Eq, Ord, PartialOrd)]
 #[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
 pub struct EmployeeView
 {

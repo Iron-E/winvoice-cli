@@ -69,7 +69,7 @@ mod tests
 		};
 
 		let start = Instant::now();
-		assert_eq!(format!("{}", ContactView::Address(street_view)), "1337 Some Street, Phoenix, Arizona, USA, Earth");
+		assert_eq!(format!("{}", ContactView::from(street_view)), "1337 Some Street, Phoenix, Arizona, USA, Earth");
 		assert_eq!(format!("{}", ContactView::Email("foo@bar.io".into())), "foo@bar.io");
 		assert_eq!(format!("{}", ContactView::Phone("1-603-555-5555".into())), "1-603-555-5555");
 		println!("\n>>>>> ContactView::test_display {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 3);

@@ -91,7 +91,7 @@ mod tests
 		clinvoice_data::
 		{
 			chrono::Utc, Contact, Decimal, EmployeeStatus, Money,
-			views::{ContactView, EmployeeView, LocationView, PersonView},
+			views::{EmployeeView, LocationView, PersonView},
 		},
 		std::time::Instant,
 	};
@@ -144,7 +144,7 @@ mod tests
 				outer: None,
 			};
 
-			let contact_info_view = vec![ContactView::Address(earth_view.clone())];
+			let contact_info_view = vec![earth_view.clone().into()];
 
 			let ceo_testy_view = EmployeeView
 			{

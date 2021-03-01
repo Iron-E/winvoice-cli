@@ -1,4 +1,5 @@
 mod display;
+mod from_location_view;
 
 use super::LocationView;
 

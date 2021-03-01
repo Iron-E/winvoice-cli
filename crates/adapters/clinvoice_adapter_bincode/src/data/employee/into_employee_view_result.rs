@@ -111,7 +111,7 @@ mod tests
 			};
 
 			let contact_info_view: Vec<ContactView> = vec![
-				ContactView::Address(earth_view.clone())
+				earth_view.clone().into()
 			];
 
 			let ceo_testy_view = EmployeeView

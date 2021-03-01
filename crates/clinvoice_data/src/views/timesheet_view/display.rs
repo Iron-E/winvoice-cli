@@ -83,7 +83,7 @@ mod tests
 		};
 
 		let contact_info = vec![
-			ContactView::Address(street_view.clone()),
+			street_view.clone().into(),
 			ContactView::Email("foo@bar.io".into()),
 			ContactView::Phone("1-800-555-5555".into()),
 		];

@@ -88,7 +88,7 @@ mod tests
 		let employee = EmployeeView
 		{
 			contact_info: vec![
-				ContactView::Address(work_street_view.clone()),
+				work_street_view.clone().into(),
 				ContactView::Email("foo@bar.io".into()),
 			],
 			id: Id::new_v4(),
@@ -101,7 +101,7 @@ mod tests
 			person: PersonView
 			{
 				contact_info: vec![
-				ContactView::Address(home_street_view.clone()),
+				home_street_view.clone().into(),
 				ContactView::Email("bar@foo.io".into()),
 				],
 				id: Id::new_v4(),

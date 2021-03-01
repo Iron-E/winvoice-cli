@@ -15,30 +15,35 @@ impl Into<DynamicResult<EmployeeView>> for BincodeEmployee<'_, '_, '_>
 	fn into(self) -> DynamicResult<EmployeeView>
 
 	{
+		let id = self.employee.id;
+		let status = self.employee.status;
+		let store = self.store;
+		let title = self.employee.title.clone();
+
 		let contact_info_view = contact::into_views(self.employee.contact_info.clone(), self.store)?;
 
 		let organization_result: DynamicResult<Organization> = self.clone().into();
 		let organization_view_result: DynamicResult<OrganizationView> = BincodeOrganization
 		{
 			organization: organization_result?,
-			store: self.store,
+			store,
 		}.into();
 
-		let person_result: DynamicResult<Person> = self.clone().into();
+		let person_result: DynamicResult<Person> = self.into();
 		let person_view_result: DynamicResult<PersonView> = BincodePerson
 		{
 			person: person_result?,
-			store: self.store,
+			store,
 		}.into();
 
 		Ok(EmployeeView
 		{
 			contact_info: contact_info_view,
-			id: self.employee.id,
+			id,
 			organization: organization_view_result?,
 			person: person_view_result?,
-			status: self.employee.status,
-			title: self.employee.title,
+			status,
+			title,
 		})
 	}
 }

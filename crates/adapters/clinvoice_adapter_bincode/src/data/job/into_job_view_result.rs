@@ -18,16 +18,25 @@ impl Into<DynamicResult<JobView>> for BincodeJob<'_, '_, '_>
 {
 	fn into(self) -> DynamicResult<JobView>
 	{
-		let organization_result: DynamicResult<Organization> = self.clone().into();
+		let date_close = self.job.date_close;
+		let date_open = self.job.date_open;
+		let id = self.job.id;
+		let invoice = self.job.invoice.clone();
+		let notes = self.job.notes.clone();
+		let objectives = self.job.objectives.clone();
+		let store = self.store;
+		let timesheets = self.job.timesheets.clone();
+
+		let organization_result: DynamicResult<Organization> = self.into();
 		let organization_view_result: DynamicResult<OrganizationView> = BincodeOrganization
 		{
 			organization: organization_result?,
-			store: self.store,
+			store,
 		}.into();
 
-		let mut timesheet_views = Vec::<TimesheetView>::with_capacity(self.job.timesheets.len());
+		let mut timesheet_views = Vec::<TimesheetView>::with_capacity(timesheets.len());
 
-		for timesheet in self.job.timesheets
+		for timesheet in timesheets
 		{
 			let employee_view_result: DynamicResult<EmployeeView> = match BincodeEmployee::retrieve(
 				MatchWhen::Any, // contact_info
@@ -36,7 +45,7 @@ impl Into<DynamicResult<JobView>> for BincodeJob<'_, '_, '_>
 				MatchWhen::Any, // person
 				MatchWhen::Any, // title
 				MatchWhen::Any, // status
-				self.store,
+				store,
 			)?.first()
 			{
 				Some(first) => first.clone().into(),
@@ -56,12 +65,12 @@ impl Into<DynamicResult<JobView>> for BincodeJob<'_, '_, '_>
 		Ok(JobView
 		{
 			client: organization_view_result?,
-			date_close: self.job.date_close,
-			date_open: self.job.date_open,
-			id: self.job.id,
-			invoice: self.job.invoice,
-			notes: self.job.notes,
-			objectives: self.job.objectives,
+			date_close,
+			date_open,
+			id,
+			invoice,
+			notes,
+			objectives,
 			timesheets: timesheet_views,
 		})
 	}

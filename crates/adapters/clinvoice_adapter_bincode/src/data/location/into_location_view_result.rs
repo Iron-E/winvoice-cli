@@ -10,29 +10,26 @@ impl Into<DynamicResult<LocationView>> for BincodeLocation<'_, '_, '_>
 	fn into(self) -> DynamicResult<LocationView>
 	{
 		let mut outer_locations = self.outer_locations()?;
-		let mut outer_location_views = Vec::<LocationView>::with_capacity(outer_locations.len());
-
 		outer_locations.reverse();
 
+		let mut previous_view: Option<LocationView> = None;
 		for i in 0..outer_locations.len()
 		{
 			let outer_location = &outer_locations[i];
-			outer_location_views.push(LocationView::new(
-				outer_location.id,
-				outer_location.name.clone(),
-				match i
-				{
-					0 => None,
-					_ => Some(&outer_location_views[i-1]),
-				},
-			));
+			previous_view = Some(LocationView
+			{
+				id: outer_location.id,
+				name: outer_location.name.clone(),
+				outer: previous_view.map(|l| l.into()),
+			});
 		}
 
-		Ok(LocationView::new(
-			self.location.id,
-			self.location.name,
-			outer_location_views.last(),
-		))
+		Ok(LocationView
+		{
+			id: self.location.id,
+			name: self.location.name,
+			outer: previous_view.map(|l| l.into()),
+		})
 	}
 }
 

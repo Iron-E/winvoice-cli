@@ -1,5 +1,7 @@
-pub mod error;
+mod error;
 pub mod util;
+
+pub use error::Error;
 
 use
 {
@@ -29,7 +31,7 @@ pub fn edit<T>(entity: T) -> DynamicResult<T> where
 	Ok(match toml_editor().edit(&toml::to_string_pretty(&entity)?)?
 	{
 		Some(edited) => toml::from_str(&edited)?,
-		None => entity,
+		None => Error::NotEdited,
 	})
 }
 

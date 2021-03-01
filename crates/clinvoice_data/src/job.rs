@@ -1,5 +1,6 @@
 mod from_view;
 mod hash;
+mod partial_eq;
 
 use
 {
@@ -27,7 +28,7 @@ const MINUTES_PER_HOUR: i8 = 60;
 /// structures may define [the method of payment](Invoice),
 /// [client](Organization) information, and [work periods](Timesheet)— this
 /// structure defines what work _may_ performed.
-#[derive(Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Eq, Ord, PartialOrd)]
 #[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
 pub struct Job
 {

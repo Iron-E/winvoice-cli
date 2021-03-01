@@ -1,5 +1,6 @@
 mod from_view;
 mod hash;
+mod partial_eq;
 
 use crate::{Contact, EmployeeStatus, Id};
 
@@ -10,7 +11,7 @@ use serde::{Deserialize, Serialize};
 ///
 /// An `Employee` is a [`Person`](super::person::Person) who completes [`Job`](super::job::Job)s
 /// for an [employer](crate::Organization).
-#[derive(Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Eq, Ord, PartialOrd)]
 #[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
 pub struct Employee
 {

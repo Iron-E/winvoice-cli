@@ -20,7 +20,10 @@ struct SerdeWrapper<T> { value: T }
 pub fn contact_info<'pass, 'path, 'user, L>(store: Store<'pass, 'path, 'user>) -> DynamicResult<Vec<Contact>>
 	where L : LocationAdapter<'pass, 'path, 'user>
 {
-	let locations = select_location_or_err::<L, &str>(store, "Select locations to be part of the contact info.")?;
+	let locations = super::select(
+		&retrieve_locations_or_err::<L>(store)?,
+		"Select locations to be part of the contact info.",
+	)?;
 
 	let mut contact_info = super::select(
 		&locations.into_iter().map(|l| l.into()).collect::<Vec<ContactView>>(),
@@ -47,9 +50,8 @@ pub fn contact_info<'pass, 'path, 'user, L>(store: Store<'pass, 'path, 'user>) -
 ///
 /// [L_retrieve]: clinvoice_adapter::data::LocationAdapter::retrieve
 /// [location]: clinvoice_data::Location
-pub fn select_location_or_err<'pass, 'path, 'user, L, S>(store: Store<'pass, 'path, 'user>, prompt: S) -> DynamicResult<Vec<LocationView>> where
+pub fn retrieve_locations_or_err<'pass, 'path, 'user, L>(store: Store<'pass, 'path, 'user>) -> DynamicResult<Vec<LocationView>> where
 	L : LocationAdapter<'pass, 'path, 'user>,
-	S : Into<String>,
 {
 	let locations = L::retrieve(MatchWhen::Any, MatchWhen::Any, MatchWhen::Any, store)?;
 
@@ -58,16 +60,12 @@ pub fn select_location_or_err<'pass, 'path, 'user, L, S>(store: Store<'pass, 'pa
 		return Err(Error::NoData {entity: stringify!(Location)}.into());
 	}
 
-	Ok(super::select(
-		&locations.into_iter().try_fold(
-			Vec::new(),
-			|mut v, l| -> DynamicResult<Vec<LocationView>>
-			{
-				let result: DynamicResult<LocationView> = l.into();
-				v.push(result?);
-				Ok(v)
-			}
-		)?,
-		prompt
+	Ok(locations.into_iter().try_fold(Vec::new(),
+		|mut v, l| -> DynamicResult<Vec<LocationView>>
+		{
+			let result: DynamicResult<LocationView> = l.into();
+			v.push(result?);
+			Ok(v)
+		},
 	)?)
 }

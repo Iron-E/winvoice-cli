@@ -20,7 +20,7 @@ struct SerdeWrapper<T> { value: T }
 pub fn contact_info<'pass, 'path, 'user, L>(store: Store<'pass, 'path, 'user>) -> DynamicResult<Vec<Contact>>
 	where L : LocationAdapter<'pass, 'path, 'user>
 {
-	let locations = select_location_or_quit::<L, &str>(store, "Select locations to be part of the contact info.")?;
+	let locations = select_location_or_err::<L, &str>(store, "Select locations to be part of the contact info.")?;
 
 	let mut contact_info = super::select(
 		&locations.into_iter().map(|l| l.into()).collect::<Vec<ContactView>>(),
@@ -33,7 +33,7 @@ pub fn contact_info<'pass, 'path, 'user, L>(store: Store<'pass, 'path, 'user>) -
 	Ok(super::edit(SerdeWrapper {value: contact_info})?.value.into_iter().map(|c| c.into()).collect())
 }
 
-pub fn select_location_or_quit<'pass, 'path, 'user, L, S>(store: Store<'pass, 'path, 'user>, prompt: S) -> DynamicResult<Vec<LocationView>> where
+pub fn select_location_or_err<'pass, 'path, 'user, L, S>(store: Store<'pass, 'path, 'user>, prompt: S) -> DynamicResult<Vec<LocationView>> where
 	L : LocationAdapter<'pass, 'path, 'user>,
 	S : Into<String>,
 {

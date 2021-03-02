@@ -64,7 +64,14 @@ impl<'pass, 'path, 'user> Create
 
 				Self::Location {name} => BincodeLocation::create(&name, *store).and(Ok(())),
 
-				Self::Organization {name} => todo!() /*BincodeOrganization::create(*store).and(Ok(()))*/,
+				Self::Organization {name} => BincodeOrganization::create(
+					input::select_one(
+						&input::util::retrieve_locations_or_err::<BincodeLocation>(*store)?,
+						format!("Select a Location for {}", name),
+					)?.into(),
+					&name,
+					*store
+				).and(Ok(())),
 
 				Self::Person {name} => BincodePerson::create(
 					input::util::contact_info::<BincodeLocation>(*store)?,

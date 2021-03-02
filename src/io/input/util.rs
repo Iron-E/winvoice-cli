@@ -33,6 +33,20 @@ pub fn contact_info<'pass, 'path, 'user, L>(store: Store<'pass, 'path, 'user>) -
 	Ok(super::edit(SerdeWrapper {value: contact_info})?.value.into_iter().map(|c| c.into()).collect())
 }
 
+/// # Summary
+///
+/// Retrieve all [`Location`][location]s from the specified `store` and [select](super::select)
+/// them with a `prompt`. If not [`Location`][location]s are retrieved, return an
+/// [error](Error::NoData).
+///
+/// # Errors
+///
+/// * If the [retrieval][L_retrieve] operation fails, its error is forwarded.
+/// * If no [`Location`][location]s are [retrieved][L_retrieve], an [`Error::NoData`] is returned.
+/// * If the [selection](super::select) operation fails, its error is forwarded.
+///
+/// [L_retrieve]: clinvoice_adapter::data::LocationAdapter::retrieve
+/// [location]: clinvoice_data::Location
 pub fn select_location_or_err<'pass, 'path, 'user, L, S>(store: Store<'pass, 'path, 'user>, prompt: S) -> DynamicResult<Vec<LocationView>> where
 	L : LocationAdapter<'pass, 'path, 'user>,
 	S : Into<String>,

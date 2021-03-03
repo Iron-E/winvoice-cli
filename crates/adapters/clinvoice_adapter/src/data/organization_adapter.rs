@@ -1,19 +1,22 @@
 use
 {
 	super::{Deletable, Initializable, MatchWhen, Updatable},
-	crate::{DynamicResult, Store},
+	crate::Store,
 	clinvoice_data::{Employee, Location, Organization, Id, views::OrganizationView},
+	std::error::Error,
 };
 
-pub trait OrganizationAdapter<'pass, 'path, 'user> :
-	Deletable +
-	Initializable +
+pub trait OrganizationAdapter<'pass, 'path, 'user, E>  :
+	Deletable<E> +
+	Initializable<E> +
 	Into<Organization> +
-	Into<DynamicResult<Vec<Employee>>> +
-	Into<DynamicResult<Location>> +
-	Into<DynamicResult<OrganizationView>> +
+	Into<Result<Vec<Employee>, E>> +
+	Into<Result<Location, E>> +
+	Into<Result<OrganizationView, E>> +
 	Into<Store<'pass, 'path, 'user>> +
-	Updatable +
+	Updatable<E> +
+where
+	 E : Error,
 {
 	/// # Summary
 	///
@@ -30,7 +33,7 @@ pub trait OrganizationAdapter<'pass, 'path, 'user> :
 		location: Location,
 		name: &str,
 		store: Store<'pass, 'path, 'user>,
-	) -> DynamicResult<Self>;
+	) -> Result<Self, E>;
 
 	/// # Summary
 	///
@@ -49,5 +52,5 @@ pub trait OrganizationAdapter<'pass, 'path, 'user> :
 		location: MatchWhen<Id>,
 		name: MatchWhen<String>,
 		store: Store<'pass, 'path, 'user>,
-	) -> DynamicResult<Vec<Self>>;
+	) -> Result<Vec<Self>, E>;
 }

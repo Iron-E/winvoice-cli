@@ -1,17 +1,20 @@
 use
 {
 	super::{Deletable, Initializable, MatchWhen, Updatable},
-	crate::{DynamicResult, Store},
+	crate::Store,
 	clinvoice_data::{Contact, Person, Id, views::PersonView},
+	std::error::Error,
 };
 
-pub trait PersonAdapter<'pass, 'path, 'user> :
-	Deletable +
-	Initializable +
+pub trait PersonAdapter<'pass, 'path, 'user, E> :
+	Deletable<E> +
+	Initializable<E> +
 	Into<Person> +
-	Into<DynamicResult<PersonView>> +
+	Into<Result<PersonView, E>> +
 	Into<Store<'pass, 'path, 'user>> +
-	Updatable +
+	Updatable<E> +
+where
+	E : Error,
 {
 	/// # Summary
 	///
@@ -28,7 +31,7 @@ pub trait PersonAdapter<'pass, 'path, 'user> :
 		contact_info: Vec<Contact>,
 		name: &str,
 		store: Store<'pass, 'path, 'user>,
-	) -> DynamicResult<Self>;
+	) -> Result<Self, E>;
 
 	/// # Summary
 	///
@@ -47,5 +50,5 @@ pub trait PersonAdapter<'pass, 'path, 'user> :
 		id: MatchWhen<Id>,
 		name: MatchWhen<String>,
 		store: Store<'pass, 'path, 'user>,
-	) -> DynamicResult<Vec<Self>>;
+	) -> Result<Vec<Self>, E>;
 }

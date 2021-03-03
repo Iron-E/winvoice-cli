@@ -1,9 +1,10 @@
-use crate::{DynamicResult, Store};
+use crate::Store;
+use std::error::Error;
 
-pub trait Initializable
+pub trait Initializable<E> where E : Error
 {
 	/// # Summary
 	///
 	/// Initialize the database for a given [`Store`].
-	fn init(store: &Store) -> DynamicResult<()>;
+	fn init(store: &Store) -> Result<(), E>;
 }

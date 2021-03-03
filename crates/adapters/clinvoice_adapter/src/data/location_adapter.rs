@@ -1,18 +1,21 @@
 use
 {
-	super::{MatchWhen, Deletable, Error, Initializable, Updatable},
-	crate::{DynamicResult, Store},
+	super::{MatchWhen, Deletable, Initializable, Updatable},
+	crate::Store,
 	clinvoice_data::{Location, Id, views::LocationView},
+	std::error::Error,
 };
 
-pub trait LocationAdapter<'pass, 'path, 'user> :
+pub trait LocationAdapter<'pass, 'path, 'user, E> :
 	Clone +
-	Deletable +
-	Initializable +
+	Deletable<E> +
+	Initializable<E> +
 	Into<Location> +
-	Into<DynamicResult<LocationView>> +
+	Into<Result<LocationView, E>> +
 	Into<Store<'pass, 'path, 'user>> +
-	Updatable +
+	Updatable<E> +
+where
+	 E : Error,
 {
 	/// # Summary
 	///
@@ -27,7 +30,7 @@ pub trait LocationAdapter<'pass, 'path, 'user> :
 	/// ```ignore
 	/// Location {name, id: /* generated */};
 	/// ```
-	fn create(name: &str, store: Store<'pass, 'path, 'user>) -> DynamicResult<Self>;
+	fn create(name: &str, store: Store<'pass, 'path, 'user>) -> Result<Self, E>;
 
 	/// # Summary
 	///
@@ -42,12 +45,12 @@ pub trait LocationAdapter<'pass, 'path, 'user> :
 	/// ```ignore
 	/// Location {name, id: /* generated */, outside_id: self.unroll().id};
 	/// ```
-	fn create_inner(&self, name: &str) -> DynamicResult<Self>;
+	fn create_inner(&self, name: &str) -> Result<Self, E>;
 
 	/// # Summary
 	///
 	/// Get the [`Location`]s which contain this [`Location`].
-	fn outer_locations(&self) -> Result<Vec<Location>, Error>
+	fn outer_locations(&self) -> Result<Vec<Location>, super::Error>
 	{
 		let mut outer_locations = Vec::<Location>::new();
 
@@ -74,7 +77,7 @@ pub trait LocationAdapter<'pass, 'path, 'user> :
 				}
 			}
 
-			return Err(Error::DataIntegrity {id});
+			return Err(super::Error::DataIntegrity {id});
 		}
 
 		Ok(outer_locations)
@@ -97,5 +100,5 @@ pub trait LocationAdapter<'pass, 'path, 'user> :
 		name: MatchWhen<String>,
 		outer: MatchWhen<Option<Id>>,
 		store: Store<'pass, 'path, 'user>,
-	) -> DynamicResult<Vec<Self>>;
+	) -> Result<Vec<Self>, E>;
 }

@@ -1,9 +1,9 @@
-use crate::DynamicResult;
+use std::error::Error;
 
 /// # Summary
 ///
 /// A structure which can be updated on some remote [`Store`][store].
-pub trait Updatable
+pub trait Updatable<E> where E : Error
 {
 	/// # Summary
 	///
@@ -23,5 +23,5 @@ pub trait Updatable
 	/// * An `Error`, when something goes wrong.
 	///
 	/// [store]: crate::Store
-	fn update(&self) -> DynamicResult<()>;
+	fn update(&self) -> Result<(), E>;
 }

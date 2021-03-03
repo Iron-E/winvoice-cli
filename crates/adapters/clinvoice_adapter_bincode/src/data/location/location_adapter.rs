@@ -15,8 +15,10 @@ use
 	std::{fs, io::BufReader},
 };
 
-impl<'pass, 'path, 'user> LocationAdapter<'pass, 'path, 'user, Error> for BincodeLocation<'pass, 'path, 'user>
+impl<'pass, 'path, 'user> LocationAdapter<'pass, 'path, 'user> for BincodeLocation<'pass, 'path, 'user>
 {
+	type Error = Error;
+
 	/// # Summary
 	///
 	/// Create a new `Location` with a generated ID.

@@ -15,8 +15,10 @@ use
 	std::{fs, io::BufReader},
 };
 
-impl<'pass, 'path, 'user> OrganizationAdapter<'pass, 'path, 'user, Error> for BincodeOrganization<'pass, 'path, 'user>
+impl<'pass, 'path, 'user> OrganizationAdapter<'pass, 'path, 'user> for BincodeOrganization<'pass, 'path, 'user>
 {
+	type Error = Error;
+
 	/// # Summary
 	///
 	/// Create a new [`Organization`] on the active [`Store`](crate::Store).

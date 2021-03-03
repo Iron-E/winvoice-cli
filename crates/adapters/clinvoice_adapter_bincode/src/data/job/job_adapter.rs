@@ -19,8 +19,10 @@ use
 	std::{fs, io::BufReader},
 };
 
-impl<'pass, 'path, 'user> JobAdapter<'pass, 'path, 'user, Error> for BincodeJob<'pass, 'path, 'user>
+impl<'pass, 'path, 'user> JobAdapter<'pass, 'path, 'user> for BincodeJob<'pass, 'path, 'user>
 {
+	type Error = Error;
+
 	/// # Summary
 	///
 	/// Create a new [`Person`] on the active [`Store`](crate::Store).

@@ -15,8 +15,10 @@ use
 	std::{fs, io::BufReader},
 };
 
-impl<'pass, 'path, 'user> PersonAdapter<'pass, 'path, 'user, Error> for BincodePerson<'pass, 'path, 'user>
+impl<'pass, 'path, 'user> PersonAdapter<'pass, 'path, 'user> for BincodePerson<'pass, 'path, 'user>
 {
+	type Error = Error;
+
 	/// # Summary
 	///
 	/// Create a new [`Person`] on the active [`Store`](crate::Store).

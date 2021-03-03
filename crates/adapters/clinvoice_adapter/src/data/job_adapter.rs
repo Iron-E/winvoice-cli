@@ -10,17 +10,17 @@ use
 	std::error::Error,
 };
 
-pub trait JobAdapter<'pass, 'path, 'user, E> :
-	Deletable<E> +
-	Initializable<E> +
+pub trait JobAdapter<'pass, 'path, 'user> :
+	Deletable<Self::Error> +
+	Initializable<Self::Error> +
 	Into<Job> +
-	Into<Result<JobView, E>> +
-	Into<Result<Organization, E>> +
+	Into<Result<JobView, Self::Error>> +
+	Into<Result<Organization, Self::Error>> +
 	Into<Store<'pass, 'path, 'user>> +
-	Updatable<E> +
-where
-	 E : Error,
+	Updatable<Self::Error> +
 {
+	type Error : Error;
+
 	/// # Summary
 	///
 	/// Create a new [`Person`] on the active [`Store`](crate::Store).
@@ -38,7 +38,7 @@ where
 		hourly_rate: Money,
 		objectives: &str,
 		store: Store<'pass, 'path, 'user>,
-	) -> Result<Self, E>;
+	) -> Result<Self, Self::Error>;
 
 	/// # Summary
 	///
@@ -65,5 +65,5 @@ where
 		timesheet_begin: MatchWhen<DateTime<Utc>>,
 		timesheet_end: MatchWhen<Option<DateTime<Utc>>>,
 		store: Store<'pass, 'path, 'user>,
-	) -> Result<Vec<Self>, E>;
+	) -> Result<Vec<Self>, Self::Error>;
 }

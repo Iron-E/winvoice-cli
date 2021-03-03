@@ -6,16 +6,16 @@ use
 	std::error::Error,
 };
 
-pub trait PersonAdapter<'pass, 'path, 'user, E> :
-	Deletable<E> +
-	Initializable<E> +
+pub trait PersonAdapter<'pass, 'path, 'user> :
+	Deletable<Self::Error> +
+	Initializable<Self::Error> +
 	Into<Person> +
-	Into<Result<PersonView, E>> +
+	Into<Result<PersonView, Self::Error>> +
 	Into<Store<'pass, 'path, 'user>> +
-	Updatable<E> +
-where
-	E : Error,
+	Updatable<Self::Error> +
 {
+	type Error : Error;
+
 	/// # Summary
 	///
 	/// Create a new [`Person`] on the active [`Store`](crate::Store).
@@ -31,7 +31,7 @@ where
 		contact_info: Vec<Contact>,
 		name: &str,
 		store: Store<'pass, 'path, 'user>,
-	) -> Result<Self, E>;
+	) -> Result<Self, Self::Error>;
 
 	/// # Summary
 	///
@@ -50,5 +50,5 @@ where
 		id: MatchWhen<Id>,
 		name: MatchWhen<String>,
 		store: Store<'pass, 'path, 'user>,
-	) -> Result<Vec<Self>, E>;
+	) -> Result<Vec<Self>, Self::Error>;
 }

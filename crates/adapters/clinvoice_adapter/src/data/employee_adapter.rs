@@ -6,18 +6,18 @@ use
 	std::error::Error,
 };
 
-pub trait EmployeeAdapter<'pass, 'path, 'user, E> :
-	Deletable<E> +
-	Initializable<E> +
+pub trait EmployeeAdapter<'pass, 'path, 'user> :
+	Deletable<Self::Error> +
+	Initializable<Self::Error> +
 	Into<Employee> +
-	Into<Result<EmployeeView, E>> +
-	Into<Result<Organization, E>> +
-	Into<Result<Person, E>> +
+	Into<Result<EmployeeView, Self::Error>> +
+	Into<Result<Organization, Self::Error>> +
+	Into<Result<Person, Self::Error>> +
 	Into<Store<'pass, 'path, 'user>> +
-	Updatable<E> +
-where
-	 E : Error,
+	Updatable<Self::Error> +
 {
+	type Error : Error;
+
 	/// # Summary
 	///
 	/// Create some [`Employee`] on an active [`Store`](crate::Store).
@@ -37,7 +37,7 @@ where
 		title: &str,
 		status: EmployeeStatus,
 		store: Store<'pass, 'path, 'user>,
-	) -> Result<Self, E>;
+	) -> Result<Self, Self::Error>;
 
 	/// # Summary
 	///
@@ -59,5 +59,5 @@ where
 		title: MatchWhen<String>,
 		status: MatchWhen<EmployeeStatus>,
 		store: Store<'pass, 'path, 'user>,
-	) -> Result<Vec<Self>, E>;
+	) -> Result<Vec<Self>, Self::Error>;
 }

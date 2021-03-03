@@ -6,17 +6,17 @@ use
 	std::error::Error,
 };
 
-pub trait LocationAdapter<'pass, 'path, 'user, E> :
+pub trait LocationAdapter<'pass, 'path, 'user> :
 	Clone +
-	Deletable<E> +
-	Initializable<E> +
+	Deletable<Self::Error> +
+	Initializable<Self::Error> +
 	Into<Location> +
-	Into<Result<LocationView, E>> +
+	Into<Result<LocationView, Self::Error>> +
 	Into<Store<'pass, 'path, 'user>> +
-	Updatable<E> +
-where
-	 E : Error,
+	Updatable<Self::Error> +
 {
+	type Error : Error;
+
 	/// # Summary
 	///
 	/// Create a new `Location` with a generated ID.
@@ -30,7 +30,7 @@ where
 	/// ```ignore
 	/// Location {name, id: /* generated */};
 	/// ```
-	fn create(name: &str, store: Store<'pass, 'path, 'user>) -> Result<Self, E>;
+	fn create(name: &str, store: Store<'pass, 'path, 'user>) -> Result<Self, Self::Error>;
 
 	/// # Summary
 	///
@@ -45,7 +45,7 @@ where
 	/// ```ignore
 	/// Location {name, id: /* generated */, outside_id: self.unroll().id};
 	/// ```
-	fn create_inner(&self, name: &str) -> Result<Self, E>;
+	fn create_inner(&self, name: &str) -> Result<Self, Self::Error>;
 
 	/// # Summary
 	///
@@ -100,5 +100,5 @@ where
 		name: MatchWhen<String>,
 		outer: MatchWhen<Option<Id>>,
 		store: Store<'pass, 'path, 'user>,
-	) -> Result<Vec<Self>, E>;
+	) -> Result<Vec<Self>, Self::Error>;
 }

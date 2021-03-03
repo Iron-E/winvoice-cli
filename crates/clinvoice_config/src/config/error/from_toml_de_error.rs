@@ -1,9 +1,9 @@
-use toml::ser::Error;
+use toml::de::Error;
 
 impl From<Error> for super::Error
 {
 	fn from(err: Error) -> Self
 	{
-		Self::Toml {err}
+		Self::TomlDe {err}
 	}
 }

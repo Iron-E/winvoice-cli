@@ -1,5 +1,6 @@
 mod from_io_error;
-mod from_toml_error;
+mod from_toml_de_error;
+mod from_toml_ser_error;
 
 use
 {
@@ -16,7 +17,11 @@ pub enum Error
 
 	#[cfg_attr(debug_assertions,      snafu(display("{:?}", err)))]
 	#[cfg_attr(not(debug_assertions), snafu(display("{}",   err)))]
-	Toml {err: toml::ser::Error},
+	TomlDe {err: toml::de::Error},
+
+	#[cfg_attr(debug_assertions,      snafu(display("{:?}", err)))]
+	#[cfg_attr(not(debug_assertions), snafu(display("{}",   err)))]
+	TomlSer {err: toml::ser::Error},
 }
 
 pub type Result<T> = StdResult<T, Error>;

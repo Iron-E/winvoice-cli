@@ -1,11 +1,10 @@
 mod error;
 pub mod util;
 
-pub use error::Error;
+pub use error::{Error, Result};
 
 use
 {
-	clinvoice_adapter::DynamicResult,
 	std::{fmt::Display, io},
 	dialoguer::{Editor, MultiSelect, Select},
 	serde::{de::DeserializeOwned, Serialize},
@@ -24,14 +23,14 @@ use
 ///
 /// * The deserialized entity with values filled in by the user.
 /// * An [`Error`] encountered while creating, editing, or removing the temporary file.
-pub fn edit<T>(entity: T) -> DynamicResult<T> where
+pub fn edit<T>(entity: T) -> Result<T> where
 	T : DeserializeOwned + Serialize
 {
 	// Write the entity to the `temp_path` and then edit that file.
 	match toml_editor().edit(&toml::to_string_pretty(&entity)?)?
 	{
 		Some(edited) => Ok(toml::from_str(&edited)?),
-		_ => Err(Error::NotEdited.into()),
+		_ => Err(Error::NotEdited),
 	}
 }
 
@@ -44,7 +43,7 @@ pub fn edit<T>(entity: T) -> DynamicResult<T> where
 /// * The deserialized entity with values filled in by the user.
 /// * An [`Error`] encountered while creating, editing, or removing the temporary file.
 pub fn select<T>(entities: &[T], prompt: impl Into<String>) -> io::Result<Vec<T>> where
-	T : Clone + DeserializeOwned + Display + Serialize
+	T : Clone + Display
 {
 
 	let selection = MultiSelect::new().items(entities).paged(true).with_prompt(prompt).interact()?;
@@ -63,7 +62,7 @@ pub fn select<T>(entities: &[T], prompt: impl Into<String>) -> io::Result<Vec<T>
 /// * The deserialized entity with values filled in by the user.
 /// * An [`Error`] encountered while creating, editing, or removing the temporary file.
 pub fn select_one<T>(entities: &[T], prompt: impl Into<String>) -> io::Result<T> where
-	T : Clone + DeserializeOwned + Display + Serialize
+	T : Clone + Display
 {
 
 	let selection = Select::new().items(entities).paged(true).with_prompt(prompt).interact()?;

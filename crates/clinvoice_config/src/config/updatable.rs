@@ -1,13 +1,13 @@
 use
 {
-	super::Config,
-	clinvoice_adapter::{data::Updatable, DynamicResult},
+	super::{Config, Error, Result},
+	clinvoice_adapter::data::Updatable,
 	std::fs,
 };
 
-impl Updatable for Config<'_, '_, '_, '_, '_, '_>
+impl Updatable<Error> for Config<'_, '_, '_, '_, '_, '_>
 {
-	fn update(&self) -> DynamicResult<()>
+	fn update(&self) -> Result<()>
 	{
 		let path = Self::path();
 

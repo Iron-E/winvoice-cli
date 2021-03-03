@@ -21,6 +21,9 @@ dirs = "3"
 # Durations
 humantime-serde = "1"
 
+# Errors
+snafu = "0.6"
+
 # Serialization
 serde = {version="1", features=["derive"]}
 toml = "0.5"

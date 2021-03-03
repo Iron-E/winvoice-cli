@@ -1,14 +1,12 @@
-mod employees;
-mod invoices;
-mod store_value;
-mod timesheets;
+mod error;
 mod updatable;
 
-pub use {employees::Employees, invoices::Invoices, store_value::StoreValue, timesheets::Timesheets};
+pub use error::{Error, Result};
 
 use
 {
-	clinvoice_adapter::{Adapters, DynamicResult, data::Updatable, Store},
+	crate::{Employees, Invoices, StoreValue, Timesheets},
+	clinvoice_adapter::{Adapters, data::Updatable, Store},
 	clinvoice_data::Id,
 	std::{collections::BTreeMap, path::PathBuf, time::Duration},
 	serde::{Deserialize, Serialize},
@@ -48,7 +46,7 @@ impl Config<'_, '_, '_, '_, '_, '_>
 	/// # Summary
 	///
 	/// Create a configuration file with some defaults.
-	pub fn init() -> DynamicResult<()>
+	pub fn init() -> Result<()>
 	{
 		if !Self::path().is_file()
 		{

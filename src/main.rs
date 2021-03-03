@@ -1,10 +1,12 @@
 mod app;
+mod dyn_result;
 mod io;
 
 use
 {
 	app::App,
 	clinvoice_config::Config,
+	dyn_result::DynResult,
 	structopt::StructOpt,
 	std::{error::Error, fs, process},
 };
@@ -26,7 +28,7 @@ fn exit_with_err<E>(error: E) -> ! where E : Error
 fn main()
 {
 	// Create a default user configuration if not already present.
-	Config::init().unwrap_or_else(|e| exit_with_err(e.as_ref()));
+	Config::init().unwrap_or_else(|e| exit_with_err(e));
 
 	// Get the user configuration.
 	let config_bytes = fs::read(Config::path()).unwrap_or_else(|e| exit_with_err(e));

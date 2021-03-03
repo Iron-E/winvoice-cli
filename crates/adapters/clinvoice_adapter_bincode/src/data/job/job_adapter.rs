@@ -1,11 +1,15 @@
 use
 {
 	super::BincodeJob,
-	crate::util,
+	crate::
+	{
+		data::{Error, Result},
+		util,
+	},
 	clinvoice_adapter::
 	{
 		data::{Initializable, JobAdapter, MatchWhen, Updatable},
-		DynamicResult, Store
+		Store
 	},
 	clinvoice_data::
 	{
@@ -15,7 +19,7 @@ use
 	std::{fs, io::BufReader},
 };
 
-impl<'pass, 'path, 'user> JobAdapter<'pass, 'path, 'user> for BincodeJob<'pass, 'path, 'user>
+impl<'pass, 'path, 'user> JobAdapter<'pass, 'path, 'user, Error> for BincodeJob<'pass, 'path, 'user>
 {
 	/// # Summary
 	///
@@ -34,7 +38,7 @@ impl<'pass, 'path, 'user> JobAdapter<'pass, 'path, 'user> for BincodeJob<'pass, 
 		hourly_rate: Money,
 		objectives: &str,
 		store: Store<'pass, 'path, 'user>,
-	) -> DynamicResult<Self>
+	) -> Result<Self>
 	{
 		Self::init(&store)?;
 
@@ -88,7 +92,7 @@ impl<'pass, 'path, 'user> JobAdapter<'pass, 'path, 'user> for BincodeJob<'pass, 
 		timesheet_begin: MatchWhen<DateTime<Utc>>,
 		timesheet_end: MatchWhen<Option<DateTime<Utc>>>,
 		store: Store<'pass, 'path, 'user>,
-	) -> DynamicResult<Vec<Self>>
+	) -> Result<Vec<Self>>
 	{
 		Self::init(&store)?;
 

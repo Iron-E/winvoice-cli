@@ -1,13 +1,14 @@
 use
 {
 	super::BincodeLocation,
-	clinvoice_adapter::{data::LocationAdapter, DynamicResult},
+	crate::data::Result,
+	clinvoice_adapter::data::LocationAdapter,
 	clinvoice_data::views::LocationView,
 };
 
-impl Into<DynamicResult<LocationView>> for BincodeLocation<'_, '_, '_>
+impl Into<Result<LocationView>> for BincodeLocation<'_, '_, '_>
 {
-	fn into(self) -> DynamicResult<LocationView>
+	fn into(self) -> Result<LocationView>
 	{
 		let mut outer_locations = self.outer_locations()?;
 		outer_locations.reverse();
@@ -38,7 +39,7 @@ mod tests
 {
 	use
 	{
-		super::{BincodeLocation, DynamicResult, LocationAdapter, LocationView},
+		super::{BincodeLocation, Result, LocationAdapter, LocationView},
 		crate::util,
 		std::time::Instant,
 	};
@@ -81,7 +82,7 @@ mod tests
 			};
 
 			let start = Instant::now();
-			let phoenix_view_result: DynamicResult<LocationView> = phoenix.into();
+			let phoenix_view_result: Result<LocationView> = phoenix.into();
 			println!("\n>>>>> BincodeLocation::into_view {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 
 			assert_eq!(phoenix_view, phoenix_view_result.unwrap());

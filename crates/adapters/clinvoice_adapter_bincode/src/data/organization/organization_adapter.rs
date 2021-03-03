@@ -1,17 +1,21 @@
 use
 {
 	super::BincodeOrganization,
-	crate::util,
+	crate::
+	{
+		data::{Error, Result},
+		util,
+	},
 	clinvoice_adapter::
 	{
 		data::{Initializable, MatchWhen, OrganizationAdapter, Updatable},
-		DynamicResult, Store,
+		Store,
 	},
 	clinvoice_data::{Location, Organization, Id},
 	std::{fs, io::BufReader},
 };
 
-impl<'pass, 'path, 'user> OrganizationAdapter<'pass, 'path, 'user> for BincodeOrganization<'pass, 'path, 'user>
+impl<'pass, 'path, 'user> OrganizationAdapter<'pass, 'path, 'user, Error> for BincodeOrganization<'pass, 'path, 'user>
 {
 	/// # Summary
 	///
@@ -28,7 +32,7 @@ impl<'pass, 'path, 'user> OrganizationAdapter<'pass, 'path, 'user> for BincodeOr
 		location: Location,
 		name: &str,
 		store: Store<'pass, 'path, 'user>,
-	) -> DynamicResult<Self>
+	) -> Result<Self>
 	{
 		Self::init(&store)?;
 
@@ -65,7 +69,7 @@ impl<'pass, 'path, 'user> OrganizationAdapter<'pass, 'path, 'user> for BincodeOr
 		location: MatchWhen<Id>,
 		name: MatchWhen<String>,
 		store: Store<'pass, 'path, 'user>,
-	) -> DynamicResult<Vec<Self>>
+	) -> Result<Vec<Self>>
 	{
 		Self::init(&store)?;
 

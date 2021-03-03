@@ -1,18 +1,14 @@
 use
 {
 	super::BincodeOrganization,
-	crate::data::{BincodeEmployee, BincodeJob},
-	clinvoice_adapter::
-	{
-		data::{Deletable, EmployeeAdapter, JobAdapter, MatchWhen},
-		DynamicResult,
-	},
+	crate::data::{BincodeEmployee, BincodeJob, Error, Result},
+	clinvoice_adapter::data::{Deletable, EmployeeAdapter, JobAdapter, MatchWhen},
 	std::{fs, io::ErrorKind},
 };
 
-impl Deletable for BincodeOrganization<'_, '_, '_>
+impl Deletable<Error> for BincodeOrganization<'_, '_, '_>
 {
-	fn delete(&self, cascade: bool) -> DynamicResult<()>
+	fn delete(&self, cascade: bool) -> Result<()>
 	{
 		if let Err(e) = fs::remove_file(self.filepath())
 		{

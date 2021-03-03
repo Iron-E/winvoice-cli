@@ -1,8 +1,7 @@
 use
 {
 	super::BincodeEmployee,
-	crate::data::{BincodeOrganization, BincodePerson, contact},
-	clinvoice_adapter::DynamicResult,
+	crate::data::{BincodeOrganization, BincodePerson, contact, Result},
 	clinvoice_data::
 	{
 		Organization, Person,
@@ -10,9 +9,9 @@ use
 	},
 };
 
-impl Into<DynamicResult<EmployeeView>> for BincodeEmployee<'_, '_, '_>
+impl Into<Result<EmployeeView>> for BincodeEmployee<'_, '_, '_>
 {
-	fn into(self) -> DynamicResult<EmployeeView>
+	fn into(self) -> Result<EmployeeView>
 
 	{
 		let id = self.employee.id;
@@ -22,15 +21,15 @@ impl Into<DynamicResult<EmployeeView>> for BincodeEmployee<'_, '_, '_>
 
 		let contact_info_view = contact::into_views(self.employee.contact_info.clone(), self.store)?;
 
-		let organization_result: DynamicResult<Organization> = self.clone().into();
-		let organization_view_result: DynamicResult<OrganizationView> = BincodeOrganization
+		let organization_result: Result<Organization> = self.clone().into();
+		let organization_view_result: Result<OrganizationView> = BincodeOrganization
 		{
 			organization: organization_result?,
 			store,
 		}.into();
 
-		let person_result: DynamicResult<Person> = self.into();
-		let person_view_result: DynamicResult<PersonView> = BincodePerson
+		let person_result: Result<Person> = self.into();
+		let person_view_result: Result<PersonView> = BincodePerson
 		{
 			person: person_result?,
 			store,
@@ -53,17 +52,13 @@ mod tests
 {
 	use
 	{
-		super::{BincodeEmployee, EmployeeView, OrganizationView, PersonView},
+		super::{BincodeEmployee, EmployeeView, OrganizationView, PersonView, Result},
 		crate::
 		{
 			data::{BincodeLocation, BincodeOrganization, BincodePerson},
 			util,
 		},
-		clinvoice_adapter::
-		{
-			DynamicResult,
-			data::{EmployeeAdapter, LocationAdapter, OrganizationAdapter, PersonAdapter}
-		},
+		clinvoice_adapter::data::{EmployeeAdapter, LocationAdapter, OrganizationAdapter, PersonAdapter},
 		clinvoice_data::
 		{
 			Contact, EmployeeStatus,
@@ -135,7 +130,7 @@ mod tests
 			};
 
 			let start = Instant::now();
-			let ceo_testy_view_result: DynamicResult<EmployeeView> = ceo_testy.into();
+			let ceo_testy_view_result: Result<EmployeeView> = ceo_testy.into();
 			println!("\n>>>>> BincodeEmployee::into_view {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 
 			// Asser that the synthetic view is the same as the view which was created naturally.

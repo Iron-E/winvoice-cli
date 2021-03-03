@@ -1,17 +1,21 @@
 use
 {
 	super::BincodeEmployee,
-	crate::util,
+	crate::
+	{
+		data::{Error, Result},
+		util,
+	},
 	clinvoice_adapter::
 	{
 		data::{EmployeeAdapter, Initializable, MatchWhen, Updatable},
-		DynamicResult, Store,
+		Store,
 	},
 	clinvoice_data::{Contact, Employee, EmployeeStatus, Organization, Person, Id},
 	std::{fs, io::BufReader},
 };
 
-impl<'pass, 'path, 'user> EmployeeAdapter<'pass, 'path, 'user> for BincodeEmployee<'pass, 'path, 'user>
+impl<'pass, 'path, 'user> EmployeeAdapter<'pass, 'path, 'user, Error> for BincodeEmployee<'pass, 'path, 'user>
 {
 	/// # Summary
 	///
@@ -32,7 +36,7 @@ impl<'pass, 'path, 'user> EmployeeAdapter<'pass, 'path, 'user> for BincodeEmploy
 		title: &str,
 		status: EmployeeStatus,
 		store: Store<'pass, 'path, 'user>,
-	) -> DynamicResult<Self>
+	) -> Result<Self>
 	{
 		Self::init(&store)?;
 
@@ -75,7 +79,7 @@ impl<'pass, 'path, 'user> EmployeeAdapter<'pass, 'path, 'user> for BincodeEmploy
 		title: MatchWhen<String>,
 		status: MatchWhen<EmployeeStatus>,
 		store: Store<'pass, 'path, 'user>,
-	) -> DynamicResult<Vec<Self>>
+	) -> Result<Vec<Self>>
 	{
 		Self::init(&store)?;
 

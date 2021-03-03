@@ -18,5 +18,8 @@ clinvoice_data = {path="../../clinvoice_data", features=["serde_support"], versi
 # Environment Variable Expansion
 shellexpand = "2"
 
+# Errors
+snafu = "0.6"
+
 # Serialization
 bincode = "1"

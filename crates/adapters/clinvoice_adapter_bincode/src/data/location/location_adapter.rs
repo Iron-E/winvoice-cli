@@ -1,17 +1,21 @@
 use
 {
 	super::BincodeLocation,
-	crate::util,
+	crate::
+	{
+		data::{Error, Result},
+		util,
+	},
 	clinvoice_adapter::
 	{
 		data::{Initializable, LocationAdapter, MatchWhen, Updatable},
-		DynamicResult, Store,
+		Store,
 	},
 	clinvoice_data::{Location, Id},
 	std::{fs, io::BufReader},
 };
 
-impl<'pass, 'path, 'user> LocationAdapter<'pass, 'path, 'user> for BincodeLocation<'pass, 'path, 'user>
+impl<'pass, 'path, 'user> LocationAdapter<'pass, 'path, 'user, Error> for BincodeLocation<'pass, 'path, 'user>
 {
 	/// # Summary
 	///
@@ -26,7 +30,7 @@ impl<'pass, 'path, 'user> LocationAdapter<'pass, 'path, 'user> for BincodeLocati
 	/// ```ignore
 	/// Location {name, id: /* generated */};
 	/// ```
-	fn create(name: &str, store: Store<'pass, 'path, 'user>) -> DynamicResult<Self>
+	fn create(name: &str, store: Store<'pass, 'path, 'user>) -> Result<Self>
 	{
 		Self::init(&store)?;
 
@@ -59,7 +63,7 @@ impl<'pass, 'path, 'user> LocationAdapter<'pass, 'path, 'user> for BincodeLocati
 	/// ```ignore
 	/// Location {name, id: /* generated */, outside_id: self.unroll().id};
 	/// ```
-	fn create_inner(&self, name: &str) -> DynamicResult<Self>
+	fn create_inner(&self, name: &str) -> Result<Self>
 	{
 		let inner_person = Self
 		{
@@ -94,7 +98,7 @@ impl<'pass, 'path, 'user> LocationAdapter<'pass, 'path, 'user> for BincodeLocati
 		name: MatchWhen<String>,
 		outer: MatchWhen<Option<Id>>,
 		store: Store<'pass, 'path, 'user>,
-	) -> DynamicResult<Vec<Self>>
+	) -> Result<Vec<Self>>
 	{
 		Self::init(&store)?;
 

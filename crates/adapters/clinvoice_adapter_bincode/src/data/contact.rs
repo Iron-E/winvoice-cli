@@ -1,10 +1,11 @@
 use
 {
 	super::BincodeLocation,
+	crate::data::Result,
 	clinvoice_adapter::
 	{
 		data::{Error as DataError, LocationAdapter, MatchWhen},
-		DynamicResult, Store,
+		Store,
 	},
 	clinvoice_data::{Contact, views::{ContactView, LocationView}},
 };
@@ -12,7 +13,7 @@ use
 /// # Summary
 ///
 /// Convert some [`Contact`] into a [`ContactView`].
-pub fn into_view(contact: Contact, store: Store) -> DynamicResult<ContactView>
+pub fn into_view(contact: Contact, store: Store) -> Result<ContactView>
 {
 	Ok(match contact
 	{
@@ -25,7 +26,7 @@ pub fn into_view(contact: Contact, store: Store) -> DynamicResult<ContactView>
 			{
 				Some(result) =>
 				{
-					let view: DynamicResult<LocationView> = result.into();
+					let view: Result<LocationView> = result.into();
 					view?.into()
 				},
 				_ => return Err(DataError::DataIntegrity {id: address}.into()),
@@ -38,7 +39,7 @@ pub fn into_view(contact: Contact, store: Store) -> DynamicResult<ContactView>
 /// # Summary
 ///
 /// Convert some [`Contact`] into a [`ContactView`].
-pub fn into_views<I>(contact_info: I, store: Store) -> DynamicResult<Vec<ContactView>> where I : IntoIterator<Item = Contact>
+pub fn into_views<I>(contact_info: I, store: Store) -> Result<Vec<ContactView>> where I : IntoIterator<Item = Contact>
 {
 	let contact_info_view_result = contact_info.into_iter().map(|c| into_view(c, store));
 	let mut contact_info_view = Vec::new();

@@ -1,17 +1,13 @@
 use
 {
-	crate::data::{BincodeEmployee, BincodeOrganization},
-	clinvoice_adapter::
-	{
-		data::{EmployeeAdapter, MatchWhen},
-		DynamicResult,
-	},
+	crate::data::{BincodeEmployee, BincodeOrganization, Result},
+	clinvoice_adapter::data::{EmployeeAdapter, MatchWhen},
 	clinvoice_data::Employee,
 };
 
-impl Into<DynamicResult<Vec<Employee>>> for BincodeOrganization<'_, '_, '_>
+impl Into<Result<Vec<Employee>>> for BincodeOrganization<'_, '_, '_>
 {
-	fn into(self) -> DynamicResult<Vec<Employee>>
+	fn into(self) -> Result<Vec<Employee>>
 	{
 		let results = BincodeEmployee::retrieve(
 			MatchWhen::Any, // contact info
@@ -32,9 +28,9 @@ mod tests
 {
 	use
 	{
-		super::{BincodeEmployee, BincodeOrganization, EmployeeAdapter},
+		super::{BincodeEmployee, BincodeOrganization, EmployeeAdapter, Result},
 		crate::util,
-		clinvoice_adapter::{data::OrganizationAdapter, DynamicResult},
+		clinvoice_adapter::data::OrganizationAdapter,
 		clinvoice_data::{Contact, Employee, EmployeeStatus, Id, Location, Person},
 		std::{collections::HashSet, time::Instant},
 	};
@@ -80,7 +76,7 @@ mod tests
 
 			let start = Instant::now();
 			// Retrieve the written employees back into the `Employee` structure.
-			let reps: DynamicResult<Vec<Employee>> = dogood.into();
+			let reps: Result<Vec<Employee>> = dogood.into();
 			println!("\n>>>>> BincodeOrganization::into_vec_employee {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 
 			assert_eq!(

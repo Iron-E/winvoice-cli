@@ -1,10 +1,13 @@
 use
 {
 	super::BincodePerson,
-	crate::util,
+	crate::
+	{
+		data::{Error, Result},
+		util,
+	},
 	clinvoice_adapter::
 	{
-		DynamicResult,
 		data::{MatchWhen, Initializable, PersonAdapter, Updatable},
 		Store,
 	},
@@ -12,7 +15,7 @@ use
 	std::{fs, io::BufReader},
 };
 
-impl<'pass, 'path, 'user> PersonAdapter<'pass, 'path, 'user> for BincodePerson<'pass, 'path, 'user>
+impl<'pass, 'path, 'user> PersonAdapter<'pass, 'path, 'user, Error> for BincodePerson<'pass, 'path, 'user>
 {
 	/// # Summary
 	///
@@ -29,7 +32,7 @@ impl<'pass, 'path, 'user> PersonAdapter<'pass, 'path, 'user> for BincodePerson<'
 		contact_info: Vec<Contact>,
 		name: &'name str,
 		store: Store<'pass, 'path, 'user>,
-	) -> DynamicResult<Self>
+	) -> Result<Self>
 	{
 		Self::init(&store)?;
 
@@ -66,7 +69,7 @@ impl<'pass, 'path, 'user> PersonAdapter<'pass, 'path, 'user> for BincodePerson<'
 		id: MatchWhen<Id>,
 		name: MatchWhen<String>,
 		store: Store<'pass, 'path, 'user>,
-	) -> DynamicResult<Vec<Self>>
+	) -> Result<Vec<Self>>
 	{
 		Self::init(&store)?;
 

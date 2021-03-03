@@ -1,8 +1,7 @@
 use
 {
 	super::BincodeOrganization,
-	crate::data::BincodeLocation,
-	clinvoice_adapter::DynamicResult,
+	crate::data::{BincodeLocation, Result},
 	clinvoice_data::
 	{
 		Location,
@@ -11,16 +10,16 @@ use
 };
 
 // NOTE: tests not needed because this is called in `Into<EmployeeView>`
-impl Into<DynamicResult<OrganizationView>> for BincodeOrganization<'_, '_, '_>
+impl Into<Result<OrganizationView>> for BincodeOrganization<'_, '_, '_>
 {
-	fn into(self) -> DynamicResult<OrganizationView>
+	fn into(self) -> Result<OrganizationView>
 	{
 		let id = self.organization.id;
 		let name = self.organization.name.clone();
 		let store = self.store;
 
-		let location_result: DynamicResult<Location> = self.into();
-		let location_view_result: DynamicResult<LocationView> = BincodeLocation
+		let location_result: Result<Location> = self.into();
+		let location_view_result: Result<LocationView> = BincodeLocation
 		{
 			location: location_result?,
 			store,

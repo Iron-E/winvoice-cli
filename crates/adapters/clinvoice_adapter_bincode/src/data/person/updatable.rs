@@ -1,13 +1,14 @@
 use
 {
 	super::BincodePerson,
-	clinvoice_adapter::{DynamicResult, data::Updatable},
+	crate::data::{Error, Result},
+	clinvoice_adapter::data::Updatable,
 	std::fs,
 };
 
-impl Updatable for BincodePerson<'_, '_, '_>
+impl Updatable<Error> for BincodePerson<'_, '_, '_>
 {
-	fn update(&self) -> DynamicResult<()>
+	fn update(&self) -> Result<()>
 	{
 		fs::write(self.filepath(), bincode::serialize(&self.person)?)?;
 		Ok(())

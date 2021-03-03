@@ -1,15 +1,14 @@
 use
 {
 	super::BincodePerson,
-	crate::data::contact,
-	clinvoice_adapter::DynamicResult,
+	crate::data::{contact, Result},
 	clinvoice_data::views::PersonView,
 };
 
 // NOTE: tests not needed because this is called in `Into<EmployeeView>`
-impl Into<DynamicResult<PersonView>> for BincodePerson<'_, '_, '_>
+impl Into<Result<PersonView>> for BincodePerson<'_, '_, '_>
 {
-	fn into(self) -> DynamicResult<PersonView>
+	fn into(self) -> Result<PersonView>
 	{
 		Ok(PersonView
 		{

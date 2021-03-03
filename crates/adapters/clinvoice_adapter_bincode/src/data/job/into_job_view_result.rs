@@ -1,12 +1,8 @@
 use
 {
 	super::BincodeJob,
-	crate::data::{BincodeEmployee, BincodeOrganization},
-	clinvoice_adapter::
-	{
-		data::{EmployeeAdapter, Error, MatchWhen},
-		DynamicResult,
-	},
+	crate::data::{BincodeEmployee, BincodeOrganization, Result},
+	clinvoice_adapter::data::{EmployeeAdapter, Error, MatchWhen},
 	clinvoice_data::
 	{
 		Organization,
@@ -14,9 +10,9 @@ use
 	},
 };
 
-impl Into<DynamicResult<JobView>> for BincodeJob<'_, '_, '_>
+impl Into<Result<JobView>> for BincodeJob<'_, '_, '_>
 {
-	fn into(self) -> DynamicResult<JobView>
+	fn into(self) -> Result<JobView>
 	{
 		let date_close = self.job.date_close;
 		let date_open = self.job.date_open;
@@ -27,8 +23,8 @@ impl Into<DynamicResult<JobView>> for BincodeJob<'_, '_, '_>
 		let store = self.store;
 		let timesheets = self.job.timesheets.clone();
 
-		let organization_result: DynamicResult<Organization> = self.into();
-		let organization_view_result: DynamicResult<OrganizationView> = BincodeOrganization
+		let organization_result: Result<Organization> = self.into();
+		let organization_view_result: Result<OrganizationView> = BincodeOrganization
 		{
 			organization: organization_result?,
 			store,
@@ -38,7 +34,7 @@ impl Into<DynamicResult<JobView>> for BincodeJob<'_, '_, '_>
 
 		for timesheet in timesheets
 		{
-			let employee_view_result: DynamicResult<EmployeeView> = match BincodeEmployee::retrieve(
+			let employee_view_result: Result<EmployeeView> = match BincodeEmployee::retrieve(
 				MatchWhen::Any, // contact_info
 				MatchWhen::EqualTo(timesheet.employee_id), // id
 				MatchWhen::Any, // organization
@@ -81,7 +77,7 @@ mod tests
 {
 	use
 	{
-		super::{BincodeJob, DynamicResult, JobView, OrganizationView, TimesheetView},
+		super::{BincodeJob, JobView, OrganizationView, TimesheetView, Result},
 		crate::
 		{
 			data::{BincodeEmployee, BincodeLocation, BincodeOrganization, BincodePerson},
@@ -196,7 +192,7 @@ mod tests
 			};
 
 			let start = Instant::now();
-			let create_job_view_result: DynamicResult<JobView> = create_job.into();
+			let create_job_view_result: Result<JobView> = create_job.into();
 			println!("\n>>>>> BincodeJob::into_view {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 
 			assert_eq!(create_job_view, create_job_view_result.unwrap());

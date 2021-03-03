@@ -1,7 +1,6 @@
 use
 {
-	crate::{Config, StructOpt},
-	clinvoice_adapter::DynamicResult,
+	crate::{Config, DynResult, StructOpt},
 };
 
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, StructOpt)]
@@ -53,7 +52,7 @@ pub(super) enum RetrieveCommand
 
 impl Retrieve
 {
-	pub(super) fn run(self, config: Config, store_name: &str) -> DynamicResult<()>
+	pub(super) fn run(self, config: Config, store_name: &str) -> DynResult<()>
 	{
 		todo!()
 	}

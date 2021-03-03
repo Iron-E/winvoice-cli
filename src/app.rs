@@ -5,8 +5,9 @@ use
 {
 	create::Create,
 	retrieve::Retrieve,
-	crate::{Config, io::input, StructOpt},
-	clinvoice_adapter::{DynamicResult, data::Updatable},
+	crate::{Config, DynResult, io::input, StructOpt},
+	clinvoice_adapter::data::Updatable,
+	clinvoice_config::Result as ConfigResult,
 };
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, StructOpt)]
@@ -35,7 +36,7 @@ impl App
 	/// # Summary
 	///
 	/// Edit the user's configuration file.
-	fn edit_config(config: Config) -> DynamicResult<()>
+	fn edit_config(config: Config) -> ConfigResult<()>
 	{
 		if let Some(edited) = input::toml_editor().edit(&toml::to_string_pretty(&config)?)?
 		{
@@ -48,11 +49,11 @@ impl App
 	/// # Summary
 	///
 	/// Run the application and parse its provided arguments / flags.
-	pub fn run(self, config: Config) -> DynamicResult<()>
+	pub fn run(self, config: Config) -> DynResult<()>
 	{
 		match self.command
 		{
-			AppCommand::Config => Self::edit_config(config),
+			AppCommand::Config => Self::edit_config(config).map_err(|e| e.into()),
 			AppCommand::Create(cmd) => cmd.run(config, &self.store),
 			AppCommand::Retrieve(cmd) => cmd.run(config, &self.store),
 		}

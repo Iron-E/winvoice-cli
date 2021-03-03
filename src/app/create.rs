@@ -1,9 +1,9 @@
 use
 {
-	crate::{Config, io::input, StructOpt},
+	crate::{Config, DynResult, io::input, StructOpt},
 	clinvoice_adapter::
 	{
-		Adapters, DynamicResult, Error,
+		Adapters, Error,
 		data::{EmployeeAdapter, JobAdapter, LocationAdapter, OrganizationAdapter, PersonAdapter},
 	},
 };
@@ -49,7 +49,7 @@ pub(super) enum Create
 
 impl<'pass, 'path, 'user> Create
 {
-	pub(super) fn run(self, config: Config, store_name: &str) -> DynamicResult<()>
+	pub(super) fn run(self, config: Config, store_name: &str) -> DynResult<()>
 	{
 		let store = config.get_store(store_name).expect("Storage name not known.");
 
@@ -65,16 +65,16 @@ impl<'pass, 'path, 'user> Create
 				Self::Location {name} => BincodeLocation::create(&name, *store).and(Ok(())),
 
 				Self::Organization {name} => BincodeOrganization::create(
-					input::select_one(
-						&input::util::retrieve_locations_or_err::<BincodeLocation>(*store)?,
+					input::util::select_one_location::<BincodeLocation, String>(
 						format!("Select a Location for {}", name),
+						*store,
 					)?.into(),
 					&name,
 					*store
 				).and(Ok(())),
 
 				Self::Person {name} => BincodePerson::create(
-					input::util::contact_info::<BincodeLocation>(*store)?,
+					input::util::select_contact_info::<BincodeLocation>(*store)?,
 					&name,
 					*store,
 				).and(Ok(())),

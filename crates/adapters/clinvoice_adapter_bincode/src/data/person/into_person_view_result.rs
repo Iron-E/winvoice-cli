@@ -6,7 +6,7 @@ use
 };
 
 // NOTE: tests not needed because this is called in `Into<EmployeeView>`
-impl Into<Result<PersonView>> for BincodePerson<'_, '_, '_>
+impl Into<Result<PersonView>> for BincodePerson<'_>
 {
 	fn into(self) -> Result<PersonView>
 	{

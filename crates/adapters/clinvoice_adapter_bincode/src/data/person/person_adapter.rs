@@ -15,7 +15,7 @@ use
 	std::{fs, io::BufReader},
 };
 
-impl<'pass, 'path, 'user> PersonAdapter<'pass, 'path, 'user> for BincodePerson<'pass, 'path, 'user>
+impl PersonAdapter for BincodePerson<'_>
 {
 	type Error = Error;
 
@@ -30,11 +30,11 @@ impl<'pass, 'path, 'user> PersonAdapter<'pass, 'path, 'user> for BincodePerson<'
 	/// # Returns
 	///
 	/// The newly created [`Person`].
-	fn create<'name>(
+	fn create(
 		contact_info: Vec<Contact>,
-		name: &'name str,
-		store: Store<'pass, 'path, 'user>,
-	) -> Result<Self>
+		name: &str,
+		store: &Store,
+	) -> Result<Person>
 	{
 		Self::init(&store)?;
 
@@ -51,7 +51,7 @@ impl<'pass, 'path, 'user> PersonAdapter<'pass, 'path, 'user> for BincodePerson<'
 
 		bincode_person.update()?;
 
-		Ok(bincode_person)
+		Ok(bincode_person.person)
 	}
 
 	/// # Summary
@@ -70,8 +70,8 @@ impl<'pass, 'path, 'user> PersonAdapter<'pass, 'path, 'user> for BincodePerson<'
 		contact_info: MatchWhen<Contact>,
 		id: MatchWhen<Id>,
 		name: MatchWhen<String>,
-		store: Store<'pass, 'path, 'user>,
-	) -> Result<Vec<Self>>
+		store: &Store,
+	) -> Result<Vec<Person>>
 	{
 		Self::init(&store)?;
 
@@ -87,7 +87,7 @@ impl<'pass, 'path, 'user> PersonAdapter<'pass, 'path, 'user> for BincodePerson<'
 				id.is_match(&person.id) &&
 				name.is_match(&person.name)
 			{
-				results.push(BincodePerson {person, store});
+				results.push(person);
 			}
 		}
 
@@ -100,7 +100,7 @@ mod tests
 {
 	use
 	{
-		super::{BincodePerson, Contact, Id, MatchWhen, PersonAdapter, util},
+		super::{BincodePerson, Contact, Id, MatchWhen, Person, PersonAdapter, Store, util},
 		std::{fs, time::Instant},
 		bincode,
 	};
@@ -111,19 +111,60 @@ mod tests
 		util::test_temp_store(|store|
 		{
 			let start = Instant::now();
-			test_create_assertion(BincodePerson::create(vec![Contact::Address(Id::new_v4())], "", *store).unwrap());
-			test_create_assertion(BincodePerson::create(vec![Contact::Email("foo@bar.io".into())], "", *store).unwrap());
-			test_create_assertion(BincodePerson::create(vec![Contact::Phone("1-800-555-3600".into())], "", *store).unwrap());
-			test_create_assertion(BincodePerson::create(vec![Contact::Address(Id::new_v4())], "", *store).unwrap());
-			test_create_assertion(BincodePerson::create(vec![Contact::Email("obviousemail@server.com".into())], "", *store).unwrap());
+
+			test_create_assertion(
+				BincodePerson::create(
+					vec![Contact::Address(Id::new_v4())],
+					"",
+					&store,
+				).unwrap(),
+				&store,
+			);
+
+			test_create_assertion(
+				BincodePerson::create(
+					vec![Contact::Email("foo@bar.io".into())],
+					"",
+					&store,
+				).unwrap(),
+				&store,
+			);
+
+			test_create_assertion(
+				BincodePerson::create(
+					vec![Contact::Phone("1-800-555-3600".into())],
+					"",
+					&store,
+				).unwrap(),
+				&store,
+			);
+
+			test_create_assertion(
+				BincodePerson::create(
+					vec![Contact::Address(Id::new_v4())],
+					"",
+					&store,
+				).unwrap(),
+				&store,
+			);
+
+			test_create_assertion(
+				BincodePerson::create(
+					vec![Contact::Email("obviousemail@server.com".into())],
+					"",
+					&store,
+				).unwrap(),
+				&store,
+			);
+
 			println!("\n>>>>> BincodePerson::create {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 5);
 		});
 	}
 
-	fn test_create_assertion(bincode_person: BincodePerson)
+	fn test_create_assertion(person: Person, store: &Store)
 	{
-		let read_result = fs::read(bincode_person.filepath()).unwrap();
-		assert_eq!(bincode_person.person, bincode::deserialize(&read_result).unwrap());
+		let read_result = fs::read(BincodePerson {person, store}.filepath()).unwrap();
+		assert_eq!(person, bincode::deserialize(&read_result).unwrap());
 	}
 
 	#[test]
@@ -134,43 +175,43 @@ mod tests
 			let flingo = BincodePerson::create(
 				vec![Contact::Address(Id::new_v4())],
 				"flingo",
-				*store
+				&store
 			).unwrap();
 
 			let bob = BincodePerson::create(
 				vec![Contact::Email("foo@bar.io".into())],
 				"bob",
-				*store
+				&store
 			).unwrap();
 
 			let slimdi = BincodePerson::create(
 				vec![Contact::Phone("1-800-555-3600".into())],
 				"slimdi",
-				*store
+				&store
 			).unwrap();
 
 			let longone = BincodePerson::create(
 				vec![Contact::Address(Id::new_v4())],
 				"longone",
-				*store
+				&store
 			).unwrap();
 
 			let start = Instant::now();
 
 			// Retrieve bob
 			let only_bob = BincodePerson::retrieve(
-				MatchWhen::HasAll(bob.person.contact_info.iter().collect()), // contact info
+				MatchWhen::HasAll(bob.contact_info.iter().collect()), // contact info
 				MatchWhen::Any, // id
 				MatchWhen::Any, // name
-				*store,
+				&store,
 			).unwrap();
 
 			// Retrieve longone and slimdi
 			let longone_slimdi = BincodePerson::retrieve(
 				MatchWhen::Any, // contact info
 				MatchWhen::Any, // id
-				MatchWhen::HasAny([slimdi.person.name.clone(), longone.person.name.clone()].iter().collect()), // name
-				*store,
+				MatchWhen::HasAny([slimdi.name.clone(), longone.name.clone()].iter().collect()), // name
+				&store,
 			).unwrap();
 
 			println!("\n>>>>> BincodePerson::retrieve {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 2);

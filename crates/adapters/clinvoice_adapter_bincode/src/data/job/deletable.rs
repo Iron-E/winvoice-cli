@@ -42,27 +42,39 @@ mod tests
 	{
 		util::test_temp_store(|store|
 		{
-			let big_test = BincodeOrganization::create(
-				Location {id: Id::new_v4(), name: "".into(), outer_id: None},
-				"Big Old Test Corporation".into(),
-				*store,
-			).unwrap();
+			let big_test = BincodeOrganization
+			{
+				organization: BincodeOrganization::create(
+					Location {id: Id::new_v4(), name: "".into(), outer_id: None},
+					"Big Old Test Corporation".into(),
+					&store,
+				).unwrap(),
+				store,
+			};
 
-			let create_job = BincodeJob::create(
-				big_test.organization.clone(),
-				Utc::now(),
-				Money::new(Decimal::new(200, 2), ""),
-				"Test the job creation function.",
-				*store,
-			).unwrap();
+			let create_job = BincodeJob
+			{
+				job: BincodeJob::create(
+					big_test.organization.clone(),
+					Utc::now(),
+					Money::new(Decimal::new(200, 2), ""),
+					"Test the job creation function.",
+					&store,
+				).unwrap(),
+				store,
+			};
 
-			let assert_job = BincodeJob::create(
-				big_test.organization.clone(),
-				Utc::now(),
-				Money::new(Decimal::new(200, 2), "USD"),
-				"Assert that this stuff works.",
-				*store,
-			).unwrap();
+			let assert_job = BincodeJob
+			{
+				job: BincodeJob::create(
+					big_test.organization.clone(),
+					Utc::now(),
+					Money::new(Decimal::new(200, 2), "USD"),
+					"Assert that this stuff works.",
+					&store,
+				).unwrap(),
+				store,
+			};
 
 			let start = Instant::now();
 			// Delete both jobs

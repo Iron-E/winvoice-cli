@@ -23,7 +23,7 @@ impl Deletable for BincodeOrganization<'_>
 
 		if cascade
 		{
-			for result in BincodeJob::retrieve(
+			BincodeJob::retrieve(
 				MatchWhen::EqualTo(self.organization.id), // client
 				MatchWhen::Any, // date close
 				MatchWhen::Any, // date open
@@ -36,9 +36,12 @@ impl Deletable for BincodeOrganization<'_>
 				MatchWhen::Any, // timesheet time begin
 				MatchWhen::Any, // timesheet time end
 				self.store,
-			)? { result.delete(true)?; }
+			)?.into_iter()
+				.map(|j| BincodeJob {job: j, store: self.store})
+				.try_for_each(|j| j.delete(true))?
+			;
 
-			for result in BincodeEmployee::retrieve(
+			BincodeEmployee::retrieve(
 				MatchWhen::Any, // contact info
 				MatchWhen::Any, // id
 				MatchWhen::EqualTo(self.organization.id), // organization
@@ -46,7 +49,10 @@ impl Deletable for BincodeOrganization<'_>
 				MatchWhen::Any, // title
 				MatchWhen::Any, // status
 				self.store,
-			)? { result.delete(true)?; }
+			)?.into_iter()
+				.map(|e| BincodeEmployee {employee: e, store: self.store})
+				.try_for_each(|e| e.delete(true))?
+			;
 		}
 
 		Ok(())
@@ -74,39 +80,59 @@ mod tests
 	{
 		util::test_temp_store(|store|
 		{
-			let earth = BincodeLocation::create("Earth", *store).unwrap();
+			let earth = BincodeLocation
+			{
+				location: BincodeLocation::create("Earth", &store).unwrap(),
+				store,
+			};
 
-			let big_old_test = BincodeOrganization::create(
-				earth.location.clone(),
-				"Big Old Test Corporation",
-				*store,
-			).unwrap();
+			let big_old_test = BincodeOrganization
+			{
+				organization: BincodeOrganization::create(
+					earth.location.clone(),
+					"Big Old Test Corporation",
+					&store,
+				).unwrap(),
+				store,
+			};
 
 			let mut contact_info = Vec::new();
 			contact_info.push(Contact::Address(earth.location.id));
 
-			let testy = BincodePerson::create(
-				contact_info.clone(),
-				"Testy Mćtesterson",
-				*store,
-			).unwrap();
+			let testy = BincodePerson
+			{
+				person: BincodePerson::create(
+					contact_info.clone(),
+					"Testy Mćtesterson",
+					&store,
+				).unwrap(),
+				store,
+			};
 
-			let ceo_testy = BincodeEmployee::create(
-				contact_info.clone(),
-				big_old_test.organization.clone(),
-				testy.person.clone(),
-				"CEO of Tests",
-				EmployeeStatus::Representative,
-				*store,
-			).unwrap();
+			let ceo_testy = BincodeEmployee
+			{
+				employee: BincodeEmployee::create(
+					contact_info.clone(),
+					big_old_test.organization.clone(),
+					testy.person.clone(),
+					"CEO of Tests",
+					EmployeeStatus::Representative,
+					&store,
+				).unwrap(),
+				store,
+			};
 
-			let mut creation = BincodeJob::create(
-				big_old_test.organization.clone(),
-				Utc::now(),
-				Money::new(Decimal::new(200, 2), "USD"),
-				"Test the job creation function.",
-				*store,
-			).unwrap();
+			let mut creation = BincodeJob
+			{
+				job: BincodeJob::create(
+					big_old_test.organization.clone(),
+					Utc::now(),
+					Money::new(Decimal::new(200, 2), "USD"),
+					"Test the job creation function.",
+					&store,
+				).unwrap(),
+				store,
+			};
 
 			creation.job.start_timesheet(ceo_testy.employee.id);
 			creation.update().unwrap();

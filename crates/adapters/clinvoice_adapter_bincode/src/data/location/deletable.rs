@@ -23,19 +23,25 @@ impl Deletable for BincodeLocation<'_>
 
 		if cascade
 		{
-			for result in BincodeLocation::retrieve(
+			BincodeLocation::retrieve(
 				MatchWhen::Any, // id
 				MatchWhen::Any, // name
 				MatchWhen::EqualTo(Some(self.location.id)), // outer id
 				self.store,
-			)? { result.delete(true)?; }
+			)?.into_iter()
+				.map(|l| BincodeLocation {location: l, store: self.store })
+				.try_for_each(|l| l.delete(true))?
+			;
 
-			for result in BincodeOrganization::retrieve(
+			BincodeOrganization::retrieve(
 				MatchWhen::Any, // id
 				MatchWhen::EqualTo(self.location.id), // location
 				MatchWhen::Any, // name
 				self.store,
-			)? { result.delete(true)?; }
+			)?.into_iter()
+				.map(|o| BincodeOrganization {organization: o, store: self.store})
+				.try_for_each(|o| o.delete(true))?
+			;
 		}
 
 		Ok(())
@@ -58,16 +64,39 @@ mod tests
 	{
 		util::test_temp_store(|store|
 		{
-			let earth = BincodeLocation::create("Earth", *store).unwrap();
-			let usa = earth.create_inner("USA").unwrap();
-			let arizona = usa.create_inner("Arizona").unwrap();
-			let phoenix = arizona.create_inner("Phoenix").unwrap();
+			let earth = BincodeLocation
+			{
+				location: BincodeLocation::create("Earth", &store).unwrap(),
+				store,
+			};
 
-			let dogood = BincodeOrganization::create(
-				arizona.location.clone(),
-				"DoGood Inc",
-				*store
-			).unwrap();
+			let usa = BincodeLocation
+			{
+				location: earth.create_inner("USA").unwrap(),
+				store,
+			};
+
+			let arizona = BincodeLocation
+			{
+				location: usa.create_inner("Arizona").unwrap(),
+				store,
+			};
+
+			let phoenix = BincodeLocation
+			{
+				location: arizona.create_inner("Phoenix").unwrap(),
+				store,
+			};
+
+			let dogood = BincodeOrganization
+			{
+				organization: BincodeOrganization::create(
+					arizona.location.clone(),
+					"DoGood Inc",
+					&store
+				).unwrap(),
+				store,
+			};
 
 			let start = Instant::now();
 

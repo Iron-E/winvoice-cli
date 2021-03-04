@@ -38,8 +38,12 @@ impl Deletable for BincodeEmployee<'_>
 				self.store,
 			)?
 			{
-				result.job.timesheets = result.job.timesheets.into_iter().filter(|t| t.employee_id != self.employee.id).collect();
-				result.update()?;
+				result.timesheets = result.timesheets.into_iter()
+					.filter(|t| t.employee_id != self.employee.id)
+					.collect()
+				;
+
+				BincodeJob {job: result, store: self.store}.update()?;
 			}
 		}
 
@@ -68,39 +72,59 @@ mod tests
 	{
 		util::test_temp_store(|store|
 		{
-			let earth = BincodeLocation::create("Earth", *store).unwrap();
+			let earth = BincodeLocation
+			{
+				location: BincodeLocation::create("Earth", &store).unwrap(),
+				store,
+			};
 
-			let mut big_old_test = BincodeOrganization::create(
-				earth.location.clone(),
-				"Big Old Test Corporation",
-				*store,
-			).unwrap();
+			let mut big_old_test = BincodeOrganization
+			{
+				organization: BincodeOrganization::create(
+					earth.location.clone(),
+					"Big Old Test Corporation",
+					&store,
+				).unwrap(),
+				store,
+			};
 
 			let mut contact_info = Vec::new();
 			contact_info.push(Contact::Address(earth.location.id));
 
-			let testy = BincodePerson::create(
-				contact_info.clone(),
-				"Testy Mćtesterson",
-				*store,
-			).unwrap();
+			let testy = BincodePerson
+			{
+				person: BincodePerson::create(
+					contact_info.clone(),
+					"Testy Mćtesterson",
+					&store,
+				).unwrap(),
+				store,
+			};
 
-			let ceo_testy = BincodeEmployee::create(
-				contact_info.clone(),
-				big_old_test.organization.clone(),
-				testy.person.clone(),
-				"CEO of Tests",
-				EmployeeStatus::Employed,
-				*store,
-			).unwrap();
+			let ceo_testy = BincodeEmployee
+			{
+				employee: BincodeEmployee::create(
+					contact_info.clone(),
+					big_old_test.organization.clone(),
+					testy.person.clone(),
+					"CEO of Tests",
+					EmployeeStatus::Employed,
+					&store,
+				).unwrap(),
+				store,
+			};
 
-			let mut creation = BincodeJob::create(
-				big_old_test.organization.clone(),
-				Utc::now(),
-				Money::new(Decimal::new(200, 2), "USD"),
-				"Test the job creation function.",
-				*store,
-			).unwrap();
+			let mut creation = BincodeJob
+			{
+				job: BincodeJob::create(
+					big_old_test.organization.clone(),
+					Utc::now(),
+					Money::new(Decimal::new(200, 2), "USD"),
+					"Test the job creation function.",
+					&store,
+				).unwrap(),
+				store,
+			};
 
 			creation.job.start_timesheet(ceo_testy.employee.id);
 			creation.update().unwrap();
@@ -119,27 +143,35 @@ mod tests
 			assert!(earth.filepath().is_file());
 			assert!(testy.filepath().is_file());
 
-			big_old_test = BincodeOrganization::retrieve(
-				MatchWhen::EqualTo(big_old_test.organization.id), // id
-				MatchWhen::Any, // location
-				MatchWhen::Any, // name
-				*store,
-			).unwrap().iter().next().unwrap().clone();
+			big_old_test = BincodeOrganization
+			{
+				organization: BincodeOrganization::retrieve(
+					MatchWhen::EqualTo(big_old_test.organization.id), // id
+					MatchWhen::Any, // location
+					MatchWhen::Any, // name
+					&store,
+				).unwrap().iter().next().unwrap().clone(),
+				store,
+			};
 
-			creation = BincodeJob::retrieve(
-				MatchWhen::EqualTo(big_old_test.organization.id), // client
-				MatchWhen::Any, // date close
-				MatchWhen::Any, // date open
-				MatchWhen::EqualTo(creation.job.id), // id
-				MatchWhen::Any, // invoice date
-				MatchWhen::Any, // invoice hourly rate
-				MatchWhen::Any, // notes
-				MatchWhen::Any, // objectives
-				MatchWhen::Any, // timesheet employee
-				MatchWhen::Any, // timesheet time begin
-				MatchWhen::Any, // timesheet time end
-				*store,
-			).unwrap().iter().next().unwrap().clone();
+			creation = BincodeJob
+			{
+				job: BincodeJob::retrieve(
+					MatchWhen::EqualTo(big_old_test.organization.id), // client
+					MatchWhen::Any, // date close
+					MatchWhen::Any, // date open
+					MatchWhen::EqualTo(creation.job.id), // id
+					MatchWhen::Any, // invoice date
+					MatchWhen::Any, // invoice hourly rate
+					MatchWhen::Any, // notes
+					MatchWhen::Any, // objectives
+					MatchWhen::Any, // timesheet employee
+					MatchWhen::Any, // timesheet time begin
+					MatchWhen::Any, // timesheet time end
+					&store,
+				).unwrap().iter().next().unwrap().clone(),
+				store,
+			};
 
 			// Assert that no references to the deleted entity remain.
 			assert!(creation.job.timesheets.iter().all(|t| t.employee_id != ceo_testy.employee.id));

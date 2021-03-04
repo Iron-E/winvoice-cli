@@ -1,4 +1,3 @@
-#[macro_export]
 /// # Summary
 ///
 /// `Adapt!` is a marcro which allows quick generation of wrapper types necessary to implement
@@ -20,6 +19,7 @@
 /// ```rust
 /// clinvoice_adapter::Adapt!(Employee => FooEmployee);
 /// ```
+#[macro_export]
 macro_rules! Adapt
 {
 	(Employee => $name: ident) =>

@@ -12,6 +12,7 @@ pub trait LocationAdapter :
 	Initializable<Error = <Self as LocationAdapter>::Error> +
 	Into<Location> +
 	Into<Result<LocationView, <Self as LocationAdapter>::Error>> +
+	Into<Store> +
 	Updatable<Error = <Self as LocationAdapter>::Error> +
 {
 	type Error : Error;
@@ -63,7 +64,7 @@ pub trait LocationAdapter :
 				MatchWhen::EqualTo(id), // id
 				MatchWhen::Any, // name
 				MatchWhen::Any, // outer id
-				store,
+				store.clone(),
 			)
 			{
 				if let Some(adapted_location) = results.into_iter().next()

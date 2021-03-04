@@ -13,7 +13,7 @@ use
 /// # Summary
 ///
 /// Convert some [`Contact`] into a [`ContactView`].
-pub fn into_view(contact: Contact, store: Store) -> Result<ContactView>
+pub fn into_view(contact: Contact, store: &Store) -> Result<ContactView>
 {
 	Ok(match contact
 	{
@@ -26,7 +26,7 @@ pub fn into_view(contact: Contact, store: Store) -> Result<ContactView>
 			{
 				Some(result) =>
 				{
-					let view: Result<LocationView> = result.into();
+					let view: Result<LocationView> = BincodeLocation {location: result, store}.into();
 					view?.into()
 				},
 				_ => return Err(DataError::DataIntegrity {id: address}.into()),
@@ -39,7 +39,7 @@ pub fn into_view(contact: Contact, store: Store) -> Result<ContactView>
 /// # Summary
 ///
 /// Convert some [`Contact`] into a [`ContactView`].
-pub fn into_views<I>(contact_info: I, store: Store) -> Result<Vec<ContactView>> where I : IntoIterator<Item = Contact>
+pub fn into_views<I>(contact_info: I, store: &Store) -> Result<Vec<ContactView>> where I : IntoIterator<Item = Contact>
 {
 	let contact_info_view_result = contact_info.into_iter().map(|c| into_view(c, store));
 	let mut contact_info_view = Vec::new();

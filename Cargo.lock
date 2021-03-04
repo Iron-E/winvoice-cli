@@ -122,6 +122,7 @@ dependencies = [
  "clinvoice_adapter_bincode",
  "clinvoice_config",
  "clinvoice_data",
+ "clinvoice_error",
  "dialoguer",
  "serde",
  "snafu",

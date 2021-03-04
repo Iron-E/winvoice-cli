@@ -1,11 +1,15 @@
 use
 {
 	super::BincodeLocation,
-	crate::{data::Result, util},
+	crate::
+	{
+		data::{Error, Result},
+		util,
+	},
 	clinvoice_adapter::{data::Initializable, Store},
 };
 
-impl Initializable for BincodeLocation<'_, '_, '_>
+impl Initializable for BincodeLocation<'_>
 {
 	/// # Summary
 	///

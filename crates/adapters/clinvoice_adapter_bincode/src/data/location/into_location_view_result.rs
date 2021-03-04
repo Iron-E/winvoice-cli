@@ -6,7 +6,7 @@ use
 	clinvoice_data::views::LocationView,
 };
 
-impl Into<Result<LocationView>> for BincodeLocation<'_, '_, '_>
+impl Into<Result<LocationView>> for BincodeLocation<'_>
 {
 	fn into(self) -> Result<LocationView>
 	{
@@ -54,10 +54,29 @@ mod tests
 	{
 		util::test_temp_store(|store|
 		{
-			let earth = BincodeLocation::create("Earth", *store).unwrap();
-			let usa = earth.create_inner("USA").unwrap();
-			let arizona = usa.create_inner("Arizona").unwrap();
-			let phoenix = arizona.create_inner("Phoenix").unwrap();
+			let earth = BincodeLocation::create("Earth", &store).unwrap();
+
+			let usa = BincodeLocation
+			{
+				location: earth,
+				store,
+			}.create_inner("USA").unwrap();
+
+			let arizona = BincodeLocation
+			{
+				location: usa,
+				store,
+			}.create_inner("Arizona").unwrap();
+
+			let phoenix = BincodeLocation
+			{
+				location: BincodeLocation
+				{
+					location: arizona,
+					store,
+				}.create_inner("Phoenix").unwrap(),
+				store,
+			};
 
 			let phoenix_view = LocationView
 			{
@@ -65,16 +84,16 @@ mod tests
 				name: phoenix.location.name.clone(),
 				outer: Some(LocationView
 				{
-					id: arizona.location.id,
-					name: arizona.location.name,
+					id: arizona.id,
+					name: arizona.name,
 					outer: Some(LocationView
 					{
-						id: usa.location.id,
-						name: usa.location.name,
+						id: usa.id,
+						name: usa.name,
 						outer: Some(LocationView
 						{
-							id: earth.location.id,
-							name: earth.location.name,
+							id: earth.id,
+							name: earth.name,
 							outer: None,
 						}.into()),
 					}.into()),

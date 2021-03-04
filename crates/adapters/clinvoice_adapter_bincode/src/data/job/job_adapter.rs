@@ -19,7 +19,7 @@ use
 	std::{fs, io::BufReader},
 };
 
-impl<'pass, 'path, 'user> JobAdapter<'pass, 'path, 'user> for BincodeJob<'pass, 'path, 'user>
+impl JobAdapter for BincodeJob<'_>
 {
 	type Error = Error;
 
@@ -39,8 +39,8 @@ impl<'pass, 'path, 'user> JobAdapter<'pass, 'path, 'user> for BincodeJob<'pass, 
 		date_open: DateTime<Utc>,
 		hourly_rate: Money,
 		objectives: &str,
-		store: Store<'pass, 'path, 'user>,
-	) -> Result<Self>
+		store: &Store,
+	) -> Result<Job>
 	{
 		Self::init(&store)?;
 
@@ -66,7 +66,7 @@ impl<'pass, 'path, 'user> JobAdapter<'pass, 'path, 'user> for BincodeJob<'pass, 
 
 		bincode_job.update()?;
 
-		Ok(bincode_job)
+		Ok(bincode_job.job)
 	}
 
 	/// # Summary
@@ -93,8 +93,8 @@ impl<'pass, 'path, 'user> JobAdapter<'pass, 'path, 'user> for BincodeJob<'pass, 
 		timesheet_employee: MatchWhen<Id>,
 		timesheet_begin: MatchWhen<DateTime<Utc>>,
 		timesheet_end: MatchWhen<Option<DateTime<Utc>>>,
-		store: Store<'pass, 'path, 'user>,
-	) -> Result<Vec<Self>>
+		store: &Store,
+	) -> Result<Vec<Job>>
 	{
 		Self::init(&store)?;
 
@@ -118,7 +118,7 @@ impl<'pass, 'path, 'user> JobAdapter<'pass, 'path, 'user> for BincodeJob<'pass, 
 				timesheet_begin.set_matches(&job.timesheets.iter().map(|t| &t.time_begin).collect()) &&
 				timesheet_end.set_matches(&job.timesheets.iter().map(|t| &t.time_end).collect())
 			{
-				results.push(BincodeJob {job, store});
+				results.push(job);
 			}
 		}
 
@@ -131,7 +131,7 @@ mod tests
 {
 	use
 	{
-		super::{BincodeJob, Id, JobAdapter, MatchWhen, Money, Organization, Utc, util},
+		super::{BincodeJob, Id, Job, JobAdapter, MatchWhen, Money, Organization, Store, Utc, util},
 		clinvoice_data::Decimal,
 		std::{fs, time::Instant},
 	};
@@ -150,54 +150,69 @@ mod tests
 		{
 			let start = Instant::now();
 
-			test_create_assertion(BincodeJob::create(
-				organization.clone(),
-				Utc::now(),
-				Money::new(Decimal::new(200, 2), ""),
-				"Test the job creation function.",
-				*store,
-			).unwrap());
+			test_create_assertion(
+				BincodeJob::create(
+					organization.clone(),
+					Utc::now(),
+					Money::new(Decimal::new(200, 2), ""),
+					"Test the job creation function.",
+					&store,
+				).unwrap(),
+				&store,
+			);
 
-			test_create_assertion(BincodeJob::create(
-				organization.clone(),
-				Utc::now(),
-				Money::new(Decimal::new(200, 2), "USD"),
-				"Test the job creation function.",
-				*store,
-			).unwrap());
+			test_create_assertion(
+				BincodeJob::create(
+					organization.clone(),
+					Utc::now(),
+					Money::new(Decimal::new(200, 2), "USD"),
+					"Test the job creation function.",
+					&store,
+				).unwrap(),
+				&store,
+			);
 
-			test_create_assertion(BincodeJob::create(
-				organization.clone(),
-				Utc::now(),
-				Money::new(Decimal::new(20000, 0), "YEN"),
-				"TEST THE JOB CREATION FUNCTION.",
-				*store,
-			).unwrap());
+			test_create_assertion(
+				BincodeJob::create(
+					organization.clone(),
+					Utc::now(),
+					Money::new(Decimal::new(20000, 0), "YEN"),
+					"TEST THE JOB CREATION FUNCTION.",
+					&store,
+				).unwrap(),
+				&store,
+			);
 
-			test_create_assertion(BincodeJob::create(
-				organization.clone(),
-				Utc::now(),
-				Money::new(Decimal::new(500, 2), "CDN"),
-				"test the job creation function.",
-				*store,
-			).unwrap());
+			test_create_assertion(
+				BincodeJob::create(
+					organization.clone(),
+					Utc::now(),
+					Money::new(Decimal::new(500, 2), "CDN"),
+					"test the job creation function.",
+					&store,
+				).unwrap(),
+				&store,
+			);
 
-			test_create_assertion(BincodeJob::create(
-				organization.clone(),
-				Utc::now(),
-				Money::new(Decimal::new(1000, 2), "EUR"),
-				"TeSt ThE jOb CrEaTiOn FuNcTiOn.",
-				*store,
-			).unwrap());
+			test_create_assertion(
+				BincodeJob::create(
+					organization.clone(),
+					Utc::now(),
+					Money::new(Decimal::new(1000, 2), "EUR"),
+					"TeSt ThE jOb CrEaTiOn FuNcTiOn.",
+					&store,
+				).unwrap(),
+				&store,
+			);
 
 			println!("\n>>>>> BincodeJob::create {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 5);
 		});
 	}
 
-	fn test_create_assertion(bincode_job: BincodeJob)
+	fn test_create_assertion(job: Job, store: &Store)
 	{
-		let read_result = fs::read(bincode_job.filepath()).unwrap();
-		assert_eq!(bincode_job.job, bincode::deserialize(&read_result).unwrap());
+		let read_result = fs::read(BincodeJob {job, store}.filepath()).unwrap();
+		assert_eq!(job, bincode::deserialize(&read_result).unwrap());
 	}
 
 	#[test]
@@ -217,7 +232,7 @@ mod tests
 				Utc::now(),
 				Money::new(Decimal::new(200, 2), "USD"),
 				"Test the job creation function.",
-				*store,
+				&store,
 			).unwrap();
 
 			let retrieval = BincodeJob::create(
@@ -225,7 +240,7 @@ mod tests
 				Utc::now(),
 				Money::new(Decimal::new(200, 2), "USD"),
 				"Test the job retrieval function.",
-				*store,
+				&store,
 			).unwrap();
 
 			let assertion = BincodeJob::create(
@@ -233,7 +248,7 @@ mod tests
 				Utc::now(),
 				Money::new(Decimal::new(20000, 0), "YEN"),
 				"Assert something",
-				*store,
+				&store,
 			).unwrap();
 
 			let start = Instant::now();
@@ -251,15 +266,15 @@ mod tests
 				MatchWhen::Any, // timesheet employee
 				MatchWhen::Any, // timesheet time begin
 				MatchWhen::Any, // timesheet time end
-				*store,
+				&store,
 			).unwrap();
 
 			// retrieve retrieval and assertion
 			let not_creation = BincodeJob::retrieve(
 				MatchWhen::Any, // client
 				MatchWhen::Any, // date close
-				MatchWhen::HasNone([creation.job.date_open].iter().collect()), // date open
-				MatchWhen::HasAny([retrieval.job.id, assertion.job.id].iter().collect()), // id
+				MatchWhen::HasNone([creation.date_open].iter().collect()), // date open
+				MatchWhen::HasAny([retrieval.id, assertion.id].iter().collect()), // id
 				MatchWhen::Any, // invoice date
 				MatchWhen::Any, // invoice hourly rate
 				MatchWhen::Any, // notes
@@ -267,7 +282,7 @@ mod tests
 				MatchWhen::Any, // timesheet employee
 				MatchWhen::Any, // timesheet time begin
 				MatchWhen::Any, // timesheet time end
-				*store,
+				&store,
 			).unwrap();
 
 			println!("\n>>>>> BincodeJob::retrieve {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 2);

@@ -6,7 +6,7 @@ use
 	std::{fs, io::ErrorKind},
 };
 
-impl Deletable for BincodeJob<'_, '_, '_>
+impl Deletable for BincodeJob<'_>
 {
 	fn delete(&self, _cascade: bool) -> Result<()>
 	{

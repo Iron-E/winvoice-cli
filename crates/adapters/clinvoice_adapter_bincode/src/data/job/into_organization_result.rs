@@ -5,7 +5,7 @@ use
 	clinvoice_data::Organization,
 };
 
-impl Into<Result<Organization>> for BincodeJob<'_, '_, '_>
+impl Into<Result<Organization>> for BincodeJob<'_>
 {
 	fn into(self) -> Result<Organization>
 	{
@@ -16,13 +16,13 @@ impl Into<Result<Organization>> for BincodeJob<'_, '_, '_>
 			self.store,
 		)?;
 
-		let bincode_organization = match results.get(0)
+		let organization = match results.get(0)
 		{
-			Some(bin_org) => bin_org,
+			Some(org) => org,
 			_ => return Err(DataError::DataIntegrity {id: self.job.client_id}.into()),
 		};
 
-		Ok(bincode_organization.organization.clone())
+		Ok(organization.clone())
 	}
 }
 
@@ -46,22 +46,26 @@ mod tests
 			let dogood = BincodeOrganization::create(
 				Location {name: "Earth".into(), id: Id::new_v4(), outer_id: None},
 				"DoGood Inc",
-				*store
+				&store
 			).unwrap();
 
-			let test_job = BincodeJob::create(
-				dogood.organization.clone(),
-				Utc::now(),
-				Money::new(Decimal::new(200, 2), ""),
-				"Test the job creation function.",
-				*store,
-			).unwrap();
+			let test_job = BincodeJob
+			{
+				job: BincodeJob::create(
+					dogood.clone(),
+					Utc::now(),
+					Money::new(Decimal::new(200, 2), ""),
+					"Test the job creation function.",
+					&store,
+				).unwrap(),
+				store,
+			};
 
 			let start = Instant::now();
 			let test_org: Result<Organization> = test_job.into();
 			println!("\n>>>>> BincodeJob::into_organization {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 
-			assert_eq!(dogood.organization, test_org.unwrap());
+			assert_eq!(dogood, test_org.unwrap());
 		});
 	}
 }

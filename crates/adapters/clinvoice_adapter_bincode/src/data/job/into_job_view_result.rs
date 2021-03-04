@@ -10,7 +10,7 @@ use
 	},
 };
 
-impl Into<Result<JobView>> for BincodeJob<'_, '_, '_>
+impl Into<Result<JobView>> for BincodeJob<'_>
 {
 	fn into(self) -> Result<JobView>
 	{
@@ -44,7 +44,7 @@ impl Into<Result<JobView>> for BincodeJob<'_, '_, '_>
 				store,
 			)?.first()
 			{
-				Some(first) => first.clone().into(),
+				Some(first) => BincodeEmployee {employee: first.clone(), store}.into(),
 				_ => Err(Error::DataIntegrity {id: timesheet.employee_id}.into()),
 			};
 
@@ -99,44 +99,48 @@ mod tests
 		{
 			let earth = BincodeLocation::create(
 				"Earth".into(),
-				*store,
+				&store,
 			).unwrap();
 
 			let big_test = BincodeOrganization::create(
-				earth.location.clone(),
+				earth.clone(),
 				"Big Old Test Corporation".into(),
-				*store,
+				&store,
 			).unwrap();
 
-			let mut create_job = BincodeJob::create(
-				big_test.organization.clone(),
-				Utc::now(),
-				Money::new(Decimal::new(200, 2), ""),
-				"Test the job creation function.",
-				*store,
-			).unwrap();
+			let mut create_job = BincodeJob
+			{
+				job: BincodeJob::create(
+					big_test.clone(),
+					Utc::now(),
+					Money::new(Decimal::new(200, 2), ""),
+					"Test the job creation function.",
+					&store,
+				).unwrap(),
+				store,
+			};
 
-			let contact_info = vec![Contact::Address(earth.location.id)];
+			let contact_info = vec![Contact::Address(earth.id)];
 
 			let testy = BincodePerson::create(
 				contact_info.clone(),
 				"Testy Mćtesterson",
-				*store,
+				&store,
 			).unwrap();
 
 			let ceo_testy = BincodeEmployee::create(
 				contact_info.clone(),
-				big_test.organization.clone(),
-				testy.person.clone(),
+				big_test.clone(),
+				testy.clone(),
 				"CEO of Tests",
 				EmployeeStatus::Employed,
-				*store,
+				&store,
 			).unwrap();
 
 			let earth_view = LocationView
 			{
-				id: earth.location.id,
-				name: earth.location.name,
+				id: earth.id,
+				name: earth.name,
 				outer: None,
 			};
 
@@ -145,24 +149,24 @@ mod tests
 			let ceo_testy_view = EmployeeView
 			{
 				contact_info: contact_info_view.clone(),
-				id: ceo_testy.employee.id,
+				id: ceo_testy.id,
 				organization: OrganizationView
 				{
-					id: big_test.organization.id,
+					id: big_test.id,
 					location: earth_view,
-					name: big_test.organization.name,
+					name: big_test.name,
 				},
 				person: PersonView
 				{
 					contact_info: contact_info_view,
-					id: testy.person.id,
-					name: testy.person.name,
+					id: testy.id,
+					name: testy.name,
 				},
-				title: ceo_testy.employee.title.clone(),
-				status: ceo_testy.employee.status,
+				title: ceo_testy.title.clone(),
+				status: ceo_testy.status,
 			};
 
-			create_job.job.start_timesheet(ceo_testy.employee.id);
+			create_job.job.start_timesheet(ceo_testy.id);
 
 			let create_job_view = JobView
 			{

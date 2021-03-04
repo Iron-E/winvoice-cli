@@ -1,11 +1,7 @@
-mod from_bincode_error;
-mod from_data_error;
-mod from_io_error;
-
 use
 {
 	clinvoice_adapter::data,
-	std::{io, result::Result as StdResult},
+	std::io,
 	snafu::Snafu,
 };
 
@@ -25,4 +21,7 @@ pub enum Error
 	Io {err: io::Error},
 }
 
-pub type Result<T> = StdResult<T, Error>;
+clinvoice_error::FromError!(Bincode, bincode::Error);
+clinvoice_error::FromError!(Data, data::Error);
+clinvoice_error::FromError!(Io, io::Error);
+clinvoice_error::AliasResult!();

@@ -14,6 +14,7 @@ repository = "https://www.github.com/Iron-E/clinvoice"
 # CLInvoice
 clinvoice_adapter = {path="../clinvoice_adapter", version="0.4"}
 clinvoice_data = {path="../../clinvoice_data", features=["serde_support"], version="0.3"}
+clinvoice_error = {path="../../clinvoice_error", version="0.1"}
 
 # Environment Variable Expansion
 shellexpand = "2"

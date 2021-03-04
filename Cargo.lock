@@ -145,6 +145,7 @@ dependencies = [
  "bincode",
  "clinvoice_adapter",
  "clinvoice_data",
+ "clinvoice_error",
  "shellexpand",
  "snafu",
 ]
@@ -171,6 +172,10 @@ dependencies = [
  "serde",
  "uuid",
 ]
+
+[[package]]
+name = "clinvoice_error"
+version = "0.1.0"
 
 [[package]]
 name = "console"

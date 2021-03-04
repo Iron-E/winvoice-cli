@@ -6,14 +6,14 @@ use
 	std::error::Error,
 };
 
-pub trait LocationAdapter :
+pub trait LocationAdapter<'store> :
 	Clone +
-	Deletable<Error = <Self as LocationAdapter>::Error> +
-	Initializable<Error = <Self as LocationAdapter>::Error> +
+	Deletable<Error = <Self as LocationAdapter<'store>>::Error> +
+	Initializable<Error = <Self as LocationAdapter<'store>>::Error> +
 	Into<Location> +
-	Into<Result<LocationView, <Self as LocationAdapter>::Error>> +
+	Into<Result<LocationView, <Self as LocationAdapter<'store>>::Error>> +
 	Into<Store> +
-	Updatable<Error = <Self as LocationAdapter>::Error> +
+	Updatable<Error = <Self as LocationAdapter<'store>>::Error> +
 {
 	type Error : Error;
 
@@ -30,7 +30,7 @@ pub trait LocationAdapter :
 	/// ```ignore
 	/// Location {name, id: /* generated */};
 	/// ```
-	fn create(name: &str, store: &Store) -> Result<Location, <Self as LocationAdapter>::Error>;
+	fn create(name: &str, store: &'store Store) -> Result<Location, <Self as LocationAdapter<'store>>::Error>;
 
 	/// # Summary
 	///
@@ -45,17 +45,17 @@ pub trait LocationAdapter :
 	/// ```ignore
 	/// Location {name, id: /* generated */, outside_id: self.unroll().id};
 	/// ```
-	fn create_inner(&self, name: &str) -> Result<Location, <Self as LocationAdapter>::Error>;
+	fn create_inner(&self, name: &str) -> Result<Location, <Self as LocationAdapter<'store>>::Error>;
 
 	/// # Summary
 	///
 	/// Get the [`Location`]s which contain this [`Location`].
-	fn outer_locations(&self) -> Result<Vec<Location>, super::Error>
+	fn outer_locations(self) -> Result<Vec<Location>, super::Error>
 	{
 		let mut outer_locations = Vec::<Location>::new();
 
 		let location: Location = self.clone().into();
-		let store: Store = self.clone().into();
+		let store: Store = self.into();
 
 		let mut outer_id = location.outer_id;
 		while let Some(id) = outer_id
@@ -99,6 +99,6 @@ pub trait LocationAdapter :
 		id: MatchWhen<Id>,
 		name: MatchWhen<String>,
 		outer: MatchWhen<Option<Id>>,
-		store: &Store,
-	) -> Result<Vec<Location>, <Self as LocationAdapter>::Error>;
+		store: &'store Store,
+	) -> Result<Vec<Location>, <Self as LocationAdapter<'store>>::Error>;
 }

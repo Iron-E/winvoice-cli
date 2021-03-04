@@ -15,7 +15,7 @@ use
 	std::{fs, io::BufReader},
 };
 
-impl OrganizationAdapter for BincodeOrganization<'_>
+impl<'store> OrganizationAdapter<'store> for BincodeOrganization<'store>
 {
 	type Error = Error;
 
@@ -33,7 +33,7 @@ impl OrganizationAdapter for BincodeOrganization<'_>
 	fn create(
 		location: Location,
 		name: &str,
-		store: &Store,
+		store: &'store Store,
 	) -> Result<Organization>
 	{
 		Self::init(&store)?;
@@ -70,7 +70,7 @@ impl OrganizationAdapter for BincodeOrganization<'_>
 		id: MatchWhen<Id>,
 		location: MatchWhen<Id>,
 		name: MatchWhen<String>,
-		store: &Store,
+		store: &'store Store,
 	) -> Result<Vec<Organization>>
 	{
 		Self::init(&store)?;

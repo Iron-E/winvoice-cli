@@ -15,7 +15,7 @@ use
 	std::{fs, io::BufReader},
 };
 
-impl EmployeeAdapter for BincodeEmployee<'_>
+impl<'store> EmployeeAdapter<'store> for BincodeEmployee<'store>
 {
 	type Error = Error;
 
@@ -37,7 +37,7 @@ impl EmployeeAdapter for BincodeEmployee<'_>
 		person: Person,
 		title: &str,
 		status: EmployeeStatus,
-		store: &Store,
+		store: &'store Store,
 	) -> Result<Employee>
 	{
 		Self::init(&store)?;
@@ -80,7 +80,7 @@ impl EmployeeAdapter for BincodeEmployee<'_>
 		person: MatchWhen<Id>,
 		title: MatchWhen<String>,
 		status: MatchWhen<EmployeeStatus>,
-		store: &Store,
+		store: &'store Store,
 	) -> Result<Vec<Employee>>
 	{
 		Self::init(&store)?;

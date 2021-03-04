@@ -6,12 +6,12 @@ use
 	std::error::Error,
 };
 
-pub trait PersonAdapter :
-	Deletable<Error=<Self as PersonAdapter>::Error> +
-	Initializable<Error=<Self as PersonAdapter>::Error> +
+pub trait PersonAdapter<'store> :
+	Deletable<Error=<Self as PersonAdapter<'store>>::Error> +
+	Initializable<Error=<Self as PersonAdapter<'store>>::Error> +
 	Into<Person> +
-	Into<Result<PersonView, <Self as PersonAdapter>::Error>> +
-	Updatable<Error=<Self as PersonAdapter>::Error> +
+	Into<Result<PersonView, <Self as PersonAdapter<'store>>::Error>> +
+	Updatable<Error=<Self as PersonAdapter<'store>>::Error> +
 {
 	type Error : Error;
 
@@ -29,8 +29,8 @@ pub trait PersonAdapter :
 	fn create(
 		contact_info: Vec<Contact>,
 		name: &str,
-		store: &Store,
-	) -> Result<Person, <Self as PersonAdapter>::Error>;
+		store: &'store Store,
+	) -> Result<Person, <Self as PersonAdapter<'store>>::Error>;
 
 	/// # Summary
 	///
@@ -48,6 +48,6 @@ pub trait PersonAdapter :
 		contact_info: MatchWhen<Contact>,
 		id: MatchWhen<Id>,
 		name: MatchWhen<String>,
-		store: &Store,
-	) -> Result<Vec<Person>, <Self as PersonAdapter>::Error>;
+		store: &'store Store,
+	) -> Result<Vec<Person>, <Self as PersonAdapter<'store>>::Error>;
 }

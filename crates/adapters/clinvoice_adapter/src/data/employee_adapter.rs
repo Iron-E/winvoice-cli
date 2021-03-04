@@ -6,14 +6,14 @@ use
 	std::error::Error,
 };
 
-pub trait EmployeeAdapter :
-	Deletable<Error=<Self as EmployeeAdapter>::Error> +
-	Initializable<Error=<Self as EmployeeAdapter>::Error> +
+pub trait EmployeeAdapter<'store> :
+	Deletable<Error=<Self as EmployeeAdapter<'store>>::Error> +
+	Initializable<Error=<Self as EmployeeAdapter<'store>>::Error> +
 	Into<Employee> +
-	Into<Result<EmployeeView, <Self as EmployeeAdapter>::Error>> +
-	Into<Result<Organization, <Self as EmployeeAdapter>::Error>> +
-	Into<Result<Person, <Self as EmployeeAdapter>::Error>> +
-	Updatable<Error=<Self as EmployeeAdapter>::Error> +
+	Into<Result<EmployeeView, <Self as EmployeeAdapter<'store>>::Error>> +
+	Into<Result<Organization, <Self as EmployeeAdapter<'store>>::Error>> +
+	Into<Result<Person, <Self as EmployeeAdapter<'store>>::Error>> +
+	Updatable<Error=<Self as EmployeeAdapter<'store>>::Error> +
 {
 	type Error : Error;
 
@@ -35,8 +35,8 @@ pub trait EmployeeAdapter :
 		person: Person,
 		title: &str,
 		status: EmployeeStatus,
-		store: &Store,
-	) -> Result<Employee, <Self as EmployeeAdapter>::Error>;
+		store: &'store Store,
+	) -> Result<Employee, <Self as EmployeeAdapter<'store>>::Error>;
 
 	/// # Summary
 	///
@@ -57,6 +57,6 @@ pub trait EmployeeAdapter :
 		person: MatchWhen<Id>,
 		title: MatchWhen<String>,
 		status: MatchWhen<EmployeeStatus>,
-		store: &Store,
-	) -> Result<Vec<Employee>, <Self as EmployeeAdapter>::Error>;
+		store: &'store Store,
+	) -> Result<Vec<Employee>, <Self as EmployeeAdapter<'store>>::Error>;
 }

@@ -15,7 +15,7 @@ use
 	std::{fs, io::BufReader},
 };
 
-impl PersonAdapter for BincodePerson<'_>
+impl<'store> PersonAdapter<'store> for BincodePerson<'store>
 {
 	type Error = Error;
 
@@ -33,7 +33,7 @@ impl PersonAdapter for BincodePerson<'_>
 	fn create(
 		contact_info: Vec<Contact>,
 		name: &str,
-		store: &Store,
+		store: &'store Store,
 	) -> Result<Person>
 	{
 		Self::init(&store)?;
@@ -70,7 +70,7 @@ impl PersonAdapter for BincodePerson<'_>
 		contact_info: MatchWhen<Contact>,
 		id: MatchWhen<Id>,
 		name: MatchWhen<String>,
-		store: &Store,
+		store: &'store Store,
 	) -> Result<Vec<Person>>
 	{
 		Self::init(&store)?;

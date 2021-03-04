@@ -15,7 +15,7 @@ use
 	std::{fs, io::BufReader},
 };
 
-impl LocationAdapter for BincodeLocation<'_>
+impl<'store> LocationAdapter<'store> for BincodeLocation<'store>
 {
 	type Error = Error;
 
@@ -32,7 +32,7 @@ impl LocationAdapter for BincodeLocation<'_>
 	/// ```ignore
 	/// Location {name, id: /* generated */};
 	/// ```
-	fn create(name: &str, store: &Store) -> Result<Location>
+	fn create(name: &str, store: &'store Store) -> Result<Location>
 	{
 		Self::init(&store)?;
 
@@ -99,7 +99,7 @@ impl LocationAdapter for BincodeLocation<'_>
 		id: MatchWhen<Id>,
 		name: MatchWhen<String>,
 		outer: MatchWhen<Option<Id>>,
-		store: &Store,
+		store: &'store Store,
 	) -> Result<Vec<Location>>
 	{
 		Self::init(&store)?;

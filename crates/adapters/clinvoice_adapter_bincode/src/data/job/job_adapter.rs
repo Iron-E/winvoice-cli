@@ -19,7 +19,7 @@ use
 	std::{fs, io::BufReader},
 };
 
-impl JobAdapter for BincodeJob<'_>
+impl<'store> JobAdapter<'store> for BincodeJob<'store>
 {
 	type Error = Error;
 
@@ -39,7 +39,7 @@ impl JobAdapter for BincodeJob<'_>
 		date_open: DateTime<Utc>,
 		hourly_rate: Money,
 		objectives: &str,
-		store: &Store,
+		store: &'store Store,
 	) -> Result<Job>
 	{
 		Self::init(&store)?;
@@ -93,7 +93,7 @@ impl JobAdapter for BincodeJob<'_>
 		timesheet_employee: MatchWhen<Id>,
 		timesheet_begin: MatchWhen<DateTime<Utc>>,
 		timesheet_end: MatchWhen<Option<DateTime<Utc>>>,
-		store: &Store,
+		store: &'store Store,
 	) -> Result<Vec<Job>>
 	{
 		Self::init(&store)?;

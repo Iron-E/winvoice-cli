@@ -11,6 +11,8 @@ use
 
 impl Initializable for BincodeLocation<'_>
 {
+	type Error = Error;
+
 	/// # Summary
 	///
 	/// Initialize the database for a given [`Store`].

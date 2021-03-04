@@ -16,7 +16,7 @@ use
 ///
 /// The `Config` contains settings that affect all areas of the application.
 #[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
-pub struct Config<'alias, 'currency, 'name, 'pass, 'path, 'user>
+pub struct Config<'alias, 'currency, 'name>
 {
 	/// # Summary
 	///
@@ -33,7 +33,7 @@ pub struct Config<'alias, 'currency, 'name, 'pass, 'path, 'user>
 	///
 	/// Configurations for data storages.
 	#[serde(borrow)]
-	stores: BTreeMap<&'name str, StoreValue<'alias, 'pass, 'path, 'user>>,
+	stores: BTreeMap<&'name str, StoreValue<'alias>>,
 
 	/// # Summary
 	///
@@ -41,7 +41,7 @@ pub struct Config<'alias, 'currency, 'name, 'pass, 'path, 'user>
 	pub timesheets: Timesheets,
 }
 
-impl Config<'_, '_, '_, '_, '_, '_>
+impl Config<'_, '_, '_>
 {
 	/// # Summary
 	///

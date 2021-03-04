@@ -1,12 +1,14 @@
 use
 {
-	super::{Config, Result},
+	super::{Config, Error, Result},
 	clinvoice_adapter::data::Updatable,
 	std::fs,
 };
 
-impl Updatable for Config<'_, '_, '_, '_, '_, '_>
+impl Updatable for Config<'_, '_, '_>
 {
+	type Error = Error;
+
 	fn update(&self) -> Result<()>
 	{
 		let path = Self::path();

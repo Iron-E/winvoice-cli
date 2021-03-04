@@ -30,7 +30,7 @@ pub trait LocationAdapter :
 	/// ```ignore
 	/// Location {name, id: /* generated */};
 	/// ```
-	fn create(name: &str, store: Store) -> Result<Location, <Self as LocationAdapter>::Error>;
+	fn create(name: &str, store: &Store) -> Result<Location, <Self as LocationAdapter>::Error>;
 
 	/// # Summary
 	///
@@ -64,7 +64,7 @@ pub trait LocationAdapter :
 				MatchWhen::EqualTo(id), // id
 				MatchWhen::Any, // name
 				MatchWhen::Any, // outer id
-				store.clone(),
+				&store,
 			)
 			{
 				if let Some(adapted_location) = results.into_iter().next()
@@ -99,6 +99,6 @@ pub trait LocationAdapter :
 		id: MatchWhen<Id>,
 		name: MatchWhen<String>,
 		outer: MatchWhen<Option<Id>>,
-		store: Store,
+		store: &Store,
 	) -> Result<Vec<Location>, <Self as LocationAdapter>::Error>;
 }

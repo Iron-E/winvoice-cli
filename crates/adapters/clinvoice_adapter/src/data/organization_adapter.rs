@@ -31,7 +31,7 @@ pub trait OrganizationAdapter  :
 	fn create(
 		location: Location,
 		name: &str,
-		store: Store,
+		store: &Store,
 	) -> Result<Organization, <Self as OrganizationAdapter>::Error>;
 
 	/// # Summary
@@ -50,6 +50,6 @@ pub trait OrganizationAdapter  :
 		id: MatchWhen<Id>,
 		location: MatchWhen<Id>,
 		name: MatchWhen<String>,
-		store: Store,
+		store: &Store,
 	) -> Result<Vec<Organization>, <Self as OrganizationAdapter>::Error>;
 }

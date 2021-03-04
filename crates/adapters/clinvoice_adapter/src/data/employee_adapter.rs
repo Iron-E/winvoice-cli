@@ -35,7 +35,7 @@ pub trait EmployeeAdapter :
 		person: Person,
 		title: &str,
 		status: EmployeeStatus,
-		store: Store,
+		store: &Store,
 	) -> Result<Employee, <Self as EmployeeAdapter>::Error>;
 
 	/// # Summary
@@ -57,6 +57,6 @@ pub trait EmployeeAdapter :
 		person: MatchWhen<Id>,
 		title: MatchWhen<String>,
 		status: MatchWhen<EmployeeStatus>,
-		store: Store,
+		store: &Store,
 	) -> Result<Vec<Employee>, <Self as EmployeeAdapter>::Error>;
 }

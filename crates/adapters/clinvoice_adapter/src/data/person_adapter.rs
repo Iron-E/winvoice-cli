@@ -29,7 +29,7 @@ pub trait PersonAdapter :
 	fn create(
 		contact_info: Vec<Contact>,
 		name: &str,
-		store: Store,
+		store: &Store,
 	) -> Result<Person, <Self as PersonAdapter>::Error>;
 
 	/// # Summary
@@ -48,6 +48,6 @@ pub trait PersonAdapter :
 		contact_info: MatchWhen<Contact>,
 		id: MatchWhen<Id>,
 		name: MatchWhen<String>,
-		store: Store,
+		store: &Store,
 	) -> Result<Vec<Person>, <Self as PersonAdapter>::Error>;
 }

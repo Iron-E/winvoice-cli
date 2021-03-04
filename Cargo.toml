@@ -42,4 +42,5 @@ members = [
 	"crates/adapters/clinvoice_adapter_bincode",
 	"crates/clinvoice_config",
 	"crates/clinvoice_data",
+	"crates/clinvoice_error",
 ]

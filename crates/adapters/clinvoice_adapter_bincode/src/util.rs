@@ -41,7 +41,7 @@ pub fn create_store_dir(store_dir: &Path) -> io::Result<bool>
 /// Expand the `store`'s specified path and join the provided `subdir`.
 pub fn expand_store_path(store: &Store) -> PathBuf
 {
-	match shellexpand::full(store.path)
+	match shellexpand::full(&store.path)
 	{
 		Ok(p) => PathBuf::from(p.as_ref()),
 		_ => PathBuf::from(store.path),
@@ -91,7 +91,7 @@ pub fn test_temp_store(assertion: impl FnOnce(&Store))
 		password: None,
 		path: match temp_path.to_str()
 		{
-			Some(s) => s,
+			Some(s) => s.into(),
 			_ => Err(io::Error::new(
 				io::ErrorKind::InvalidInput,
 				"`env::temp_path` did not resolve to a valid path."

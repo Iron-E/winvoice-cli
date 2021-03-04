@@ -15,7 +15,7 @@ use
 	std::{fs, io::BufReader},
 };
 
-impl<'pass, 'path, 'user> EmployeeAdapter<'pass, 'path, 'user> for BincodeEmployee<'pass, 'path, 'user>
+impl EmployeeAdapter for BincodeEmployee<'_>
 {
 	type Error = Error;
 
@@ -37,8 +37,8 @@ impl<'pass, 'path, 'user> EmployeeAdapter<'pass, 'path, 'user> for BincodeEmploy
 		person: Person,
 		title: &str,
 		status: EmployeeStatus,
-		store: Store<'pass, 'path, 'user>,
-	) -> Result<Self>
+		store: &Store,
+	) -> Result<Employee>
 	{
 		Self::init(&store)?;
 
@@ -58,7 +58,7 @@ impl<'pass, 'path, 'user> EmployeeAdapter<'pass, 'path, 'user> for BincodeEmploy
 
 		bincode_person.update()?;
 
-		Ok(bincode_person)
+		Ok(bincode_person.employee)
 	}
 
 	/// # Summary
@@ -80,8 +80,8 @@ impl<'pass, 'path, 'user> EmployeeAdapter<'pass, 'path, 'user> for BincodeEmploy
 		person: MatchWhen<Id>,
 		title: MatchWhen<String>,
 		status: MatchWhen<EmployeeStatus>,
-		store: Store<'pass, 'path, 'user>,
-	) -> Result<Vec<Self>>
+		store: &Store,
+	) -> Result<Vec<Employee>>
 	{
 		Self::init(&store)?;
 
@@ -100,7 +100,7 @@ impl<'pass, 'path, 'user> EmployeeAdapter<'pass, 'path, 'user> for BincodeEmploy
 				title.is_match(&employee.title) &&
 				status.is_match(&employee.status)
 			{
-				results.push(BincodeEmployee {employee, store});
+				results.push(employee);
 			}
 		}
 
@@ -113,7 +113,7 @@ mod tests
 {
 	use
 	{
-		super::{BincodeEmployee, Contact, EmployeeAdapter, EmployeeStatus, Id, MatchWhen, Organization, Person, util},
+		super::{BincodeEmployee, Contact, Employee, EmployeeAdapter, EmployeeStatus, Id, MatchWhen, Organization, Person, Store, util},
 		std::{fs, time::Instant},
 	};
 
@@ -131,84 +131,99 @@ mod tests
 		{
 			let start = Instant::now();
 
-			test_create_assertion(BincodeEmployee::create(
-				vec![Contact::Address(Id::new_v4())],
-				organization.clone(),
-				Person
-				{
-					contact_info: vec![Contact::Address(Id::new_v4())],
-					id: Id::new_v4(),
-					name: "Testy Mćtesterson".into(),
-				},
-				"CEO of Tests",
-				EmployeeStatus::Employed,
-				*store,
-			).unwrap());
+			test_create_assertion(
+				BincodeEmployee::create(
+					vec![Contact::Address(Id::new_v4())],
+					organization.clone(),
+					Person
+					{
+						contact_info: vec![Contact::Address(Id::new_v4())],
+						id: Id::new_v4(),
+						name: "Testy Mćtesterson".into(),
+					},
+					"CEO of Tests",
+					EmployeeStatus::Employed,
+					&store,
+				).unwrap(),
+				&store,
+			);
 
-			test_create_assertion(BincodeEmployee::create(
-				vec![Contact::Email("foo@bar.io".into())],
-				organization.clone(),
-				Person
-				{
-					contact_info: vec![Contact::Email("foo2@bar.io".into())],
-					id: Id::new_v4(),
-					name: "Nimron MacBeaver".into(),
-				},
-				"Oblong Shape Holder",
-				EmployeeStatus::NotEmployed,
-				*store,
-			).unwrap());
+			test_create_assertion(
+				BincodeEmployee::create(
+					vec![Contact::Email("foo@bar.io".into())],
+					organization.clone(),
+					Person
+					{
+						contact_info: vec![Contact::Email("foo2@bar.io".into())],
+						id: Id::new_v4(),
+						name: "Nimron MacBeaver".into(),
+					},
+					"Oblong Shape Holder",
+					EmployeeStatus::NotEmployed,
+					&store,
+				).unwrap(),
+				&store,
+			);
 
-			test_create_assertion(BincodeEmployee::create(
-				vec![Contact::Phone("1-800-555-3600".into())],
-				organization.clone(),
-				Person
-				{
-					contact_info: vec![Contact::Phone("1-800-555-3601".into())],
-					id: Id::new_v4(),
-					name: "An Actual «Tor♯tust".into(),
-				},
-				"Mixer of Soups",
-				EmployeeStatus::Representative,
-				*store,
-			).unwrap());
+			test_create_assertion(
+				BincodeEmployee::create(
+					vec![Contact::Phone("1-800-555-3600".into())],
+					organization.clone(),
+					Person
+					{
+						contact_info: vec![Contact::Phone("1-800-555-3601".into())],
+						id: Id::new_v4(),
+						name: "An Actual «Tor♯tust".into(),
+					},
+					"Mixer of Soups",
+					EmployeeStatus::Representative,
+					&store,
+				).unwrap(),
+				&store,
+			);
 
-			test_create_assertion(BincodeEmployee::create(
-				vec![Contact::Address(Id::new_v4())],
-				organization.clone(),
-				Person
-				{
-					contact_info: vec![Contact::Address(Id::new_v4())],
-					id: Id::new_v4(),
-					name: "Jimmy Neutron, Boy Genius' Dog 'Gottard'".into(),
-				},
-				"Sidekick",
-				EmployeeStatus::Employed,
-				*store,
-			).unwrap());
+			test_create_assertion(
+				BincodeEmployee::create(
+					vec![Contact::Address(Id::new_v4())],
+					organization.clone(),
+					Person
+					{
+						contact_info: vec![Contact::Address(Id::new_v4())],
+						id: Id::new_v4(),
+						name: "Jimmy Neutron, Boy Genius' Dog 'Gottard'".into(),
+					},
+					"Sidekick",
+					EmployeeStatus::Employed,
+					&store,
+				).unwrap(),
+				&store,
+			);
 
-			test_create_assertion(BincodeEmployee::create(
-				vec![Contact::Email("obviousemail@server.com".into())],
-				organization.clone(),
-				Person
-				{
-					contact_info: vec![Contact::Email("obviousemail2@server.com".into())],
-					id: Id::new_v4(),
-					name: "Testy Mćtesterson".into(),
-				},
-				"Lazy No-good Duplicate Name User",
-				EmployeeStatus::NotEmployed,
-				*store,
-			).unwrap());
+			test_create_assertion(
+				BincodeEmployee::create(
+					vec![Contact::Email("obviousemail@server.com".into())],
+					organization.clone(),
+					Person
+					{
+						contact_info: vec![Contact::Email("obviousemail2@server.com".into())],
+						id: Id::new_v4(),
+						name: "Testy Mćtesterson".into(),
+					},
+					"Lazy No-good Duplicate Name User",
+					EmployeeStatus::NotEmployed,
+					&store,
+				).unwrap(),
+				&store,
+			);
 
 			println!("\n>>>>> BincodeEmployee::create {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 5);
 		});
 	}
 
-	fn test_create_assertion(bincode_employee: BincodeEmployee)
+	fn test_create_assertion(employee: Employee, store: &Store)
 	{
-		let read_result = fs::read(bincode_employee.filepath()).unwrap();
-		assert_eq!(bincode_employee.employee, bincode::deserialize(&read_result).unwrap());
+		let read_result = fs::read(BincodeEmployee {employee, store}.filepath()).unwrap();
+		assert_eq!(employee, bincode::deserialize(&read_result).unwrap());
 	}
 
 	#[test]
@@ -237,7 +252,7 @@ mod tests
 				},
 				"CEO of Tests",
 				EmployeeStatus::NotEmployed,
-				*store,
+				&store,
 			).unwrap();
 
 			contact_info.push(Contact::Email("foo@bar.io".into()));
@@ -252,7 +267,7 @@ mod tests
 				},
 				"Oblong Shape Holder",
 				EmployeeStatus::Employed,
-				*store,
+				&store,
 			).unwrap();
 
 			contact_info.push(Contact::Phone("1-800-555-3600".into()));
@@ -267,7 +282,7 @@ mod tests
 				},
 				"Mixer of Soups",
 				EmployeeStatus::Representative,
-				*store,
+				&store,
 			).unwrap();
 
 			contact_info.push(Contact::Address(Id::new_v4()));
@@ -282,7 +297,7 @@ mod tests
 				},
 				"Sidekick",
 				EmployeeStatus::Employed,
-				*store,
+				&store,
 			).unwrap();
 
 			contact_info.push(Contact::Email("obviousemail@server.com".into()));
@@ -297,7 +312,7 @@ mod tests
 				},
 				"Lazy No-good Duplicate Name User",
 				EmployeeStatus::NotEmployed,
-				*store,
+				&store,
 			).unwrap();
 
 			let start = Instant::now();
@@ -309,18 +324,18 @@ mod tests
 				MatchWhen::Any, // person
 				MatchWhen::Any, // title
 				MatchWhen::Any, // status
-				*store,
+				&store,
 			).unwrap();
 
 			// Retrieve testy and gottard
 			let testy_gottard = BincodeEmployee::retrieve(
 				MatchWhen::Any, // contact info
-				MatchWhen::HasAny([testy_mctesterson.employee.id, gottard.employee.id].iter().collect()), // id
+				MatchWhen::HasAny([testy_mctesterson.id, gottard.id].iter().collect()), // id
 				MatchWhen::Any, // organization
 				MatchWhen::Any, // person
 				MatchWhen::Any, // title
 				MatchWhen::Any, // status
-				*store,
+				&store,
 			).unwrap();
 
 			println!("\n>>>>> BincodeEmployee::retrieve {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 2);

@@ -6,7 +6,7 @@ use
 	std::fs,
 };
 
-impl Updatable for BincodeEmployee<'_, '_, '_>
+impl Updatable for BincodeEmployee<'_>
 {
 	fn update(&self) -> Result<()>
 	{

@@ -1,12 +1,18 @@
 use
 {
 	super::BincodeEmployee,
-	crate::{data::Result, util},
+	crate::
+	{
+		data::{Error, Result},
+		util,
+	},
 	clinvoice_adapter::{data::Initializable, Store},
 };
 
-impl Initializable for BincodeEmployee<'_, '_, '_>
+impl Initializable for BincodeEmployee<'_>
 {
+	type Error = Error;
+
 	/// # Summary
 	///
 	/// Initialize the database for a given [`Store`].

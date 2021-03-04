@@ -5,7 +5,7 @@ use
 	clinvoice_data::Person,
 };
 
-impl Into<Result<Person>> for BincodeEmployee<'_, '_, '_>
+impl Into<Result<Person>> for BincodeEmployee<'_>
 {
 	fn into(self) -> Result<Person>
 	{
@@ -16,13 +16,13 @@ impl Into<Result<Person>> for BincodeEmployee<'_, '_, '_>
 			self.store,
 		)?;
 
-		let bincode_person = match results.get(0)
+		let person = match results.get(0)
 		{
-			Some(bin_org) => bin_org,
+			Some(prsn) => prsn,
 			_ => return Err(DataError::DataIntegrity {id: self.employee.person_id}.into()),
 		};
 
-		Ok(bincode_person.person.clone())
+		Ok(person.clone())
 	}
 }
 
@@ -46,28 +46,32 @@ mod tests
 			let testy = BincodePerson::create(
 				vec![Contact::Email("yum".into())],
 				"Testy Mćtesterson".into(),
-				*store,
+				&store,
 			).unwrap();
 
-			let testy_employed = BincodeEmployee::create(
-				vec![Contact::Email("foo".into())],
-				Organization
-				{
-					id: Id::new_v4(),
-					location_id: Id::new_v4(),
-					name: "DoGood Inc".into(),
-				},
-				testy.person.clone(),
-				"CEO of Tests",
-				EmployeeStatus::NotEmployed,
-				*store,
-			).unwrap();
+			let testy_employed = BincodeEmployee
+			{
+				employee: BincodeEmployee::create(
+					vec![Contact::Email("foo".into())],
+					Organization
+					{
+						id: Id::new_v4(),
+						location_id: Id::new_v4(),
+						name: "DoGood Inc".into(),
+					},
+					testy.clone(),
+					"CEO of Tests",
+					EmployeeStatus::NotEmployed,
+					&store,
+				).unwrap(),
+				store,
+			};
 
 			let start = Instant::now();
 			let testy_person: Result<Person> = testy_employed.into();
 			println!("\n>>>>> BincodeEmployee::into_person {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 
-			assert_eq!(testy.person, testy_person.unwrap());
+			assert_eq!(testy, testy_person.unwrap());
 		});
 	}
 }

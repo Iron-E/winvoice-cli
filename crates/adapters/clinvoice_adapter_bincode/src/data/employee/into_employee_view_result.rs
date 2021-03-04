@@ -9,7 +9,7 @@ use
 	},
 };
 
-impl Into<Result<EmployeeView>> for BincodeEmployee<'_, '_, '_>
+impl Into<Result<EmployeeView>> for BincodeEmployee<'_>
 {
 	fn into(self) -> Result<EmployeeView>
 
@@ -72,36 +72,36 @@ mod tests
 	{
 		util::test_temp_store(|store|
 		{
-			let earth = BincodeLocation::create("Earth", *store).unwrap();
+			let earth = BincodeLocation::create("Earth", &store).unwrap();
 
 			let big_old_test = BincodeOrganization::create(
-				earth.location.clone(),
+				earth.clone(),
 				"Big Old Test Corporation",
-				*store,
+				&store,
 			).unwrap();
 
 			let mut contact_info = Vec::new();
-			contact_info.push(Contact::Address(earth.location.id));
+			contact_info.push(Contact::Address(earth.id));
 
 			let testy = BincodePerson::create(
 				contact_info.clone(),
 				"Testy Mćtesterson",
-				*store,
+				&store,
 			).unwrap();
 
 			let ceo_testy = BincodeEmployee::create(
 				contact_info.clone(),
-				big_old_test.organization.clone(),
-				testy.person.clone(),
+				big_old_test.clone(),
+				testy.clone(),
 				"CEO of Tests",
 				EmployeeStatus::Employed,
-				*store,
+				&store,
 			).unwrap();
 
 			let earth_view = LocationView
 			{
-				id: earth.location.id,
-				name: earth.location.name,
+				id: earth.id,
+				name: earth.name,
 				outer: None,
 			};
 
@@ -112,25 +112,25 @@ mod tests
 			let ceo_testy_view = EmployeeView
 			{
 				contact_info: contact_info_view.clone(),
-				id: ceo_testy.employee.id,
+				id: ceo_testy.id,
 				organization: OrganizationView
 				{
-					id: big_old_test.organization.id,
+					id: big_old_test.id,
 					location: earth_view,
-					name: big_old_test.organization.name,
+					name: big_old_test.name,
 				},
 				person: PersonView
 				{
 					contact_info: contact_info_view,
-					id: testy.person.id,
-					name: testy.person.name,
+					id: testy.id,
+					name: testy.name,
 				},
-				title: ceo_testy.employee.title.clone(),
-				status: ceo_testy.employee.status,
+				title: ceo_testy.title.clone(),
+				status: ceo_testy.status,
 			};
 
 			let start = Instant::now();
-			let ceo_testy_view_result: Result<EmployeeView> = ceo_testy.into();
+			let ceo_testy_view_result: Result<EmployeeView> = BincodeEmployee {employee: ceo_testy, store}.into();
 			println!("\n>>>>> BincodeEmployee::into_view {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 
 			// Asser that the synthetic view is the same as the view which was created naturally.

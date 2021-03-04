@@ -1,13 +1,15 @@
 use
 {
 	super::BincodeOrganization,
-	crate::data::Result,
+	crate::data::{Error, Result},
 	clinvoice_adapter::data::Updatable,
 	std::fs,
 };
 
-impl Updatable for BincodeOrganization<'_, '_, '_>
+impl Updatable for BincodeOrganization<'_>
 {
+	type Error = Error;
+
 	fn update(&self) -> Result<()>
 	{
 		fs::write(self.filepath(), bincode::serialize(&self.organization)?)?;

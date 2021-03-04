@@ -5,11 +5,11 @@ use
 	clinvoice_data::Employee,
 };
 
-impl Into<Result<Vec<Employee>>> for BincodeOrganization<'_, '_, '_>
+impl Into<Result<Vec<Employee>>> for BincodeOrganization<'_>
 {
 	fn into(self) -> Result<Vec<Employee>>
 	{
-		let results = BincodeEmployee::retrieve(
+		Ok(BincodeEmployee::retrieve(
 			MatchWhen::Any, // contact info
 			MatchWhen::Any, // id
 			MatchWhen::EqualTo(self.organization.id), // organization
@@ -17,9 +17,7 @@ impl Into<Result<Vec<Employee>>> for BincodeOrganization<'_, '_, '_>
 			MatchWhen::Any, // status
 			MatchWhen::Any, // title
 			self.store,
-		)?;
-
-		Ok(results.iter().map(|result| result.employee.clone()).collect())
+		)?)
 	}
 }
 
@@ -40,11 +38,15 @@ mod tests
 	{
 		util::test_temp_store(|store|
 		{
-			let dogood = BincodeOrganization::create(
-				Location {name: "Earth".into(), id: Id::new_v4(), outer_id: None},
-				"DoGood Inc",
-				*store
-			).unwrap();
+			let dogood = BincodeOrganization
+			{
+				organization: BincodeOrganization::create(
+					Location {name: "Earth".into(), id: Id::new_v4(), outer_id: None},
+					"DoGood Inc",
+					&store
+				).unwrap(),
+				store,
+			};
 
 			let testy = BincodeEmployee::create(
 				vec![Contact::Email("foo@bar.io".into())],
@@ -57,7 +59,7 @@ mod tests
 				},
 				"CEO of Tests",
 				EmployeeStatus::Representative,
-				*store,
+				&store,
 			).unwrap();
 
 			let mr_flu = BincodeEmployee::create(
@@ -71,7 +73,7 @@ mod tests
 				},
 				"Janitor",
 				EmployeeStatus::Employed,
-				*store,
+				&store,
 			).unwrap();
 
 			let start = Instant::now();
@@ -81,7 +83,7 @@ mod tests
 
 			assert_eq!(
 				reps.unwrap().into_iter().collect::<HashSet<Employee>>(),
-				[mr_flu.employee, testy.employee].iter().cloned().collect::<HashSet<Employee>>()
+				[mr_flu, testy].iter().cloned().collect::<HashSet<Employee>>()
 			);
 		});
 	}

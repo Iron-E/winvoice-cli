@@ -5,7 +5,7 @@ use
 	clinvoice_data::Location,
 };
 
-impl Into<Result<Location>> for BincodeOrganization<'_, '_, '_>
+impl Into<Result<Location>> for BincodeOrganization<'_>
 {
 	fn into(self) -> Result<Location>
 	{
@@ -16,13 +16,13 @@ impl Into<Result<Location>> for BincodeOrganization<'_, '_, '_>
 			self.store,
 		)?;
 
-		let bincode_location = match results.get(0)
+		let location = match results.get(0)
 		{
-			Some(bin_org) => bin_org,
+			Some(loc) => loc,
 			_ => return Err(DataError::DataIntegrity {id: self.organization.location_id}.into()),
 		};
 
-		Ok(bincode_location.location.clone())
+		Ok(location.clone())
 	}
 }
 
@@ -43,12 +43,16 @@ mod tests
 	{
 		util::test_temp_store(|store|
 		{
-			let arizona = BincodeLocation::create("Arizona", *store).unwrap();
-			let dogood = BincodeOrganization::create(
-				arizona.location.clone(),
-				"DoGood Inc",
-				*store
-			).unwrap();
+			let arizona = BincodeLocation::create("Arizona", &store).unwrap();
+			let dogood = BincodeOrganization
+			{
+				organization: BincodeOrganization::create(
+					arizona.clone(),
+					"DoGood Inc",
+					&store
+				).unwrap(),
+				store,
+			};
 
 			let start = Instant::now();
 			// Retrieve the written employees back into the `Employee` structure.
@@ -56,7 +60,7 @@ mod tests
 			println!("\n>>>>> BincodeOrganization::into_location {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 
 			// Assert that the location retrieved is the location expected
-			assert_eq!(arizona.location, dogood_location.unwrap());
+			assert_eq!(arizona, dogood_location.unwrap());
 		});
 	}
 }

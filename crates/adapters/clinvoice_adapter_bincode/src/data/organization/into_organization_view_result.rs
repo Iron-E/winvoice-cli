@@ -10,7 +10,7 @@ use
 };
 
 // NOTE: tests not needed because this is called in `Into<EmployeeView>`
-impl Into<Result<OrganizationView>> for BincodeOrganization<'_, '_, '_>
+impl Into<Result<OrganizationView>> for BincodeOrganization<'_>
 {
 	fn into(self) -> Result<OrganizationView>
 	{

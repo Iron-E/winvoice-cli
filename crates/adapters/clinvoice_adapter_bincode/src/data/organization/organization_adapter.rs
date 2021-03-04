@@ -15,7 +15,7 @@ use
 	std::{fs, io::BufReader},
 };
 
-impl<'pass, 'path, 'user> OrganizationAdapter<'pass, 'path, 'user> for BincodeOrganization<'pass, 'path, 'user>
+impl OrganizationAdapter for BincodeOrganization<'_>
 {
 	type Error = Error;
 
@@ -33,8 +33,8 @@ impl<'pass, 'path, 'user> OrganizationAdapter<'pass, 'path, 'user> for BincodeOr
 	fn create(
 		location: Location,
 		name: &str,
-		store: Store<'pass, 'path, 'user>,
-	) -> Result<Self>
+		store: &Store,
+	) -> Result<Organization>
 	{
 		Self::init(&store)?;
 
@@ -51,7 +51,7 @@ impl<'pass, 'path, 'user> OrganizationAdapter<'pass, 'path, 'user> for BincodeOr
 
 		bincode_organization.update()?;
 
-		Ok(bincode_organization)
+		Ok(bincode_organization.organization)
 	}
 
 	/// # Summary
@@ -70,8 +70,8 @@ impl<'pass, 'path, 'user> OrganizationAdapter<'pass, 'path, 'user> for BincodeOr
 		id: MatchWhen<Id>,
 		location: MatchWhen<Id>,
 		name: MatchWhen<String>,
-		store: Store<'pass, 'path, 'user>,
-	) -> Result<Vec<Self>>
+		store: &Store,
+	) -> Result<Vec<Organization>>
 	{
 		Self::init(&store)?;
 
@@ -87,7 +87,7 @@ impl<'pass, 'path, 'user> OrganizationAdapter<'pass, 'path, 'user> for BincodeOr
 				location.is_match(&organization.location_id) &&
 				name.is_match(&organization.name)
 			{
-				results.push(BincodeOrganization {organization, store});
+				results.push(organization);
 			}
 		}
 
@@ -100,7 +100,7 @@ mod tests
 {
 	use
 	{
-		super::{BincodeOrganization, Id, Location, MatchWhen, OrganizationAdapter, util},
+		super::{BincodeOrganization, Id, Location, MatchWhen, Organization, OrganizationAdapter, Store, util},
 		std::{fs, time::Instant},
 	};
 
@@ -117,39 +117,54 @@ mod tests
 
 			let start = Instant::now();
 
-			test_create_assertion(BincodeOrganization::create(
-				Location {name: "Earth".into(), id: Id::new_v4(), outer_id: None},
-				"alsdkjaldkj", *store
-			).unwrap());
+			test_create_assertion(
+				BincodeOrganization::create(
+					Location {name: "Earth".into(), id: Id::new_v4(), outer_id: None},
+					"alsdkjaldkj", &store
+				).unwrap(),
+				&store,
+			);
 
-			test_create_assertion(BincodeOrganization::create(
-				Location {name: "USA".into(), id: usa_id, outer_id: Some(earth_id)},
-				"alskdjalgkh  ladhkj EAL ISdh", *store
-			).unwrap());
+			test_create_assertion(
+				BincodeOrganization::create(
+					Location {name: "USA".into(), id: usa_id, outer_id: Some(earth_id)},
+					"alskdjalgkh  ladhkj EAL ISdh", &store
+				).unwrap(),
+				&store,
+			);
 
-			test_create_assertion(BincodeOrganization::create(
-				Location {name: "Arizona".into(), id: arizona_id, outer_id: Some(earth_id)},
-				" AAA – 44 %%", *store
-			).unwrap());
+			test_create_assertion(
+				BincodeOrganization::create(
+					Location {name: "Arizona".into(), id: arizona_id, outer_id: Some(earth_id)},
+					" AAA – 44 %%", &store
+				).unwrap(),
+				&store,
+			);
 
-			test_create_assertion(BincodeOrganization::create(
-				Location {name: "Phoenix".into(), id: phoenix_id, outer_id: Some(arizona_id)},
-				" ^^^ ADSLKJDLASKJD FOCJCI", *store
-			).unwrap());
+			test_create_assertion(
+				BincodeOrganization::create(
+					Location {name: "Phoenix".into(), id: phoenix_id, outer_id: Some(arizona_id)},
+					" ^^^ ADSLKJDLASKJD FOCJCI", &store
+				).unwrap(),
+				&store,
+			);
 
-			test_create_assertion(BincodeOrganization::create(
-				Location {name: "Some Road".into(), id: some_id, outer_id: Some(phoenix_id)},
-				"aldkj doiciuc giguy &&", *store
-			).unwrap());
+			test_create_assertion(
+				BincodeOrganization::create(
+					Location {name: "Some Road".into(), id: some_id, outer_id: Some(phoenix_id)},
+					"aldkj doiciuc giguy &&", &store
+				).unwrap(),
+				&store,
+			);
 
 			println!("\n>>>>> BincodeOrganization::create {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 5);
 		});
 	}
 
-	fn test_create_assertion(bincode_organization: BincodeOrganization)
+	fn test_create_assertion(organization: Organization, store: &Store)
 	{
-		let read_result = fs::read(bincode_organization.filepath()).unwrap();
-		assert_eq!(bincode_organization.organization, bincode::deserialize(&read_result).unwrap());
+		let read_result = fs::read(BincodeOrganization {organization, store}.filepath()).unwrap();
+		assert_eq!(organization, bincode::deserialize(&read_result).unwrap());
 	}
 
 	#[test]
@@ -160,19 +175,19 @@ mod tests
 			let earth_id = Id::new_v4();
 			let packing = BincodeOrganization::create(
 				Location {name: "Earth".into(), id: earth_id, outer_id: None},
-				"Packing Co", *store
+				"Packing Co", &store
 			).unwrap();
 
 			let usa_id = Id::new_v4();
 			let eal = BincodeOrganization::create(
 				Location {name: "USA".into(), id: usa_id, outer_id: Some(earth_id)},
-				"alskdjalgkh  ladhkj EAL ISdh", *store
+				"alskdjalgkh  ladhkj EAL ISdh", &store
 			).unwrap();
 
 			let arizona_id = Id::new_v4();
 			let aaa = BincodeOrganization::create(
 				Location {name: "Arizona".into(), id: arizona_id, outer_id: Some(usa_id)},
-				" AAA – 44 %%", *store
+				" AAA – 44 %%", &store
 			).unwrap();
 
 			let start = Instant::now();
@@ -180,8 +195,8 @@ mod tests
 			let results = BincodeOrganization::retrieve(
 				MatchWhen::Any, // id
 				MatchWhen::InRange(&|id| id == &earth_id || id == &usa_id), // location
-				MatchWhen::HasNone([aaa.organization.name.clone()].iter().collect()), // name
-				*store,
+				MatchWhen::HasNone([aaa.name.clone()].iter().collect()), // name
+				&store,
 			).unwrap();
 			println!("\n>>>>> BincodeOrganization::retrieve {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 

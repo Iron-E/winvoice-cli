@@ -1,10 +1,6 @@
-mod from_io_error;
-mod from_toml_de_error;
-mod from_toml_ser_error;
-
 use
 {
-	std::{io, result::Result as StdResult},
+	std::io,
 	snafu::Snafu,
 };
 
@@ -24,4 +20,7 @@ pub enum Error
 	TomlSer {err: toml::ser::Error},
 }
 
-pub type Result<T> = StdResult<T, Error>;
+clinvoice_error::FromError!(Io, io::Error);
+clinvoice_error::FromError!(TomlDe, toml::de::Error);
+clinvoice_error::FromError!(TomlSer, toml::ser::Error);
+clinvoice_error::AliasResult!();

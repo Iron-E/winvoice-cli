@@ -156,6 +156,7 @@ version = "0.1.0"
 dependencies = [
  "clinvoice_adapter",
  "clinvoice_data",
+ "clinvoice_error",
  "dirs",
  "humantime-serde",
  "serde",

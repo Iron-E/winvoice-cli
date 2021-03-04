@@ -13,8 +13,10 @@ use
 	},
 };
 
-impl Initializable<Error> for BincodePerson<'_, '_, '_>
+impl Initializable for BincodePerson<'_, '_, '_>
 {
+	type Error = Error;
+
 	/// # Summary
 	///
 	/// Initialize the database for a given [`Store`].

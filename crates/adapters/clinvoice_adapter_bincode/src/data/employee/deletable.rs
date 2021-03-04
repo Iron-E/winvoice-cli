@@ -6,8 +6,10 @@ use
 	std::{fs, io::ErrorKind},
 };
 
-impl Deletable<Error> for BincodeEmployee<'_, '_, '_>
+impl Deletable for BincodeEmployee<'_, '_, '_>
 {
+	type Error = Error;
+
 	fn delete(&self, cascade: bool) -> Result<()>
 	{
 		if let Err(e) = fs::remove_file(self.filepath())

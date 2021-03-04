@@ -9,8 +9,10 @@ use
 	clinvoice_adapter::{data::Initializable, Store},
 };
 
-impl Initializable<Error> for BincodeEmployee<'_, '_, '_>
+impl Initializable for BincodeEmployee<'_, '_, '_>
 {
+	type Error = Error;
+
 	/// # Summary
 	///
 	/// Initialize the database for a given [`Store`].

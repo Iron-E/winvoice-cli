@@ -6,8 +6,10 @@ use
 	std::fs,
 };
 
-impl Updatable<Error> for BincodePerson<'_, '_, '_>
+impl Updatable for BincodePerson<'_, '_, '_>
 {
+	type Error = Error;
+
 	fn update(&self) -> Result<()>
 	{
 		fs::write(self.filepath(), bincode::serialize(&self.person)?)?;

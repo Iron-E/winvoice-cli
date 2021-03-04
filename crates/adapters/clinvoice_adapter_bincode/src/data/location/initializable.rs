@@ -1,18 +1,12 @@
 use
 {
 	super::BincodeLocation,
-	crate::
-	{
-		data::{Error, Result},
-		util,
-	},
+	crate::{data::Result, util},
 	clinvoice_adapter::{data::Initializable, Store},
 };
 
 impl Initializable for BincodeLocation<'_, '_, '_>
 {
-	type Error = Error;
-
 	/// # Summary
 	///
 	/// Initialize the database for a given [`Store`].

@@ -1,15 +1,13 @@
 use
 {
 	super::BincodeLocation,
-	crate::data::{BincodeOrganization, Error, Result},
+	crate::data::{BincodeOrganization, Result},
 	clinvoice_adapter::data::{Deletable, LocationAdapter, MatchWhen, OrganizationAdapter},
 	std::{fs, io::ErrorKind},
 };
 
 impl Deletable for BincodeLocation<'_, '_, '_>
 {
-	type Error = Error;
-
 	fn delete(&self, cascade: bool) -> Result<()>
 	{
 		if let Err(e) = fs::remove_file(self.filepath())

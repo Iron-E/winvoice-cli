@@ -1,15 +1,13 @@
 use
 {
 	super::BincodeJob,
-	crate::data::{Error, Result},
+	crate::data::Result,
 	clinvoice_adapter::data::Deletable,
 	std::{fs, io::ErrorKind},
 };
 
 impl Deletable for BincodeJob<'_, '_, '_>
 {
-	type Error = Error;
-
 	fn delete(&self, _cascade: bool) -> Result<()>
 	{
 		if let Err(e) = fs::remove_file(self.filepath())

@@ -1,7 +1,7 @@
 #[macro_export]
 macro_rules! AdaptOrganization
 {
-	($name: ident, $($store_life: lifetime)*) =>
+	($name: ident, $store_life: lifetime) =>
 	{
 		use
 		{
@@ -13,25 +13,17 @@ macro_rules! AdaptOrganization
 		///
 		/// A wrapper around [`Organization`] with a [`Store`] that points to its location.
 		#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-		pub struct $name<$($store_life),*>
+		pub struct $name<$store_life>
 		{
 			pub organization: Organization,
-			pub store: Store<$($store_life),*>,
+			pub store: &$store_life Store,
 		}
 
-		impl<$($store_life),*> Into<Organization> for $name<$($store_life),*>
+		impl Into<Organization> for $name<'_>
 		{
 			fn into(self) -> Organization
 			{
 				self.organization
-			}
-		}
-
-		impl<$($store_life),*> Into<Store<$($store_life),*>> for $name<$($store_life),*>
-		{
-			fn into(self) -> Store<$($store_life),*>
-			{
-				self.store
 			}
 		}
 	}

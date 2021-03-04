@@ -1,7 +1,7 @@
 #[macro_export]
 macro_rules! AdaptLocation
 {
-	($name: ident, $($store_life: lifetime)*) =>
+	($name: ident, $store_life: lifetime) =>
 	{
 		use
 		{
@@ -13,13 +13,13 @@ macro_rules! AdaptLocation
 		///
 		/// A wrapper around [`Location`] with a [`Store`] that points to its location.
 		#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-		pub struct $name<$($store_life),*>
+		pub struct $name<$store_life>
 		{
 			pub location: Location,
-			pub store: Store<$($store_life),*>,
+			pub store: &$store_life Store,
 		}
 
-		impl<$($store_life),*> Into<Location> for $name<$($store_life),*>
+		impl Into<Location> for $name<'_>
 		{
 			fn into(self) -> Location
 			{
@@ -27,11 +27,11 @@ macro_rules! AdaptLocation
 			}
 		}
 
-		impl<$($store_life),*> Into<Store<$($store_life),*>> for $name<$($store_life),*>
+		impl Into<Store> for $name<'_>
 		{
-			fn into(self) -> Store<$($store_life),*>
+			fn into(self) -> Store
 			{
-				self.store
+				self.store.clone()
 			}
 		}
 	}

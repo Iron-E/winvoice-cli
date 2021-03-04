@@ -14,7 +14,7 @@ use
 
 clinvoice_adapter::Adapt!(Organization => BincodeOrganization);
 
-impl BincodeOrganization<'_, '_, '_>
+impl BincodeOrganization<'_>
 {
 	/// # Summary
 	///

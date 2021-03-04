@@ -13,7 +13,7 @@ use
 
 clinvoice_adapter::Adapt!(Job => BincodeJob);
 
-impl BincodeJob<'_, '_, '_>
+impl BincodeJob<'_>
 {
 	/// # Summary
 	///

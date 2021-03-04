@@ -12,7 +12,7 @@ use
 
 clinvoice_adapter::Adapt!(Person => BincodePerson);
 
-impl BincodePerson<'_, '_, '_>
+impl BincodePerson<'_>
 {
 	/// # Summary
 	///

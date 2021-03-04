@@ -12,7 +12,7 @@ use
 
 clinvoice_adapter::Adapt!(Location => BincodeLocation);
 
-impl BincodeLocation<'_, '_, '_>
+impl BincodeLocation<'_>
 {
 	/// # Summary
 	///

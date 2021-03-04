@@ -1,11 +1,11 @@
 use
 {
-	super::{Config, Error, Result},
+	super::{Config, Result},
 	clinvoice_adapter::data::Updatable,
 	std::fs,
 };
 
-impl Updatable<Error> for Config<'_, '_, '_, '_, '_, '_>
+impl Updatable for Config<'_, '_, '_, '_, '_, '_>
 {
 	fn update(&self) -> Result<()>
 	{

@@ -6,15 +6,14 @@ use
 	std::error::Error,
 };
 
-pub trait OrganizationAdapter<'pass, 'path, 'user>  :
-	Deletable<Self::Error> +
-	Initializable<Self::Error> +
+pub trait OrganizationAdapter  :
+	Deletable<Error=<Self as OrganizationAdapter>::Error> +
+	Initializable<Error=<Self as OrganizationAdapter>::Error> +
 	Into<Organization> +
-	Into<Result<Vec<Employee>, Self::Error>> +
-	Into<Result<Location, Self::Error>> +
-	Into<Result<OrganizationView, Self::Error>> +
-	Into<Store<'pass, 'path, 'user>> +
-	Updatable<Self::Error> +
+	Into<Result<Vec<Employee>, <Self as OrganizationAdapter>::Error>> +
+	Into<Result<Location, <Self as OrganizationAdapter>::Error>> +
+	Into<Result<OrganizationView, <Self as OrganizationAdapter>::Error>> +
+	Updatable<Error=<Self as OrganizationAdapter>::Error> +
 {
 	type Error : Error;
 
@@ -32,8 +31,8 @@ pub trait OrganizationAdapter<'pass, 'path, 'user>  :
 	fn create(
 		location: Location,
 		name: &str,
-		store: Store<'pass, 'path, 'user>,
-	) -> Result<Self, Self::Error>;
+		store: Store,
+	) -> Result<Organization, <Self as OrganizationAdapter>::Error>;
 
 	/// # Summary
 	///
@@ -51,6 +50,6 @@ pub trait OrganizationAdapter<'pass, 'path, 'user>  :
 		id: MatchWhen<Id>,
 		location: MatchWhen<Id>,
 		name: MatchWhen<String>,
-		store: Store<'pass, 'path, 'user>,
-	) -> Result<Vec<Self>, Self::Error>;
+		store: Store,
+	) -> Result<Vec<Organization>, <Self as OrganizationAdapter>::Error>;
 }

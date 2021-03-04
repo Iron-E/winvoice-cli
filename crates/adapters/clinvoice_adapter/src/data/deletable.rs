@@ -3,8 +3,10 @@ use std::error::Error;
 /// # Summary
 ///
 /// A structure which can be deleted from a remote [`Store`](crate::Store).
-pub trait Deletable<E> where E : Error
+pub trait Deletable
 {
+	type Error : Error;
+
 	/// # Summary
 	///
 	/// Delete a [`Person`].
@@ -20,5 +22,5 @@ pub trait Deletable<E> where E : Error
 	/// * An [`Error`] when:
 	///   * `self.id` had not already been `create`d.
 	///   * Something goes wrong.
-	fn delete(&self, cascade: bool) -> Result<(), E>;
+	fn delete(&self, cascade: bool) -> Result<(), Self::Error>;
 }

@@ -10,16 +10,14 @@ use
 	std::error::Error,
 };
 
-pub trait JobAdapter<'pass, 'path, 'user> :
-	Deletable<Self::Error> +
-	Initializable<Self::Error> +
+pub trait JobAdapter :
+	Deletable<Error=<Self as JobAdapter>::Error> +
+	Initializable<Error=<Self as JobAdapter>::Error> +
 	Into<Job> +
-	Into<Result<JobView, Self::Error>> +
-	Into<Result<Organization, Self::Error>> +
-	Into<Store<'pass, 'path, 'user>> +
-	Updatable<Self::Error> +
-{
-	type Error : Error;
+	Into<Result<JobView, <Self as JobAdapter>::Error>> +
+	Into<Result<Organization, <Self as JobAdapter>::Error>> +
+	Updatable<Error=<Self as JobAdapter>::Error> +
+{ type Error : Error;
 
 	/// # Summary
 	///
@@ -37,8 +35,8 @@ pub trait JobAdapter<'pass, 'path, 'user> :
 		date_open: DateTime<Utc>,
 		hourly_rate: Money,
 		objectives: &str,
-		store: Store<'pass, 'path, 'user>,
-	) -> Result<Self, Self::Error>;
+		store: Store,
+	) -> Result<Job, <Self as JobAdapter>::Error>;
 
 	/// # Summary
 	///
@@ -64,6 +62,6 @@ pub trait JobAdapter<'pass, 'path, 'user> :
 		timesheet_employee: MatchWhen<Id>,
 		timesheet_begin: MatchWhen<DateTime<Utc>>,
 		timesheet_end: MatchWhen<Option<DateTime<Utc>>>,
-		store: Store<'pass, 'path, 'user>,
-	) -> Result<Vec<Self>, Self::Error>;
+		store: Store,
+	) -> Result<Vec<Job>, <Self as JobAdapter>::Error>;
 }

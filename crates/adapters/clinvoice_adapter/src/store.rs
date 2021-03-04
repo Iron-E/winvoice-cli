@@ -13,7 +13,7 @@ use serde::{Deserialize, Serialize};
 /// database.
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
-pub struct Store<'pass, 'path, 'user>
+pub struct Store
 {
 	/// # Summary
 	///
@@ -28,7 +28,7 @@ pub struct Store<'pass, 'path, 'user>
 	///
 	/// A password may or may not be accompanied by a username. The username is only necessary in a
 	/// networked login environment, whereas a password may be used for locally encrypted files.
-	pub password: Option<&'pass str>,
+	pub password: Option<String>,
 
 	/// # Summary
 	///
@@ -41,7 +41,7 @@ pub struct Store<'pass, 'path, 'user>
 	///
 	/// The user shouldn't necessarily have to worry about what this value is, just that it follows
 	/// a consistent format which is documented for the adapter.
-	pub path: &'path str,
+	pub path: String,
 
 	/// # Summary
 	///
@@ -51,5 +51,5 @@ pub struct Store<'pass, 'path, 'user>
 	///
 	/// A username may or may not be accompanied by a password. While commonplace, it is not
 	/// mandated that each instance of a user account be protected by a password.
-	pub username: Option<&'user str>,
+	pub username: Option<String>,
 }

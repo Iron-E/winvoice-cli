@@ -3,8 +3,10 @@ use std::error::Error;
 /// # Summary
 ///
 /// A structure which can be updated on some remote [`Store`][store].
-pub trait Updatable<E> where E : Error
+pub trait Updatable
 {
+	type Error : Error;
+
 	/// # Summary
 	///
 	/// Send this entity's data to the active [`Store`][store].
@@ -23,5 +25,5 @@ pub trait Updatable<E> where E : Error
 	/// * An `Error`, when something goes wrong.
 	///
 	/// [store]: crate::Store
-	fn update(&self) -> Result<(), E>;
+	fn update(&self) -> Result<(), Self::Error>;
 }

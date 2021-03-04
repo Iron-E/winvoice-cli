@@ -6,14 +6,13 @@ use
 	std::error::Error,
 };
 
-pub trait LocationAdapter<'pass, 'path, 'user> :
+pub trait LocationAdapter :
 	Clone +
-	Deletable<Self::Error> +
-	Initializable<Self::Error> +
+	Deletable<Error = <Self as LocationAdapter>::Error> +
+	Initializable<Error = <Self as LocationAdapter>::Error> +
 	Into<Location> +
-	Into<Result<LocationView, Self::Error>> +
-	Into<Store<'pass, 'path, 'user>> +
-	Updatable<Self::Error> +
+	Into<Result<LocationView, <Self as LocationAdapter>::Error>> +
+	Updatable<Error = <Self as LocationAdapter>::Error> +
 {
 	type Error : Error;
 
@@ -30,7 +29,7 @@ pub trait LocationAdapter<'pass, 'path, 'user> :
 	/// ```ignore
 	/// Location {name, id: /* generated */};
 	/// ```
-	fn create(name: &str, store: Store<'pass, 'path, 'user>) -> Result<Self, Self::Error>;
+	fn create(name: &str, store: Store) -> Result<Location, <Self as LocationAdapter>::Error>;
 
 	/// # Summary
 	///
@@ -45,7 +44,7 @@ pub trait LocationAdapter<'pass, 'path, 'user> :
 	/// ```ignore
 	/// Location {name, id: /* generated */, outside_id: self.unroll().id};
 	/// ```
-	fn create_inner(&self, name: &str) -> Result<Self, Self::Error>;
+	fn create_inner(&self, name: &str) -> Result<Location, <Self as LocationAdapter>::Error>;
 
 	/// # Summary
 	///
@@ -99,6 +98,6 @@ pub trait LocationAdapter<'pass, 'path, 'user> :
 		id: MatchWhen<Id>,
 		name: MatchWhen<String>,
 		outer: MatchWhen<Option<Id>>,
-		store: Store<'pass, 'path, 'user>,
-	) -> Result<Vec<Self>, Self::Error>;
+		store: Store,
+	) -> Result<Vec<Location>, <Self as LocationAdapter>::Error>;
 }

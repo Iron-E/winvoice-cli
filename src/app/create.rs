@@ -58,25 +58,25 @@ impl<'pass, 'path, 'user> Create
 			#[cfg(feature="bincode")]
 			Adapters::Bincode => match self
 			{
-				Self::Employee {} => todo!() /*BincodeEmployee::create(*store).and(Ok(()))*/,
+				Self::Employee {} => todo!() /*BincodeEmployee::create(store).and(Ok(()))*/,
 
-				Self::Job {} => todo!() /*BincodeJob::create(*store).and(Ok(()))*/,
+				Self::Job {} => todo!() /*BincodeJob::create(store).and(Ok(()))*/,
 
-				Self::Location {name} => BincodeLocation::create(&name, *store).and(Ok(())),
+				Self::Location {name} => BincodeLocation::create(&name, store).and(Ok(())),
 
 				Self::Organization {name} => BincodeOrganization::create(
 					input::util::select_one_location::<BincodeLocation, String>(
 						format!("Select a Location for {}", name),
-						*store,
+						store,
 					)?.into(),
 					&name,
-					*store
+					store
 				).and(Ok(())),
 
 				Self::Person {name} => BincodePerson::create(
-					input::util::select_contact_info::<BincodeLocation>(*store)?,
+					input::util::select_contact_info::<BincodeLocation>(store)?,
 					&name,
-					*store,
+					store,
 				).and(Ok(())),
 			},
 

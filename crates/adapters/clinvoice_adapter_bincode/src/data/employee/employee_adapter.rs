@@ -52,9 +52,7 @@ impl<'store> EmployeeAdapter<'store> for BincodeEmployee<'_, 'store>
 			status,
 		};
 
-		{
-			Self {employee: &employee, store}.update()?;
-		}
+		BincodeEmployee {employee: &employee, store}.update()?;
 
 		Ok(employee)
 	}

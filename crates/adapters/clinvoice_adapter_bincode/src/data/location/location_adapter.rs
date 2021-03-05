@@ -43,9 +43,7 @@ impl<'store> LocationAdapter<'store> for BincodeLocation<'_, 'store>
 			outer_id: None,
 		};
 
-		{
-			Self {location: &location, store}.update()?;
-		}
+		BincodeLocation {location: &location, store}.update()?;
 
 		Ok(location)
 	}
@@ -72,9 +70,7 @@ impl<'store> LocationAdapter<'store> for BincodeLocation<'_, 'store>
 			outer_id: Some(self.location.id),
 		};
 
-		{
-			Self {location: &inner_location, store: self.store}.update()?;
-		}
+		BincodeLocation {location: &inner_location, store: self.store}.update()?;
 
 		Ok(inner_location)
 	}

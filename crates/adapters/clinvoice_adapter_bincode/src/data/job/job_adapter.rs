@@ -61,7 +61,7 @@ impl<'store> JobAdapter<'store> for BincodeJob<'_, 'store>
 		};
 
 		{
-			Self {job: &job, store}.update()?;
+			BincodeJob {job: &job, store}.update()?;
 		}
 
 		Ok(job)

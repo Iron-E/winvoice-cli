@@ -41,9 +41,7 @@ impl<'store> OrganizationAdapter<'store> for BincodeOrganization<'_, 'store>
 			name: name.into(),
 		};
 
-		{
-			Self {organization: &organization, store}.update()?;
-		}
+		BincodeOrganization {organization: &organization, store}.update()?;
 
 		Ok(organization)
 	}

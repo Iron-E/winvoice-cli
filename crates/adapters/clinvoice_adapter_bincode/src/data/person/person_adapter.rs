@@ -41,9 +41,7 @@ impl<'store> PersonAdapter<'store> for BincodePerson<'_, 'store>
 			name: name.into(),
 		};
 
-		{
-			Self {person: &person, store}.update()?;
-		}
+		BincodePerson {person: &person, store}.update()?;
 
 		Ok(person)
 	}

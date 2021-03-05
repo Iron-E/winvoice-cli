@@ -31,8 +31,8 @@ struct SerdeWrapper<T> { value: T }
 ///
 /// [L_retrieve]: clinvoice_adapter::data::LocationAdapter::retrieve
 /// [location]: clinvoice_data::Location
-fn retrieve_locations_or_err<'pass, 'path, 'user, L>(store: Store<'pass, 'path, 'user>) -> DynResult<Vec<LocationView>> where
-	L : LocationAdapter<'pass, 'path, 'user>,
+fn retrieve_locations_or_err<'store, L>(store: &Store) -> DynResult<Vec<LocationView>> where
+	L : LocationAdapter<'store>,
 {
 	let locations = L::retrieve(MatchWhen::Any, MatchWhen::Any, MatchWhen::Any, store)?;
 
@@ -42,17 +42,17 @@ fn retrieve_locations_or_err<'pass, 'path, 'user, L>(store: Store<'pass, 'path, 
 	}
 
 	Ok(locations.into_iter().try_fold(Vec::new(),
-		|mut v, l| -> Result<Vec<LocationView>, L::Error>
+		|mut v, l| -> Result<Vec<LocationView>, <L as LocationAdapter<'store>>::Error>
 		{
-			let result: Result<LocationView, L::Error> = l.into();
+			let result: Result<LocationView, <L as LocationAdapter<'store>>::Error> = l.into();
 			v.push(result?);
 			Ok(v)
 		},
 	)?)
 }
 
-pub fn select_contact_info<'pass, 'path, 'user, L>(store: Store<'pass, 'path, 'user>) -> DynResult<Vec<Contact>> where
-	L : LocationAdapter<'pass, 'path, 'user>,
+pub fn select_contact_info<'store, L>(store: &Store) -> DynResult<Vec<Contact>> where
+	L : LocationAdapter<'store>,
 {
 	let locations = super::select(
 		&retrieve_locations_or_err::<L>(store)?,
@@ -70,8 +70,8 @@ pub fn select_contact_info<'pass, 'path, 'user, L>(store: Store<'pass, 'path, 'u
 	Ok(super::edit(SerdeWrapper {value: contact_info})?.value.into_iter().map(|c| c.into()).collect())
 }
 
-pub fn select_one_location<'pass, 'path, 'user, L, S>(prompt: S, store: Store<'pass, 'path, 'user>) -> DynResult<LocationView> where
-	L : LocationAdapter<'pass, 'path, 'user>,
+pub fn select_one_location<'store, L, S>(prompt: S, store: &Store) -> DynResult<LocationView> where
+	L : LocationAdapter<'store>,
 	S : Into<String>,
 {
 	super::select_one(

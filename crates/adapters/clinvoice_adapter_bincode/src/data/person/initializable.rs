@@ -13,7 +13,7 @@ use
 	},
 };
 
-impl Initializable for BincodePerson<'_>
+impl Initializable for BincodePerson<'_, '_>
 {
 	type Error = Error;
 

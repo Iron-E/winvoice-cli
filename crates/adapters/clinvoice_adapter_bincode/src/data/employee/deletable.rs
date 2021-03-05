@@ -6,7 +6,7 @@ use
 	std::{fs, io::ErrorKind},
 };
 
-impl Deletable for BincodeEmployee<'_>
+impl Deletable for BincodeEmployee<'_, '_>
 {
 	type Error = Error;
 
@@ -43,7 +43,7 @@ impl Deletable for BincodeEmployee<'_>
 					.collect()
 				;
 
-				BincodeJob {job: result, store: self.store}.update()?;
+				BincodeJob {job: &result, store: self.store}.update()?;
 			}
 		}
 
@@ -74,13 +74,13 @@ mod tests
 		{
 			let earth = BincodeLocation
 			{
-				location: BincodeLocation::create("Earth", &store).unwrap(),
+				location: &BincodeLocation::create("Earth", &store).unwrap(),
 				store,
 			};
 
 			let mut big_old_test = BincodeOrganization
 			{
-				organization: BincodeOrganization::create(
+				organization: &BincodeOrganization::create(
 					earth.location.clone(),
 					"Big Old Test Corporation",
 					&store,
@@ -93,7 +93,7 @@ mod tests
 
 			let testy = BincodePerson
 			{
-				person: BincodePerson::create(
+				person: &BincodePerson::create(
 					contact_info.clone(),
 					"Testy Mćtesterson",
 					&store,
@@ -103,7 +103,7 @@ mod tests
 
 			let ceo_testy = BincodeEmployee
 			{
-				employee: BincodeEmployee::create(
+				employee: &BincodeEmployee::create(
 					contact_info.clone(),
 					big_old_test.organization.clone(),
 					testy.person.clone(),
@@ -116,7 +116,7 @@ mod tests
 
 			let mut creation = BincodeJob
 			{
-				job: BincodeJob::create(
+				job: &BincodeJob::create(
 					big_old_test.organization.clone(),
 					Utc::now(),
 					Money::new(Decimal::new(200, 2), "USD"),
@@ -145,7 +145,7 @@ mod tests
 
 			big_old_test = BincodeOrganization
 			{
-				organization: BincodeOrganization::retrieve(
+				organization: &BincodeOrganization::retrieve(
 					MatchWhen::EqualTo(big_old_test.organization.id), // id
 					MatchWhen::Any, // location
 					MatchWhen::Any, // name
@@ -156,7 +156,7 @@ mod tests
 
 			creation = BincodeJob
 			{
-				job: BincodeJob::retrieve(
+				job: &BincodeJob::retrieve(
 					MatchWhen::EqualTo(big_old_test.organization.id), // client
 					MatchWhen::Any, // date close
 					MatchWhen::Any, // date open

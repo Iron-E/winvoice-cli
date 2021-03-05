@@ -9,7 +9,7 @@ use
 	},
 };
 
-impl Into<Result<EmployeeView>> for BincodeEmployee<'_>
+impl Into<Result<EmployeeView>> for BincodeEmployee<'_, '_>
 {
 	fn into(self) -> Result<EmployeeView>
 
@@ -24,14 +24,14 @@ impl Into<Result<EmployeeView>> for BincodeEmployee<'_>
 		let organization_result: Result<Organization> = self.clone().into();
 		let organization_view_result: Result<OrganizationView> = BincodeOrganization
 		{
-			organization: organization_result?,
+			organization: &organization_result?,
 			store,
 		}.into();
 
 		let person_result: Result<Person> = self.into();
 		let person_view_result: Result<PersonView> = BincodePerson
 		{
-			person: person_result?,
+			person: &person_result?,
 			store,
 		}.into();
 
@@ -130,7 +130,7 @@ mod tests
 			};
 
 			let start = Instant::now();
-			let ceo_testy_view_result: Result<EmployeeView> = BincodeEmployee {employee: ceo_testy, store}.into();
+			let ceo_testy_view_result: Result<EmployeeView> = BincodeEmployee {employee: &ceo_testy, store}.into();
 			println!("\n>>>>> BincodeEmployee::into_view {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 
 			// Asser that the synthetic view is the same as the view which was created naturally.

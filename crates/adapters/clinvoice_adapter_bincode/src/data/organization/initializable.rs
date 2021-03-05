@@ -9,7 +9,7 @@ use
 	clinvoice_adapter::{data::Initializable, Store},
 };
 
-impl Initializable for BincodeOrganization<'_>
+impl Initializable for BincodeOrganization<'_, '_>
 {
 	type Error = Error;
 

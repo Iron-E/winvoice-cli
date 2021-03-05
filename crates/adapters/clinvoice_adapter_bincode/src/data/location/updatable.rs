@@ -6,7 +6,7 @@ use
 	std::fs,
 };
 
-impl Updatable for BincodeLocation<'_>
+impl Updatable for BincodeLocation<'_, '_>
 {
 	type Error = Error;
 

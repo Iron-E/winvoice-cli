@@ -6,7 +6,7 @@ use
 	std::{fs, io::ErrorKind},
 };
 
-impl Deletable for BincodeLocation<'_>
+impl Deletable for BincodeLocation<'_, '_>
 {
 	type Error = Error;
 
@@ -28,20 +28,26 @@ impl Deletable for BincodeLocation<'_>
 				MatchWhen::Any, // name
 				MatchWhen::EqualTo(Some(self.location.id)), // outer id
 				self.store,
-			)?.into_iter()
-				.map(|l| BincodeLocation {location: l, store: self.store })
-				.try_for_each(|l| l.delete(true))?
-			;
+			)?.into_iter().try_for_each(|l|
+				BincodeLocation
+				{
+					location: &l,
+					store: self.store,
+				}.delete(true)
+			)?;
 
 			BincodeOrganization::retrieve(
 				MatchWhen::Any, // id
 				MatchWhen::EqualTo(self.location.id), // location
 				MatchWhen::Any, // name
 				self.store,
-			)?.into_iter()
-				.map(|o| BincodeOrganization {organization: o, store: self.store})
-				.try_for_each(|o| o.delete(true))?
-			;
+			)?.into_iter().try_for_each(|o|
+				BincodeOrganization
+				{
+					organization: &o,
+					store: self.store,
+				}.delete(true)
+			)?;
 		}
 
 		Ok(())
@@ -66,31 +72,31 @@ mod tests
 		{
 			let earth = BincodeLocation
 			{
-				location: BincodeLocation::create("Earth", &store).unwrap(),
+				location: &BincodeLocation::create("Earth", store).unwrap(),
 				store,
 			};
 
 			let usa = BincodeLocation
 			{
-				location: earth.create_inner("USA").unwrap(),
+				location: &earth.create_inner("USA").unwrap(),
 				store,
 			};
 
 			let arizona = BincodeLocation
 			{
-				location: usa.create_inner("Arizona").unwrap(),
+				location: &usa.create_inner("Arizona").unwrap(),
 				store,
 			};
 
 			let phoenix = BincodeLocation
 			{
-				location: arizona.create_inner("Phoenix").unwrap(),
+				location: &arizona.create_inner("Phoenix").unwrap(),
 				store,
 			};
 
 			let dogood = BincodeOrganization
 			{
-				organization: BincodeOrganization::create(
+				organization: &BincodeOrganization::create(
 					arizona.location.clone(),
 					"DoGood Inc",
 					&store

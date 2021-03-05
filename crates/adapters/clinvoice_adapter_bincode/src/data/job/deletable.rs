@@ -6,7 +6,7 @@ use
 	std::{fs, io::ErrorKind},
 };
 
-impl Deletable for BincodeJob<'_>
+impl Deletable for BincodeJob<'_, '_>
 {
 	type Error = Error;
 
@@ -44,7 +44,7 @@ mod tests
 		{
 			let big_test = BincodeOrganization
 			{
-				organization: BincodeOrganization::create(
+				organization: &BincodeOrganization::create(
 					Location {id: Id::new_v4(), name: "".into(), outer_id: None},
 					"Big Old Test Corporation".into(),
 					&store,
@@ -54,7 +54,7 @@ mod tests
 
 			let create_job = BincodeJob
 			{
-				job: BincodeJob::create(
+				job: &BincodeJob::create(
 					big_test.organization.clone(),
 					Utc::now(),
 					Money::new(Decimal::new(200, 2), ""),
@@ -66,7 +66,7 @@ mod tests
 
 			let assert_job = BincodeJob
 			{
-				job: BincodeJob::create(
+				job: &BincodeJob::create(
 					big_test.organization.clone(),
 					Utc::now(),
 					Money::new(Decimal::new(200, 2), "USD"),

@@ -10,7 +10,7 @@ use
 	},
 };
 
-impl Into<Result<JobView>> for BincodeJob<'_>
+impl Into<Result<JobView>> for BincodeJob<'_, '_>
 {
 	fn into(self) -> Result<JobView>
 	{
@@ -26,7 +26,7 @@ impl Into<Result<JobView>> for BincodeJob<'_>
 		let organization_result: Result<Organization> = self.into();
 		let organization_view_result: Result<OrganizationView> = BincodeOrganization
 		{
-			organization: organization_result?,
+			organization: &organization_result?,
 			store,
 		}.into();
 
@@ -44,7 +44,7 @@ impl Into<Result<JobView>> for BincodeJob<'_>
 				store,
 			)?.first()
 			{
-				Some(first) => BincodeEmployee {employee: first.clone(), store}.into(),
+				Some(first) => BincodeEmployee {employee: first, store}.into(),
 				_ => Err(Error::DataIntegrity {id: timesheet.employee_id}.into()),
 			};
 
@@ -110,7 +110,7 @@ mod tests
 
 			let mut create_job = BincodeJob
 			{
-				job: BincodeJob::create(
+				job: &BincodeJob::create(
 					big_test.clone(),
 					Utc::now(),
 					Money::new(Decimal::new(200, 2), ""),

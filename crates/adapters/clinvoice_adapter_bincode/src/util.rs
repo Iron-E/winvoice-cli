@@ -44,7 +44,7 @@ pub fn expand_store_path(store: &Store) -> PathBuf
 	match shellexpand::full(&store.path)
 	{
 		Ok(p) => PathBuf::from(p.as_ref()),
-		_ => PathBuf::from(store.path),
+		_ => PathBuf::from(&store.path),
 	}
 }
 

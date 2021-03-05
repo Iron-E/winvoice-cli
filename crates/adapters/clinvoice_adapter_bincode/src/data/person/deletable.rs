@@ -6,7 +6,7 @@ use
 	std::{fs, io::ErrorKind},
 };
 
-impl Deletable for BincodePerson<'_>
+impl Deletable for BincodePerson<'_, '_>
 {
 	type Error = Error;
 
@@ -31,10 +31,13 @@ impl Deletable for BincodePerson<'_>
 				MatchWhen::Any, // title
 				MatchWhen::Any, // status
 				self.store,
-			)?.into_iter()
-				.map(|e| BincodeEmployee {employee: e, store: self.store})
-				.try_for_each(|e| e.delete(true))?
-			;
+			)?.into_iter().try_for_each(|e|
+				BincodeEmployee
+				{
+					employee: &e,
+					store: self.store,
+				}.delete(true)
+			)?;
 		}
 
 		Ok(())
@@ -64,13 +67,13 @@ mod tests
 		{
 			let earth = BincodeLocation
 			{
-				location: BincodeLocation::create("Earth", &store).unwrap(),
+				location: &BincodeLocation::create("Earth", &store).unwrap(),
 				store,
 			};
 
 			let big_old_test = BincodeOrganization
 			{
-				organization: BincodeOrganization::create(
+				organization: &BincodeOrganization::create(
 					earth.location.clone(),
 					"Big Old Test Corporation",
 					&store,
@@ -83,7 +86,7 @@ mod tests
 
 			let testy = BincodePerson
 			{
-				person: BincodePerson::create(
+				person: &BincodePerson::create(
 					contact_info.clone(),
 					"Testy Mćtesterson",
 					&store,
@@ -93,7 +96,7 @@ mod tests
 
 			let ceo_testy = BincodeEmployee
 			{
-				employee: BincodeEmployee::create(
+				employee: &BincodeEmployee::create(
 					contact_info.clone(),
 					big_old_test.organization.clone(),
 					testy.person.clone(),

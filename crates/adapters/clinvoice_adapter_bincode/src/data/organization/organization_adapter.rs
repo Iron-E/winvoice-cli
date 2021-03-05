@@ -15,7 +15,7 @@ use
 	std::{fs, io::BufReader},
 };
 
-impl<'store> OrganizationAdapter<'store> for BincodeOrganization<'store>
+impl<'store> OrganizationAdapter<'store> for BincodeOrganization<'_, 'store>
 {
 	type Error = Error;
 
@@ -30,28 +30,22 @@ impl<'store> OrganizationAdapter<'store> for BincodeOrganization<'store>
 	/// # Returns
 	///
 	/// The newly created [`Organization`].
-	fn create(
-		location: Location,
-		name: &str,
-		store: &'store Store,
-	) -> Result<Organization>
+	fn create(location: Location, name: &str, store: &'store Store) -> Result<Organization>
 	{
 		Self::init(&store)?;
 
-		let bincode_organization = Self
+		let organization = Organization
 		{
-			organization: Organization
-			{
-				id: util::unique_id(&Self::path(&store))?,
-				location_id: location.id,
-				name: name.into(),
-			},
-			store,
+			id: util::unique_id(&Self::path(&store))?,
+			location_id: location.id,
+			name: name.into(),
 		};
 
-		bincode_organization.update()?;
+		{
+			Self {organization: &organization, store}.update()?;
+		}
 
-		Ok(bincode_organization.organization)
+		Ok(organization)
 	}
 
 	/// # Summary
@@ -163,7 +157,7 @@ mod tests
 
 	fn test_create_assertion(organization: Organization, store: &Store)
 	{
-		let read_result = fs::read(BincodeOrganization {organization, store}.filepath()).unwrap();
+		let read_result = fs::read(BincodeOrganization {organization: &organization, store}.filepath()).unwrap();
 		assert_eq!(organization, bincode::deserialize(&read_result).unwrap());
 	}
 

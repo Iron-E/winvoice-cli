@@ -26,11 +26,7 @@ pub trait PersonAdapter<'store> :
 	/// # Returns
 	///
 	/// The newly created [`Person`].
-	fn create(
-		contact_info: Vec<Contact>,
-		name: &str,
-		store: &'store Store,
-	) -> Result<Person, <Self as PersonAdapter<'store>>::Error>;
+	fn create(contact_info: Vec<Contact>, name: &str, store: &'store Store) -> Result<Person, <Self as PersonAdapter<'store>>::Error>;
 
 	/// # Summary
 	///

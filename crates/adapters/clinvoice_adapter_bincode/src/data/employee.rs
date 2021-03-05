@@ -14,7 +14,7 @@ use
 
 clinvoice_adapter::Adapt!(Employee => BincodeEmployee);
 
-impl BincodeEmployee<'_>
+impl BincodeEmployee<'_, '_>
 {
 	/// # Summary
 	///

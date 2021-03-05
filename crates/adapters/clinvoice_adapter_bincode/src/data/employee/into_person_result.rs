@@ -5,7 +5,7 @@ use
 	clinvoice_data::Person,
 };
 
-impl Into<Result<Person>> for BincodeEmployee<'_>
+impl Into<Result<Person>> for BincodeEmployee<'_, '_>
 {
 	fn into(self) -> Result<Person>
 	{
@@ -51,7 +51,7 @@ mod tests
 
 			let testy_employed = BincodeEmployee
 			{
-				employee: BincodeEmployee::create(
+				employee: &BincodeEmployee::create(
 					vec![Contact::Email("foo".into())],
 					Organization
 					{

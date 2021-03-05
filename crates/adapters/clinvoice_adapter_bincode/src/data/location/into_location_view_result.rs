@@ -6,10 +6,13 @@ use
 	clinvoice_data::views::LocationView,
 };
 
-impl Into<Result<LocationView>> for BincodeLocation<'_>
+impl Into<Result<LocationView>> for BincodeLocation<'_, '_>
 {
 	fn into(self) -> Result<LocationView>
 	{
+		let id = self.location.id;
+		let name = self.location.name.clone();
+
 		let mut outer_locations = self.outer_locations()?;
 		outer_locations.reverse();
 
@@ -25,12 +28,7 @@ impl Into<Result<LocationView>> for BincodeLocation<'_>
 			});
 		}
 
-		Ok(LocationView
-		{
-			id: self.location.id,
-			name: self.location.name,
-			outer: previous_view.map(|l| l.into()),
-		})
+		Ok(LocationView {id, name, outer: previous_view.map(|l| l.into())})
 	}
 }
 
@@ -58,21 +56,21 @@ mod tests
 
 			let usa = BincodeLocation
 			{
-				location: earth,
+				location: &earth,
 				store,
 			}.create_inner("USA").unwrap();
 
 			let arizona = BincodeLocation
 			{
-				location: usa,
+				location: &usa,
 				store,
 			}.create_inner("Arizona").unwrap();
 
 			let phoenix = BincodeLocation
 			{
-				location: BincodeLocation
+				location: &BincodeLocation
 				{
-					location: arizona,
+					location: &arizona,
 					store,
 				}.create_inner("Phoenix").unwrap(),
 				store,

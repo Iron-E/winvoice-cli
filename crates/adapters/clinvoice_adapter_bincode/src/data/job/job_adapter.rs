@@ -19,7 +19,7 @@ use
 	std::{fs, io::BufReader},
 };
 
-impl<'store> JobAdapter<'store> for BincodeJob<'store>
+impl<'store> JobAdapter<'store> for BincodeJob<'_, 'store>
 {
 	type Error = Error;
 
@@ -44,29 +44,27 @@ impl<'store> JobAdapter<'store> for BincodeJob<'store>
 	{
 		Self::init(&store)?;
 
-		let bincode_job = Self
+		let job = Job
 		{
-			job: Job
+			client_id: client.id,
+			date_close: None,
+			date_open,
+			id: util::unique_id(&Self::path(&store))?,
+			invoice: Invoice
 			{
-				client_id: client.id,
-				date_close: None,
-				date_open,
-				id: util::unique_id(&Self::path(&store))?,
-				invoice: Invoice
-				{
-					date: None,
-					hourly_rate,
-				},
-				objectives: objectives.into(),
-				notes: "".into(),
-				timesheets: Vec::new(),
+				date: None,
+				hourly_rate,
 			},
-			store,
+			objectives: objectives.into(),
+			notes: "".into(),
+			timesheets: Vec::new(),
 		};
 
-		bincode_job.update()?;
+		{
+			Self {job: &job, store}.update()?;
+		}
 
-		Ok(bincode_job.job)
+		Ok(job)
 	}
 
 	/// # Summary
@@ -211,7 +209,7 @@ mod tests
 
 	fn test_create_assertion(job: Job, store: &Store)
 	{
-		let read_result = fs::read(BincodeJob {job, store}.filepath()).unwrap();
+		let read_result = fs::read(BincodeJob {job: &job, store}.filepath()).unwrap();
 		assert_eq!(job, bincode::deserialize(&read_result).unwrap());
 	}
 

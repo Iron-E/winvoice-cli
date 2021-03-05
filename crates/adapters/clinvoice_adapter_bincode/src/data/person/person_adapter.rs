@@ -15,7 +15,7 @@ use
 	std::{fs, io::BufReader},
 };
 
-impl<'store> PersonAdapter<'store> for BincodePerson<'store>
+impl<'store> PersonAdapter<'store> for BincodePerson<'_, 'store>
 {
 	type Error = Error;
 
@@ -30,28 +30,22 @@ impl<'store> PersonAdapter<'store> for BincodePerson<'store>
 	/// # Returns
 	///
 	/// The newly created [`Person`].
-	fn create(
-		contact_info: Vec<Contact>,
-		name: &str,
-		store: &'store Store,
-	) -> Result<Person>
+	fn create(contact_info: Vec<Contact>, name: &str, store: &'store Store,) -> Result<Person>
 	{
 		Self::init(&store)?;
 
-		let bincode_person = Self
+		let person = Person
 		{
-			person: Person
-			{
-				contact_info,
-				id: util::unique_id(&Self::path(&store))?,
-				name: name.into(),
-			},
-			store,
+			contact_info,
+			id: util::unique_id(&Self::path(&store))?,
+			name: name.into(),
 		};
 
-		bincode_person.update()?;
+		{
+			Self {person: &person, store}.update()?;
+		}
 
-		Ok(bincode_person.person)
+		Ok(person)
 	}
 
 	/// # Summary
@@ -163,7 +157,7 @@ mod tests
 
 	fn test_create_assertion(person: Person, store: &Store)
 	{
-		let read_result = fs::read(BincodePerson {person, store}.filepath()).unwrap();
+		let read_result = fs::read(BincodePerson {person: &person, store}.filepath()).unwrap();
 		assert_eq!(person, bincode::deserialize(&read_result).unwrap());
 	}
 

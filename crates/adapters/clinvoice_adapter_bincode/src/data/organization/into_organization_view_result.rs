@@ -10,7 +10,7 @@ use
 };
 
 // NOTE: tests not needed because this is called in `Into<EmployeeView>`
-impl Into<Result<OrganizationView>> for BincodeOrganization<'_>
+impl Into<Result<OrganizationView>> for BincodeOrganization<'_, '_>
 {
 	fn into(self) -> Result<OrganizationView>
 	{
@@ -21,7 +21,7 @@ impl Into<Result<OrganizationView>> for BincodeOrganization<'_>
 		let location_result: Result<Location> = self.into();
 		let location_view_result: Result<LocationView> = BincodeLocation
 		{
-			location: location_result?,
+			location: &location_result?,
 			store,
 		}.into();
 

@@ -5,7 +5,7 @@ use
 	clinvoice_data::Location,
 };
 
-impl Into<Result<Location>> for BincodeOrganization<'_>
+impl Into<Result<Location>> for BincodeOrganization<'_, '_>
 {
 	fn into(self) -> Result<Location>
 	{
@@ -46,7 +46,7 @@ mod tests
 			let arizona = BincodeLocation::create("Arizona", &store).unwrap();
 			let dogood = BincodeOrganization
 			{
-				organization: BincodeOrganization::create(
+				organization: &BincodeOrganization::create(
 					arizona.clone(),
 					"DoGood Inc",
 					&store

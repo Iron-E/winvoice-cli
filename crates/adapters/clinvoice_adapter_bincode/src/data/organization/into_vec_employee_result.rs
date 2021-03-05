@@ -5,7 +5,7 @@ use
 	clinvoice_data::Employee,
 };
 
-impl Into<Result<Vec<Employee>>> for BincodeOrganization<'_>
+impl Into<Result<Vec<Employee>>> for BincodeOrganization<'_, '_>
 {
 	fn into(self) -> Result<Vec<Employee>>
 	{
@@ -40,7 +40,7 @@ mod tests
 		{
 			let dogood = BincodeOrganization
 			{
-				organization: BincodeOrganization::create(
+				organization: &BincodeOrganization::create(
 					Location {name: "Earth".into(), id: Id::new_v4(), outer_id: None},
 					"DoGood Inc",
 					&store

@@ -15,7 +15,7 @@ use
 	std::{fs, io::BufReader},
 };
 
-impl<'store> LocationAdapter<'store> for BincodeLocation<'store>
+impl<'store> LocationAdapter<'store> for BincodeLocation<'_, 'store>
 {
 	type Error = Error;
 
@@ -36,20 +36,18 @@ impl<'store> LocationAdapter<'store> for BincodeLocation<'store>
 	{
 		Self::init(&store)?;
 
-		let bincode_location = Self
+		let location = Location
 		{
-			location: Location
-			{
-				id: util::unique_id(&Self::path(&store))?,
-				name: name.into(),
-				outer_id: None,
-			},
-			store,
+			id: util::unique_id(&Self::path(&store))?,
+			name: name.into(),
+			outer_id: None,
 		};
 
-		bincode_location.update()?;
+		{
+			Self {location: &location, store}.update()?;
+		}
 
-		Ok(bincode_location.location)
+		Ok(location)
 	}
 
 	/// # Summary
@@ -67,20 +65,18 @@ impl<'store> LocationAdapter<'store> for BincodeLocation<'store>
 	/// ```
 	fn create_inner(&self, name: &str) -> Result<Location>
 	{
-		let inner_person = Self
+		let inner_location = Location
 		{
-			location: Location
-			{
-				id: util::unique_id(&Self::path(&self.store))?,
-				name: name.into(),
-				outer_id: Some(self.location.id),
-			},
-			store: self.store,
+			id: util::unique_id(&Self::path(&self.store))?,
+			name: name.into(),
+			outer_id: Some(self.location.id),
 		};
 
-		inner_person.update()?;
+		{
+			Self {location: &inner_location, store: self.store}.update()?;
+		}
 
-		Ok(inner_person.location)
+		Ok(inner_location)
 	}
 
 	/// # Summary
@@ -140,9 +136,9 @@ mod tests
 		{
 			let start = Instant::now();
 			let earth = BincodeLocation::create("Earth", &store).unwrap();
-			let usa = BincodeLocation {location: earth, store}.create_inner("USA").unwrap();
-			let arizona = BincodeLocation {location: usa, store}.create_inner("Arizona").unwrap();
-			let phoenix = BincodeLocation {location: arizona, store}.create_inner("Phoenix").unwrap();
+			let usa = BincodeLocation {location: &earth, store}.create_inner("USA").unwrap();
+			let arizona = BincodeLocation {location: &usa, store}.create_inner("Arizona").unwrap();
+			let phoenix = BincodeLocation {location: &arizona, store}.create_inner("Phoenix").unwrap();
 			println!("\n>>>>> BincodeLocation::start {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 4);
 
 			assert_eq!(usa.outer_id, Some(earth.id));
@@ -158,7 +154,7 @@ mod tests
 	/// The assertion most commonly used for the [`create` test](test_create).
 	fn test_create_assertion(location: Location, store: &Store)
 	{
-		let read_result = fs::read(BincodeLocation {location, store}.filepath()).unwrap();
+		let read_result = fs::read(BincodeLocation {location: &location, store}.filepath()).unwrap();
 		assert_eq!(location, bincode::deserialize(&read_result).unwrap());
 	}
 
@@ -168,9 +164,9 @@ mod tests
 		util::test_temp_store(|store|
 		{
 			let earth = BincodeLocation::create("Earth", &store).unwrap();
-			let usa = BincodeLocation {location: earth, store}.create_inner("USA").unwrap();
-			let arizona = BincodeLocation {location: usa, store}.create_inner("Arizona").unwrap();
-			let phoenix = BincodeLocation {location: arizona, store}.create_inner("Phoenix").unwrap();
+			let usa = BincodeLocation {location: &earth, store}.create_inner("USA").unwrap();
+			let arizona = BincodeLocation {location: &usa, store}.create_inner("Arizona").unwrap();
+			let phoenix = BincodeLocation {location: &arizona, store}.create_inner("Phoenix").unwrap();
 
 			let start = Instant::now();
 

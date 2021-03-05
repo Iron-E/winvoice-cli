@@ -6,7 +6,7 @@ use
 	std::fs,
 };
 
-impl Updatable for BincodeEmployee<'_>
+impl Updatable for BincodeEmployee<'_, '_>
 {
 	type Error = Error;
 

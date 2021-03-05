@@ -28,11 +28,7 @@ pub trait OrganizationAdapter<'store>  :
 	/// # Returns
 	///
 	/// The newly created [`Organization`].
-	fn create(
-		location: Location,
-		name: &str,
-		store: &'store Store,
-	) -> Result<Organization, <Self as OrganizationAdapter<'store>>::Error>;
+	fn create(location: Location, name: &str, store: &'store Store) -> Result<Organization, <Self as OrganizationAdapter<'store>>::Error>;
 
 	/// # Summary
 	///

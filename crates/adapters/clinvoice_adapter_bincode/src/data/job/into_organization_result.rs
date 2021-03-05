@@ -5,7 +5,7 @@ use
 	clinvoice_data::Organization,
 };
 
-impl Into<Result<Organization>> for BincodeJob<'_>
+impl Into<Result<Organization>> for BincodeJob<'_, '_>
 {
 	fn into(self) -> Result<Organization>
 	{
@@ -51,7 +51,7 @@ mod tests
 
 			let test_job = BincodeJob
 			{
-				job: BincodeJob::create(
+				job: &BincodeJob::create(
 					dogood.clone(),
 					Utc::now(),
 					Money::new(Decimal::new(200, 2), ""),

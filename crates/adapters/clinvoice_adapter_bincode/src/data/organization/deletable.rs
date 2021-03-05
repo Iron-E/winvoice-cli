@@ -6,7 +6,7 @@ use
 	std::{fs, io::ErrorKind},
 };
 
-impl Deletable for BincodeOrganization<'_>
+impl Deletable for BincodeOrganization<'_, '_>
 {
 	type Error = Error;
 
@@ -36,10 +36,13 @@ impl Deletable for BincodeOrganization<'_>
 				MatchWhen::Any, // timesheet time begin
 				MatchWhen::Any, // timesheet time end
 				self.store,
-			)?.into_iter()
-				.map(|j| BincodeJob {job: j, store: self.store})
-				.try_for_each(|j| j.delete(true))?
-			;
+			)?.into_iter().try_for_each(|j|
+				BincodeJob
+				{
+					job: &j,
+					store: self.store,
+				}.delete(true)
+			)?;
 
 			BincodeEmployee::retrieve(
 				MatchWhen::Any, // contact info
@@ -49,10 +52,13 @@ impl Deletable for BincodeOrganization<'_>
 				MatchWhen::Any, // title
 				MatchWhen::Any, // status
 				self.store,
-			)?.into_iter()
-				.map(|e| BincodeEmployee {employee: e, store: self.store})
-				.try_for_each(|e| e.delete(true))?
-			;
+			)?.into_iter().try_for_each(|e|
+				BincodeEmployee
+				{
+					employee: &e,
+					store: self.store,
+				}.delete(true)
+			)?;
 		}
 
 		Ok(())
@@ -82,13 +88,13 @@ mod tests
 		{
 			let earth = BincodeLocation
 			{
-				location: BincodeLocation::create("Earth", &store).unwrap(),
+				location: &BincodeLocation::create("Earth", &store).unwrap(),
 				store,
 			};
 
 			let big_old_test = BincodeOrganization
 			{
-				organization: BincodeOrganization::create(
+				organization: &BincodeOrganization::create(
 					earth.location.clone(),
 					"Big Old Test Corporation",
 					&store,
@@ -101,7 +107,7 @@ mod tests
 
 			let testy = BincodePerson
 			{
-				person: BincodePerson::create(
+				person: &BincodePerson::create(
 					contact_info.clone(),
 					"Testy Mćtesterson",
 					&store,
@@ -111,7 +117,7 @@ mod tests
 
 			let ceo_testy = BincodeEmployee
 			{
-				employee: BincodeEmployee::create(
+				employee: &BincodeEmployee::create(
 					contact_info.clone(),
 					big_old_test.organization.clone(),
 					testy.person.clone(),
@@ -122,20 +128,16 @@ mod tests
 				store,
 			};
 
-			let mut creation = BincodeJob
-			{
-				job: BincodeJob::create(
-					big_old_test.organization.clone(),
-					Utc::now(),
-					Money::new(Decimal::new(200, 2), "USD"),
-					"Test the job creation function.",
-					&store,
-				).unwrap(),
-				store,
-			};
+			let mut creation = BincodeJob::create(
+				big_old_test.organization.clone(),
+				Utc::now(),
+				Money::new(Decimal::new(200, 2), "USD"),
+				"Test the job creation function.",
+				&store,
+			).unwrap();
 
-			creation.job.start_timesheet(ceo_testy.employee.id);
-			creation.update().unwrap();
+			creation.start_timesheet(ceo_testy.employee.id);
+			BincodeJob {job: &creation, store}.update().unwrap();
 
 			let start = Instant::now();
 			// Assert that the deletion works
@@ -145,7 +147,7 @@ mod tests
 			// Assert that the dependent files are gone
 			assert!(!big_old_test.filepath().is_file());
 			assert!(!ceo_testy.filepath().is_file());
-			assert!(!creation.filepath().is_file());
+			assert!(!BincodeJob {job: &creation, store}.filepath().is_file());
 
 			// Assert that the independent files are present
 			assert!(earth.filepath().is_file());

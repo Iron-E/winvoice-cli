@@ -9,7 +9,7 @@ use
 	clinvoice_adapter::{data::Initializable, Store},
 };
 
-impl Initializable for BincodeJob<'_>
+impl Initializable for BincodeJob<'_, '_>
 {
 	type Error = Error;
 

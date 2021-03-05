@@ -6,15 +6,15 @@ use
 };
 
 // NOTE: tests not needed because this is called in `Into<EmployeeView>`
-impl Into<Result<PersonView>> for BincodePerson<'_>
+impl Into<Result<PersonView>> for BincodePerson<'_, '_>
 {
 	fn into(self) -> Result<PersonView>
 	{
 		Ok(PersonView
 		{
-			contact_info: contact::into_views(self.person.contact_info, self.store)?,
+			contact_info: contact::into_views(self.person.contact_info.clone(), self.store)?,
 			id: self.person.id,
-			name: self.person.name,
+			name: self.person.name.clone(),
 		})
 	}
 }

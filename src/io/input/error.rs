@@ -1,6 +1,6 @@
 use
 {
-	std::{io, result::Result as StdResult},
+	std::io,
 	snafu::Snafu
 };
 

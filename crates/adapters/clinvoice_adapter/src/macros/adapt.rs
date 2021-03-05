@@ -24,26 +24,26 @@ macro_rules! Adapt
 {
 	(Employee => $name: ident) =>
 	{
-		clinvoice_adapter::AdaptEmployee!($name, 'store);
+		clinvoice_adapter::AdaptEmployee!($name, 'emp, 'store);
 	};
 
 	(Job => $name: ident) =>
 	{
-		clinvoice_adapter::AdaptJob!($name, 'store);
+		clinvoice_adapter::AdaptJob!($name, 'job, 'store);
 	};
 
 	(Location => $name: ident) =>
 	{
-		clinvoice_adapter::AdaptLocation!($name, 'store);
+		clinvoice_adapter::AdaptLocation!($name, 'loc, 'store);
 	};
 
 	(Organization => $name: ident) =>
 	{
-		clinvoice_adapter::AdaptOrganization!($name, 'store);
+		clinvoice_adapter::AdaptOrganization!($name, 'org, 'store);
 	};
 
 	(Person => $name: ident) =>
 	{
-		clinvoice_adapter::AdaptPerson!($name, 'store);
+		clinvoice_adapter::AdaptPerson!($name, 'per, 'store);
 	};
 }

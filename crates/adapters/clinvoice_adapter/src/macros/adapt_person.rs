@@ -1,7 +1,7 @@
 #[macro_export]
 macro_rules! AdaptPerson
 {
-	($name: ident, $store_life: lifetime) =>
+	($name: ident, $per_life: lifetime, $store_life: lifetime) =>
 	{
 		use
 		{
@@ -13,17 +13,17 @@ macro_rules! AdaptPerson
 		///
 		/// A wrapper around [`Person`] with a [`Store`] that points to its location.
 		#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-		pub struct $name<$store_life>
+		pub struct $name<$per_life, $store_life>
 		{
-			pub person: Person,
+			pub person: &$per_life Person,
 			pub store: &$store_life Store,
 		}
 
-		impl Into<Person> for $name<'_>
+		impl Into<Person> for $name<'_, '_>
 		{
 			fn into(self) -> Person
 			{
-				self.person
+				self.person.clone()
 			}
 		}
 	}

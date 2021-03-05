@@ -1,7 +1,7 @@
 #[macro_export]
 macro_rules! AdaptJob
 {
-	($name: ident, $store_life: lifetime) =>
+	($name: ident, $job_life: lifetime, $store_life: lifetime) =>
 	{
 		use
 		{
@@ -13,17 +13,17 @@ macro_rules! AdaptJob
 		///
 		/// A wrapper around [`Job`] with a [`Store`] that points to its location.
 		#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-		pub struct $name<$store_life>
+		pub struct $name<$job_life, $store_life>
 		{
-			pub job: Job,
+			pub job: &$job_life Job,
 			pub store: &$store_life Store,
 		}
 
-		impl Into<Job> for $name<'_>
+		impl Into<Job> for $name<'_, '_>
 		{
 			fn into(self) -> Job
 			{
-				self.job
+				self.job.clone()
 			}
 		}
 	};

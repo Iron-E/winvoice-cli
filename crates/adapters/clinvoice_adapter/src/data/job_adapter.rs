@@ -62,6 +62,6 @@ pub trait JobAdapter<'store> :
 		timesheet_employee: MatchWhen<Id>,
 		timesheet_begin: MatchWhen<DateTime<Utc>>,
 		timesheet_end: MatchWhen<Option<DateTime<Utc>>>,
-		store: &'store Store,
+		store: &Store,
 	) -> Result<Vec<Job>, <Self as JobAdapter<'store>>::Error>;
 }

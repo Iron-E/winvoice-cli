@@ -80,7 +80,7 @@ impl<'store> EmployeeAdapter<'store> for BincodeEmployee<'store>
 		person: MatchWhen<Id>,
 		title: MatchWhen<String>,
 		status: MatchWhen<EmployeeStatus>,
-		store: &'store Store,
+		store: &Store,
 	) -> Result<Vec<Employee>>
 	{
 		Self::init(&store)?;

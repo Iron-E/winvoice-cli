@@ -99,7 +99,7 @@ impl<'store> LocationAdapter<'store> for BincodeLocation<'store>
 		id: MatchWhen<Id>,
 		name: MatchWhen<String>,
 		outer: MatchWhen<Option<Id>>,
-		store: &'store Store,
+		store: &Store,
 	) -> Result<Vec<Location>>
 	{
 		Self::init(&store)?;

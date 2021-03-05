@@ -70,7 +70,7 @@ impl<'store> PersonAdapter<'store> for BincodePerson<'store>
 		contact_info: MatchWhen<Contact>,
 		id: MatchWhen<Id>,
 		name: MatchWhen<String>,
-		store: &'store Store,
+		store: &Store,
 	) -> Result<Vec<Person>>
 	{
 		Self::init(&store)?;

@@ -99,6 +99,6 @@ pub trait LocationAdapter<'store> :
 		id: MatchWhen<Id>,
 		name: MatchWhen<String>,
 		outer: MatchWhen<Option<Id>>,
-		store: &'store Store,
+		store: &Store,
 	) -> Result<Vec<Location>, <Self as LocationAdapter<'store>>::Error>;
 }

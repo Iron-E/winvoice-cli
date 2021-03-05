@@ -48,6 +48,6 @@ pub trait PersonAdapter<'store> :
 		contact_info: MatchWhen<Contact>,
 		id: MatchWhen<Id>,
 		name: MatchWhen<String>,
-		store: &'store Store,
+		store: &Store,
 	) -> Result<Vec<Person>, <Self as PersonAdapter<'store>>::Error>;
 }

@@ -70,7 +70,7 @@ impl<'store> OrganizationAdapter<'store> for BincodeOrganization<'store>
 		id: MatchWhen<Id>,
 		location: MatchWhen<Id>,
 		name: MatchWhen<String>,
-		store: &'store Store,
+		store: &Store,
 	) -> Result<Vec<Organization>>
 	{
 		Self::init(&store)?;

@@ -46,6 +46,6 @@ pub trait OrganizationAdapter<'store>  :
 		id: MatchWhen<Id>,
 		location: MatchWhen<Id>,
 		name: MatchWhen<String>,
-		store: &Store,
+		store: &'store Store,
 	) -> Result<Vec<Organization>, <Self as OrganizationAdapter<'store>>::Error>;
 }

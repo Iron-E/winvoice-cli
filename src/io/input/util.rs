@@ -3,7 +3,8 @@ use
 	crate::DynResult,
 	clinvoice_adapter::
 	{
-		data::{Error, LocationAdapter, MatchWhen},
+		Adapters, Error as AdapterError,
+		data::{Error as DataError, LocationAdapter, MatchWhen},
 		Store,
 	},
 	clinvoice_data::
@@ -13,6 +14,9 @@ use
 	},
 	serde::{Deserialize, Serialize},
 };
+
+#[cfg(feature="bincode")]
+use clinvoice_adapter_bincode::data::{BincodeLocation, Result as BincodeResult};
 
 #[derive(Deserialize, Serialize)]
 struct SerdeWrapper<T> { value: T }
@@ -31,27 +35,39 @@ struct SerdeWrapper<T> { value: T }
 ///
 /// [L_retrieve]: clinvoice_adapter::data::LocationAdapter::retrieve
 /// [location]: clinvoice_data::Location
-fn retrieve_locations_or_err<'store, L>(store: &Store) -> DynResult<Vec<LocationView>> where
+fn retrieve_locations_or_err<'store, L>(store: &'store Store) -> DynResult<Vec<LocationView>> where
 	L : LocationAdapter<'store>,
 {
 	let locations = L::retrieve(MatchWhen::Any, MatchWhen::Any, MatchWhen::Any, store)?;
 
 	if locations.is_empty()
 	{
-		return Err(Error::NoData {entity: stringify!(Location)}.into());
+		return Err(DataError::NoData {entity: stringify!(Location)}.into());
 	}
 
 	Ok(locations.into_iter().try_fold(Vec::new(),
-		|mut v, l| -> Result<Vec<LocationView>, <L as LocationAdapter<'store>>::Error>
+		|mut v, l| -> DynResult<Vec<LocationView>>
 		{
-			let result: Result<LocationView, <L as LocationAdapter<'store>>::Error> = l.into();
-			v.push(result?);
+			v.push(
+				match store.adapter
+				{
+					#[cfg(feature="bincode")]
+					Adapters::Bincode =>
+					{
+						let result: BincodeResult<LocationView> = BincodeLocation {location: &l, store}.into();
+						result
+					},
+
+					_ => return Err(AdapterError::FeatureNotFound {adapter: store.adapter}.into()),
+				}?
+			);
+
 			Ok(v)
 		},
 	)?)
 }
 
-pub fn select_contact_info<'store, L>(store: &Store) -> DynResult<Vec<Contact>> where
+pub fn select_contact_info<'store, L>(store: &'store Store) -> DynResult<Vec<Contact>> where
 	L : LocationAdapter<'store>,
 {
 	let locations = super::select(
@@ -70,7 +86,7 @@ pub fn select_contact_info<'store, L>(store: &Store) -> DynResult<Vec<Contact>> 
 	Ok(super::edit(SerdeWrapper {value: contact_info})?.value.into_iter().map(|c| c.into()).collect())
 }
 
-pub fn select_one_location<'store, L, S>(prompt: S, store: &Store) -> DynResult<LocationView> where
+pub fn select_one_location<'store, L, S>(prompt: S, store: &'store Store) -> DynResult<LocationView> where
 	L : LocationAdapter<'store>,
 	S : Into<String>,
 {

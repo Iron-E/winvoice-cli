@@ -47,11 +47,11 @@ pub(super) enum Create
 	},
 }
 
-impl<'pass, 'path, 'user> Create
+impl Create
 {
-	pub(super) fn run(self, config: Config, store_name: &str) -> DynResult<()>
+	pub(super) fn run<'store>(self, config: &'store Config, store_name: String) -> DynResult<'store, ()>
 	{
-		let store = config.get_store(store_name).expect("Storage name not known.");
+		let store = config.get_store(&store_name).expect("Storage name not known.");
 
 		match store.adapter
 		{

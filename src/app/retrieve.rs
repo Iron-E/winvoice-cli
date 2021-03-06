@@ -52,7 +52,7 @@ pub(super) enum RetrieveCommand
 
 impl Retrieve
 {
-	pub(super) fn run(self, config: Config, store_name: &str) -> DynResult<()>
+	pub(super) fn run<'config>(self, config: &'config Config, store_name: String) -> DynResult<'config, ()>
 	{
 		todo!()
 	}

@@ -35,8 +35,8 @@ struct SerdeWrapper<T> { value: T }
 ///
 /// [L_retrieve]: clinvoice_adapter::data::LocationAdapter::retrieve
 /// [location]: clinvoice_data::Location
-fn retrieve_locations_or_err<'store, L>(store: &'store Store) -> DynResult<Vec<LocationView>> where
-	L : LocationAdapter<'store>,
+fn retrieve_locations_or_err<'store, L>(store: &'store Store) -> DynResult<'store, Vec<LocationView>> where
+	L : LocationAdapter<'store> + 'store,
 {
 	let locations = L::retrieve(MatchWhen::Any, MatchWhen::Any, MatchWhen::Any, store)?;
 
@@ -48,27 +48,25 @@ fn retrieve_locations_or_err<'store, L>(store: &'store Store) -> DynResult<Vec<L
 	Ok(locations.into_iter().try_fold(Vec::new(),
 		|mut v, l| -> DynResult<Vec<LocationView>>
 		{
-			v.push(
-				match store.adapter
+			v.push(match store.adapter
+			{
+				#[cfg(feature="bincode")]
+				Adapters::Bincode =>
 				{
-					#[cfg(feature="bincode")]
-					Adapters::Bincode =>
-					{
-						let result: BincodeResult<LocationView> = BincodeLocation {location: &l, store}.into();
-						result
-					},
+					let result: BincodeResult<LocationView> = BincodeLocation {location: &l, store}.into();
+					result
+				},
 
-					_ => return Err(AdapterError::FeatureNotFound {adapter: store.adapter}.into()),
-				}?
-			);
+				_ => return Err(AdapterError::FeatureNotFound {adapter: store.adapter}.into()),
+			}?);
 
 			Ok(v)
 		},
 	)?)
 }
 
-pub fn select_contact_info<'store, L>(store: &'store Store) -> DynResult<Vec<Contact>> where
-	L : LocationAdapter<'store>,
+pub fn select_contact_info<'store, L>(store: &'store Store) -> DynResult<'store, Vec<Contact>> where
+	L : LocationAdapter<'store> + 'store,
 {
 	let locations = super::select(
 		&retrieve_locations_or_err::<L>(store)?,
@@ -86,8 +84,8 @@ pub fn select_contact_info<'store, L>(store: &'store Store) -> DynResult<Vec<Con
 	Ok(super::edit(SerdeWrapper {value: contact_info})?.value.into_iter().map(|c| c.into()).collect())
 }
 
-pub fn select_one_location<'store, L, S>(prompt: S, store: &'store Store) -> DynResult<LocationView> where
-	L : LocationAdapter<'store>,
+pub fn select_one_location<'store, L, S>(prompt: S, store: &'store Store) -> DynResult<'store, LocationView> where
+	L : LocationAdapter<'store> + 'store,
 	S : Into<String>,
 {
 	super::select_one(

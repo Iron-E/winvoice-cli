@@ -36,9 +36,9 @@ impl App
 	/// # Summary
 	///
 	/// Edit the user's configuration file.
-	fn edit_config(config: Config) -> ConfigResult<()>
+	fn edit_config(config: &Config) -> ConfigResult<()>
 	{
-		if let Some(edited) = input::toml_editor().edit(&toml::to_string_pretty(&config)?)?
+		if let Some(edited) = input::toml_editor().edit(&toml::to_string_pretty(config)?)?
 		{
 			toml::from_str::<Config>(&edited)?.update()?;
 		};
@@ -49,13 +49,13 @@ impl App
 	/// # Summary
 	///
 	/// Run the application and parse its provided arguments / flags.
-	pub fn run(self, config: Config) -> DynResult<()>
+	pub fn run<'config>(self, config: &'config Config) -> DynResult<'config, ()>
 	{
 		match self.command
 		{
 			AppCommand::Config => Self::edit_config(config).map_err(|e| e.into()),
-			AppCommand::Create(cmd) => cmd.run(config, &self.store),
-			AppCommand::Retrieve(cmd) => cmd.run(config, &self.store),
+			AppCommand::Create(cmd) => cmd.run(config, self.store),
+			AppCommand::Retrieve(cmd) => cmd.run(config, self.store),
 		}
 	}
 }

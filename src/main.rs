@@ -35,5 +35,5 @@ fn main()
 	let config: Config = toml::from_slice(&config_bytes).unwrap_or_else(|e| exit_with_err(e));
 
 	// Run the CLInvoice application.
-	App::from_args().run(config).unwrap_or_else(|e| exit_with_err(e.as_ref()));
+	App::from_args().run(&config).unwrap_or_else(|e| exit_with_err(e.as_ref()));
 }

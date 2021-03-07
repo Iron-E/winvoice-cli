@@ -146,7 +146,7 @@ mod tests
 	{
 		super::test_temp_store(|store|
 		{
-			let test_path = PathBuf::new().join(store.path).join("test_next_id");
+			let test_path = PathBuf::new().join(&store.path).join("test_next_id");
 
 			if test_path.is_dir()
 			{

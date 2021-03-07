@@ -108,17 +108,13 @@ mod tests
 				&store,
 			).unwrap();
 
-			let mut create_job = BincodeJob
-			{
-				job: &BincodeJob::create(
-					big_test.clone(),
-					Utc::now(),
-					Money::new(Decimal::new(200, 2), ""),
-					"Test the job creation function.",
-					&store,
-				).unwrap(),
-				store,
-			};
+			let mut create_job = BincodeJob::create(
+				big_test.clone(),
+				Utc::now(),
+				Money::new(Decimal::new(200, 2), ""),
+				"Test the job creation function.",
+				&store,
+			).unwrap();
 
 			let contact_info = vec![Contact::Address(earth.id)];
 
@@ -166,28 +162,28 @@ mod tests
 				status: ceo_testy.status,
 			};
 
-			create_job.job.start_timesheet(ceo_testy.id);
+			create_job.start_timesheet(ceo_testy.id);
 
 			let create_job_view = JobView
 			{
 				client: ceo_testy_view.organization.clone(),
-				date_close: create_job.job.date_close,
-				date_open: create_job.job.date_open,
-				id: create_job.job.id,
-				invoice: create_job.job.invoice.clone(),
-				notes: create_job.job.notes.clone(),
-				objectives: create_job.job.objectives.clone(),
+				date_close: create_job.date_close,
+				date_open: create_job.date_open,
+				id: create_job.id,
+				invoice: create_job.invoice.clone(),
+				notes: create_job.notes.clone(),
+				objectives: create_job.objectives.clone(),
 				timesheets: vec![TimesheetView
 				{
 					employee: ceo_testy_view,
 					expenses: None,
-					time_begin: match create_job.job.timesheets.first()
+					time_begin: match create_job.timesheets.first()
 					{
 						Some(t) => t.time_begin,
 						_ => panic!("Timesheet did not attach!"),
 					},
 					time_end: None,
-					work_notes: match create_job.job.timesheets.first()
+					work_notes: match create_job.timesheets.first()
 					{
 						Some(t) => t.work_notes.clone(),
 						_ => panic!("Timesheet did not attach!"),
@@ -196,7 +192,7 @@ mod tests
 			};
 
 			let start = Instant::now();
-			let create_job_view_result: Result<JobView> = create_job.into();
+			let create_job_view_result: Result<JobView> = BincodeJob {job: &create_job, store}.into();
 			println!("\n>>>>> BincodeJob::into_view {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 
 			assert_eq!(create_job_view, create_job_view_result.unwrap());

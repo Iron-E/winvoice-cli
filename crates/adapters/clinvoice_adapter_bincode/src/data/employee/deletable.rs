@@ -78,15 +78,11 @@ mod tests
 				store,
 			};
 
-			let mut big_old_test = BincodeOrganization
-			{
-				organization: &BincodeOrganization::create(
-					earth.location.clone(),
-					"Big Old Test Corporation",
-					&store,
-				).unwrap(),
-				store,
-			};
+			let mut big_old_test = BincodeOrganization::create(
+				earth.location.clone(),
+				"Big Old Test Corporation",
+				&store,
+			).unwrap();
 
 			let mut contact_info = Vec::new();
 			contact_info.push(Contact::Address(earth.location.id));
@@ -105,7 +101,7 @@ mod tests
 			{
 				employee: &BincodeEmployee::create(
 					contact_info.clone(),
-					big_old_test.organization.clone(),
+					big_old_test.clone(),
 					testy.person.clone(),
 					"CEO of Tests",
 					EmployeeStatus::Employed,
@@ -114,20 +110,16 @@ mod tests
 				store,
 			};
 
-			let mut creation = BincodeJob
-			{
-				job: &BincodeJob::create(
-					big_old_test.organization.clone(),
-					Utc::now(),
-					Money::new(Decimal::new(200, 2), "USD"),
-					"Test the job creation function.",
-					&store,
-				).unwrap(),
-				store,
-			};
+			let mut creation = BincodeJob::create(
+				big_old_test.clone(),
+				Utc::now(),
+				Money::new(Decimal::new(200, 2), "USD"),
+				"Test the job creation function.",
+				&store,
+			).unwrap();
 
-			creation.job.start_timesheet(ceo_testy.employee.id);
-			creation.update().unwrap();
+			creation.start_timesheet(ceo_testy.employee.id);
+			BincodeJob {job: &creation, store}.update().unwrap();
 
 			let start = Instant::now();
 			// Assert that the deletion works
@@ -138,43 +130,35 @@ mod tests
 			assert!(!ceo_testy.filepath().is_file());
 
 			// Assert that the relevant files still exist
-			assert!(big_old_test.filepath().is_file());
-			assert!(creation.filepath().is_file());
+			assert!(BincodeOrganization {organization: &big_old_test, store}.filepath().is_file());
+			assert!(BincodeJob {job: &creation, store}.filepath().is_file());
 			assert!(earth.filepath().is_file());
 			assert!(testy.filepath().is_file());
 
-			big_old_test = BincodeOrganization
-			{
-				organization: &BincodeOrganization::retrieve(
-					MatchWhen::EqualTo(big_old_test.organization.id), // id
-					MatchWhen::Any, // location
-					MatchWhen::Any, // name
-					&store,
-				).unwrap().iter().next().unwrap().clone(),
-				store,
-			};
+			big_old_test = BincodeOrganization::retrieve(
+				MatchWhen::EqualTo(big_old_test.id), // id
+				MatchWhen::Any, // location
+				MatchWhen::Any, // name
+				&store,
+			).unwrap().iter().next().unwrap().clone();
 
-			creation = BincodeJob
-			{
-				job: &BincodeJob::retrieve(
-					MatchWhen::EqualTo(big_old_test.organization.id), // client
-					MatchWhen::Any, // date close
-					MatchWhen::Any, // date open
-					MatchWhen::EqualTo(creation.job.id), // id
-					MatchWhen::Any, // invoice date
-					MatchWhen::Any, // invoice hourly rate
-					MatchWhen::Any, // notes
-					MatchWhen::Any, // objectives
-					MatchWhen::Any, // timesheet employee
-					MatchWhen::Any, // timesheet time begin
-					MatchWhen::Any, // timesheet time end
-					&store,
-				).unwrap().iter().next().unwrap().clone(),
-				store,
-			};
+			creation = BincodeJob::retrieve(
+				MatchWhen::EqualTo(big_old_test.id), // client
+				MatchWhen::Any, // date close
+				MatchWhen::Any, // date open
+				MatchWhen::EqualTo(creation.id), // id
+				MatchWhen::Any, // invoice date
+				MatchWhen::Any, // invoice hourly rate
+				MatchWhen::Any, // notes
+				MatchWhen::Any, // objectives
+				MatchWhen::Any, // timesheet employee
+				MatchWhen::Any, // timesheet time begin
+				MatchWhen::Any, // timesheet time end
+				&store,
+			).unwrap().iter().next().unwrap().clone();
 
 			// Assert that no references to the deleted entity remain.
-			assert!(creation.job.timesheets.iter().all(|t| t.employee_id != ceo_testy.employee.id));
+			assert!(creation.timesheets.iter().all(|t| t.employee_id != ceo_testy.employee.id));
 		});
 	}
 }

@@ -24,7 +24,7 @@ impl Into<Result<LocationView>> for BincodeLocation<'_, '_>
 				|previous: Option<LocationView>, outer_location| Some(LocationView
 				{
 					id: outer_location.id,
-					name: outer_location.name.clone(),
+					name: outer_location.name,
 					outer: previous.map(|l| l.into()),
 				}),
 			).map(|l| l.into()),

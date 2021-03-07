@@ -9,7 +9,7 @@ impl Into<Result<Vec<Employee>>> for BincodeOrganization<'_, '_>
 {
 	fn into(self) -> Result<Vec<Employee>>
 	{
-		Ok(BincodeEmployee::retrieve(
+		BincodeEmployee::retrieve(
 			MatchWhen::Any, // contact info
 			MatchWhen::Any, // id
 			MatchWhen::EqualTo(self.organization.id), // organization
@@ -17,7 +17,7 @@ impl Into<Result<Vec<Employee>>> for BincodeOrganization<'_, '_>
 			MatchWhen::Any, // status
 			MatchWhen::Any, // title
 			self.store,
-		)?)
+		)
 	}
 }
 

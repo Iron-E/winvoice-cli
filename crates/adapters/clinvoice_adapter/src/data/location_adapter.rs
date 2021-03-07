@@ -69,10 +69,8 @@ pub trait LocationAdapter<'store> :
 			{
 				if let Some(adapted_location) = results.into_iter().next()
 				{
-					let loc: Location = adapted_location.into();
-
-					outer_id = loc.outer_id;
-					outer_locations.push(loc);
+					outer_id = adapted_location.outer_id;
+					outer_locations.push(adapted_location);
 					continue;
 				}
 			}

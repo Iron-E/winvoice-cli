@@ -45,7 +45,7 @@ fn retrieve_locations_or_err<'store, L>(store: &'store Store) -> DynResult<'stor
 		return Err(DataError::NoData {entity: stringify!(Location)}.into());
 	}
 
-	Ok(locations.into_iter().try_fold(Vec::new(),
+	locations.into_iter().try_fold(Vec::new(),
 		|mut v, l| -> DynResult<Vec<LocationView>>
 		{
 			v.push(match store.adapter
@@ -62,7 +62,7 @@ fn retrieve_locations_or_err<'store, L>(store: &'store Store) -> DynResult<'stor
 
 			Ok(v)
 		},
-	)?)
+	)
 }
 
 pub fn select_contact_info<'store, L>(store: &'store Store) -> DynResult<'store, Vec<Contact>> where

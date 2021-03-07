@@ -68,10 +68,7 @@ fn retrieve_locations_or_err<'store, L>(store: &'store Store) -> DynResult<'stor
 pub fn select_contact_info<'store, L>(store: &'store Store) -> DynResult<'store, Vec<Contact>> where
 	L : LocationAdapter<'store> + 'store,
 {
-	let locations = super::select(
-		&retrieve_locations_or_err::<L>(store)?,
-		"Select locations to be part of the contact info.",
-	)?;
+	let locations = retrieve_locations_or_err::<L>(store)?;
 
 	let mut contact_info = super::select(
 		&locations.into_iter().map(|l| l.into()).collect::<Vec<ContactView>>(),

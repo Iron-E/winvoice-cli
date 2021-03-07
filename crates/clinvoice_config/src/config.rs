@@ -124,13 +124,13 @@ mod tests
 		stores.insert("c", StoreValue::Storage(Store {
 			adapter: Adapters::Bincode,
 			password: None,
-			path: "c/path",
+			path: "c/path".into(),
 			username: None,
 		}));
 		stores.insert("d", StoreValue::Storage(Store {
 			adapter: Adapters::Bincode,
-			password: Some("asldkj"),
-			path: "d/path",
+			password: Some("asldkj".into()),
+			path: "d/path".into(),
 			username: None,
 		}));
 		stores.insert("e", StoreValue::Alias("d"));

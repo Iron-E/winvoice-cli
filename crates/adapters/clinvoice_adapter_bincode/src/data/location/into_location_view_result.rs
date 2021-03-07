@@ -16,19 +16,19 @@ impl Into<Result<LocationView>> for BincodeLocation<'_, '_>
 		let mut outer_locations = self.outer_locations()?;
 		outer_locations.reverse();
 
-		let mut previous_view: Option<LocationView> = None;
-		for i in 0..outer_locations.len()
+		Ok(LocationView
 		{
-			let outer_location = &outer_locations[i];
-			previous_view = Some(LocationView
-			{
-				id: outer_location.id,
-				name: outer_location.name.clone(),
-				outer: previous_view.map(|l| l.into()),
-			});
-		}
-
-		Ok(LocationView {id, name, outer: previous_view.map(|l| l.into())})
+			id,
+			name,
+			outer: outer_locations.into_iter().fold(None,
+				|previous: Option<LocationView>, outer_location| Some(LocationView
+				{
+					id: outer_location.id,
+					name: outer_location.name.clone(),
+					outer: previous.map(|l| l.into()),
+				}),
+			).map(|l| l.into()),
+		})
 	}
 }
 

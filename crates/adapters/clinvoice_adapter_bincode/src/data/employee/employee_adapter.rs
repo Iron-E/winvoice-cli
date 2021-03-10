@@ -35,8 +35,8 @@ impl<'store> EmployeeAdapter<'store> for BincodeEmployee<'_, 'store>
 		contact_info: Vec<Contact>,
 		organization: Organization,
 		person: Person,
-		title: &str,
 		status: EmployeeStatus,
+		title: &str,
 		store: &'store Store,
 	) -> Result<Employee>
 	{
@@ -137,8 +137,8 @@ mod tests
 						id: Id::new_v4(),
 						name: "Testy Mćtesterson".into(),
 					},
-					"CEO of Tests",
 					EmployeeStatus::Employed,
+					"CEO of Tests",
 					&store,
 				).unwrap(),
 				&store,
@@ -154,8 +154,8 @@ mod tests
 						id: Id::new_v4(),
 						name: "Nimron MacBeaver".into(),
 					},
-					"Oblong Shape Holder",
 					EmployeeStatus::NotEmployed,
+					"Oblong Shape Holder",
 					&store,
 				).unwrap(),
 				&store,
@@ -171,8 +171,8 @@ mod tests
 						id: Id::new_v4(),
 						name: "An Actual «Tor♯tust".into(),
 					},
-					"Mixer of Soups",
 					EmployeeStatus::Representative,
+					"Mixer of Soups",
 					&store,
 				).unwrap(),
 				&store,
@@ -188,8 +188,8 @@ mod tests
 						id: Id::new_v4(),
 						name: "Jimmy Neutron, Boy Genius' Dog 'Gottard'".into(),
 					},
-					"Sidekick",
 					EmployeeStatus::Employed,
+					"Sidekick",
 					&store,
 				).unwrap(),
 				&store,
@@ -205,8 +205,8 @@ mod tests
 						id: Id::new_v4(),
 						name: "Testy Mćtesterson".into(),
 					},
-					"Lazy No-good Duplicate Name User",
 					EmployeeStatus::NotEmployed,
+					"Lazy No-good Duplicate Name User",
 					&store,
 				).unwrap(),
 				&store,
@@ -246,8 +246,8 @@ mod tests
 					id: Id::new_v4(),
 					name: "Testy Mćtesterson".into(),
 				},
-				"CEO of Tests",
 				EmployeeStatus::NotEmployed,
+				"CEO of Tests",
 				&store,
 			).unwrap();
 
@@ -261,8 +261,8 @@ mod tests
 					id: Id::new_v4(),
 					name: "Nimron MacBeaver".into(),
 				},
-				"Oblong Shape Holder",
 				EmployeeStatus::Employed,
+				"Oblong Shape Holder",
 				&store,
 			).unwrap();
 
@@ -276,8 +276,8 @@ mod tests
 					id: Id::new_v4(),
 					name: "An Actual «Tor♯tust".into(),
 				},
-				"Mixer of Soups",
 				EmployeeStatus::Representative,
+				"Mixer of Soups",
 				&store,
 			).unwrap();
 
@@ -291,8 +291,8 @@ mod tests
 					id: Id::new_v4(),
 					name: "Jimmy Neutron, Boy Genius' Dog 'Gottard'".into(),
 				},
-				"Sidekick",
 				EmployeeStatus::Employed,
+				"Sidekick",
 				&store,
 			).unwrap();
 
@@ -306,8 +306,8 @@ mod tests
 					id: Id::new_v4(),
 					name: "Testy Mćtesterson".into(),
 				},
-				"Lazy No-good Duplicate Name User",
 				EmployeeStatus::NotEmployed,
+				"Lazy No-good Duplicate Name User",
 				&store,
 			).unwrap();
 

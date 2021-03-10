@@ -33,8 +33,8 @@ pub trait EmployeeAdapter<'store> :
 		contact_info: Vec<Contact>,
 		organization: Organization,
 		person: Person,
-		title: &str,
 		status: EmployeeStatus,
+		title: &str,
 		store: &'store Store,
 	) -> Result<Employee, <Self as EmployeeAdapter<'store>>::Error>;
 

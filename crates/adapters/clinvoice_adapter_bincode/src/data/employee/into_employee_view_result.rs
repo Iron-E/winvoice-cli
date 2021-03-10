@@ -93,8 +93,8 @@ mod tests
 				contact_info.clone(),
 				big_old_test.clone(),
 				testy.clone(),
-				"CEO of Tests",
 				EmployeeStatus::Employed,
+				"CEO of Tests",
 				&store,
 			).unwrap();
 

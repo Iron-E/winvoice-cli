@@ -57,8 +57,8 @@ mod tests
 					id: Id::new_v4(),
 					name: "Testy Mćtesterson".into(),
 				},
-				"CEO of Tests",
 				EmployeeStatus::Representative,
+				"CEO of Tests",
 				&store,
 			).unwrap();
 
@@ -71,8 +71,8 @@ mod tests
 					id: Id::new_v4(),
 					name: "Mr. Flu".into(),
 				},
-				"Janitor",
 				EmployeeStatus::Employed,
+				"Janitor",
 				&store,
 			).unwrap();
 

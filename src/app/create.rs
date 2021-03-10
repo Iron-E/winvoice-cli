@@ -1,6 +1,6 @@
 use
 {
-	crate::{Config, DynResult, io::input, StructOpt},
+	crate::{Config, DynResult, io::input::util as input_util, StructOpt},
 	clinvoice_adapter::
 	{
 		Adapters, Error,
@@ -18,6 +18,7 @@ pub(super) enum Create
 	#[structopt(about="Create a new employee record")]
 	Employee
 	{
+		title: String,
 	},
 
 	#[structopt(about="Create a new job record")]
@@ -58,23 +59,27 @@ impl Create
 			#[cfg(feature="bincode")]
 			Adapters::Bincode => match self
 			{
-				Self::Employee {} => todo!() /*BincodeEmployee::create(store).and(Ok(()))*/,
+				Self::Employee {title} => BincodeEmployee::create(
+					input_util::contact::select::<BincodeLocation>(store)?,
+					input_util::organization::select_one::<BincodeOrganization, &str>("Which organization does this employee work at?", store)?.into(),
+					input_util::person::select_one::<BincodePerson, &str>("Which person is working for the organization?", store)?.into(),
+					input_util::employee_status::select_one("What is the status of the employee?")?,
+					&title,
+					store,
+				).and(Ok(())),
 
 				Self::Job {} => todo!() /*BincodeJob::create(store).and(Ok(()))*/,
 
 				Self::Location {name} => BincodeLocation::create(&name, store).and(Ok(())),
 
 				Self::Organization {name} => BincodeOrganization::create(
-					input::util::select_one_location::<BincodeLocation, String>(
-						format!("Select a Location for {}", name),
-						store,
-					)?.into(),
+					input_util::location::select_one::<BincodeLocation, String>(format!("Select a Location for {}", name), store)?.into(),
 					&name,
 					store
 				).and(Ok(())),
 
 				Self::Person {name} => BincodePerson::create(
-					input::util::select_contact_info::<BincodeLocation>(store)?,
+					input_util::contact::select::<BincodeLocation>(store)?,
 					&name,
 					store,
 				).and(Ok(())),

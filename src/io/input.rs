@@ -23,13 +23,39 @@ use
 ///
 /// * The deserialized entity with values filled in by the user.
 /// * An [`Error`] encountered while creating, editing, or removing the temporary file.
-pub fn edit<T>(entity: T) -> Result<T> where
+pub fn edit<T>(prompt: Option<&str>, entity: T) -> Result<T> where
 	T : DeserializeOwned + Serialize
 {
+	let serialized = toml::to_string_pretty(&entity)?;
+	let to_edit = match prompt
+	{
+		Some(p) => format!("# {}\n\n{}", p, serialized),
+		_ => serialized,
+	};
+
 	// Write the entity to the `temp_path` and then edit that file.
-	match toml_editor().edit(&toml::to_string_pretty(&entity)?)?
+	match toml_editor().edit(&to_edit)?
 	{
 		Some(edited) => Ok(toml::from_str(&edited)?),
+		_ => Err(Error::NotEdited),
+	}
+}
+
+/// # Summary
+///
+/// [Edit](edit_func) markdown based on some `prompt` which will appear in the user's editor.
+///
+/// # Errors
+///
+/// * [`io::Error`] when the [edit][edit_func] fails.
+/// * [`Error::NotEdited`] when the user does not change the `prompt`.
+///
+/// [edit_func]: Editor::edit
+pub fn edit_markdown(prompt: &str) -> Result<String>
+{
+	match Editor::new().extension(".md").edit(prompt)?
+	{
+		Some(edited) => Ok(edited),
 		_ => Err(Error::NotEdited),
 	}
 }

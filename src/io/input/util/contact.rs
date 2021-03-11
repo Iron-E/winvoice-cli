@@ -6,7 +6,7 @@ use
 	clinvoice_data::{Contact, views::ContactView},
 };
 
-pub fn select<'store, L>(store: &'store Store) -> DynResult<'store, Vec<Contact>> where
+pub fn edit_select<'store, L>(store: &'store Store) -> DynResult<'store, Vec<Contact>> where
 	L : LocationAdapter<'store> + 'store,
 {
 	let locations = super::location::retrieve_or_err::<L>(store)?;
@@ -19,5 +19,8 @@ pub fn select<'store, L>(store: &'store Store) -> DynResult<'store, Vec<Contact>
 	contact_info.push(ContactView::Email("An email address. E.g. `foo@gmail.com`".into()));
 	contact_info.push(ContactView::Phone("A phone number. E.g. `600-555-5555`".into()));
 
-	Ok(input::edit(SerdeWrapper {value: contact_info})?.value.into_iter().map(|c| c.into()).collect())
+	Ok(input::edit(
+		Some("Edit your contact information, or add any as necessary."),
+		SerdeWrapper {value: contact_info},
+	)?.value.into_iter().map(|c| c.into()).collect())
 }

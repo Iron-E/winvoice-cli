@@ -1,10 +1,15 @@
 use
 {
-	crate::{Config, DynResult, io::input::util as input_util, StructOpt},
+	crate::{Config, DynResult, io::input, StructOpt},
 	clinvoice_adapter::
 	{
 		Adapters, Error,
 		data::{EmployeeAdapter, JobAdapter, LocationAdapter, OrganizationAdapter, PersonAdapter},
+	},
+	clinvoice_data::
+	{
+		chrono::{DateTime, Local, Utc},
+		Decimal, Money,
 	},
 };
 
@@ -22,9 +27,7 @@ pub(super) enum Create
 	},
 
 	#[structopt(about="Create a new job record")]
-	Job
-	{
-	},
+	Job,
 
 	#[structopt(about="Create a new location record")]
 	Location
@@ -59,27 +62,49 @@ impl Create
 			#[cfg(feature="bincode")]
 			Adapters::Bincode => match self
 			{
-				Self::Employee {title} => BincodeEmployee::create(
-					input_util::contact::select::<BincodeLocation>(store)?,
-					input_util::organization::select_one::<BincodeOrganization, &str>("Which organization does this employee work at?", store)?.into(),
-					input_util::person::select_one::<BincodePerson, &str>("Which person is working for the organization?", store)?.into(),
-					input_util::employee_status::select_one("What is the status of the employee?")?,
-					&title,
+				Self::Employee {title} =>
+				{
+					let organization = input::util::organization::select_one::<BincodeOrganization, &str>(
+						"Which organization does this employee work at?",
+						store,
+					)?.into();
+
+					let person = input::util::person::select_one::<BincodePerson, &str>(
+						"Which person is working for the organization?",
+						store,
+					)?.into();
+
+					BincodeEmployee::create(
+						input::util::contact::edit_select::<BincodeLocation>(store)?,
+						organization,
+						person,
+						input::util::employee_status::select_one("What is the status of the employee?")?,
+						&title,
+						store,
+					).and(Ok(()))
+				}
+
+				Self::Job => BincodeJob::create(
+					input::util::organization::select_one::<BincodeOrganization, &str>("", store)?.into(),
+					DateTime::<Utc>::from(input::edit(
+							Some(""),
+							Local::now()
+					)?),
+					input::edit(Some(""), Money::new(Decimal::new(2000, 2), "USD"))?,
+					&input::edit_markdown("* List your objectives.\n* All markdown syntax works.")?,
 					store,
 				).and(Ok(())),
-
-				Self::Job {} => todo!() /*BincodeJob::create(store).and(Ok(()))*/,
 
 				Self::Location {name} => BincodeLocation::create(&name, store).and(Ok(())),
 
 				Self::Organization {name} => BincodeOrganization::create(
-					input_util::location::select_one::<BincodeLocation, String>(format!("Select a Location for {}", name), store)?.into(),
+					input::util::location::select_one::<BincodeLocation, String>(format!("Select a Location for {}", name), store)?.into(),
 					&name,
 					store
 				).and(Ok(())),
 
 				Self::Person {name} => BincodePerson::create(
-					input_util::contact::select::<BincodeLocation>(store)?,
+					input::util::contact::edit_select::<BincodeLocation>(store)?,
 					&name,
 					store,
 				).and(Ok(())),

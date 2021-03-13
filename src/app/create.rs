@@ -87,10 +87,13 @@ impl Create
 				Self::Job => BincodeJob::create(
 					input::util::organization::select_one::<BincodeOrganization, &str>("", store)?.into(),
 					DateTime::<Utc>::from(input::edit(
-							Some(""),
-							Local::now()
+						Some("Set the time that the job was opened."),
+						Local::now(),
 					)?),
-					input::edit(Some(""), Money::new(Decimal::new(2000, 2), "USD"))?,
+					input::edit(
+						Some("Set the hourly rate of the job."),
+						Money::new(Decimal::new(2000, 2), "USD"),
+					)?,
 					&input::edit_markdown("* List your objectives.\n* All markdown syntax works.")?,
 					store,
 				).and(Ok(())),
@@ -98,9 +101,12 @@ impl Create
 				Self::Location {name} => BincodeLocation::create(&name, store).and(Ok(())),
 
 				Self::Organization {name} => BincodeOrganization::create(
-					input::util::location::select_one::<BincodeLocation, String>(format!("Select a Location for {}", name), store)?.into(),
+					input::util::location::select_one::<BincodeLocation, String>(
+						format!("Select a Location for {}", name),
+						store,
+					)?.into(),
 					&name,
-					store
+					store,
 				).and(Ok(())),
 
 				Self::Person {name} => BincodePerson::create(

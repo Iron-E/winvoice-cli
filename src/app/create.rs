@@ -85,7 +85,10 @@ impl Create
 				}
 
 				Self::Job => BincodeJob::create(
-					input::util::organization::select_one::<BincodeOrganization, &str>("", store)?.into(),
+					input::util::organization::select_one::<BincodeOrganization, &str>(
+						"Select the client for this job.",
+						store,
+					)?.into(),
 					DateTime::<Utc>::from(input::edit(
 						Some("Set the time that the job was opened."),
 						Local::now(),
@@ -102,7 +105,7 @@ impl Create
 
 				Self::Organization {name} => BincodeOrganization::create(
 					input::util::location::select_one::<BincodeLocation, String>(
-						format!("Select a Location for {}", name),
+						format!("Select a location for {}", name),
 						store,
 					)?.into(),
 					&name,

@@ -6,5 +6,5 @@ pub mod person;
 
 use serde::{Deserialize, Serialize};
 
-#[derive(Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize)]
 struct SerdeWrapper<T> { value: T }

@@ -16,6 +16,11 @@ pub enum Adapters
 	///
 	/// A bincode filesystem.
 	Bincode,
+
+	/// # Summary
+	///
+	/// A bincode filesystem.
+	Postgres,
 }
 
 impl Adapters

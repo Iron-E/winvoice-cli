@@ -8,8 +8,10 @@ impl Display for Adapters
 {
 	fn fmt(&self, formatter: &mut Formatter) -> FmtResult
 	{
-		write!(formatter, "{}", match self {
-			Adapters::Bincode => "Bincode"
+		write!(formatter, "{}", match self
+		{
+			Adapters::Bincode => "Bincode",
+			Adapters::Postgres => "Postgres",
 		})
 	}
 }

@@ -30,11 +30,11 @@ pub(super) enum Create
 	#[structopt(about="Create a new job record")]
 	Job
 	{
-		#[structopt(help="The amount of money charged per hour for this job.")]
-		hourly_rate_amount: Decimal,
+		#[structopt(help="The currency which the hourly rate is stated in.", long, short)]
+		currency: Option<String>,
 
-		#[structopt(help="The currency which the hourly rate is stated in.")]
-		hourly_rate_currency: String,
+		#[structopt(help="The amount of money charged per hour for this job.")]
+		hourly_rate: Decimal,
 
 		#[structopt(help="The (local timezone) year that the job was created. Defaults to current year.", requires("month"))]
 		year: Option<i32>,
@@ -107,7 +107,7 @@ impl Create
 					).and(Ok(()))
 				}
 
-				Self::Job {hourly_rate_amount, hourly_rate_currency, year, month, day, hour, minute} => BincodeJob::create(
+				Self::Job {currency, hourly_rate, year, month, day, hour, minute} => BincodeJob::create(
 					input::util::organization::select_one::<BincodeOrganization, &str>(
 						"Select the client for this job.",
 						store,
@@ -122,7 +122,11 @@ impl Create
 							hour.unwrap_or(now.hour()), minute.unwrap_or(now.minute()), 0,
 						)
 					}),
-					Money { amount: hourly_rate_amount, currency: hourly_rate_currency },
+					Money
+					{
+						amount: hourly_rate,
+						currency: currency.unwrap_or(config.invoices.default_currency.into()),
+					},
 					&input::edit_markdown("* List your objectives.\n* All markdown syntax works.")?,
 					store,
 				).and(Ok(())),

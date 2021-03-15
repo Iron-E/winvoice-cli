@@ -33,7 +33,7 @@ pub(super) fn retrieve_or_err<'store, O>(store: &'store Store) -> DynResult<'sto
 
 	if organizations.is_empty()
 	{
-		return Err(DataError::NoData {entity: stringify!(Location)}.into());
+		return Err(DataError::NoData {entity: stringify!(Organization)}.into());
 	}
 
 	organizations.into_iter().try_fold(Vec::new(),

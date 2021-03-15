@@ -11,7 +11,7 @@ use serde::{Deserialize, Serialize};
 /// A view of [`Location`](crate::Location).
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
-#[cfg_attr(feature="serde_support", serde(content="contect", tag="type"))]
+#[cfg_attr(feature="serde_support", serde(content="content", tag="type"))]
 pub enum ContactView
 {
 	/// # Summary

@@ -23,53 +23,53 @@ pub(super) enum Create
 	#[structopt(about="Create a new employee record")]
 	Employee
 	{
-		#[structopt(about="The job title of the employee.")]
+		#[structopt(help="The job title of the employee.")]
 		title: String,
 	},
 
 	#[structopt(about="Create a new job record")]
 	Job
 	{
-		#[structopt(about="The amount of money charged per hour for this job.", requires("hourly_rate_currency"))]
+		#[structopt(help="The amount of money charged per hour for this job.")]
 		hourly_rate_amount: Decimal,
 
-		#[structopt(about="The currency which the hourly rate is stated in.", requires("hourly_rate_amount"))]
+		#[structopt(help="The currency which the hourly rate is stated in.")]
 		hourly_rate_currency: String,
 
-		#[structopt(about="The year that the job was created (local timezone). Defaults to current year.", requires("month"))]
+		#[structopt(help="The (local timezone) year that the job was created. Defaults to current year.", requires("month"))]
 		year: Option<i32>,
 
-		#[structopt(about="The month that the job was created (local timezone). Defaults to current month.", requires("day"))]
+		#[structopt(help="The (local timezone) month that the job was created. Defaults to current month.", requires("day"))]
 		month: Option<u32>,
 
-		#[structopt(about="The day that the job was created (local timezone). Defaults to current day.", requires("year"))]
+		#[structopt(help="The (local timezone) day that the job was created. Defaults to current day.", requires("year"))]
 		day: Option<u32>,
 
-		#[structopt(about="The hour that the job was created (local timezone). Defaults to current hour.", requires("year"))]
+		#[structopt(help="The (local timezone) hour that the job was created. Defaults to current hour.", requires("year"))]
 		hour: Option<u32>,
 
-		#[structopt(about="The minute that the job was created (local timezone). Defaults to current minute.", requires("hour"))]
+		#[structopt(help="The (local timezone) minute that the job was created. Defaults to current minute.", requires("hour"))]
 		minute: Option<u32>,
 	},
 
 	#[structopt(about="Create a new location record")]
 	Location
 	{
-		#[structopt(about="The name of the location to create.")]
+		#[structopt(help="The name of the location to create.")]
 		name: String,
 	},
 
 	#[structopt(about="Create a new organization record")]
 	Organization
 	{
-		#[structopt(about="The name of the organization to create.")]
+		#[structopt(help="The name of the organization to create.")]
 		name: String,
 	},
 
 	#[structopt(about="Create a new organization record")]
 	Person
 	{
-		#[structopt(about="The name of the person to create.")]
+		#[structopt(help="The name of the person to create.")]
 		name: String,
 	},
 }

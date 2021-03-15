@@ -14,7 +14,7 @@ use
 #[structopt(name="clinvoice", about="CLInvoice is a tool to help with invoicing from the command line!")]
 pub struct App
 {
-	#[structopt(about="Select retrieved entities for deletion", default_value="default", long, short)]
+	#[structopt(default_value="default", help="A store from the configuration file which operations should be performed on", long, short)]
 	store: String,
 
 	#[structopt(subcommand)]

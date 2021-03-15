@@ -24,6 +24,7 @@ pub struct App
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, StructOpt)]
 enum AppCommand
 {
+	#[structopt(about="Edit the configuration file in the default editor")]
 	Config,
 
 	Create(Create),

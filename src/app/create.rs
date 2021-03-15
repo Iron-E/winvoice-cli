@@ -23,6 +23,7 @@ pub(super) enum Create
 	#[structopt(about="Create a new employee record")]
 	Employee
 	{
+		#[structopt(about="The job title of the employee.")]
 		title: String,
 	},
 

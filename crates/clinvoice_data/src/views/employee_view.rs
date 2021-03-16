@@ -1,6 +1,7 @@
 mod display;
 mod hash;
 mod partial_eq;
+mod preservable_serde;
 
 use
 {

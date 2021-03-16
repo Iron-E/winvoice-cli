@@ -8,5 +8,5 @@ pub trait PreservableSerde
 	///
 	/// Take some elements of an `original` and restore them from the defaults which were assigned
 	/// upon deserialization.
-	fn restore(&mut self, original: Self);
+	fn restore(&mut self, original: &Self);
 }

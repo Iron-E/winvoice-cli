@@ -1,10 +1,10 @@
 use
 {
 	super::JobView,
-	crate::views::PreservableSerde,
+	crate::views::RestorableSerde,
 };
 
-impl PreservableSerde for JobView
+impl RestorableSerde for JobView
 {
 	fn restore(&mut self, original: &Self)
 	{

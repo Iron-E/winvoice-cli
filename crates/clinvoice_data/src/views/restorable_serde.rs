@@ -2,7 +2,7 @@
 ///
 /// Defines procedures to preserve specific values during serialization and deserialization, while
 /// [hiding](https://serde.rs/attr-skip-serializing.html) the field from the user's view.
-pub trait PreservableSerde
+pub trait RestorableSerde
 {
 	/// # Summary
 	///

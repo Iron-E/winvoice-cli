@@ -1,10 +1,10 @@
 use
 {
 	super::PersonView,
-	crate::views::PreservableSerde,
+	crate::views::RestorableSerde,
 };
 
-impl PreservableSerde for PersonView
+impl RestorableSerde for PersonView
 {
 	fn restore(&mut self, original: &Self)
 	{

@@ -4,7 +4,7 @@ mod job_view;
 mod location_view;
 mod organization_view;
 mod person_view;
-mod preservable_serde;
+mod restorable_serde;
 mod timesheet_view;
 
 pub use
@@ -15,6 +15,6 @@ pub use
 	location_view::LocationView,
 	organization_view::OrganizationView,
 	person_view::PersonView,
-	preservable_serde::PreservableSerde,
+	restorable_serde::RestorableSerde,
 	timesheet_view::TimesheetView,
 };

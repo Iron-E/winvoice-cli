@@ -1,10 +1,10 @@
 use
 {
 	super::ContactView,
-	crate::views::PreservableSerde,
+	crate::views::RestorableSerde,
 };
 
-impl PreservableSerde for ContactView
+impl RestorableSerde for ContactView
 {
 	fn restore(&mut self, original: &Self)
 	{
@@ -22,7 +22,7 @@ impl PreservableSerde for ContactView
 	}
 }
 
-impl PreservableSerde for Vec<ContactView>
+impl RestorableSerde for Vec<ContactView>
 {
 	fn restore(&mut self, original: &Self)
 	{

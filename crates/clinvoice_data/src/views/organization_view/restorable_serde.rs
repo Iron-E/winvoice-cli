@@ -1,10 +1,10 @@
 use
 {
 	super::OrganizationView,
-	crate::views::PreservableSerde,
+	crate::views::RestorableSerde,
 };
 
-impl PreservableSerde for OrganizationView
+impl RestorableSerde for OrganizationView
 {
 	fn restore(&mut self, original: &Self)
 	{

@@ -1,5 +1,5 @@
 mod display;
-mod preservable_serde;
+mod restorable_serde;
 
 use crate::Id;
 

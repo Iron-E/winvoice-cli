@@ -1,6 +1,6 @@
 mod display;
 mod from_location_view;
-mod preservable_serde;
+mod restorable_serde;
 
 use super::LocationView;
 

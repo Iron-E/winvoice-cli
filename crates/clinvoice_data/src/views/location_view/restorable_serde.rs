@@ -1,10 +1,10 @@
 use
 {
 	super::LocationView,
-	crate::views::PreservableSerde,
+	crate::views::RestorableSerde,
 };
 
-impl PreservableSerde for LocationView
+impl RestorableSerde for LocationView
 {
 	fn restore(&mut self, original: &Self)
 	{

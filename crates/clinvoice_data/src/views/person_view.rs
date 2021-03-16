@@ -33,7 +33,7 @@ pub struct PersonView
 	/// The other `View` structures do not contain an `id` field because they have enough
 	/// information for unique identification and hashing. However, the [`Person`] requires this
 	/// field in order to be uniquely identified.
-	#[cfg_attr(feature="serde_support", serde(skip_serializing))]
+	#[cfg_attr(feature="serde_support", serde(skip))]
 	pub id: Id,
 
 	/// # Summary

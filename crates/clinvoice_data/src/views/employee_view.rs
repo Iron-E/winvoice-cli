@@ -27,7 +27,7 @@ pub struct EmployeeView
 	///
 	/// The reference number of this [`Employee`], which can be used instead of the compound key
 	/// {`organization`, `person_id`}.
-	#[cfg_attr(feature="serde_support", serde(skip_serializing))]
+	#[cfg_attr(feature="serde_support", serde(skip))]
 	pub id: Id,
 
 	/// # Summary

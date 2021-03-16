@@ -27,7 +27,7 @@ pub struct OrganizationView
 	/// # Summary
 	///
 	/// The unique reference number for this [`Organization`].
-	#[cfg_attr(feature="serde_support", serde(skip_serializing))]
+	#[cfg_attr(feature="serde_support", serde(skip))]
 	pub id: Id,
 
 	/// # Summary

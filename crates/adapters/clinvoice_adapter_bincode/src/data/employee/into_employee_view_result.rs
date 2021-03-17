@@ -80,17 +80,14 @@ mod tests
 				&store,
 			).unwrap();
 
-			let mut contact_info = Vec::new();
-			contact_info.push(Contact::Address(earth.id));
-
 			let testy = BincodePerson::create(
-				contact_info.clone(),
+				vec![("Home".into(), Contact::Address(earth.id))].into_iter().collect(),
 				"Testy Mćtesterson",
 				&store,
 			).unwrap();
 
 			let ceo_testy = BincodeEmployee::create(
-				contact_info.clone(),
+				vec![("Work".into(), Contact::Address(earth.id))].into_iter().collect(),
 				big_old_test.clone(),
 				testy.clone(),
 				EmployeeStatus::Employed,
@@ -105,23 +102,19 @@ mod tests
 				outer: None,
 			};
 
-			let contact_info_view: Vec<ContactView> = vec![
-				earth_view.clone().into()
-			];
-
 			let ceo_testy_view = EmployeeView
 			{
-				contact_info: contact_info_view.clone(),
+				contact_info: vec![("Work".into(), ContactView::Address(earth_view.clone()))].into_iter().collect(),
 				id: ceo_testy.id,
 				organization: OrganizationView
 				{
 					id: big_old_test.id,
-					location: earth_view,
+					location: earth_view.clone(),
 					name: big_old_test.name,
 				},
 				person: PersonView
 				{
-					contact_info: contact_info_view,
+					contact_info: vec![("Home".into(), ContactView::Address(earth_view))].into_iter().collect(),
 					id: testy.id,
 					name: testy.name,
 				},

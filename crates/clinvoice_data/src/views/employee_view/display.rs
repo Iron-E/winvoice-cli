@@ -11,16 +11,18 @@ impl Display for EmployeeView
 		writeln!(formatter, "{} {}", self.title, self.person.name)?;
 		writeln!(formatter, "\tEmployer: {}", self.organization)?;
 		writeln!(formatter, "\tEmployee Contact Info:")?;
-
-		let mut sorted_employee_contact_info = self.contact_info.clone();
-		sorted_employee_contact_info.sort();
-		sorted_employee_contact_info.iter().try_for_each(|c| writeln!(formatter, "\t\t- {}", c))?;
+		{
+			let mut sorted_employee_contact_info: Vec<String> = self.contact_info.keys().cloned().collect();
+			sorted_employee_contact_info.sort();
+			sorted_employee_contact_info.iter().try_for_each(|c| writeln!(formatter, "\t\t- {}: {}", c, self.contact_info[c]))?;
+		}
 
 		writeln!(formatter, "\tPersonal Contact Info:")?;
-
-		let mut sorted_person_contact_info = self.person.contact_info.clone();
-		sorted_person_contact_info .sort();
-		sorted_person_contact_info.iter().try_for_each(|c| writeln!(formatter, "\t\t- {}", c))?;
+		{
+			let mut sorted_person_contact_info: Vec<String> = self.person.contact_info.keys().cloned().collect();
+			sorted_person_contact_info.sort();
+			sorted_person_contact_info.iter().try_for_each(|c| writeln!(formatter, "\t\t- {}: {}", c, self.person.contact_info[c]))?;
+		}
 
 		write!(formatter, "\tStatus: {}", self.status)
 	}
@@ -88,9 +90,9 @@ mod tests
 		let employee = EmployeeView
 		{
 			contact_info: vec![
-				work_street_view.clone().into(),
-				ContactView::Email("foo@bar.io".into()),
-			],
+				("Place of Work".into(), work_street_view.clone().into()),
+				("Work Email".into(), ContactView::Email("foo@bar.io".into())),
+			].into_iter().collect(),
 			id: Id::new_v4(),
 			organization: OrganizationView
 			{
@@ -101,9 +103,9 @@ mod tests
 			person: PersonView
 			{
 				contact_info: vec![
-				home_street_view.clone().into(),
-				ContactView::Email("bar@foo.io".into()),
-				],
+					("Home".into(), home_street_view.clone().into()),
+					("Personal Email".into(), ContactView::Email("bar@foo.io".into())),
+				].into_iter().collect(),
 				id: Id::new_v4(),
 				name: "Testy McTesterson".into(),
 			},
@@ -117,11 +119,11 @@ mod tests
 "CEO of Tests Testy McTesterson
 	Employer: Big Old Test @ 1234 Work Street, Phoenix, Arizona, USA, Earth
 	Employee Contact Info:
-		- 1234 Work Street, Phoenix, Arizona, USA, Earth
-		- foo@bar.io
+		- Place of Work: 1234 Work Street, Phoenix, Arizona, USA, Earth
+		- Work Email: foo@bar.io
 	Personal Contact Info:
-		- 1337 Home Road, Phoenix, Arizona, USA, Earth
-		- bar@foo.io
+		- Home: 1337 Home Road, Phoenix, Arizona, USA, Earth
+		- Personal Email: bar@foo.io
 	Status: Representative",
 		);
 		println!("\n>>>>> EmployeeView::fmt {}us <<<<<\n", Instant::now().duration_since(start).as_micros());

@@ -49,11 +49,11 @@ mod tests
 			};
 
 			let testy = BincodeEmployee::create(
-				vec![Contact::Email("foo@bar.io".into())],
+				vec![("Work Email".into(), Contact::Email("foo@bar.io".into()))].into_iter().collect(),
 				dogood.organization.clone(),
 				Person
 				{
-					contact_info: vec![Contact::Email("yum@bar.io".into())],
+					contact_info: vec![("Personal Email".into(), Contact::Email("yum@bar.io".into()))].into_iter().collect(),
 					id: Id::new_v4(),
 					name: "Testy Mćtesterson".into(),
 				},
@@ -63,11 +63,11 @@ mod tests
 			).unwrap();
 
 			let mr_flu = BincodeEmployee::create(
-				vec![Contact::Email("flu@bar.io".into())],
+				vec![("Work Email".into(), Contact::Email("flu@bar.io".into()))].into_iter().collect(),
 				dogood.organization.clone(),
 				Person
 				{
-					contact_info: vec![Contact::Email("sig@bar.io".into())],
+					contact_info: vec![("Personal Email".into(), Contact::Email("sig@bar.io".into()))].into_iter().collect(),
 					id: Id::new_v4(),
 					name: "Mr. Flu".into(),
 				},

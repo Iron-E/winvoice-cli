@@ -12,7 +12,7 @@ macro_rules! AdaptEmployee
 		/// # Summary
 		///
 		/// A wrapper around [`Employee`] with a [`Store`] that points to its location.
-		#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+		#[derive(Clone, Debug, Eq, PartialEq)]
 		pub struct $name<$emp_life, $store_life>
 		{
 			pub employee: &$emp_life Employee,

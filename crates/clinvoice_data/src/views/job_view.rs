@@ -14,7 +14,7 @@ use serde::{Deserialize, Serialize};
 /// # Summary
 ///
 /// A view of [`Job`](crate::Job).
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 #[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
 pub struct JobView
 {

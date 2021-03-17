@@ -2,7 +2,11 @@ mod from_view;
 mod hash;
 mod partial_eq;
 
-use crate::{Contact, EmployeeStatus, Id};
+use
+{
+	crate::{Contact, EmployeeStatus, Id},
+	std::collections::HashMap,
+};
 
 #[cfg(feature="serde_support")]
 use serde::{Deserialize, Serialize};
@@ -11,14 +15,18 @@ use serde::{Deserialize, Serialize};
 ///
 /// An `Employee` is a [`Person`](super::person::Person) who completes [`Job`](super::job::Job)s
 /// for an [employer](crate::Organization).
-#[derive(Clone, Debug, Eq, Ord, PartialOrd)]
+#[derive(Clone, Debug, Eq)]
 #[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
 pub struct Employee
 {
 	/// # Summary
 	///
 	/// Contact information specific to the [`Organization`] that the [`Employee`] does work for.
-	pub contact_info: Vec<Contact>,
+	///
+	/// # Remarks
+	///
+	/// Keys in the [map](HashMap) are labels of the contact is (e.g. "Primary Phone").
+	pub contact_info: HashMap<String, Contact>,
 
 	/// # Summary
 	///

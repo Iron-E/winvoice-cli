@@ -3,7 +3,7 @@ use
 	super::{MatchWhen, Deletable, Initializable, Updatable},
 	crate::Store,
 	clinvoice_data::{Contact, Employee, EmployeeStatus, Id, Organization, Person, views::EmployeeView},
-	std::error::Error,
+	std::{collections::HashMap, error::Error},
 };
 
 pub trait EmployeeAdapter<'store> :
@@ -30,7 +30,7 @@ pub trait EmployeeAdapter<'store> :
 	/// * The created [`Employee`], if there were no errors.
 	/// * An [`Error`], if something goes wrong.
 	fn create(
-		contact_info: Vec<Contact>,
+		contact_info: HashMap<String, Contact>,
 		organization: Organization,
 		person: Person,
 		status: EmployeeStatus,

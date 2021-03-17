@@ -3,7 +3,7 @@ use
 	super::{Deletable, Initializable, MatchWhen, Updatable},
 	crate::Store,
 	clinvoice_data::{Contact, Person, Id, views::PersonView},
-	std::error::Error,
+	std::{collections::HashMap, error::Error},
 };
 
 pub trait PersonAdapter<'store> :
@@ -26,7 +26,7 @@ pub trait PersonAdapter<'store> :
 	/// # Returns
 	///
 	/// The newly created [`Person`].
-	fn create(contact_info: Vec<Contact>, name: &str, store: &'store Store) -> Result<Person, <Self as PersonAdapter<'store>>::Error>;
+	fn create(contact_info: HashMap<String, Contact>, name: &str, store: &'store Store) -> Result<Person, <Self as PersonAdapter<'store>>::Error>;
 
 	/// # Summary
 	///

@@ -10,11 +10,14 @@ impl Display for PersonView
 	{
 		writeln!(formatter, "Name: {}", self.name)?;
 
-		let mut sorted_contact_info = self.contact_info.clone();
-		sorted_contact_info.sort();
-
 		write!(formatter, "Contact Info:")?;
-		sorted_contact_info.iter().try_for_each(|c| write!(formatter, "\n\t- {}", c))
+		{
+			let mut sorted_employee_contact_info: Vec<String> = self.contact_info.keys().cloned().collect();
+			sorted_employee_contact_info.sort();
+			sorted_employee_contact_info.iter().try_for_each(|c| write!(formatter, "\n\t- {}: {}", c, self.contact_info[c]))?;
+		}
+
+		Ok(())
 	}
 }
 
@@ -27,7 +30,7 @@ mod tests
 		crate::
 		{
 			Id,
-			views::{ContactView, LocationView}
+			views::{ContactView, LocationView},
 		},
 		std::time::Instant,
 	};
@@ -71,10 +74,10 @@ mod tests
 		};
 
 		let contact_info = vec![
-			street_view.into(),
-			ContactView::Email("foo@bar.io".into()),
-			ContactView::Phone("1-800-555-5555".into()),
-		];
+			("Home Address".into(), street_view.into()),
+			("Personal Email".into(), ContactView::Email("foo@bar.io".into())),
+			("Home Phone".into(), ContactView::Phone("1-800-555-5555".into())),
+		].into_iter().collect();
 
 		let person_view = PersonView
 		{
@@ -88,9 +91,9 @@ mod tests
 			format!("{}", person_view),
 "Name: Someone
 Contact Info:
-	- 1337 Some Street, Phoenix, Arizona, USA, Earth
-	- foo@bar.io
-	- 1-800-555-5555",
+	- Home Address: 1337 Some Street, Phoenix, Arizona, USA, Earth
+	- Home Phone: 1-800-555-5555
+	- Personal Email: foo@bar.io",
 		);
 		println!("\n>>>>> PersonView::fmt {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 	}

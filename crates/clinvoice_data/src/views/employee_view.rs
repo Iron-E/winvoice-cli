@@ -5,8 +5,9 @@ mod restorable_serde;
 
 use
 {
-	crate::{EmployeeStatus, Id},
 	super::{ContactView, OrganizationView, PersonView},
+	crate::{EmployeeStatus, Id},
+	std::collections::HashMap,
 };
 
 #[cfg(feature="serde_support")]
@@ -15,14 +16,18 @@ use serde::{Deserialize, Serialize};
 /// # Summary
 ///
 /// A view of [`Employee`](crate::Employee).
-#[derive(Clone, Debug, Eq, Ord, PartialOrd)]
+#[derive(Clone, Debug, Eq)]
 #[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
 pub struct EmployeeView
 {
 	/// # Summary
 	///
 	/// Contact information specific to the [`Organization`] that the [`Employee`] does work for.
-	pub contact_info: Vec<ContactView>,
+	///
+	/// # Remarks
+	///
+	/// Keys in the [map](HashMap) are labels of the contact is (e.g. "Primary Phone").
+	pub contact_info: HashMap<String, ContactView>,
 
 	/// # Summary
 	///

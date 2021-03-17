@@ -41,7 +41,7 @@ mod tests
 			chrono::Utc, Decimal, EmployeeStatus, Expense, ExpenseCategory, Id, Money,
 			views::{ContactView, EmployeeView, LocationView, OrganizationView, PersonView}
 		},
-		std::time::Instant,
+		std::{collections::HashMap, time::Instant},
 	};
 
 	#[test]
@@ -82,11 +82,11 @@ mod tests
 			outer: Some(phoenix_view.into()),
 		};
 
-		let contact_info = vec![
-			street_view.clone().into(),
-			ContactView::Email("foo@bar.io".into()),
-			ContactView::Phone("1-800-555-5555".into()),
-		];
+		let contact_info: HashMap<String, ContactView> = vec![
+			("Street Address".into(), street_view.clone().into()),
+			("Email".into(), ContactView::Email("foo@bar.io".into())),
+			("Phone".into(), ContactView::Phone("1-800-555-5555".into())),
+		].into_iter().collect();
 
 		let timesheet =  TimesheetView
 		{

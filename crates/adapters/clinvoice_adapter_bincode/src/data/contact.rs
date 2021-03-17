@@ -8,6 +8,7 @@ use
 		Store,
 	},
 	clinvoice_data::{Contact, views::{ContactView, LocationView}},
+	std::{collections::HashMap, hash::Hash},
 };
 
 /// # Summary
@@ -39,8 +40,11 @@ pub fn into_view(contact: Contact, store: &Store) -> Result<ContactView>
 /// # Summary
 ///
 /// Convert some [`Contact`] into a [`ContactView`].
-pub fn into_views<I>(contact_info: I, store: &Store) -> Result<Vec<ContactView>> where
-	I : IntoIterator<Item=Contact>,
+pub fn into_views<I, T>(contact_info: I, store: &Store) -> Result<HashMap<T, ContactView>> where
+	I : IntoIterator<Item=(T, Contact)>,
+	T : Eq + Hash,
 {
-	contact_info.into_iter().map(|c| into_view(c, store)).collect()
+	contact_info.into_iter().map(|(key, contact)|
+		into_view(contact, store).and_then(|view| Ok((key, view)))
+	).collect()
 }

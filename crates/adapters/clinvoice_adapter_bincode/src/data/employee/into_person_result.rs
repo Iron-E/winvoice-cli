@@ -44,7 +44,7 @@ mod tests
 		util::test_temp_store(|store|
 		{
 			let testy = BincodePerson::create(
-				vec![Contact::Email("yum".into())],
+				vec![("Personal Email".into(), Contact::Email("yum".into()))].into_iter().collect(),
 				"Testy Mćtesterson".into(),
 				&store,
 			).unwrap();
@@ -52,7 +52,7 @@ mod tests
 			let testy_employed = BincodeEmployee
 			{
 				employee: &BincodeEmployee::create(
-					vec![Contact::Email("foo".into())],
+					vec![("Work Email".into(), Contact::Email("foo".into()))].into_iter().collect(),
 					Organization
 					{
 						id: Id::new_v4(),

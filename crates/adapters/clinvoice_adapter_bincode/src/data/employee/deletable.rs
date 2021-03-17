@@ -84,13 +84,10 @@ mod tests
 				&store,
 			).unwrap();
 
-			let mut contact_info = Vec::new();
-			contact_info.push(Contact::Address(earth.location.id));
-
 			let testy = BincodePerson
 			{
 				person: &BincodePerson::create(
-					contact_info.clone(),
+					vec![("Home".into(), Contact::Address(earth.location.id))].into_iter().collect(),
 					"Testy Mćtesterson",
 					&store,
 				).unwrap(),
@@ -100,7 +97,7 @@ mod tests
 			let ceo_testy = BincodeEmployee
 			{
 				employee: &BincodeEmployee::create(
-					contact_info.clone(),
+					vec![("Work".into(), Contact::Address(earth.location.id))].into_iter().collect(),
 					big_old_test.clone(),
 					testy.person.clone(),
 					EmployeeStatus::Employed,

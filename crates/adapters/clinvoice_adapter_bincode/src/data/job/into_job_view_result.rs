@@ -87,9 +87,9 @@ mod tests
 		clinvoice_data::
 		{
 			chrono::Utc, Contact, Decimal, EmployeeStatus, Money,
-			views::{EmployeeView, LocationView, PersonView},
+			views::{ContactView, EmployeeView, LocationView, PersonView},
 		},
-		std::time::Instant,
+		std::{collections::HashMap, time::Instant},
 	};
 
 	#[test]
@@ -116,7 +116,9 @@ mod tests
 				&store,
 			).unwrap();
 
-			let contact_info = vec![Contact::Address(earth.id)];
+			let contact_info: HashMap<String, Contact> = vec![
+				("Address".into(), Contact::Address(earth.id))
+			].into_iter().collect();
 
 			let testy = BincodePerson::create(
 				contact_info.clone(),
@@ -140,7 +142,9 @@ mod tests
 				outer: None,
 			};
 
-			let contact_info_view = vec![earth_view.clone().into()];
+			let contact_info_view: HashMap<String, ContactView> = vec![
+				("Address View".into(), earth_view.clone().into())
+			].into_iter().collect();
 
 			let ceo_testy_view = EmployeeView
 			{
@@ -177,17 +181,9 @@ mod tests
 				{
 					employee: ceo_testy_view,
 					expenses: None,
-					time_begin: match create_job.timesheets.first()
-					{
-						Some(t) => t.time_begin,
-						_ => panic!("Timesheet did not attach!"),
-					},
+					time_begin: create_job.timesheets.first().expect("Timesheet did not attach!").time_begin,
 					time_end: None,
-					work_notes: match create_job.timesheets.first()
-					{
-						Some(t) => t.work_notes.clone(),
-						_ => panic!("Timesheet did not attach!"),
-					},
+					work_notes: create_job.timesheets.first().expect("Timesheet did not attach!").work_notes.clone(),
 				}],
 			};
 

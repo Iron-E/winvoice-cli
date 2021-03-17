@@ -10,7 +10,7 @@ impl From<View> for Employee
 	{
 		Self
 		{
-			contact_info: view.contact_info.into_iter().map(|c| c.into()).collect(),
+			contact_info: view.contact_info.into_iter().map(|(label, contact)| (label, contact.into())).collect(),
 			id: view.id,
 			organization_id: view.organization.id,
 			person_id: view.person.id,
@@ -26,7 +26,7 @@ impl From<&View> for Employee
 	{
 		Self
 		{
-			contact_info: view.contact_info.iter().cloned().map(|c| c.into()).collect(),
+			contact_info: view.contact_info.clone().into_iter().map(|(label, contact)| (label, contact.into())).collect(),
 			id: view.id,
 			organization_id: view.organization.id,
 			person_id: view.person.id,

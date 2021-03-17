@@ -52,11 +52,11 @@ mod tests
 			let testy = BincodeEmployee
 			{
 				employee: &BincodeEmployee::create(
-					vec![Contact::Email("foo".into())],
+					vec![("Work Email".into(), Contact::Email("foo".into()))].into_iter().collect(),
 					dogood.clone(),
 					Person
 					{
-						contact_info: vec![Contact::Email("yum".into())],
+						contact_info: vec![("Personal Email".into(), Contact::Email("yum".into()))].into_iter().collect(),
 						id: Id::new_v4(),
 						name: "Testy Mćtesterson".into(),
 					},

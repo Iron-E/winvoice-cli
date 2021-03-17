@@ -39,7 +39,7 @@ mod tests
 		crate::
 		{
 			chrono::Utc, Decimal, EmployeeStatus, Id, Invoice, Job, Money,
-			views::{EmployeeView, LocationView, OrganizationView, PersonView, TimesheetView},
+			views::{ContactView, EmployeeView, LocationView, OrganizationView, PersonView, TimesheetView},
 		},
 		std::time::Instant,
 	};
@@ -54,21 +54,19 @@ mod tests
 			outer: None,
 		};
 
-		let contact_info_view = vec![earth_view.clone().into()];
-
 		let ceo_testy_view = EmployeeView
 		{
-			contact_info: contact_info_view.clone(),
+			contact_info: vec![("Office".into(), ContactView::Address(earth_view.clone()))].into_iter().collect(),
 			id: Id::new_v4(),
 			organization: OrganizationView
 			{
 				id: Id::new_v4(),
-				location: earth_view,
+				location: earth_view.clone(),
 				name: "Big Old Test".into(),
 			},
 			person: PersonView
 			{
-				contact_info: contact_info_view,
+				contact_info: vec![("Home Address".into(), ContactView::Address(earth_view))].into_iter().collect(),
 				id: Id::new_v4(),
 				name: "Testy McTesterson".into(),
 			},

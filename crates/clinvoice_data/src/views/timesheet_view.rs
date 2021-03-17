@@ -20,7 +20,7 @@ use serde::{Deserialize, Serialize};
 /// It is likely that a given CLInvoice business object will contain multiple timesheets. As such,
 /// it is proposed that the container for business logic contain an array of `Timesheet`, rather
 /// than only one.
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 #[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
 pub struct TimesheetView
 {

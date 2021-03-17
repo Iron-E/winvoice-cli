@@ -2,6 +2,7 @@ use
 {
 	super::ContactView,
 	crate::views::RestorableSerde,
+	std::{collections::HashMap, hash::Hash},
 };
 
 impl RestorableSerde for ContactView
@@ -22,12 +23,13 @@ impl RestorableSerde for ContactView
 	}
 }
 
-impl RestorableSerde for Vec<ContactView>
+impl<S> RestorableSerde for HashMap<S, ContactView> where
+	S : Eq + Hash
 {
 	fn restore(&mut self, original: &Self)
 	{
-		self.iter_mut().enumerate().for_each(|(index, contact)|
-			if let Some(original_contact) = original.get(index)
+		self.iter_mut().for_each(|(label, contact)|
+			if let Some(original_contact) = original.get(label)
 			{
 				contact.restore(original_contact)
 			}

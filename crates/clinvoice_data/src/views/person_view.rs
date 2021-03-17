@@ -3,12 +3,7 @@ mod hash;
 mod partial_eq;
 mod restorable_serde;
 
-use
-{
-	super::ContactView,
-	crate::Id,
-	std::collections::HashMap,
-};
+use crate::Id;
 
 #[cfg(feature="serde_support")]
 use serde::{Deserialize, Serialize};
@@ -20,16 +15,6 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
 pub struct PersonView
 {
-	/// # Summary
-	///
-	/// Contact information specific to the individual [`Person`], rather than a corporation they
-	/// work at.
-	///
-	/// # Remarks
-	///
-	/// Keys in the [map](HashMap) are labels of the contact is (e.g. "Primary Phone").
-	pub contact_info: HashMap<String, ContactView>,
-
 	/// # Summary
 	///
 	/// This is the unique reference number for the [`Person`].

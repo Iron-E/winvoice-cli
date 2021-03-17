@@ -29,7 +29,7 @@ use clinvoice_adapter_bincode::data::{BincodePerson, Result as BincodeResult};
 pub(super) fn retrieve_or_err<'store, P>(store: &'store Store) -> DynResult<'store, Vec<PersonView>> where
 	P : PersonAdapter<'store> + 'store,
 {
-	let people = P::retrieve(MatchWhen::Any, MatchWhen::Any, MatchWhen::Any, store)?;
+	let people = P::retrieve(MatchWhen::Any, MatchWhen::Any, store)?;
 
 	if people.is_empty()
 	{

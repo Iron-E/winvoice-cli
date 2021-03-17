@@ -143,7 +143,6 @@ impl Create
 				).and(Ok(())),
 
 				Self::Person {name} => BincodePerson::create(
-					input::util::contact::edit_select::<BincodeLocation>(store)?,
 					&name,
 					store,
 				).and(Ok(())),

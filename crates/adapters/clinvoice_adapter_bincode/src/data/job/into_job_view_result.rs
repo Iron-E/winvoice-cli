@@ -121,7 +121,6 @@ mod tests
 			].into_iter().collect();
 
 			let testy = BincodePerson::create(
-				contact_info.clone(),
 				"Testy Mćtesterson",
 				&store,
 			).unwrap();
@@ -158,7 +157,6 @@ mod tests
 				},
 				person: PersonView
 				{
-					contact_info: contact_info_view,
 					id: testy.id,
 					name: testy.name,
 				},

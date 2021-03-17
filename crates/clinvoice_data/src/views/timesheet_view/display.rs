@@ -102,7 +102,6 @@ mod tests
 				},
 				person: PersonView
 				{
-					contact_info,
 					id: Id::new_v4(),
 					name: "Testy McTesterson".into(),
 				},

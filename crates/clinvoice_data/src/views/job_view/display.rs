@@ -66,7 +66,6 @@ mod tests
 			},
 			person: PersonView
 			{
-				contact_info: vec![("Home Address".into(), ContactView::Address(earth_view))].into_iter().collect(),
 				id: Id::new_v4(),
 				name: "Testy McTesterson".into(),
 			},

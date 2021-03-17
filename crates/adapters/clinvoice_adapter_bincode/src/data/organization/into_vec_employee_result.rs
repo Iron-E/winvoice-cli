@@ -53,7 +53,6 @@ mod tests
 				dogood.organization.clone(),
 				Person
 				{
-					contact_info: vec![("Personal Email".into(), Contact::Email("yum@bar.io".into()))].into_iter().collect(),
 					id: Id::new_v4(),
 					name: "Testy Mćtesterson".into(),
 				},
@@ -67,7 +66,6 @@ mod tests
 				dogood.organization.clone(),
 				Person
 				{
-					contact_info: vec![("Personal Email".into(), Contact::Email("sig@bar.io".into()))].into_iter().collect(),
 					id: Id::new_v4(),
 					name: "Mr. Flu".into(),
 				},

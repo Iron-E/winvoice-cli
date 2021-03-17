@@ -81,7 +81,6 @@ mod tests
 			).unwrap();
 
 			let testy = BincodePerson::create(
-				vec![("Home".into(), Contact::Address(earth.id))].into_iter().collect(),
 				"Testy Mćtesterson",
 				&store,
 			).unwrap();
@@ -114,7 +113,6 @@ mod tests
 				},
 				person: PersonView
 				{
-					contact_info: vec![("Home".into(), ContactView::Address(earth_view))].into_iter().collect(),
 					id: testy.id,
 					name: testy.name,
 				},

@@ -10,7 +10,6 @@ impl Into<Result<Person>> for BincodeEmployee<'_, '_>
 	fn into(self) -> Result<Person>
 	{
 		let results = BincodePerson::retrieve(
-			MatchWhen::Any, // contact into
 			MatchWhen::EqualTo(self.employee.person_id), // id
 			MatchWhen::Any, // name
 			self.store,
@@ -44,7 +43,6 @@ mod tests
 		util::test_temp_store(|store|
 		{
 			let testy = BincodePerson::create(
-				vec![("Personal Email".into(), Contact::Email("yum".into()))].into_iter().collect(),
 				"Testy Mćtesterson".into(),
 				&store,
 			).unwrap();

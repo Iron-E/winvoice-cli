@@ -17,13 +17,6 @@ impl Display for EmployeeView
 			sorted_employee_contact_info.iter().try_for_each(|c| writeln!(formatter, "\t\t- {}: {}", c, self.contact_info[c]))?;
 		}
 
-		writeln!(formatter, "\tPersonal Contact Info:")?;
-		{
-			let mut sorted_person_contact_info: Vec<String> = self.person.contact_info.keys().cloned().collect();
-			sorted_person_contact_info.sort();
-			sorted_person_contact_info.iter().try_for_each(|c| writeln!(formatter, "\t\t- {}: {}", c, self.person.contact_info[c]))?;
-		}
-
 		write!(formatter, "\tStatus: {}", self.status)
 	}
 }
@@ -73,13 +66,6 @@ mod tests
 			outer: Some(arizona_view.into()),
 		};
 
-		let home_street_view = LocationView
-		{
-			name: "1337 Home Road".into(),
-			id: Id::new_v4(),
-			outer: Some(phoenix_view.clone().into()),
-		};
-
 		let work_street_view = LocationView
 		{
 			name: "1234 Work Street".into(),
@@ -102,10 +88,6 @@ mod tests
 			},
 			person: PersonView
 			{
-				contact_info: vec![
-					("Home".into(), home_street_view.clone().into()),
-					("Personal Email".into(), ContactView::Email("bar@foo.io".into())),
-				].into_iter().collect(),
 				id: Id::new_v4(),
 				name: "Testy McTesterson".into(),
 			},
@@ -121,9 +103,6 @@ mod tests
 	Employee Contact Info:
 		- Place of Work: 1234 Work Street, Phoenix, Arizona, USA, Earth
 		- Work Email: foo@bar.io
-	Personal Contact Info:
-		- Home: 1337 Home Road, Phoenix, Arizona, USA, Earth
-		- Personal Email: bar@foo.io
 	Status: Representative",
 		);
 		println!("\n>>>>> EmployeeView::fmt {}us <<<<<\n", Instant::now().duration_since(start).as_micros());

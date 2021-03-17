@@ -56,7 +56,6 @@ mod tests
 					dogood.clone(),
 					Person
 					{
-						contact_info: vec![("Personal Email".into(), Contact::Email("yum".into()))].into_iter().collect(),
 						id: Id::new_v4(),
 						name: "Testy Mćtesterson".into(),
 					},

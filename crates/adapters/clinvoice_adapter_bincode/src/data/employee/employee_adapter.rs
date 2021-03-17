@@ -133,7 +133,6 @@ mod tests
 					organization.clone(),
 					Person
 					{
-						contact_info: vec![("Home".into(), Contact::Address(Id::new_v4()))].into_iter().collect(),
 						id: Id::new_v4(),
 						name: "Testy Mćtesterson".into(),
 					},
@@ -150,7 +149,6 @@ mod tests
 					organization.clone(),
 					Person
 					{
-						contact_info: vec![("Personal Email".into(), Contact::Email("foo2@bar.io".into()))].into_iter().collect(),
 						id: Id::new_v4(),
 						name: "Nimron MacBeaver".into(),
 					},
@@ -167,7 +165,6 @@ mod tests
 					organization.clone(),
 					Person
 					{
-						contact_info: vec![("Personal Phone".into(), Contact::Phone("1-800-555-3601".into()))].into_iter().collect(),
 						id: Id::new_v4(),
 						name: "An Actual «Tor♯tust".into(),
 					},
@@ -184,7 +181,6 @@ mod tests
 					organization.clone(),
 					Person
 					{
-						contact_info: vec![("Home".into(), Contact::Address(Id::new_v4()))].into_iter().collect(),
 						id: Id::new_v4(),
 						name: "Jimmy Neutron, Boy Genius' Dog 'Gottard'".into(),
 					},
@@ -201,7 +197,6 @@ mod tests
 					organization.clone(),
 					Person
 					{
-						contact_info: vec![("Personal Email".into(), Contact::Email("obviousemail2@server.com".into()))].into_iter().collect(),
 						id: Id::new_v4(),
 						name: "Testy Mćtesterson".into(),
 					},
@@ -239,7 +234,6 @@ mod tests
 				organization.clone(),
 				Person
 				{
-					contact_info: vec![("Home Address".into(), Contact::Address(Id::new_v4()))].into_iter().collect(),
 					id: Id::new_v4(),
 					name: "Testy Mćtesterson".into(),
 				},
@@ -253,7 +247,6 @@ mod tests
 				organization.clone(),
 				Person
 				{
-					contact_info: vec![("Home Address".into(), Contact::Email("foo@bar.io".into()))].into_iter().collect(),
 					id: Id::new_v4(),
 					name: "Nimron MacBeaver".into(),
 				},
@@ -267,7 +260,6 @@ mod tests
 				organization.clone(),
 				Person
 				{
-					contact_info: vec![("Home Phone".into(), Contact::Phone("1-800-555-3600".into()))].into_iter().collect(),
 					id: Id::new_v4(),
 					name: "An Actual «Tor♯tust".into(),
 				},
@@ -281,7 +273,6 @@ mod tests
 				organization.clone(),
 				Person
 				{
-					contact_info: vec![("Home Address".into(), Contact::Address(Id::new_v4()))].into_iter().collect(),
 					id: Id::new_v4(),
 					name: "Jimmy Neutron, Boy Genius' Dog 'Gottard'".into(),
 				},
@@ -295,7 +286,6 @@ mod tests
 				organization.clone(),
 				Person
 				{
-					contact_info: vec![("Home Email".into(), Contact::Email("obviousemail@server.com".into()))].into_iter().collect(),
 					id: Id::new_v4(),
 					name: "Testy Mćtesterson".into(),
 				},

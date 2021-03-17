@@ -84,7 +84,6 @@ mod tests
 			let testy = BincodePerson
 			{
 				person: &BincodePerson::create(
-					vec![("Home".into(), Contact::Address(earth.location.id))].into_iter().collect(),
 					"Testy Mćtesterson",
 					&store,
 				).unwrap(),

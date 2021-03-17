@@ -11,8 +11,8 @@ use
 		data::{MatchWhen, Initializable, PersonAdapter, Updatable},
 		Store,
 	},
-	clinvoice_data::{Contact, Person, Id},
-	std::{collections::HashMap, fs, io::BufReader},
+	clinvoice_data::{Person, Id},
+	std::{fs, io::BufReader},
 };
 
 impl<'store> PersonAdapter<'store> for BincodePerson<'_, 'store>
@@ -30,13 +30,12 @@ impl<'store> PersonAdapter<'store> for BincodePerson<'_, 'store>
 	/// # Returns
 	///
 	/// The newly created [`Person`].
-	fn create(contact_info: HashMap<String, Contact>, name: &str, store: &'store Store,) -> Result<Person>
+	fn create(name: &str, store: &'store Store,) -> Result<Person>
 	{
 		Self::init(&store)?;
 
 		let person = Person
 		{
-			contact_info,
 			id: util::unique_id(&Self::path(&store))?,
 			name: name.into(),
 		};
@@ -59,7 +58,6 @@ impl<'store> PersonAdapter<'store> for BincodePerson<'_, 'store>
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`Job`]s.
 	fn retrieve(
-		contact_info: MatchWhen<Contact>,
 		id: MatchWhen<Id>,
 		name: MatchWhen<String>,
 		store: &Store,
@@ -75,9 +73,7 @@ impl<'store> PersonAdapter<'store> for BincodePerson<'_, 'store>
 				fs::File::open(node_path)?
 			))?;
 
-			if contact_info.set_matches(&person.contact_info.iter().map(|(_, v)| v).collect()) &&
-				id.is_match(&person.id) &&
-				name.is_match(&person.name)
+			if id.is_match(&person.id) && name.is_match(&person.name)
 			{
 				results.push(person);
 			}
@@ -92,7 +88,7 @@ mod tests
 {
 	use
 	{
-		super::{BincodePerson, Contact, Id, MatchWhen, Person, PersonAdapter, Store, util},
+		super::{BincodePerson, MatchWhen, Person, PersonAdapter, Store, util},
 		std::{fs, time::Instant},
 		bincode,
 	};
@@ -106,7 +102,6 @@ mod tests
 
 			test_create_assertion(
 				BincodePerson::create(
-					vec![("Home Address".into(), Contact::Address(Id::new_v4()))].into_iter().collect(),
 					"Widdle",
 					&store,
 				).unwrap(),
@@ -115,7 +110,6 @@ mod tests
 
 			test_create_assertion(
 				BincodePerson::create(
-					vec![("Personal Email".into(), Contact::Email("foo@bar.io".into()))].into_iter().collect(),
 					"Long",
 					&store,
 				).unwrap(),
@@ -124,7 +118,6 @@ mod tests
 
 			test_create_assertion(
 				BincodePerson::create(
-					vec![("Home Number".into(), Contact::Phone("1-800-555-3600".into()))].into_iter().collect(),
 					"Steven",
 					&store,
 				).unwrap(),
@@ -133,7 +126,6 @@ mod tests
 
 			test_create_assertion(
 				BincodePerson::create(
-					vec![("PO Box".into(), Contact::Address(Id::new_v4()))].into_iter().collect(),
 					"JingleBob",
 					&store,
 				).unwrap(),
@@ -142,7 +134,6 @@ mod tests
 
 			test_create_assertion(
 				BincodePerson::create(
-					vec![("Throwaray Email".into(), Contact::Email("obviousemail@server.com".into()))].into_iter().collect(),
 					"asldkj jdsoai",
 					&store,
 				).unwrap(),
@@ -165,25 +156,21 @@ mod tests
 		util::test_temp_store(|store|
 		{
 			let flingo = BincodePerson::create(
-				vec![("Home Address".into(), Contact::Address(Id::new_v4()))].into_iter().collect(),
 				"flingo",
 				&store
 			).unwrap();
 
 			let bob = BincodePerson::create(
-				vec![("Personal Email".into(), Contact::Email("foo@bar.io".into()))].into_iter().collect(),
 				"bob",
 				&store
 			).unwrap();
 
 			let slimdi = BincodePerson::create(
-				vec![("Home Phone".into(), Contact::Phone("1-800-555-3600".into()))].into_iter().collect(),
 				"slimdi",
 				&store
 			).unwrap();
 
 			let longone = BincodePerson::create(
-				vec![("PO Box".into(), Contact::Address(Id::new_v4()))].into_iter().collect(),
 				"longone",
 				&store
 			).unwrap();
@@ -192,15 +179,13 @@ mod tests
 
 			// Retrieve bob
 			let only_bob = BincodePerson::retrieve(
-				MatchWhen::HasAll(bob.contact_info.iter().map(|(_, v)| v).collect()), // contact info
+				MatchWhen::EqualTo(bob.id),
 				MatchWhen::Any, // id
-				MatchWhen::Any, // name
 				&store,
 			).unwrap();
 
 			// Retrieve longone and slimdi
 			let longone_slimdi = BincodePerson::retrieve(
-				MatchWhen::Any, // contact info
 				MatchWhen::Any, // id
 				MatchWhen::HasAny([slimdi.name.clone(), longone.name.clone()].iter().collect()), // name
 				&store,

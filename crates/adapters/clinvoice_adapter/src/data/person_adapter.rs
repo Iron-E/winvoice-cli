@@ -2,8 +2,8 @@ use
 {
 	super::{Deletable, Initializable, MatchWhen, Updatable},
 	crate::Store,
-	clinvoice_data::{Contact, Person, Id, views::PersonView},
-	std::{collections::HashMap, error::Error},
+	clinvoice_data::{Person, Id, views::PersonView},
+	std::error::Error,
 };
 
 pub trait PersonAdapter<'store> :
@@ -26,7 +26,7 @@ pub trait PersonAdapter<'store> :
 	/// # Returns
 	///
 	/// The newly created [`Person`].
-	fn create(contact_info: HashMap<String, Contact>, name: &str, store: &'store Store) -> Result<Person, <Self as PersonAdapter<'store>>::Error>;
+	fn create(name: &str, store: &'store Store) -> Result<Person, <Self as PersonAdapter<'store>>::Error>;
 
 	/// # Summary
 	///
@@ -41,7 +41,6 @@ pub trait PersonAdapter<'store> :
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`Job`]s.
 	fn retrieve(
-		contact_info: MatchWhen<Contact>,
 		id: MatchWhen<Id>,
 		name: MatchWhen<String>,
 		store: &Store,

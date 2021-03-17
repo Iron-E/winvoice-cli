@@ -10,7 +10,6 @@ impl From<View> for Person
 	{
 		Self
 		{
-			contact_info: view.contact_info.into_iter().map(|(label, contact)| (label, contact.into())).collect(),
 			id: view.id,
 			name: view.name,
 		}
@@ -23,7 +22,6 @@ impl From<&View> for Person
 	{
 		Self
 		{
-			contact_info: view.contact_info.clone().into_iter().map(|(label, contact)| (label, contact.into())).collect(),
 			id: view.id,
 			name: view.name.clone(),
 		}

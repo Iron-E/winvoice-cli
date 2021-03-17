@@ -5,6 +5,7 @@ pub use error::{Error, Result};
 
 use
 {
+	clinvoice_data::views::RestorableSerde,
 	std::{fmt::Display, io},
 	dialoguer::{Editor, MultiSelect, Select},
 	serde::{de::DeserializeOwned, Serialize},
@@ -24,7 +25,7 @@ use
 /// * The deserialized entity with values filled in by the user.
 /// * An [`Error`] encountered while creating, editing, or removing the temporary file.
 pub fn edit<T>(prompt: Option<&str>, entity: T) -> Result<T> where
-	T : DeserializeOwned + Serialize
+	T : DeserializeOwned + RestorableSerde + Serialize
 {
 	let serialized = toml::to_string_pretty(&entity)?;
 	let to_edit = match prompt
@@ -34,11 +35,13 @@ pub fn edit<T>(prompt: Option<&str>, entity: T) -> Result<T> where
 	};
 
 	// Write the entity to the `temp_path` and then edit that file.
-	match toml_editor().edit(&to_edit)?
+	let mut edited: T = match toml_editor().edit(&to_edit)?
 	{
-		Some(edited) => Ok(toml::from_str(&edited)?),
-		_ => Err(Error::NotEdited),
-	}
+		Some(edited) => toml::from_str(&edited)?,
+		_ => return Err(Error::NotEdited),
+	};
+	edited.restore(&entity);
+	Ok(edited)
 }
 
 /// # Summary

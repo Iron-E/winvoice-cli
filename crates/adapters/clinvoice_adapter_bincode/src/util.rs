@@ -55,7 +55,8 @@ pub fn expand_store_path(store: &Store) -> PathBuf
 /// # Errors
 ///
 /// Will error whenever [`fs::read_dir`] does.
-pub fn read_files<P: AsRef<Path>>(path: P) -> io::Result<FilterMap<fs::ReadDir, impl FnMut(io::Result<fs::DirEntry>) -> Option<PathBuf>>>
+pub fn read_files<P>(path: P) -> io::Result<FilterMap<fs::ReadDir, impl FnMut(io::Result<fs::DirEntry>) -> Option<PathBuf>>> where
+	P : AsRef<Path>,
 {
 	Ok(fs::read_dir(path)?.filter_map(
 		|node| match node

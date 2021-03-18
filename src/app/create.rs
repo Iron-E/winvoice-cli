@@ -98,7 +98,7 @@ impl Create
 					)?.into();
 
 					BincodeEmployee::create(
-						input::util::contact::edit_select::<BincodeLocation>(store)?,
+						input::util::contact::creation_menu::<BincodeLocation>(store)?.into_iter().map(|e| (e.0, e.1.into())).collect(),
 						organization,
 						person,
 						input::util::employee_status::select_one("What is the status of the employee?")?,

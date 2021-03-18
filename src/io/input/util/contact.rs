@@ -14,7 +14,7 @@ pub fn edit_select<'store, L>(store: &'store Store) -> DynResult<'store, HashMap
 
 	fn label(index: usize) -> String
 	{
-		String::from("[Contact label #") + &index.to_string() + "]"
+		String::from("LABEL ME ") + &(index + 1).to_string()
 	}
 
 	let mut contact_info: HashMap<String, ContactView> = input::select(

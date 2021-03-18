@@ -74,12 +74,16 @@ pub fn edit_markdown(prompt: &str) -> Result<String>
 pub fn select<T>(entities: &[T], prompt: impl Into<String>) -> io::Result<Vec<T>> where
 	T : Clone + Display
 {
+	if !entities.is_empty()
+	{
+		let selection = MultiSelect::new().items(entities).paged(true).with_prompt(prompt).interact()?;
 
-	let selection = MultiSelect::new().items(entities).paged(true).with_prompt(prompt).interact()?;
+		return Ok(entities.iter().enumerate().filter_map(
+			|(i, entity)| selection.binary_search(&i).and(Ok(entity.clone())).ok()
+		).collect());
+	}
 
-	Ok(entities.iter().enumerate().filter_map(
-		|(i, entity)| selection.binary_search(&i).and(Ok(entity.clone())).ok()
-	).collect())
+	Ok(Vec::new())
 }
 
 /// # Summary

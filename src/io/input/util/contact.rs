@@ -64,7 +64,7 @@ pub fn creation_menu<'store, L>(store: &'store Store) -> DynResult<'store, HashM
 
 	loop
 	{
-		match input::select_one(&ALL_ACTIONS, "This is the menu for creating contact information.\nWhat would you like to do?")?
+		match input::select_one(&ALL_ACTIONS, "\nThis is the menu for creating contact information.\nWhat would you like to do?")?
 		{
 			ADD => add_menu(&mut contact_info, &locations)?,
 			CONTINUE => break,
@@ -82,10 +82,13 @@ pub fn creation_menu<'store, L>(store: &'store Store) -> DynResult<'store, HashM
 /// Show a menu for deleting [contact information](clinvoice_data::Contact).
 fn delete_menu(contact_info: &mut HashMap<String, ContactView>) -> input::Result<()>
 {
-	contact_info.remove(&input::select_one(
-		&contact_info.keys().cloned().collect::<Vec<String>>(),
-		"Select a piece of contact information to remove",
-	)?);
+	if !contact_info.is_empty()
+	{
+		contact_info.remove(&input::select_one(
+			&contact_info.keys().cloned().collect::<Vec<String>>(),
+			"Select a piece of contact information to remove",
+		)?);
+	}
 
 	Ok(())
 }
@@ -95,17 +98,22 @@ fn delete_menu(contact_info: &mut HashMap<String, ContactView>) -> input::Result
 /// Show a menu for editing [contact information](clinvoice_data::Contact).
 fn edit_menu(contact_info: &mut HashMap<String, ContactView>) -> input::Result<()>
 {
-	let to_edit_key = input::select_one(
-		&contact_info.keys().filter(|k|
-			matches!(contact_info[*k], ContactView::Email(_) | ContactView::Phone(_))
-		).cloned().collect::<Vec<String>>(),
-		"Select a piece of contact information to edit.",
-	)?;
-
-	Ok(match input::edit(None, contact_info[&to_edit_key].clone())
+	if !contact_info.is_empty()
 	{
-		Ok(edit) => { contact_info.insert(to_edit_key, edit); }
-		Err(input::Error::NotEdited) => (),
-		Err(e) => return Err(e.into()),
-	})
+		let to_edit_key = input::select_one(
+			&contact_info.keys().filter(|k|
+				matches!(contact_info[*k], ContactView::Email(_) | ContactView::Phone(_))
+			).cloned().collect::<Vec<String>>(),
+			"Select a piece of contact information to edit.",
+		)?;
+
+		match input::edit(None, contact_info[&to_edit_key].clone())
+		{
+			Ok(edit) => { contact_info.insert(to_edit_key, edit); }
+			Err(input::Error::NotEdited) => (),
+			Err(e) => return Err(e.into()),
+		};
+	}
+
+	Ok(())
 }

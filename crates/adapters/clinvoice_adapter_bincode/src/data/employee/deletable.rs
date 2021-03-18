@@ -110,7 +110,7 @@ mod tests
 				big_old_test.clone(),
 				Utc::now(),
 				Money::new(Decimal::new(200, 2), "USD"),
-				"Test the job creation function.",
+				"Test the job creation function",
 				&store,
 			).unwrap();
 

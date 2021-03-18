@@ -85,14 +85,14 @@ mod tests
 				hourly_rate: Money::new(Decimal::new(2000, 2), "USD"),
 			},
 			notes: "Remember not to work with these guys again!".into(),
-			objectives: "Get into the mainframe, or something like that.".into(),
+			objectives: "Get into the mainframe, or something like that".into(),
 			timesheets: vec![TimesheetView
 			{
 				employee: ceo_testy_view,
 				expenses: None,
 				time_begin: Utc::now(),
 				time_end: Some(Utc::today().and_hms(23, 59, 59)),
-				work_notes: "Went to non-corporate fast food restaurant for business meeting.".into(),
+				work_notes: "Went to non-corporate fast food restaurant for business meeting".into(),
 			}],
 		};
 
@@ -102,15 +102,15 @@ mod tests
 			format!(
 "Job #{} for Big Old Test: {} – {}
 	Hourly Rate: 20.00 USD
-	Invoice Status: Not issued.
+	Invoice Status: Not issued
 	Notes:
 		Remember not to work with these guys again!
 	Objectives:
-		Get into the mainframe, or something like that.
+		Get into the mainframe, or something like that
 	Timesheets:
 		CEO of Tests Testy McTesterson from Big Old Test: {} – {}
 			Work Notes:
-				Went to non-corporate fast food restaurant for business meeting.
+				Went to non-corporate fast food restaurant for business meeting
 	Total Amount Owed: {}",
 				create_job_view.id,
 				create_job_view.date_open,

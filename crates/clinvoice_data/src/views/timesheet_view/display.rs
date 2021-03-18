@@ -124,7 +124,7 @@ mod tests
 			]),
 			time_begin: Utc::now(),
 			time_end: Some(Utc::today().and_hms(23, 59, 59)),
-			work_notes: "Went to non-corporate fast food restaurant for business meeting.".into(),
+			work_notes: "Went to non-corporate fast food restaurant for business meeting".into(),
 		};
 
 		let start = Instant::now();
@@ -138,7 +138,7 @@ mod tests
 		Travel – 10.00 USD
 			Gas
 	Work Notes:
-		Went to non-corporate fast food restaurant for business meeting.",
+		Went to non-corporate fast food restaurant for business meeting",
 				timesheet.time_begin,
 				timesheet.time_end.unwrap()
 			),

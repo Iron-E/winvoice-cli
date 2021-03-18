@@ -95,7 +95,7 @@ pub fn test_temp_store(assertion: impl FnOnce(&Store))
 			Some(s) => s.into(),
 			_ => Err(io::Error::new(
 				io::ErrorKind::InvalidInput,
-				"`env::temp_path` did not resolve to a valid path."
+				"`env::temp_path` did not resolve to a valid path"
 			)).unwrap(),
 		},
 		username: None,

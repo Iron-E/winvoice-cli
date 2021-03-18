@@ -23,53 +23,53 @@ pub(super) enum Create
 	#[structopt(about="Create a new employee record")]
 	Employee
 	{
-		#[structopt(help="The job title of the employee.")]
+		#[structopt(help="The job title of the employee")]
 		title: String,
 	},
 
 	#[structopt(about="Create a new job record")]
 	Job
 	{
-		#[structopt(help="The currency which the hourly rate is stated in.", long, short)]
+		#[structopt(help="The currency which the hourly rate is stated in", long, short)]
 		currency: Option<String>,
 
-		#[structopt(help="The amount of money charged per hour for this job.")]
+		#[structopt(help="The amount of money charged per hour for this job")]
 		hourly_rate: Decimal,
 
-		#[structopt(help="The (local timezone) year that the job was created. Defaults to current year.", requires("month"))]
+		#[structopt(help="The (local timezone) year that the job was created. Defaults to current year", requires("month"))]
 		year: Option<i32>,
 
-		#[structopt(help="The (local timezone) month that the job was created. Defaults to current month.", requires("day"))]
+		#[structopt(help="The (local timezone) month that the job was created. Defaults to current month", requires("day"))]
 		month: Option<u32>,
 
-		#[structopt(help="The (local timezone) day that the job was created. Defaults to current day.", requires("year"))]
+		#[structopt(help="The (local timezone) day that the job was created. Defaults to current day", requires("year"))]
 		day: Option<u32>,
 
-		#[structopt(help="The (local timezone) hour that the job was created. Defaults to current hour.", requires("year"))]
+		#[structopt(help="The (local timezone) hour that the job was created. Defaults to current hour", requires("year"))]
 		hour: Option<u32>,
 
-		#[structopt(help="The (local timezone) minute that the job was created. Defaults to current minute.", requires("hour"))]
+		#[structopt(help="The (local timezone) minute that the job was created. Defaults to current minute", requires("hour"))]
 		minute: Option<u32>,
 	},
 
 	#[structopt(about="Create a new location record")]
 	Location
 	{
-		#[structopt(help="The name of the location to create.")]
+		#[structopt(help="The name of the location to create")]
 		name: String,
 	},
 
 	#[structopt(about="Create a new organization record")]
 	Organization
 	{
-		#[structopt(help="The name of the organization to create.")]
+		#[structopt(help="The name of the organization to create")]
 		name: String,
 	},
 
 	#[structopt(about="Create a new organization record")]
 	Person
 	{
-		#[structopt(help="The name of the person to create.")]
+		#[structopt(help="The name of the person to create")]
 		name: String,
 	},
 }
@@ -78,7 +78,7 @@ impl Create
 {
 	pub(super) fn run<'store>(self, config: &'store Config, store_name: String) -> DynResult<'store, ()>
 	{
-		let store = config.get_store(&store_name).expect("Storage name not known.");
+		let store = config.get_store(&store_name).expect("Storage name not known");
 
 		match store.adapter
 		{
@@ -109,7 +109,7 @@ impl Create
 
 				Self::Job {currency, hourly_rate, year, month, day, hour, minute} => BincodeJob::create(
 					input::util::organization::select_one::<BincodeOrganization, &str>(
-						"Select the client for this job.",
+						"Select the client for this job",
 						store,
 					)?.into(),
 					DateTime::<Utc>::from({
@@ -127,7 +127,7 @@ impl Create
 						amount: hourly_rate,
 						currency: currency.unwrap_or(config.invoices.default_currency.into()),
 					},
-					&input::edit_markdown("* List your objectives.\n* All markdown syntax works.")?,
+					&input::edit_markdown("* List your objectives.\n* All markdown syntax works")?,
 					store,
 				).and(Ok(())),
 

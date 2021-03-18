@@ -13,7 +13,7 @@ impl Display for Invoice
 		write!(formatter, "Invoice Status: {}", match &self.date
 		{
 			Some(date) => date.to_string(),
-			_ => "Not issued.".into(),
+			_ => "Not issued".into(),
 		})
 	}
 }

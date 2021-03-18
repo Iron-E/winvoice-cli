@@ -59,9 +59,9 @@ impl Config<'_, '_, '_>
 					("foo", StoreValue::Storage(Store
 					{
 						adapter: Adapters::Bincode,
-						password: Some("Optional password. May or may not be accompanied by a username.".into()),
-						username: Some("Optional username. May or may not be accompanied by a password.".into()),
-						path: "Place where data can be found. Depends on the adapter— may be a path to a folder on a filesystem, or a schema on a database.".into(),
+						password: Some("Optional password. May or may not be accompanied by a username".into()),
+						username: Some("Optional username. May or may not be accompanied by a password".into()),
+						path: "Place where data can be found. Depends on the adapter— may be a path to a folder on a filesystem, or a schema on a database".into(),
 					})),
 				].iter().cloned().collect(),
 				timesheets: Timesheets {interval: Duration::from_secs(300)},
@@ -99,7 +99,7 @@ impl Config<'_, '_, '_>
 
 	pub fn path() -> PathBuf
 	{
-		dirs::config_dir().expect("Operating System is not supported.").join("clinvoice").join("config.toml")
+		dirs::config_dir().expect("Operating System is not supported").join("clinvoice").join("config.toml")
 	}
 }
 

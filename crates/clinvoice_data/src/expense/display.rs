@@ -30,14 +30,14 @@ mod tests
 		{
 			category: ExpenseCategory::Food,
 			cost: Money::new(Decimal::new(2000, 2), "USD"),
-			description: "Take-out for 2.".into(),
+			description: "Take-out for 2".into(),
 		};
 
 		let start = Instant::now();
 		assert_eq!(
 			format!("{}", expense),
 "Food – 20.00 USD
-	Take-out for 2.",
+	Take-out for 2",
 		);
 		println!("\n>>>>> Expense::fmt {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 	}

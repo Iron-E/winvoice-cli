@@ -16,7 +16,7 @@ pub enum Error
 	/// [adapter type][adapter] was found.
 	///
 	/// [adapter]: crate::Adapters
-	#[snafu(display("Expected the {} adapter, but got the {} adapter.", expected, actual))]
+	#[snafu(display("Expected the {} adapter, but got the {} adapter", expected, actual))]
 	AdapterMismatch {expected: Adapters, actual: Adapters},
 
 	/// # Summary
@@ -25,6 +25,6 @@ pub enum Error
 	/// the application.
 	///
 	/// [adapter]: crate::Adapters
-	#[snafu(display("Using this adapter requires the {} feature.", adapter))]
+	#[snafu(display("Using this adapter requires the {} feature", adapter))]
 	FeatureNotFound {adapter: Adapters},
 }

@@ -7,7 +7,7 @@ use
 {
 	clinvoice_data::views::RestorableSerde,
 	std::{fmt::Display, io},
-	dialoguer::{Editor, MultiSelect, Select},
+	dialoguer::{Editor, Input, MultiSelect, Select},
 	serde::{de::DeserializeOwned, Serialize},
 };
 
@@ -97,6 +97,14 @@ pub fn select_one<T>(entities: &[T], prompt: impl Into<String>) -> io::Result<T>
 	let selection = Select::new().items(entities).paged(true).with_prompt(prompt).interact()?;
 
 	Ok(entities[selection].clone())
+}
+
+/// # Summary
+///
+/// `prompt` the user to enter text.
+pub fn text(prompt: impl Into<String>) -> io::Result<String>
+{
+	Input::new().with_prompt(prompt).interact_text()
 }
 
 /// # Summary

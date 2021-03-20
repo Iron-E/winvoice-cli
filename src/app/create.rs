@@ -42,13 +42,13 @@ pub(super) enum Create
 		#[structopt(help="The (local timezone) month that the job was created. Defaults to current month", requires("day"))]
 		month: Option<u32>,
 
-		#[structopt(help="The (local timezone) day that the job was created. Defaults to current day", requires("year"))]
+		#[structopt(help="The (local timezone) day that the job was created. Defaults to current day")]
 		day: Option<u32>,
 
-		#[structopt(help="The (local timezone) hour that the job was created. Defaults to current hour", requires("year"))]
+		#[structopt(help="The (local timezone) hour that the job was created. Defaults to current hour", requires("minute"))]
 		hour: Option<u32>,
 
-		#[structopt(help="The (local timezone) minute that the job was created. Defaults to current minute", requires("hour"))]
+		#[structopt(help="The (local timezone) minute that the job was created. Defaults to current minute")]
 		minute: Option<u32>,
 	},
 

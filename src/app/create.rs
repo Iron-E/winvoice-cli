@@ -36,19 +36,19 @@ pub(super) enum Create
 		#[structopt(help="The amount of money charged per hour for this job (e.g. 12.00)")]
 		hourly_rate: Decimal,
 
-		#[structopt(help="The (local timezone) year that the job was created (e.g. 2021). Defaults to current year", requires("month"))]
+		#[structopt(help="The year that the job was created (e.g. 2021). Defaults to current year", requires("month"))]
 		year: Option<i32>,
 
-		#[structopt(help="The (local timezone) month that the job was created (e.g. 4 for 'April'). Defaults to current month", requires("day"))]
+		#[structopt(help="The month that the job was created (e.g. 4 for 'April'). Defaults to current month", requires("day"))]
 		month: Option<u32>,
 
-		#[structopt(help="The (local timezone) day that the job was created (e.g. 21). Defaults to current day")]
+		#[structopt(help="The day that the job was created (e.g. 21). Defaults to current day")]
 		day: Option<u32>,
 
-		#[structopt(help="The (local timezone) hour that the job was created (e.g. 13 for 1pm). Defaults to current hour", requires("minute"))]
+		#[structopt(help="The hour that the job was created (e.g. 13 for 1pm). Defaults to current hour", requires("minute"))]
 		hour: Option<u32>,
 
-		#[structopt(help="The (local timezone) minute that the job was created (e.g. 45). Defaults to current minute")]
+		#[structopt(help="The minute that the job was created (e.g. 45). Defaults to current minute")]
 		minute: Option<u32>,
 	},
 

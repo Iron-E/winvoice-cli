@@ -1,14 +1,21 @@
 use
 {
 	core::{cmp::Eq, hash::Hash, iter::Iterator},
-	std::collections::HashSet,
+	std::{borrow::Cow, collections::HashSet, cmp::Ord, fmt::Debug},
+	serde::{Deserialize, Serialize},
 };
 
 /// # Summary
 ///
 /// A value in a retrieval operation.
-pub enum MatchWhen<'element, T> where T : 'element + Hash
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
+#[cfg_attr(feature="serde_support", serde(content="value", tag="condition"))]
+pub enum MatchWhen<'element, T> where
+	T : Clone + Debug + Hash + Ord
 {
+	#[cfg_attr(feature="serde_support", serde(bound(deserialize = "T : Deserialize<'de>")))]
+
 	/// # Summary
 	///
 	/// Always match.
@@ -20,7 +27,7 @@ pub enum MatchWhen<'element, T> where T : 'element + Hash
 	///
 	/// * `v` equals this value.
 	/// * A set of `v`'s type has one element, and is equal to `v`.
-	EqualTo(T),
+	EqualTo(Cow<'element, T>),
 
 	/// # Summary
 	///
@@ -28,7 +35,7 @@ pub enum MatchWhen<'element, T> where T : 'element + Hash
 	///
 	/// * A set of `v` is made up of elements which are contained in this set.
 	/// * This set has one element, and `v` is equivalent.
-	HasAll(HashSet<&'element T>),
+	HasAll(HashSet<Cow<'element, T>>),
 
 	/// # Summary
 	///
@@ -36,7 +43,7 @@ pub enum MatchWhen<'element, T> where T : 'element + Hash
 	///
 	/// * A set of `v`'s type has any value contained in this set.
 	/// * `v` is contained within this set.
-	HasAny(HashSet<&'element T>),
+	HasAny(HashSet<Cow<'element, T>>),
 
 	/// # Summary
 	///
@@ -44,26 +51,35 @@ pub enum MatchWhen<'element, T> where T : 'element + Hash
 	///
 	/// * A set of `v`'s type has no values contained in this set.
 	/// * `v` is not contained within this set.
-	HasNone(HashSet<&'element T>),
+	HasNone(HashSet<Cow<'element, T>>),
 
 	/// # Summary
 	///
 	/// For some value `v`, match if and only if:
 	///
-	/// * Passing `v` to this function returns `true`.
-	/// * A set of `v`'s type all return `true` when passed to this function.
+	/// * The value of `v` is greater than or equal to the first value.
+	/// * The value of `v` is less than the first value.
 	///
 	/// # Example
 	///
 	/// ```rust
 	/// use clinvoice_adapter::data::MatchWhen;
+	/// use std::borrow::Cow;
 	///
-	/// println!("{}", MatchWhen::InRange(&|v| *v > 0 && *v < 5).is_match(&4));
+	/// println!("{}", MatchWhen::InRange(Cow::Borrowed(&3),Cow::Borrowed(&5)).is_match(&4));
 	/// ```
-	InRange(&'element dyn Fn(&T) -> bool),
+	InRange(Cow<'element, T>, Cow<'element, T>),
 }
 
-impl<'element, T> MatchWhen<'element, T> where T : 'element + Eq + Hash
+/// # Summary
+///
+/// Return whether or not some [`MatchWhen::InRange`] is in range.
+fn is_in_range<T>(min: &T, max: &T, value: &T) -> bool where T : Ord {
+	min <= value && value < max
+}
+
+impl<'element, T> MatchWhen<'element, T> where
+	T : 'element + Clone + Debug + Hash + Ord
 {
 	/// # Summary
 	///
@@ -82,11 +98,11 @@ impl<'element, T> MatchWhen<'element, T> where T : 'element + Eq + Hash
 		match self
 		{
 			MatchWhen::Any => true,
-			MatchWhen::EqualTo(equal_value) => equal_value == value,
+			MatchWhen::EqualTo(equal_value) => equal_value.as_ref() == value,
 			MatchWhen::HasAll(required_values) => required_values.len() == 1 && required_values.contains(value),
 			MatchWhen::HasAny(accepted_values) => accepted_values.contains(value),
 			MatchWhen::HasNone(denied_values) => !denied_values.contains(value),
-			MatchWhen::InRange(in_range) => in_range(value),
+			MatchWhen::InRange(min, max) => is_in_range(min.as_ref(), max.as_ref(), value),
 		}
 	}
 
@@ -107,11 +123,11 @@ impl<'element, T> MatchWhen<'element, T> where T : 'element + Eq + Hash
 		match self
 		{
 			MatchWhen::Any => true,
-			MatchWhen::EqualTo(equal_value) => values.len() == 1 && values.contains(equal_value),
-			MatchWhen::HasAll(required_values) => required_values.is_subset(values),
-			MatchWhen::HasAny(accepted_values) => !accepted_values.is_disjoint(values),
-			MatchWhen::HasNone(denied_values) => denied_values.is_disjoint(values),
-			MatchWhen::InRange(in_range) => values.iter().all(|v| in_range(v)),
+			MatchWhen::EqualTo(equal_value) => values.len() == 1 && values.contains(equal_value.as_ref()),
+			MatchWhen::HasAll(required_values) => required_values.iter().map(|v| v.as_ref()).collect::<HashSet<_>>().is_subset(values),
+			MatchWhen::HasAny(accepted_values) => !accepted_values.iter().map(|v| v.as_ref()).collect::<HashSet<_>>().is_disjoint(values),
+			MatchWhen::HasNone(denied_values) => denied_values.iter().map(|v| v.as_ref()).collect::<HashSet<_>>().is_disjoint(values),
+			MatchWhen::InRange(min, max) => values.iter().all(|v| is_in_range(min.as_ref(), max.as_ref(), v)),
 		}
 	}
 }
@@ -121,7 +137,7 @@ mod tests
 {
 	use
 	{
-		super::{HashSet, MatchWhen},
+		super::{Cow, HashSet, MatchWhen},
 		std::time::Instant,
 	};
 
@@ -130,11 +146,11 @@ mod tests
 	{
 		let test_value = &7;
 
-		let has_all: HashSet<&i32> = [7].iter().collect();
-		let has_any: HashSet<&i32> = [1, 2, 3, 7].iter().collect();
-		let has_none: HashSet<&i32> = [1, 2, 3].iter().collect();
+		let has_all: HashSet<_> = vec![Cow::Borrowed(&7)].into_iter().collect();
+		let has_any: HashSet<_> = vec![Cow::Borrowed(&1), Cow::Borrowed(&2), Cow::Borrowed(&3), Cow::Borrowed(&7)].into_iter().collect();
+		let has_none: HashSet<_> = vec![Cow::Borrowed(&1), Cow::Borrowed(&2), Cow::Borrowed(&3)].into_iter().collect();
 
-		let not_has_all: HashSet<&i32> = [3].iter().collect();
+		let not_has_all: HashSet<_> = vec![Cow::Borrowed(&3)].into_iter().collect();
 		let not_has_any = has_none.clone();
 		let not_has_none = has_any.clone();
 
@@ -144,8 +160,8 @@ mod tests
 		assert!(MatchWhen::Any.is_match(test_value));
 
 		// Test equal
-		assert!(MatchWhen::EqualTo(7).is_match(test_value));
-		assert!(!MatchWhen::EqualTo(6).is_match(test_value));
+		assert!(MatchWhen::EqualTo(Cow::Borrowed(&7)).is_match(test_value));
+		assert!(!MatchWhen::EqualTo(Cow::Borrowed(&6)).is_match(test_value));
 
 		// Test has all
 		assert!(MatchWhen::HasAll(has_all).is_match(test_value));
@@ -160,8 +176,8 @@ mod tests
 		assert!(!MatchWhen::HasNone(not_has_none).is_match(test_value));
 
 		// Test in range
-		assert!(MatchWhen::InRange(&|v| *v > 0 && *v < 8).is_match(test_value));
-		assert!(!MatchWhen::InRange(&|v| *v > 0 && *v < 3).is_match(test_value));
+		assert!(MatchWhen::InRange(Cow::Borrowed(&0), Cow::Borrowed(&8)).is_match(test_value));
+		assert!(!MatchWhen::InRange(Cow::Borrowed(&0), Cow::Borrowed(&3)).is_match(test_value));
 
 		println!("\n>>>>> MatchWhen::is_match {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 11);
 	}
@@ -169,18 +185,18 @@ mod tests
 	#[test]
 	fn test_set_matches()
 	{
-		let test_set: HashSet<&i32> = [4, 7, 17].iter().collect();
-		let test_set_single_element: HashSet<&i32> = [4].iter().collect();
+		let test_set: HashSet<_> = [4, 7, 17].iter().collect();
+		let test_set_single_element: HashSet<_> = [4].iter().collect();
 
-		let has_all: HashSet<&i32> = [4].iter().collect();
-		let has_any: HashSet<&i32> = [1, 4].iter().collect();
-		let has_none: HashSet<&i32> = [1].iter().collect();
-		let in_range = |v: &i32| *v > 0 && *v < 18;
+		let has_all: HashSet<_> = vec![Cow::Borrowed(&4)].into_iter().collect();
+		let has_any: HashSet<_> = vec![Cow::Borrowed(&1), Cow::Borrowed(&4)].into_iter().collect();
+		let has_none: HashSet<_> = vec![Cow::Borrowed(&1)].into_iter().collect();
+		let in_range = MatchWhen::InRange(Cow::Borrowed(&0), Cow::Borrowed(&18));
 
-		let not_has_all: HashSet<&i32> = [4, 6].iter().collect();
+		let not_has_all: HashSet<_> = vec![Cow::Borrowed(&4), Cow::Borrowed(&6)].into_iter().collect();
 		let not_has_any = has_none.clone();
 		let not_has_none = has_any.clone();
-		let not_in_range = |v: &i32| *v > 0 && *v < 3;
+		let not_in_range = MatchWhen::InRange(Cow::Borrowed(&0), Cow::Borrowed(&3));
 
 		let start = Instant::now();
 
@@ -189,10 +205,10 @@ mod tests
 		assert!(MatchWhen::Any.set_matches(&test_set_single_element));
 
 		// Test equal
-		assert!(!MatchWhen::EqualTo(4).set_matches(&test_set));
-		assert!(MatchWhen::EqualTo(4).set_matches(&test_set_single_element));
-		assert!(!MatchWhen::EqualTo(6).set_matches(&test_set));
-		assert!(!MatchWhen::EqualTo(6).set_matches(&test_set_single_element));
+		assert!(!MatchWhen::EqualTo(Cow::Borrowed(&4)).set_matches(&test_set));
+		assert!(MatchWhen::EqualTo(Cow::Borrowed(&4)).set_matches(&test_set_single_element));
+		assert!(!MatchWhen::EqualTo(Cow::Borrowed(&6)).set_matches(&test_set));
+		assert!(!MatchWhen::EqualTo(Cow::Borrowed(&6)).set_matches(&test_set_single_element));
 
 		// Test has all
 		assert!(MatchWhen::HasAll(has_all.clone()).set_matches(&test_set));
@@ -213,10 +229,10 @@ mod tests
 		assert!(!MatchWhen::HasNone(not_has_none).set_matches(&test_set_single_element));
 
 		// Test in range
-		assert!(MatchWhen::InRange(&in_range).set_matches(&test_set));
-		assert!(MatchWhen::InRange(&in_range).set_matches(&test_set_single_element));
-		assert!(!MatchWhen::InRange(&not_in_range).set_matches(&test_set));
-		assert!(!MatchWhen::InRange(&not_in_range).set_matches(&test_set_single_element));
+		assert!(in_range.set_matches(&test_set));
+		assert!(in_range.set_matches(&test_set_single_element));
+		assert!(!not_in_range.set_matches(&test_set));
+		assert!(!not_in_range.set_matches(&test_set_single_element));
 
 		println!("\n>>>>> MatchWhen::set_match {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 22);
 	}

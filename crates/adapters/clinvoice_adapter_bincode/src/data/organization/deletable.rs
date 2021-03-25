@@ -3,7 +3,7 @@ use
 	super::BincodeOrganization,
 	crate::data::{BincodeEmployee, BincodeJob, Error, Result},
 	clinvoice_adapter::data::{Deletable, EmployeeAdapter, JobAdapter, MatchWhen},
-	std::{fs, io::ErrorKind},
+	std::{borrow::Cow, fs, io::ErrorKind},
 };
 
 impl Deletable for BincodeOrganization<'_, '_>
@@ -24,7 +24,7 @@ impl Deletable for BincodeOrganization<'_, '_>
 		if cascade
 		{
 			BincodeJob::retrieve(
-				MatchWhen::EqualTo(self.organization.id), // client
+				MatchWhen::EqualTo(Cow::Borrowed(&self.organization.id)), // client
 				MatchWhen::Any, // date close
 				MatchWhen::Any, // date open
 				MatchWhen::Any, // id
@@ -47,7 +47,7 @@ impl Deletable for BincodeOrganization<'_, '_>
 			BincodeEmployee::retrieve(
 				MatchWhen::Any, // contact info
 				MatchWhen::Any, // id
-				MatchWhen::EqualTo(self.organization.id), // organization
+				MatchWhen::EqualTo(Cow::Borrowed(&self.organization.id)), // organization
 				MatchWhen::Any, // person
 				MatchWhen::Any, // title
 				MatchWhen::Any, // status

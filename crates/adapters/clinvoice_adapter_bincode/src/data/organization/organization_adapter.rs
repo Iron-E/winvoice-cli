@@ -93,7 +93,7 @@ mod tests
 	use
 	{
 		super::{BincodeOrganization, Id, Location, MatchWhen, Organization, OrganizationAdapter, Store, util},
-		std::{fs, time::Instant},
+		std::{borrow::Cow, fs, time::Instant},
 	};
 
 	#[test]
@@ -186,8 +186,8 @@ mod tests
 			// retrieve `packing` and `eal`
 			let results = BincodeOrganization::retrieve(
 				MatchWhen::Any, // id
-				MatchWhen::InRange(&|id| id == &earth_id || id == &usa_id), // location
-				MatchWhen::HasNone([aaa.name.clone()].iter().collect()), // name
+				MatchWhen::HasAny(vec![Cow::Borrowed(&earth_id), Cow::Borrowed(&usa_id)].into_iter().collect()), // location
+				MatchWhen::HasNone(vec![Cow::Borrowed(&aaa.name)].into_iter().collect()), // name
 				&store,
 			).unwrap();
 			println!("\n>>>>> BincodeOrganization::retrieve {}us <<<<<\n", Instant::now().duration_since(start).as_micros());

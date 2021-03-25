@@ -8,7 +8,7 @@ use
 		Store,
 	},
 	clinvoice_data::{Contact, views::{ContactView, LocationView}},
-	std::{collections::HashMap, hash::Hash},
+	std::{borrow::Cow, collections::HashMap, hash::Hash},
 };
 
 /// # Summary
@@ -19,7 +19,7 @@ pub fn into_view(contact: Contact, store: &Store) -> Result<ContactView>
 	Ok(match contact
 	{
 		Contact::Address(address) => match BincodeLocation::retrieve(
-				MatchWhen::EqualTo(address), // id
+				MatchWhen::EqualTo(Cow::Borrowed(&address)), // id
 				MatchWhen::Any, // outer_id
 				MatchWhen::Any, // name
 				store,

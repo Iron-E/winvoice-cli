@@ -110,7 +110,7 @@ mod tests
 	use
 	{
 		super::{BincodeEmployee, Contact, Employee, EmployeeAdapter, EmployeeStatus, Id, MatchWhen, Organization, Person, Store, util},
-		std::{fs, time::Instant},
+		std::{borrow::Cow, fs, time::Instant},
 	};
 
 	#[test]
@@ -309,7 +309,7 @@ mod tests
 			// Retrieve testy and gottard
 			let testy_gottard = BincodeEmployee::retrieve(
 				MatchWhen::Any, // contact info
-				MatchWhen::HasAny([testy_mctesterson.id, gottard.id].iter().collect()), // id
+				MatchWhen::HasAny(vec![Cow::Borrowed(&testy_mctesterson.id), Cow::Borrowed(&gottard.id)].into_iter().collect()), // id
 				MatchWhen::Any, // organization
 				MatchWhen::Any, // person
 				MatchWhen::Any, // title

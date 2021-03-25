@@ -8,6 +8,7 @@ use
 		Organization,
 		views::{EmployeeView, JobView, OrganizationView, TimesheetView},
 	},
+	std::borrow::Cow,
 };
 
 impl Into<Result<JobView>> for BincodeJob<'_, '_>
@@ -36,7 +37,7 @@ impl Into<Result<JobView>> for BincodeJob<'_, '_>
 		{
 			let employee_view_result: Result<EmployeeView> = match BincodeEmployee::retrieve(
 				MatchWhen::Any, // contact_info
-				MatchWhen::EqualTo(timesheet.employee_id), // id
+				MatchWhen::EqualTo(Cow::Borrowed(&timesheet.employee_id)), // id
 				MatchWhen::Any, // organization
 				MatchWhen::Any, // person
 				MatchWhen::Any, // title

@@ -121,8 +121,8 @@ mod tests
 {
 	use
 	{
-		super::{BincodeLocation, Id, Location, LocationAdapter, MatchWhen, Store, util},
-		std::{fs, time::Instant},
+		super::{BincodeLocation, Location, LocationAdapter, MatchWhen, Store, util},
+		std::{borrow::Cow, fs, time::Instant},
 	};
 
 	#[test]
@@ -176,9 +176,9 @@ mod tests
 
 			// Retrieve Arizona
 			let only_arizona = BincodeLocation::retrieve(
-				MatchWhen::HasAny([earth.id, arizona.id].iter().collect()), // id
+				MatchWhen::HasAny(vec![Cow::Borrowed(&earth.id), Cow::Borrowed(&arizona.id)].into_iter().collect()), // id
 				MatchWhen::Any, // name
-				MatchWhen::HasNone([Option::<Id>::None].iter().collect()), // outer id
+				MatchWhen::HasNone(vec![Cow::Borrowed(&None)].into_iter().collect()), // outer id
 				&store,
 			).unwrap();
 

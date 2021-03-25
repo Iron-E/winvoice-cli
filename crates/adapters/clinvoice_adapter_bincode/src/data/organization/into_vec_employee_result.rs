@@ -3,6 +3,7 @@ use
 	crate::data::{BincodeEmployee, BincodeOrganization, Result},
 	clinvoice_adapter::data::{EmployeeAdapter, MatchWhen},
 	clinvoice_data::Employee,
+	std::borrow::Cow,
 };
 
 impl Into<Result<Vec<Employee>>> for BincodeOrganization<'_, '_>
@@ -12,7 +13,7 @@ impl Into<Result<Vec<Employee>>> for BincodeOrganization<'_, '_>
 		BincodeEmployee::retrieve(
 			MatchWhen::Any, // contact info
 			MatchWhen::Any, // id
-			MatchWhen::EqualTo(self.organization.id), // organization
+			MatchWhen::EqualTo(Cow::Borrowed(&self.organization.id)), // organization
 			MatchWhen::Any, // person
 			MatchWhen::Any, // status
 			MatchWhen::Any, // title

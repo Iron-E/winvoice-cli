@@ -3,7 +3,7 @@ use
 	super::BincodePerson,
 	crate::data::{BincodeEmployee, Error, Result},
 	clinvoice_adapter::data::{Deletable, EmployeeAdapter, MatchWhen},
-	std::{fs, io::ErrorKind},
+	std::{borrow::Cow, fs, io::ErrorKind},
 };
 
 impl Deletable for BincodePerson<'_, '_>
@@ -27,7 +27,7 @@ impl Deletable for BincodePerson<'_, '_>
 				MatchWhen::Any, // contact info
 				MatchWhen::Any, // id
 				MatchWhen::Any, // organization
-				MatchWhen::EqualTo(self.person.id), // person
+				MatchWhen::EqualTo(Cow::Borrowed(&self.person.id)), // person
 				MatchWhen::Any, // title
 				MatchWhen::Any, // status
 				self.store,

@@ -89,7 +89,7 @@ mod tests
 	use
 	{
 		super::{BincodePerson, MatchWhen, Person, PersonAdapter, Store, util},
-		std::{fs, time::Instant},
+		std::{borrow::Cow, fs, time::Instant},
 		bincode,
 	};
 
@@ -179,7 +179,7 @@ mod tests
 
 			// Retrieve bob
 			let only_bob = BincodePerson::retrieve(
-				MatchWhen::EqualTo(bob.id),
+				MatchWhen::EqualTo(Cow::Borrowed(&bob.id)),
 				MatchWhen::Any, // id
 				&store,
 			).unwrap();
@@ -187,7 +187,7 @@ mod tests
 			// Retrieve longone and slimdi
 			let longone_slimdi = BincodePerson::retrieve(
 				MatchWhen::Any, // id
-				MatchWhen::HasAny([slimdi.name.clone(), longone.name.clone()].iter().collect()), // name
+				MatchWhen::HasAny(vec![Cow::Borrowed(&slimdi.name.clone()), Cow::Borrowed(&longone.name.clone())].into_iter().collect()), // name
 				&store,
 			).unwrap();
 

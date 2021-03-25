@@ -3,6 +3,7 @@ use
 	crate::data::{BincodeEmployee, BincodeOrganization, Result},
 	clinvoice_adapter::data::{Error as DataError, MatchWhen, OrganizationAdapter},
 	clinvoice_data::Organization,
+	std::borrow::Cow,
 };
 
 impl Into<Result<Organization>> for BincodeEmployee<'_, '_>
@@ -10,7 +11,7 @@ impl Into<Result<Organization>> for BincodeEmployee<'_, '_>
 	fn into(self) -> Result<Organization>
 	{
 		let results = BincodeOrganization::retrieve(
-			MatchWhen::EqualTo(self.employee.organization_id), // id
+			MatchWhen::EqualTo(Cow::Borrowed(&self.employee.organization_id)), // id
 			MatchWhen::Any, // location
 			MatchWhen::Any, // name
 			self.store,

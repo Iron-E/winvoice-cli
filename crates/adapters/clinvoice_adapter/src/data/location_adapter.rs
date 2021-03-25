@@ -3,7 +3,7 @@ use
 	super::{MatchWhen, Deletable, Initializable, Updatable},
 	crate::Store,
 	clinvoice_data::{Location, Id, views::LocationView},
-	std::error::Error,
+	std::{borrow::Cow, error::Error},
 };
 
 pub trait LocationAdapter<'store> :
@@ -61,7 +61,7 @@ pub trait LocationAdapter<'store> :
 		while let Some(id) = outer_id
 		{
 			if let Ok(results) = Self::retrieve(
-				MatchWhen::EqualTo(id), // id
+				MatchWhen::EqualTo(Cow::Borrowed(&id)), // id
 				MatchWhen::Any, // name
 				MatchWhen::Any, // outer id
 				&store,

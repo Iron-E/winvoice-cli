@@ -3,7 +3,7 @@ use
 	super::BincodeEmployee,
 	crate::data::{BincodeJob, Error, Result},
 	clinvoice_adapter::data::{Deletable, JobAdapter, MatchWhen, Updatable},
-	std::{fs, io::ErrorKind},
+	std::{borrow::Cow, fs, io::ErrorKind},
 };
 
 impl Deletable for BincodeEmployee<'_, '_>
@@ -32,7 +32,7 @@ impl Deletable for BincodeEmployee<'_, '_>
 				MatchWhen::Any, // invoice hourly rate
 				MatchWhen::Any, // notes
 				MatchWhen::Any, // objectives
-				MatchWhen::HasAny([self.employee.id].iter().collect()), // timesheet employee
+				MatchWhen::HasAny(vec![Cow::Borrowed(&self.employee.id)].into_iter().collect()), // timesheet employee
 				MatchWhen::Any, // timesheet time begin
 				MatchWhen::Any, // timesheet time end
 				self.store,
@@ -56,7 +56,7 @@ mod tests
 {
 	use
 	{
-		super::{BincodeEmployee, BincodeJob, Deletable, JobAdapter, MatchWhen, Updatable},
+		super::{BincodeEmployee, BincodeJob, Cow, Deletable, JobAdapter, MatchWhen, Updatable},
 		crate::
 		{
 			data::{BincodeLocation, BincodeOrganization, BincodePerson},
@@ -132,17 +132,17 @@ mod tests
 			assert!(testy.filepath().is_file());
 
 			big_old_test = BincodeOrganization::retrieve(
-				MatchWhen::EqualTo(big_old_test.id), // id
+				MatchWhen::EqualTo(Cow::Borrowed(&big_old_test.id)), // id
 				MatchWhen::Any, // location
 				MatchWhen::Any, // name
 				&store,
 			).unwrap().iter().next().unwrap().clone();
 
 			creation = BincodeJob::retrieve(
-				MatchWhen::EqualTo(big_old_test.id), // client
+				MatchWhen::EqualTo(Cow::Borrowed(&big_old_test.id)), // client
 				MatchWhen::Any, // date close
 				MatchWhen::Any, // date open
-				MatchWhen::EqualTo(creation.id), // id
+				MatchWhen::EqualTo(Cow::Borrowed(&creation.id)), // id
 				MatchWhen::Any, // invoice date
 				MatchWhen::Any, // invoice hourly rate
 				MatchWhen::Any, // notes

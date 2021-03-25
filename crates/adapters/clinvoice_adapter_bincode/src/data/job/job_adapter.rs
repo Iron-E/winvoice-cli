@@ -131,7 +131,7 @@ mod tests
 	{
 		super::{BincodeJob, Id, Job, JobAdapter, MatchWhen, Money, Organization, Store, Utc, util},
 		clinvoice_data::Decimal,
-		std::{fs, time::Instant},
+		std::{borrow::Cow, fs, time::Instant},
 	};
 
 	#[test]
@@ -253,7 +253,7 @@ mod tests
 
 			// retrieve everything
 			let everything = BincodeJob::retrieve(
-				MatchWhen::EqualTo(organization.id), // client
+				MatchWhen::EqualTo(Cow::Borrowed(&organization.id)), // client
 				MatchWhen::Any, // date close
 				MatchWhen::Any, // date open
 				MatchWhen::Any, // id
@@ -271,8 +271,8 @@ mod tests
 			let not_creation = BincodeJob::retrieve(
 				MatchWhen::Any, // client
 				MatchWhen::Any, // date close
-				MatchWhen::HasNone([creation.date_open].iter().collect()), // date open
-				MatchWhen::HasAny([retrieval.id, assertion.id].iter().collect()), // id
+				MatchWhen::HasNone(vec![Cow::Borrowed(&creation.date_open)].into_iter().collect()), // date open
+				MatchWhen::HasAny(vec![Cow::Borrowed(&retrieval.id), Cow::Borrowed(&assertion.id)].into_iter().collect()), // id
 				MatchWhen::Any, // invoice date
 				MatchWhen::Any, // invoice hourly rate
 				MatchWhen::Any, // notes

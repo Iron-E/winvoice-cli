@@ -9,6 +9,7 @@ mod match_when;
 mod organization_adapter;
 mod person_adapter;
 mod updatable;
+pub mod retrieve;
 
 pub use
 {

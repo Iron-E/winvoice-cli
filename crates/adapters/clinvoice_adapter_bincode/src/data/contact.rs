@@ -45,6 +45,6 @@ pub fn into_views<I, T>(contact_info: I, store: &Store) -> Result<HashMap<T, Con
 	T : Eq + Hash,
 {
 	contact_info.into_iter().map(|(key, contact)|
-		into_view(contact, store).and_then(|view| Ok((key, view)))
+		into_view(contact, store).map(|view| (key, view))
 	).collect()
 }

@@ -1,3 +1,5 @@
+#![allow(clippy::suspicious_else_formatting)]
+
 mod contact;
 mod employee;
 mod employee_status;

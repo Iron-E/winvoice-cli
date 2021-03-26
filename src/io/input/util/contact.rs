@@ -21,7 +21,7 @@ fn add_menu(contact_info: &mut HashMap<String, ContactView>, locations: &[Locati
 		input::text(format!("Please enter a label for \"{}\"", entity))
 	}
 
-	Ok(match input::select_one(&ALL_CONTACT_TYPES, "Select which type of contact info to add")?
+	match input::select_one(&ALL_CONTACT_TYPES, "Select which type of contact info to add")?
 	{
 		ADDRESS =>
 		{
@@ -42,7 +42,9 @@ fn add_menu(contact_info: &mut HashMap<String, ContactView>, locations: &[Locati
 		}
 
 		_ => panic!("Unkown contact type"),
-	})
+	};
+
+	Ok(())
 }
 
 /// # Summary
@@ -111,7 +113,7 @@ fn edit_menu(contact_info: &mut HashMap<String, ContactView>) -> input::Result<(
 		{
 			Ok(edit) => { contact_info.insert(to_edit_key, edit); }
 			Err(input::Error::NotEdited) => (),
-			Err(e) => return Err(e.into()),
+			Err(e) => return Err(e),
 		};
 	}
 

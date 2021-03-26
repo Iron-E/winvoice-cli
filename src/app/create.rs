@@ -117,15 +117,15 @@ impl Create
 
 						// This should be valid because of the `requires` on `Job`. Either all are present or none.
 						Local.ymd(
-							year.unwrap_or(now.year()), month.unwrap_or(now.month()), day.unwrap_or(now.day()),
+							year.unwrap_or_else(|| now.year()), month.unwrap_or_else(|| now.month()), day.unwrap_or_else(|| now.day()),
 						).and_hms(
-							hour.unwrap_or(now.hour()), minute.unwrap_or(now.minute()), 0,
+							hour.unwrap_or_else(|| now.hour()), minute.unwrap_or_else(|| now.minute()), 0,
 						)
 					}),
 					Money
 					{
 						amount: hourly_rate,
-						currency: currency.unwrap_or(config.invoices.default_currency.into()),
+						currency: currency.unwrap_or_else(|| config.invoices.default_currency.into()),
 					},
 					&input::edit_markdown("* List your objectives.\n* All markdown syntax works")?,
 					store,

@@ -24,5 +24,5 @@ pub fn select_one(prompt: impl Into<String>) -> Result<EmployeeStatus>
 			EmployeeStatus::Representative,
 		],
 		prompt,
-	).map_err(|e| e.into())
+	)
 }

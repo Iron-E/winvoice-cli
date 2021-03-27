@@ -1,3 +1,5 @@
+mod default;
+
 use
 {
 	core::{cmp::Eq, hash::Hash, iter::Iterator},

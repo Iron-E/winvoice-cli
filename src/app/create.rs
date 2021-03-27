@@ -112,7 +112,8 @@ impl Create
 						"Select the client for this job",
 						store,
 					)?.into(),
-					DateTime::<Utc>::from({
+					DateTime::<Utc>::from(
+					{
 						let now = Local::now();
 
 						// This should be valid because of the `requires` on `Job`. Either all are present or none.

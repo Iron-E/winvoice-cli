@@ -6,9 +6,12 @@ use
 	{
 		chrono::{DateTime, Utc},
 		Id,
+		views::JobView,
 	},
-	serde::{Deserialize, Serialize},
 };
+
+#[cfg(feature="serde_support")]
+use serde::{Deserialize, Serialize};
 
 /// # Summary
 ///
@@ -40,4 +43,23 @@ pub struct Job<'m>
 
 	#[cfg_attr(feature="serde_support", serde(default))]
 	pub timesheet: Timesheet<'m>,
+}
+
+impl Job<'_>
+{
+	/// # Summary
+	///
+	/// Return `true` if `job` is a match.
+	pub fn matches(&self, job: &clinvoice_data::Job) -> bool
+	{
+		todo!()
+	}
+
+	/// # Summary
+	///
+	/// Return `true` if `job` is a match.
+	pub fn matches_view(&self, job: &JobView) -> bool
+	{
+		todo!()
+	}
 }

@@ -1,9 +1,11 @@
 use
 {
 	crate::data::MatchWhen,
-	clinvoice_data::Id,
-	serde::{Deserialize, Serialize},
+	clinvoice_data::{Id, views::PersonView},
 };
+
+#[cfg(feature="serde_support")]
+use serde::{Deserialize, Serialize};
 
 /// # Summary
 ///
@@ -17,4 +19,25 @@ pub struct Person<'m>
 
 	#[cfg_attr(feature="serde_support", serde(default))]
 	pub name: MatchWhen<'m, String>,
+}
+
+impl Person<'_>
+{
+	/// # Summary
+	///
+	/// Return `true` if `person` is a match.
+	pub fn matches(&self, person: &clinvoice_data::Person) -> bool
+	{
+		self.id.matches(&person.id) &&
+		self.name.matches(&person.name)
+	}
+
+	/// # Summary
+	///
+	/// Return `true` if `person` is a match.
+	pub fn matches_view(&self, person: &PersonView) -> bool
+	{
+		self.id.matches(&person.id) &&
+		self.name.matches(&person.name)
+	}
 }

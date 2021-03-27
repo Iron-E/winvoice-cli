@@ -73,7 +73,7 @@ impl<'store> PersonAdapter<'store> for BincodePerson<'_, 'store>
 				fs::File::open(node_path)?
 			))?;
 
-			if id.is_match(&person.id) && name.is_match(&person.name)
+			if id.matches(&person.id) && name.matches(&person.name)
 			{
 				results.push(person);
 			}

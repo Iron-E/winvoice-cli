@@ -104,14 +104,14 @@ impl<'store> JobAdapter<'store> for BincodeJob<'_, 'store>
 				fs::File::open(node_path)?
 			))?;
 
-			if client.is_match(&job.client_id) &&
-				date_close.is_match(&job.date_close) &&
-				date_open.is_match(&job.date_open) &&
-				id.is_match(&job.id) &&
-				invoice_date.is_match(&job.invoice.date) &&
-				invoice_hourly_rate.is_match(&job.invoice.hourly_rate) &&
-				notes.is_match(&job.notes) &&
-				objectives.is_match(&job.objectives) &&
+			if client.matches(&job.client_id) &&
+				date_close.matches(&job.date_close) &&
+				date_open.matches(&job.date_open) &&
+				id.matches(&job.id) &&
+				invoice_date.matches(&job.invoice.date) &&
+				invoice_hourly_rate.matches(&job.invoice.hourly_rate) &&
+				notes.matches(&job.notes) &&
+				objectives.matches(&job.objectives) &&
 				timesheet_employee.set_matches(&job.timesheets.iter().map(|t| &t.employee_id).collect()) &&
 				timesheet_begin.set_matches(&job.timesheets.iter().map(|t| &t.time_begin).collect()) &&
 				timesheet_end.set_matches(&job.timesheets.iter().map(|t| &t.time_end).collect())

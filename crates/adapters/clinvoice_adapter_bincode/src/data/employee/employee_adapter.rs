@@ -90,11 +90,11 @@ impl<'store> EmployeeAdapter<'store> for BincodeEmployee<'_, 'store>
 			))?;
 
 			if contact_info.set_matches(&employee.contact_info.iter().map(|(_, v)| v).collect()) &&
-				id.is_match(&employee.id) &&
-				organization.is_match(&employee.organization_id) &&
-				person.is_match(&employee.person_id) &&
-				title.is_match(&employee.title) &&
-				status.is_match(&employee.status)
+				id.matches(&employee.id) &&
+				organization.matches(&employee.organization_id) &&
+				person.matches(&employee.person_id) &&
+				title.matches(&employee.title) &&
+				status.matches(&employee.status)
 			{
 				results.push(employee);
 			}

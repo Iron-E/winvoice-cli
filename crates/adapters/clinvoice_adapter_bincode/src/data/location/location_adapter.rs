@@ -104,9 +104,9 @@ impl<'store> LocationAdapter<'store> for BincodeLocation<'_, 'store>
 				fs::File::open(node_path)?
 			))?;
 
-			if id.is_match(&location.id) &&
-				name.is_match(&location.name) &&
-				outer.is_match(&location.outer_id)
+			if id.matches(&location.id) &&
+				name.matches(&location.name) &&
+				outer.matches(&location.outer_id)
 			{
 				results.push(location);
 			}

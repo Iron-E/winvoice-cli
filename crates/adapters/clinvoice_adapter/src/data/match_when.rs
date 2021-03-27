@@ -68,7 +68,7 @@ pub enum MatchWhen<'element, T> where
 	/// use clinvoice_adapter::data::MatchWhen;
 	/// use std::borrow::Cow;
 	///
-	/// println!("{}", MatchWhen::InRange(Cow::Borrowed(&3),Cow::Borrowed(&5)).is_match(&4));
+	/// println!("{}", MatchWhen::InRange(Cow::Borrowed(&3),Cow::Borrowed(&5)).matches(&4));
 	/// ```
 	InRange(Cow<'element, T>, Cow<'element, T>),
 }
@@ -95,7 +95,7 @@ impl<'element, T> MatchWhen<'element, T> where
 	///
 	/// * `true`, if the `value` matches the passed [`MatchWhen`].
 	/// * `false`, if the `value` does not match.
-	pub fn is_match(&self, value: &T) -> bool
+	pub fn matches(&self, value: &T) -> bool
 	{
 		match self
 		{
@@ -144,7 +144,7 @@ mod tests
 	};
 
 	#[test]
-	fn test_is_match()
+	fn test_matches()
 	{
 		let test_value = &7;
 
@@ -159,29 +159,29 @@ mod tests
 		let start = Instant::now();
 
 		// Test any
-		assert!(MatchWhen::Any.is_match(test_value));
+		assert!(MatchWhen::Any.matches(test_value));
 
 		// Test equal
-		assert!(MatchWhen::EqualTo(Cow::Borrowed(&7)).is_match(test_value));
-		assert!(!MatchWhen::EqualTo(Cow::Borrowed(&6)).is_match(test_value));
+		assert!(MatchWhen::EqualTo(Cow::Borrowed(&7)).matches(test_value));
+		assert!(!MatchWhen::EqualTo(Cow::Borrowed(&6)).matches(test_value));
 
 		// Test has all
-		assert!(MatchWhen::HasAll(has_all).is_match(test_value));
-		assert!(!MatchWhen::HasAll(not_has_all).is_match(test_value));
+		assert!(MatchWhen::HasAll(has_all).matches(test_value));
+		assert!(!MatchWhen::HasAll(not_has_all).matches(test_value));
 
 		// Test has any
-		assert!(MatchWhen::HasAny(has_any).is_match(test_value));
-		assert!(!MatchWhen::HasAny(not_has_any).is_match(test_value));
+		assert!(MatchWhen::HasAny(has_any).matches(test_value));
+		assert!(!MatchWhen::HasAny(not_has_any).matches(test_value));
 
 		// Test has none
-		assert!(MatchWhen::HasNone(has_none).is_match(test_value));
-		assert!(!MatchWhen::HasNone(not_has_none).is_match(test_value));
+		assert!(MatchWhen::HasNone(has_none).matches(test_value));
+		assert!(!MatchWhen::HasNone(not_has_none).matches(test_value));
 
 		// Test in range
-		assert!(MatchWhen::InRange(Cow::Borrowed(&0), Cow::Borrowed(&8)).is_match(test_value));
-		assert!(!MatchWhen::InRange(Cow::Borrowed(&0), Cow::Borrowed(&3)).is_match(test_value));
+		assert!(MatchWhen::InRange(Cow::Borrowed(&0), Cow::Borrowed(&8)).matches(test_value));
+		assert!(!MatchWhen::InRange(Cow::Borrowed(&0), Cow::Borrowed(&3)).matches(test_value));
 
-		println!("\n>>>>> MatchWhen::is_match {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 11);
+		println!("\n>>>>> MatchWhen::matches {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 11);
 	}
 
 	#[test]

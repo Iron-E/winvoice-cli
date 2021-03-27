@@ -75,9 +75,9 @@ impl<'store> OrganizationAdapter<'store> for BincodeOrganization<'_, 'store>
 				fs::File::open(node_path)?
 			))?;
 
-			if id.is_match(&organization.id) &&
-				location.is_match(&organization.location_id) &&
-				name.is_match(&organization.name)
+			if id.matches(&organization.id) &&
+				location.matches(&organization.location_id) &&
+				name.matches(&organization.name)
 			{
 				results.push(organization);
 			}

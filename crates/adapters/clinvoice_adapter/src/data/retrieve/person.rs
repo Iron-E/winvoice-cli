@@ -26,6 +26,14 @@ impl Person<'_>
 	/// # Summary
 	///
 	/// Return `true` if `person` is a match.
+	pub fn any_matches_view(&self, people: &[&PersonView]) -> bool
+	{
+		people.iter().any(|p| self.matches_view(p))
+	}
+
+	/// # Summary
+	///
+	/// Return `true` if `person` is a match.
 	pub fn matches(&self, person: &clinvoice_data::Person) -> bool
 	{
 		self.id.matches(&person.id) &&

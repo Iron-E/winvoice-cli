@@ -1,4 +1,4 @@
-use super::{Location, outer_default};
+use super::{Location, location_outer_default};
 
 impl Default for Location<'_>
 {
@@ -6,7 +6,7 @@ impl Default for Location<'_>
 	{
 		Self
 		{
-			outer: outer_default(),
+			outer: location_outer_default(),
 			..Default::default()
 		}
 	}

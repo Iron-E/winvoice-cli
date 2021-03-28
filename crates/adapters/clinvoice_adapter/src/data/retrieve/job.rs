@@ -42,7 +42,7 @@ pub struct Job<'m>
 	pub objectives: MatchWhen<'m, String>,
 
 	#[cfg_attr(feature="serde_support", serde(default))]
-	pub timesheet: Timesheet<'m>,
+	pub timesheets: Timesheet<'m>,
 }
 
 impl Job<'_>
@@ -52,7 +52,14 @@ impl Job<'_>
 	/// Return `true` if `job` is a match.
 	pub fn matches(&self, job: &clinvoice_data::Job) -> bool
 	{
-		todo!()
+		self.client.id.matches(&job.client_id) &&
+		self.date_close.matches(&job.date_close) &&
+		self.date_open.matches(&job.date_open) &&
+		self.id.matches(&job.id) &&
+		self.invoice.matches(&job.invoice) &&
+		self.notes.matches(&job.notes) &&
+		self.objectives.matches(&job.objectives) &&
+		self.timesheets.set_matches(job.timesheets.as_slice())
 	}
 
 	/// # Summary
@@ -60,6 +67,13 @@ impl Job<'_>
 	/// Return `true` if `job` is a match.
 	pub fn matches_view(&self, job: &JobView) -> bool
 	{
-		todo!()
+		self.client.matches_view(&job.client) &&
+		self.date_close.matches(&job.date_close) &&
+		self.date_open.matches(&job.date_open) &&
+		self.id.matches(&job.id) &&
+		self.invoice.matches(&job.invoice) &&
+		self.notes.matches(&job.notes) &&
+		self.objectives.matches(&job.objectives) &&
+		self.timesheets.any_matches_view(job.timesheets.as_slice())
 	}
 }

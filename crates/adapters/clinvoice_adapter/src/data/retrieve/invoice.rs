@@ -11,7 +11,7 @@ use serde::{Deserialize, Serialize};
 /// # Summary
 ///
 /// An [`Invoice`](clinvoice_data::Invoice) with [matchable](MatchWhen) fields.
-#[derive(Clone, Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Default, Debug, Eq, PartialEq)]
 #[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
 pub struct Invoice<'m>
 {
@@ -29,6 +29,10 @@ impl Invoice<'_>
 	/// Return `true` if `invoice` is a match.
 	pub fn matches(&self, invoice: &clinvoice_data::Invoice) -> bool
 	{
-		todo!()
+		self.hourly_rate.matches(&invoice.hourly_rate) &&
+		match &self.date {
+			Some(date) => invoice.date.as_ref().map(|d| date.matches(d)).unwrap_or(false),
+			_ => invoice.date.is_none(),
+		}
 	}
 }

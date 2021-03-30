@@ -2,7 +2,7 @@ use
 {
 	super::BincodeOrganization,
 	crate::data::{BincodeEmployee, BincodeJob, Error, Result},
-	clinvoice_adapter::data::{Deletable, EmployeeAdapter, JobAdapter, MatchWhen},
+	clinvoice_adapter::data::{Deletable, EmployeeAdapter, JobAdapter, Match},
 	std::{borrow::Cow, fs, io::ErrorKind},
 };
 
@@ -24,17 +24,17 @@ impl Deletable for BincodeOrganization<'_, '_>
 		if cascade
 		{
 			BincodeJob::retrieve(
-				MatchWhen::EqualTo(Cow::Borrowed(&self.organization.id)), // client
-				MatchWhen::Any, // date close
-				MatchWhen::Any, // date open
-				MatchWhen::Any, // id
-				MatchWhen::Any, // invoice date
-				MatchWhen::Any, // invoice hourly rate
-				MatchWhen::Any, // notes
-				MatchWhen::Any, // objectives
-				MatchWhen::Any, // timesheet employee
-				MatchWhen::Any, // timesheet time begin
-				MatchWhen::Any, // timesheet time end
+				Match::EqualTo(Cow::Borrowed(&self.organization.id)), // client
+				Match::Any, // date close
+				Match::Any, // date open
+				Match::Any, // id
+				Match::Any, // invoice date
+				Match::Any, // invoice hourly rate
+				Match::Any, // notes
+				Match::Any, // objectives
+				Match::Any, // timesheet employee
+				Match::Any, // timesheet time begin
+				Match::Any, // timesheet time end
 				self.store,
 			)?.into_iter().try_for_each(|j|
 				BincodeJob
@@ -45,12 +45,12 @@ impl Deletable for BincodeOrganization<'_, '_>
 			)?;
 
 			BincodeEmployee::retrieve(
-				MatchWhen::Any, // contact info
-				MatchWhen::Any, // id
-				MatchWhen::EqualTo(Cow::Borrowed(&self.organization.id)), // organization
-				MatchWhen::Any, // person
-				MatchWhen::Any, // title
-				MatchWhen::Any, // status
+				Match::Any, // contact info
+				Match::Any, // id
+				Match::EqualTo(Cow::Borrowed(&self.organization.id)), // organization
+				Match::Any, // person
+				Match::Any, // title
+				Match::Any, // status
 				self.store,
 			)?.into_iter().try_for_each(|e|
 				BincodeEmployee

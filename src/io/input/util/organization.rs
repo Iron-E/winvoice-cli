@@ -4,7 +4,7 @@ use
 	clinvoice_adapter::
 	{
 		Adapters, Error as AdapterError,
-		data::{Error as DataError, OrganizationAdapter, MatchWhen},
+		data::{Error as DataError, OrganizationAdapter, Match},
 		Store,
 	},
 	clinvoice_data::views::OrganizationView,
@@ -29,7 +29,7 @@ use clinvoice_adapter_bincode::data::{BincodeOrganization, Result as BincodeResu
 pub(super) fn retrieve_or_err<'store, O>(store: &'store Store) -> DynResult<'store, Vec<OrganizationView>> where
 	O : OrganizationAdapter<'store> + 'store,
 {
-	let organizations = O::retrieve(MatchWhen::Any, MatchWhen::Any, MatchWhen::Any, store)?;
+	let organizations = O::retrieve(Match::Any, Match::Any, Match::Any, store)?;
 
 	if organizations.is_empty()
 	{

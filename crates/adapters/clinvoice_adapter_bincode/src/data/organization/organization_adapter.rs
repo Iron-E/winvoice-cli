@@ -8,7 +8,7 @@ use
 	},
 	clinvoice_adapter::
 	{
-		data::{Initializable, MatchWhen, OrganizationAdapter, Updatable},
+		data::{Initializable, Match, OrganizationAdapter, Updatable},
 		Store,
 	},
 	clinvoice_data::{Location, Organization, Id},
@@ -59,9 +59,9 @@ impl<'store> OrganizationAdapter<'store> for BincodeOrganization<'_, 'store>
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`Job`]s.
 	fn retrieve(
-		id: MatchWhen<Id>,
-		location: MatchWhen<Id>,
-		name: MatchWhen<String>,
+		id: Match<Id>,
+		location: Match<Id>,
+		name: Match<String>,
 		store: &Store,
 	) -> Result<Vec<Organization>>
 	{
@@ -92,7 +92,7 @@ mod tests
 {
 	use
 	{
-		super::{BincodeOrganization, Id, Location, MatchWhen, Organization, OrganizationAdapter, Store, util},
+		super::{BincodeOrganization, Id, Location, Match, Organization, OrganizationAdapter, Store, util},
 		std::{borrow::Cow, fs, time::Instant},
 	};
 
@@ -185,9 +185,9 @@ mod tests
 			let start = Instant::now();
 			// retrieve `packing` and `eal`
 			let results = BincodeOrganization::retrieve(
-				MatchWhen::Any, // id
-				MatchWhen::HasAny(vec![Cow::Borrowed(&earth_id), Cow::Borrowed(&usa_id)].into_iter().collect()), // location
-				MatchWhen::HasNone(vec![Cow::Borrowed(&aaa.name)].into_iter().collect()), // name
+				Match::Any, // id
+				Match::HasAny(vec![Cow::Borrowed(&earth_id), Cow::Borrowed(&usa_id)].into_iter().collect()), // location
+				Match::HasNone(vec![Cow::Borrowed(&aaa.name)].into_iter().collect()), // name
 				&store,
 			).unwrap();
 			println!("\n>>>>> BincodeOrganization::retrieve {}us <<<<<\n", Instant::now().duration_since(start).as_micros());

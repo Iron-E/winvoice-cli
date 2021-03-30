@@ -8,7 +8,7 @@ use
 	},
 	clinvoice_adapter::
 	{
-		data::{Initializable, JobAdapter, MatchWhen, Updatable},
+		data::{Initializable, JobAdapter, Match, Updatable},
 		Store
 	},
 	clinvoice_data::
@@ -80,17 +80,17 @@ impl<'store> JobAdapter<'store> for BincodeJob<'_, 'store>
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`Job`]s.
 	fn retrieve(
-		client: MatchWhen<Id>,
-		date_close: MatchWhen<Option<DateTime<Utc>>>,
-		date_open: MatchWhen<DateTime<Utc>>,
-		id: MatchWhen<Id>,
-		invoice_date: MatchWhen<Option<InvoiceDate>>,
-		invoice_hourly_rate: MatchWhen<Money>,
-		notes: MatchWhen<String>,
-		objectives: MatchWhen<String>,
-		timesheet_employee: MatchWhen<Id>,
-		timesheet_begin: MatchWhen<DateTime<Utc>>,
-		timesheet_end: MatchWhen<Option<DateTime<Utc>>>,
+		client: Match<Id>,
+		date_close: Match<Option<DateTime<Utc>>>,
+		date_open: Match<DateTime<Utc>>,
+		id: Match<Id>,
+		invoice_date: Match<Option<InvoiceDate>>,
+		invoice_hourly_rate: Match<Money>,
+		notes: Match<String>,
+		objectives: Match<String>,
+		timesheet_employee: Match<Id>,
+		timesheet_begin: Match<DateTime<Utc>>,
+		timesheet_end: Match<Option<DateTime<Utc>>>,
 		store: &Store,
 	) -> Result<Vec<Job>>
 	{
@@ -129,7 +129,7 @@ mod tests
 {
 	use
 	{
-		super::{BincodeJob, Id, Job, JobAdapter, MatchWhen, Money, Organization, Store, Utc, util},
+		super::{BincodeJob, Id, Job, JobAdapter, Match, Money, Organization, Store, Utc, util},
 		clinvoice_data::Decimal,
 		std::{borrow::Cow, fs, time::Instant},
 	};
@@ -253,33 +253,33 @@ mod tests
 
 			// retrieve everything
 			let everything = BincodeJob::retrieve(
-				MatchWhen::EqualTo(Cow::Borrowed(&organization.id)), // client
-				MatchWhen::Any, // date close
-				MatchWhen::Any, // date open
-				MatchWhen::Any, // id
-				MatchWhen::Any, // invoice date
-				MatchWhen::Any, // invoice hourly rate
-				MatchWhen::Any, // notes
-				MatchWhen::Any, // objectives
-				MatchWhen::Any, // timesheet employee
-				MatchWhen::Any, // timesheet time begin
-				MatchWhen::Any, // timesheet time end
+				Match::EqualTo(Cow::Borrowed(&organization.id)), // client
+				Match::Any, // date close
+				Match::Any, // date open
+				Match::Any, // id
+				Match::Any, // invoice date
+				Match::Any, // invoice hourly rate
+				Match::Any, // notes
+				Match::Any, // objectives
+				Match::Any, // timesheet employee
+				Match::Any, // timesheet time begin
+				Match::Any, // timesheet time end
 				&store,
 			).unwrap();
 
 			// retrieve retrieval and assertion
 			let not_creation = BincodeJob::retrieve(
-				MatchWhen::Any, // client
-				MatchWhen::Any, // date close
-				MatchWhen::HasNone(vec![Cow::Borrowed(&creation.date_open)].into_iter().collect()), // date open
-				MatchWhen::HasAny(vec![Cow::Borrowed(&retrieval.id), Cow::Borrowed(&assertion.id)].into_iter().collect()), // id
-				MatchWhen::Any, // invoice date
-				MatchWhen::Any, // invoice hourly rate
-				MatchWhen::Any, // notes
-				MatchWhen::Any, // objectives
-				MatchWhen::Any, // timesheet employee
-				MatchWhen::Any, // timesheet time begin
-				MatchWhen::Any, // timesheet time end
+				Match::Any, // client
+				Match::Any, // date close
+				Match::HasNone(vec![Cow::Borrowed(&creation.date_open)].into_iter().collect()), // date open
+				Match::HasAny(vec![Cow::Borrowed(&retrieval.id), Cow::Borrowed(&assertion.id)].into_iter().collect()), // id
+				Match::Any, // invoice date
+				Match::Any, // invoice hourly rate
+				Match::Any, // notes
+				Match::Any, // objectives
+				Match::Any, // timesheet employee
+				Match::Any, // timesheet time begin
+				Match::Any, // timesheet time end
 				&store,
 			).unwrap();
 

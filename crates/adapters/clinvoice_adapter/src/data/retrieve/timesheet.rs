@@ -1,7 +1,7 @@
 use
 {
 	super::Employee,
-	crate::data::MatchWhen,
+	crate::data::Match,
 	clinvoice_data::
 	{
 		chrono::{DateTime, Utc},
@@ -23,10 +23,10 @@ pub struct Timesheet<'m>
 	pub employee: Employee<'m>,
 
 	#[cfg_attr(feature="serde_support", serde(default))]
-	pub time_begin: MatchWhen<'m, DateTime<Utc>>,
+	pub time_begin: Match<'m, DateTime<Utc>>,
 
 	#[cfg_attr(feature="serde_support", serde(default))]
-	pub time_end: MatchWhen<'m, Option<DateTime<Utc>>>,
+	pub time_end: Match<'m, Option<DateTime<Utc>>>,
 }
 
 impl Timesheet<'_>

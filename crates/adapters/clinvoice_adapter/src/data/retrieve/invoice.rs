@@ -1,7 +1,7 @@
 use
 {
 	super::InvoiceDate,
-	crate::data::MatchWhen,
+	crate::data::Match,
 	clinvoice_data::Money,
 };
 
@@ -19,7 +19,7 @@ pub struct Invoice<'m>
 	pub date: Option<InvoiceDate<'m>>,
 
 	#[cfg_attr(feature="serde_support", serde(default))]
-	pub hourly_rate: MatchWhen<'m, Money>,
+	pub hourly_rate: Match<'m, Money>,
 }
 
 impl Invoice<'_>

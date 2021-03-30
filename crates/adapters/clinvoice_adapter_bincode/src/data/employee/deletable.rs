@@ -2,7 +2,7 @@ use
 {
 	super::BincodeEmployee,
 	crate::data::{BincodeJob, Error, Result},
-	clinvoice_adapter::data::{Deletable, JobAdapter, MatchWhen, Updatable},
+	clinvoice_adapter::data::{Deletable, JobAdapter, Match, Updatable},
 	std::{borrow::Cow, fs, io::ErrorKind},
 };
 
@@ -24,17 +24,17 @@ impl Deletable for BincodeEmployee<'_, '_>
 		if cascade
 		{
 			for mut result in BincodeJob::retrieve(
-				MatchWhen::Any, // client
-				MatchWhen::Any, // date close
-				MatchWhen::Any, // date open
-				MatchWhen::Any, // id
-				MatchWhen::Any, // invoice date
-				MatchWhen::Any, // invoice hourly rate
-				MatchWhen::Any, // notes
-				MatchWhen::Any, // objectives
-				MatchWhen::HasAny(vec![Cow::Borrowed(&self.employee.id)].into_iter().collect()), // timesheet employee
-				MatchWhen::Any, // timesheet time begin
-				MatchWhen::Any, // timesheet time end
+				Match::Any, // client
+				Match::Any, // date close
+				Match::Any, // date open
+				Match::Any, // id
+				Match::Any, // invoice date
+				Match::Any, // invoice hourly rate
+				Match::Any, // notes
+				Match::Any, // objectives
+				Match::HasAny(vec![Cow::Borrowed(&self.employee.id)].into_iter().collect()), // timesheet employee
+				Match::Any, // timesheet time begin
+				Match::Any, // timesheet time end
 				self.store,
 			)?
 			{
@@ -56,7 +56,7 @@ mod tests
 {
 	use
 	{
-		super::{BincodeEmployee, BincodeJob, Cow, Deletable, JobAdapter, MatchWhen, Updatable},
+		super::{BincodeEmployee, BincodeJob, Cow, Deletable, JobAdapter, Match, Updatable},
 		crate::
 		{
 			data::{BincodeLocation, BincodeOrganization, BincodePerson},
@@ -132,24 +132,24 @@ mod tests
 			assert!(testy.filepath().is_file());
 
 			big_old_test = BincodeOrganization::retrieve(
-				MatchWhen::EqualTo(Cow::Borrowed(&big_old_test.id)), // id
-				MatchWhen::Any, // location
-				MatchWhen::Any, // name
+				Match::EqualTo(Cow::Borrowed(&big_old_test.id)), // id
+				Match::Any, // location
+				Match::Any, // name
 				&store,
 			).unwrap().iter().next().unwrap().clone();
 
 			creation = BincodeJob::retrieve(
-				MatchWhen::EqualTo(Cow::Borrowed(&big_old_test.id)), // client
-				MatchWhen::Any, // date close
-				MatchWhen::Any, // date open
-				MatchWhen::EqualTo(Cow::Borrowed(&creation.id)), // id
-				MatchWhen::Any, // invoice date
-				MatchWhen::Any, // invoice hourly rate
-				MatchWhen::Any, // notes
-				MatchWhen::Any, // objectives
-				MatchWhen::Any, // timesheet employee
-				MatchWhen::Any, // timesheet time begin
-				MatchWhen::Any, // timesheet time end
+				Match::EqualTo(Cow::Borrowed(&big_old_test.id)), // client
+				Match::Any, // date close
+				Match::Any, // date open
+				Match::EqualTo(Cow::Borrowed(&creation.id)), // id
+				Match::Any, // invoice date
+				Match::Any, // invoice hourly rate
+				Match::Any, // notes
+				Match::Any, // objectives
+				Match::Any, // timesheet employee
+				Match::Any, // timesheet time begin
+				Match::Any, // timesheet time end
 				&store,
 			).unwrap().iter().next().unwrap().clone();
 

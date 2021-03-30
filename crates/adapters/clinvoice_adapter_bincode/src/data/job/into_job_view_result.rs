@@ -2,7 +2,7 @@ use
 {
 	super::BincodeJob,
 	crate::data::{BincodeEmployee, BincodeOrganization, Result},
-	clinvoice_adapter::data::{EmployeeAdapter, Error, MatchWhen},
+	clinvoice_adapter::data::{EmployeeAdapter, Error, Match},
 	clinvoice_data::
 	{
 		Organization,
@@ -36,12 +36,12 @@ impl Into<Result<JobView>> for BincodeJob<'_, '_>
 		for timesheet in timesheets
 		{
 			let employee_view_result: Result<EmployeeView> = match BincodeEmployee::retrieve(
-				MatchWhen::Any, // contact_info
-				MatchWhen::EqualTo(Cow::Borrowed(&timesheet.employee_id)), // id
-				MatchWhen::Any, // organization
-				MatchWhen::Any, // person
-				MatchWhen::Any, // title
-				MatchWhen::Any, // status
+				Match::Any, // contact_info
+				Match::EqualTo(Cow::Borrowed(&timesheet.employee_id)), // id
+				Match::Any, // organization
+				Match::Any, // person
+				Match::Any, // title
+				Match::Any, // status
 				store,
 			)?.first()
 			{

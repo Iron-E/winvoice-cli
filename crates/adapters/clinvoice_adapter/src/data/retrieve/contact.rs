@@ -1,7 +1,7 @@
 use
 {
 	super::Location,
-	crate::data::MatchWhen,
+	crate::data::Match,
 	clinvoice_data::views::ContactView,
 };
 
@@ -27,7 +27,7 @@ pub struct Contact<'m>
 	/// # Example
 	///
 	/// * 'foo@bar.io'
-	pub email: MatchWhen<'m, String>,
+	pub email: Match<'m, String>,
 
 	/// # Summary
 	///
@@ -37,7 +37,7 @@ pub struct Contact<'m>
 	///
 	/// * '1-603-555-1234'
 	/// * '603-555-1234'
-	pub phone: MatchWhen<'m, String>,
+	pub phone: Match<'m, String>,
 }
 
 impl Contact<'_>

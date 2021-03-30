@@ -8,7 +8,7 @@ use
 	},
 	clinvoice_adapter::
 	{
-		data::{Initializable, LocationAdapter, MatchWhen, Updatable},
+		data::{Initializable, LocationAdapter, Match, Updatable},
 		Store,
 	},
 	clinvoice_data::{Location, Id},
@@ -88,9 +88,9 @@ impl<'store> LocationAdapter<'store> for BincodeLocation<'_, 'store>
 	/// * An [`Error`], when something goes wrong.
 	/// * A list of matches, if there are any.
 	fn retrieve(
-		id: MatchWhen<Id>,
-		name: MatchWhen<String>,
-		outer: MatchWhen<Option<Id>>,
+		id: Match<Id>,
+		name: Match<String>,
+		outer: Match<Option<Id>>,
 		store: &Store,
 	) -> Result<Vec<Location>>
 	{
@@ -121,7 +121,7 @@ mod tests
 {
 	use
 	{
-		super::{BincodeLocation, Location, LocationAdapter, MatchWhen, Store, util},
+		super::{BincodeLocation, Location, LocationAdapter, Match, Store, util},
 		std::{borrow::Cow, fs, time::Instant},
 	};
 
@@ -168,17 +168,17 @@ mod tests
 
 			// Retrieve everything.
 			let everything = BincodeLocation::retrieve(
-				MatchWhen::Any, // id
-				MatchWhen::Any, // name
-				MatchWhen::Any, // outer id
+				Match::Any, // id
+				Match::Any, // name
+				Match::Any, // outer id
 				&store,
 			).unwrap();
 
 			// Retrieve Arizona
 			let only_arizona = BincodeLocation::retrieve(
-				MatchWhen::HasAny(vec![Cow::Borrowed(&earth.id), Cow::Borrowed(&arizona.id)].into_iter().collect()), // id
-				MatchWhen::Any, // name
-				MatchWhen::HasNone(vec![Cow::Borrowed(&None)].into_iter().collect()), // outer id
+				Match::HasAny(vec![Cow::Borrowed(&earth.id), Cow::Borrowed(&arizona.id)].into_iter().collect()), // id
+				Match::Any, // name
+				Match::HasNone(vec![Cow::Borrowed(&None)].into_iter().collect()), // outer id
 				&store,
 			).unwrap();
 

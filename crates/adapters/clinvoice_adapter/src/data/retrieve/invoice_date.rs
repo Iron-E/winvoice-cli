@@ -1,6 +1,6 @@
 use
 {
-	crate::data::MatchWhen,
+	crate::data::Match,
 	clinvoice_data::chrono::{DateTime, Utc},
 };
 
@@ -15,10 +15,10 @@ use serde::{Deserialize, Serialize};
 pub struct InvoiceDate<'m>
 {
 	#[cfg_attr(feature="serde_support", serde(default))]
-	pub issued: MatchWhen<'m, DateTime<Utc>>,
+	pub issued: Match<'m, DateTime<Utc>>,
 
 	#[cfg_attr(feature="serde_support", serde(default))]
-	pub paid: MatchWhen<'m, Option<DateTime<Utc>>>,
+	pub paid: Match<'m, Option<DateTime<Utc>>>,
 }
 
 impl InvoiceDate<'_>

@@ -2,7 +2,7 @@ use
 {
 	super::BincodePerson,
 	crate::data::{BincodeEmployee, Error, Result},
-	clinvoice_adapter::data::{Deletable, EmployeeAdapter, MatchWhen},
+	clinvoice_adapter::data::{Deletable, EmployeeAdapter, Match},
 	std::{borrow::Cow, fs, io::ErrorKind},
 };
 
@@ -24,12 +24,12 @@ impl Deletable for BincodePerson<'_, '_>
 		if cascade
 		{
 			BincodeEmployee::retrieve(
-				MatchWhen::Any, // contact info
-				MatchWhen::Any, // id
-				MatchWhen::Any, // organization
-				MatchWhen::EqualTo(Cow::Borrowed(&self.person.id)), // person
-				MatchWhen::Any, // title
-				MatchWhen::Any, // status
+				Match::Any, // contact info
+				Match::Any, // id
+				Match::Any, // organization
+				Match::EqualTo(Cow::Borrowed(&self.person.id)), // person
+				Match::Any, // title
+				Match::Any, // status
 				self.store,
 			)?.into_iter().try_for_each(|e|
 				BincodeEmployee

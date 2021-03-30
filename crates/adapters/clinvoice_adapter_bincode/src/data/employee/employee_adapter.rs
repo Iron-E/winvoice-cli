@@ -8,7 +8,7 @@ use
 	},
 	clinvoice_adapter::
 	{
-		data::{EmployeeAdapter, Initializable, MatchWhen, Updatable},
+		data::{EmployeeAdapter, Initializable, Match, Updatable},
 		Store,
 	},
 	clinvoice_data::{Contact, Employee, EmployeeStatus, Organization, Person, Id},
@@ -70,12 +70,12 @@ impl<'store> EmployeeAdapter<'store> for BincodeEmployee<'_, 'store>
 	/// * Any matching [`Employee`]s.
 	/// * An [`Error`], should something go wrong.
 	fn retrieve(
-		contact_info: MatchWhen<Contact>,
-		id: MatchWhen<Id>,
-		organization: MatchWhen<Id>,
-		person: MatchWhen<Id>,
-		title: MatchWhen<String>,
-		status: MatchWhen<EmployeeStatus>,
+		contact_info: Match<Contact>,
+		id: Match<Id>,
+		organization: Match<Id>,
+		person: Match<Id>,
+		title: Match<String>,
+		status: Match<EmployeeStatus>,
 		store: &Store,
 	) -> Result<Vec<Employee>>
 	{
@@ -109,7 +109,7 @@ mod tests
 {
 	use
 	{
-		super::{BincodeEmployee, Contact, Employee, EmployeeAdapter, EmployeeStatus, Id, MatchWhen, Organization, Person, Store, util},
+		super::{BincodeEmployee, Contact, Employee, EmployeeAdapter, EmployeeStatus, Id, Match, Organization, Person, Store, util},
 		std::{borrow::Cow, fs, time::Instant},
 	};
 
@@ -297,23 +297,23 @@ mod tests
 			let start = Instant::now();
 
 			let everything = BincodeEmployee::retrieve(
-				MatchWhen::Any, // contact info
-				MatchWhen::Any, // id
-				MatchWhen::Any, // organization
-				MatchWhen::Any, // person
-				MatchWhen::Any, // title
-				MatchWhen::Any, // status
+				Match::Any, // contact info
+				Match::Any, // id
+				Match::Any, // organization
+				Match::Any, // person
+				Match::Any, // title
+				Match::Any, // status
 				&store,
 			).unwrap();
 
 			// Retrieve testy and gottard
 			let testy_gottard = BincodeEmployee::retrieve(
-				MatchWhen::Any, // contact info
-				MatchWhen::HasAny(vec![Cow::Borrowed(&testy_mctesterson.id), Cow::Borrowed(&gottard.id)].into_iter().collect()), // id
-				MatchWhen::Any, // organization
-				MatchWhen::Any, // person
-				MatchWhen::Any, // title
-				MatchWhen::Any, // status
+				Match::Any, // contact info
+				Match::HasAny(vec![Cow::Borrowed(&testy_mctesterson.id), Cow::Borrowed(&gottard.id)].into_iter().collect()), // id
+				Match::Any, // organization
+				Match::Any, // person
+				Match::Any, // title
+				Match::Any, // status
 				&store,
 			).unwrap();
 

@@ -1,11 +1,10 @@
-// LOCAL
 mod deletable;
 mod employee_adapter;
 mod error;
 mod initializable;
 mod job_adapter;
 mod location_adapter;
-mod match_when;
+mod r#match;
 mod organization_adapter;
 mod person_adapter;
 mod updatable;
@@ -19,7 +18,7 @@ pub use
 	initializable::Initializable,
 	job_adapter::JobAdapter,
 	location_adapter::LocationAdapter,
-	match_when::MatchWhen,
+	r#match::Match,
 	organization_adapter::OrganizationAdapter,
 	person_adapter::PersonAdapter,
 	updatable::Updatable,

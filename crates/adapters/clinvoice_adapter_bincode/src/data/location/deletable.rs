@@ -2,7 +2,7 @@ use
 {
 	super::BincodeLocation,
 	crate::data::{BincodeOrganization, Error, Result},
-	clinvoice_adapter::data::{Deletable, LocationAdapter, MatchWhen, OrganizationAdapter},
+	clinvoice_adapter::data::{Deletable, LocationAdapter, Match, OrganizationAdapter},
 	std::{borrow::Cow, fs, io::ErrorKind},
 };
 
@@ -24,9 +24,9 @@ impl Deletable for BincodeLocation<'_, '_>
 		if cascade
 		{
 			BincodeLocation::retrieve(
-				MatchWhen::Any, // id
-				MatchWhen::Any, // name
-				MatchWhen::EqualTo(Cow::Borrowed(&Some(self.location.id))), // outer id
+				Match::Any, // id
+				Match::Any, // name
+				Match::EqualTo(Cow::Borrowed(&Some(self.location.id))), // outer id
 				self.store,
 			)?.into_iter().try_for_each(|l|
 				BincodeLocation
@@ -37,9 +37,9 @@ impl Deletable for BincodeLocation<'_, '_>
 			)?;
 
 			BincodeOrganization::retrieve(
-				MatchWhen::Any, // id
-				MatchWhen::EqualTo(Cow::Borrowed(&self.location.id)), // location
-				MatchWhen::Any, // name
+				Match::Any, // id
+				Match::EqualTo(Cow::Borrowed(&self.location.id)), // location
+				Match::Any, // name
 				self.store,
 			)?.into_iter().try_for_each(|o|
 				BincodeOrganization

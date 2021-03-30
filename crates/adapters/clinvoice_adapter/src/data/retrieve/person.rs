@@ -1,6 +1,6 @@
 use
 {
-	crate::data::MatchWhen,
+	crate::data::Match,
 	clinvoice_data::{Id, views::PersonView},
 };
 
@@ -15,10 +15,10 @@ use serde::{Deserialize, Serialize};
 pub struct Person<'m>
 {
 	#[cfg_attr(feature="serde_support", serde(default))]
-	pub id: MatchWhen<'m, Id>,
+	pub id: Match<'m, Id>,
 
 	#[cfg_attr(feature="serde_support", serde(default))]
-	pub name: MatchWhen<'m, String>,
+	pub name: Match<'m, String>,
 }
 
 impl Person<'_>

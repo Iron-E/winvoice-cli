@@ -2,7 +2,7 @@ mod default;
 
 use
 {
-	crate::data::MatchWhen,
+	crate::data::Match,
 	clinvoice_data::{Id, views::LocationView},
 };
 
@@ -17,13 +17,13 @@ use serde::{Deserialize, Serialize};
 pub struct Location<'m>
 {
 	#[cfg_attr(feature="serde_support", serde(default))]
-	pub id: MatchWhen<'m, Id>,
+	pub id: Match<'m, Id>,
 
 	#[cfg_attr(feature="serde_support", serde(default = "location_outer_default"))]
 	pub outer: Result<Box<Self>, bool>,
 
 	#[cfg_attr(feature="serde_support", serde(default))]
-	pub name: MatchWhen<'m, String>,
+	pub name: Match<'m, String>,
 }
 
 const fn location_outer_default<'m>() -> Result<Box<Location<'m>>, bool>

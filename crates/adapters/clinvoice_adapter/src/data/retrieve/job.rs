@@ -1,7 +1,7 @@
 use
 {
 	super::{Invoice, Organization, Timesheet},
-	crate::data::MatchWhen,
+	crate::data::Match,
 	clinvoice_data::
 	{
 		chrono::{DateTime, Utc},
@@ -24,22 +24,22 @@ pub struct Job<'m>
 	pub client: Organization<'m>,
 
 	#[cfg_attr(feature="serde_support", serde(default))]
-	pub date_close: MatchWhen<'m, Option<DateTime<Utc>>>,
+	pub date_close: Match<'m, Option<DateTime<Utc>>>,
 
 	#[cfg_attr(feature="serde_support", serde(default))]
-	pub date_open: MatchWhen<'m, DateTime<Utc>>,
+	pub date_open: Match<'m, DateTime<Utc>>,
 
 	#[cfg_attr(feature="serde_support", serde(default))]
-	pub id: MatchWhen<'m, Id>,
+	pub id: Match<'m, Id>,
 
 	#[cfg_attr(feature="serde_support", serde(default))]
 	pub invoice: Invoice<'m>,
 
 	#[cfg_attr(feature="serde_support", serde(default))]
-	pub notes: MatchWhen<'m, String>,
+	pub notes: Match<'m, String>,
 
 	#[cfg_attr(feature="serde_support", serde(default))]
-	pub objectives: MatchWhen<'m, String>,
+	pub objectives: Match<'m, String>,
 
 	#[cfg_attr(feature="serde_support", serde(default))]
 	pub timesheets: Timesheet<'m>,

@@ -1,7 +1,7 @@
 use
 {
 	super::Location,
-	crate::data::MatchWhen,
+	crate::data::Match,
 	clinvoice_data::{Id, views::OrganizationView},
 };
 
@@ -16,13 +16,13 @@ use serde::{Deserialize, Serialize};
 pub struct Organization<'m>
 {
 	#[cfg_attr(feature="serde_support", serde(default))]
-	pub id: MatchWhen<'m, Id>,
+	pub id: Match<'m, Id>,
 
 	#[cfg_attr(feature="serde_support", serde(default))]
 	pub location: Location<'m>,
 
 	#[cfg_attr(feature="serde_support", serde(default))]
-	pub name: MatchWhen<'m, String>,
+	pub name: Match<'m, String>,
 }
 
 impl Organization<'_>

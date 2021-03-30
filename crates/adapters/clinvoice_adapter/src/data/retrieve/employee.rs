@@ -1,7 +1,7 @@
 use
 {
 	super::{Contact, Organization, Person},
-	crate::data::MatchWhen,
+	crate::data::Match,
 	clinvoice_data::{EmployeeStatus, Id, views::EmployeeView},
 };
 
@@ -19,7 +19,7 @@ pub struct Employee<'m>
 	pub contact_info: Contact<'m>,
 
 	#[cfg_attr(feature="serde_support", serde(default))]
-	pub id: MatchWhen<'m, Id>,
+	pub id: Match<'m, Id>,
 
 	#[cfg_attr(feature="serde_support", serde(default))]
 	pub organization: Organization<'m>,
@@ -28,10 +28,10 @@ pub struct Employee<'m>
 	pub person: Person<'m>,
 
 	#[cfg_attr(feature="serde_support", serde(default))]
-	pub title: MatchWhen<'m, String>,
+	pub title: Match<'m, String>,
 
 	#[cfg_attr(feature="serde_support", serde(default))]
-	pub status: MatchWhen<'m, EmployeeStatus>,
+	pub status: Match<'m, EmployeeStatus>,
 }
 
 impl Employee<'_>

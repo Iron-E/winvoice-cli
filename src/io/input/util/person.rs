@@ -4,7 +4,7 @@ use
 	clinvoice_adapter::
 	{
 		Adapters, Error as AdapterError,
-		data::{Error as DataError, PersonAdapter, MatchWhen},
+		data::{Error as DataError, PersonAdapter, Match},
 		Store,
 	},
 	clinvoice_data::views::PersonView,
@@ -29,7 +29,7 @@ use clinvoice_adapter_bincode::data::{BincodePerson, Result as BincodeResult};
 pub(super) fn retrieve_or_err<'store, P>(store: &'store Store) -> DynResult<'store, Vec<PersonView>> where
 	P : PersonAdapter<'store> + 'store,
 {
-	let people = P::retrieve(MatchWhen::Any, MatchWhen::Any, store)?;
+	let people = P::retrieve(Match::Any, Match::Any, store)?;
 
 	if people.is_empty()
 	{

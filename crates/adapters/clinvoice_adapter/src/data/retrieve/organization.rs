@@ -30,14 +30,6 @@ impl Organization<'_>
 	/// # Summary
 	///
 	/// Return `true` if `organization` is a match.
-	pub fn any_matches_view(&self, organizations: &[&OrganizationView]) -> bool
-	{
-		organizations.iter().any(|o| self.matches_view(o))
-	}
-
-	/// # Summary
-	///
-	/// Return `true` if `organization` is a match.
 	pub fn matches(&self, organization: &clinvoice_data::Organization) -> bool
 	{
 		self.id.matches(&organization.id) &&

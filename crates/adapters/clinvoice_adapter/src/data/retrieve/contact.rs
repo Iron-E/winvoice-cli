@@ -45,22 +45,21 @@ impl Contact<'_>
 	/// # Summary
 	///
 	/// Return `true` if `employee` is a match.
-	pub fn any_matches_view(&self, contact_info: &[&ContactView]) -> bool
+	pub fn any_matches_view<'item>(&self, contact_info: impl Clone + Iterator<Item=&'item ContactView>) -> bool
 	{
-		self.address.any_matches_view(
-			&contact_info.iter().flat_map(|c| match c
-			{
-				ContactView::Address(a) => Some(a),
-				_ => None,
-			}).collect::<Vec<_>>()
-		) && self.email.set_matches(
-			&contact_info.iter().flat_map(|c| match c
+		contact_info.clone().flat_map(|c| match c
+		{
+			ContactView::Address(a) => Some(a),
+			_ => None,
+		}).any(|a| self.address.matches_view(a)) &&
+		self.email.set_matches(
+			&contact_info.clone().flat_map(|c| match c
 			{
 				ContactView::Email(e) => Some(e),
 				_ => None,
 			}).collect()
 		) && self.phone.set_matches(
-			&contact_info.iter().flat_map(|c| match c
+			&contact_info.flat_map(|c| match c
 			{
 				ContactView::Email(p) => Some(p),
 				_ => None,
@@ -71,22 +70,22 @@ impl Contact<'_>
 	/// # Summary
 	///
 	/// Return `true` if `employee` is a match.
-	pub fn set_matches(&self, contact_info: &[&clinvoice_data::Contact]) -> bool
+	pub fn set_matches<'item>(&self, contact_info: impl Clone + Iterator<Item=&'item clinvoice_data::Contact>) -> bool
 	{
 		self.address.id.set_matches(
-			&contact_info.iter().flat_map(|c| match c
+			&contact_info.clone().flat_map(|c| match c
 			{
 				clinvoice_data::Contact::Address(a) => Some(a),
 				_ => None,
 			}).collect()
 		) && self.email.set_matches(
-			&contact_info.iter().flat_map(|c| match c
+			&contact_info.clone().flat_map(|c| match c
 			{
 				clinvoice_data::Contact::Email(e) => Some(e),
 				_ => None,
 			}).collect()
 		) && self.phone.set_matches(
-			&contact_info.iter().flat_map(|c| match c
+			&contact_info.flat_map(|c| match c
 			{
 				clinvoice_data::Contact::Phone(p) => Some(p),
 				_ => None,

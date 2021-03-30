@@ -36,14 +36,6 @@ impl Location<'_>
 	/// # Summary
 	///
 	/// Return `true` if `location` is a match.
-	pub fn any_matches_view(&self, locations: &[&LocationView]) -> bool
-	{
-		locations.iter().any(|l| self.matches_view(l))
-	}
-
-	/// # Summary
-	///
-	/// Return `true` if `location` is a match.
 	pub fn matches(&self, location: &clinvoice_data::Location) -> bool
 	{
 		self.id.matches(&location.id) &&

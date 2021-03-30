@@ -36,7 +36,7 @@ impl Timesheet<'_>
 	/// Return `true` if `timesheet` is a match.
 	pub fn any_matches_view(&self, timesheets: &[TimesheetView]) -> bool
 	{
-		self.employee.any_matches_view(&timesheets.iter().map(|t| &t.employee).collect::<Vec<_>>()) &&
+		timesheets.iter().map(|t| &t.employee).any(|e| self.employee.matches_view(e)) &&
 		self.time_begin.set_matches(&timesheets.iter().map(|t| &t.time_begin).collect()) &&
 		self.time_end.set_matches(&timesheets.iter().map(|t| &t.time_end).collect())
 	}

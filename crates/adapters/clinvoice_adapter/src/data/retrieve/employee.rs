@@ -39,17 +39,9 @@ impl Employee<'_>
 	/// # Summary
 	///
 	/// Return `true` if `employee` is a match.
-	pub fn any_matches_view(&self, employees: &[&EmployeeView]) -> bool
-	{
-		employees.iter().any(|e| self.matches_view(e))
-	}
-
-	/// # Summary
-	///
-	/// Return `true` if `employee` is a match.
 	pub fn matches(&self, employee: &clinvoice_data::Employee) -> bool
 	{
-		self.contact_info.set_matches(&employee.contact_info.values().collect::<Vec<_>>()) &&
+		self.contact_info.set_matches(employee.contact_info.values()) &&
 		self.id.matches(&employee.id) &&
 		self.organization.id.matches(&employee.organization_id) &&
 		self.person.id.matches(&employee.person_id) &&
@@ -62,7 +54,7 @@ impl Employee<'_>
 	/// Return `true` if `employee` is a match.
 	pub fn matches_view(&self, employee: &EmployeeView) -> bool
 	{
-		self.contact_info.any_matches_view(&employee.contact_info.values().collect::<Vec<_>>()) &&
+		self.contact_info.any_matches_view(employee.contact_info.values()) &&
 		self.id.matches(&employee.id) &&
 		self.organization.matches_view(&employee.organization) &&
 		self.person.matches_view(&employee.person) &&

@@ -1,8 +1,8 @@
 use
 {
-	super::{MatchWhen, Deletable, Initializable, Updatable},
+	super::{MatchWhen, Deletable, Initializable, retrieve, Updatable},
 	crate::Store,
-	clinvoice_data::{Location, Id, views::LocationView},
+	clinvoice_data::{Location, views::LocationView},
 	std::{borrow::Cow, error::Error},
 };
 
@@ -61,9 +61,11 @@ pub trait LocationAdapter<'store> :
 		while let Some(id) = outer_id
 		{
 			if let Ok(results) = Self::retrieve(
-				MatchWhen::EqualTo(Cow::Borrowed(&id)), // id
-				MatchWhen::Any, // name
-				MatchWhen::Any, // outer id
+				retrieve::Location
+				{
+					id: MatchWhen::EqualTo(Cow::Borrowed(&id)),
+					..Default::default()
+				},
 				&store,
 			)
 			{
@@ -94,9 +96,7 @@ pub trait LocationAdapter<'store> :
 	/// * An [`Error`], when something goes wrong.
 	/// * A list of matches, if there are any.
 	fn retrieve(
-		id: MatchWhen<Id>,
-		name: MatchWhen<String>,
-		outer: MatchWhen<Option<Id>>,
+		query: retrieve::Location,
 		store: &Store,
 	) -> Result<Vec<Location>, <Self as LocationAdapter<'store>>::Error>;
 }

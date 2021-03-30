@@ -1,11 +1,11 @@
 use
 {
-	super::{Deletable, Initializable, MatchWhen, Updatable},
+	super::{Deletable, Initializable, retrieve, Updatable},
 	crate::Store,
 	clinvoice_data::
 	{
 		chrono::{DateTime, Utc},
-		Id, InvoiceDate, Job, Money, Organization, views::JobView
+		Job, Money, Organization, views::JobView
 	},
 	std::error::Error,
 };
@@ -51,17 +51,7 @@ pub trait JobAdapter<'store> :
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`Job`]s.
 	fn retrieve(
-		client: MatchWhen<Id>,
-		date_close: MatchWhen<Option<DateTime<Utc>>>,
-		date_open: MatchWhen<DateTime<Utc>>,
-		id: MatchWhen<Id>,
-		invoice_date: MatchWhen<Option<InvoiceDate>>,
-		invoice_hourly_rate: MatchWhen<Money>,
-		notes: MatchWhen<String>,
-		objectives: MatchWhen<String>,
-		timesheet_employee: MatchWhen<Id>,
-		timesheet_begin: MatchWhen<DateTime<Utc>>,
-		timesheet_end: MatchWhen<Option<DateTime<Utc>>>,
+		query: retrieve::Job,
 		store: &Store,
 	) -> Result<Vec<Job>, <Self as JobAdapter<'store>>::Error>;
 }

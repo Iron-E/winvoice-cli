@@ -1,8 +1,8 @@
 use
 {
-	super::{Deletable, Initializable, MatchWhen, Updatable},
+	super::{Deletable, Initializable, retrieve, Updatable},
 	crate::Store,
-	clinvoice_data::{Person, Id, views::PersonView},
+	clinvoice_data::{Person, views::PersonView},
 	std::error::Error,
 };
 
@@ -41,8 +41,7 @@ pub trait PersonAdapter<'store> :
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`Job`]s.
 	fn retrieve(
-		id: MatchWhen<Id>,
-		name: MatchWhen<String>,
+		query: retrieve::Person,
 		store: &Store,
 	) -> Result<Vec<Person>, <Self as PersonAdapter<'store>>::Error>;
 }

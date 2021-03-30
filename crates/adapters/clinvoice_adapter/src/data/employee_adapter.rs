@@ -1,8 +1,8 @@
 use
 {
-	super::{MatchWhen, Deletable, Initializable, Updatable},
+	super::{Deletable, Initializable, retrieve, Updatable},
 	crate::Store,
-	clinvoice_data::{Contact, Employee, EmployeeStatus, Id, Organization, Person, views::EmployeeView},
+	clinvoice_data::{Contact, Employee, EmployeeStatus, Organization, Person, views::EmployeeView},
 	std::{collections::HashMap, error::Error},
 };
 
@@ -51,12 +51,7 @@ pub trait EmployeeAdapter<'store> :
 	/// * Any matching [`Employee`]s.
 	/// * An [`Error`], should something go wrong.
 	fn retrieve(
-		contact_info: MatchWhen<Contact>,
-		id: MatchWhen<Id>,
-		organization: MatchWhen<Id>,
-		person: MatchWhen<Id>,
-		title: MatchWhen<String>,
-		status: MatchWhen<EmployeeStatus>,
+		query: retrieve::Employee,
 		store: &Store,
 	) -> Result<Vec<Employee>, <Self as EmployeeAdapter<'store>>::Error>;
 }

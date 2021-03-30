@@ -1,7 +1,7 @@
 use
 {
 	crate::data::{BincodeEmployee, BincodePerson, Result},
-	clinvoice_adapter::data::{Error as DataError, Match, PersonAdapter},
+	clinvoice_adapter::data::{Error as DataError, Match, PersonAdapter, retrieve},
 	clinvoice_data::Person,
 	std::borrow::Cow,
 };
@@ -11,8 +11,11 @@ impl Into<Result<Person>> for BincodeEmployee<'_, '_>
 	fn into(self) -> Result<Person>
 	{
 		let results = BincodePerson::retrieve(
-			Match::EqualTo(Cow::Borrowed(&self.employee.person_id)), // id
-			Match::Any, // name
+			retrieve::Person
+			{
+				id: Match::EqualTo(Cow::Borrowed(&self.employee.person_id)),
+				..Default::default()
+			},
 			self.store,
 		)?;
 

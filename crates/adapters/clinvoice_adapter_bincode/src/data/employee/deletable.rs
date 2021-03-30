@@ -2,7 +2,7 @@ use
 {
 	super::BincodeEmployee,
 	crate::data::{BincodeJob, Error, Result},
-	clinvoice_adapter::data::{Deletable, JobAdapter, Match, Updatable},
+	clinvoice_adapter::data::{Deletable, JobAdapter, Match, retrieve, Updatable},
 	std::{borrow::Cow, fs, io::ErrorKind},
 };
 
@@ -24,17 +24,19 @@ impl Deletable for BincodeEmployee<'_, '_>
 		if cascade
 		{
 			for mut result in BincodeJob::retrieve(
-				Match::Any, // client
-				Match::Any, // date close
-				Match::Any, // date open
-				Match::Any, // id
-				Match::Any, // invoice date
-				Match::Any, // invoice hourly rate
-				Match::Any, // notes
-				Match::Any, // objectives
-				Match::HasAny(vec![Cow::Borrowed(&self.employee.id)].into_iter().collect()), // timesheet employee
-				Match::Any, // timesheet time begin
-				Match::Any, // timesheet time end
+				retrieve::Job
+				{
+					timesheets: retrieve::Timesheet
+					{
+						employee: retrieve::Employee
+						{
+							id: Match::HasAny(vec![Cow::Borrowed(&self.employee.id)].into_iter().collect()),
+							..Default::default()
+						},
+						..Default::default()
+					},
+					..Default::default()
+				},
 				self.store,
 			)?
 			{
@@ -56,7 +58,7 @@ mod tests
 {
 	use
 	{
-		super::{BincodeEmployee, BincodeJob, Cow, Deletable, JobAdapter, Match, Updatable},
+		super::{BincodeEmployee, BincodeJob, Cow, Deletable, JobAdapter, Match, retrieve, Updatable},
 		crate::
 		{
 			data::{BincodeLocation, BincodeOrganization, BincodePerson},
@@ -132,24 +134,25 @@ mod tests
 			assert!(testy.filepath().is_file());
 
 			big_old_test = BincodeOrganization::retrieve(
-				Match::EqualTo(Cow::Borrowed(&big_old_test.id)), // id
-				Match::Any, // location
-				Match::Any, // name
+				retrieve::Organization
+				{
+					id: Match::EqualTo(Cow::Borrowed(&big_old_test.id)),
+					..Default::default()
+				},
 				&store,
 			).unwrap().iter().next().unwrap().clone();
 
 			creation = BincodeJob::retrieve(
-				Match::EqualTo(Cow::Borrowed(&big_old_test.id)), // client
-				Match::Any, // date close
-				Match::Any, // date open
-				Match::EqualTo(Cow::Borrowed(&creation.id)), // id
-				Match::Any, // invoice date
-				Match::Any, // invoice hourly rate
-				Match::Any, // notes
-				Match::Any, // objectives
-				Match::Any, // timesheet employee
-				Match::Any, // timesheet time begin
-				Match::Any, // timesheet time end
+				retrieve::Job
+				{
+					client: retrieve::Organization
+					{
+						id: Match::EqualTo(Cow::Borrowed(&big_old_test.id)),
+						..Default::default()
+					},
+					id: Match::EqualTo(Cow::Borrowed(&creation.id)),
+					..Default::default()
+				},
 				&store,
 			).unwrap().iter().next().unwrap().clone();
 

@@ -1,7 +1,7 @@
 use
 {
 	crate::data::{BincodeEmployee, BincodeOrganization, Result},
-	clinvoice_adapter::data::{EmployeeAdapter, Match},
+	clinvoice_adapter::data::{EmployeeAdapter, Match, retrieve},
 	clinvoice_data::Employee,
 	std::borrow::Cow,
 };
@@ -11,12 +11,15 @@ impl Into<Result<Vec<Employee>>> for BincodeOrganization<'_, '_>
 	fn into(self) -> Result<Vec<Employee>>
 	{
 		BincodeEmployee::retrieve(
-			Match::Any, // contact info
-			Match::Any, // id
-			Match::EqualTo(Cow::Borrowed(&self.organization.id)), // organization
-			Match::Any, // person
-			Match::Any, // status
-			Match::Any, // title
+			retrieve::Employee
+			{
+				organization: retrieve::Organization
+				{
+					id: Match::EqualTo(Cow::Borrowed(&self.organization.id)),
+					..Default::default()
+				},
+				..Default::default()
+			},
 			self.store,
 		)
 	}

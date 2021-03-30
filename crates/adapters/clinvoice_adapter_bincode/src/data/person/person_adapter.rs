@@ -8,10 +8,10 @@ use
 	},
 	clinvoice_adapter::
 	{
-		data::{Match, Initializable, PersonAdapter, Updatable},
+		data::{Initializable, PersonAdapter, retrieve, Updatable},
 		Store,
 	},
-	clinvoice_data::{Person, Id},
+	clinvoice_data::Person,
 	std::{fs, io::BufReader},
 };
 
@@ -57,11 +57,7 @@ impl<'store> PersonAdapter<'store> for BincodePerson<'_, 'store>
 	///
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`Job`]s.
-	fn retrieve(
-		id: Match<Id>,
-		name: Match<String>,
-		store: &Store,
-	) -> Result<Vec<Person>>
+	fn retrieve(query: retrieve::Person, store: &Store) -> Result<Vec<Person>>
 	{
 		Self::init(&store)?;
 
@@ -73,7 +69,7 @@ impl<'store> PersonAdapter<'store> for BincodePerson<'_, 'store>
 				fs::File::open(node_path)?
 			))?;
 
-			if id.matches(&person.id) && name.matches(&person.name)
+			if query.matches(&person)
 			{
 				results.push(person);
 			}
@@ -88,9 +84,9 @@ mod tests
 {
 	use
 	{
-		super::{BincodePerson, Match, Person, PersonAdapter, Store, util},
+		super::{BincodePerson, Person, PersonAdapter, retrieve, Store, util},
+		clinvoice_adapter::data::Match,
 		std::{borrow::Cow, fs, time::Instant},
-		bincode,
 	};
 
 	#[test]
@@ -179,15 +175,21 @@ mod tests
 
 			// Retrieve bob
 			let only_bob = BincodePerson::retrieve(
-				Match::EqualTo(Cow::Borrowed(&bob.id)),
-				Match::Any, // id
+				retrieve::Person
+				{
+					id: Match::EqualTo(Cow::Borrowed(&bob.id)),
+					..Default::default()
+				},
 				&store,
 			).unwrap();
 
 			// Retrieve longone and slimdi
 			let longone_slimdi = BincodePerson::retrieve(
-				Match::Any, // id
-				Match::HasAny(vec![Cow::Borrowed(&slimdi.name.clone()), Cow::Borrowed(&longone.name.clone())].into_iter().collect()), // name
+				retrieve::Person
+				{
+					name: Match::HasAny(vec![Cow::Borrowed(&slimdi.name.clone()), Cow::Borrowed(&longone.name.clone())].into_iter().collect()),
+					..Default::default()
+				},
 				&store,
 			).unwrap();
 

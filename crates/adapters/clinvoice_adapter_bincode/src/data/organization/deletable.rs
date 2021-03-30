@@ -2,7 +2,7 @@ use
 {
 	super::BincodeOrganization,
 	crate::data::{BincodeEmployee, BincodeJob, Error, Result},
-	clinvoice_adapter::data::{Deletable, EmployeeAdapter, JobAdapter, Match},
+	clinvoice_adapter::data::{Deletable, EmployeeAdapter, JobAdapter, Match, retrieve},
 	std::{borrow::Cow, fs, io::ErrorKind},
 };
 
@@ -24,40 +24,33 @@ impl Deletable for BincodeOrganization<'_, '_>
 		if cascade
 		{
 			BincodeJob::retrieve(
-				Match::EqualTo(Cow::Borrowed(&self.organization.id)), // client
-				Match::Any, // date close
-				Match::Any, // date open
-				Match::Any, // id
-				Match::Any, // invoice date
-				Match::Any, // invoice hourly rate
-				Match::Any, // notes
-				Match::Any, // objectives
-				Match::Any, // timesheet employee
-				Match::Any, // timesheet time begin
-				Match::Any, // timesheet time end
-				self.store,
-			)?.into_iter().try_for_each(|j|
-				BincodeJob
+				retrieve::Job
 				{
-					job: &j,
-					store: self.store,
-				}.delete(true)
+					client: retrieve::Organization
+					{
+						id: Match::EqualTo(Cow::Borrowed(&self.organization.id)),
+						..Default::default()
+					},
+					..Default::default()
+				},
+				self.store,
+			)?.into_iter().try_for_each(
+				|j| BincodeJob {job: &j, store: self.store}.delete(true)
 			)?;
 
 			BincodeEmployee::retrieve(
-				Match::Any, // contact info
-				Match::Any, // id
-				Match::EqualTo(Cow::Borrowed(&self.organization.id)), // organization
-				Match::Any, // person
-				Match::Any, // title
-				Match::Any, // status
-				self.store,
-			)?.into_iter().try_for_each(|e|
-				BincodeEmployee
+				retrieve::Employee
 				{
-					employee: &e,
-					store: self.store,
-				}.delete(true)
+					organization: retrieve::Organization
+					{
+						id: Match::EqualTo(Cow::Borrowed(&self.organization.id)),
+						..Default::default()
+					},
+					..Default::default()
+				},
+				self.store,
+			)?.into_iter().try_for_each(
+				|e| BincodeEmployee {employee: &e, store: self.store}.delete(true)
 			)?;
 		}
 

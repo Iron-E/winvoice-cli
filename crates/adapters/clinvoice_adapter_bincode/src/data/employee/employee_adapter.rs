@@ -8,10 +8,10 @@ use
 	},
 	clinvoice_adapter::
 	{
-		data::{EmployeeAdapter, Initializable, Match, Updatable},
+		data::{EmployeeAdapter, Initializable, retrieve, Updatable},
 		Store,
 	},
-	clinvoice_data::{Contact, Employee, EmployeeStatus, Organization, Person, Id},
+	clinvoice_data::{Contact, Employee, EmployeeStatus, Organization, Person},
 	std::{collections::HashMap, fs, io::BufReader},
 };
 
@@ -69,15 +69,7 @@ impl<'store> EmployeeAdapter<'store> for BincodeEmployee<'_, 'store>
 	///
 	/// * Any matching [`Employee`]s.
 	/// * An [`Error`], should something go wrong.
-	fn retrieve(
-		contact_info: Match<Contact>,
-		id: Match<Id>,
-		organization: Match<Id>,
-		person: Match<Id>,
-		title: Match<String>,
-		status: Match<EmployeeStatus>,
-		store: &Store,
-	) -> Result<Vec<Employee>>
+	fn retrieve(query: retrieve::Employee, store: &Store) -> Result<Vec<Employee>>
 	{
 		Self::init(&store)?;
 
@@ -89,12 +81,7 @@ impl<'store> EmployeeAdapter<'store> for BincodeEmployee<'_, 'store>
 				fs::File::open(node_path)?
 			))?;
 
-			if contact_info.set_matches(&employee.contact_info.iter().map(|(_, v)| v).collect()) &&
-				id.matches(&employee.id) &&
-				organization.matches(&employee.organization_id) &&
-				person.matches(&employee.person_id) &&
-				title.matches(&employee.title) &&
-				status.matches(&employee.status)
+			if query.matches(&employee)
 			{
 				results.push(employee);
 			}
@@ -109,7 +96,9 @@ mod tests
 {
 	use
 	{
-		super::{BincodeEmployee, Contact, Employee, EmployeeAdapter, EmployeeStatus, Id, Match, Organization, Person, Store, util},
+		super::{BincodeEmployee, Contact, Employee, EmployeeAdapter, EmployeeStatus, Organization, Person, retrieve, Store, util},
+		clinvoice_adapter::data::Match,
+		clinvoice_data::Id,
 		std::{borrow::Cow, fs, time::Instant},
 	};
 
@@ -296,24 +285,15 @@ mod tests
 
 			let start = Instant::now();
 
-			let everything = BincodeEmployee::retrieve(
-				Match::Any, // contact info
-				Match::Any, // id
-				Match::Any, // organization
-				Match::Any, // person
-				Match::Any, // title
-				Match::Any, // status
-				&store,
-			).unwrap();
+			let everything = BincodeEmployee::retrieve(Default::default(), &store).unwrap();
 
 			// Retrieve testy and gottard
 			let testy_gottard = BincodeEmployee::retrieve(
-				Match::Any, // contact info
-				Match::HasAny(vec![Cow::Borrowed(&testy_mctesterson.id), Cow::Borrowed(&gottard.id)].into_iter().collect()), // id
-				Match::Any, // organization
-				Match::Any, // person
-				Match::Any, // title
-				Match::Any, // status
+				retrieve::Employee
+				{
+					id: Match::HasAny(vec![Cow::Borrowed(&testy_mctesterson.id), Cow::Borrowed(&gottard.id)].into_iter().collect()),
+					..Default::default()
+				},
 				&store,
 			).unwrap();
 

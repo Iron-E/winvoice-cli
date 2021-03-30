@@ -8,10 +8,10 @@ use
 	},
 	clinvoice_adapter::
 	{
-		data::{Initializable, Match, OrganizationAdapter, Updatable},
+		data::{Initializable, OrganizationAdapter, retrieve, Updatable},
 		Store,
 	},
-	clinvoice_data::{Location, Organization, Id},
+	clinvoice_data::{Location, Organization},
 	std::{fs, io::BufReader},
 };
 
@@ -58,12 +58,7 @@ impl<'store> OrganizationAdapter<'store> for BincodeOrganization<'_, 'store>
 	///
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`Job`]s.
-	fn retrieve(
-		id: Match<Id>,
-		location: Match<Id>,
-		name: Match<String>,
-		store: &Store,
-	) -> Result<Vec<Organization>>
+	fn retrieve(query: retrieve::Organization, store: &Store) -> Result<Vec<Organization>>
 	{
 		Self::init(&store)?;
 
@@ -75,9 +70,7 @@ impl<'store> OrganizationAdapter<'store> for BincodeOrganization<'_, 'store>
 				fs::File::open(node_path)?
 			))?;
 
-			if id.matches(&organization.id) &&
-				location.matches(&organization.location_id) &&
-				name.matches(&organization.name)
+			if query.matches(&organization)
 			{
 				results.push(organization);
 			}
@@ -92,7 +85,9 @@ mod tests
 {
 	use
 	{
-		super::{BincodeOrganization, Id, Location, Match, Organization, OrganizationAdapter, Store, util},
+		super::{BincodeOrganization, Location, Organization, OrganizationAdapter, retrieve, Store, util},
+		clinvoice_adapter::data::Match,
+		clinvoice_data::Id,
 		std::{borrow::Cow, fs, time::Instant},
 	};
 
@@ -185,9 +180,16 @@ mod tests
 			let start = Instant::now();
 			// retrieve `packing` and `eal`
 			let results = BincodeOrganization::retrieve(
-				Match::Any, // id
-				Match::HasAny(vec![Cow::Borrowed(&earth_id), Cow::Borrowed(&usa_id)].into_iter().collect()), // location
-				Match::HasNone(vec![Cow::Borrowed(&aaa.name)].into_iter().collect()), // name
+				retrieve::Organization
+				{
+					location: retrieve::Location
+					{
+						id: Match::HasAny(vec![Cow::Borrowed(&earth_id), Cow::Borrowed(&usa_id)].into_iter().collect()),
+						..Default::default()
+					},
+					name: Match::HasNone(vec![Cow::Borrowed(&aaa.name)].into_iter().collect()),
+					..Default::default()
+				},
 				&store,
 			).unwrap();
 			println!("\n>>>>> BincodeOrganization::retrieve {}us <<<<<\n", Instant::now().duration_since(start).as_micros());

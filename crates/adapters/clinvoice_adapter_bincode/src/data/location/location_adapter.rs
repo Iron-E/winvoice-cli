@@ -8,10 +8,10 @@ use
 	},
 	clinvoice_adapter::
 	{
-		data::{Initializable, LocationAdapter, Match, Updatable},
+		data::{Initializable, LocationAdapter, retrieve, Updatable},
 		Store,
 	},
-	clinvoice_data::{Location, Id},
+	clinvoice_data::Location,
 	std::{fs, io::BufReader},
 };
 
@@ -87,12 +87,7 @@ impl<'store> LocationAdapter<'store> for BincodeLocation<'_, 'store>
 	///
 	/// * An [`Error`], when something goes wrong.
 	/// * A list of matches, if there are any.
-	fn retrieve(
-		id: Match<Id>,
-		name: Match<String>,
-		outer: Match<Option<Id>>,
-		store: &Store,
-	) -> Result<Vec<Location>>
+	fn retrieve(query: retrieve::Location, store: &Store) -> Result<Vec<Location>>
 	{
 		Self::init(&store)?;
 
@@ -104,9 +99,7 @@ impl<'store> LocationAdapter<'store> for BincodeLocation<'_, 'store>
 				fs::File::open(node_path)?
 			))?;
 
-			if id.matches(&location.id) &&
-				name.matches(&location.name) &&
-				outer.matches(&location.outer_id)
+			if query.matches(&location)
 			{
 				results.push(location);
 			}
@@ -121,7 +114,8 @@ mod tests
 {
 	use
 	{
-		super::{BincodeLocation, Location, LocationAdapter, Match, Store, util},
+		super::{BincodeLocation, Location, LocationAdapter, retrieve, Store, util},
+		clinvoice_adapter::data::Match,
 		std::{borrow::Cow, fs, time::Instant},
 	};
 
@@ -167,18 +161,16 @@ mod tests
 			let start = Instant::now();
 
 			// Retrieve everything.
-			let everything = BincodeLocation::retrieve(
-				Match::Any, // id
-				Match::Any, // name
-				Match::Any, // outer id
-				&store,
-			).unwrap();
+			let everything = BincodeLocation::retrieve(Default::default(), &store).unwrap();
 
 			// Retrieve Arizona
 			let only_arizona = BincodeLocation::retrieve(
-				Match::HasAny(vec![Cow::Borrowed(&earth.id), Cow::Borrowed(&arizona.id)].into_iter().collect()), // id
-				Match::Any, // name
-				Match::HasNone(vec![Cow::Borrowed(&None)].into_iter().collect()), // outer id
+				retrieve::Location
+				{
+					id: Match::HasAny(vec![Cow::Borrowed(&earth.id), Cow::Borrowed(&arizona.id)].into_iter().collect()),
+					outer: Err(true),
+					..Default::default()
+				},
 				&store,
 			).unwrap();
 

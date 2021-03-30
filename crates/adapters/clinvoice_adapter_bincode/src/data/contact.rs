@@ -4,7 +4,7 @@ use
 	crate::data::Result,
 	clinvoice_adapter::
 	{
-		data::{Error as DataError, LocationAdapter, Match},
+		data::{Error as DataError, LocationAdapter, Match, retrieve},
 		Store,
 	},
 	clinvoice_data::{Contact, views::{ContactView, LocationView}},
@@ -19,9 +19,11 @@ pub fn into_view(contact: Contact, store: &Store) -> Result<ContactView>
 	Ok(match contact
 	{
 		Contact::Address(address) => match BincodeLocation::retrieve(
-				Match::EqualTo(Cow::Borrowed(&address)), // id
-				Match::Any, // outer_id
-				Match::Any, // name
+				retrieve::Location
+				{
+					id: Match::EqualTo(Cow::Borrowed(&address)),
+					..Default::default()
+				},
 				store,
 			)?.into_iter().next()
 			{

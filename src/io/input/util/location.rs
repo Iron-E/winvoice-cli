@@ -4,7 +4,7 @@ use
 	clinvoice_adapter::
 	{
 		Adapters, Error as AdapterError,
-		data::{Error as DataError, LocationAdapter, Match},
+		data::{Error as DataError, LocationAdapter},
 		Store,
 	},
 	clinvoice_data::views::LocationView,
@@ -29,7 +29,7 @@ use clinvoice_adapter_bincode::data::{BincodeLocation, Result as BincodeResult};
 pub(super) fn retrieve_or_err<'store, L>(store: &'store Store) -> DynResult<'store, Vec<LocationView>> where
 	L : LocationAdapter<'store> + 'store,
 {
-	let locations = L::retrieve(Match::Any, Match::Any, Match::Any, store)?;
+	let locations = L::retrieve(Default::default(), store)?;
 
 	if locations.is_empty()
 	{

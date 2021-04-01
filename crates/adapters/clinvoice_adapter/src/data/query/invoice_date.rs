@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 
 /// # Summary
 ///
-/// An [`InvoiceDate`](clinvoice_data::InvoiceDate) with [matchable](MatchWhen) fields.
+/// An [`InvoiceDate`](clinvoice_data::InvoiceDate) with [matchable](Match) fields.
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 #[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
 pub struct InvoiceDate<'m>

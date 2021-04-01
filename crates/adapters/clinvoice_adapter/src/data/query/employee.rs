@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 
 /// # Summary
 ///
-/// An [`Employee`](clinvoice_data::Employee) with [matchable](MatchWhen) fields.
+/// An [`Employee`](clinvoice_data::Employee) with [matchable](Match) fields.
 #[derive(Clone, Default, Debug, Eq, PartialEq)]
 #[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
 pub struct Employee<'m>

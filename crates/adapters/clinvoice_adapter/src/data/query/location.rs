@@ -13,7 +13,7 @@ pub use outer_location::OuterLocation;
 
 /// # Summary
 ///
-/// An [`Location`](clinvoice_data::Location) with [matchable](MatchWhen) fields.
+/// An [`Location`](clinvoice_data::Location) with [matchable](Match) fields.
 #[derive(Clone, Default, Debug, Eq, PartialEq)]
 #[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
 pub struct Location<'m>

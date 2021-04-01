@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 
 /// # Summary
 ///
-/// An [`Invoice`](clinvoice_data::Invoice) with [matchable](MatchWhen) fields.
+/// An [`Invoice`](clinvoice_data::Invoice) with [matchable](Match) fields.
 #[derive(Clone, Default, Debug, Eq, PartialEq)]
 #[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
 pub struct Invoice<'m>

@@ -15,7 +15,7 @@ use serde::{Deserialize, Serialize};
 
 /// # Summary
 ///
-/// An [`Job`](clinvoice_data::Job) with [matchable](MatchWhen) fields.
+/// An [`Job`](clinvoice_data::Job) with [matchable](Match) fields.
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 #[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
 pub struct Job<'m>

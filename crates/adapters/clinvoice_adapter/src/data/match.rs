@@ -65,17 +65,17 @@ pub enum Match<'element, T> where
 	/// # Example
 	///
 	/// ```rust
-	/// use clinvoice_adapter::data::MatchWhen;
+	/// use clinvoice_adapter::data::Match;
 	/// use std::borrow::Cow;
 	///
-	/// println!("{}", MatchWhen::InRange(Cow::Borrowed(&3),Cow::Borrowed(&5)).matches(&4));
+	/// println!("{}", Match::InRange(Cow::Borrowed(&3),Cow::Borrowed(&5)).matches(&4));
 	/// ```
 	InRange(Cow<'element, T>, Cow<'element, T>),
 }
 
 /// # Summary
 ///
-/// Return whether or not some [`MatchWhen::InRange`] is in range.
+/// Return whether or not some [`Match::InRange`] is in range.
 fn is_in_range<T>(min: &T, max: &T, value: &T) -> bool where T : Ord {
 	min <= value && value < max
 }
@@ -93,7 +93,7 @@ impl<'element, T> Match<'element, T> where
 	///
 	/// # Returns
 	///
-	/// * `true`, if the `value` matches the passed [`MatchWhen`].
+	/// * `true`, if the `value` matches the passed [`Match`].
 	/// * `false`, if the `value` does not match.
 	pub fn matches(&self, value: &T) -> bool
 	{
@@ -118,7 +118,7 @@ impl<'element, T> Match<'element, T> where
 	///
 	/// # Returns
 	///
-	/// * `true`, if the `values` match the passed [`MatchWhen`].
+	/// * `true`, if the `values` match the passed [`Match`].
 	/// * `false`, if the `values` do not match.
 	pub fn set_matches(&self, values: &HashSet<&T>) -> bool
 	{
@@ -181,7 +181,7 @@ mod tests
 		assert!(Match::InRange(Cow::Borrowed(&0), Cow::Borrowed(&8)).matches(test_value));
 		assert!(!Match::InRange(Cow::Borrowed(&0), Cow::Borrowed(&3)).matches(test_value));
 
-		println!("\n>>>>> MatchWhen::matches {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 11);
+		println!("\n>>>>> Match::matches {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 11);
 	}
 
 	#[test]
@@ -236,6 +236,6 @@ mod tests
 		assert!(!not_in_range.set_matches(&test_set));
 		assert!(!not_in_range.set_matches(&test_set_single_element));
 
-		println!("\n>>>>> MatchWhen::set_match {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 22);
+		println!("\n>>>>> Match::set_match {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 22);
 	}
 }

@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 
 /// # Summary
 ///
-/// An [`Organization`](clinvoice_data::Organization) with [matchable](MatchWhen) fields.
+/// An [`Organization`](clinvoice_data::Organization) with [matchable](Match) fields.
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 #[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
 pub struct Organization<'m>

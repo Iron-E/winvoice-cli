@@ -1,3 +1,7 @@
+//! # Summary
+//!
+//! This crate provides definitions of what a user's `clinvoice` configuration should look like.
+
 mod config;
 mod employees;
 mod invoices;

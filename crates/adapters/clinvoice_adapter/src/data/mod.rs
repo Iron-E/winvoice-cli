@@ -1,3 +1,13 @@
+//! # Summary
+//!
+//! This module defines common and specific adapter types for [`clinvoice` data](clinvoice_data).
+//!
+//! # Remarks
+//!
+//! One example of a common adapter type is [`Deletable`], since all top-level
+//! [`clinvoice` data](clinvoice_data) types may implement it with the same signature. This is in
+//! contrast to [`JobAdapter`], which may only be implemented by [`Job`](clinvoice_data::Job)s.
+
 mod deletable;
 mod employee_adapter;
 mod error;

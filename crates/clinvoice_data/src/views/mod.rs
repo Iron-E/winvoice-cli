@@ -1,3 +1,9 @@
+///! # Summary
+///
+/// This module provides definitions for what high-level views of each [data](super) item in this
+/// crate should look like. These structures differ from their counterparts in typically obvious
+/// ways (e.g. joins have been performed on relational data, and `Display` is implemented).
+
 mod contact_view;
 mod employee_view;
 mod job_view;

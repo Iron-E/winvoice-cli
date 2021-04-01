@@ -1,3 +1,21 @@
+//! # Summary
+//!
+//! This crate provides a complete resource for data items which are to be stored in a database (or
+//! other permanent storage fixture). It is independent of all other crates in the `clinvoice`
+//! suite, so the definitions can be used apart from any other project-local crate.
+//!
+//! Consequently, most other parts of `clinvoice` depend on this crate.
+//!
+//! # Features
+//!
+//! Support for [`serde`](http://serde.rs/) can be enabled with the `serde_support` feature flag.
+//! Otherwise, serialization will have to be implemented for these types by hand.
+//!
+//! # Remarks
+//!
+//! In the base you can find the types which are intended to be stored (e.g. [`Contact`]) and in
+//! [`views`] you can find all logical views of the data.
+
 #![allow(clippy::suspicious_else_formatting)]
 
 mod contact;

@@ -15,28 +15,8 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
 pub struct Contact<'m>
 {
-	/// # Summary
-	///
-	/// A [`Location`](crate::Location).
 	pub address: Location<'m>,
-
-	/// # Summary
-	///
-	/// An email address.
-	///
-	/// # Example
-	///
-	/// * 'foo@bar.io'
 	pub email: Match<'m, String>,
-
-	/// # Summary
-	///
-	/// A phone number.
-	///
-	/// # Example
-	///
-	/// * '1-603-555-1234'
-	/// * '603-555-1234'
 	pub phone: Match<'m, String>,
 }
 

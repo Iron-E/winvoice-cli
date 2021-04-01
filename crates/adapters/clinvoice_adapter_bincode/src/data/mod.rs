@@ -1,3 +1,9 @@
+//! # Summary
+//!
+//! This module implements adapters (and associated adapter types such as
+//! [`Deletable`](clinvoice_adapter::data::Deletable)) for a Bincode filesystem.
+
+
 pub mod contact;
 mod employee;
 mod error;

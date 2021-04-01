@@ -6,8 +6,9 @@ impl Default for Location<'_>
 	{
 		Self
 		{
+			id: Default::default(),
+			name: Default::default(),
 			outer: location_outer_default(),
-			..Default::default()
 		}
 	}
 }

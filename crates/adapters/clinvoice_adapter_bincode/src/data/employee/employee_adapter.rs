@@ -8,7 +8,7 @@ use
 	},
 	clinvoice_adapter::
 	{
-		data::{EmployeeAdapter, Initializable, retrieve, Updatable},
+		data::{EmployeeAdapter, Initializable, query, Updatable},
 		Store,
 	},
 	clinvoice_data::{Contact, Employee, EmployeeStatus, Organization, Person},
@@ -69,7 +69,7 @@ impl<'store> EmployeeAdapter<'store> for BincodeEmployee<'_, 'store>
 	///
 	/// * Any matching [`Employee`]s.
 	/// * An [`Error`], should something go wrong.
-	fn retrieve(query: retrieve::Employee, store: &Store) -> Result<Vec<Employee>>
+	fn retrieve(query: query::Employee, store: &Store) -> Result<Vec<Employee>>
 	{
 		Self::init(&store)?;
 
@@ -96,7 +96,7 @@ mod tests
 {
 	use
 	{
-		super::{BincodeEmployee, Contact, Employee, EmployeeAdapter, EmployeeStatus, Organization, Person, retrieve, Store, util},
+		super::{BincodeEmployee, Contact, Employee, EmployeeAdapter, EmployeeStatus, Organization, Person, query, Store, util},
 		clinvoice_adapter::data::Match,
 		clinvoice_data::Id,
 		std::{borrow::Cow, fs, time::Instant},
@@ -289,7 +289,7 @@ mod tests
 
 			// Retrieve testy and gottard
 			let testy_gottard = BincodeEmployee::retrieve(
-				retrieve::Employee
+				query::Employee
 				{
 					id: Match::HasAny(vec![Cow::Borrowed(&testy_mctesterson.id), Cow::Borrowed(&gottard.id)].into_iter().collect()),
 					..Default::default()

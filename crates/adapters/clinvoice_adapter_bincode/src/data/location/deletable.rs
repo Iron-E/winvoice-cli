@@ -2,7 +2,7 @@ use
 {
 	super::BincodeLocation,
 	crate::data::{BincodeOrganization, Error, Result},
-	clinvoice_adapter::data::{Deletable, LocationAdapter, Match, OrganizationAdapter, retrieve},
+	clinvoice_adapter::data::{Deletable, LocationAdapter, Match, OrganizationAdapter, query},
 	std::{borrow::Cow, fs, io::ErrorKind},
 };
 
@@ -24,9 +24,9 @@ impl Deletable for BincodeLocation<'_, '_>
 		if cascade
 		{
 			BincodeLocation::retrieve(
-				retrieve::Location
+				query::Location
 				{
-					outer: Ok(retrieve::Location
+					outer: Ok(query::Location
 					{
 						id: Match::EqualTo(Cow::Borrowed(&self.location.id)),
 						..Default::default()
@@ -39,9 +39,9 @@ impl Deletable for BincodeLocation<'_, '_>
 			)?;
 
 			BincodeOrganization::retrieve(
-				retrieve::Organization
+				query::Organization
 				{
-					location: retrieve::Location
+					location: query::Location
 					{
 						id: Match::EqualTo(Cow::Borrowed(&self.location.id)),
 						..Default::default()

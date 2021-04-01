@@ -1,6 +1,6 @@
 use
 {
-	super::{Deletable, Initializable, retrieve, Updatable},
+	super::{Deletable, Initializable, query, Updatable},
 	crate::Store,
 	clinvoice_data::{Contact, Employee, EmployeeStatus, Organization, Person, views::EmployeeView},
 	std::{collections::HashMap, error::Error},
@@ -51,7 +51,7 @@ pub trait EmployeeAdapter<'store> :
 	/// * Any matching [`Employee`]s.
 	/// * An [`Error`], should something go wrong.
 	fn retrieve(
-		query: retrieve::Employee,
+		query: query::Employee,
 		store: &Store,
 	) -> Result<Vec<Employee>, <Self as EmployeeAdapter<'store>>::Error>;
 }

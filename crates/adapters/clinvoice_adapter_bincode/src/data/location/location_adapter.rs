@@ -8,7 +8,7 @@ use
 	},
 	clinvoice_adapter::
 	{
-		data::{Initializable, LocationAdapter, retrieve, Updatable},
+		data::{Initializable, LocationAdapter, query, Updatable},
 		Store,
 	},
 	clinvoice_data::Location,
@@ -87,7 +87,7 @@ impl<'store> LocationAdapter<'store> for BincodeLocation<'_, 'store>
 	///
 	/// * An [`Error`], when something goes wrong.
 	/// * A list of matches, if there are any.
-	fn retrieve(query: retrieve::Location, store: &Store) -> Result<Vec<Location>>
+	fn retrieve(query: query::Location, store: &Store) -> Result<Vec<Location>>
 	{
 		Self::init(&store)?;
 
@@ -114,7 +114,7 @@ mod tests
 {
 	use
 	{
-		super::{BincodeLocation, Location, LocationAdapter, retrieve, Store, util},
+		super::{BincodeLocation, Location, LocationAdapter, query, Store, util},
 		clinvoice_adapter::data::Match,
 		std::{borrow::Cow, fs, time::Instant},
 	};
@@ -165,7 +165,7 @@ mod tests
 
 			// Retrieve Arizona
 			let only_arizona = BincodeLocation::retrieve(
-				retrieve::Location
+				query::Location
 				{
 					id: Match::HasAny(vec![Cow::Borrowed(&earth.id), Cow::Borrowed(&arizona.id)].into_iter().collect()),
 					outer: Err(true),

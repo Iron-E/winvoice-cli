@@ -1,7 +1,7 @@
 use
 {
 	crate::data::{BincodeLocation, BincodeOrganization, Result},
-	clinvoice_adapter::data::{Error as DataError, LocationAdapter, Match, retrieve},
+	clinvoice_adapter::data::{Error as DataError, LocationAdapter, Match, query},
 	clinvoice_data::Location,
 	std::borrow::Cow,
 };
@@ -11,7 +11,7 @@ impl Into<Result<Location>> for BincodeOrganization<'_, '_>
 	fn into(self) -> Result<Location>
 	{
 		let results = BincodeLocation::retrieve(
-			retrieve::Location
+			query::Location
 			{
 				id: Match::EqualTo(Cow::Borrowed(&self.organization.location_id)),
 				..Default::default()

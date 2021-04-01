@@ -1,6 +1,6 @@
 use
 {
-	super::{Deletable, Initializable, retrieve, Updatable},
+	super::{Deletable, Initializable, query, Updatable},
 	crate::Store,
 	clinvoice_data::
 	{
@@ -51,7 +51,7 @@ pub trait JobAdapter<'store> :
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`Job`]s.
 	fn retrieve(
-		query: retrieve::Job,
+		query: query::Job,
 		store: &Store,
 	) -> Result<Vec<Job>, <Self as JobAdapter<'store>>::Error>;
 }

@@ -8,7 +8,7 @@ use
 	},
 	clinvoice_adapter::
 	{
-		data::{Initializable, OrganizationAdapter, retrieve, Updatable},
+		data::{Initializable, OrganizationAdapter, query, Updatable},
 		Store,
 	},
 	clinvoice_data::{Location, Organization},
@@ -58,7 +58,7 @@ impl<'store> OrganizationAdapter<'store> for BincodeOrganization<'_, 'store>
 	///
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`Job`]s.
-	fn retrieve(query: retrieve::Organization, store: &Store) -> Result<Vec<Organization>>
+	fn retrieve(query: query::Organization, store: &Store) -> Result<Vec<Organization>>
 	{
 		Self::init(&store)?;
 
@@ -85,7 +85,7 @@ mod tests
 {
 	use
 	{
-		super::{BincodeOrganization, Location, Organization, OrganizationAdapter, retrieve, Store, util},
+		super::{BincodeOrganization, Location, Organization, OrganizationAdapter, query, Store, util},
 		clinvoice_adapter::data::Match,
 		clinvoice_data::Id,
 		std::{borrow::Cow, fs, time::Instant},
@@ -180,9 +180,9 @@ mod tests
 			let start = Instant::now();
 			// retrieve `packing` and `eal`
 			let results = BincodeOrganization::retrieve(
-				retrieve::Organization
+				query::Organization
 				{
-					location: retrieve::Location
+					location: query::Location
 					{
 						id: Match::HasAny(vec![Cow::Borrowed(&earth_id), Cow::Borrowed(&usa_id)].into_iter().collect()),
 						..Default::default()

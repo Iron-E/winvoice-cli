@@ -2,7 +2,7 @@ use
 {
 	super::BincodeOrganization,
 	crate::data::{BincodeEmployee, BincodeJob, Error, Result},
-	clinvoice_adapter::data::{Deletable, EmployeeAdapter, JobAdapter, Match, retrieve},
+	clinvoice_adapter::data::{Deletable, EmployeeAdapter, JobAdapter, Match, query},
 	std::{borrow::Cow, fs, io::ErrorKind},
 };
 
@@ -24,9 +24,9 @@ impl Deletable for BincodeOrganization<'_, '_>
 		if cascade
 		{
 			BincodeJob::retrieve(
-				retrieve::Job
+				query::Job
 				{
-					client: retrieve::Organization
+					client: query::Organization
 					{
 						id: Match::EqualTo(Cow::Borrowed(&self.organization.id)),
 						..Default::default()
@@ -39,9 +39,9 @@ impl Deletable for BincodeOrganization<'_, '_>
 			)?;
 
 			BincodeEmployee::retrieve(
-				retrieve::Employee
+				query::Employee
 				{
-					organization: retrieve::Organization
+					organization: query::Organization
 					{
 						id: Match::EqualTo(Cow::Borrowed(&self.organization.id)),
 						..Default::default()

@@ -1,7 +1,7 @@
 use
 {
 	crate::data::{BincodeJob, BincodeOrganization, Result},
-	clinvoice_adapter::data::{Error as DataError, Match, OrganizationAdapter, retrieve},
+	clinvoice_adapter::data::{Error as DataError, Match, OrganizationAdapter, query},
 	clinvoice_data::Organization,
 	std::borrow::Cow,
 };
@@ -11,7 +11,7 @@ impl Into<Result<Organization>> for BincodeJob<'_, '_>
 	fn into(self) -> Result<Organization>
 	{
 		let results = BincodeOrganization::retrieve(
-			retrieve::Organization
+			query::Organization
 			{
 				id: Match::EqualTo(Cow::Borrowed(&self.job.client_id)),
 				..Default::default()

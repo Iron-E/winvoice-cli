@@ -8,7 +8,7 @@ use
 	},
 	clinvoice_adapter::
 	{
-		data::{Initializable, JobAdapter, retrieve, Updatable},
+		data::{Initializable, JobAdapter, query, Updatable},
 		Store
 	},
 	clinvoice_data::
@@ -79,7 +79,7 @@ impl<'store> JobAdapter<'store> for BincodeJob<'_, 'store>
 	///
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`Job`]s.
-	fn retrieve(query: retrieve::Job, store: &Store) -> Result<Vec<Job>>
+	fn retrieve(query: query::Job, store: &Store) -> Result<Vec<Job>>
 	{
 		Self::init(&store)?;
 
@@ -106,7 +106,7 @@ mod tests
 {
 	use
 	{
-		super::{BincodeJob, Job, JobAdapter, Money, Organization, retrieve, Store, Utc, util},
+		super::{BincodeJob, Job, JobAdapter, Money, Organization, query, Store, Utc, util},
 		clinvoice_adapter::data::Match,
 		clinvoice_data::{Decimal, Id},
 		std::{borrow::Cow, fs, time::Instant},
@@ -231,9 +231,9 @@ mod tests
 
 			// retrieve everything
 			let everything = BincodeJob::retrieve(
-				retrieve::Job
+				query::Job
 				{
-					client: retrieve::Organization
+					client: query::Organization
 					{
 						id: Match::EqualTo(Cow::Borrowed(&organization.id)),
 						..Default::default()
@@ -245,7 +245,7 @@ mod tests
 
 			// retrieve retrieval and assertion
 			let not_creation = BincodeJob::retrieve(
-				retrieve::Job
+				query::Job
 				{
 					date_open: Match::HasNone(vec![Cow::Borrowed(&creation.date_open)].into_iter().collect()),
 					id: Match::HasAny(vec![Cow::Borrowed(&retrieval.id), Cow::Borrowed(&assertion.id)].into_iter().collect()),

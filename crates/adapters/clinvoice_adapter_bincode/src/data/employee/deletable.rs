@@ -2,7 +2,7 @@ use
 {
 	super::BincodeEmployee,
 	crate::data::{BincodeJob, Error, Result},
-	clinvoice_adapter::data::{Deletable, JobAdapter, Match, retrieve, Updatable},
+	clinvoice_adapter::data::{Deletable, JobAdapter, Match, query, Updatable},
 	std::{borrow::Cow, fs, io::ErrorKind},
 };
 
@@ -24,11 +24,11 @@ impl Deletable for BincodeEmployee<'_, '_>
 		if cascade
 		{
 			for mut result in BincodeJob::retrieve(
-				retrieve::Job
+				query::Job
 				{
-					timesheets: retrieve::Timesheet
+					timesheets: query::Timesheet
 					{
-						employee: retrieve::Employee
+						employee: query::Employee
 						{
 							id: Match::HasAny(vec![Cow::Borrowed(&self.employee.id)].into_iter().collect()),
 							..Default::default()
@@ -58,7 +58,7 @@ mod tests
 {
 	use
 	{
-		super::{BincodeEmployee, BincodeJob, Cow, Deletable, JobAdapter, Match, retrieve, Updatable},
+		super::{BincodeEmployee, BincodeJob, Cow, Deletable, JobAdapter, Match, query, Updatable},
 		crate::
 		{
 			data::{BincodeLocation, BincodeOrganization, BincodePerson},
@@ -134,7 +134,7 @@ mod tests
 			assert!(testy.filepath().is_file());
 
 			big_old_test = BincodeOrganization::retrieve(
-				retrieve::Organization
+				query::Organization
 				{
 					id: Match::EqualTo(Cow::Borrowed(&big_old_test.id)),
 					..Default::default()
@@ -143,9 +143,9 @@ mod tests
 			).unwrap().iter().next().unwrap().clone();
 
 			creation = BincodeJob::retrieve(
-				retrieve::Job
+				query::Job
 				{
-					client: retrieve::Organization
+					client: query::Organization
 					{
 						id: Match::EqualTo(Cow::Borrowed(&big_old_test.id)),
 						..Default::default()

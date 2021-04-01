@@ -35,7 +35,7 @@ pub use
 	invoice::Invoice,
 	invoice_date::InvoiceDate,
 	job::Job,
-	location::Location,
+	location::{Location, OuterLocation},
 	organization::Organization,
 	person::Person,
 	timesheet::Timesheet,

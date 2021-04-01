@@ -26,11 +26,13 @@ impl Deletable for BincodeLocation<'_, '_>
 			BincodeLocation::retrieve(
 				query::Location
 				{
-					outer: Ok(query::Location
-					{
-						id: Match::EqualTo(Cow::Borrowed(&self.location.id)),
-						..Default::default()
-					}.into()),
+					outer: query::OuterLocation::Some(
+						query::Location
+						{
+							id: Match::EqualTo(Cow::Borrowed(&self.location.id)),
+							..Default::default()
+						}.into()
+					),
 					..Default::default()
 				},
 				self.store,

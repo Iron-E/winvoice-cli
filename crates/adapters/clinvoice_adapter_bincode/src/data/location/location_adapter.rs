@@ -168,7 +168,7 @@ mod tests
 				query::Location
 				{
 					id: Match::HasAny(vec![Cow::Borrowed(&earth.id), Cow::Borrowed(&arizona.id)].into_iter().collect()),
-					outer: Err(true),
+					outer: query::OuterLocation::Some(query::Location::default().into()),
 					..Default::default()
 				},
 				&store,

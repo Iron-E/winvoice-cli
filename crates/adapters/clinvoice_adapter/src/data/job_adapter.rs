@@ -13,7 +13,6 @@ use
 pub trait JobAdapter<'store> :
 	Deletable<Error=<Self as JobAdapter<'store>>::Error> +
 	Initializable<Error=<Self as JobAdapter<'store>>::Error> +
-	Into<Job> +
 	Into<Result<JobView, <Self as JobAdapter<'store>>::Error>> +
 	Into<Result<Organization, <Self as JobAdapter<'store>>::Error>> +
 	Updatable<Error=<Self as JobAdapter<'store>>::Error> +

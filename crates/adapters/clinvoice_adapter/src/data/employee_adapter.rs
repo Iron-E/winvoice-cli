@@ -9,7 +9,6 @@ use
 pub trait EmployeeAdapter<'store> :
 	Deletable<Error=<Self as EmployeeAdapter<'store>>::Error> +
 	Initializable<Error=<Self as EmployeeAdapter<'store>>::Error> +
-	Into<Employee> +
 	Into<Result<EmployeeView, <Self as EmployeeAdapter<'store>>::Error>> +
 	Into<Result<Organization, <Self as EmployeeAdapter<'store>>::Error>> +
 	Into<Result<Person, <Self as EmployeeAdapter<'store>>::Error>> +

@@ -18,13 +18,5 @@ macro_rules! AdaptOrganization
 			pub organization: &$org_life Organization,
 			pub store: &$store_life Store,
 		}
-
-		impl Into<Organization> for $name<'_, '_>
-		{
-			fn into(self) -> Organization
-			{
-				self.organization.clone()
-			}
-		}
 	}
 }

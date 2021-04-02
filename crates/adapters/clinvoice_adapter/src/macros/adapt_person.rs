@@ -18,13 +18,5 @@ macro_rules! AdaptPerson
 			pub person: &$per_life Person,
 			pub store: &$store_life Store,
 		}
-
-		impl Into<Person> for $name<'_, '_>
-		{
-			fn into(self) -> Person
-			{
-				self.person.clone()
-			}
-		}
 	}
 }

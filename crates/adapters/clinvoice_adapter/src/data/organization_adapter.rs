@@ -9,7 +9,6 @@ use
 pub trait OrganizationAdapter<'store>  :
 	Deletable<Error=<Self as OrganizationAdapter<'store>>::Error> +
 	Initializable<Error=<Self as OrganizationAdapter<'store>>::Error> +
-	Into<Organization> +
 	Into<Result<Vec<Employee>, <Self as OrganizationAdapter<'store>>::Error>> +
 	Into<Result<Location, <Self as OrganizationAdapter<'store>>::Error>> +
 	Into<Result<OrganizationView, <Self as OrganizationAdapter<'store>>::Error>> +

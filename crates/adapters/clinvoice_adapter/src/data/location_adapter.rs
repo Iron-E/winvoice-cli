@@ -10,9 +10,7 @@ pub trait LocationAdapter<'store> :
 	Clone +
 	Deletable<Error = <Self as LocationAdapter<'store>>::Error> +
 	Initializable<Error = <Self as LocationAdapter<'store>>::Error> +
-	Into<Location> +
 	Into<Result<LocationView, <Self as LocationAdapter<'store>>::Error>> +
-	Into<Store> +
 	Updatable<Error = <Self as LocationAdapter<'store>>::Error> +
 {
 	type Error : Error;
@@ -50,12 +48,9 @@ pub trait LocationAdapter<'store> :
 	/// # Summary
 	///
 	/// Get the [`Location`]s which contain this [`Location`].
-	fn outer_locations(self) -> Result<Vec<Location>, super::Error>
+	fn outers(location: &Location, store: &Store) -> Result<Vec<Location>, super::Error>
 	{
 		let mut outer_locations = Vec::<Location>::new();
-
-		let location: Location = self.clone().into();
-		let store: Store = self.into();
 
 		let mut outer_id = location.outer_id;
 		while let Some(id) = outer_id

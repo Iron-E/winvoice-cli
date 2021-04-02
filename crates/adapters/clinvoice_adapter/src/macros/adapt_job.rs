@@ -18,13 +18,5 @@ macro_rules! AdaptJob
 			pub job: &$job_life Job,
 			pub store: &$store_life Store,
 		}
-
-		impl Into<Job> for $name<'_, '_>
-		{
-			fn into(self) -> Job
-			{
-				self.job.clone()
-			}
-		}
 	};
 }

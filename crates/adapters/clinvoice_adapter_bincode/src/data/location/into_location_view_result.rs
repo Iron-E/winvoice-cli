@@ -10,16 +10,13 @@ impl Into<Result<LocationView>> for BincodeLocation<'_, '_>
 {
 	fn into(self) -> Result<LocationView>
 	{
-		let id = self.location.id;
-		let name = self.location.name.clone();
-
-		let mut outer_locations = self.outer_locations()?;
+		let mut outer_locations = BincodeLocation::outers(self.location, self.store)?;
 		outer_locations.reverse();
 
 		Ok(LocationView
 		{
-			id,
-			name,
+			id: self.location.id,
+			name: self.location.name.clone(),
 			outer: outer_locations.into_iter().fold(None,
 				|previous: Option<LocationView>, outer_location| Some(LocationView
 				{

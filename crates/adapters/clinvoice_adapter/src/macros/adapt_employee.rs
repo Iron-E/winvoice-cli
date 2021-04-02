@@ -18,13 +18,5 @@ macro_rules! AdaptEmployee
 			pub employee: &$emp_life Employee,
 			pub store: &$store_life Store,
 		}
-
-		impl Into<Employee> for $name<'_, '_>
-		{
-			fn into(self) -> Employee
-			{
-				self.employee.clone()
-			}
-		}
 	};
 }

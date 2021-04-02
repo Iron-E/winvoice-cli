@@ -18,21 +18,5 @@ macro_rules! AdaptLocation
 			pub location: &$loc_life Location,
 			pub store: &$store_life Store,
 		}
-
-		impl Into<Location> for $name<'_, '_>
-		{
-			fn into(self) -> Location
-			{
-				self.location.clone()
-			}
-		}
-
-		impl Into<Store> for $name<'_, '_>
-		{
-			fn into(self) -> Store
-			{
-				self.store.clone()
-			}
-		}
 	}
 }

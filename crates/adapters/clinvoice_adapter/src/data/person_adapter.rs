@@ -9,7 +9,6 @@ use
 pub trait PersonAdapter<'store> :
 	Deletable<Error=<Self as PersonAdapter<'store>>::Error> +
 	Initializable<Error=<Self as PersonAdapter<'store>>::Error> +
-	Into<Person> +
 	Into<Result<PersonView, <Self as PersonAdapter<'store>>::Error>> +
 	Updatable<Error=<Self as PersonAdapter<'store>>::Error> +
 {

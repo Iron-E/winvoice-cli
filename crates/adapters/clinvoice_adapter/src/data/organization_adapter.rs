@@ -29,9 +29,10 @@ pub trait OrganizationAdapter<'store>  :
 	/// # Summary
 	///
 	/// Get all of the [`Employee`]s which work at some `organization`.
-	fn into_employees<E>(organization: &Organization, store: &'store Store) -> Result<Vec<Employee>, <Self as OrganizationAdapter<'store>>::Error> where
+	fn into_employees<E>(organization: &Organization, store: &'store Store)
+		-> Result<Vec<Employee>, <E as EmployeeAdapter<'store>>::Error>
+	where
 		E : EmployeeAdapter<'store>,
-		<Self as OrganizationAdapter<'store>>::Error : From<<E as EmployeeAdapter<'store>>::Error>
 	{
 		E::retrieve(
 			query::Employee
@@ -44,15 +45,16 @@ pub trait OrganizationAdapter<'store>  :
 				..Default::default()
 			},
 			store,
-		).map_err(|e| e.into())
+		)
 	}
 
 	/// # Summary
 	///
 	/// Convert some `organization` into a [`Location`] through it's `location_id` field.
-	fn into_location<L>(organization: &Organization, store: &'store Store) -> Result<Location, <Self as OrganizationAdapter<'store>>::Error> where
+	fn into_location<L>(organization: &Organization, store: &'store Store)
+		-> Result<Location, <L as LocationAdapter<'store>>::Error>
+	where
 		L : LocationAdapter<'store>,
-		<Self as OrganizationAdapter<'store>>::Error : From<<L as LocationAdapter<'store>>::Error>
 	{
 		let results = L::retrieve(
 			query::Location
@@ -75,9 +77,10 @@ pub trait OrganizationAdapter<'store>  :
 	/// # Summary
 	///
 	/// Convert some `organization` into a [`OrganizationView`].
-	fn into_view<L>(organization: Organization, store: &'store Store) -> Result<OrganizationView, <Self as OrganizationAdapter<'store>>::Error> where
+	fn into_view<L>(organization: Organization, store: &'store Store)
+		-> Result<OrganizationView, <L as LocationAdapter<'store>>::Error>
+	where
 		L : LocationAdapter<'store>,
-		<Self as OrganizationAdapter<'store>>::Error : From<<L as LocationAdapter<'store>>::Error>
 	{
 		let location_result = Self::into_location::<L>(&organization, store)?;
 		let location_view_result = L::into_view(location_result, store);

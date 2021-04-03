@@ -3,15 +3,11 @@ use
 	crate::{DynResult, io::input},
 	clinvoice_adapter::
 	{
-		Adapters, Error as AdapterError,
 		data::{Error as DataError, LocationAdapter},
 		Store,
 	},
 	clinvoice_data::views::LocationView,
 };
-
-#[cfg(feature="bincode")]
-use clinvoice_adapter_bincode::data::{BincodeLocation, Result as BincodeResult};
 
 /// # Summary
 ///
@@ -36,20 +32,12 @@ pub(super) fn retrieve_or_err<'store, L>(store: &'store Store) -> DynResult<'sto
 		return Err(DataError::NoData {entity: stringify!(Location)}.into());
 	}
 
-	locations.into_iter().try_fold(Vec::new(),
-		|mut v, l| -> DynResult<Vec<LocationView>>
+	let locations_len = locations.len();
+	locations.into_iter().try_fold(
+		Vec::with_capacity(locations_len),
+		|mut v, l| -> DynResult<'store, Vec<LocationView>>
 		{
-			v.push(match store.adapter
-			{
-				#[cfg(feature="bincode")]
-				Adapters::Bincode =>
-				{
-					let result: BincodeResult<LocationView> = BincodeLocation {location: &l, store}.into();
-					result
-				},
-
-				_ => return Err(AdapterError::FeatureNotFound {adapter: store.adapter}.into()),
-			}?);
+			v.push(L::into_view(l, store)?);
 
 			Ok(v)
 		},

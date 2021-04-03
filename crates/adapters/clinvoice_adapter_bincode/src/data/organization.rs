@@ -1,8 +1,5 @@
 mod deletable;
 mod initializable;
-mod into_location_result;
-mod into_organization_view_result;
-mod into_vec_employee_result;
 mod organization_adapter;
 mod updatable;
 

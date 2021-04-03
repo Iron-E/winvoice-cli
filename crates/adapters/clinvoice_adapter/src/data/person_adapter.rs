@@ -2,14 +2,13 @@ use
 {
 	super::{Deletable, Initializable, query, Updatable},
 	crate::Store,
-	clinvoice_data::{Person, views::PersonView},
+	clinvoice_data::Person,
 	std::error::Error,
 };
 
 pub trait PersonAdapter<'store> :
 	Deletable<Error=<Self as PersonAdapter<'store>>::Error> +
 	Initializable<Error=<Self as PersonAdapter<'store>>::Error> +
-	Into<Result<PersonView, <Self as PersonAdapter<'store>>::Error>> +
 	Updatable<Error=<Self as PersonAdapter<'store>>::Error> +
 {
 	type Error : Error;

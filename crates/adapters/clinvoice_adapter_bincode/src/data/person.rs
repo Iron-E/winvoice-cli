@@ -1,6 +1,5 @@
 mod deletable;
 mod initializable;
-mod into_person_view_result;
 mod person_adapter;
 mod updatable;
 

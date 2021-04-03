@@ -1,4 +1,5 @@
 mod display;
+mod from_person;
 mod hash;
 mod partial_eq;
 mod restorable_serde;

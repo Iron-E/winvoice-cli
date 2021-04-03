@@ -11,7 +11,7 @@ use
 		data::{Initializable, PersonAdapter, query, Updatable},
 		Store,
 	},
-	clinvoice_data::Person,
+	clinvoice_data::{Person, views::PersonView},
 	std::{fs, io::BufReader},
 };
 

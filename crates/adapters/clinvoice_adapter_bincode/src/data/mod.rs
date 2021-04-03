@@ -4,7 +4,6 @@
 //! [`Deletable`](clinvoice_adapter::data::Deletable)) for a Bincode filesystem.
 
 
-pub mod contact;
 mod employee;
 mod error;
 mod job;

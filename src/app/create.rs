@@ -87,7 +87,7 @@ impl Create
 			{
 				Self::Employee {title} =>
 				{
-					let organization = input::util::organization::select_one::<BincodeOrganization, &str>(
+					let organization = input::util::organization::select_one::<BincodeLocation, BincodeOrganization, &str>(
 						"Which organization does this employee work at?",
 						store,
 					)?.into();
@@ -108,7 +108,7 @@ impl Create
 				}
 
 				Self::Job {currency, hourly_rate, year, month, day, hour, minute} => BincodeJob::create(
-					input::util::organization::select_one::<BincodeOrganization, &str>(
+					input::util::organization::select_one::<BincodeLocation, BincodeOrganization, &str>(
 						"Select the client for this job",
 						store,
 					)?.into(),

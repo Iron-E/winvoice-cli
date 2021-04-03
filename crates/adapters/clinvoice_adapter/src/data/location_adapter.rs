@@ -10,10 +10,9 @@ pub trait LocationAdapter<'store> :
 	Clone +
 	Deletable<Error = <Self as LocationAdapter<'store>>::Error> +
 	Initializable<Error = <Self as LocationAdapter<'store>>::Error> +
-	Into<Result<LocationView, <Self as LocationAdapter<'store>>::Error>> +
 	Updatable<Error = <Self as LocationAdapter<'store>>::Error> +
 {
-	type Error : Error;
+	type Error : From<super::Error> + Error;
 
 	/// # Summary
 	///
@@ -44,6 +43,29 @@ pub trait LocationAdapter<'store> :
 	/// Location {name, id: /* generated */, outside_id: self.unroll().id};
 	/// ```
 	fn create_inner(&self, name: &str) -> Result<Location, <Self as LocationAdapter<'store>>::Error>;
+
+	/// # Summary
+	///
+	/// Convert some `location` into a [`LocationView`].
+	fn into_view(location: Location, store: &'store Store) -> Result<LocationView, <Self as LocationAdapter<'store>>::Error>
+	{
+		let mut outer_locations = Self::outers(&location, store)?;
+		outer_locations.reverse();
+
+		Ok(LocationView
+		{
+			id: location.id,
+			name: location.name,
+			outer: outer_locations.into_iter().fold(None,
+				|previous: Option<LocationView>, outer_location| Some(LocationView
+				{
+					id: outer_location.id,
+					name: outer_location.name,
+					outer: previous.map(|l| l.into()),
+				}),
+			).map(|l| l.into()),
+		})
+	}
 
 	/// # Summary
 	///

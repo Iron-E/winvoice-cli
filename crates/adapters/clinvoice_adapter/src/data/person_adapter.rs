@@ -11,7 +11,7 @@ pub trait PersonAdapter<'store> :
 	Initializable<Error=<Self as PersonAdapter<'store>>::Error> +
 	Updatable<Error=<Self as PersonAdapter<'store>>::Error> +
 {
-	type Error : Error;
+	type Error : From<super::Error> + Error;
 
 	/// # Summary
 	///

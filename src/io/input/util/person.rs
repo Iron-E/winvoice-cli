@@ -3,15 +3,11 @@ use
 	crate::{DynResult, io::input},
 	clinvoice_adapter::
 	{
-		Adapters, Error as AdapterError,
 		data::{Error as DataError, PersonAdapter},
 		Store,
 	},
 	clinvoice_data::views::PersonView,
 };
-
-#[cfg(feature="bincode")]
-use clinvoice_adapter_bincode::data::{BincodePerson, Result as BincodeResult};
 
 /// # Summary
 ///
@@ -36,24 +32,7 @@ pub(super) fn retrieve_or_err<'store, P>(store: &'store Store) -> DynResult<'sto
 		return Err(DataError::NoData {entity: stringify!(Person)}.into());
 	}
 
-	people.into_iter().try_fold(Vec::new(),
-		|mut v, p| -> DynResult<Vec<PersonView>>
-		{
-			v.push(match store.adapter
-			{
-				#[cfg(feature="bincode")]
-				Adapters::Bincode =>
-				{
-					let result: BincodeResult<PersonView> = BincodePerson {person: &p, store}.into();
-					result
-				},
-
-				_ => return Err(AdapterError::FeatureNotFound {adapter: store.adapter}.into()),
-			}?);
-
-			Ok(v)
-		},
-	)
+	Ok(people.into_iter().map(|p| p.into()).collect())
 }
 
 /// # Summary

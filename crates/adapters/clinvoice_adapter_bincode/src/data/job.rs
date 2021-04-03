@@ -1,7 +1,5 @@
 mod deletable;
 mod initializable;
-mod into_job_view_result;
-mod into_organization_result;
 mod job_adapter;
 mod updatable;
 

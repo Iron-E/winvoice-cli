@@ -15,3 +15,15 @@ impl From<Person> for PersonView
 		}
 	}
 }
+
+impl From<&Person> for PersonView
+{
+	fn from(person: &Person) -> PersonView
+	{
+		PersonView
+		{
+			id: person.id,
+			name: person.name.clone(),
+		}
+	}
+}

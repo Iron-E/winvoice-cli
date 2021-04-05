@@ -11,7 +11,7 @@ use
 		data::{Initializable, LocationAdapter, query, Updatable},
 		Store,
 	},
-	clinvoice_data::{Location, views::LocationView},
+	clinvoice_data::Location,
 	std::{fs, io::BufReader},
 };
 

@@ -24,8 +24,8 @@ use
 ///
 /// * The deserialized entity with values filled in by the user.
 /// * An [`Error`] encountered while creating, editing, or removing the temporary file.
-pub fn edit<T>(prompt: Option<&str>, entity: T) -> Result<T> where
-	T : DeserializeOwned + RestorableSerde + Serialize
+pub fn edit<T>(prompt: Option<&str>, entity: &T) -> Result<T> where
+	T : DeserializeOwned + Serialize
 {
 	let serialized = toml::to_string_pretty(&entity)?;
 	let to_edit = match prompt
@@ -35,13 +35,60 @@ pub fn edit<T>(prompt: Option<&str>, entity: T) -> Result<T> where
 	};
 
 	// Write the entity to the `temp_path` and then edit that file.
-	let mut edited: T = match toml_editor().edit(&to_edit)?
+	match toml_editor().edit(&to_edit)?
 	{
-		Some(edited) => toml::from_str(&edited)?,
-		_ => return Err(Error::NotEdited),
-	};
-	edited.restore(&entity);
+		Some(edited) => Ok(toml::from_str(&edited)?),
+		_ => Err(Error::NotEdited),
+	}
+}
+
+/// # Summary
+///
+/// Gather input from the user's text editor of choice.
+///
+/// # Remarks
+///
+/// The user's specified `$EDITOR` environment variable will be opened first, followed by whichever
+/// editor is discovered by the [`edit_file`](edit::edit_file) function.
+///
+/// # Returns
+///
+/// * The deserialized entity with values filled in by the user.
+/// * An [`Error`] encountered while creating, editing, or removing the temporary file.
+pub fn edit_and_restore<T>(prompt: Option<&str>, entity: &T) -> Result<T> where
+	T : DeserializeOwned + RestorableSerde + Serialize
+{
+	let mut edited = edit(prompt, entity)?;
+	edited.restore(entity);
 	Ok(edited)
+}
+
+/// # Summary
+///
+/// Gather input from the user's text editor of choice.
+///
+/// # Remarks
+///
+/// The user's specified `$EDITOR` environment variable will be opened first, followed by whichever
+/// editor is discovered by the [`edit_file`](edit::edit_file) function.
+///
+/// # Returns
+///
+/// * The deserialized entity with values filled in by the user.
+/// * An [`Error`] encountered while creating, editing, or removing the temporary file.
+pub fn edit_default<T>(prompt: Option<&str>) -> Result<T> where
+	T : Default + DeserializeOwned + Serialize
+{
+	let default = T::default();
+	Ok(match edit(prompt, &default)
+	{
+		Ok(d) => d,
+		Err(e) => match e
+		{
+			Error::NotEdited => default,
+			_ => return Err(e),
+		},
+	})
 }
 
 /// # Summary

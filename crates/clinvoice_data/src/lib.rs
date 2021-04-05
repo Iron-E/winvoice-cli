@@ -23,6 +23,7 @@ mod employee;
 mod employee_status;
 mod expense;
 mod expense_category;
+pub mod export;
 mod id;
 mod invoice;
 mod invoice_date;

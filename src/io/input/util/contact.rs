@@ -86,10 +86,12 @@ fn delete_menu(contact_info: &mut HashMap<String, ContactView>) -> input::Result
 {
 	if !contact_info.is_empty()
 	{
-		contact_info.remove(&input::select_one(
-			&contact_info.keys().cloned().collect::<Vec<String>>(),
-			"Select a piece of contact information to remove",
-		)?);
+		contact_info.remove(
+			&input::select_one(
+				&contact_info.keys().cloned().collect::<Vec<_>>(),
+				"Select a piece of contact information to remove",
+			)?
+		);
 	}
 
 	Ok(())
@@ -103,13 +105,13 @@ fn edit_menu(contact_info: &mut HashMap<String, ContactView>) -> input::Result<(
 	if !contact_info.is_empty()
 	{
 		let to_edit_key = input::select_one(
-			&contact_info.keys().filter(|k|
-				matches!(contact_info[*k], ContactView::Email(_) | ContactView::Phone(_))
-			).cloned().collect::<Vec<String>>(),
+			&contact_info.keys().filter(
+				|k| matches!(contact_info[*k], ContactView::Email(_) | ContactView::Phone(_))
+			).cloned().collect::<Vec<_>>(),
 			"Select a piece of contact information to edit.",
 		)?;
 
-		match input::edit(None, contact_info[&to_edit_key].clone())
+		match input::edit_and_restore(None, &contact_info[&to_edit_key])
 		{
 			Ok(edit) => { contact_info.insert(to_edit_key, edit); }
 			Err(input::Error::NotEdited) => (),

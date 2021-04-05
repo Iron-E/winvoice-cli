@@ -85,13 +85,11 @@ impl Retrieve
 					let query: query::Person = input::edit_default(Some(QUERY_PROMPT))?;
 
 					let results = BincodePerson::retrieve(query, &store)?;
-					results.iter().try_for_each(|person| -> BincodeResult<()> {
-						// let view: BincodeResult<PersonView> = BincodePerson {person, store}.into();
+					results.iter().for_each(|person|
+					{
 						let view: PersonView = person.into();
 						println!("{}", view);
-
-						Ok(())
-					})?;
+					});
 				}
 			},
 

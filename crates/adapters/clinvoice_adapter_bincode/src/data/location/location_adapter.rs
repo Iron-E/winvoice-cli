@@ -120,9 +120,9 @@ mod tests
 	};
 
 	#[test]
-	fn test_create()
+	fn create()
 	{
-		util::test_temp_store(|store|
+		util::temp_store(|store|
 		{
 			let start = Instant::now();
 			let earth = BincodeLocation::create("Earth", &store).unwrap();
@@ -134,24 +134,24 @@ mod tests
 			assert_eq!(usa.outer_id, Some(earth.id));
 			assert_eq!(arizona.outer_id, Some(usa.id));
 			assert_eq!(phoenix.outer_id, Some(arizona.id));
-			test_create_assertion(earth, &store);
-			test_create_assertion(usa, &store);
-			test_create_assertion(arizona, &store);
-			test_create_assertion(phoenix, &store);
+			create_assertion(earth, &store);
+			create_assertion(usa, &store);
+			create_assertion(arizona, &store);
+			create_assertion(phoenix, &store);
 		});
 	}
 
 	/// The assertion most commonly used for the [`create` test](test_create).
-	fn test_create_assertion(location: Location, store: &Store)
+	fn create_assertion(location: Location, store: &Store)
 	{
 		let read_result = fs::read(BincodeLocation {location: &location, store}.filepath()).unwrap();
 		assert_eq!(location, bincode::deserialize(&read_result).unwrap());
 	}
 
 	#[test]
-	fn test_retrieve()
+	fn retrieve()
 	{
-		util::test_temp_store(|store|
+		util::temp_store(|store|
 		{
 			let earth = BincodeLocation::create("Earth", &store).unwrap();
 			let usa = BincodeLocation {location: &earth, store}.create_inner("USA").unwrap();

@@ -113,7 +113,7 @@ mod tests
 	};
 
 	#[test]
-	fn test_create()
+	fn create()
 	{
 		let organization = Organization
 		{
@@ -122,11 +122,11 @@ mod tests
 			name: "Big Old Test Corporation".into(),
 		};
 
-		util::test_temp_store(|store|
+		util::temp_store(|store|
 		{
 			let start = Instant::now();
 
-			test_create_assertion(
+			create_assertion(
 				BincodeJob::create(
 					organization.clone(),
 					Utc::now(),
@@ -137,7 +137,7 @@ mod tests
 				&store,
 			);
 
-			test_create_assertion(
+			create_assertion(
 				BincodeJob::create(
 					organization.clone(),
 					Utc::now(),
@@ -148,7 +148,7 @@ mod tests
 				&store,
 			);
 
-			test_create_assertion(
+			create_assertion(
 				BincodeJob::create(
 					organization.clone(),
 					Utc::now(),
@@ -159,7 +159,7 @@ mod tests
 				&store,
 			);
 
-			test_create_assertion(
+			create_assertion(
 				BincodeJob::create(
 					organization.clone(),
 					Utc::now(),
@@ -170,7 +170,7 @@ mod tests
 				&store,
 			);
 
-			test_create_assertion(
+			create_assertion(
 				BincodeJob::create(
 					organization.clone(),
 					Utc::now(),
@@ -185,14 +185,14 @@ mod tests
 		});
 	}
 
-	fn test_create_assertion(job: Job, store: &Store)
+	fn create_assertion(job: Job, store: &Store)
 	{
 		let read_result = fs::read(BincodeJob {job: &job, store}.filepath()).unwrap();
 		assert_eq!(job, bincode::deserialize(&read_result).unwrap());
 	}
 
 	#[test]
-	fn test_retrieve()
+	fn retrieve()
 	{
 		let organization = Organization
 		{
@@ -201,7 +201,7 @@ mod tests
 			name: "Big Old Test Corporation".into(),
 		};
 
-		util::test_temp_store(|store|
+		util::temp_store(|store|
 		{
 			let creation = BincodeJob::create(
 				organization.clone(),

@@ -90,13 +90,13 @@ mod tests
 	};
 
 	#[test]
-	fn test_create()
+	fn create()
 	{
-		util::test_temp_store(|store|
+		util::temp_store(|store|
 		{
 			let start = Instant::now();
 
-			test_create_assertion(
+			create_assertion(
 				BincodePerson::create(
 					"Widdle",
 					&store,
@@ -104,7 +104,7 @@ mod tests
 				&store,
 			);
 
-			test_create_assertion(
+			create_assertion(
 				BincodePerson::create(
 					"Long",
 					&store,
@@ -112,7 +112,7 @@ mod tests
 				&store,
 			);
 
-			test_create_assertion(
+			create_assertion(
 				BincodePerson::create(
 					"Steven",
 					&store,
@@ -120,7 +120,7 @@ mod tests
 				&store,
 			);
 
-			test_create_assertion(
+			create_assertion(
 				BincodePerson::create(
 					"JingleBob",
 					&store,
@@ -128,7 +128,7 @@ mod tests
 				&store,
 			);
 
-			test_create_assertion(
+			create_assertion(
 				BincodePerson::create(
 					"asldkj jdsoai",
 					&store,
@@ -140,16 +140,16 @@ mod tests
 		});
 	}
 
-	fn test_create_assertion(person: Person, store: &Store)
+	fn create_assertion(person: Person, store: &Store)
 	{
 		let read_result = fs::read(BincodePerson {person: &person, store}.filepath()).unwrap();
 		assert_eq!(person, bincode::deserialize(&read_result).unwrap());
 	}
 
 	#[test]
-	fn test_retrieve()
+	fn retrieve()
 	{
-		util::test_temp_store(|store|
+		util::temp_store(|store|
 		{
 			let flingo = BincodePerson::create(
 				"flingo",

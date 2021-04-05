@@ -144,7 +144,7 @@ mod tests
 	};
 
 	#[test]
-	fn test_matches()
+	fn matches()
 	{
 		let test_value = &7;
 
@@ -185,7 +185,7 @@ mod tests
 	}
 
 	#[test]
-	fn test_set_matches()
+	fn set_matches()
 	{
 		let test_set: HashSet<_> = [4, 7, 17].iter().collect();
 		let test_set_single_element: HashSet<_> = [4].iter().collect();

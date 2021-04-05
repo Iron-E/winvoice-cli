@@ -29,7 +29,7 @@ mod tests
 	};
 
 	#[test]
-	fn test_display()
+	fn display()
 	{
 		let date = InvoiceDate
 		{

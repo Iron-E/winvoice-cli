@@ -82,7 +82,7 @@ pub fn read_files<P>(path: P) -> io::Result<FilterMap<fs::ReadDir, impl FnMut(io
 ///
 /// [fn_temp_dir]: std::env::temp_dir
 #[cfg(test)]
-pub fn test_temp_store(assertion: impl FnOnce(&Store))
+pub fn temp_store(assertion: impl FnOnce(&Store))
 {
 	let temp_path = env::temp_dir().join("clinvoice_adapter_bincode_data");
 
@@ -143,9 +143,9 @@ mod tests
 	};
 
 	#[test]
-	fn test_unique_id()
+	fn unique_id()
 	{
-		super::test_temp_store(|store|
+		super::temp_store(|store|
 		{
 			let test_path = PathBuf::new().join(&store.path).join("test_next_id");
 

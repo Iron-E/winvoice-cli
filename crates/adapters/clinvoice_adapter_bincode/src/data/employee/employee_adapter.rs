@@ -103,7 +103,7 @@ mod tests
 	};
 
 	#[test]
-	fn test_create()
+	fn create()
 	{
 		let organization = Organization
 		{
@@ -112,11 +112,11 @@ mod tests
 			name: "Big Old Test Corporation".into(),
 		};
 
-		util::test_temp_store(|store|
+		util::temp_store(|store|
 		{
 			let start = Instant::now();
 
-			test_create_assertion(
+			create_assertion(
 				BincodeEmployee::create(
 					vec![("Work".into(), Contact::Address(Id::new_v4()))].into_iter().collect(),
 					organization.clone(),
@@ -132,7 +132,7 @@ mod tests
 				&store,
 			);
 
-			test_create_assertion(
+			create_assertion(
 				BincodeEmployee::create(
 					vec![("Work Email".into(), Contact::Email("foo@bar.io".into()))].into_iter().collect(),
 					organization.clone(),
@@ -148,7 +148,7 @@ mod tests
 				&store,
 			);
 
-			test_create_assertion(
+			create_assertion(
 				BincodeEmployee::create(
 					vec![("Work Phone".into(), Contact::Phone("1-800-555-3600".into()))].into_iter().collect(),
 					organization.clone(),
@@ -164,7 +164,7 @@ mod tests
 				&store,
 			);
 
-			test_create_assertion(
+			create_assertion(
 				BincodeEmployee::create(
 					vec![("Work".into(), Contact::Address(Id::new_v4()))].into_iter().collect(),
 					organization.clone(),
@@ -180,7 +180,7 @@ mod tests
 				&store,
 			);
 
-			test_create_assertion(
+			create_assertion(
 				BincodeEmployee::create(
 					vec![("Work Email".into(), Contact::Email("obviousemail@server.com".into()))].into_iter().collect(),
 					organization.clone(),
@@ -200,14 +200,14 @@ mod tests
 		});
 	}
 
-	fn test_create_assertion(employee: Employee, store: &Store)
+	fn create_assertion(employee: Employee, store: &Store)
 	{
 		let read_result = fs::read(BincodeEmployee {employee: &employee, store}.filepath()).unwrap();
 		assert_eq!(employee, bincode::deserialize(&read_result).unwrap());
 	}
 
 	#[test]
-	fn test_retrieve()
+	fn retrieve()
 	{
 		let organization = Organization
 		{
@@ -216,7 +216,7 @@ mod tests
 			name: "Big Old Test Corporation".into(),
 		};
 
-		util::test_temp_store(|store|
+		util::temp_store(|store|
 		{
 			let testy_mctesterson = BincodeEmployee::create(
 				vec![("Work Address".into(), Contact::Address(Id::new_v4()))].into_iter().collect(),

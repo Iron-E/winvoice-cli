@@ -23,7 +23,7 @@ mod tests
 	};
 
 	#[test]
-	fn test_display()
+	fn display()
 	{
 		let start = Instant::now();
 		assert_eq!(format!("{}", Money::new(Decimal::new(5000, 2), "USD")), "50.00 USD");

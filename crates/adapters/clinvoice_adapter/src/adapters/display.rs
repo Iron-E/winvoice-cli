@@ -26,7 +26,7 @@ mod tests
 	};
 
 	#[test]
-	fn test_display()
+	fn display()
 	{
 		let start = Instant::now();
 		assert_eq!(format!("{}", Adapters::Bincode), "Bincode");

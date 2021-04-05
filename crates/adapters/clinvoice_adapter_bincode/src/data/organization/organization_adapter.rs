@@ -92,9 +92,9 @@ mod tests
 	};
 
 	#[test]
-	fn test_create()
+	fn create()
 	{
-		util::test_temp_store(|store|
+		util::temp_store(|store|
 		{
 			let earth_id = Id::new_v4();
 			let usa_id = Id::new_v4();
@@ -104,7 +104,7 @@ mod tests
 
 			let start = Instant::now();
 
-			test_create_assertion(
+			create_assertion(
 				BincodeOrganization::create(
 					Location {name: "Earth".into(), id: Id::new_v4(), outer_id: None},
 					"alsdkjaldkj", &store
@@ -112,7 +112,7 @@ mod tests
 				&store,
 			);
 
-			test_create_assertion(
+			create_assertion(
 				BincodeOrganization::create(
 					Location {name: "USA".into(), id: usa_id, outer_id: Some(earth_id)},
 					"alskdjalgkh  ladhkj EAL ISdh", &store
@@ -120,7 +120,7 @@ mod tests
 				&store,
 			);
 
-			test_create_assertion(
+			create_assertion(
 				BincodeOrganization::create(
 					Location {name: "Arizona".into(), id: arizona_id, outer_id: Some(earth_id)},
 					" AAA – 44 %%", &store
@@ -128,7 +128,7 @@ mod tests
 				&store,
 			);
 
-			test_create_assertion(
+			create_assertion(
 				BincodeOrganization::create(
 					Location {name: "Phoenix".into(), id: phoenix_id, outer_id: Some(arizona_id)},
 					" ^^^ ADSLKJDLASKJD FOCJCI", &store
@@ -136,7 +136,7 @@ mod tests
 				&store,
 			);
 
-			test_create_assertion(
+			create_assertion(
 				BincodeOrganization::create(
 					Location {name: "Some Road".into(), id: some_id, outer_id: Some(phoenix_id)},
 					"aldkj doiciuc giguy &&", &store
@@ -148,16 +148,16 @@ mod tests
 		});
 	}
 
-	fn test_create_assertion(organization: Organization, store: &Store)
+	fn create_assertion(organization: Organization, store: &Store)
 	{
 		let read_result = fs::read(BincodeOrganization {organization: &organization, store}.filepath()).unwrap();
 		assert_eq!(organization, bincode::deserialize(&read_result).unwrap());
 	}
 
 	#[test]
-	fn test_retrieve()
+	fn retrieve()
 	{
-		util::test_temp_store(|store|
+		util::temp_store(|store|
 		{
 			let earth_id = Id::new_v4();
 			let packing = BincodeOrganization::create(

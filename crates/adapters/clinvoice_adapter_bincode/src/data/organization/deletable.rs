@@ -75,9 +75,9 @@ mod tests
 	};
 
 	#[test]
-	fn test_delete()
+	fn delete()
 	{
-		util::test_temp_store(|store|
+		util::temp_store(|store|
 		{
 			let earth = BincodeLocation
 			{

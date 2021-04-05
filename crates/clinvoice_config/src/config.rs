@@ -115,7 +115,7 @@ mod tests
 	};
 
 	#[test]
-	fn test_get_store()
+	fn get_store()
 	{
 		let mut stores = BTreeMap::new();
 

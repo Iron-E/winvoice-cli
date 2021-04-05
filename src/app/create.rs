@@ -76,7 +76,7 @@ pub(super) enum Create
 
 impl Create
 {
-	pub(super) fn run<'store>(self, config: &'store Config, store_name: String) -> DynResult<'store, ()>
+	pub(super) fn run<'config>(self, config: &'config Config, store_name: String) -> DynResult<'config, ()>
 	{
 		let store = config.get_store(&store_name).expect("Storage name not known");
 

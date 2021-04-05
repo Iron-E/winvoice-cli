@@ -1,7 +1,21 @@
 use
 {
-	crate::{Config, DynResult, StructOpt},
+	crate::{Config, DynResult, io::input, StructOpt},
+	clinvoice_adapter::
+	{
+		Adapters, Error,
+		data::{EmployeeAdapter, JobAdapter, LocationAdapter, OrganizationAdapter, PersonAdapter, query},
+	},
+	clinvoice_data::views::PersonView,
 };
+
+#[cfg(feature="bincode")]
+use clinvoice_adapter_bincode::data::{BincodeEmployee, BincodeJob, BincodeLocation, BincodeOrganization, BincodePerson, Result as BincodeResult};
+
+/// # Summary
+///
+/// The prompt for when editing a [query](clinvoice_adapter::data::query).
+const QUERY_PROMPT: &str = "See the documentation of `clinvoice_adapter::data::query` for how to format these queries.";
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, StructOpt)]
 #[structopt(about="Retrieve information that was recorded with CLInvoice")]
@@ -31,9 +45,7 @@ pub(super) enum RetrieveCommand
 	},
 
 	#[structopt(about="Retrieve existing records about job")]
-	Job
-	{
-	},
+	Job,
 
 	#[structopt(about="Retrieve existing records about locations")]
 	Location
@@ -43,20 +55,49 @@ pub(super) enum RetrieveCommand
 	},
 
 	#[structopt(about="Retrieve existing records about organizations")]
-	Organization
-	{
-	},
+	Organization,
 
 	#[structopt(about="Retrieve existing records about people")]
-	Person
-	{
-	},
+	Person,
 }
 
 impl Retrieve
 {
 	pub(super) fn run<'config>(self, config: &'config Config, store_name: String) -> DynResult<'config, ()>
 	{
-		todo!()
+		let store = config.get_store(&store_name).expect("Storage name not known");
+
+		match store.adapter
+		{
+			#[cfg(feature="bincode")]
+			Adapters::Bincode => match self.command
+			{
+				RetrieveCommand::Employee {select_default} => todo!(),
+
+				RetrieveCommand::Job => todo!(),
+
+				RetrieveCommand::Location {create_inner} => todo!(),
+
+				RetrieveCommand::Organization => todo!(),
+
+				RetrieveCommand::Person =>
+				{
+					let query: query::Person = input::edit_default(Some(QUERY_PROMPT))?;
+
+					let results = BincodePerson::retrieve(query, &store)?;
+					results.iter().try_for_each(|person| -> BincodeResult<()> {
+						// let view: BincodeResult<PersonView> = BincodePerson {person, store}.into();
+						let view: PersonView = person.into();
+						println!("{}", view);
+
+						Ok(())
+					})?;
+				}
+			},
+
+			_ => return Err(Error::FeatureNotFound {adapter: store.adapter}.into()),
+		};
+
+		Ok(())
 	}
 }

@@ -3,12 +3,15 @@ use
 	crate::{Config, DynResult, StructOpt},
 };
 
-#[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, StructOpt)]
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, StructOpt)]
 #[structopt(about="Retrieve information that was recorded with CLInvoice")]
 pub(super) struct Retrieve
 {
 	#[structopt(help="Select retrieved entities for deletion", long, short)]
 	pub delete: bool,
+
+	#[structopt(default_value="markdown", help="Export retrieved entities to the specified format. Supported: markdown", long, short)]
+	pub export: String,
 
 	#[structopt(help="Select retrieved entities for data updating", long, short)]
 	pub update: bool,

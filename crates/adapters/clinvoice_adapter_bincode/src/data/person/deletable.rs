@@ -5,7 +5,7 @@ use
 	super::BincodePerson,
 	crate::data::{BincodeEmployee, Error, Result},
 
-	clinvoice_adapter::data::{Deletable, EmployeeAdapter, Match, query},
+	clinvoice_adapter::data::{Deletable, EmployeeAdapter, Error as DataError, Match, query},
 };
 
 impl Deletable for BincodePerson<'_, '_>
@@ -14,6 +14,30 @@ impl Deletable for BincodePerson<'_, '_>
 
 	fn delete(&self, cascade: bool) -> Result<()>
 	{
+		let associated_employees = BincodeEmployee::retrieve(
+			query::Employee
+			{
+				person: query::Person
+				{
+					id: Match::EqualTo(Cow::Borrowed(&self.person.id)),
+					..Default::default()
+				},
+				..Default::default()
+			},
+			self.store,
+		)?;
+
+		if cascade
+		{
+			associated_employees.into_iter().try_for_each(
+				|e| BincodeEmployee {employee: &e, store: self.store}.delete(true)
+			)?;
+		}
+		else if associated_employees.len() > 0
+		{
+			return Err(DataError::DeleteRestricted(self.person.id).into());
+		}
+
 		if let Err(e) = fs::remove_file(self.filepath())
 		{
 			// We don't care if a file is missing; we want it deleted anyway.
@@ -21,24 +45,6 @@ impl Deletable for BincodePerson<'_, '_>
 			{
 				return Err(e.into());
 			}
-		}
-
-		if cascade
-		{
-			BincodeEmployee::retrieve(
-				query::Employee
-				{
-					person: query::Person
-					{
-						id: Match::EqualTo(Cow::Borrowed(&self.person.id)),
-						..Default::default()
-					},
-					..Default::default()
-				},
-				self.store,
-			)?.into_iter().try_for_each(
-				|e| BincodeEmployee {employee: &e, store: self.store}.delete(true)
-			)?;
 		}
 
 		Ok(())
@@ -50,15 +56,17 @@ mod tests
 {
 	use
 	{
+		std::time::Instant,
+
 		super::{BincodeEmployee, BincodePerson, Deletable, EmployeeAdapter},
 		crate::
 		{
 			data::{BincodeLocation, BincodeOrganization},
 			util,
 		},
+
 		clinvoice_adapter::data::{LocationAdapter, OrganizationAdapter, PersonAdapter},
 		clinvoice_data::{Contact, EmployeeStatus},
-		std::time::Instant,
 	};
 
 	#[test]
@@ -105,9 +113,11 @@ mod tests
 			};
 
 			let start = Instant::now();
-			// Assert that the deletion works
+			// Assert that the deletion fails when restricted
+			assert!(testy.delete(false).is_err());
+			// Assert that the deletion works when cascading
 			assert!(testy.delete(true).is_ok());
-			println!("\n>>>>> BincodePerson::delete {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+			println!("\n>>>>> BincodePerson::delete {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 2);
 
 			// Assert that `testy` and its referencing employee is gone.
 			assert!(!testy.filepath().is_file());

@@ -5,7 +5,7 @@ use
 	super::BincodeEmployee,
 	crate::data::{BincodeJob, Error, Result},
 
-	clinvoice_adapter::data::{Deletable, JobAdapter, Match, query, Updatable},
+	clinvoice_adapter::data::{Deletable, Error as DataError, JobAdapter, Match, query, Updatable},
 };
 
 impl Deletable for BincodeEmployee<'_, '_>
@@ -14,40 +14,46 @@ impl Deletable for BincodeEmployee<'_, '_>
 
 	fn delete(&self, cascade: bool) -> Result<()>
 	{
-		if let Err(e) = fs::remove_file(self.filepath())
-		{
-			// We don't care if a file is missing; we want it deleted anyway.
-			if e.kind() != ErrorKind::NotFound
+		let associated_jobs = BincodeJob::retrieve(
+			query::Job
 			{
-				return Err(e.into());
-			}
-		}
-
-		if cascade
-		{
-			for mut result in BincodeJob::retrieve(
-				query::Job
+				timesheets: query::Timesheet
 				{
-					timesheets: query::Timesheet
+					employee: query::Employee
 					{
-						employee: query::Employee
-						{
-							id: Match::HasAny(vec![Cow::Borrowed(&self.employee.id)].into_iter().collect()),
-							..Default::default()
-						},
+						id: Match::HasAny(vec![Cow::Borrowed(&self.employee.id)].into_iter().collect()),
 						..Default::default()
 					},
 					..Default::default()
 				},
-				self.store,
-			)?
+				..Default::default()
+			},
+			self.store,
+		)?;
+
+		if cascade
+		{
+			associated_jobs.into_iter().try_for_each(|mut result|
 			{
 				result.timesheets = result.timesheets.into_iter()
 					.filter(|t| t.employee_id != self.employee.id)
 					.collect()
 				;
 
-				BincodeJob {job: &result, store: self.store}.update()?;
+				BincodeJob {job: &result, store: self.store}.update()
+			})?;
+		}
+		else if associated_jobs.len() > 0
+		{
+			return Err(DataError::DeleteRestricted(self.employee.id).into());
+		}
+
+		if let Err(e) = fs::remove_file(self.filepath())
+		{
+			// We don't care if a file is missing; we want it deleted anyway.
+			if e.kind() != ErrorKind::NotFound
+			{
+				return Err(e.into());
 			}
 		}
 
@@ -60,15 +66,17 @@ mod tests
 {
 	use
 	{
+		std::time::Instant,
+
 		super::{BincodeEmployee, BincodeJob, Cow, Deletable, JobAdapter, Match, query, Updatable},
 		crate::
 		{
 			data::{BincodeLocation, BincodeOrganization, BincodePerson},
 			util,
 		},
+
 		clinvoice_adapter::data::{EmployeeAdapter, LocationAdapter, OrganizationAdapter, PersonAdapter},
 		clinvoice_data::{chrono::Utc, Contact, Decimal, EmployeeStatus, Money},
-		std::time::Instant,
 	};
 
 	#[test]
@@ -122,9 +130,11 @@ mod tests
 			BincodeJob {job: &creation, store}.update().unwrap();
 
 			let start = Instant::now();
-			// Assert that the deletion works
+			// Assert that the deletion fails when restricted
+			assert!(ceo_testy.delete(false).is_err());
+			// Assert that the deletion works when cascading
 			assert!(ceo_testy.delete(true).is_ok());
-			println!("\n>>>>> BincodeEmployee::delete {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+			println!("\n>>>>> BincodeEmployee::delete {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 2);
 
 			// Assert the deleted file is gone.
 			assert!(!ceo_testy.filepath().is_file());

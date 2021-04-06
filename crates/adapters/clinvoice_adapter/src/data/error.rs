@@ -19,6 +19,12 @@ pub enum Error
 
 	/// # Summary
 	///
+	/// Some reference to an `id` was expected, but none was found.
+	#[error("Attempted to delete ID #{0}, but one or more other entities require it. Cascade delete to remove them")]
+	DeleteRestricted(Id),
+
+	/// # Summary
+	///
 	/// At least one of some entity is necessary to perform an operation, but none were found.
 	#[error("There must be at least one `{0}` before this operation can be performed")]
 	NoData(&'static str),

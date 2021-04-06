@@ -14,7 +14,12 @@ pub trait Deletable
 	/// # Paramteters
 	///
 	/// * `id`, the [`Id`] of the [`Person`] to delete.
-	/// * `cascade`, whether or not to delete entries which reference this [`Person`].
+	/// * `cascade`, whether or not to delete entries which reference this entity.
+	///
+	/// # Remarks
+	///
+	/// If `cascade` is false, the deletion operation will be restricted if any entities are found
+	/// that require this one.
 	///
 	/// # Returns
 	///

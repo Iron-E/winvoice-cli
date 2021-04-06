@@ -32,11 +32,13 @@ mod tests
 {
 	use
 	{
+		std::time::Instant,
+
 		super::{BincodeJob, Deletable},
 		crate::{data::BincodeOrganization, util},
+
 		clinvoice_adapter::data::{JobAdapter, OrganizationAdapter},
 		clinvoice_data::{chrono::Utc, Decimal, Id, Location, Money},
-		std::time::Instant,
 	};
 
 	#[test]

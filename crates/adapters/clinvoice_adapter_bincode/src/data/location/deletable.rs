@@ -5,7 +5,8 @@ use
 	super::BincodeLocation,
 	crate::data::{BincodeOrganization, Error, Result},
 
-	clinvoice_adapter::data::{Deletable, LocationAdapter, Match, OrganizationAdapter, query},
+	clinvoice_adapter::data::{Deletable, Error as DataError, LocationAdapter, Match, OrganizationAdapter, query},
+	clinvoice_data::Location,
 };
 
 impl Deletable for BincodeLocation<'_, '_>
@@ -14,16 +15,7 @@ impl Deletable for BincodeLocation<'_, '_>
 
 	fn delete(&self, cascade: bool) -> Result<()>
 	{
-		if let Err(e) = fs::remove_file(self.filepath())
-		{
-			// We don't care if a file is missing; we want it deleted anyway.
-			if e.kind() != ErrorKind::NotFound
-			{
-				return Err(e.into());
-			}
-		}
-
-		if cascade
+		let associated_locations = || -> Result<Vec<Location>>
 		{
 			BincodeLocation::retrieve(
 				query::Location
@@ -38,24 +30,44 @@ impl Deletable for BincodeLocation<'_, '_>
 					..Default::default()
 				},
 				self.store,
-			)?.into_iter().try_for_each(
-				|l| BincodeLocation {location: &l, store: self.store}.delete(true)
-			)?;
+			)
+		};
 
-			BincodeOrganization::retrieve(
-				query::Organization
+		let associated_organizations = BincodeOrganization::retrieve(
+			query::Organization
+			{
+				location: query::Location
 				{
-					location: query::Location
-					{
-						id: Match::EqualTo(Cow::Borrowed(&self.location.id)),
-						..Default::default()
-					},
+					id: Match::EqualTo(Cow::Borrowed(&self.location.id)),
 					..Default::default()
 				},
-				self.store,
-			)?.into_iter().try_for_each(
-				|o| BincodeOrganization {organization: &o, store: self.store}.delete(true)
+				..Default::default()
+			},
+			self.store,
+		)?;
+
+		if cascade
+		{
+			associated_organizations.into_iter().try_for_each(
+				|o| BincodeOrganization {organization: &o, store: self.store}.delete(cascade)
 			)?;
+
+			associated_locations()?.into_iter().try_for_each(
+				|l| BincodeLocation {location: &l, store: self.store}.delete(cascade)
+			)?;
+		}
+		else if associated_organizations.len() > 0 || associated_locations()?.len() > 0
+		{
+			return Err(DataError::DeleteRestricted(self.location.id).into());
+		}
+
+		if let Err(e) = fs::remove_file(self.filepath())
+		{
+			// We don't care if a file is missing; we want it deleted anyway.
+			if e.kind() != ErrorKind::NotFound
+			{
+				return Err(e.into());
+			}
 		}
 
 		Ok(())
@@ -67,10 +79,12 @@ mod tests
 {
 	use
 	{
+		std::time::Instant,
+
 		super::{BincodeLocation, Deletable, LocationAdapter},
 		crate::{data::BincodeOrganization, util},
+
 		clinvoice_adapter::data::OrganizationAdapter,
-		std::time::Instant,
 	};
 
 	#[test]
@@ -118,7 +132,15 @@ mod tests
 			phoenix.delete(false).unwrap();
 
 			// assert that phoenix is gone.
-			assert!(!&phoenix.filepath().is_file());
+			assert!(!phoenix.filepath().is_file());
+
+			// Assert that every location inside the USA is there
+			assert!(earth.filepath().is_file());
+			assert!(usa.filepath().is_file());
+			assert!(arizona.filepath().is_file());
+
+			// assert that `dogood`, located in arizona, is there
+			assert!(dogood.filepath().is_file());
 
 			// delete the usa and everything in it.
 			usa.delete(true).unwrap();
@@ -126,12 +148,12 @@ mod tests
 			println!("\n>>>>> BincodeLocation::delete {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 2);
 
 			// Assert that every location inside the USA is gone
-			assert!(&earth.filepath().is_file());
-			assert!(!&usa.filepath().is_file());
-			assert!(!&arizona.filepath().is_file());
+			assert!(earth.filepath().is_file());
+			assert!(!usa.filepath().is_file());
+			assert!(!arizona.filepath().is_file());
 
 			// assert that `dogood`, located in arizona, is gone.
-			assert!(!&dogood.filepath().is_file());
+			assert!(!dogood.filepath().is_file());
 		});
 	}
 }

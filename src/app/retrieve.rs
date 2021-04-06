@@ -75,13 +75,77 @@ impl Retrieve
 			#[cfg(feature="bincode")]
 			Adapters::Bincode => match self.command
 			{
-				RetrieveCommand::Employee {select_default} => todo!(),
+				RetrieveCommand::Employee {select_default} =>
+				{
+					let query: query::Employee = input::edit_default(Some(QUERY_PROMPT))?;
 
-				RetrieveCommand::Job {export} => todo!(),
+					let results = BincodeEmployee::retrieve(query, &store)?;
+					results.into_iter().try_for_each(|employee| -> BincodeResult<()>
+					{
+						let view = BincodeEmployee::to_view::<BincodeLocation, BincodeOrganization, BincodePerson>(
+							employee,
+							&store,
+						)?;
 
-				RetrieveCommand::Location {create_inner} => todo!(),
+						println!("{}", view);
 
-				RetrieveCommand::Organization => todo!(),
+						Ok(())
+					})?;
+				},
+
+				RetrieveCommand::Job {export} =>
+				{
+					let query: query::Job = input::edit_default(Some(QUERY_PROMPT))?;
+
+					let results = BincodeJob::retrieve(query, &store)?;
+					results.into_iter().try_for_each(|job| -> BincodeResult<()>
+					{
+						let view = BincodeJob::to_view::<BincodeEmployee, BincodeLocation, BincodeOrganization, BincodePerson>(
+							job,
+							&store,
+						)?;
+
+						println!("{}", view);
+
+						Ok(())
+					})?;
+				},
+
+				RetrieveCommand::Location {create_inner} =>
+				{
+					let query: query::Location = input::edit_default(Some(QUERY_PROMPT))?;
+
+					let results = BincodeLocation::retrieve(query, &store)?;
+					results.into_iter().try_for_each(|job| -> BincodeResult<()>
+					{
+						let view = BincodeLocation::to_view(
+							job,
+							&store,
+						)?;
+
+						println!("{}", view);
+
+						Ok(())
+					})?;
+				},
+
+				RetrieveCommand::Organization =>
+				{
+					let query: query::Organization = input::edit_default(Some(QUERY_PROMPT))?;
+
+					let results = BincodeOrganization::retrieve(query, &store)?;
+					results.into_iter().try_for_each(|job| -> BincodeResult<()>
+					{
+						let view = BincodeOrganization::to_view::<BincodeLocation>(
+							job,
+							&store,
+						)?;
+
+						println!("{}", view);
+
+						Ok(())
+					})?;
+				},
 
 				RetrieveCommand::Person =>
 				{

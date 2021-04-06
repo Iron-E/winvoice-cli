@@ -11,7 +11,7 @@ use
 /// # Summary
 ///
 /// Convert some [`Contact`] into a [`ContactView`].
-pub fn into_view<'store, L>(contact: Contact, store: &'store Store)
+pub fn to_view<'store, L>(contact: Contact, store: &'store Store)
 	-> Result<ContactView, <L as LocationAdapter<'store>>::Error>
 where
 	L : LocationAdapter<'store>
@@ -27,7 +27,7 @@ where
 			store,
 		)?.into_iter().next()
 		{
-			Some(result) => L::into_view(result, store)?.into(),
+			Some(result) => L::to_view(result, store)?.into(),
 			_ => return Err(Error::DataIntegrity(address).into()),
 		},
 		Contact::Email(email) => ContactView::Email(email),
@@ -38,14 +38,13 @@ where
 /// # Summary
 ///
 /// Convert some [`Contact`] into a [`ContactView`].
-pub fn into_views<'store, L, T>(contact_info: HashMap<T, Contact>, store: &'store Store)
+pub fn to_views<'store, L, T>(contact_info: HashMap<T, Contact>, store: &'store Store)
 	-> Result<HashMap<T, ContactView>, <L as LocationAdapter<'store>>::Error>
 where
 	L : LocationAdapter<'store>,
 	T : Eq + Hash,
 {
 	contact_info.into_iter().map(|(key, contact)|
-		into_view::<L>(contact, store).map(|view| (key, view))
+		to_view::<L>(contact, store).map(|view| (key, view))
 	).collect()
 }
-

@@ -14,7 +14,7 @@ use
 };
 
 #[test]
-fn into_organization()
+fn to_organization()
 {
 	util::temp_store(|store|
 	{
@@ -38,15 +38,15 @@ fn into_organization()
 		).unwrap();
 
 		let start = Instant::now();
-		let testy_org = BincodeEmployee::into_organization::<BincodeOrganization>(&testy, store);
-		println!("\n>>>>> BincodeEmployee::into_organization {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+		let testy_org = BincodeEmployee::to_organization::<BincodeOrganization>(&testy, store);
+		println!("\n>>>>> BincodeEmployee::to_organization {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 
 		assert_eq!(dogood, testy_org.unwrap());
 	});
 }
 
 #[test]
-fn into_person()
+fn to_person()
 {
 	util::temp_store(|store|
 	{
@@ -70,15 +70,15 @@ fn into_person()
 		).unwrap();
 
 		let start = Instant::now();
-		let testy_person = BincodeEmployee::into_person::<BincodePerson>(&testy_employed, store);
-		println!("\n>>>>> BincodeEmployee::into_person {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+		let testy_person = BincodeEmployee::to_person::<BincodePerson>(&testy_employed, store);
+		println!("\n>>>>> BincodeEmployee::to_person {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 
 		assert_eq!(testy, testy_person.unwrap());
 	});
 }
 
 #[test]
-fn into_view()
+fn to_view()
 {
 	util::temp_store(|store|
 	{
@@ -131,8 +131,8 @@ fn into_view()
 		};
 
 		let start = Instant::now();
-		let ceo_testy_view_result = BincodeEmployee::into_view::<BincodeLocation, BincodeOrganization, BincodePerson>(ceo_testy, store);
-		println!("\n>>>>> BincodeEmployee::into_view {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+		let ceo_testy_view_result = BincodeEmployee::to_view::<BincodeLocation, BincodeOrganization, BincodePerson>(ceo_testy, store);
+		println!("\n>>>>> BincodeEmployee::to_view {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 
 		// Asser that the synthetic view is the same as the view which was created naturally.
 		assert_eq!(ceo_testy_view, ceo_testy_view_result.unwrap());

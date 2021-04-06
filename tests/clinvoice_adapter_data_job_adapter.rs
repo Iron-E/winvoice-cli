@@ -15,7 +15,7 @@ use
 };
 
 #[test]
-fn into_organization()
+fn to_organization()
 {
 	util::temp_store(|store|
 	{
@@ -34,15 +34,15 @@ fn into_organization()
 		).unwrap();
 
 		let start = Instant::now();
-		let test_org = BincodeJob::into_organization::<BincodeOrganization>(&test_job, store);
-		println!("\n>>>>> BincodeJob::into_organization {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+		let test_org = BincodeJob::to_organization::<BincodeOrganization>(&test_job, store);
+		println!("\n>>>>> BincodeJob::to_organization {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 
 		assert_eq!(dogood, test_org.unwrap());
 	});
 }
 
 #[test]
-fn into_view()
+fn to_view()
 {
 	util::temp_store(|store|
 	{
@@ -135,8 +135,8 @@ fn into_view()
 		};
 
 		let start = Instant::now();
-		let create_job_view_result = BincodeJob::into_view::<BincodeEmployee, BincodeLocation, BincodeOrganization, BincodePerson>(create_job, store);
-		println!("\n>>>>> BincodeJob::into_view {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+		let create_job_view_result = BincodeJob::to_view::<BincodeEmployee, BincodeLocation, BincodeOrganization, BincodePerson>(create_job, store);
+		println!("\n>>>>> BincodeJob::to_view {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 
 		assert_eq!(create_job_view, create_job_view_result.unwrap());
 	});

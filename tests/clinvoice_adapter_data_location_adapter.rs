@@ -10,7 +10,7 @@ use
 };
 
 #[test]
-fn into_view()
+fn to_view()
 {
 	util::temp_store(|store|
 	{
@@ -57,8 +57,8 @@ fn into_view()
 		};
 
 		let start = Instant::now();
-		let phoenix_view_result = BincodeLocation::into_view(phoenix, store);
-		println!("\n>>>>> BincodeLocation::into_view {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+		let phoenix_view_result = BincodeLocation::to_view(phoenix, store);
+		println!("\n>>>>> BincodeLocation::to_view {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 
 		assert_eq!(phoenix_view, phoenix_view_result.unwrap());
 	});

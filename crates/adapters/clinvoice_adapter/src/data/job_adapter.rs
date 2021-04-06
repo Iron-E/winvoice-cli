@@ -41,8 +41,25 @@ pub trait JobAdapter<'store> :
 
 	/// # Summary
 	///
+	/// Retrieve some [`Person`] from the active [`Store`](crate::Store).
+	///
+	/// # Parameters
+	///
+	/// See [`Job`].
+	///
+	/// # Returns
+	///
+	/// * An `Error`, if something goes wrong.
+	/// * A list of matching [`Job`]s.
+	fn retrieve(
+		query: query::Job,
+		store: &Store,
+	) -> Result<Vec<Job>, <Self as JobAdapter<'store>>::Error>;
+
+	/// # Summary
+	///
 	/// Convert some `employee` into a [`Person`].
-	fn into_organization<O>(job: &Job, store: &'store Store)
+	fn to_organization<O>(job: &Job, store: &'store Store)
 		-> Result<Organization, <O as OrganizationAdapter<'store>>::Error>
 	where
 		O : OrganizationAdapter<'store>,
@@ -68,7 +85,7 @@ pub trait JobAdapter<'store> :
 	/// # Summary
 	///
 	/// Convert some `job` into a [`JobView`].
-	fn into_view<E, L, O, P>(job: Job, store: &'store Store)
+	fn to_view<E, L, O, P>(job: Job, store: &'store Store)
 		-> Result<JobView, <Self as JobAdapter<'store>>::Error>
 	where
 		E : EmployeeAdapter<'store>,
@@ -82,15 +99,15 @@ pub trait JobAdapter<'store> :
 
 		<Self as JobAdapter<'store>>::Error : From<<E as EmployeeAdapter<'store>>::Error>,
 	{
-		let organization = Self::into_organization::<O>(&job, store).map_err(|e| e.into())?;
-		let organization_view = O::into_view::<L>(organization, store).map_err(|e| e.into())?;
+		let organization = Self::to_organization::<O>(&job, store).map_err(|e| e.into())?;
+		let organization_view = O::to_view::<L>(organization, store).map_err(|e| e.into())?;
 
 		let mut timesheet_views = Vec::with_capacity(job.timesheets.len());
 
 		for timesheet in job.timesheets
 		{
-			let employee = timesheet::into_employee::<E>(&timesheet, store)?;
-			let employee_view = E::into_view::<L, O, P>(employee, store)?;
+			let employee = timesheet::to_employee::<E>(&timesheet, store)?;
+			let employee_view = E::to_view::<L, O, P>(employee, store)?;
 
 			timesheet_views.push(TimesheetView
 			{
@@ -114,21 +131,4 @@ pub trait JobAdapter<'store> :
 			timesheets: timesheet_views,
 		})
 	}
-
-	/// # Summary
-	///
-	/// Retrieve some [`Person`] from the active [`Store`](crate::Store).
-	///
-	/// # Parameters
-	///
-	/// See [`Job`].
-	///
-	/// # Returns
-	///
-	/// * An `Error`, if something goes wrong.
-	/// * A list of matching [`Job`]s.
-	fn retrieve(
-		query: query::Job,
-		store: &Store,
-	) -> Result<Vec<Job>, <Self as JobAdapter<'store>>::Error>;
 }

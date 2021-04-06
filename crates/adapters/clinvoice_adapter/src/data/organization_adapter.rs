@@ -30,8 +30,25 @@ pub trait OrganizationAdapter<'store>  :
 
 	/// # Summary
 	///
+	/// Retrieve some [`Organization`] from the active [`Store`]crate::Store).
+	///
+	/// # Parameters
+	///
+	/// See [`Organization`].
+	///
+	/// # Returns
+	///
+	/// * An `Error`, if something goes wrong.
+	/// * A list of matching [`Job`]s.
+	fn retrieve(
+		query: query::Organization,
+		store: &Store,
+	) -> Result<Vec<Organization>, <Self as OrganizationAdapter<'store>>::Error>;
+
+	/// # Summary
+	///
 	/// Get all of the [`Employee`]s which work at some `organization`.
-	fn into_employees<E>(organization: &Organization, store: &'store Store)
+	fn to_employees<E>(organization: &Organization, store: &'store Store)
 		-> Result<Vec<Employee>, <E as EmployeeAdapter<'store>>::Error>
 	where
 		E : EmployeeAdapter<'store>,
@@ -53,7 +70,7 @@ pub trait OrganizationAdapter<'store>  :
 	/// # Summary
 	///
 	/// Convert some `organization` into a [`Location`] through it's `location_id` field.
-	fn into_location<L>(organization: &Organization, store: &'store Store)
+	fn to_location<L>(organization: &Organization, store: &'store Store)
 		-> Result<Location, <L as LocationAdapter<'store>>::Error>
 	where
 		L : LocationAdapter<'store>,
@@ -79,13 +96,13 @@ pub trait OrganizationAdapter<'store>  :
 	/// # Summary
 	///
 	/// Convert some `organization` into a [`OrganizationView`].
-	fn into_view<L>(organization: Organization, store: &'store Store)
+	fn to_view<L>(organization: Organization, store: &'store Store)
 		-> Result<OrganizationView, <L as LocationAdapter<'store>>::Error>
 	where
 		L : LocationAdapter<'store>,
 	{
-		let location_result = Self::into_location::<L>(&organization, store)?;
-		let location_view_result = L::into_view(location_result, store);
+		let location_result = Self::to_location::<L>(&organization, store)?;
+		let location_view_result = L::to_view(location_result, store);
 
 		Ok(OrganizationView
 		{
@@ -94,21 +111,4 @@ pub trait OrganizationAdapter<'store>  :
 			name: organization.name,
 		})
 	}
-
-	/// # Summary
-	///
-	/// Retrieve some [`Organization`] from the active [`Store`]crate::Store).
-	///
-	/// # Parameters
-	///
-	/// See [`Organization`].
-	///
-	/// # Returns
-	///
-	/// * An `Error`, if something goes wrong.
-	/// * A list of matching [`Job`]s.
-	fn retrieve(
-		query: query::Organization,
-		store: &Store,
-	) -> Result<Vec<Organization>, <Self as OrganizationAdapter<'store>>::Error>;
 }

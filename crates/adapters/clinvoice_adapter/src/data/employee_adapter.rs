@@ -42,8 +42,25 @@ pub trait EmployeeAdapter<'store> :
 
 	/// # Summary
 	///
+	/// Retrieve some [`Employee`] from an active [`Store`](crate::Store).
+	///
+	/// # Parameters
+	///
+	/// See [`Employee`].
+	///
+	/// # Returns
+	///
+	/// * Any matching [`Employee`]s.
+	/// * An [`Error`], should something go wrong.
+	fn retrieve(
+		query: query::Employee,
+		store: &Store,
+	) -> Result<Vec<Employee>, <Self as EmployeeAdapter<'store>>::Error>;
+
+	/// # Summary
+	///
 	/// Convert some `employee` into a [`Organization`].
-	fn into_organization<O>(employee: &Employee, store: &'store Store)
+	fn to_organization<O>(employee: &Employee, store: &'store Store)
 		-> Result<Organization, <O as OrganizationAdapter<'store>>::Error>
 	where
 		O : OrganizationAdapter<'store>,
@@ -69,7 +86,7 @@ pub trait EmployeeAdapter<'store> :
 	/// # Summary
 	///
 	/// Convert some `employee` into a [`Person`].
-	fn into_person<P>(employee: &Employee, store: &'store Store)
+	fn to_person<P>(employee: &Employee, store: &'store Store)
 		-> Result<Person, <P as PersonAdapter<'store>>::Error>
 	where
 		P : PersonAdapter<'store>,
@@ -95,7 +112,7 @@ pub trait EmployeeAdapter<'store> :
 	/// # Summary
 	///
 	/// Convert some `employee` into a [`EmployeeView`].
-	fn into_view<L, O, P>(employee: Employee, store: &'store Store)
+	fn to_view<L, O, P>(employee: Employee, store: &'store Store)
 		-> Result<EmployeeView, <Self as EmployeeAdapter<'store>>::Error>
 	where
 		L : LocationAdapter<'store>,
@@ -106,12 +123,12 @@ pub trait EmployeeAdapter<'store> :
 		<Self as EmployeeAdapter<'store>>::Error : From<<O as OrganizationAdapter<'store>>::Error>,
 		<Self as EmployeeAdapter<'store>>::Error : From<<P as PersonAdapter<'store>>::Error>,
 	{
-		let organization = Self::into_organization::<O>(&employee, store)?;
-		let organization_view = O::into_view::<L>(organization, store)?;
+		let organization = Self::to_organization::<O>(&employee, store)?;
+		let organization_view = O::to_view::<L>(organization, store)?;
 
-		let person_view: PersonView = Self::into_person::<P>(&employee, store)?.into();
+		let person_view: PersonView = Self::to_person::<P>(&employee, store)?.into();
 
-		let contact_info_view = contact::into_views::<L, String>(employee.contact_info, store)?;
+		let contact_info_view = contact::to_views::<L, String>(employee.contact_info, store)?;
 
 		Ok(EmployeeView
 		{
@@ -123,21 +140,4 @@ pub trait EmployeeAdapter<'store> :
 			title: employee.title,
 		})
 	}
-
-	/// # Summary
-	///
-	/// Retrieve some [`Employee`] from an active [`Store`](crate::Store).
-	///
-	/// # Parameters
-	///
-	/// See [`Employee`].
-	///
-	/// # Returns
-	///
-	/// * Any matching [`Employee`]s.
-	/// * An [`Error`], should something go wrong.
-	fn retrieve(
-		query: query::Employee,
-		store: &Store,
-	) -> Result<Vec<Employee>, <Self as EmployeeAdapter<'store>>::Error>;
 }

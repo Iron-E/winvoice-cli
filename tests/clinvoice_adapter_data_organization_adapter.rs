@@ -10,7 +10,7 @@ use
 };
 
 #[test]
-fn into_location()
+fn to_location()
 {
 	util::temp_store(|store|
 	{
@@ -23,8 +23,8 @@ fn into_location()
 
 		let start = Instant::now();
 		// Retrieve the written employees back into the `Employee` structure.
-		let dogood_location = BincodeOrganization::into_location::<BincodeLocation>(&dogood, store);
-		println!("\n>>>>> BincodeOrganization::into_location {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+		let dogood_location = BincodeOrganization::to_location::<BincodeLocation>(&dogood, store);
+		println!("\n>>>>> BincodeOrganization::to_location {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 
 		// Assert that the location retrieved is the location expected
 		assert_eq!(arizona, dogood_location.unwrap());
@@ -32,7 +32,7 @@ fn into_location()
 }
 
 #[test]
-fn into_vec_employee()
+fn to_vec_employee()
 {
 	util::temp_store(|store|
 	{
@@ -70,8 +70,8 @@ fn into_vec_employee()
 
 		let start = Instant::now();
 		// Retrieve the written employees back into the `Employee` structure.
-		let reps = BincodeOrganization::into_employees::<BincodeEmployee>(&dogood, store);
-		println!("\n>>>>> BincodeOrganization::into_vec_employee {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+		let reps = BincodeOrganization::to_employees::<BincodeEmployee>(&dogood, store);
+		println!("\n>>>>> BincodeOrganization::to_vec_employee {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 
 		assert_eq!(
 			reps.unwrap().into_iter().collect::<HashSet<_>>(),

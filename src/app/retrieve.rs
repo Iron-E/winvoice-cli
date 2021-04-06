@@ -24,9 +24,6 @@ pub(super) struct Retrieve
 	#[structopt(help="Select retrieved entities for deletion", long, short)]
 	pub delete: bool,
 
-	#[structopt(default_value="markdown", help="Export retrieved entities to the specified format. Supported: markdown", long, short)]
-	pub export: String,
-
 	#[structopt(help="Select retrieved entities for data updating", long, short)]
 	pub update: bool,
 
@@ -34,7 +31,7 @@ pub(super) struct Retrieve
 	pub command: RetrieveCommand,
 }
 
-#[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, StructOpt)]
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, StructOpt)]
 pub(super) enum RetrieveCommand
 {
 	#[structopt(about="Retrieve existing records about employees")]
@@ -45,7 +42,11 @@ pub(super) enum RetrieveCommand
 	},
 
 	#[structopt(about="Retrieve existing records about job")]
-	Job,
+	Job
+	{
+		#[structopt(default_value="markdown", help="Export retrieved entities to the specified format. Supported: markdown", long, short)]
+		export: String,
+	},
 
 	#[structopt(about="Retrieve existing records about locations")]
 	Location
@@ -74,7 +75,7 @@ impl Retrieve
 			{
 				RetrieveCommand::Employee {select_default} => todo!(),
 
-				RetrieveCommand::Job => todo!(),
+				RetrieveCommand::Job {export} => todo!(),
 
 				RetrieveCommand::Location {create_inner} => todo!(),
 

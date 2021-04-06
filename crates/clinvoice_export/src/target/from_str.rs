@@ -11,6 +11,11 @@ impl FromStr for Target
 
 	fn from_str(s: &str) -> Result<Self>
 	{
-		todo!()
+		let lowercase = s.to_ascii_lowercase();
+		match lowercase.as_str()
+		{
+			"markdown" => Ok(Self::Markdown),
+			_ => Err(Error::InvalidTarget(lowercase)),
+		}
 	}
 }

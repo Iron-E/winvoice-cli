@@ -11,7 +11,7 @@ pub enum Text<'text>
 	/// # Example
 	///
 	/// ```
-	/// use clinvoice_data::export::MarkdownText::Bold;
+	/// use clinvoice_export::markdown::Text::Bold;
 	///
 	/// assert_eq!(Bold("Something").render(), "**Something**");
 	/// ```
@@ -24,7 +24,7 @@ pub enum Text<'text>
 	/// # Example
 	///
 	/// ```
-	/// use clinvoice_data::export::MarkdownText::Italic;
+	/// use clinvoice_export::markdown::Text::Italic;
 	///
 	/// assert_eq!(Italic("Something").render(), "*Something*");
 	/// ```
@@ -37,7 +37,7 @@ pub enum Text<'text>
 	/// # Example
 	///
 	/// ```
-	/// use clinvoice_data::export::MarkdownText::Math;
+	/// use clinvoice_export::markdown::Text::Math;
 	///
 	/// assert_eq!(Math("Something").render(), "$Something$");
 	/// ```

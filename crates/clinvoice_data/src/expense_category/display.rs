@@ -1,6 +1,8 @@
+
 use
 {
 	core::fmt::{Display, Formatter, Result},
+
 	super::ExpenseCategory,
 };
 

@@ -8,6 +8,7 @@ use
 		data::{EmployeeAdapter, JobAdapter, LocationAdapter, OrganizationAdapter, PersonAdapter, query},
 	},
 	clinvoice_data::views::PersonView,
+	clinvoice_export::Target,
 };
 
 #[cfg(feature="bincode")]
@@ -45,8 +46,8 @@ pub(super) enum RetrieveCommand
 	#[structopt(about="Retrieve existing records about job")]
 	Job
 	{
-		#[structopt(default_value="markdown", help="Export retrieved entities to the specified format. Supported: markdown", long, short)]
-		export: String,
+		#[structopt(default_value="markdown", help="Export retrieved entities to the specified format.\nSupported: markdown", long, short)]
+		export: Target,
 	},
 
 	#[structopt(about="Retrieve existing records about locations")]

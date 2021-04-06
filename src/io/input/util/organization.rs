@@ -30,7 +30,7 @@ pub(super) fn retrieve_or_err<'store, L, O>(store: &'store Store) -> DynResult<'
 
 	if organizations.is_empty()
 	{
-		return Err(DataError::NoData {entity: stringify!(Organization)}.into());
+		return Err(DataError::NoData(stringify!(Organization)).into());
 	}
 
 	let organizations_len = organizations.len();

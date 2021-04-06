@@ -1,35 +1,32 @@
 use
 {
 	std::io,
-	snafu::Snafu
+	thiserror::Error
 };
 
 /// # Summary
 ///
 /// [`Error`](std::error::Error)s referencing [`Store`](crate::Store)s and [`Adapters`].
-#[derive(Debug, Snafu)]
+#[derive(Debug, Error)]
 pub enum Error
 {
-	#[cfg_attr(debug_assertions,      snafu(display("{:?}", err)))]
-	#[cfg_attr(not(debug_assertions), snafu(display("{}",   err)))]
-	Io {err: io::Error},
+	#[cfg_attr(debug_assertions,      error("{0:?}"))]
+	#[cfg_attr(not(debug_assertions), error("{0}"))]
+	Io(#[from] io::Error),
 
 	/// # Summary
 	///
 	/// An entity needed to be edited in order to be valid, but the user did not edit it.
-	#[snafu(display("The text was not edited"))]
+	#[error("The text was not edited")]
 	NotEdited,
 
-	#[cfg_attr(debug_assertions,      snafu(display("{:?}", err)))]
-	#[cfg_attr(not(debug_assertions), snafu(display("{}",   err)))]
-	TomlDe {err: toml::de::Error},
+	#[cfg_attr(debug_assertions,      error("{0:?}"))]
+	#[cfg_attr(not(debug_assertions), error("{0}"))]
+	TomlDe(#[from] toml::de::Error),
 
-	#[cfg_attr(debug_assertions,      snafu(display("{:?}", err)))]
-	#[cfg_attr(not(debug_assertions), snafu(display("{}",   err)))]
-	TomlSer {err: toml::ser::Error},
+	#[cfg_attr(debug_assertions,      error("{0:?}"))]
+	#[cfg_attr(not(debug_assertions), error("{0}"))]
+	TomlSer(#[from] toml::ser::Error),
 }
 
-clinvoice_error::FromError!(Io, io::Error);
-clinvoice_error::FromError!(TomlDe, toml::de::Error);
-clinvoice_error::FromError!(TomlSer, toml::ser::Error);
 clinvoice_error::AliasResult!();

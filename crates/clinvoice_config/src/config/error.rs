@@ -1,26 +1,23 @@
 use
 {
 	std::io,
-	snafu::Snafu,
+	thiserror::Error,
 };
 
-#[derive(Debug, Snafu)]
+#[derive(Debug, Error)]
 pub enum Error
 {
-	#[cfg_attr(debug_assertions,      snafu(display("{:?}", err)))]
-	#[cfg_attr(not(debug_assertions), snafu(display("{}",   err)))]
-	Io {err: io::Error},
+	#[cfg_attr(debug_assertions,      error("{0:?}"))]
+	#[cfg_attr(not(debug_assertions), error("{0}"))]
+	Io(#[from] io::Error),
 
-	#[cfg_attr(debug_assertions,      snafu(display("{:?}", err)))]
-	#[cfg_attr(not(debug_assertions), snafu(display("{}",   err)))]
-	TomlDe {err: toml::de::Error},
+	#[cfg_attr(debug_assertions,      error("{0:?}"))]
+	#[cfg_attr(not(debug_assertions), error("{0}"))]
+	TomlDe(#[from] toml::de::Error),
 
-	#[cfg_attr(debug_assertions,      snafu(display("{:?}", err)))]
-	#[cfg_attr(not(debug_assertions), snafu(display("{}",   err)))]
-	TomlSer {err: toml::ser::Error},
+	#[cfg_attr(debug_assertions,      error("{0:?}"))]
+	#[cfg_attr(not(debug_assertions), error("{0}"))]
+	TomlSer(#[from] toml::ser::Error),
 }
 
-clinvoice_error::FromError!(Io, io::Error);
-clinvoice_error::FromError!(TomlDe, toml::de::Error);
-clinvoice_error::FromError!(TomlSer, toml::ser::Error);
 clinvoice_error::AliasResult!();

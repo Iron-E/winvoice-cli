@@ -94,7 +94,7 @@ impl Retrieve
 				}
 			},
 
-			_ => return Err(Error::FeatureNotFound {adapter: store.adapter}.into()),
+			_ => return Err(Error::FeatureNotFound(store.adapter).into()),
 		};
 
 		Ok(())

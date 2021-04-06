@@ -94,7 +94,7 @@ pub trait LocationAdapter<'store> :
 				}
 			}
 
-			return Err(super::Error::DataIntegrity {id});
+			return Err(super::Error::DataIntegrity(id));
 		}
 
 		Ok(outer_locations)

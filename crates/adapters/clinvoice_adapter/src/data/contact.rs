@@ -26,7 +26,7 @@ where
 		)?.into_iter().next()
 		{
 			Some(result) => L::into_view(result, store)?.into(),
-			_ => return Err(Error::DataIntegrity {id: address}.into()),
+			_ => return Err(Error::DataIntegrity(address).into()),
 		},
 		Contact::Email(email) => ContactView::Email(email),
 		Contact::Phone(phone) => ContactView::Phone(phone),

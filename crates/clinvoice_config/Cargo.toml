@@ -23,7 +23,7 @@ dirs = "3"
 humantime-serde = "1"
 
 # Errors
-snafu = "0.6"
+thiserror = "1"
 
 # Serialization
 serde = {version="1", features=["derive"]}

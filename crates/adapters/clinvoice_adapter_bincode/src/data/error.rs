@@ -2,26 +2,23 @@ use
 {
 	clinvoice_adapter::data,
 	std::io,
-	snafu::Snafu,
+	thiserror::Error,
 };
 
-#[derive(Debug, Snafu)]
+#[derive(Debug, Error)]
 pub enum Error
 {
-	#[cfg_attr(debug_assertions,      snafu(display("{:?}", err)))]
-	#[cfg_attr(not(debug_assertions), snafu(display("{}",   err)))]
-	Bincode {err: bincode::Error},
+	#[cfg_attr(debug_assertions,      error("{0:?}"))]
+	#[cfg_attr(not(debug_assertions), error("{0}"))]
+	Bincode(#[from] bincode::Error),
 
-	#[cfg_attr(debug_assertions,      snafu(display("{:?}", err)))]
-	#[cfg_attr(not(debug_assertions), snafu(display("{}",   err)))]
-	Data {err: data::Error},
+	#[cfg_attr(debug_assertions,      error("{0:?}"))]
+	#[cfg_attr(not(debug_assertions), error("{0}"))]
+	Data(#[from] data::Error),
 
-	#[cfg_attr(debug_assertions,      snafu(display("{:?}", err)))]
-	#[cfg_attr(not(debug_assertions), snafu(display("{}",   err)))]
-	Io {err: io::Error},
+	#[cfg_attr(debug_assertions,      error("{0:?}"))]
+	#[cfg_attr(not(debug_assertions), error("{0}"))]
+	Io(#[from] io::Error),
 }
 
-clinvoice_error::FromError!(Bincode, bincode::Error);
-clinvoice_error::FromError!(Data, data::Error);
-clinvoice_error::FromError!(Io, io::Error);
 clinvoice_error::AliasResult!();

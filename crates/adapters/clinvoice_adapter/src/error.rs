@@ -1,13 +1,13 @@
 use
 {
 	crate::Adapters,
-	snafu::Snafu,
+	thiserror::Error,
 };
 
 /// # Summary
 ///
 /// [`Error`](std::error::Error)s referencing [`Store`](crate::Store)s and [`Adapters`].
-#[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Snafu)]
+#[derive(Copy, Clone, Debug, Eq, Error, Hash, Ord, PartialEq, PartialOrd)]
 pub enum Error
 {
 	/// # Summary
@@ -16,7 +16,7 @@ pub enum Error
 	/// [adapter type][adapter] was found.
 	///
 	/// [adapter]: crate::Adapters
-	#[snafu(display("Expected the {} adapter, but got the {} adapter", expected, actual))]
+	#[error("Expected the {expected} adapter, but got the {actual} adapter")]
 	AdapterMismatch {expected: Adapters, actual: Adapters},
 
 	/// # Summary
@@ -25,6 +25,8 @@ pub enum Error
 	/// the application.
 	///
 	/// [adapter]: crate::Adapters
-	#[snafu(display("Using this adapter requires the {} feature", adapter))]
-	FeatureNotFound {adapter: Adapters},
+	#[error("Using this adapter requires the {0} feature")]
+	FeatureNotFound(Adapters),
 }
+
+clinvoice_error::AliasResult!();

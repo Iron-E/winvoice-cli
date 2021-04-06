@@ -57,7 +57,7 @@ pub trait JobAdapter<'store> :
 		let organization = match results.get(0)
 		{
 			Some(org) => org,
-			_ => return Err(super::Error::DataIntegrity {id: job.client_id}.into()),
+			_ => return Err(super::Error::DataIntegrity(job.client_id).into()),
 		};
 
 		Ok(organization.clone())

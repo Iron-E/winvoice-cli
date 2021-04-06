@@ -29,7 +29,7 @@ pub(super) fn retrieve_or_err<'store, P>(store: &'store Store) -> DynResult<'sto
 
 	if people.is_empty()
 	{
-		return Err(DataError::NoData {entity: stringify!(Person)}.into());
+		return Err(DataError::NoData(stringify!(Person)).into());
 	}
 
 	Ok(people.into_iter().map(|p| p.into()).collect())

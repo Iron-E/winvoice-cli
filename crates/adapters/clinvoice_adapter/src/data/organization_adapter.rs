@@ -68,7 +68,7 @@ pub trait OrganizationAdapter<'store>  :
 		let location = match results.get(0)
 		{
 			Some(loc) => loc,
-			_ => return Err(super::Error::DataIntegrity {id: organization.location_id}.into()),
+			_ => return Err(super::Error::DataIntegrity(organization.location_id).into()),
 		};
 
 		Ok(location.clone())

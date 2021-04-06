@@ -58,7 +58,7 @@ pub trait EmployeeAdapter<'store> :
 		let organization = match results.get(0)
 		{
 			Some(org) => org,
-			_ => return Err(super::Error::DataIntegrity {id: employee.organization_id}.into()),
+			_ => return Err(super::Error::DataIntegrity(employee.organization_id).into()),
 		};
 
 		Ok(organization.clone())
@@ -84,7 +84,7 @@ pub trait EmployeeAdapter<'store> :
 		let person = match results.get(0)
 		{
 			Some(org) => org,
-			_ => return Err(super::Error::DataIntegrity {id: employee.organization_id}.into()),
+			_ => return Err(super::Error::DataIntegrity(employee.organization_id).into()),
 		};
 
 		Ok(person.clone())

@@ -24,6 +24,6 @@ where
 	)?.first()
 	{
 		Some(employee) => Ok(employee.clone()),
-		_ => Err(Error::DataIntegrity {id: timesheet.employee_id}.into()),
+		_ => Err(Error::DataIntegrity(timesheet.employee_id).into()),
 	}
 }

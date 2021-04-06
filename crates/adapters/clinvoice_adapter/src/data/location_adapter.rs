@@ -8,7 +8,6 @@ use
 };
 
 pub trait LocationAdapter<'store> :
-	Clone +
 	Deletable<Error = <Self as LocationAdapter<'store>>::Error> +
 	Initializable<Error = <Self as LocationAdapter<'store>>::Error> +
 	Updatable<Error = <Self as LocationAdapter<'store>>::Error> +

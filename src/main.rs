@@ -4,11 +4,14 @@ mod io;
 
 use
 {
-	app::App,
-	clinvoice_config::Config,
-	dyn_result::DynResult,
-	structopt::StructOpt,
 	std::{error::Error, fs, process},
+
+	app::App,
+	dyn_result::DynResult,
+
+	clinvoice_config::Config,
+
+	structopt::StructOpt,
 };
 
 /// # Summary

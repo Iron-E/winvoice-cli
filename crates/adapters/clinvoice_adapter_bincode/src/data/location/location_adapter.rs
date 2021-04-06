@@ -1,18 +1,20 @@
 use
 {
+	std::{fs, io::BufReader},
+
 	super::BincodeLocation,
 	crate::
 	{
 		data::{Error, Result},
 		util,
 	},
+
 	clinvoice_adapter::
 	{
 		data::{Initializable, LocationAdapter, query, Updatable},
 		Store,
 	},
 	clinvoice_data::Location,
-	std::{fs, io::BufReader},
 };
 
 impl<'store> LocationAdapter<'store> for BincodeLocation<'_, 'store>

@@ -1,8 +1,8 @@
 use
 {
+	core::{cmp::Ord, fmt::Debug, hash::Hash},
+
 	super::Match,
-	core::hash::Hash,
-	std::{cmp::Ord, fmt::Debug},
 };
 
 

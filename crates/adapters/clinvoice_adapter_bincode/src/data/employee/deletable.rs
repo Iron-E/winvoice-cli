@@ -1,9 +1,11 @@
 use
 {
+	std::{borrow::Cow, fs, io::ErrorKind},
+
 	super::BincodeEmployee,
 	crate::data::{BincodeJob, Error, Result},
+
 	clinvoice_adapter::data::{Deletable, JobAdapter, Match, query, Updatable},
-	std::{borrow::Cow, fs, io::ErrorKind},
 };
 
 impl Deletable for BincodeEmployee<'_, '_>

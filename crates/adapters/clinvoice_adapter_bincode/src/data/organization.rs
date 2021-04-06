@@ -5,8 +5,9 @@ mod updatable;
 
 use
 {
-	crate::util,
 	std::path::PathBuf,
+
+	crate::util,
 };
 
 clinvoice_adapter::Adapt!(Organization => BincodeOrganization);

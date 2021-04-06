@@ -5,8 +5,11 @@ pub use error::{Error, Result};
 
 use
 {
+	core::fmt::Display,
+	std::io,
+
 	clinvoice_data::views::RestorableSerde,
-	std::{fmt::Display, io},
+
 	dialoguer::{Editor, Input, MultiSelect, Select},
 	serde::{de::DeserializeOwned, Serialize},
 };

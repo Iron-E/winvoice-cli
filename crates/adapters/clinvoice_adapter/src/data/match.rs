@@ -2,8 +2,15 @@ mod default;
 
 use
 {
-	core::{cmp::Eq, hash::Hash, iter::Iterator},
-	std::{borrow::Cow, collections::HashSet, cmp::Ord, fmt::Debug},
+	core::
+	{
+		cmp::{Eq, Ord},
+		fmt::Debug,
+		hash::Hash,
+		iter::Iterator,
+	},
+	std::{borrow::Cow, collections::HashSet},
+
 	serde::{Deserialize, Serialize},
 };
 

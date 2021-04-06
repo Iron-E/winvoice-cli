@@ -3,6 +3,7 @@ mod outer_location;
 use
 {
 	crate::data::Match,
+
 	clinvoice_data::{Id, views::LocationView},
 };
 

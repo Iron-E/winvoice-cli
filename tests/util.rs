@@ -1,7 +1,8 @@
 use
 {
-	clinvoice_adapter::{Adapters, Store},
 	std::{env, io},
+
+	clinvoice_adapter::{Adapters, Store},
 };
 
 /// # Summary

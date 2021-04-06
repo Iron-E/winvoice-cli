@@ -1,7 +1,8 @@
 use
 {
-	super::Job,
 	core::hash::{Hash, Hasher},
+
+	super::Job,
 };
 
 impl Hash for Job

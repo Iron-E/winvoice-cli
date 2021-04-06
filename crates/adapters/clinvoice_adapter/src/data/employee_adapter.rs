@@ -1,13 +1,15 @@
 use
 {
+	std::{borrow::Cow, collections::HashMap, error::Error},
+
 	super::{contact, Deletable, Initializable, LocationAdapter, Match, OrganizationAdapter, PersonAdapter, query, Updatable},
 	crate::Store,
+
 	clinvoice_data::
 	{
 		Contact, Employee, EmployeeStatus, Organization, Person,
 		views::{EmployeeView, PersonView},
 	},
-	std::{borrow::Cow, collections::HashMap, error::Error},
 };
 
 pub trait EmployeeAdapter<'store> :

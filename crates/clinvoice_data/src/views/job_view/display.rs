@@ -1,8 +1,9 @@
 use
 {
+	core::fmt::{Display, Formatter, Result},
+
 	super::JobView,
 	crate::Job,
-	std::fmt::{Display, Formatter, Result},
 };
 
 impl Display for JobView

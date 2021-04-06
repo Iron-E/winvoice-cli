@@ -1,9 +1,11 @@
 use
 {
+	std::error::Error,
+
 	super::{Deletable, Initializable, query, Updatable},
 	crate::Store,
+
 	clinvoice_data::Person,
-	std::error::Error,
 };
 
 pub trait PersonAdapter<'store> :

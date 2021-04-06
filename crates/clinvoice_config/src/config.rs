@@ -5,10 +5,14 @@ pub use error::{Error, Result};
 
 use
 {
+	core::time::Duration,
+	std::{collections::BTreeMap, path::PathBuf},
+
 	crate::{Employees, Invoices, StoreValue, Timesheets},
+
 	clinvoice_adapter::{Adapters, data::Updatable, Store},
 	clinvoice_data::Id,
-	std::{collections::BTreeMap, path::PathBuf, time::Duration},
+
 	serde::{Deserialize, Serialize},
 };
 

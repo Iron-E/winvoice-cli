@@ -5,9 +5,10 @@ mod restorable_serde;
 
 use
 {
+	std::collections::HashMap,
+
 	super::{ContactView, OrganizationView, PersonView},
 	crate::{EmployeeStatus, Id},
-	std::collections::HashMap,
 };
 
 #[cfg(feature="serde_support")]

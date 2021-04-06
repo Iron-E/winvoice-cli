@@ -2,8 +2,9 @@ mod from_view;
 
 use
 {
-	chrono::{DateTime, Utc},
 	crate::{Expense, Id},
+
+	chrono::{DateTime, Utc},
 };
 
 #[cfg(feature="serde_support")]

@@ -2,10 +2,11 @@ mod util;
 
 use
 {
+	std::{collections::HashSet, time::Instant},
+
 	clinvoice_adapter::data::{EmployeeAdapter, LocationAdapter, OrganizationAdapter},
 	clinvoice_adapter_bincode::data::{BincodeEmployee, BincodeLocation, BincodeOrganization},
 	clinvoice_data::{Contact, Id, EmployeeStatus, Location, Person},
-	std::{collections::HashSet, time::Instant},
 };
 
 #[test]

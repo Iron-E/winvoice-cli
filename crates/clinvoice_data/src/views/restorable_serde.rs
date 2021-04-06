@@ -1,4 +1,8 @@
-use std::{collections::HashMap, hash::Hash};
+use
+{
+	core::hash::Hash,
+	std::collections::HashMap,
+};
 
 /// # Summary
 ///

@@ -1,7 +1,9 @@
 use
 {
-	clinvoice_adapter::data,
 	std::io,
+
+	clinvoice_adapter::data,
+
 	thiserror::Error,
 };
 

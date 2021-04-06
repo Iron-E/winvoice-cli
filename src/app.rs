@@ -5,7 +5,9 @@ use
 {
 	create::Create,
 	retrieve::Retrieve,
+
 	crate::{Config, DynResult, io::input, StructOpt},
+
 	clinvoice_adapter::data::Updatable,
 	clinvoice_config::Result as ConfigResult,
 };

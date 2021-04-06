@@ -1,9 +1,11 @@
 use
 {
+	std::borrow::Cow,
+
 	super::{EmployeeAdapter, Error, Match, query},
 	crate::Store,
+
 	clinvoice_data::{Employee, Timesheet},
-	std::borrow::Cow,
 };
 
 /// # Summary

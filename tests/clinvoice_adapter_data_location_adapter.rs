@@ -2,10 +2,11 @@ mod util;
 
 use
 {
+	std::time::Instant,
+
 	clinvoice_adapter::data::LocationAdapter,
 	clinvoice_adapter_bincode::data::BincodeLocation,
 	clinvoice_data::views::LocationView,
-	std::time::Instant,
 };
 
 #[test]

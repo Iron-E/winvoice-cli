@@ -1,9 +1,11 @@
 use
 {
+	std::{borrow::Cow, collections::HashMap, hash::Hash},
+
 	super::{Error, LocationAdapter, Match, query},
 	crate::Store,
+
 	clinvoice_data::{Contact, views::ContactView},
-	std::{borrow::Cow, collections::HashMap, hash::Hash},
 };
 
 /// # Summary

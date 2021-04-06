@@ -1,11 +1,14 @@
 use
 {
+	std::{fs, io::BufReader},
+
 	super::BincodeJob,
 	crate::
 	{
 		data::{Error, Result},
 		util,
 	},
+
 	clinvoice_adapter::
 	{
 		data::{Initializable, JobAdapter, query, Updatable},
@@ -16,7 +19,6 @@ use
 		chrono::{DateTime, Utc},
 		Invoice, Job, Money, Organization
 	},
-	std::{fs, io::BufReader},
 };
 
 impl<'store> JobAdapter<'store> for BincodeJob<'_, 'store>

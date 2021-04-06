@@ -1,5 +1,8 @@
-use super::ContactView;
-use crate::views::LocationView as View;
+use
+{
+	super::ContactView,
+	crate::views::LocationView as View,
+};
 
 impl From<View> for ContactView
 {

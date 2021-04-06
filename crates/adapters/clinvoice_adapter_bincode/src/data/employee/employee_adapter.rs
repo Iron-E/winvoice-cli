@@ -1,18 +1,20 @@
 use
 {
+	std::{collections::HashMap, fs, io::BufReader},
+
 	super::BincodeEmployee,
 	crate::
 	{
 		data::{Error, Result},
 		util,
 	},
+
 	clinvoice_adapter::
 	{
 		data::{EmployeeAdapter, Initializable, query, Updatable},
 		Store,
 	},
 	clinvoice_data::{Contact, Employee, EmployeeStatus, Organization, Person},
-	std::{collections::HashMap, fs, io::BufReader},
 };
 
 impl<'store> EmployeeAdapter<'store> for BincodeEmployee<'_, 'store>

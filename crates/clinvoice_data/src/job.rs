@@ -5,6 +5,7 @@ mod partial_eq;
 use
 {
 	crate::{Decimal, Expense, Id, Invoice, Money, Timesheet},
+
 	chrono::{DateTime, Utc},
 };
 

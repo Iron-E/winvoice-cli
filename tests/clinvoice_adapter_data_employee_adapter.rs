@@ -2,6 +2,8 @@ mod util;
 
 use
 {
+	std::time::Instant,
+
 	clinvoice_adapter::data::{EmployeeAdapter, LocationAdapter, OrganizationAdapter, PersonAdapter},
 	clinvoice_adapter_bincode::data::{BincodeEmployee, BincodeLocation, BincodeOrganization, BincodePerson},
 	clinvoice_data::
@@ -9,7 +11,6 @@ use
 		Contact, EmployeeStatus, Id, Location, Organization, Person,
 		views::{ContactView, EmployeeView, LocationView, OrganizationView, PersonView},
 	},
-	std::time::Instant,
 };
 
 #[test]

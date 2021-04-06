@@ -1,9 +1,11 @@
 use
 {
+	std::{fs, io::ErrorKind},
+
 	super::BincodeJob,
 	crate::data::{Error, Result},
+
 	clinvoice_adapter::data::Deletable,
-	std::{fs, io::ErrorKind},
 };
 
 impl Deletable for BincodeJob<'_, '_>

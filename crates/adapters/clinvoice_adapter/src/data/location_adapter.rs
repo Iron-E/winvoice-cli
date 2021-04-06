@@ -1,9 +1,10 @@
 use
 {
+	std::{borrow::Cow, error::Error},
 	super::{Match, Deletable, Initializable, query, Updatable},
 	crate::Store,
+
 	clinvoice_data::{Location, views::LocationView},
-	std::{borrow::Cow, error::Error},
 };
 
 pub trait LocationAdapter<'store> :

@@ -1,7 +1,8 @@
 use
 {
+	core::fmt::{Display, Formatter, Result},
+
 	super::Invoice,
-	std::fmt::{Display, Formatter, Result},
 };
 
 impl Display for Invoice

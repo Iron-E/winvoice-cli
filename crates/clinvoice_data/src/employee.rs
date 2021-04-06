@@ -4,8 +4,9 @@ mod partial_eq;
 
 use
 {
-	crate::{Contact, EmployeeStatus, Id},
 	std::collections::HashMap,
+
+	crate::{Contact, EmployeeStatus, Id},
 };
 
 #[cfg(feature="serde_support")]

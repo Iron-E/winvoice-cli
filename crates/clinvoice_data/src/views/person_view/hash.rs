@@ -1,7 +1,8 @@
 use
 {
-	super::PersonView,
 	core::hash::{Hash, Hasher},
+
+	super::PersonView,
 };
 
 impl Hash for PersonView

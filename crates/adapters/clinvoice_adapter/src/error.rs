@@ -1,6 +1,7 @@
 use
 {
 	crate::Adapters,
+
 	thiserror::Error,
 };
 

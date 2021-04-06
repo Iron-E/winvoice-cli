@@ -1,6 +1,7 @@
 use
 {
 	crate::{DynResult, io::input},
+
 	clinvoice_adapter::
 	{
 		data::{Error as DataError, PersonAdapter},

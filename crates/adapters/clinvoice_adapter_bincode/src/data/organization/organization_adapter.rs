@@ -1,18 +1,20 @@
 use
 {
+	std::{fs, io::BufReader},
+
 	super::BincodeOrganization,
 	crate::
 	{
 		data::{Error, Result},
 		util,
 	},
+
 	clinvoice_adapter::
 	{
 		data::{Initializable, OrganizationAdapter, query, Updatable},
 		Store,
 	},
 	clinvoice_data::{Location, Organization},
-	std::{fs, io::BufReader},
 };
 
 impl<'store> OrganizationAdapter<'store> for BincodeOrganization<'_, 'store>

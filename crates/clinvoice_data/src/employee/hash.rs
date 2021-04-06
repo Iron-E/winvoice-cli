@@ -1,7 +1,8 @@
 use
 {
-	super::Employee,
 	core::hash::{Hash, Hasher},
+
+	super::Employee,
 };
 
 impl Hash for Employee

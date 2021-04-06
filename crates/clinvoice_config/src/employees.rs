@@ -1,6 +1,7 @@
 use
 {
 	clinvoice_data::Id,
+
 	serde::{Deserialize, Serialize},
 };
 

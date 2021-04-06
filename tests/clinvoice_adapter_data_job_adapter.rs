@@ -2,6 +2,8 @@ mod util;
 
 use
 {
+	std::{collections::HashMap, time::Instant},
+
 	clinvoice_adapter::data::{EmployeeAdapter, JobAdapter, LocationAdapter, OrganizationAdapter, PersonAdapter},
 	clinvoice_adapter_bincode::data::{BincodeEmployee, BincodeJob, BincodeLocation, BincodeOrganization, BincodePerson},
 	clinvoice_data::
@@ -10,7 +12,6 @@ use
 		Contact, Decimal, EmployeeStatus, Id, Location, Money,
 		views::{ContactView, EmployeeView, JobView, LocationView, OrganizationView, PersonView, TimesheetView},
 	},
-	std::{collections::HashMap, time::Instant},
 };
 
 #[test]

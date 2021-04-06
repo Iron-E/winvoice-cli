@@ -2,6 +2,7 @@ use
 {
 	super::{Contact, Organization, Person},
 	crate::data::Match,
+
 	clinvoice_data::{EmployeeStatus, Id, views::EmployeeView},
 };
 

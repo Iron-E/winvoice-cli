@@ -1,14 +1,16 @@
 use
 {
+	std::{borrow::Cow, error::Error},
+
 	super::{Deletable, EmployeeAdapter, Initializable, LocationAdapter, Match, OrganizationAdapter, PersonAdapter, query, timesheet, Updatable},
 	crate::Store,
+
 	clinvoice_data::
 	{
 		chrono::{DateTime, Utc},
 		Job, Money, Organization,
 		views::{JobView, TimesheetView},
 	},
-	std::{borrow::Cow, error::Error},
 };
 
 pub trait JobAdapter<'store> :

@@ -1,18 +1,20 @@
 use
 {
+	std::{fs, io::BufReader},
+
 	super::BincodePerson,
 	crate::
 	{
 		data::{Error, Result},
 		util,
 	},
+
 	clinvoice_adapter::
 	{
 		data::{Initializable, PersonAdapter, query, Updatable},
 		Store,
 	},
 	clinvoice_data::Person,
-	std::{fs, io::BufReader},
 };
 
 impl<'store> PersonAdapter<'store> for BincodePerson<'_, 'store>

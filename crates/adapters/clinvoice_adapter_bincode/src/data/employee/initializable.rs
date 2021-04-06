@@ -1,12 +1,13 @@
 use
 {
+	clinvoice_adapter::{data::Initializable, Store},
+
 	super::BincodeEmployee,
 	crate::
 	{
 		data::{Error, Result},
 		util,
 	},
-	clinvoice_adapter::{data::Initializable, Store},
 };
 
 impl Initializable for BincodeEmployee<'_, '_>

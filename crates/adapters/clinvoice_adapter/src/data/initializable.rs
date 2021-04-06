@@ -1,5 +1,9 @@
-use crate::Store;
-use std::error::Error;
+use
+{
+	std::error::Error,
+
+	crate::Store,
+};
 
 pub trait Initializable
 {

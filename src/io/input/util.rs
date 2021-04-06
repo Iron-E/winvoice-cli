@@ -7,6 +7,7 @@ pub mod person;
 use
 {
 	clinvoice_data::views::RestorableSerde,
+
 	serde::{Deserialize, Serialize},
 };
 

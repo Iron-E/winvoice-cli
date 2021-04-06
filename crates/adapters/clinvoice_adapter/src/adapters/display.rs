@@ -1,7 +1,8 @@
 use
 {
-	super::Adapters,
 	core::fmt::{Display, Formatter, Result as FmtResult},
+
+	super::Adapters,
 };
 
 impl Display for Adapters

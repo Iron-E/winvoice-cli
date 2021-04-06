@@ -1,7 +1,8 @@
 use
 {
-	super::EmployeeView,
 	core::hash::{Hash, Hasher},
+
+	super::EmployeeView,
 };
 
 impl Hash for EmployeeView

@@ -1,8 +1,14 @@
 use
 {
+	core::iter::FilterMap,
+	std::
+	{
+		fs, io,
+		path::{Path, PathBuf},
+	},
+
 	clinvoice_adapter::Store,
 	clinvoice_data::{Id, UUID_NAMESPACE},
-	std::{fs, io, iter::FilterMap, path::{Path, PathBuf}},
 };
 
 #[cfg(test)]

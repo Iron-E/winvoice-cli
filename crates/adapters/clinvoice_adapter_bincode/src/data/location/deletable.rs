@@ -1,9 +1,11 @@
 use
 {
+	std::{borrow::Cow, fs, io::ErrorKind},
+
 	super::BincodeLocation,
 	crate::data::{BincodeOrganization, Error, Result},
+
 	clinvoice_adapter::data::{Deletable, LocationAdapter, Match, OrganizationAdapter, query},
-	std::{borrow::Cow, fs, io::ErrorKind},
 };
 
 impl Deletable for BincodeLocation<'_, '_>

@@ -6,6 +6,7 @@ use
 		data::{Error, Result},
 		util,
 	},
+
 	clinvoice_adapter::{data::Initializable, Store},
 };
 

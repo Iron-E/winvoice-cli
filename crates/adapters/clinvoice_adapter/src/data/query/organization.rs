@@ -2,6 +2,7 @@ use
 {
 	super::Location,
 	crate::data::Match,
+
 	clinvoice_data::{Id, views::OrganizationView},
 };
 

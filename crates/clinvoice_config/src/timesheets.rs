@@ -1,6 +1,7 @@
 use
 {
-	std::time::Duration,
+	core::time::Duration,
+
 	serde::{Deserialize, Serialize},
 };
 

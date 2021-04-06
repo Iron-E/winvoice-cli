@@ -18,9 +18,10 @@ mod tests
 {
 	use
 	{
+		std::time::Instant,
+
 		super::Money,
 		crate::Decimal,
-		std::time::Instant,
 	};
 
 	#[test]

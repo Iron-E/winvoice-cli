@@ -36,13 +36,14 @@ mod tests
 {
 	use
 	{
+		std::{collections::HashMap, time::Instant},
+
 		super::TimesheetView,
 		crate::
 		{
 			chrono::Utc, Decimal, EmployeeStatus, Expense, ExpenseCategory, Id, Money,
 			views::{ContactView, EmployeeView, LocationView, OrganizationView, PersonView}
 		},
-		std::{collections::HashMap, time::Instant},
 	};
 
 	#[test]

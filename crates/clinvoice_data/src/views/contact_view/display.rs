@@ -23,9 +23,10 @@ mod tests
 {
 	use
 	{
+		std::time::Instant,
+
 		super::ContactView,
 		crate::{Id, views::LocationView},
-		std::time::Instant,
 	};
 
 	/// # Summary

@@ -98,10 +98,12 @@ mod tests
 {
 	use
 	{
+		std::{borrow::Cow, fs, time::Instant},
+
 		super::{BincodeEmployee, Contact, Employee, EmployeeAdapter, EmployeeStatus, Organization, Person, query, Store, util},
+
 		clinvoice_adapter::data::Match,
 		clinvoice_data::Id,
-		std::{borrow::Cow, fs, time::Instant},
 	};
 
 	#[test]

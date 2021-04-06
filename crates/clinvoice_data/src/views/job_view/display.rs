@@ -36,13 +36,14 @@ mod tests
 {
 	use
 	{
+		std::time::Instant,
+
 		super::JobView,
 		crate::
 		{
 			chrono::Utc, Decimal, EmployeeStatus, Id, Invoice, Job, Money,
 			views::{ContactView, EmployeeView, LocationView, OrganizationView, PersonView, TimesheetView},
 		},
-		std::time::Instant,
 	};
 
 	#[test]

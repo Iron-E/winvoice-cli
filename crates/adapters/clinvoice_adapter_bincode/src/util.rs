@@ -144,8 +144,9 @@ mod tests
 {
 	use
 	{
-		super::fs,
 		std::{collections::HashSet, path::PathBuf, time::Instant},
+
+		super::fs,
 	};
 
 	#[test]

@@ -24,9 +24,10 @@ mod tests
 {
 	use
 	{
+		std::time::Instant,
+
 		super::Invoice,
 		crate::{chrono::Utc, Decimal, InvoiceDate, Money},
-		std::time::Instant,
 	};
 
 	#[test]

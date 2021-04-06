@@ -27,13 +27,14 @@ mod tests
 {
 	use
 	{
+		std::time::Instant,
+
 		super::EmployeeView,
 		crate::
 		{
 			Id, EmployeeStatus,
 			views::{ContactView, LocationView, OrganizationView, PersonView},
 		},
-		std::time::Instant,
 	};
 
 	#[test]

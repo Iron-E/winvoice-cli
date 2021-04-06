@@ -86,9 +86,11 @@ mod tests
 {
 	use
 	{
-		super::{BincodePerson, Person, PersonAdapter, query, Store, util},
-		clinvoice_adapter::data::Match,
 		std::{borrow::Cow, fs, time::Instant},
+
+		super::{BincodePerson, Person, PersonAdapter, query, Store, util},
+
+		clinvoice_adapter::data::Match,
 	};
 
 	#[test]

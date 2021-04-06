@@ -108,10 +108,12 @@ mod tests
 {
 	use
 	{
+		std::{borrow::Cow, fs, time::Instant},
+
 		super::{BincodeJob, Job, JobAdapter, Money, Organization, query, Store, Utc, util},
+
 		clinvoice_adapter::data::Match,
 		clinvoice_data::{Decimal, Id},
-		std::{borrow::Cow, fs, time::Instant},
 	};
 
 	#[test]

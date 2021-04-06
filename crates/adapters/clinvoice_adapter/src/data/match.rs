@@ -146,8 +146,9 @@ mod tests
 {
 	use
 	{
-		super::{Cow, HashSet, Match},
 		std::time::Instant,
+
+		super::{Cow, HashSet, Match},
 	};
 
 	#[test]

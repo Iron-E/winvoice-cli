@@ -22,8 +22,9 @@ mod tests
 {
 	use
 	{
-		super::Adapters,
 		std::time::Instant,
+
+		super::Adapters,
 	};
 
 	#[test]

@@ -112,10 +112,12 @@ mod tests
 {
 	use
 	{
+		std::time::{Duration, Instant},
+
 		super::{Config, Employees, BTreeMap, Invoices, Store, StoreValue, Timesheets},
+
 		clinvoice_adapter::Adapters,
 		clinvoice_data::Id,
-		std::time::{Duration, Instant},
 	};
 
 	#[test]

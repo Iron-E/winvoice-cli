@@ -23,8 +23,9 @@ mod tests
 {
 	use
 	{
-		super::EmployeeStatus,
 		std::time::Instant,
+
+		super::EmployeeStatus,
 	};
 
 	#[test]

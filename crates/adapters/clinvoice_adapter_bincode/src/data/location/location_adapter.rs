@@ -116,9 +116,11 @@ mod tests
 {
 	use
 	{
-		super::{BincodeLocation, Location, LocationAdapter, query, Store, util},
-		clinvoice_adapter::data::Match,
 		std::{borrow::Cow, fs, time::Instant},
+
+		super::{BincodeLocation, Location, LocationAdapter, query, Store, util},
+
+		clinvoice_adapter::data::Match,
 	};
 
 	#[test]

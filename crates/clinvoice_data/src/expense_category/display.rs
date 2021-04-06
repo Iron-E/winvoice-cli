@@ -27,8 +27,9 @@ mod tests
 {
 	use
 	{
-		super::ExpenseCategory,
 		std::time::Instant,
+
+		super::ExpenseCategory,
 	};
 
 	#[test]

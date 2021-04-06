@@ -18,9 +18,10 @@ mod tests
 {
 	use
 	{
+		std::time::Instant,
+
 		super::PersonView,
 		crate::Id,
-		std::time::Instant,
 	};
 
 	#[test]

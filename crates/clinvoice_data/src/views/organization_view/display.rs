@@ -18,9 +18,10 @@ mod tests
 {
 	use
 	{
+		std::time::Instant,
+
 		super::OrganizationView,
 		crate::{Id, views::LocationView},
-		std::time::Instant,
 	};
 
 	#[test]

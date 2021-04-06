@@ -1,5 +1,3 @@
-use std::cmp;
-
 /// # Summary
 ///
 /// Different elements of [`Markdown`].
@@ -13,13 +11,11 @@ use std::cmp;
 ///
 /// * this is an UnorderedList
 ///
-/// this is another BlockText
+/// this is another BlockText (there are Linebreaks between elements)
 ///
-/// 1. this is an OrderedList above a Linebreak
+/// 1. this is an OrderedList
 ///
-/// &nbsp;
-///
-/// 1. this is another OrderedList below a Linebreak
+/// 1. this is another OrderedList
 /// ```
 pub enum MarkdownElement<'text>
 {
@@ -30,13 +26,17 @@ pub enum MarkdownElement<'text>
 
 	/// # Summary
 	///
-	/// A heading.
-	Heading {depth: usize, text: &'text str},
+	/// A space between two [`MarkdownElement`]s.
+	///
+	/// # Remarks
+	///
+	/// Typically used on [`OrderedList`]s or [`UnorderedList`]s.
+	Break,
 
 	/// # Summary
 	///
-	/// A space between two lines.
-	Linebreak,
+	/// A heading.
+	Heading {depth: usize, text: &'text str},
 
 	/// # Summary
 	///
@@ -58,11 +58,56 @@ impl MarkdownElement<'_>
 	{
 		(match self
 		{
-			Self::BlockText(text) => text.into(),
-			Self::Heading {depth, text} => format!("{} {}", "#".repeat(cmp::max(1, depth)), text),
-			Self::Linebreak => "\n&nbsp;".into(),
+			Self::BlockText(text) => format!("{}\n", text),
+			Self::Break => String::with_capacity(1),
+			Self::Heading {depth, text} => format!("{} {}\n", "#".repeat(1.max(depth)), text),
 			Self::OrderedList {depth, text} => format!("{}1. {}", "\t".repeat(depth), text),
 			Self::UnorderedList {depth, text} => format!("{}- {}", "\t".repeat(depth), text),
 		}) + "\n"
+	}
+}
+
+#[cfg(test)]
+mod tests
+{
+	use super::MarkdownElement as Element;
+
+	#[test]
+	fn render()
+	{
+		assert_eq!(vec![
+			Element::Heading {depth: 1, text: "This is a test heading!"}.render(),
+			Element::Heading {depth: 2, text: "Paragraphs"}.render(),
+			Element::BlockText("I can create a paragraph.").render(),
+			Element::Heading {depth: 2, text: "Ordered Lists"}.render(),
+			Element::OrderedList {depth: 0, text: "Ordered lists are not a problem."}.render(),
+			Element::OrderedList {depth: 0, text: "Continuing is just fine."}.render(),
+			Element::Break.render(),
+			Element::Heading {depth: 2, text: "Break"}.render(),
+			Element::Heading {depth: 2, text: "Unordered List"}.render(),
+			Element::UnorderedList {depth: 0, text: "I can break at any point."}.render(),
+			Element::UnorderedList {depth: 1, text: "Indenting? Eazy breezy."}.render(),
+			Element::UnorderedList {depth: 0, text: "De-indenting? Easier!"}.render(),
+		].join(""),
+"# This is a test heading!
+
+## Paragraphs
+
+I can create a paragraph.
+
+## Ordered Lists
+
+1. Ordered lists are not a problem.
+1. Continuing is just fine.
+
+## Break
+
+## Unordered List
+
+- I can break at any point.
+	- Indenting? Eazy breezy.
+- De-indenting? Easier!
+"
+		);
 	}
 }

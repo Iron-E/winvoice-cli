@@ -5,7 +5,7 @@ use
 	clinvoice_adapter::
 	{
 		Adapters, Error,
-		data::{EmployeeAdapter, JobAdapter, LocationAdapter, OrganizationAdapter, PersonAdapter, query},
+		data::{Deletable, EmployeeAdapter, JobAdapter, LocationAdapter, OrganizationAdapter, PersonAdapter, query},
 	},
 	clinvoice_data::views::PersonView,
 	clinvoice_export::Target,
@@ -23,8 +23,11 @@ const QUERY_PROMPT: &str = "See the documentation of `clinvoice_adapter::data::q
 #[structopt(about="Retrieve information that was recorded with CLInvoice")]
 pub(super) struct Retrieve
 {
-	#[structopt(help="Select retrieved entities for deletion", long, short)]
+	#[structopt(help="Select retrieved entities for deletion. See -c", long, short)]
 	pub delete: bool,
+
+	#[structopt(help="Cascade -d operations. Without this flag, entities referenced by other entities cannot be deleted", long, short)]
+	pub cascade: bool,
 
 	#[structopt(help="Select retrieved entities for data updating", long, short)]
 	pub update: bool,
@@ -66,6 +69,9 @@ pub(super) enum RetrieveCommand
 
 impl Retrieve
 {
+	/// # Summary
+	///
+	/// Execute the constructed command.
 	pub(super) fn run<'config>(self, config: &'config Config, store_name: String) -> DynResult<'config, ()>
 	{
 		let store = config.get_store(&store_name).expect("Storage name not known");

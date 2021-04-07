@@ -1,0 +1,7 @@
+//#include outer_location
+//#include match
+//#include types
+
+// pub id: Match<'m, Id>,
+// pub outer: OuterLocation<'m>,
+// pub name: Match<'m, String>,

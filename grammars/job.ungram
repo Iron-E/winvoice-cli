@@ -1,0 +1,14 @@
+//#include invoice
+//#include match
+//#include organization
+//#include timesheet
+//#include types
+
+// client: Organization<'m>,
+// date_close: Match<'m, Option<DateTime<Utc>>>,
+// date_open: Match<'m, DateTime<Utc>>,
+// id: Match<'m, Id>,
+// invoice: Invoice<'m>,
+// notes: Match<'m, String>,
+// objectives: Match<'m, String>,
+// timesheets: Timesheet<'m>,

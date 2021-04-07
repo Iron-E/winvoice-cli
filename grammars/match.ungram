@@ -1,0 +1,4 @@
+MatchCondition = 'condition = '
+MatchAny = MatchCondition 'Any'
+
+MatchValue = 'value = '

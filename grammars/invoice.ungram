@@ -1,0 +1,6 @@
+//#include invoice_date
+//#include match
+//#include types
+
+// date: Option<InvoiceDate<'m>>,
+// hourly_rate: Match<'m, Money>,

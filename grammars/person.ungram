@@ -1,0 +1,34 @@
+//#include match
+//#include types
+
+TomlPersonQuery =
+  '[' ('ident_parent' '.')* 'id' ']' 'literal_newline'
+  TomlPersonQueryId 'literal_newline'
+  '[' ('ident_parent' '.')* 'name' ']' 'literal_newline'
+  TomlPersonQueryName
+
+TomlPersonQueryId =
+  MatchAny
+| MatchCondition 'EqualTo' 'literal_newline'
+  MatchValue Uuid
+| MatchCondition 'HasAll' 'literal_newline'
+  MatchValue '[' (Uuid ',')* ']'
+| MatchCondition 'HasAny' 'literal_newline'
+  MatchValue '[' (Uuid ',')* ']'
+| MatchCondition 'HasNone' 'literal_newline'
+  MatchValue '[' (Uuid ',')* ']'
+| MatchCondition 'InRange' 'literal_newline'
+  MatchValue '[' min:Uuid ',' max:Uuid ']'
+
+TomlPersonQueryName =
+  MatchAny
+| MatchCondition 'EqualTo' 'literal_newline'
+  MatchValue String
+| MatchCondition 'HasAll' 'literal_newline'
+  MatchValue '[' (String ',')* ']'
+| MatchCondition 'HasAny' 'literal_newline'
+  MatchValue '[' (String ',')* ']'
+| MatchCondition 'HasNone' 'literal_newline'
+  MatchValue '[' (String ',')* ']'
+| MatchCondition 'InRange' 'literal_newline'
+  MatchValue '[' min:String ',' max:String ']'

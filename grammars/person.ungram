@@ -9,26 +9,26 @@ TomlPersonQuery =
 
 TomlPersonQueryId =
   MatchAny
-| MatchCondition 'EqualTo' 'literal_newline'
+| MatchCondition '"EqualTo"' 'literal_newline'
   MatchValue Uuid
-| MatchCondition 'HasAll' 'literal_newline'
+| MatchCondition '"HasAll"' 'literal_newline'
   MatchValue '[' (Uuid ',')* ']'
-| MatchCondition 'HasAny' 'literal_newline'
+| MatchCondition '"HasAny"' 'literal_newline'
   MatchValue '[' (Uuid ',')* ']'
-| MatchCondition 'HasNone' 'literal_newline'
+| MatchCondition '"HasNone"' 'literal_newline'
   MatchValue '[' (Uuid ',')* ']'
-| MatchCondition 'InRange' 'literal_newline'
+| MatchCondition '"InRange"' 'literal_newline'
   MatchValue '[' min:Uuid ',' max:Uuid ']'
 
 TomlPersonQueryName =
   MatchAny
-| MatchCondition 'EqualTo' 'literal_newline'
+| MatchCondition '"EqualTo"' 'literal_newline'
   MatchValue String
-| MatchCondition 'HasAll' 'literal_newline'
+| MatchCondition '"HasAll"' 'literal_newline'
   MatchValue '[' (String ',')* ']'
-| MatchCondition 'HasAny' 'literal_newline'
+| MatchCondition '"HasAny"' 'literal_newline'
   MatchValue '[' (String ',')* ']'
-| MatchCondition 'HasNone' 'literal_newline'
+| MatchCondition '"HasNone"' 'literal_newline'
   MatchValue '[' (String ',')* ']'
-| MatchCondition 'InRange' 'literal_newline'
+| MatchCondition '"InRange"' 'literal_newline'
   MatchValue '[' min:String ',' max:String ']'

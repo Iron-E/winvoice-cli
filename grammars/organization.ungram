@@ -2,6 +2,36 @@
 //#include match
 //#include types
 
-// id: Match<'m, Id>,
-// location: Location<'m>,
-// name: Match<'m, String>,
+TomlOrganizationQuery =
+  '[' ('ident_parent' '.')* 'id' ']' 'literal_newline'
+  TomlOrganizationQueryId 'literal_newline'
+  '[' ('ident_parent' '.')* 'location' ']' 'literal_newline'
+  TomlLocationQuery
+  '[' ('ident_parent' '.')* 'name' ']' 'literal_newline'
+  TomlOrganizationQueryName
+
+TomlOrganizationQueryId =
+  MatchAny
+| MatchCondition '"EqualTo"' 'literal_newline'
+  MatchValue Uuid
+| MatchCondition '"HasAll"' 'literal_newline'
+  MatchValue '[' (Uuid ',')* ']'
+| MatchCondition '"HasAny"' 'literal_newline'
+  MatchValue '[' (Uuid ',')* ']'
+| MatchCondition '"HasNone"' 'literal_newline'
+  MatchValue '[' (Uuid ',')* ']'
+| MatchCondition '"InRange"' 'literal_newline'
+  MatchValue '[' min:Uuid ',' max:Uuid ']'
+
+TomlOrganizationQueryName =
+  MatchAny
+| MatchCondition '"EqualTo"' 'literal_newline'
+  MatchValue String
+| MatchCondition '"HasAll"' 'literal_newline'
+  MatchValue '[' (String ',')* ']'
+| MatchCondition '"HasAny"' 'literal_newline'
+  MatchValue '[' (String ',')* ']'
+| MatchCondition '"HasNone"' 'literal_newline'
+  MatchValue '[' (String ',')* ']'
+| MatchCondition '"InRange"' 'literal_newline'
+  MatchValue '[' min:String ',' max:String ']'

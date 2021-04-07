@@ -1,4 +1,47 @@
+//#include types
+
+/// A condition for a `Match`
 MatchCondition = 'condition = '
+
+/// A `Match` for anything.
 MatchAny = MatchCondition '"Any"'
 
+/// A value for a `MatchCondition`. Not needed for `MatchAny`.
 MatchValue = 'value = '
+
+/// A query for the `String` type.
+QueryString =
+  MatchAny
+| MatchCondition '"EqualTo"literal_newline'
+  MatchValue String
+| MatchCondition '"HasAll"literal_newline'
+  MatchValue '[' (String ',')* ']'
+| MatchCondition '"HasAny"literal_newline'
+  MatchValue '[' (String ',')* ']'
+| MatchCondition '"HasNone"literal_newline'
+  MatchValue '[' (String ',')* ']'
+| MatchCondition '"InRange"literal_newline'
+  MatchValue '[' min:String ',' max:String ']'
+
+/// Any string literal.
+String = '"' 'literal_character'* '"'
+
+/// A query for the `Uuid` type.
+QueryUuid =
+  MatchAny
+| MatchCondition '"EqualTo"literal_newline'
+  MatchValue Uuid
+| MatchCondition '"HasAll"literal_newline'
+  MatchValue '[' (Uuid ',')* ']'
+| MatchCondition '"HasAny"literal_newline'
+  MatchValue '[' (Uuid ',')* ']'
+| MatchCondition '"HasNone"literal_newline'
+  MatchValue '[' (Uuid ',')* ']'
+| MatchCondition '"InRange"literal_newline'
+  MatchValue '[' min:Uuid ',' max:Uuid ']'
+
+/// A universally-unique identifier.
+Uuid = '"' UuidCharacter UuidCharacter UuidCharacter UuidCharacter UuidCharacter UuidCharacter UuidCharacter UuidCharacter '-' UuidCharacter UuidCharacter UuidCharacter UuidCharacter '-' UuidCharacter UuidCharacter UuidCharacter UuidCharacter '-' UuidCharacter UuidCharacter UuidCharacter UuidCharacter '-' UuidCharacter UuidCharacter UuidCharacter UuidCharacter UuidCharacter UuidCharacter UuidCharacter UuidCharacter UuidCharacter UuidCharacter UuidCharacter UuidCharacter '"'
+
+/// A character which is part of some `Uuid`.
+UuidCharacter = AlphabetLowercase | Integer

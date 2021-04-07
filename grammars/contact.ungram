@@ -2,6 +2,53 @@
 //#include match
 //#include types
 
-// address: Location<'m>,
-// email: Match<'m, String>,
-// phone: Match<'m, String>,
+TomlContactQuery =
+  '[' 'ident_parent.'* 'address]literal_newline'
+  TomlLocationQuery 'literal_newline'
+  '[' 'ident_parent.'* 'email]literal_newline'
+  TomlContactQueryEmail
+  '[' 'ident_parent.'* 'phone]literal_newline'
+  TomlContactQueryPhone
+
+TomlContactQueryEmail =
+  MatchAny
+| MatchCondition '"EqualTo"literal_newline'
+  MatchValue Email
+| MatchCondition '"HasAll"literal_newline'
+  MatchValue '[' (Email ',')* ']'
+| MatchCondition '"HasAny"literal_newline'
+  MatchValue '[' (Email ',')* ']'
+| MatchCondition '"HasNone"literal_newline'
+  MatchValue '[' (Email ',')* ']'
+| MatchCondition '"InRange"literal_newline'
+  MatchValue '[' min:Email ',' max:Email ']'
+
+/// A valid email address NOTE: definition may not comprise all valid email addresses, only most.
+///
+/// Example: foo@bar.io
+Email = '"' EmailPrefix '@' EmailDomain '.top_level_domain' '"'
+
+/// The part of an email before the '@'.
+EmailPrefix =
+  AlphabetLowercase EmailPrefix*
+| Integer EmailPrefix*
+| (AlphabetLowercase|Integer) ('-'|'_'|'.') (AlphabetLowercase|Integer) EmailPrefix*
+
+/// The part of an email after the '@'.
+EmailDomain = (AlphabetLowercase|Integer) (AlphabetLowercase|Integer|'-')* (AlphabetLowercase|Integer)
+
+TomlContactQueryPhone =
+  MatchAny
+| MatchCondition '"EqualTo"literal_newline'
+  MatchValue Phone
+| MatchCondition '"HasAll"literal_newline'
+  MatchValue '[' (Phone ',')* ']'
+| MatchCondition '"HasAny"literal_newline'
+  MatchValue '[' (Phone ',')* ']'
+| MatchCondition '"HasNone"literal_newline'
+  MatchValue '[' (Phone ',')* ']'
+| MatchCondition '"InRange"literal_newline'
+  MatchValue '[' min:Phone ',' max:Phone ']'
+
+/// A standard phone number. Contains an optional country code (e.g. 1-555-627-5309 or 555-627-5309).
+Phone = '"' (Integer Integer* '-')? Integer Integer Integer '-' Integer Integer Integer '-' Integer Integer Integer Integer '"'

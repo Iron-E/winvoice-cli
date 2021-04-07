@@ -1,4 +1,4 @@
 MatchCondition = 'condition = '
-MatchAny = MatchCondition 'Any'
+MatchAny = MatchCondition '"Any"'
 
 MatchValue = 'value = '

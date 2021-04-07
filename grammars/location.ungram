@@ -2,41 +2,41 @@
 //#include types
 
 TomlLocationQuery =
-  '[' ('ident_parent' '.')* 'id' ']' 'literal_newline'
+  '[' 'ident_parent.'* 'id]literal_newline'
   TomlLocationQueryId 'literal_newline'
-  '[' ('ident_parent' '.')* 'outer' ']' 'literal_newline'
+  '[' 'ident_parent.'* 'outer]literal_newline'
   TomlLocationQueryOuter 'literal_newline'
-  '[' ('ident_parent' '.')* 'name' ']' 'literal_newline'
+  '[' 'ident_parent.'* 'name]literal_newline'
   TomlLocationQueryName
 
 TomlLocationQueryId =
   MatchAny
-| MatchCondition '"EqualTo"' 'literal_newline'
+| MatchCondition '"EqualTo"literal_newline'
   MatchValue Uuid
-| MatchCondition '"HasAll"' 'literal_newline'
+| MatchCondition '"HasAll"literal_newline'
   MatchValue '[' (Uuid ',')* ']'
-| MatchCondition '"HasAny"' 'literal_newline'
+| MatchCondition '"HasAny"literal_newline'
   MatchValue '[' (Uuid ',')* ']'
-| MatchCondition '"HasNone"' 'literal_newline'
+| MatchCondition '"HasNone"literal_newline'
   MatchValue '[' (Uuid ',')* ']'
-| MatchCondition '"InRange"' 'literal_newline'
+| MatchCondition '"InRange"literal_newline'
   MatchValue '[' min:Uuid ',' max:Uuid ']'
 
 TomlLocationQueryOuter =
   MatchAny
-| MatchCondition '"Some"' 'literal_newline'
+| MatchCondition '"Some"literal_newline'
   TomlLocationQuery
 | MatchCondition '"None"'
 
 TomlLocationQueryName =
   MatchAny
-| MatchCondition '"EqualTo"' 'literal_newline'
+| MatchCondition '"EqualTo"literal_newline'
   MatchValue String
-| MatchCondition '"HasAll"' 'literal_newline'
+| MatchCondition '"HasAll"literal_newline'
   MatchValue '[' (String ',')* ']'
-| MatchCondition '"HasAny"' 'literal_newline'
+| MatchCondition '"HasAny"literal_newline'
   MatchValue '[' (String ',')* ']'
-| MatchCondition '"HasNone"' 'literal_newline'
+| MatchCondition '"HasNone"literal_newline'
   MatchValue '[' (String ',')* ']'
-| MatchCondition '"InRange"' 'literal_newline'
+| MatchCondition '"InRange"literal_newline'
   MatchValue '[' min:String ',' max:String ']'

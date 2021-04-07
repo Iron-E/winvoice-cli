@@ -110,7 +110,7 @@ mod tests
 	{
 		std::{borrow::Cow, fs, time::Instant},
 
-		super::{BincodeJob, Job, JobAdapter, Money, Organization, query, Store, Utc, util},
+		super::{BincodeJob, DateTime, Job, JobAdapter, Money, Organization, query, Store, Utc, util},
 
 		clinvoice_adapter::data::Match,
 		clinvoice_data::{Decimal, Id},
@@ -251,7 +251,7 @@ mod tests
 			let not_creation = BincodeJob::retrieve(
 				query::Job
 				{
-					date_open: Match::HasNone(vec![Cow::Borrowed(&creation.date_open)].into_iter().collect()),
+					date_open: Match::HasNone(vec![Cow::Borrowed(&DateTime::from(creation.date_open))].into_iter().collect()),
 					id: Match::HasAny(vec![Cow::Borrowed(&retrieval.id), Cow::Borrowed(&assertion.id)].into_iter().collect()),
 					..Default::default()
 				},

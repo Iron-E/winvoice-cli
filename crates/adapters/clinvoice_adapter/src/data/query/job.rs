@@ -5,7 +5,7 @@ use
 
 	clinvoice_data::
 	{
-		chrono::{DateTime, Utc},
+		chrono::{DateTime, Local},
 		Id,
 		views::JobView,
 	},
@@ -25,10 +25,10 @@ pub struct Job<'m>
 	pub client: Organization<'m>,
 
 	#[cfg_attr(feature="serde_support", serde(default))]
-	pub date_close: Match<'m, Option<DateTime<Utc>>>,
+	pub date_close: Match<'m, Option<DateTime<Local>>>,
 
 	#[cfg_attr(feature="serde_support", serde(default))]
-	pub date_open: Match<'m, DateTime<Utc>>,
+	pub date_open: Match<'m, DateTime<Local>>,
 
 	#[cfg_attr(feature="serde_support", serde(default))]
 	pub id: Match<'m, Id>,
@@ -54,8 +54,8 @@ impl Job<'_>
 	pub fn matches(&self, job: &clinvoice_data::Job) -> bool
 	{
 		self.client.id.matches(&job.client_id) &&
-		self.date_close.matches(&job.date_close) &&
-		self.date_open.matches(&job.date_open) &&
+		self.date_close.matches(&job.date_close.map(|date| DateTime::from(date))) &&
+		self.date_open.matches(&DateTime::from(job.date_open)) &&
 		self.id.matches(&job.id) &&
 		self.invoice.matches(&job.invoice) &&
 		self.notes.matches(&job.notes) &&
@@ -69,8 +69,8 @@ impl Job<'_>
 	pub fn matches_view(&self, job: &JobView) -> bool
 	{
 		self.client.matches_view(&job.client) &&
-		self.date_close.matches(&job.date_close) &&
-		self.date_open.matches(&job.date_open) &&
+		self.date_close.matches(&job.date_close.map(|date| DateTime::from(date))) &&
+		self.date_open.matches(&DateTime::from(job.date_open)) &&
 		self.id.matches(&job.id) &&
 		self.invoice.matches(&job.invoice) &&
 		self.notes.matches(&job.notes) &&

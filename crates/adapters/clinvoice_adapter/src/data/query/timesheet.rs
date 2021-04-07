@@ -5,7 +5,7 @@ use
 
 	clinvoice_data::
 	{
-		chrono::{DateTime, Utc},
+		chrono::{DateTime, Local},
 		views::TimesheetView,
 	},
 };
@@ -24,10 +24,10 @@ pub struct Timesheet<'m>
 	pub employee: Employee<'m>,
 
 	#[cfg_attr(feature="serde_support", serde(default))]
-	pub time_begin: Match<'m, DateTime<Utc>>,
+	pub time_begin: Match<'m, DateTime<Local>>,
 
 	#[cfg_attr(feature="serde_support", serde(default))]
-	pub time_end: Match<'m, Option<DateTime<Utc>>>,
+	pub time_end: Match<'m, Option<DateTime<Local>>>,
 }
 
 impl Timesheet<'_>
@@ -38,8 +38,8 @@ impl Timesheet<'_>
 	pub fn any_matches_view(&self, timesheets: &[TimesheetView]) -> bool
 	{
 		timesheets.iter().map(|t| &t.employee).any(|e| self.employee.matches_view(e)) &&
-		self.time_begin.set_matches(&timesheets.iter().map(|t| &t.time_begin).collect()) &&
-		self.time_end.set_matches(&timesheets.iter().map(|t| &t.time_end).collect())
+		self.time_begin.set_matches(&timesheets.iter().map(|t| DateTime::from(t.time_begin)).collect::<Vec<_>>().iter().collect()) &&
+		self.time_end.set_matches(&timesheets.iter().map(|t| t.time_end.map(|time| DateTime::from(time))).collect::<Vec<_>>().iter().collect())
 	}
 
 	/// # Summary
@@ -48,7 +48,7 @@ impl Timesheet<'_>
 	pub fn set_matches(&self, timesheets: &[clinvoice_data::Timesheet]) -> bool
 	{
 		self.employee.id.set_matches(&timesheets.iter().map(|t| &t.employee_id).collect()) &&
-		self.time_begin.set_matches(&timesheets.iter().map(|t| &t.time_begin).collect()) &&
-		self.time_end.set_matches(&timesheets.iter().map(|t| &t.time_end).collect())
+		self.time_begin.set_matches(&timesheets.iter().map(|t| DateTime::from(t.time_begin)).collect::<Vec<_>>().iter().collect()) &&
+		self.time_end.set_matches(&timesheets.iter().map(|t| t.time_end.map(|time| DateTime::from(time))).collect::<Vec<_>>().iter().collect())
 	}
 }

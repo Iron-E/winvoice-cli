@@ -16,8 +16,13 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
 pub struct Contact<'m>
 {
+	#[cfg_attr(feature="serde_support", serde(default))]
 	pub address: Location<'m>,
+
+	#[cfg_attr(feature="serde_support", serde(default))]
 	pub email: Match<'m, String>,
+
+	#[cfg_attr(feature="serde_support", serde(default))]
 	pub phone: Match<'m, String>,
 }
 

@@ -2,6 +2,7 @@
 //#include match
 //#include types
 
+/// A query for a `Contact`.
 TomlContactQuery =
   '[' 'ident_parent.'* 'address]literal_newline'
   TomlLocationQuery 'literal_newline'
@@ -10,6 +11,7 @@ TomlContactQuery =
   '[' 'ident_parent.'* 'phone]literal_newline'
   TomlContactQueryPhone
 
+/// A query for the `email` field of a `Contact`.
 TomlContactQueryEmail =
   MatchAny
 | MatchCondition '"EqualTo"literal_newline'
@@ -37,6 +39,7 @@ EmailPrefix =
 /// The part of an email after the '@'.
 EmailDomain = (AlphabetLowercase|Integer) (AlphabetLowercase|Integer|'-')* (AlphabetLowercase|Integer)
 
+/// A query for the `phone` field of a `Contact`.
 TomlContactQueryPhone =
   MatchAny
 | MatchCondition '"EqualTo"literal_newline'

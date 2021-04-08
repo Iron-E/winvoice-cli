@@ -2,7 +2,7 @@
 //#include match
 //#include types
 
-/// A query for a `Organization`.
+/// A query for an `Organization`.
 TomlOrganizationQuery =
   '[' 'ident_parent.'* 'id]literal_newline'
   QueryUuid 'literal_newline'

@@ -1,5 +1,6 @@
 //#include match
 
+/// A query for a `Location`.
 TomlLocationQuery =
   '[' 'ident_parent.'* 'id]literal_newline'
   QueryUuid 'literal_newline'
@@ -8,8 +9,9 @@ TomlLocationQuery =
   '[' 'ident_parent.'* 'name]literal_newline'
   QueryString
 
+/// A query for the `outer` `Location` of some `Location`.
 TomlLocationQueryOuter =
   MatchAny
+| MatchCondition '"None"'
 | MatchCondition '"Some"literal_newline'
   TomlLocationQuery
-| MatchCondition '"None"'

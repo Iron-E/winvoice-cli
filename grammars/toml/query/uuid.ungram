@@ -2,7 +2,7 @@
 //#include ../types
 
 /// A query for the `Uuid` type.
-QueryUuid =
+TomlUuidQuery =
   MatchAny
 | MatchCondition '"EqualTo"literal_newline'
   MatchValue Uuid

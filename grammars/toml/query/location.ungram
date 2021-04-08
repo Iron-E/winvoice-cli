@@ -5,11 +5,11 @@
 /// A query for a `Location`.
 TomlLocationQuery =
   '[' 'ident_parent.'* 'id]literal_newline'
-  QueryUuid 'literal_newline'
+  TomlUuidQuery 'literal_newline'
   '[' 'ident_parent.'* 'outer]literal_newline'
   TomlLocationQueryOuter 'literal_newline'
   '[' 'ident_parent.'* 'name]literal_newline'
-  QueryString
+  TomlStringQuery
 
 /// A query for the `outer` `Location` of some `Location`.
 TomlLocationQueryOuter =

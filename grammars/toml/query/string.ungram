@@ -1,7 +1,7 @@
 //#include ../match
 
 /// A query for the `String` type.
-QueryString =
+TomlStringQuery =
   MatchAny
 | MatchCondition '"EqualTo"literal_newline'
   MatchValue String

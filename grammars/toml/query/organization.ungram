@@ -5,8 +5,8 @@
 /// A query for an `Organization`.
 TomlOrganizationQuery =
   '[' 'ident_parent.'* 'id]literal_newline'
-  QueryUuid 'literal_newline'
+  TomlUuidQuery 'literal_newline'
   '[' 'ident_parent.'* 'location]literal_newline'
   TomlLocationQuery
   '[' 'ident_parent.'* 'name]literal_newline'
-  QueryString
+  TomlStringQuery

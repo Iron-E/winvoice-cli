@@ -1,6 +1,38 @@
-//#include invoice_date
+//#include ../fields
 //#include ../match
 //#include ../types
+//#include invoice_date
 
-// date: Option<InvoiceDate<'m>>,
-// hourly_rate: Match<'m, Money>,
+/// A query for an `Invoice`.
+YamlInvoiceQuery =
+  YamlFieldNamePrefix 'date:literal_newline'
+  YamlInvoiceDateQuery 'literal_newline'
+  YamlFieldNamePrefix 'hourly' '_' 'rate:literal_newline'
+  YamlInvoiceQueryHourlyRate
+
+/// A query for the `hourly_rate` field of an `Invoice`.
+YamlInvoiceQueryHourlyRate =
+  MatchAny
+| MatchCondition 'EqualTo' 'literal_newline'
+  MatchValue Money
+| MatchCondition 'HasAll' 'literal_newline'
+  MatchValue YamlMoneyList
+| MatchCondition 'HasAny' 'literal_newline'
+  MatchValue YamlMoneyList
+| MatchCondition 'HasNone' 'literal_newline'
+  MatchValue YamlMoneyList
+| MatchCondition 'InRange' 'literal_newline'
+  MatchValue min:YamlMoneyListItem max:YamlMoneyListItem
+
+/// A list of `Money`
+YamlMoneyList =
+  '[]'
+| YamlMoneyListItem YamlMoneyListItem*
+
+/// An item in a list of `Money`.
+YamlMoneyListItem = 'literal_newline' YamlFieldPrefix '- ' Money
+
+/// An `amount` of some `currency` according to ISO-4217 currency codes.
+Money =
+  YamlFieldNamePrefix 'amount: "' Integer Integer* ('.' Integer Integer)? '"literal_newline'
+  YamlFieldNamePrefix 'currency: iso_4217'

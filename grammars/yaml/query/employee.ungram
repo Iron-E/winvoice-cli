@@ -1,12 +1,47 @@
-//#include contact
+//#include ../fields
 //#include ../match
+//#include contact
 //#include organization
 //#include person
-//#include ../types
+//#include string
+//#include uuid
 
-// contact_info: Contact<'m>,
-// id: Match<'m, Id>,
-// organization: Organization<'m>,
-// person: Person<'m>,
-// title: Match<'m, String>,
-// status: Match<'m, EmployeeStatus>,
+/// A query for an `Employee`.
+YamlEmployeeQuery =
+  YamlFieldNamePrefix 'contact' '_' 'info:literal_newline'
+  YamlContactQuery 'literal_newline'
+  YamlFieldNamePrefix 'id:literal_newline'
+  YamlUuidQuery 'literal_newline'
+  YamlFieldNamePrefix 'organization:literal_newline'
+  YamlOrganizationQuery 'literal_newline'
+  YamlFieldNamePrefix 'person:literal_newline'
+  YamlPersonQuery 'literal_newline'
+  YamlFieldNamePrefix 'title:literal_newline'
+  YamlStringQuery 'literal_newline'
+  YamlFieldNamePrefix 'status:literal_newline'
+  YamlEmployeeStatusQuery
+
+/// A query for the `EmployeeStatus` type.
+YamlEmployeeStatusQuery =
+  MatchAny
+| MatchCondition 'EqualTo' 'literal_newline'
+  MatchValue EmployeeStatus
+| MatchCondition 'HasAll' 'literal_newline'
+  MatchValue YamlEmployeeStatusList
+| MatchCondition 'HasAny' 'literal_newline'
+  MatchValue YamlEmployeeStatusList
+| MatchCondition 'HasNone' 'literal_newline'
+  MatchValue YamlEmployeeStatusList
+| MatchCondition 'InRange' 'literal_newline'
+  MatchValue min:YamlEmployeeStatusListItem max:YamlEmployeeStatusListItem
+
+YamlEmployeeStatusList =
+  '[]'
+| YamlEmployeeStatusListItem YamlEmployeeStatusListItem*
+
+YamlEmployeeStatusListItem = 'literal_newline' YamlFieldPrefix '- ' EmployeeStatus
+
+EmployeeStatus =
+  'Employed',
+| 'NotEmployed'
+| 'Representative'

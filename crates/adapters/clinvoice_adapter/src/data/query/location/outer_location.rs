@@ -11,6 +11,6 @@ use serde::{Deserialize, Serialize};
 pub enum OuterLocation<'m>
 {
 	Any,
-	Some(Box<Location<'m>>),
 	None,
+	Some(Box<Location<'m>>),
 }

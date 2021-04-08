@@ -17,20 +17,19 @@ YamlContactQueryEmail =
 | MatchCondition 'EqualTo' 'literal_newline'
   MatchValue Email
 | MatchCondition 'HasAll' 'literal_newline'
-  MatchValue
-  ('literal_newline' YamlEmailListItem ('literal_newline' YamlEmailListItem)* | '[]')
+  MatchValue YamlEmailList
 | MatchCondition 'HasAny' 'literal_newline'
-  MatchValue
-  ('literal_newline' YamlEmailListItem ('literal_newline' YamlEmailListItem)* | '[]')
+  MatchValue YamlEmailList
 | MatchCondition 'HasNone' 'literal_newline'
-  MatchValue
-  ('literal_newline' YamlEmailListItem ('literal_newline' YamlEmailListItem)* | '[]')
+  MatchValue YamlEmailList
 | MatchCondition 'InRange' 'literal_newline'
-  MatchValue 'literal_newline'
-  min:YamlEmailListItem 'literal_newline'
-  max:YamlEmailListItem
+  MatchValue min:YamlEmailListItem max:YamlEmailListItem
 
-YamlEmailListItem = YamlFieldPrefix '- ' Email
+YamlEmailList =
+  '[]'
+| YamlEmailListItem YamlEmailListItem*
+
+YamlEmailListItem = 'literal_newline' YamlFieldPrefix '- ' Email
 
 /// A valid email address NOTE: definition may not comprise all valid email addresses, only most.
 ///
@@ -52,20 +51,19 @@ YamlContactQueryPhone =
 | MatchCondition 'EqualTo' 'literal_newline'
   MatchValue Phone
 | MatchCondition 'HasAll' 'literal_newline'
-  MatchValue
-  ('literal_newline' YamlPhoneListItem ('literal_newline' YamlPhoneListItem)* | '[]')
+  MatchValue YamlPhoneList
 | MatchCondition 'HasAny' 'literal_newline'
-  MatchValue
-  ('literal_newline' YamlPhoneListItem ('literal_newline' YamlPhoneListItem)* | '[]')
+  MatchValue YamlPhoneList
 | MatchCondition 'HasNone' 'literal_newline'
-  MatchValue
-  ('literal_newline' YamlPhoneListItem ('literal_newline' YamlPhoneListItem)* | '[]')
+  MatchValue YamlPhoneList
 | MatchCondition 'InRange' 'literal_newline'
-  MatchValue 'literal_newline'
-  min:YamlPhoneListItem 'literal_newline'
-  max:YamlPhoneListItem
+  MatchValue min:YamlPhoneListItem max:YamlPhoneListItem
 
-YamlPhoneListItem = YamlFieldPrefix '- ' Phone
+YamlPhoneList =
+  '[]'
+| YamlPhoneListItem YamlPhoneListItem*
+
+YamlPhoneListItem = 'literal_newline' YamlFieldPrefix '- ' Phone
 
 /// A standard phone number. Contains an optional country code (e.g. 1-555-627-5309 or 555-627-5309).
 Phone = '"' (Integer Integer* '-')? Integer Integer Integer '-' Integer Integer Integer '-' Integer Integer Integer Integer '"'

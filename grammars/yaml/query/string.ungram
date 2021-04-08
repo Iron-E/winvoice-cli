@@ -8,20 +8,19 @@ YamlStringQuery =
 | MatchCondition 'EqualTo' 'literal_newline'
   MatchValue String
 | MatchCondition 'HasAll' 'literal_newline'
-  MatchValue
-  ('literal_newline' YamlStringListItem ('literal_newline' YamlStringListItem)* | '[]')
+  MatchValue YamlStringList
 | MatchCondition 'HasAny' 'literal_newline'
-  MatchValue
-  ('literal_newline' YamlStringListItem ('literal_newline' YamlStringListItem)* | '[]')
+  MatchValue YamlStringList
 | MatchCondition 'HasNone' 'literal_newline'
-  MatchValue
-  ('literal_newline' YamlStringListItem ('literal_newline' YamlStringListItem)* | '[]')
+  MatchValue YamlStringList
 | MatchCondition 'InRange' 'literal_newline'
-  MatchValue 'literal_newline'
-  min:YamlStringListItem 'literal_newline'
-  max:YamlStringListItem
+  MatchValue min:YamlStringListItem max:YamlStringListItem
 
-YamlStringListItem = YamlFieldPrefix '- ' String
+YamlStringList =
+  '[]'
+| YamlStringListItem YamlStringListItem*
+
+YamlStringListItem = 'literal_newline' YamlFieldPrefix '- ' String
 
 /// Any string literal.
 String =

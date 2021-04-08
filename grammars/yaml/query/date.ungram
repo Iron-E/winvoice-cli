@@ -7,20 +7,19 @@ YamlDateTimeQuery =
 | MatchCondition 'EqualTo' 'literal_newline'
   MatchValue DateTime
 | MatchCondition 'HasAll' 'literal_newline'
-  MatchValue
-  ('literal_newline' YamlDateTimeListItem ('literal_newline' YamlDateTimeListItem)* | '[]')
+  MatchValue YamlDateTimeList
 | MatchCondition 'HasAny' 'literal_newline'
-  MatchValue
-  ('literal_newline' YamlDateTimeListItem ('literal_newline' YamlDateTimeListItem)* | '[]')
+  MatchValue YamlDateTimeList
 | MatchCondition 'HasNone' 'literal_newline'
-  MatchValue
-  ('literal_newline' YamlDateTimeListItem ('literal_newline' YamlDateTimeListItem)* | '[]')
+  MatchValue YamlDateTimeList
 | MatchCondition 'InRange' 'literal_newline'
-  MatchValue 'literal_newline'
-  min:YamlDateTimeListItem 'literal_newline'
-  max:YamlDateTimeListItem
+  MatchValue min:YamlDateTimeListItem max:YamlDateTimeListItem
 
-YamlDateTimeListItem = YamlFieldPrefix '- ' DateTime
+YamlDateTimeList =
+  '[]'
+| YamlDateTimeListItem YamlDateTimeListItem*
+
+YamlDateTimeListItem = 'literal_newline' YamlFieldPrefix '- ' DateTime
 
 /// A combination of `Date` and `Time`. The fields are separated by a literal 'T'.
 DateTime = '"' Date 'T' Time '"'
@@ -63,20 +62,19 @@ YamlOptionalDateTimeQuery =
 | MatchCondition 'EqualTo' 'literal_newline'
   MatchValue OptionalDateTime
 | MatchCondition 'HasAll' 'literal_newline'
-  MatchValue
-  ('literal_newline' YamlOptionalDateTimeListItem ('literal_newline' YamlOptionalDateTimeListItem)* | '[]')
+  MatchValue YamlOptionalDateTimeList
 | MatchCondition 'HasAny' 'literal_newline'
-  MatchValue
-  ('literal_newline' YamlOptionalDateTimeListItem ('literal_newline' YamlOptionalDateTimeListItem)* | '[]')
+  MatchValue YamlOptionalDateTimeList
 | MatchCondition 'HasNone' 'literal_newline'
-  MatchValue
-  ('literal_newline' YamlOptionalDateTimeListItem ('literal_newline' YamlOptionalDateTimeListItem)* | '[]')
+  MatchValue YamlOptionalDateTimeList
 | MatchCondition 'InRange' 'literal_newline'
-  MatchValue 'literal_newline'
-  min:YamlOptionalDateTimeListItem 'literal_newline'
-  max:YamlOptionalDateTimeListItem
+  MatchValue min:YamlOptionalDateTimeListItem max:YamlOptionalDateTimeListItem
 
-YamlOptionalDateTimeListItem = YamlFieldPrefix '- ' OptionalDateTime
+YamlOptionalDateTimeList =
+  '[]'
+| YamlOptionalDateTimeListItem YamlOptionalDateTimeListItem*
+
+YamlOptionalDateTimeListItem = 'literal_newline' YamlFieldPrefix '- ' OptionalDateTime
 
 OptionalDateTime =
   '~'

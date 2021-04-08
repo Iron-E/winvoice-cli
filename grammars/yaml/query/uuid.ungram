@@ -8,20 +8,19 @@ YamlUuidQuery =
 | MatchCondition 'EqualTo' 'literal_newline'
   MatchValue Uuid
 | MatchCondition 'HasAll' 'literal_newline'
-  MatchValue
-  ('literal_newline' YamlUuidListItem ('literal_newline' YamlUuidListItem)* | '[]')
+  MatchValue YamlUuidList
 | MatchCondition 'HasAny' 'literal_newline'
-  MatchValue
-  ('literal_newline' YamlUuidListItem ('literal_newline' YamlUuidListItem)* | '[]')
+  MatchValue YamlUuidList
 | MatchCondition 'HasNone' 'literal_newline'
-  MatchValue
-  ('literal_newline' YamlUuidListItem ('literal_newline' YamlUuidListItem)* | '[]')
+  MatchValue YamlUuidList
 | MatchCondition 'InRange' 'literal_newline'
-  MatchValue 'literal_newline'
-  min:YamlUuidListItem 'literal_newline'
-  max:YamlUuidListItem
+  MatchValue min:YamlUuidListItem max:YamlUuidListItem
 
-YamlUuidListItem = YamlFieldPrefix '- ' Uuid
+YamlUuidList =
+  '[]'
+| YamlUuidListItem YamlUuidListItem*
+
+YamlUuidListItem = 'literal_newline' YamlFieldPrefix '- ' Uuid
 
 /// A universally-unique identifier.
 Uuid = '"' UuidCharacter UuidCharacter UuidCharacter UuidCharacter UuidCharacter UuidCharacter UuidCharacter UuidCharacter '-' UuidCharacter UuidCharacter UuidCharacter UuidCharacter '-' UuidCharacter UuidCharacter UuidCharacter UuidCharacter '-' UuidCharacter UuidCharacter UuidCharacter UuidCharacter '-' UuidCharacter UuidCharacter UuidCharacter UuidCharacter UuidCharacter UuidCharacter UuidCharacter UuidCharacter UuidCharacter UuidCharacter UuidCharacter UuidCharacter '"'

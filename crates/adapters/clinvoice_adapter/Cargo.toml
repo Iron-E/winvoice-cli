@@ -15,6 +15,9 @@ repository = "https://www.github.com/Iron-E/clinvoice"
 clinvoice_data = {path="../../clinvoice_data", version="0.3"}
 clinvoice_error = {path="../../clinvoice_error", version="0.1"}
 
+# Const Contat
+const_format = "0.2"
+
 # Errors
 thiserror = "1"
 

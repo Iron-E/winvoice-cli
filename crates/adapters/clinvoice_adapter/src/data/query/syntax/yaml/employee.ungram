@@ -1,24 +1,16 @@
-//#include ../fields
-//#include ../match
-//#include contact
-//#include organization
-//#include person
-//#include string
-//#include uuid
-
 /// A query for an `Employee`.
 YamlEmployeeQuery =
-  YamlFieldNamePrefix 'contact' '_' 'info:literal_newline'
+  Tab* 'contact' '_' 'info:literal_newline'
   YamlContactQuery 'literal_newline'
-  YamlFieldNamePrefix 'id:literal_newline'
+  Tab* 'id:literal_newline'
   YamlUuidQuery 'literal_newline'
-  YamlFieldNamePrefix 'organization:literal_newline'
+  Tab* 'organization:literal_newline'
   YamlOrganizationQuery 'literal_newline'
-  YamlFieldNamePrefix 'person:literal_newline'
+  Tab* 'person:literal_newline'
   YamlPersonQuery 'literal_newline'
-  YamlFieldNamePrefix 'title:literal_newline'
+  Tab* 'title:literal_newline'
   YamlStringQuery 'literal_newline'
-  YamlFieldNamePrefix 'status:literal_newline'
+  Tab* 'status:literal_newline'
   YamlEmployeeStatusQuery
 
 /// A query for the `EmployeeStatus` type.
@@ -35,11 +27,13 @@ YamlEmployeeStatusQuery =
 | MatchCondition 'InRange' 'literal_newline'
   MatchValue min:YamlEmployeeStatusListItem max:YamlEmployeeStatusListItem
 
+/// A list of `Employee`.
 YamlEmployeeStatusList =
   '[]'
 | YamlEmployeeStatusListItem YamlEmployeeStatusListItem*
 
-YamlEmployeeStatusListItem = 'literal_newline' YamlFieldPrefix '- ' EmployeeStatus
+/// An item in a list of `Employee`.
+YamlEmployeeStatusListItem = 'literal_newline' OneOrMoreTab '- ' EmployeeStatus
 
 EmployeeStatus =
   'Employed',

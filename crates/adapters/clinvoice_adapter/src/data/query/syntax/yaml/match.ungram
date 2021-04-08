@@ -1,10 +1,8 @@
-//#include fields
-
 /// A `Match` for anything.
 MatchAny = MatchCondition 'Any'
 
 /// A condition for a `Match`
-MatchCondition = YamlFieldPrefix 'condition: '
+MatchCondition = OneOrMoreTab 'condition: '
 
 /// A value for a `MatchCondition`. Not needed for `MatchAny`.
-MatchValue = YamlFieldPrefix 'value: '
+MatchValue = OneOrMoreTab 'value: '

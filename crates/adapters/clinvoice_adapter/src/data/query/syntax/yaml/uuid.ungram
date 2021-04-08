@@ -1,7 +1,3 @@
-//#include ../fields
-//#include ../match
-//#include ../types
-
 /// A query for the `Uuid` type.
 YamlUuidQuery =
   MatchAny
@@ -16,11 +12,13 @@ YamlUuidQuery =
 | MatchCondition 'InRange' 'literal_newline'
   MatchValue min:YamlUuidListItem max:YamlUuidListItem
 
+/// A list of `Uuid`s.
 YamlUuidList =
   '[]'
 | YamlUuidListItem YamlUuidListItem*
 
-YamlUuidListItem = 'literal_newline' YamlFieldPrefix '- ' Uuid
+/// An item in a list of `Uuid`s.
+YamlUuidListItem = 'literal_newline' OneOrMoreTab '- ' Uuid
 
 /// A universally-unique identifier.
 Uuid = '"' UuidCharacter UuidCharacter UuidCharacter UuidCharacter UuidCharacter UuidCharacter UuidCharacter UuidCharacter '-' UuidCharacter UuidCharacter UuidCharacter UuidCharacter '-' UuidCharacter UuidCharacter UuidCharacter UuidCharacter '-' UuidCharacter UuidCharacter UuidCharacter UuidCharacter '-' UuidCharacter UuidCharacter UuidCharacter UuidCharacter UuidCharacter UuidCharacter UuidCharacter UuidCharacter UuidCharacter UuidCharacter UuidCharacter UuidCharacter '"'

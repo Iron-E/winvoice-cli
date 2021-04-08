@@ -1,6 +1,3 @@
-//#include ../fields
-//#include ../types
-
 /// A query for the `DateTime` type.
 YamlDateTimeQuery =
   MatchAny
@@ -15,11 +12,13 @@ YamlDateTimeQuery =
 | MatchCondition 'InRange' 'literal_newline'
   MatchValue min:YamlDateTimeListItem max:YamlDateTimeListItem
 
+/// A list of `DateTime`.
 YamlDateTimeList =
   '[]'
 | YamlDateTimeListItem YamlDateTimeListItem*
 
-YamlDateTimeListItem = 'literal_newline' YamlFieldPrefix '- ' DateTime
+/// An item in a list of `DateTime`.
+YamlDateTimeListItem = 'literal_newline' OneOrMoreTab '- ' DateTime
 
 /// A combination of `Date` and `Time`. The fields are separated by a literal 'T'.
 DateTime = '"' Date 'T' Time '"'
@@ -70,11 +69,13 @@ YamlOptionalDateTimeQuery =
 | MatchCondition 'InRange' 'literal_newline'
   MatchValue min:YamlOptionalDateTimeListItem max:YamlOptionalDateTimeListItem
 
+/// A list of `OptionalDateTime`.
 YamlOptionalDateTimeList =
   '[]'
 | YamlOptionalDateTimeListItem YamlOptionalDateTimeListItem*
 
-YamlOptionalDateTimeListItem = 'literal_newline' YamlFieldPrefix '- ' OptionalDateTime
+/// An item in a list of `OptionalDateTime`.
+YamlOptionalDateTimeListItem = 'literal_newline' OneOrMoreTab '- ' OptionalDateTime
 
 OptionalDateTime =
   '~'

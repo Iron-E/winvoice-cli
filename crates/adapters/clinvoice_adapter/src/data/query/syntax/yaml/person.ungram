@@ -1,0 +1,6 @@
+/// A query for a `Person`.
+YamlPersonQuery =
+  Tab* 'id:literal_newline'
+  YamlUuidQuery 'literal_newline'
+  Tab* 'name:literal_newline'
+  YamlStringQuery

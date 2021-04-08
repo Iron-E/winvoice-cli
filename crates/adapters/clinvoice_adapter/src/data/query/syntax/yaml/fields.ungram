@@ -1,0 +1,4 @@
+OneOrMoreTab = Tab Tab*
+
+/// YAML doesn't like literal tabs. Use spaces!
+Tab = '  '

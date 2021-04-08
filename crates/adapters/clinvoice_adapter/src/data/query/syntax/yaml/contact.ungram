@@ -5,11 +5,11 @@
 
 /// A query for a `Contact`.
 YamlContactQuery =
-  YamlFieldNamePrefix 'address:literal_newline'
+  Tab* 'address:literal_newline'
   YamlLocationQuery 'literal_newline'
-  YamlFieldNamePrefix 'email:literal_newline'
+  Tab* 'email:literal_newline'
   YamlContactQueryEmail
-  YamlFieldNamePrefix 'phone:literal_newline'
+  Tab* 'phone:literal_newline'
   YamlContactQueryPhone
 
 /// A query for the `email` field of a `Contact`.
@@ -26,11 +26,13 @@ YamlContactQueryEmail =
 | MatchCondition 'InRange' 'literal_newline'
   MatchValue min:YamlEmailListItem max:YamlEmailListItem
 
+/// A list of `Email` addresses.
 YamlEmailList =
   '[]'
 | YamlEmailListItem YamlEmailListItem*
 
-YamlEmailListItem = 'literal_newline' YamlFieldPrefix '- ' Email
+/// An item in a list of `Email` addresses.
+YamlEmailListItem = 'literal_newline' OneOrMoreTab '- ' Email
 
 /// A valid email address NOTE: definition may not comprise all valid email addresses, only most.
 ///
@@ -60,11 +62,13 @@ YamlContactQueryPhone =
 | MatchCondition 'InRange' 'literal_newline'
   MatchValue min:YamlPhoneListItem max:YamlPhoneListItem
 
+/// A list of `Phone` numbers.
 YamlPhoneList =
   '[]'
 | YamlPhoneListItem YamlPhoneListItem*
 
-YamlPhoneListItem = 'literal_newline' YamlFieldPrefix '- ' Phone
+/// An item in a list of `Phone` numbers.
+YamlPhoneListItem = 'literal_newline' OneOrMoreTab '- ' Phone
 
 /// A standard phone number. Contains an optional country code (e.g. 1-555-627-5309 or 555-627-5309).
 Phone = '"' (Integer Integer* '-')? Integer Integer Integer '-' Integer Integer Integer '-' Integer Integer Integer Integer '"'

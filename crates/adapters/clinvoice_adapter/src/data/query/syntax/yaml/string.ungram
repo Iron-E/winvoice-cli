@@ -1,7 +1,3 @@
-//#include ../fields
-//#include ../match
-//#include ../types
-
 /// A query for the `String` type.
 YamlStringQuery =
   MatchAny
@@ -16,11 +12,13 @@ YamlStringQuery =
 | MatchCondition 'InRange' 'literal_newline'
   MatchValue min:YamlStringListItem max:YamlStringListItem
 
+/// A list of `String`s.
 YamlStringList =
   '[]'
 | YamlStringListItem YamlStringListItem*
 
-YamlStringListItem = 'literal_newline' YamlFieldPrefix '- ' String
+/// An item in a list of `String`s.
+YamlStringListItem = 'literal_newline' OneOrMoreTab '- ' String
 
 /// Any string literal.
 String =

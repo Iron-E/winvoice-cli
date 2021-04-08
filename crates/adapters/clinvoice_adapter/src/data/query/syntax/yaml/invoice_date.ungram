@@ -3,7 +3,7 @@
 
 /// A query for the date of an `Invoice`.
 YamlInvoiceDateQuery =
-  YamlFieldNamePrefix 'issued:literal_newline'
+  Tab* 'issued:literal_newline'
   YamlDateTimeQuery 'literal_newline'
-  YamlFieldNamePrefix 'paid:literal_newline'
+  Tab* 'paid:literal_newline'
   YamlOptionalDateTimeQuery

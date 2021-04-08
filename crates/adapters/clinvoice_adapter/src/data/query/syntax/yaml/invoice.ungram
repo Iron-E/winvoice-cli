@@ -1,13 +1,8 @@
-//#include ../fields
-//#include ../match
-//#include ../types
-//#include invoice_date
-
 /// A query for an `Invoice`.
 YamlInvoiceQuery =
-  YamlFieldNamePrefix 'date:literal_newline'
+  Tab* 'date:literal_newline'
   YamlInvoiceDateQuery 'literal_newline'
-  YamlFieldNamePrefix 'hourly' '_' 'rate:literal_newline'
+  Tab* 'hourly' '_' 'rate:literal_newline'
   YamlInvoiceQueryHourlyRate
 
 /// A query for the `hourly_rate` field of an `Invoice`.
@@ -30,9 +25,9 @@ YamlMoneyList =
 | YamlMoneyListItem YamlMoneyListItem*
 
 /// An item in a list of `Money`.
-YamlMoneyListItem = 'literal_newline' YamlFieldPrefix '- ' Money
+YamlMoneyListItem = 'literal_newline' OneOrMoreTab '- ' Money
 
 /// An `amount` of some `currency` according to ISO-4217 currency codes.
 Money =
-  YamlFieldNamePrefix 'amount: "' Integer Integer* ('.' Integer Integer)? '"literal_newline'
-  YamlFieldNamePrefix 'currency: iso_4217'
+  Tab* 'amount: "' Integer Integer* ('.' Integer Integer)? '"literal_newline'
+  Tab* 'currency: iso_4217'

@@ -1,0 +1,8 @@
+/// A query for an `Organization`.
+TomlOrganizationQuery =
+  Tab* 'id:literal_newline'
+  TomlUuidQuery 'literal_newline'
+  Tab* 'location:literal_newline'
+  TomlLocationQuery
+  Tab* 'name:literal_newline'
+  TomlStringQuery

@@ -1,0 +1,8 @@
+/// A condition for a `Match`
+MatchCondition = 'condition = '
+
+/// A `Match` for anything.
+MatchAny = MatchCondition '"Any"'
+
+/// A value for a `MatchCondition`. Not needed for `MatchAny`.
+MatchValue = 'value = '

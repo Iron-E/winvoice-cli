@@ -1,4 +1,6 @@
-//#include match
+//#include ../match
+//#include string
+//#include uuid
 
 /// A query for a `Location`.
 TomlLocationQuery =

@@ -1,6 +1,6 @@
 //#include location
-//#include match
-//#include types
+//#include ../match
+//#include ../types
 
 /// A query for a `Contact`.
 TomlContactQuery =

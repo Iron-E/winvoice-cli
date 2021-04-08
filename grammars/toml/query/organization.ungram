@@ -1,6 +1,6 @@
 //#include location
-//#include match
-//#include types
+//#include string
+//#include uuid
 
 /// A query for an `Organization`.
 TomlOrganizationQuery =

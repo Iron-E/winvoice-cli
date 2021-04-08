@@ -1,8 +1,8 @@
 //#include contact
-//#include match
+//#include ../match
 //#include organization
 //#include person
-//#include types
+//#include ../types
 
 // contact_info: Contact<'m>,
 // id: Match<'m, Id>,

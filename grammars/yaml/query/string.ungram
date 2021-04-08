@@ -1,0 +1,29 @@
+//#include ../fields
+//#include ../match
+//#include ../types
+
+/// A query for the `String` type.
+YamlStringQuery =
+  MatchAny
+| MatchCondition 'EqualTo' 'literal_newline'
+  MatchValue String
+| MatchCondition 'HasAll' 'literal_newline'
+  MatchValue
+  ('literal_newline' YamlStringListItem ('literal_newline' YamlStringListItem)* | '[]')
+| MatchCondition 'HasAny' 'literal_newline'
+  MatchValue
+  ('literal_newline' YamlStringListItem ('literal_newline' YamlStringListItem)* | '[]')
+| MatchCondition 'HasNone' 'literal_newline'
+  MatchValue
+  ('literal_newline' YamlStringListItem ('literal_newline' YamlStringListItem)* | '[]')
+| MatchCondition 'InRange' 'literal_newline'
+  MatchValue 'literal_newline'
+  min:YamlStringListItem 'literal_newline'
+  max:YamlStringListItem
+
+YamlStringListItem = YamlFieldPrefix '- ' String
+
+/// Any string literal.
+String =
+  '"' 'literal_character'* '"'
+| (Integer|'literal_letter') (Integer|'literal_letter')*

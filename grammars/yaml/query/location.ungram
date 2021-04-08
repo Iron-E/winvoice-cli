@@ -1,0 +1,19 @@
+//#include ../match
+//#include string
+//#include uuid
+
+/// A query for a `Location`.
+YamlLocationQuery =
+  YamlFieldNamePrefix 'id:literal_newline'
+  YamlUuidQuery 'literal_newline'
+  YamlFieldNamePrefix 'outer:literal_newline'
+  YamlLocationQueryOuter 'literal_newline'
+  YamlFieldNamePrefix 'name:literal_newline'
+  YamlStringQuery
+
+/// A query for the `outer` `Location` of some `Location`.
+YamlLocationQueryOuter =
+  MatchAny
+| MatchCondition 'None'
+| MatchCondition 'Some' 'literal_newline'
+  YamlLocationQuery

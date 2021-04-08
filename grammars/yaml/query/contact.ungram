@@ -1,0 +1,71 @@
+//#include location
+//#include ../match
+//#include ../types
+
+/// A query for a `Contact`.
+YamlContactQuery =
+  YamlFieldNamePrefix 'address:literal_newline'
+  YamlLocationQuery 'literal_newline'
+  YamlFieldNamePrefix 'email:literal_newline'
+  YamlContactQueryEmail
+  YamlFieldNamePrefix 'phone:literal_newline'
+  YamlContactQueryPhone
+
+/// A query for the `email` field of a `Contact`.
+YamlContactQueryEmail =
+  MatchAny
+| MatchCondition 'EqualTo' 'literal_newline'
+  MatchValue Email
+| MatchCondition 'HasAll' 'literal_newline'
+  MatchValue
+  ('literal_newline' YamlEmailListItem ('literal_newline' YamlEmailListItem)* | '[]')
+| MatchCondition 'HasAny' 'literal_newline'
+  MatchValue
+  ('literal_newline' YamlEmailListItem ('literal_newline' YamlEmailListItem)* | '[]')
+| MatchCondition 'HasNone' 'literal_newline'
+  MatchValue
+  ('literal_newline' YamlEmailListItem ('literal_newline' YamlEmailListItem)* | '[]')
+| MatchCondition 'InRange' 'literal_newline'
+  MatchValue 'literal_newline'
+  min:YamlEmailListItem 'literal_newline'
+  max:YamlEmailListItem
+
+YamlEmailListItem = YamlFieldPrefix '- ' Email
+
+/// A valid email address NOTE: definition may not comprise all valid email addresses, only most.
+///
+/// Example: foo@bar.io
+Email = '"' EmailPrefix '@' EmailDomain '.top_level_domain' '"'
+
+/// The part of an email before the '@'.
+EmailPrefix =
+  AlphabetLowercase EmailPrefix*
+| Integer EmailPrefix*
+| (AlphabetLowercase|Integer) ('-'|'_'|'.') (AlphabetLowercase|Integer) EmailPrefix*
+
+/// The part of an email after the '@'.
+EmailDomain = (AlphabetLowercase|Integer) (AlphabetLowercase|Integer|'-')* (AlphabetLowercase|Integer)
+
+/// A query for the `phone` field of a `Contact`.
+YamlContactQueryPhone =
+  MatchAny
+| MatchCondition 'EqualTo' 'literal_newline'
+  MatchValue Phone
+| MatchCondition 'HasAll' 'literal_newline'
+  MatchValue
+  ('literal_newline' YamlPhoneListItem ('literal_newline' YamlPhoneListItem)* | '[]')
+| MatchCondition 'HasAny' 'literal_newline'
+  MatchValue
+  ('literal_newline' YamlPhoneListItem ('literal_newline' YamlPhoneListItem)* | '[]')
+| MatchCondition 'HasNone' 'literal_newline'
+  MatchValue
+  ('literal_newline' YamlPhoneListItem ('literal_newline' YamlPhoneListItem)* | '[]')
+| MatchCondition 'InRange' 'literal_newline'
+  MatchValue 'literal_newline'
+  min:YamlPhoneListItem 'literal_newline'
+  max:YamlPhoneListItem
+
+YamlPhoneListItem = YamlFieldPrefix '- ' Phone
+
+/// A standard phone number. Contains an optional country code (e.g. 1-555-627-5309 or 555-627-5309).
+Phone = '"' (Integer Integer* '-')? Integer Integer Integer '-' Integer Integer Integer '-' Integer Integer Integer Integer '"'

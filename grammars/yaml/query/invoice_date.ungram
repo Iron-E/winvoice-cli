@@ -1,0 +1,13 @@
+//#include ../match
+//#include ../types
+//#include date
+
+// issued: Match<'m, DateTime<Utc>>,
+// paid: Match<'m, Option<DateTime<Utc>>>,
+
+/// A query for a `Person`.
+YamlInvoiceDateQuery =
+  YamlFieldNamePrefix 'issued:literal_newline'
+  YamlDateTimeQuery 'literal_newline'
+  YamlFieldNamePrefix 'paid:literal_newline'
+  YamlOptionalDateTimeQuery

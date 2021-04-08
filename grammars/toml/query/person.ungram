@@ -1,9 +1,0 @@
-//#include string
-//#include uuid
-
-/// A query for a `Person`.
-TomlPersonQuery =
-  '[' 'ident_parent.'* 'id]literal_newline'
-  TomlUuidQuery 'literal_newline'
-  '[' 'ident_parent.'* 'name]literal_newline'
-  TomlStringQuery

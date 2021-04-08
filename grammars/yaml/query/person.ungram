@@ -1,0 +1,10 @@
+//#include ../fields
+//#include string
+//#include uuid
+
+/// A query for a `Person`.
+YamlPersonQuery =
+  YamlFieldNamePrefix 'id:literal_newline'
+  YamlUuidQuery 'literal_newline'
+  YamlFieldNamePrefix 'name:literal_newline'
+  YamlStringQuery

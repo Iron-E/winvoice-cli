@@ -33,6 +33,7 @@ thiserror = "1"
 # Serialization
 serde = "1"
 toml = "0.5"
+serde_yaml = "0.8"
 
 [features]
 default = ["bincode"]

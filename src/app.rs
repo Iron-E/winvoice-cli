@@ -6,10 +6,12 @@ use
 	create::Create,
 	retrieve::Retrieve,
 
-	crate::{Config, DynResult, io::input, StructOpt},
+	crate::{Config, DynResult, StructOpt},
 
 	clinvoice_adapter::data::Updatable,
 	clinvoice_config::Result as ConfigResult,
+
+	dialoguer::Editor,
 };
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, StructOpt)]
@@ -41,7 +43,7 @@ impl App
 	/// Edit the user's configuration file.
 	fn edit_config(config: &Config) -> ConfigResult<()>
 	{
-		if let Some(edited) = input::toml_editor().edit(&toml::to_string_pretty(config)?)?
+		if let Some(edited) = Editor::new().extension(".toml").edit(&toml::to_string_pretty(config)?)?
 		{
 			toml::from_str::<Config>(&edited)?.update()?;
 		};

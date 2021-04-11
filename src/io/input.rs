@@ -34,7 +34,7 @@ pub fn edit<T>(prompt: Option<&str>, entity: &T) -> Result<T> where
 	let serialized = yaml::to_string(&entity)?;
 	let to_edit = match prompt
 	{
-		Some(p) => format!("# {}\n\n{}", p.replace('\n', "\n# "), serialized),
+		Some(p) => format!("{}\n# {}", serialized, p.replace('\n', "\n# ")),
 		_ => serialized,
 	};
 

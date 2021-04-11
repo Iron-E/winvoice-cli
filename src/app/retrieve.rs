@@ -14,11 +14,6 @@ use
 #[cfg(feature="bincode")]
 use clinvoice_adapter_bincode::data::{BincodeEmployee, BincodeJob, BincodeLocation, BincodeOrganization, BincodePerson, Result as BincodeResult};
 
-/// # Summary
-///
-/// The prompt for when editing a [query](clinvoice_adapter::data::query).
-const QUERY_PROMPT: &str = "See the documentation of `clinvoice_adapter::data::query` for how to format these queries.";
-
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, StructOpt)]
 #[structopt(about="Retrieve information that was recorded with CLInvoice")]
 pub(super) struct Retrieve
@@ -83,7 +78,7 @@ impl Retrieve
 			{
 				RetrieveCommand::Employee {select_default} =>
 				{
-					let query: query::Employee = input::edit_default(Some(QUERY_PROMPT))?;
+					let query: query::Employee = input::edit_default(Some(query::syntax::yaml::EMPLOYEE))?;
 
 					let results = BincodeEmployee::retrieve(query, &store)?;
 					results.into_iter().try_for_each(|employee| -> BincodeResult<()>
@@ -101,7 +96,7 @@ impl Retrieve
 
 				RetrieveCommand::Job {export} =>
 				{
-					let query: query::Job = input::edit_default(Some(QUERY_PROMPT))?;
+					let query: query::Job = input::edit_default(Some(query::syntax::yaml::JOB))?;
 
 					let results = BincodeJob::retrieve(query, &store)?;
 					results.into_iter().try_for_each(|job| -> BincodeResult<()>
@@ -119,7 +114,7 @@ impl Retrieve
 
 				RetrieveCommand::Location {create_inner} =>
 				{
-					let query: query::Location = input::edit_default(Some(QUERY_PROMPT))?;
+					let query: query::Location = input::edit_default(Some(query::syntax::yaml::LOCATION))?;
 
 					let results = BincodeLocation::retrieve(query, &store)?;
 					results.into_iter().try_for_each(|job| -> BincodeResult<()>
@@ -137,7 +132,7 @@ impl Retrieve
 
 				RetrieveCommand::Organization =>
 				{
-					let query: query::Organization = input::edit_default(Some(QUERY_PROMPT))?;
+					let query: query::Organization = input::edit_default(Some(query::syntax::yaml::ORGANIZATION))?;
 
 					let results = BincodeOrganization::retrieve(query, &store)?;
 					results.into_iter().try_for_each(|job| -> BincodeResult<()>
@@ -155,7 +150,7 @@ impl Retrieve
 
 				RetrieveCommand::Person =>
 				{
-					let query: query::Person = input::edit_default(Some(QUERY_PROMPT))?;
+					let query: query::Person = input::edit_default(Some(query::syntax::yaml::PERSON))?;
 
 					let results = BincodePerson::retrieve(query, &store)?;
 					results.iter().for_each(|person|

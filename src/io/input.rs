@@ -12,6 +12,7 @@ use
 
 	dialoguer::{Editor, Input, MultiSelect, Select},
 	serde::{de::DeserializeOwned, Serialize},
+	serde_yaml as yaml,
 };
 
 /// # Summary
@@ -30,17 +31,17 @@ use
 pub fn edit<T>(prompt: Option<&str>, entity: &T) -> Result<T> where
 	T : DeserializeOwned + Serialize
 {
-	let serialized = toml::to_string_pretty(&entity)?;
+	let serialized = yaml::to_string(&entity)?;
 	let to_edit = match prompt
 	{
-		Some(p) => format!("# {}\n\n{}", p, serialized),
+		Some(p) => format!("# {}\n\n{}", p.replace('\n', "\n# "), serialized),
 		_ => serialized,
 	};
 
 	// Write the entity to the `temp_path` and then edit that file.
-	match toml_editor().edit(&to_edit)?
+	match Editor::new().extension(".yaml").edit(&to_edit)?
 	{
-		Some(edited) => Ok(toml::from_str(&edited)?),
+		Some(edited) => Ok(yaml::from_str(&edited)?),
 		_ => Err(Error::NotEdited),
 	}
 }
@@ -159,14 +160,4 @@ pub fn select_one<T>(entities: &[T], prompt: impl Into<String>) -> io::Result<T>
 pub fn text(prompt: impl Into<String>) -> io::Result<String>
 {
 	Input::new().with_prompt(prompt).interact_text()
-}
-
-/// # Summary
-///
-/// Creates an instance of [`Editor`] which is configured to edit [`toml`] files.
-pub fn toml_editor() -> Editor
-{
-	let mut editor = Editor::new();
-	editor.extension(".toml");
-	editor
 }

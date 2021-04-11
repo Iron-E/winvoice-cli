@@ -2,7 +2,8 @@ use
 {
 	std::io,
 
-	thiserror::Error
+	serde_yaml as yaml,
+	thiserror::Error,
 };
 
 /// # Summary
@@ -23,11 +24,7 @@ pub enum Error
 
 	#[cfg_attr(debug_assertions,      error("{0:?}"))]
 	#[cfg_attr(not(debug_assertions), error("{0}"))]
-	TomlDe(#[from] toml::de::Error),
-
-	#[cfg_attr(debug_assertions,      error("{0:?}"))]
-	#[cfg_attr(not(debug_assertions), error("{0}"))]
-	TomlSer(#[from] toml::ser::Error),
+	Yaml(#[from] yaml::Error),
 }
 
 clinvoice_error::AliasResult!();

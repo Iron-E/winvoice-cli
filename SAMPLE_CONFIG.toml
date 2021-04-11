@@ -1,15 +1,13 @@
-# clinvoice -s|--store "name_one" new <client> ## NEW
-
-[store]
+[stores]
 default = "name_one"
-name_one = {adapter="JSON", path="/home/user/Documents/foo"}
-name_two = {adapter="POSTGRES", pass="word", user="name"}
+name_one = {adapter="Bincode", path="/home/user/Documents/foo"}
+name_two = {adapter="Postgres", path="pgsql://foo", pass="word", user="name"}
 
 [employees]
-default_id = 3
+default_id = "95d053c5-4be5-45bf-90f6-5e63cb43fb9c"
 
 [invoices]
 default_currency = "USD"
 
 [timesheets]
-interval = {minutes=5}
+interval = "5min"

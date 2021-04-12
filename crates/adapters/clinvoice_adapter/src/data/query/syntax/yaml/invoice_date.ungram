@@ -1,6 +1,0 @@
-/// A query for the date of an `Invoice`.
-YamlInvoiceDateQuery =
-  Tab* 'issued:literal_newline'
-  YamlDateTimeQuery 'literal_newline'
-  Tab* 'paid:literal_newline'
-  YamlOptionalDateTimeQuery

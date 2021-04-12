@@ -26,7 +26,6 @@ mod job;
 mod location;
 mod organization;
 mod person;
-pub mod syntax;
 mod timesheet;
 
 pub use

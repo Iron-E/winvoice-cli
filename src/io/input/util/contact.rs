@@ -114,7 +114,7 @@ fn edit_menu(contact_info: &mut HashMap<String, ContactView>) -> input::Result<(
 			"Select a piece of contact information to edit.",
 		)?;
 
-		match input::edit_and_restore(None, &contact_info[&to_edit_key])
+		match input::edit_and_restore(format!("Please edit the {}", to_edit_key), &contact_info[&to_edit_key])
 		{
 			Ok(edit) => { contact_info.insert(to_edit_key, edit); }
 			Err(input::Error::NotEdited) => (),

@@ -1,8 +1,0 @@
-/// A `Match` for anything.
-MatchAny = MatchCondition 'Any'
-
-/// A condition for a `Match`
-MatchCondition = OneOrMoreTab 'condition: '
-
-/// A value for a `MatchCondition`. Not needed for `MatchAny`.
-MatchValue = OneOrMoreTab 'value: '

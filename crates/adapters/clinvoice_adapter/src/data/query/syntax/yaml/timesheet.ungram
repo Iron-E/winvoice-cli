@@ -1,8 +1,0 @@
-/// A query for a `Timesheet`.
-YamlTimesheetQuery =
-  Tab* 'employee:literal_newline'
-  YamlEmployeeQuery
-  Tab* 'time' '_' 'begin:literal_newline'
-  YamlDateTimeQuery 'literal_newline'
-  Tab* 'time' '_' 'end:literal_newline'
-  YamlOptionalDateTimeQuery

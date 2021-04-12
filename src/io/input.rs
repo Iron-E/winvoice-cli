@@ -28,15 +28,11 @@ use
 ///
 /// * The deserialized entity with values filled in by the user.
 /// * An [`Error`] encountered while creating, editing, or removing the temporary file.
-pub fn edit<T>(prompt: Option<&str>, entity: &T) -> Result<T> where
+pub fn edit<T>(prompt: impl AsRef<str>, entity: &T) -> Result<T> where
 	T : DeserializeOwned + Serialize
 {
 	let serialized = yaml::to_string(&entity)?;
-	let to_edit = match prompt
-	{
-		Some(p) => format!("# {}\n\n{}", p, serialized),
-		_ => serialized,
-	};
+	let to_edit = format!("# {}\n\n{}", prompt.as_ref(), serialized);
 
 	// Write the entity to the `temp_path` and then edit that file.
 	match Editor::new().extension(".yaml").edit(&to_edit)?
@@ -59,7 +55,7 @@ pub fn edit<T>(prompt: Option<&str>, entity: &T) -> Result<T> where
 ///
 /// * The deserialized entity with values filled in by the user.
 /// * An [`Error`] encountered while creating, editing, or removing the temporary file.
-pub fn edit_and_restore<T>(prompt: Option<&str>, entity: &T) -> Result<T> where
+pub fn edit_and_restore<T>(prompt: impl AsRef<str>, entity: &T) -> Result<T> where
 	T : DeserializeOwned + RestorableSerde + Serialize
 {
 	let mut edited = edit(prompt, entity)?;
@@ -80,7 +76,7 @@ pub fn edit_and_restore<T>(prompt: Option<&str>, entity: &T) -> Result<T> where
 ///
 /// * The deserialized entity with values filled in by the user.
 /// * An [`Error`] encountered while creating, editing, or removing the temporary file.
-pub fn edit_default<T>(prompt: Option<&str>) -> Result<T> where
+pub fn edit_default<T>(prompt: impl AsRef<str>) -> Result<T> where
 	T : Default + DeserializeOwned + Serialize
 {
 	let default = T::default();

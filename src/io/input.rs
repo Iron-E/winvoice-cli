@@ -116,8 +116,8 @@ pub fn edit_markdown(prompt: &str) -> Result<String>
 ///
 /// # Returns
 ///
-/// * The deserialized entity with values filled in by the user.
-/// * An [`Error`] encountered while creating, editing, or removing the temporary file.
+/// * The selected entities.
+/// * An [`Error`] incurred while selecting.
 pub fn select<T>(entities: &[T], prompt: impl Into<String>) -> io::Result<Vec<T>> where
 	T : Clone + Display
 {
@@ -139,8 +139,8 @@ pub fn select<T>(entities: &[T], prompt: impl Into<String>) -> io::Result<Vec<T>
 ///
 /// # Returns
 ///
-/// * The deserialized entity with values filled in by the user.
-/// * An [`Error`] encountered while creating, editing, or removing the temporary file.
+/// * The selected entity.
+/// * An [`Error`] incurred while selecting.
 pub fn select_one<T>(entities: &[T], prompt: impl Into<String>) -> io::Result<T> where
 	T : Clone + Display
 {

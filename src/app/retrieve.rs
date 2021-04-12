@@ -1,7 +1,7 @@
 use
 {
 	core::fmt::Display,
-	std::error::Error,
+	std::{error::Error, result},
 
 	crate::{Config, DynResult, io::input, StructOpt},
 
@@ -10,8 +10,10 @@ use
 		Adapters, Error as AdapterError,
 		data::{Deletable, EmployeeAdapter, JobAdapter, LocationAdapter, OrganizationAdapter, PersonAdapter, query},
 	},
-	clinvoice_data::views::PersonView,
+	clinvoice_data::views::{PersonView, RestorableSerde},
 	clinvoice_export::Target,
+
+	serde::{de::DeserializeOwned, Serialize},
 };
 
 #[cfg(feature="bincode")]
@@ -21,6 +23,8 @@ use clinvoice_adapter_bincode::data::{BincodeEmployee, BincodeJob, BincodeLocati
 ///
 /// The prompt for when editing a [query](clinvoice_adapter::data::query).
 const QUERY_PROMPT: &str = "See the documentation of this query at https://github.com/Iron-E/clinvoice/wiki/Query-Syntax#";
+
+type Result<E> = result::Result<(), E>;
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, StructOpt)]
 #[structopt(about="Retrieve information that was recorded with CLInvoice")]
@@ -75,7 +79,7 @@ impl Retrieve
 	/// # Summary
 	///
 	/// Delete some `entities`
-	fn delete<'err, E, T>(entities: &[T], delete_entity: impl Fn(T) -> Result<(), E>) -> DynResult<'err, ()> where
+	fn delete<'err, E, T>(entities: &[T], delete_entity: impl Fn(T) -> Result<E>) -> DynResult<'err, ()> where
 		E : Error + 'err,
 		T : Clone + Display,
 	{
@@ -84,6 +88,13 @@ impl Retrieve
 			.try_for_each(|entity| delete_entity(entity))
 			.map_err(|e| e.into())
 	}
+
+fn update<'err, E, T>(entities: &[T], delete_entity: impl Fn(T) -> Result<E>) -> DynResult<'err, ()> where
+	E : Error + 'err,
+	T : DeserializeOwned + RestorableSerde + Serialize,
+{
+	todo!()
+}
 
 	/// # Summary
 	///

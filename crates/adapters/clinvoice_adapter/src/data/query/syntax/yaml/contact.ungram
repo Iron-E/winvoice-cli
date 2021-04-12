@@ -1,8 +1,3 @@
-//#include ../fields
-//#include ../match
-//#include ../types
-//#include location
-
 /// A query for a `Contact`.
 YamlContactQuery =
   Tab* 'address:literal_newline'

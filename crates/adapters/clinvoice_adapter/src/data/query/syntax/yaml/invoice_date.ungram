@@ -1,6 +1,3 @@
-//#include ../fields
-//#include date
-
 /// A query for the date of an `Invoice`.
 YamlInvoiceDateQuery =
   Tab* 'issued:literal_newline'

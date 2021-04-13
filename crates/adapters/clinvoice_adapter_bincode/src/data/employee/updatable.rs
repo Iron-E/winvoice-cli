@@ -14,7 +14,8 @@ impl Updatable for BincodeEmployee<'_, '_>
 
 	fn update(&self) -> Result<()>
 	{
-		fs::write(self.filepath(), bincode::serialize(&self.employee)?)?;
+		let serialized = bincode::serialize(&self.employee)?;
+		fs::write(self.filepath(), serialized)?;
 		Ok(())
 	}
 }

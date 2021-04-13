@@ -65,25 +65,19 @@ pub fn retrieve<E, T>(path: impl AsRef<Path>, query: impl Fn(&T) -> bool) -> Res
 	E : From<io::Error> + From<bincode::Error>,
 	T : DeserializeOwned,
 {
-	let files = fs::read_dir(path)?.filter_map(
-		|node| match node
-		{
-			Ok(n) if n.path().is_file() => Some(n.path()),
-			_ => None,
-		}
-	);
+	let nodes = fs::read_dir(path)?;
 
-	files.map(|file_path| fs::File::open(file_path).map(|file|
-		io::BufReader::new(file)).map_err(|e| e.into()).and_then(|reader|
+	nodes.filter_map(|node|
+		node.ok().map(|n| n.path()).filter(|node_path| node_path.is_file())
+	).map(|file_path|
+		fs::File::open(file_path).map(|file| io::BufReader::new(file)).map_err(|e| e.into()).and_then(|reader|
 		{
 			let employee: Result<T, E> = bincode::deserialize_from(reader).map_err(|e| e.into());
 			employee
 		})
-	).filter(|result| match result
-	{
-		Ok(employee) => query(&employee),
-		_ => true, // errors should be included in the output
-	}).collect()
+	).filter(|result|
+		result.as_ref().map(|r| query(r)).unwrap_or(true)
+	).collect()
 }
 
 /// # Summary

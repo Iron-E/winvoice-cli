@@ -98,56 +98,80 @@ impl Create
 						store,
 					)?.into();
 
+					let contact_info = input::util::contact::creation_menu::<BincodeLocation>(store)?;
+					let employee_status = input::util::employee_status::select_one("What is the status of the employee?")?;
+
 					BincodeEmployee::create(
-						input::util::contact::creation_menu::<BincodeLocation>(store)?.into_iter().map(|e| (e.0, e.1.into())).collect(),
+						contact_info.into_iter().map(|(label, contact)| (label, contact.into())).collect(),
 						organization,
 						person,
-						input::util::employee_status::select_one("What is the status of the employee?")?,
+						employee_status,
 						&title,
 						store,
-					).and(Ok(()))
+					)?;
+
+					Ok(())
 				}
 
-				Self::Job {currency, hourly_rate, year, month, day, hour, minute} => BincodeJob::create(
-					input::util::organization::select_one::<BincodeLocation, BincodeOrganization, &str>(
+				Self::Job {currency, hourly_rate, year, month, day, hour, minute} =>
+				{
+					let client = input::util::organization::select_one::<BincodeLocation, BincodeOrganization, &str>(
 						"Select the client for this job",
 						store,
-					)?.into(),
-					DateTime::<Utc>::from(
-					{
-						let now = Local::now();
+					)?;
 
-						// This should be valid because of the `requires` on `Job`. Either all are present or none.
-						Local.ymd(
-							year.unwrap_or_else(|| now.year()), month.unwrap_or_else(|| now.month()), day.unwrap_or_else(|| now.day()),
-						).and_hms(
-							hour.unwrap_or_else(|| now.hour()), minute.unwrap_or_else(|| now.minute()), 0,
-						)
-					}),
-					Money
-					{
-						amount: hourly_rate,
-						currency: currency.unwrap_or_else(|| config.invoices.default_currency.into()),
-					},
-					&input::edit_markdown("* List your objectives.\n* All markdown syntax works")?,
-					store,
-				).and(Ok(())),
+					let objectives = input::edit_markdown("* List your objectives.\n* All markdown syntax works")?;
+
+					BincodeJob::create(
+						client.into(),
+						DateTime::<Utc>::from(
+						{
+							let now = Local::now();
+
+							// This should be valid because of the `requires` on `Job`. Either all are present or none.
+							let date = Local.ymd(
+								year.unwrap_or_else(|| now.year()),
+								month.unwrap_or_else(|| now.month()),
+								day.unwrap_or_else(|| now.day()),
+							);
+
+							match year
+							{
+								Some(_) => date.and_hms(0, 0, 0),
+								None => date.and_hms(
+									hour.unwrap_or_else(|| now.hour()),
+									minute.unwrap_or_else(|| now.minute()),
+									0,
+								)
+							}
+						}),
+						Money
+						{
+							amount: hourly_rate,
+							currency: currency.unwrap_or_else(|| config.invoices.default_currency.into()),
+						},
+						&objectives,
+						store,
+					)?;
+
+					Ok(())
+				}
 
 				Self::Location {name} => BincodeLocation::create(&name, store).and(Ok(())),
 
-				Self::Organization {name} => BincodeOrganization::create(
-					input::util::location::select_one::<BincodeLocation, String>(
+				Self::Organization {name} =>
+				{
+					let location = input::util::location::select_one::<BincodeLocation, String>(
 						format!("Select a location for {}", name),
 						store,
-					)?.into(),
-					&name,
-					store,
-				).and(Ok(())),
+					)?;
 
-				Self::Person {name} => BincodePerson::create(
-					&name,
-					store,
-				).and(Ok(())),
+					BincodeOrganization::create(location.into(), &name, store)?;
+
+					Ok(())
+				},
+
+				Self::Person {name} => BincodePerson::create(&name, store).and(Ok(())),
 			},
 
 			_ => return Err(Error::FeatureNotFound(store.adapter).into()),

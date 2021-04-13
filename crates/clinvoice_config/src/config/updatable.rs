@@ -19,7 +19,8 @@ impl Updatable for Config<'_, '_, '_>
 			if !parent.is_dir() { fs::create_dir_all(parent)?; }
 		}
 
-		fs::write(path, toml::to_string_pretty(self)?)?;
+		let serialized = toml::to_string_pretty(self)?;
+		fs::write(path, serialized)?;
 
 		Ok(())
 	}

@@ -1,6 +1,5 @@
 use
 {
-	core::iter::FilterMap,
 	std::
 	{
 		fs, io,

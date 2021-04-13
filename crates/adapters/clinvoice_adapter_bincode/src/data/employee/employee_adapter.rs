@@ -1,6 +1,6 @@
 use
 {
-	std::{collections::HashMap, fs, io::BufReader},
+	std::collections::HashMap,
 
 	super::BincodeEmployee,
 	crate::
@@ -75,20 +75,7 @@ impl<'store> EmployeeAdapter<'store> for BincodeEmployee<'_, 'store>
 	{
 		Self::init(&store)?;
 
-		let mut results = Vec::new();
-
-		for node_path in util::read_files(BincodeEmployee::path(&store))?
-		{
-			let reader = BufReader::new(fs::File::open(node_path)?);
-			let employee: Employee = bincode::deserialize_from(reader)?;
-
-			if query.matches(&employee)
-			{
-				results.push(employee);
-			}
-		}
-
-		Ok(results)
+		util::retrieve(Self::path(store), |e| query.matches(e))
 	}
 }
 

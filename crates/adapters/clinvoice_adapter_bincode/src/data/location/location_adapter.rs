@@ -1,7 +1,5 @@
 use
 {
-	std::{fs, io::BufReader},
-
 	super::BincodeLocation,
 	crate::
 	{
@@ -93,20 +91,7 @@ impl<'store> LocationAdapter<'store> for BincodeLocation<'_, 'store>
 	{
 		Self::init(&store)?;
 
-		let mut results = Vec::new();
-
-		for node_path in util::read_files(BincodeLocation::path(&store))?
-		{
-			let reader = BufReader::new(fs::File::open(node_path)?);
-			let location: Location = bincode::deserialize_from(reader)?;
-
-			if query.matches(&location)
-			{
-				results.push(location);
-			}
-		}
-
-		Ok(results)
+		util::retrieve(Self::path(store), |l| query.matches(l))
 	}
 }
 

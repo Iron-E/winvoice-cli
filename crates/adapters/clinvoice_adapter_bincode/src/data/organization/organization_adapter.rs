@@ -1,7 +1,5 @@
 use
 {
-	std::{fs, io::BufReader},
-
 	super::BincodeOrganization,
 	crate::
 	{
@@ -64,20 +62,7 @@ impl<'store> OrganizationAdapter<'store> for BincodeOrganization<'_, 'store>
 	{
 		Self::init(&store)?;
 
-		let mut results = Vec::new();
-
-		for node_path in util::read_files(BincodeOrganization::path(&store))?
-		{
-			let reader = BufReader::new(fs::File::open(node_path)?);
-			let organization: Organization = bincode::deserialize_from(reader)?;
-
-			if query.matches(&organization)
-			{
-				results.push(organization);
-			}
-		}
-
-		Ok(results)
+		util::retrieve(Self::path(store), |o| query.matches(o))
 	}
 }
 

@@ -1,7 +1,5 @@
 use
 {
-	std::{fs, io::BufReader},
-
 	super::BincodePerson,
 	crate::
 	{
@@ -63,20 +61,7 @@ impl<'store> PersonAdapter<'store> for BincodePerson<'_, 'store>
 	{
 		Self::init(&store)?;
 
-		let mut results = Vec::new();
-
-		for node_path in util::read_files(BincodePerson::path(&store))?
-		{
-			let reader = BufReader::new(fs::File::open(node_path)?);
-			let person: Person = bincode::deserialize_from(reader)?;
-
-			if query.matches(&person)
-			{
-				results.push(person);
-			}
-		}
-
-		Ok(results)
+		util::retrieve(Self::path(store), |p| query.matches(p))
 	}
 }
 

@@ -9,6 +9,8 @@ use
 
 	clinvoice_adapter::Store,
 	clinvoice_data::{Id, UUID_NAMESPACE},
+
+	serde::de::DeserializeOwned,
 };
 
 #[cfg(test)]
@@ -61,7 +63,7 @@ pub fn expand_store_path(store: &Store) -> PathBuf
 /// # Errors
 ///
 /// Will error whenever [`fs::read_dir`] does.
-pub fn read_files<P>(path: P) -> io::Result<FilterMap<fs::ReadDir, impl FnMut(io::Result<fs::DirEntry>) -> Option<PathBuf>>> where
+fn read_files<P>(path: P) -> io::Result<FilterMap<fs::ReadDir, impl FnMut(io::Result<fs::DirEntry>) -> Option<PathBuf>>> where
 	P : AsRef<Path>,
 {
 	Ok(fs::read_dir(path)?.filter_map(
@@ -71,6 +73,29 @@ pub fn read_files<P>(path: P) -> io::Result<FilterMap<fs::ReadDir, impl FnMut(io
 			_ => None,
 		}
 	))
+}
+
+pub fn retrieve<E, T>(path: impl AsRef<Path>, query: impl Fn(&T) -> bool) -> Result<Vec<T>, E> where
+	E : From<io::Error> + From<bincode::Error>,
+	T : DeserializeOwned,
+{
+	let files = read_files(path)?;
+
+	files.map(|file_path|
+		{
+			fs::File::open(file_path).map(|file| io::BufReader::new(file)).map_err(|e| e.into()).and_then(
+				|reader|
+				{
+					let employee: Result<T, E> = bincode::deserialize_from(reader).map_err(|e| e.into());
+					employee
+				}
+			)
+		}
+	).filter(|result| match result
+	{
+		Ok(employee) => query(&employee),
+		_ => true, // errors should be included in the output
+	}).collect()
 }
 
 /// # Summary

@@ -1,7 +1,5 @@
 use
 {
-	std::{fs, io::BufReader},
-
 	super::BincodeJob,
 	crate::
 	{
@@ -85,20 +83,7 @@ impl<'store> JobAdapter<'store> for BincodeJob<'_, 'store>
 	{
 		Self::init(&store)?;
 
-		let mut results = Vec::new();
-
-		for node_path in util::read_files(BincodeJob::path(&store))?
-		{
-			let reader = BufReader::new(fs::File::open(node_path)?);
-			let job: Job = bincode::deserialize_from(reader)?;
-
-			if query.matches(&job)
-			{
-				results.push(job);
-			}
-		}
-
-		Ok(results)
+		util::retrieve(Self::path(store), |j| query.matches(j))
 	}
 }
 

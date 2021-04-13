@@ -48,7 +48,7 @@ impl App
 		{
 			let deserialized: Config = toml::from_str(&edited)?;
 			deserialized.update()?;
-		};
+		}
 
 		Ok(())
 	}

@@ -43,9 +43,11 @@ impl App
 	/// Edit the user's configuration file.
 	fn edit_config(config: &Config) -> ConfigResult<()>
 	{
-		if let Some(edited) = Editor::new().extension(".toml").edit(&toml::to_string_pretty(config)?)?
+		let serialized = toml::to_string_pretty(config)?;
+		if let Some(edited) = Editor::new().extension(".toml").edit(&serialized)?
 		{
-			toml::from_str::<Config>(&edited)?.update()?;
+			let deserialized: Config = toml::from_str(&edited)?;
+			deserialized.update()?;
 		};
 
 		Ok(())

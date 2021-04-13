@@ -14,7 +14,8 @@ impl Updatable for BincodeOrganization<'_, '_>
 
 	fn update(&self) -> Result<()>
 	{
-		fs::write(self.filepath(), bincode::serialize(&self.organization)?)?;
+		let serialized = bincode::serialize(&self.organization)?;
+		fs::write(self.filepath(), serialized)?;
 		Ok(())
 	}
 }

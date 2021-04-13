@@ -58,7 +58,7 @@ impl Config<'_, '_, '_>
 			{
 				employees: Employees {default_id: Id::default()},
 				invoices: Invoices {default_currency: "USD"},
-				stores: [
+				stores: vec![
 					("default", StoreValue::Alias("foo")),
 					("foo", StoreValue::Storage(Store
 					{
@@ -67,7 +67,7 @@ impl Config<'_, '_, '_>
 						username: Some("Optional username. May or may not be accompanied by a password".into()),
 						path: "Place where data can be found. Depends on the adapter— may be a path to a folder on a filesystem, or a schema on a database".into(),
 					})),
-				].iter().cloned().collect(),
+				].into_iter().collect(),
 				timesheets: Timesheets {interval: Duration::from_secs(300)},
 			};
 

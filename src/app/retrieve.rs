@@ -79,6 +79,8 @@ impl Retrieve
 	/// # Summary
 	///
 	/// Delete some `entities`
+	///
+	/// `delete_entity` determines how the entities are deleted.
 	fn delete<'err, E, T>(entities: &[T], delete_entity: impl Fn(T) -> Result<E>) -> DynResult<'err, ()> where
 		E : Error + 'err,
 		T : Clone + Display,
@@ -89,12 +91,17 @@ impl Retrieve
 			.map_err(|e| e.into())
 	}
 
-fn update<'err, E, T>(entities: &[T], delete_entity: impl Fn(T) -> Result<E>) -> DynResult<'err, ()> where
-	E : Error + 'err,
-	T : DeserializeOwned + RestorableSerde + Serialize,
-{
-	todo!()
-}
+	/// # Summary
+	///
+	/// Edit some `entities`, and then update them.
+	///
+	/// `update_entity` determines how the entities are updated.
+	fn update<'err, E, T>(entities: &[T], update_entity: impl Fn(T) -> Result<E>) -> DynResult<'err, ()> where
+		E : Error + 'err,
+		T : DeserializeOwned + RestorableSerde + Serialize,
+	{
+		todo!()
+	}
 
 	/// # Summary
 	///

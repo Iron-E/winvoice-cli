@@ -126,7 +126,11 @@ pub fn select<T>(entities: &[T], prompt: impl Into<String>) -> io::Result<Vec<T>
 		let selection = MultiSelect::new().items(entities).paged(true).with_prompt(prompt).interact()?;
 
 		return Ok(entities.iter().enumerate().filter_map(
-			|(i, entity)| selection.binary_search(&i).and(Ok(entity.clone())).ok()
+			|(i, entity)| match selection.binary_search(&i)
+			{
+				Ok(_) => Some(entity.clone()),
+				_ => None,
+			},
 		).collect());
 	}
 

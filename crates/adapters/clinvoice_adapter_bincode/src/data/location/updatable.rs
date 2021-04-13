@@ -14,7 +14,8 @@ impl Updatable for BincodeLocation<'_, '_>
 
 	fn update(&self) -> Result<()>
 	{
-		fs::write(self.filepath(), bincode::serialize(&self.location)?)?;
+		let serialized = bincode::serialize(&self.location)?;
+		fs::write(self.filepath(), serialized)?;
 		Ok(())
 	}
 }

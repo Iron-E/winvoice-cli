@@ -82,15 +82,16 @@ pub fn retrieve<E, T>(path: impl AsRef<Path>, query: impl Fn(&T) -> bool) -> Res
 	let files = read_files(path)?;
 
 	files.map(|file_path|
-		{
-			fs::File::open(file_path).map(|file| io::BufReader::new(file)).map_err(|e| e.into()).and_then(
+		fs::File::open(file_path)
+			.map(|file| io::BufReader::new(file))
+			.map_err(|e| e.into())
+			.and_then(
 				|reader|
 				{
 					let employee: Result<T, E> = bincode::deserialize_from(reader).map_err(|e| e.into());
 					employee
 				}
 			)
-		}
 	).filter(|result| match result
 	{
 		Ok(employee) => query(&employee),

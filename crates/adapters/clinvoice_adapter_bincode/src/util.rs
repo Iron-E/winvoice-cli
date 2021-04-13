@@ -146,21 +146,19 @@ pub fn temp_store(assertion: impl FnOnce(&Store))
 /// The next [`Id`] for an entity in `store_dir`.
 pub fn unique_id(store_dir: &Path) -> io::Result<Id>
 {
-	'gen: loop
+	let files = read_files(store_dir)?.collect::<Vec<_>>();
+
+	loop
 	{
 		let id = Id::new_v5(&UUID_NAMESPACE, Id::new_v4().as_bytes());
+		let id_string = id.to_string();
 
-		for node_path in read_files(store_dir)?
+		if files.iter()
+			.flat_map(|file_path| file_path.file_stem())
+			.all(|file_name| file_name.to_string_lossy() != id_string)
 		{
-			if match node_path.file_stem()
-			{
-				Some(stem) => stem.to_string_lossy(),
-				_ => continue,
-			} == id.to_string()
-			{ continue 'gen; }
+			return Ok(id);
 		}
-
-		return Ok(id);
 	}
 }
 
@@ -169,14 +167,16 @@ mod tests
 {
 	use
 	{
-		std::{collections::HashSet, path::PathBuf, time::Instant},
+		std::{collections::HashSet, time::Instant},
 
-		super::fs,
+		super::{fs, PathBuf},
 	};
 
 	#[test]
 	fn unique_id()
 	{
+		const LOOPS: usize = 1000;
+
 		super::temp_store(|store|
 		{
 			let test_path = PathBuf::new().join(&store.path).join("test_next_id");
@@ -189,20 +189,26 @@ mod tests
 			// Create the `test_path`.
 			super::create_store_dir(&test_path).unwrap();
 
-			let mut ids = HashSet::new();
 			let start = Instant::now();
-			for _ in 0..100
-			{
-				let id = super::unique_id(&test_path).unwrap();
-				ids.insert(id);
 
-				// Creating the next file worked.
-				assert!(fs::write(&test_path.join(id.to_string()), "TEST").is_ok());
-			}
-			println!("\n>>>>> util::uinque_id {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 100);
+			let ids = (0..LOOPS).fold(
+				HashSet::new(),
+				|mut s, _|
+				{
+					let id = super::unique_id(&test_path).unwrap();
+					s.insert(id);
+
+					// Creating the next file worked.
+					assert!(fs::write(&test_path.join(id.to_string()), "TEST").is_ok());
+
+					s
+				}
+			);
+
+			println!("\n>>>>> util::unique_id {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / (LOOPS as u128));
 
 			// Assert that the number of unique IDs created is equal to the number of times looped.
-			assert_eq!(ids.len(), 100);
+			assert_eq!(ids.len(), LOOPS);
 		});
 	}
 }

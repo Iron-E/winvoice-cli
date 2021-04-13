@@ -102,22 +102,26 @@ pub trait JobAdapter<'store> :
 		let organization = Self::to_organization::<O>(&job, store).map_err(|e| e.into())?;
 		let organization_view = O::to_view::<L>(organization, store).map_err(|e| e.into())?;
 
-		let mut timesheet_views = Vec::with_capacity(job.timesheets.len());
-
-		for timesheet in job.timesheets
-		{
-			let employee = timesheet::to_employee::<E>(&timesheet, store)?;
-			let employee_view = E::to_view::<L, O, P>(employee, store)?;
-
-			timesheet_views.push(TimesheetView
+		let timesheets_len = job.timesheets.len();
+		let timesheet_views = job.timesheets.into_iter().try_fold(
+			Vec::with_capacity(timesheets_len),
+			|mut v, t| -> Result<_, <E as EmployeeAdapter<'store>>::Error>
 			{
-				employee: employee_view,
-				expenses: timesheet.expenses,
-				time_begin: timesheet.time_begin,
-				time_end: timesheet.time_end,
-				work_notes: timesheet.work_notes,
-			});
-		}
+				let employee = timesheet::to_employee::<E>(&t, store)?;
+				let employee_view = E::to_view::<L, O, P>(employee, store)?;
+
+				v.push(TimesheetView
+				{
+					employee: employee_view,
+					expenses: t.expenses,
+					time_begin: t.time_begin,
+					time_end: t.time_end,
+					work_notes: t.work_notes,
+				});
+
+				Ok(v)
+			},
+		)?;
 
 		Ok(JobView
 		{

@@ -167,7 +167,7 @@ impl Job
 			{
 				for expense in expenses
 				{
-					if expense.cost.currency == total.currency
+					if expense.cost.currency != total.currency
 					{
 						panic!("Not all expenses were recorded in the same currency! There is currently no automatic currency conversion");
 					}

@@ -67,9 +67,8 @@ impl<'store> PersonAdapter<'store> for BincodePerson<'_, 'store>
 
 		for node_path in util::read_files(BincodePerson::path(&store))?
 		{
-			let person: Person = bincode::deserialize_from(BufReader::new(
-				fs::File::open(node_path)?
-			))?;
+			let reader = BufReader::new(fs::File::open(node_path)?);
+			let person: Person = bincode::deserialize_from(reader)?;
 
 			if query.matches(&person)
 			{

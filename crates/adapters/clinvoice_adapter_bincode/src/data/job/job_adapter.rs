@@ -89,9 +89,8 @@ impl<'store> JobAdapter<'store> for BincodeJob<'_, 'store>
 
 		for node_path in util::read_files(BincodeJob::path(&store))?
 		{
-			let job: Job = bincode::deserialize_from(BufReader::new(
-				fs::File::open(node_path)?
-			))?;
+			let reader = BufReader::new(fs::File::open(node_path)?);
+			let job: Job = bincode::deserialize_from(reader)?;
 
 			if query.matches(&job)
 			{

@@ -50,7 +50,8 @@ impl Deletable for BincodeOrganization<'_, '_>
 				|j| BincodeJob {job: &j, store: self.store}.delete(cascade)
 			)?;
 
-			associated_employees()?.into_iter().try_for_each(
+			let associated_employees = associated_employees()?;
+			associated_employees.into_iter().try_for_each(
 				|e| BincodeEmployee {employee: &e, store: self.store}.delete(cascade)
 			)?;
 		}

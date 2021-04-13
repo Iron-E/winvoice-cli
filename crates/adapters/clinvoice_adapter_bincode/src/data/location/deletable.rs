@@ -52,7 +52,8 @@ impl Deletable for BincodeLocation<'_, '_>
 				|o| BincodeOrganization {organization: &o, store: self.store}.delete(cascade)
 			)?;
 
-			associated_locations()?.into_iter().try_for_each(
+			let associated_locations = associated_locations()?;
+			associated_locations.into_iter().try_for_each(
 				|l| BincodeLocation {location: &l, store: self.store}.delete(cascade)
 			)?;
 		}

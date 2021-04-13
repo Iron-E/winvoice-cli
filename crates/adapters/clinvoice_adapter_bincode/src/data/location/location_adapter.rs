@@ -97,9 +97,8 @@ impl<'store> LocationAdapter<'store> for BincodeLocation<'_, 'store>
 
 		for node_path in util::read_files(BincodeLocation::path(&store))?
 		{
-			let location: Location = bincode::deserialize_from(BufReader::new(
-				fs::File::open(node_path)?
-			))?;
+			let reader = BufReader::new(fs::File::open(node_path)?);
+			let location: Location = bincode::deserialize_from(reader)?;
 
 			if query.matches(&location)
 			{

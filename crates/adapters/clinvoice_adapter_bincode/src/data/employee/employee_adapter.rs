@@ -79,9 +79,8 @@ impl<'store> EmployeeAdapter<'store> for BincodeEmployee<'_, 'store>
 
 		for node_path in util::read_files(BincodeEmployee::path(&store))?
 		{
-			let employee: Employee = bincode::deserialize_from(BufReader::new(
-				fs::File::open(node_path)?
-			))?;
+			let reader = BufReader::new(fs::File::open(node_path)?);
+			let employee: Employee = bincode::deserialize_from(reader)?;
 
 			if query.matches(&employee)
 			{

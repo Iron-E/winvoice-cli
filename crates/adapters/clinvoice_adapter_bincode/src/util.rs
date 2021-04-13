@@ -146,16 +146,11 @@ pub fn temp_store(assertion: impl FnOnce(&Store))
 /// The next [`Id`] for an entity in `store_dir`.
 pub fn unique_id(store_dir: &Path) -> io::Result<Id>
 {
-	let files = read_files(store_dir)?.collect::<Vec<_>>();
-
 	loop
 	{
 		let id = Id::new_v5(&UUID_NAMESPACE, Id::new_v4().as_bytes());
-		let id_string = id.to_string();
 
-		if files.iter()
-			.flat_map(|file_path| file_path.file_stem())
-			.all(|file_name| file_name.to_string_lossy() != id_string)
+		if !store_dir.join(id.to_string()).is_file()
 		{
 			return Ok(id);
 		}

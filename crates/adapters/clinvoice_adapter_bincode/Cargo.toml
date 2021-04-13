@@ -24,3 +24,4 @@ thiserror = "1"
 
 # Serialization
 bincode = "1"
+serde = "1"

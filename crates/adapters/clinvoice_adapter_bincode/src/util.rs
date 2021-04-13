@@ -49,49 +49,37 @@ pub fn create_store_dir(store_dir: &Path) -> io::Result<bool>
 /// Expand the `store`'s specified path and join the provided `subdir`.
 pub fn expand_store_path(store: &Store) -> PathBuf
 {
-	PathBuf::from(match shellexpand::full(&store.path)
+	match shellexpand::full(&store.path)
 	{
-		Ok(p) => p.as_ref(),
-		_ => &store.path,
-	})
+		Ok(p) => p.as_ref().into(),
+		_ => store.path.as_str().into(),
+	}
 }
 
 /// # Summary
 ///
-/// Return a [`FilterMap`] iterating over all valid [`File`](fs::File)s in some `path`.
+///
 ///
 /// # Errors
 ///
-/// Will error whenever [`fs::read_dir`] does.
-fn read_files<P>(path: P) -> io::Result<FilterMap<fs::ReadDir, impl FnMut(io::Result<fs::DirEntry>) -> Option<PathBuf>>> where
-	P : AsRef<Path>,
+pub fn retrieve<E, T>(path: impl AsRef<Path>, query: impl Fn(&T) -> bool) -> Result<Vec<T>, E> where
+	E : From<io::Error> + From<bincode::Error>,
+	T : DeserializeOwned,
 {
-	Ok(fs::read_dir(path)?.filter_map(
+	let files = fs::read_dir(path)?.filter_map(
 		|node| match node
 		{
 			Ok(n) if n.path().is_file() => Some(n.path()),
 			_ => None,
 		}
-	))
-}
+	);
 
-pub fn retrieve<E, T>(path: impl AsRef<Path>, query: impl Fn(&T) -> bool) -> Result<Vec<T>, E> where
-	E : From<io::Error> + From<bincode::Error>,
-	T : DeserializeOwned,
-{
-	let files = read_files(path)?;
-
-	files.map(|file_path|
-		fs::File::open(file_path)
-			.map(|file| io::BufReader::new(file))
-			.map_err(|e| e.into())
-			.and_then(
-				|reader|
-				{
-					let employee: Result<T, E> = bincode::deserialize_from(reader).map_err(|e| e.into());
-					employee
-				}
-			)
+	files.map(|file_path| fs::File::open(file_path).map(|file|
+		io::BufReader::new(file)).map_err(|e| e.into()).and_then(|reader|
+		{
+			let employee: Result<T, E> = bincode::deserialize_from(reader).map_err(|e| e.into());
+			employee
+		})
 	).filter(|result| match result
 	{
 		Ok(employee) => query(&employee),

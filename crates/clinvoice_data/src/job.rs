@@ -146,37 +146,42 @@ impl Job
 	/// # Panics
 	///
 	/// * When not all [`Money`] amounts are in the same currency.
-	///     * TODO: add currency conversion method.
+	///
+	/// # TODO
+	///
+	/// * Add currency conversion method.
+	/// * Add tests.
 	pub fn total(&self) -> Money
 	{
 		let minutes_per_hour = Decimal::from(MINUTES_PER_HOUR);
 		let seconds_per_minute = minutes_per_hour;
 
-		let mut total = Money
-		{
-			amount: Decimal::new(0, 2),
-			currency: self.invoice.hourly_rate.currency.clone(),
-		};
-
-		for timesheet in self.timesheets.iter().filter(|t| t.time_end.is_some())
-		{
-			let duration_seconds = Decimal::from(timesheet.time_end.unwrap().signed_duration_since(timesheet.time_begin).num_seconds());
-			total.amount += (duration_seconds / seconds_per_minute / minutes_per_hour) * self.invoice.hourly_rate.amount;
-
-			if let Some(expenses) = &timesheet.expenses
+		self.timesheets.iter().filter(|t| t.time_end.is_some()).fold(
+			Money
 			{
-				for expense in expenses
+				amount: Decimal::new(0, 2),
+				currency: self.invoice.hourly_rate.currency.clone(),
+			},
+			|mut total, timesheet|
+			{
+				let duration_seconds = Decimal::from(timesheet.time_end.unwrap().signed_duration_since(timesheet.time_begin).num_seconds());
+				total.amount += (duration_seconds / seconds_per_minute / minutes_per_hour) * self.invoice.hourly_rate.amount;
+
+				if let Some(expenses) = &timesheet.expenses
 				{
-					if expense.cost.currency != total.currency
+					expenses.iter().for_each(|expense|
 					{
-						panic!("Not all expenses were recorded in the same currency! There is currently no automatic currency conversion");
-					}
+						if expense.cost.currency != total.currency
+						{
+							panic!("Not all expenses were recorded in the same currency! There is currently no automatic currency conversion");
+						}
 
-					total.amount += expense.cost.amount;
+						total.amount += expense.cost.amount;
+					});
 				}
-			}
-		}
 
-		total
+				total
+			}
+		)
 	}
 }

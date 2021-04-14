@@ -131,7 +131,7 @@ fn to_view()
 		};
 
 		let start = Instant::now();
-		let ceo_testy_view_result = BincodeEmployee::to_view::<BincodeLocation, BincodeOrganization, BincodePerson>(ceo_testy, store);
+		let ceo_testy_view_result = BincodeEmployee::into_view::<BincodeLocation, BincodeOrganization, BincodePerson>(ceo_testy, store);
 		println!("\n>>>>> BincodeEmployee::to_view {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 
 		// Asser that the synthetic view is the same as the view which was created naturally.

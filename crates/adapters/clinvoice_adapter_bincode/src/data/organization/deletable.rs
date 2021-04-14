@@ -55,7 +55,7 @@ impl Deletable for BincodeOrganization<'_, '_>
 				|e| BincodeEmployee {employee: &e, store: self.store}.delete(cascade)
 			)?;
 		}
-		else if associated_jobs.len() > 0 || associated_employees()?.len() > 0
+		else if !(associated_jobs.is_empty() && associated_employees()?.is_empty())
 		{
 			return Err(DataError::DeleteRestricted(self.organization.id).into());
 		}

@@ -43,7 +43,7 @@ impl Deletable for BincodeEmployee<'_, '_>
 				BincodeJob {job: &result, store: self.store}.update()
 			})?;
 		}
-		else if associated_jobs.len() > 0
+		else if !associated_jobs.is_empty()
 		{
 			return Err(DataError::DeleteRestricted(self.employee.id).into());
 		}

@@ -30,6 +30,6 @@ impl InvoiceDate<'_>
 	pub fn matches(&self, invoice_date: &clinvoice_data::InvoiceDate) -> bool
 	{
 		self.issued.matches(&DateTime::from(invoice_date.issued)) &&
-		self.paid.matches(&invoice_date.paid.map(|date| DateTime::from(date)))
+		self.paid.matches(&invoice_date.paid.map(DateTime::from))
 	}
 }

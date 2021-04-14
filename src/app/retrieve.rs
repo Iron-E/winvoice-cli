@@ -134,7 +134,7 @@ impl Retrieve
 						Vec::with_capacity(results_len),
 						|mut v, e| -> BincodeResult<_>
 						{
-							v.push(BincodeEmployee::to_view::<BincodeLocation, BincodeOrganization, BincodePerson>(e, &store)?);
+							v.push(BincodeEmployee::into_view::<BincodeLocation, BincodeOrganization, BincodePerson>(e, &store)?);
 							Ok(v)
 						}
 					)?;
@@ -164,7 +164,7 @@ impl Retrieve
 						Vec::with_capacity(results_len),
 						|mut v, j| -> BincodeResult<_>
 						{
-							v.push(BincodeJob::to_view::<BincodeEmployee, BincodeLocation, BincodeOrganization, BincodePerson>(j, &store)?);
+							v.push(BincodeJob::into_view::<BincodeEmployee, BincodeLocation, BincodeOrganization, BincodePerson>(j, &store)?);
 							Ok(v)
 						}
 					)?;
@@ -194,7 +194,7 @@ impl Retrieve
 						Vec::with_capacity(results_len),
 						|mut v, l| -> BincodeResult<_>
 						{
-							v.push(BincodeLocation::to_view(l, &store)?);
+							v.push(BincodeLocation::into_view(l, &store)?);
 							Ok(v)
 						}
 					)?;
@@ -224,7 +224,7 @@ impl Retrieve
 						Vec::with_capacity(results_len),
 						|mut v, o| -> BincodeResult<_>
 						{
-							v.push(BincodeOrganization::to_view::<BincodeLocation>(o, &store)?);
+							v.push(BincodeOrganization::into_view::<BincodeLocation>(o, &store)?);
 							Ok(v)
 						}
 					)?;
@@ -249,7 +249,7 @@ impl Retrieve
 					let query: query::Person = input::edit_default(String::from(QUERY_PROMPT) + "persons")?;
 
 					let results = BincodePerson::retrieve(query, &store)?;
-					let results_view = results.into_iter().map(|p| PersonView::from(p)).collect::<Vec<_>>();
+					let results_view = results.into_iter().map(PersonView::from).collect::<Vec<_>>();
 
 					if self.delete
 					{

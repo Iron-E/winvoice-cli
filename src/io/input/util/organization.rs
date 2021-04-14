@@ -38,7 +38,7 @@ pub(super) fn retrieve_or_err<'store, L, O>(store: &'store Store) -> DynResult<'
 		Vec::with_capacity(organizations_len),
 		|mut v, o| -> DynResult<'store, Vec<OrganizationView>>
 		{
-			v.push(O::to_view::<L>(o, store)?);
+			v.push(O::into_view::<L>(o, store)?);
 
 			Ok(v)
 		},

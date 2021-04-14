@@ -57,7 +57,7 @@ fn to_view()
 		};
 
 		let start = Instant::now();
-		let phoenix_view_result = BincodeLocation::to_view(phoenix, store);
+		let phoenix_view_result = BincodeLocation::into_view(phoenix, store);
 		println!("\n>>>>> BincodeLocation::to_view {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 
 		assert_eq!(phoenix_view, phoenix_view_result.unwrap());

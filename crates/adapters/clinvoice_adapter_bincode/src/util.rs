@@ -73,7 +73,7 @@ pub fn retrieve<E, T>(path: impl AsRef<Path>, query: impl Fn(&T) -> bool) -> Res
 	nodes.filter_map(|node|
 		node.ok().map(|n| n.path()).filter(|node_path| node_path.is_file())
 	).map(|file_path|
-		fs::File::open(file_path).map(|file| io::BufReader::new(file)).map_err(|e| e.into()).and_then(|reader|
+		fs::File::open(file_path).map(io::BufReader::new).map_err(|e| e.into()).and_then(|reader|
 		{
 			let employee: Result<T, E> = bincode::deserialize_from(reader).map_err(|e| e.into());
 			employee
@@ -172,7 +172,7 @@ mod tests
 			let start = Instant::now();
 
 			let ids = (0..LOOPS).fold(
-				HashSet::new(),
+				HashSet::with_capacity(LOOPS),
 				|mut s, _|
 				{
 					let id = super::unique_id(&test_path).unwrap();

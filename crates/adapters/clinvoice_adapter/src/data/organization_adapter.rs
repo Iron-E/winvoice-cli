@@ -30,6 +30,25 @@ pub trait OrganizationAdapter<'store>  :
 
 	/// # Summary
 	///
+	/// Convert some `organization` into a [`OrganizationView`].
+	fn into_view<L>(organization: Organization, store: &'store Store)
+		-> Result<OrganizationView, <L as LocationAdapter<'store>>::Error>
+	where
+		L : LocationAdapter<'store>,
+	{
+		let location_result = Self::to_location::<L>(&organization, store)?;
+		let location_view_result = L::into_view(location_result, store);
+
+		Ok(OrganizationView
+		{
+			id: organization.id,
+			location: location_view_result?,
+			name: organization.name,
+		})
+	}
+
+	/// # Summary
+	///
 	/// Retrieve some [`Organization`] from the active [`Store`]crate::Store).
 	///
 	/// # Parameters
@@ -91,24 +110,5 @@ pub trait OrganizationAdapter<'store>  :
 		};
 
 		Ok(location.clone())
-	}
-
-	/// # Summary
-	///
-	/// Convert some `organization` into a [`OrganizationView`].
-	fn to_view<L>(organization: Organization, store: &'store Store)
-		-> Result<OrganizationView, <L as LocationAdapter<'store>>::Error>
-	where
-		L : LocationAdapter<'store>,
-	{
-		let location_result = Self::to_location::<L>(&organization, store)?;
-		let location_view_result = L::to_view(location_result, store);
-
-		Ok(OrganizationView
-		{
-			id: organization.id,
-			location: location_view_result?,
-			name: organization.name,
-		})
 	}
 }

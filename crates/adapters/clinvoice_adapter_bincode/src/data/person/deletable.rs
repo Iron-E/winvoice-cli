@@ -33,7 +33,7 @@ impl Deletable for BincodePerson<'_, '_>
 				|e| BincodeEmployee {employee: &e, store: self.store}.delete(true)
 			)?;
 		}
-		else if associated_employees.len() > 0
+		else if !associated_employees.is_empty()
 		{
 			return Err(DataError::DeleteRestricted(self.person.id).into());
 		}

@@ -38,7 +38,7 @@ pub(super) fn retrieve_or_err<'store, L>(store: &'store Store) -> DynResult<'sto
 		Vec::with_capacity(locations_len),
 		|mut v, l| -> DynResult<'store, Vec<LocationView>>
 		{
-			v.push(L::to_view(l, store)?);
+			v.push(L::into_view(l, store)?);
 
 			Ok(v)
 		},

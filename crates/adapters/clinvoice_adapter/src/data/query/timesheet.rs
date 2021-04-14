@@ -39,7 +39,7 @@ impl Timesheet<'_>
 	{
 		timesheets.iter().map(|t| &t.employee).any(|e| self.employee.matches_view(e)) &&
 		self.time_begin.set_matches(&timesheets.iter().map(|t| DateTime::from(t.time_begin)).collect::<Vec<_>>().iter().collect()) &&
-		self.time_end.set_matches(&timesheets.iter().map(|t| t.time_end.map(|time| DateTime::from(time))).collect::<Vec<_>>().iter().collect())
+		self.time_end.set_matches(&timesheets.iter().map(|t| t.time_end.map(DateTime::from)).collect::<Vec<_>>().iter().collect())
 	}
 
 	/// # Summary
@@ -49,6 +49,6 @@ impl Timesheet<'_>
 	{
 		self.employee.id.set_matches(&timesheets.iter().map(|t| &t.employee_id).collect()) &&
 		self.time_begin.set_matches(&timesheets.iter().map(|t| DateTime::from(t.time_begin)).collect::<Vec<_>>().iter().collect()) &&
-		self.time_end.set_matches(&timesheets.iter().map(|t| t.time_end.map(|time| DateTime::from(time))).collect::<Vec<_>>().iter().collect())
+		self.time_end.set_matches(&timesheets.iter().map(|t| t.time_end.map(DateTime::from)).collect::<Vec<_>>().iter().collect())
 	}
 }

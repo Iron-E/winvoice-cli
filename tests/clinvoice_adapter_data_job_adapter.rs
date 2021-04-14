@@ -135,7 +135,7 @@ fn to_view()
 		};
 
 		let start = Instant::now();
-		let create_job_view_result = BincodeJob::to_view::<BincodeEmployee, BincodeLocation, BincodeOrganization, BincodePerson>(create_job, store);
+		let create_job_view_result = BincodeJob::into_view::<BincodeEmployee, BincodeLocation, BincodeOrganization, BincodePerson>(create_job, store);
 		println!("\n>>>>> BincodeJob::to_view {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 
 		assert_eq!(create_job_view, create_job_view_result.unwrap());

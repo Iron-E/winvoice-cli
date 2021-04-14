@@ -57,7 +57,7 @@ impl Deletable for BincodeLocation<'_, '_>
 				|l| BincodeLocation {location: &l, store: self.store}.delete(cascade)
 			)?;
 		}
-		else if associated_organizations.len() > 0 || associated_locations()?.len() > 0
+		else if !(associated_organizations.is_empty() || associated_locations()?.is_empty())
 		{
 			return Err(DataError::DeleteRestricted(self.location.id).into());
 		}

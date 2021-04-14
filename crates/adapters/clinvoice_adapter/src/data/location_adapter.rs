@@ -46,6 +46,29 @@ pub trait LocationAdapter<'store> :
 
 	/// # Summary
 	///
+	/// Convert some `location` into a [`LocationView`].
+	fn into_view(location: Location, store: &'store Store) -> Result<LocationView, <Self as LocationAdapter<'store>>::Error>
+	{
+		let mut outer_locations = Self::outers(&location, store)?;
+		outer_locations.reverse();
+
+		Ok(LocationView
+		{
+			id: location.id,
+			name: location.name,
+			outer: outer_locations.into_iter().fold(None,
+				|previous: Option<LocationView>, outer_location| Some(LocationView
+				{
+					id: outer_location.id,
+					name: outer_location.name,
+					outer: previous.map(|l| l.into()),
+				}),
+			).map(|l| l.into()),
+		})
+	}
+
+	/// # Summary
+	///
 	/// Get the [`Location`]s which contain this [`Location`].
 	fn outers(location: &Location, store: &Store) -> Result<Vec<Location>, super::Error>
 	{
@@ -93,27 +116,4 @@ pub trait LocationAdapter<'store> :
 		query: query::Location,
 		store: &Store,
 	) -> Result<Vec<Location>, <Self as LocationAdapter<'store>>::Error>;
-
-	/// # Summary
-	///
-	/// Convert some `location` into a [`LocationView`].
-	fn to_view(location: Location, store: &'store Store) -> Result<LocationView, <Self as LocationAdapter<'store>>::Error>
-	{
-		let mut outer_locations = Self::outers(&location, store)?;
-		outer_locations.reverse();
-
-		Ok(LocationView
-		{
-			id: location.id,
-			name: location.name,
-			outer: outer_locations.into_iter().fold(None,
-				|previous: Option<LocationView>, outer_location| Some(LocationView
-				{
-					id: outer_location.id,
-					name: outer_location.name,
-					outer: previous.map(|l| l.into()),
-				}),
-			).map(|l| l.into()),
-		})
-	}
 }

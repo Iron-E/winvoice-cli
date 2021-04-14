@@ -1,14 +1,14 @@
 use
 {
 	core::fmt::Display,
-	std::{error::Error, result},
+	std::{borrow::Cow, error::Error, result},
 
 	crate::{Config, DynResult, io::input, StructOpt},
 
 	clinvoice_adapter::
 	{
 		Adapters, Error as AdapterError,
-		data::{Deletable, EmployeeAdapter, JobAdapter, LocationAdapter, OrganizationAdapter, PersonAdapter, query, Updatable},
+		data::{Deletable, EmployeeAdapter, JobAdapter, LocationAdapter, Match, OrganizationAdapter, PersonAdapter, query, Updatable},
 	},
 	clinvoice_data::views::{PersonView, RestorableSerde},
 	clinvoice_export::Target,
@@ -50,7 +50,7 @@ pub(super) enum RetrieveCommand
 	Employee
 	{
 		#[structopt(help="Select one of the employees as the default in your configuration", long, short)]
-		select_default: bool,
+		default: bool,
 	},
 
 	#[structopt(about="Retrieve existing records about job")]
@@ -63,8 +63,8 @@ pub(super) enum RetrieveCommand
 	#[structopt(about="Retrieve existing records about locations")]
 	Location
 	{
-		#[structopt(help="Create a new location inside of some selected location", long, short)]
-		create_inner: bool,
+		#[structopt(help="Create a new location inside of some selected location. Argument is the name of the new location", long, short)]
+		create_inner: Option<String>,
 	},
 
 	#[structopt(about="Retrieve existing records about organizations")]
@@ -124,9 +124,20 @@ impl Retrieve
 			#[cfg(feature="bincode")]
 			Adapters::Bincode => match self.command
 			{
-				RetrieveCommand::Employee {select_default} =>
+				RetrieveCommand::Employee {default} =>
 				{
-					let query: query::Employee = input::edit_default(String::from(QUERY_PROMPT) + "employees")?;
+					let query = if default
+					{
+						query::Employee
+						{
+							id: Match::EqualTo(Cow::Borrowed(&config.employees.default_id)),
+							..Default::default()
+						}
+					}
+					else
+					{
+						input::edit_default(String::from(QUERY_PROMPT) + "employees")?
+					};
 
 					let results = BincodeEmployee::retrieve(query, &store)?;
 					let results_len = results.len();
@@ -184,7 +195,7 @@ impl Retrieve
 					}
 				},
 
-				RetrieveCommand::Location {create_inner} =>
+				RetrieveCommand::Location {ref create_inner} =>
 				{
 					let query: query::Location = input::edit_default(String::from(QUERY_PROMPT) + "locations")?;
 
@@ -208,7 +219,13 @@ impl Retrieve
 					{
 						Self::update(&results_view, |l| BincodeLocation {location: &(l.into()), store}.update())?;
 					}
-					else if !self.delete
+
+					if let Some(name) = create_inner
+					{
+						let location = input::select_one(&results_view, format!("Select the outer Location of {}", name))?;
+						BincodeLocation {location: &(location.into()), store}.create_inner(name.as_str())?;
+					}
+					else if !(self.delete || self.update)
 					{
 						results_view.iter().for_each(|l| println!("{}", l));
 					}

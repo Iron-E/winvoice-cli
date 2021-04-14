@@ -57,10 +57,13 @@ pub fn expand_store_path(store: &Store) -> PathBuf
 
 /// # Summary
 ///
-///
+/// Retrieves all [`T`]s from `path` where `query` is `true`.
 ///
 /// # Errors
 ///
+/// * If some [`fs::File`] in `path` is not a (valid) [`T`].
+/// * When [`fs::read_dir`] does.
+/// * When [`fs::File::open`] does.
 pub fn retrieve<E, T>(path: impl AsRef<Path>, query: impl Fn(&T) -> bool) -> Result<Vec<T>, E> where
 	E : From<io::Error> + From<bincode::Error>,
 	T : DeserializeOwned,

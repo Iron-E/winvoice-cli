@@ -8,7 +8,7 @@ use
 	clinvoice_adapter::
 	{
 		Adapters, Error as AdapterError,
-		data::{Deletable, EmployeeAdapter, JobAdapter, LocationAdapter, OrganizationAdapter, PersonAdapter, query},
+		data::{Deletable, EmployeeAdapter, JobAdapter, LocationAdapter, OrganizationAdapter, PersonAdapter, query, Updatable},
 	},
 	clinvoice_data::views::{PersonView, RestorableSerde},
 	clinvoice_export::Target,
@@ -141,12 +141,12 @@ impl Retrieve
 
 					if self.delete
 					{
-						Self::delete(&results_view, |e| BincodeEmployee {employee: &e.into(), store}.delete(self.cascade))?;
+						Self::delete(&results_view, |e| BincodeEmployee {employee: &(e.into()), store}.delete(self.cascade))?;
 					}
 
 					if self.update
 					{
-						todo!()
+						Self::update(&results_view, |e| BincodeEmployee {employee: &(e.into()), store}.update())?;
 					}
 					else if !self.delete
 					{
@@ -171,12 +171,12 @@ impl Retrieve
 
 					if self.delete
 					{
-						Self::delete(&results_view, |j| BincodeJob {job: &j.into(), store}.delete(self.cascade))?;
+						Self::delete(&results_view, |j| BincodeJob {job: &(j.into()), store}.delete(self.cascade))?;
 					}
 
 					if self.update
 					{
-						todo!()
+						Self::update(&results_view, |j| BincodeJob {job: &(j.into()), store}.update())?;
 					}
 					else if !self.delete
 					{
@@ -201,12 +201,12 @@ impl Retrieve
 
 					if self.delete
 					{
-						Self::delete(&results_view, |l| BincodeLocation {location: &l.into(), store}.delete(self.cascade))?;
+						Self::delete(&results_view, |l| BincodeLocation {location: &(l.into()), store}.delete(self.cascade))?;
 					}
 
 					if self.update
 					{
-						todo!()
+						Self::update(&results_view, |l| BincodeLocation {location: &(l.into()), store}.update())?;
 					}
 					else if !self.delete
 					{
@@ -231,12 +231,12 @@ impl Retrieve
 
 					if self.delete
 					{
-						Self::delete(&results_view, |o| BincodeOrganization {organization: &o.into(), store}.delete(self.cascade))?;
+						Self::delete(&results_view, |o| BincodeOrganization {organization: &(o.into()), store}.delete(self.cascade))?;
 					}
 
 					if self.update
 					{
-						todo!()
+						Self::update(&results_view, |o| BincodeOrganization {organization: &(o.into()), store}.update())?;
 					}
 					else if !self.delete
 					{
@@ -253,12 +253,12 @@ impl Retrieve
 
 					if self.delete
 					{
-						Self::delete(&results_view, |p| BincodePerson {person: &p.into(), store}.delete(self.cascade))?;
+						Self::delete(&results_view, |p| BincodePerson {person: &(p.into()), store}.delete(self.cascade))?;
 					}
 
 					if self.update
 					{
-						todo!()
+						Self::update(&results_view, |p| BincodePerson {person: &(p.into()), store}.update())?;
 					}
 					else if !self.delete
 					{

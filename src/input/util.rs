@@ -1,5 +1,4 @@
 pub mod contact;
-pub mod employee_status;
 pub mod location;
 pub mod organization;
 pub mod person;

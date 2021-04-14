@@ -10,7 +10,7 @@ use
 	clinvoice_data::
 	{
 		chrono::{Datelike, DateTime, Local, Timelike, TimeZone, Utc},
-		Decimal, Money,
+		Decimal, EmployeeStatus, Money,
 	},
 };
 
@@ -93,18 +93,19 @@ impl Create
 						store,
 					)?.into();
 
-					let person = input::util::person::select_one::<BincodePerson, &str>(
-						"Which person is working for the organization?",
-						store,
-					)?.into();
+					let people = input::util::person::retrieve_views::<BincodePerson>(store)?;
+					let selected_person = input::select_one(&people, "Which person is working for the organization?")?;
 
 					let contact_info = input::util::contact::creation_menu::<BincodeLocation>(store)?;
-					let employee_status = input::util::employee_status::select_one("What is the status of the employee?")?;
+					let employee_status = input::select_one(
+						&[EmployeeStatus::Employed, EmployeeStatus::NotEmployed, EmployeeStatus::Representative],
+						"What is the status of the employee?",
+					)?;
 
 					BincodeEmployee::create(
 						contact_info.into_iter().map(|(label, contact)| (label, contact.into())).collect(),
 						organization,
-						person,
+						selected_person.into(),
 						employee_status,
 						&title,
 						store,
@@ -161,12 +162,10 @@ impl Create
 
 				Self::Organization {name} =>
 				{
-					let location = input::util::location::select_one::<BincodeLocation, String>(
-						format!("Select a location for {}", name),
-						store,
-					)?;
+					let location_views = input::util::location::retrieve_views::<BincodeLocation>(store)?;
+					let selected_view = input::select_one(&location_views, format!("Select a location for {}", name))?;
 
-					BincodeOrganization::create(location.into(), &name, store)?;
+					BincodeOrganization::create(selected_view.into(), &name, store)?;
 
 					Ok(())
 				},

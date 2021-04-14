@@ -1,6 +1,6 @@
 use
 {
-	crate::{DynResult, input},
+	crate::DynResult,
 
 	clinvoice_adapter::
 	{
@@ -23,7 +23,7 @@ use
 ///
 /// [L_retrieve]: clinvoice_adapter::data::LocationAdapter::retrieve
 /// [location]: clinvoice_data::Location
-pub(super) fn retrieve_or_err<'err, L>(store: &Store) -> DynResult<'err, Vec<LocationView>> where
+pub fn retrieve_views<'err, L>(store: &Store) -> DynResult<'err, Vec<LocationView>> where
 	L : LocationAdapter,
 	<L as LocationAdapter>::Error : 'err,
 {
@@ -44,23 +44,4 @@ pub(super) fn retrieve_or_err<'err, L>(store: &Store) -> DynResult<'err, Vec<Loc
 			Ok(v)
 		},
 	)
-}
-
-/// # Summary
-///
-/// `prompt` the user to [select](input::select) one [`Location`][location] from the specified `store`.
-///
-/// # Errors
-///
-/// * If [`retrieve_or_err`] fails.
-/// * If [`input::select_one`] fails.
-///
-/// [location]: clinvoice_data::Location
-pub fn select_one<'err, L, S>(prompt: S, store: &Store) -> DynResult<'err, LocationView> where
-	L : LocationAdapter,
-	<L as LocationAdapter>::Error : 'err,
-	S : Into<String>,
-{
-	let retrieved = retrieve_or_err::<L>(store)?;
-	input::select_one(&retrieved, prompt).map_err(|e| e.into())
 }

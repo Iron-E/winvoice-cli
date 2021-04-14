@@ -63,7 +63,7 @@ pub fn creation_menu<'err, L>(store: &Store) -> DynResult<'err, HashMap<String, 
 	const EDIT: &str = "Edit";
 	const ALL_ACTIONS: [&str; 4] = [ADD, CONTINUE, DELETE, EDIT];
 
-	let mut locations = super::location::retrieve_or_err::<L>(store)?;
+	let mut locations = super::location::retrieve_views::<L>(store)?;
 	locations.sort_by(|l1, l2| l1.name.cmp(&l2.name));
 
 	let mut contact_info = HashMap::<String, ContactView>::new();

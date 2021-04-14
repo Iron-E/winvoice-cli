@@ -22,7 +22,7 @@ use
 ///
 /// [P_retrieve]: clinvoice_adapter::data::OrganizationAdapter::retrieve
 /// [organization]: clinvoice_data::Organization
-pub(super) fn retrieve_or_err<'err, L, O>(store: &Store) -> DynResult<'err, Vec<OrganizationView>> where
+pub(super) fn retrieve_views<'err, L, O>(store: &Store) -> DynResult<'err, Vec<OrganizationView>> where
 	L : LocationAdapter,
 	<L as LocationAdapter>::Error : 'err,
 	O : OrganizationAdapter,
@@ -64,7 +64,7 @@ pub fn select_one<'err, L, O, S>(prompt: S, store: &Store) -> DynResult<'err, Or
 	<O as OrganizationAdapter>::Error : 'err,
 	S : Into<String>,
 {
-	let retrieved = retrieve_or_err::<L, O>(store)?;
+	let retrieved = retrieve_views::<L, O>(store)?;
 	input::select_one(&retrieved, prompt).map_err(|e| e.into())
 }
 

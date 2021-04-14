@@ -86,8 +86,7 @@ impl Retrieve
 		T : Clone + Display,
 	{
 		let selection = input::select(entities, "Select the entities you want to delete")?;
-		selection.into_iter().try_for_each(|entity| delete_entity(entity))?;
-		Ok(())
+		selection.into_iter().try_for_each(|entity| delete_entity(entity)).map_err(|e| e.into())
 	}
 
 	/// # Summary
@@ -95,7 +94,7 @@ impl Retrieve
 	/// Edit some `entities`, and then update them.
 	///
 	/// `update_entity` determines how the entities are updated.
-	fn update<'err, E, T>(entities: &[T], update_entity: impl Fn(&T) -> Result<E>) -> DynResult<'err, ()> where
+	fn update<'err, E, T>(entities: &[T], update_entity: impl Fn(T) -> Result<E>) -> DynResult<'err, ()> where
 		E : Error + 'err,
 		T : Clone + DeserializeOwned + Display + RestorableSerde + Serialize,
 	{
@@ -109,7 +108,7 @@ impl Retrieve
 				Err(e) => return Err(e.into()),
 			};
 
-			update_entity(&edited).map_err(|e| e.into())
+			update_entity(edited).map_err(|e| e.into())
 		})
 	}
 

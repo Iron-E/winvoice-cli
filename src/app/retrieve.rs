@@ -3,7 +3,7 @@ use
 	core::fmt::Display,
 	std::{borrow::Cow, error::Error, result},
 
-	crate::{Config, DynResult, io::input, StructOpt},
+	crate::{Config, DynResult, input, StructOpt},
 
 	clinvoice_adapter::
 	{

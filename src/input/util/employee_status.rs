@@ -1,6 +1,6 @@
 use
 {
-	crate::io::input,
+	crate::input,
 
 	clinvoice_data::EmployeeStatus,
 

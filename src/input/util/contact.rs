@@ -3,7 +3,7 @@ use
 	core::fmt::Display,
 	std::{collections::HashMap, io},
 
-	crate::{DynResult, io::input},
+	crate::{DynResult, input},
 
 	clinvoice_adapter::{data::LocationAdapter, Store},
 	clinvoice_data::views::{ContactView, LocationView},

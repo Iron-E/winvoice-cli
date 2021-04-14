@@ -1,6 +1,6 @@
 use
 {
-	crate::{Config, DynResult, io::input, StructOpt},
+	crate::{Config, DynResult, input, StructOpt},
 
 	clinvoice_adapter::
 	{

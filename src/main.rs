@@ -1,6 +1,6 @@
 mod app;
 mod dyn_result;
-mod io;
+mod input;
 
 use
 {

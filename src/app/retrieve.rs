@@ -119,172 +119,236 @@ impl Retrieve
 	{
 		let store = config.get_store(&store_name).expect("Storage name not known");
 
-		match store.adapter
+		match self.command
 		{
-			#[cfg(feature="bincode")]
-			Adapters::Bincode => match self.command
+			RetrieveCommand::Employee {default} =>
 			{
-				RetrieveCommand::Employee {default} =>
+				macro_rules! retrieve
 				{
-					let query = if default
-					{
-						query::Employee
+					($emp: ident, $loc: ident, $org: ident, $per: ident) =>
+					{{
+						let query = if default
 						{
-							id: Match::EqualTo(Cow::Borrowed(&config.employees.default_id)),
-							..Default::default()
+							query::Employee
+							{
+								id: Match::EqualTo(Cow::Borrowed(&config.employees.default_id)),
+								..Default::default()
+							}
 						}
-					}
-					else
-					{
-						input::edit_default(String::from(QUERY_PROMPT) + "employees")?
-					};
-
-					let results = BincodeEmployee::retrieve(query, &store)?;
-					let results_len = results.len();
-					let results_view = results.into_iter().try_fold(
-						Vec::with_capacity(results_len),
-						|mut v, e| -> BincodeResult<_>
+						else
 						{
-							v.push(BincodeEmployee::into_view::<BincodeLocation, BincodeOrganization, BincodePerson>(e, &store)?);
-							Ok(v)
-						}
-					)?;
+							input::edit_default(String::from(QUERY_PROMPT) + "employees")?
+						};
 
-					if self.delete
-					{
-						Self::delete(&results_view, |e| BincodeEmployee {employee: &(e.into()), store}.delete(self.cascade))?;
-					}
+						let results = $emp::retrieve(query, &store)?;
+						let results_len = results.len();
+						let results_view = results.into_iter().try_fold(
+							Vec::with_capacity(results_len),
+							|mut v, e| -> DynResult<'_, _>
+							{
+								v.push($emp::into_view::<$loc, $org, $per>(e, &store)?);
+								Ok(v)
+							}
+						)?;
 
-					if self.update
-					{
-						Self::update(&results_view, |e| BincodeEmployee {employee: &(e.into()), store}.update())?;
-					}
-					else if !self.delete
-					{
-						results_view.iter().for_each(|e| println!("{}", e));
-					}
-				},
-
-				RetrieveCommand::Job {export} =>
-				{
-					let query: query::Job = input::edit_default(String::from(QUERY_PROMPT) + "jobs")?;
-
-					let results = BincodeJob::retrieve(query, &store)?;
-					let results_len = results.len();
-					let results_view = results.into_iter().try_fold(
-						Vec::with_capacity(results_len),
-						|mut v, j| -> BincodeResult<_>
+						if self.delete
 						{
-							v.push(BincodeJob::into_view::<BincodeEmployee, BincodeLocation, BincodeOrganization, BincodePerson>(j, &store)?);
-							Ok(v)
+							Self::delete(&results_view, |e| $emp {employee: &(e.into()), store}.delete(self.cascade))?;
 						}
-					)?;
 
-					if self.delete
-					{
-						Self::delete(&results_view, |j| BincodeJob {job: &(j.into()), store}.delete(self.cascade))?;
-					}
-
-					if self.update
-					{
-						Self::update(&results_view, |j| BincodeJob {job: &(j.into()), store}.update())?;
-					}
-					else if !self.delete
-					{
-						results_view.iter().for_each(|j| println!("{}", j));
-					}
-				},
-
-				RetrieveCommand::Location {ref create_inner} =>
-				{
-					let query: query::Location = input::edit_default(String::from(QUERY_PROMPT) + "locations")?;
-
-					let results = BincodeLocation::retrieve(query, &store)?;
-					let results_len = results.len();
-					let results_view = results.into_iter().try_fold(
-						Vec::with_capacity(results_len),
-						|mut v, l| -> BincodeResult<_>
+						if self.update
 						{
-							v.push(BincodeLocation::into_view(l, &store)?);
-							Ok(v)
+							Self::update(&results_view, |e| $emp {employee: &(e.into()), store}.update())?;
 						}
-					)?;
-
-					if self.delete
-					{
-						Self::delete(&results_view, |l| BincodeLocation {location: &(l.into()), store}.delete(self.cascade))?;
-					}
-
-					if self.update
-					{
-						Self::update(&results_view, |l| BincodeLocation {location: &(l.into()), store}.update())?;
-					}
-
-					if let Some(name) = create_inner
-					{
-						let location = input::select_one(&results_view, format!("Select the outer Location of {}", name))?;
-						BincodeLocation {location: &(location.into()), store}.create_inner(name.as_str())?;
-					}
-					else if !(self.delete || self.update)
-					{
-						results_view.iter().for_each(|l| println!("{}", l));
-					}
-				},
-
-				RetrieveCommand::Organization =>
-				{
-					let query: query::Organization = input::edit_default(String::from(QUERY_PROMPT) + "organizations")?;
-
-					let results = BincodeOrganization::retrieve(query, &store)?;
-					let results_len = results.len();
-					let results_view = results.into_iter().try_fold(
-						Vec::with_capacity(results_len),
-						|mut v, o| -> BincodeResult<_>
+						else if !self.delete
 						{
-							v.push(BincodeOrganization::into_view::<BincodeLocation>(o, &store)?);
-							Ok(v)
+							results_view.iter().for_each(|e| println!("{}", e));
 						}
-					)?;
-
-					if self.delete
-					{
-						Self::delete(&results_view, |o| BincodeOrganization {organization: &(o.into()), store}.delete(self.cascade))?;
-					}
-
-					if self.update
-					{
-						Self::update(&results_view, |o| BincodeOrganization {organization: &(o.into()), store}.update())?;
-					}
-					else if !self.delete
-					{
-						results_view.iter().for_each(|o| println!("{}", o));
-					}
-				},
-
-				RetrieveCommand::Person =>
-				{
-					let query: query::Person = input::edit_default(String::from(QUERY_PROMPT) + "persons")?;
-
-					let results = BincodePerson::retrieve(query, &store)?;
-					let results_view = results.into_iter().map(PersonView::from).collect::<Vec<_>>();
-
-					if self.delete
-					{
-						Self::delete(&results_view, |p| BincodePerson {person: &(p.into()), store}.delete(self.cascade))?;
-					}
-
-					if self.update
-					{
-						Self::update(&results_view, |p| BincodePerson {person: &(p.into()), store}.update())?;
-					}
-					else if !self.delete
-					{
-						results_view.iter().for_each(|p| println!("{}", p));
-					}
+					}};
 				}
+
+				match store.adapter
+				{
+					#[cfg(feature="bincode")]
+					Adapters::Bincode => retrieve!(BincodeEmployee, BincodeLocation, BincodeOrganization, BincodePerson),
+
+					_ => return Err(AdapterError::FeatureNotFound(store.adapter).into()),
+				};
 			},
 
-			_ => return Err(AdapterError::FeatureNotFound(store.adapter).into()),
+			RetrieveCommand::Job {export} =>
+			{
+				macro_rules! retrieve
+				{
+					($emp: ident, $job: ident, $loc: ident, $org: ident, $per: ident) =>
+					{{
+						let query: query::Job = input::edit_default(String::from(QUERY_PROMPT) + "jobs")?;
+
+						let results = $job::retrieve(query, &store)?;
+						let results_len = results.len();
+						let results_view = results.into_iter().try_fold(
+							Vec::with_capacity(results_len),
+							|mut v, j| -> BincodeResult<_>
+							{
+								v.push($job::into_view::<$emp, $loc, $org, $per>(j, &store)?);
+								Ok(v)
+							}
+						)?;
+
+						if self.delete
+						{
+							Self::delete(&results_view, |j| $job {job: &(j.into()), store}.delete(self.cascade))?;
+						}
+
+						if self.update
+						{
+							Self::update(&results_view, |j| $job {job: &(j.into()), store}.update())?;
+						}
+						else if !self.delete
+						{
+							results_view.iter().for_each(|j| println!("{}", j));
+						}
+					}};
+				}
+
+				match store.adapter
+				{
+					#[cfg(feature="bincode")]
+					Adapters::Bincode => retrieve!(BincodeEmployee, BincodeJob, BincodeLocation, BincodeOrganization, BincodePerson),
+
+					_ => return Err(AdapterError::FeatureNotFound(store.adapter).into()),
+				};
+			},
+
+			RetrieveCommand::Location {ref create_inner} =>
+			{
+				macro_rules! retrieve
+				{
+					($loc: ident) =>
+					{{
+						let query: query::Location = input::edit_default(String::from(QUERY_PROMPT) + "locations")?;
+
+						let results = $loc::retrieve(query, &store)?;
+						let results_len = results.len();
+						let results_view = results.into_iter().try_fold(
+							Vec::with_capacity(results_len),
+							|mut v, l| -> BincodeResult<_>
+							{
+								v.push($loc::into_view(l, &store)?);
+								Ok(v)
+							}
+						)?;
+
+						if self.delete
+						{
+							Self::delete(&results_view, |l| $loc {location: &(l.into()), store}.delete(self.cascade))?;
+						}
+
+						if self.update
+						{
+							Self::update(&results_view, |l| $loc {location: &(l.into()), store}.update())?;
+						}
+
+						if let Some(name) = create_inner
+						{
+							let location = input::select_one(&results_view, format!("Select the outer Location of {}", name))?;
+							$loc {location: &(location.into()), store}.create_inner(name.as_str())?;
+						}
+						else if !(self.delete || self.update)
+						{
+							results_view.iter().for_each(|l| println!("{}", l));
+						}
+					}};
+				}
+
+				match store.adapter
+				{
+					#[cfg(feature="bincode")]
+					Adapters::Bincode => retrieve!(BincodeLocation),
+
+					_ => return Err(AdapterError::FeatureNotFound(store.adapter).into()),
+				};
+			},
+
+			RetrieveCommand::Organization =>
+			{
+				macro_rules! retrieve
+				{
+					($loc: ident, $org: ident) =>
+					{{
+						let query: query::Organization = input::edit_default(String::from(QUERY_PROMPT) + "organizations")?;
+
+						let results = $org::retrieve(query, &store)?;
+						let results_len = results.len();
+						let results_view = results.into_iter().try_fold(
+							Vec::with_capacity(results_len),
+							|mut v, o| -> DynResult<'_, _>
+							{
+								v.push($org::into_view::<$loc>(o, &store)?);
+								Ok(v)
+							}
+						)?;
+
+						if self.delete
+						{
+							Self::delete(&results_view, |o| $org {organization: &(o.into()), store}.delete(self.cascade))?;
+						}
+
+						if self.update
+						{
+							Self::update(&results_view, |o| $org {organization: &(o.into()), store}.update())?;
+						}
+						else if !self.delete
+						{
+							results_view.iter().for_each(|o| println!("{}", o));
+						}
+					}};
+				}
+
+				match store.adapter
+				{
+					#[cfg(feature="bincode")]
+					Adapters::Bincode => retrieve!(BincodeLocation, BincodeOrganization),
+
+					_ => return Err(AdapterError::FeatureNotFound(store.adapter).into()),
+				};
+			},
+
+			RetrieveCommand::Person =>
+			{
+				macro_rules! retrieve
+				{
+					($per: ident) =>
+					{{
+						let query: query::Person = input::edit_default(String::from(QUERY_PROMPT) + "persons")?;
+
+						let results = $per::retrieve(query, &store)?;
+						let results_view = results.into_iter().map(PersonView::from).collect::<Vec<_>>();
+
+						if self.delete
+						{
+							Self::delete(&results_view, |p| $per {person: &(p.into()), store}.delete(self.cascade))?;
+						}
+
+						if self.update
+						{
+							Self::update(&results_view, |p| $per {person: &(p.into()), store}.update())?;
+						}
+						else if !self.delete
+						{
+							results_view.iter().for_each(|p| println!("{}", p));
+						}
+					}};
+				}
+
+				match store.adapter
+				{
+					#[cfg(feature="bincode")]
+					Adapters::Bincode => retrieve!(BincodePerson),
+
+					_ => return Err(AdapterError::FeatureNotFound(store.adapter).into()),
+				};
+			},
 		};
 
 		Ok(())

@@ -11,10 +11,10 @@ use
 /// # Summary
 ///
 /// Convert some [`Contact`] into a [`ContactView`].
-pub fn to_view<'store, L>(contact: Contact, store: &'store Store)
-	-> Result<ContactView, <L as LocationAdapter<'store>>::Error>
+pub fn to_view<L>(contact: Contact, store: &Store)
+	-> Result<ContactView, <L as LocationAdapter>::Error>
 where
-	L : LocationAdapter<'store>
+	L : LocationAdapter
 {
 	Ok(match contact
 	{
@@ -38,10 +38,10 @@ where
 /// # Summary
 ///
 /// Convert some [`Contact`] into a [`ContactView`].
-pub fn to_views<'store, L, T>(contact_info: HashMap<T, Contact>, store: &'store Store)
-	-> Result<HashMap<T, ContactView>, <L as LocationAdapter<'store>>::Error>
+pub fn to_views<L, T>(contact_info: HashMap<T, Contact>, store: &Store)
+	-> Result<HashMap<T, ContactView>, <L as LocationAdapter>::Error>
 where
-	L : LocationAdapter<'store>,
+	L : LocationAdapter,
 	T : Eq + Hash,
 {
 	contact_info.into_iter().map(|(key, contact)|

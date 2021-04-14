@@ -12,10 +12,10 @@ use
 	},
 };
 
-pub trait EmployeeAdapter<'store> :
-	Deletable<Error=<Self as EmployeeAdapter<'store>>::Error> +
-	Initializable<Error=<Self as EmployeeAdapter<'store>>::Error> +
-	Updatable<Error=<Self as EmployeeAdapter<'store>>::Error> +
+pub trait EmployeeAdapter :
+	Deletable<Error=<Self as EmployeeAdapter>::Error> +
+	Initializable<Error=<Self as EmployeeAdapter>::Error> +
+	Updatable<Error=<Self as EmployeeAdapter>::Error> +
 {
 	type Error : From<super::Error> + Error;
 
@@ -37,22 +37,22 @@ pub trait EmployeeAdapter<'store> :
 		person: Person,
 		status: EmployeeStatus,
 		title: &str,
-		store: &'store Store,
-	) -> Result<Employee, <Self as EmployeeAdapter<'store>>::Error>;
+		store: &Store,
+	) -> Result<Employee, <Self as EmployeeAdapter>::Error>;
 
 	/// # Summary
 	///
 	/// Convert some `employee` into a [`EmployeeView`].
-	fn into_view<L, O, P>(employee: Employee, store: &'store Store)
-		-> Result<EmployeeView, <Self as EmployeeAdapter<'store>>::Error>
+	fn into_view<L, O, P>(employee: Employee, store: &Store)
+		-> Result<EmployeeView, <Self as EmployeeAdapter>::Error>
 	where
-		L : LocationAdapter<'store>,
-		O : OrganizationAdapter<'store>,
-		P : PersonAdapter<'store>,
+		L : LocationAdapter,
+		O : OrganizationAdapter,
+		P : PersonAdapter,
 
-		<Self as EmployeeAdapter<'store>>::Error : From<<L as LocationAdapter<'store>>::Error>,
-		<Self as EmployeeAdapter<'store>>::Error : From<<O as OrganizationAdapter<'store>>::Error>,
-		<Self as EmployeeAdapter<'store>>::Error : From<<P as PersonAdapter<'store>>::Error>,
+		<Self as EmployeeAdapter>::Error : From<<L as LocationAdapter>::Error>,
+		<Self as EmployeeAdapter>::Error : From<<O as OrganizationAdapter>::Error>,
+		<Self as EmployeeAdapter>::Error : From<<P as PersonAdapter>::Error>,
 	{
 		let organization = Self::to_organization::<O>(&employee, store)?;
 		let organization_view = O::into_view::<L>(organization, store)?;
@@ -87,15 +87,15 @@ pub trait EmployeeAdapter<'store> :
 	fn retrieve(
 		query: query::Employee,
 		store: &Store,
-	) -> Result<Vec<Employee>, <Self as EmployeeAdapter<'store>>::Error>;
+	) -> Result<Vec<Employee>, <Self as EmployeeAdapter>::Error>;
 
 	/// # Summary
 	///
 	/// Convert some `employee` into a [`Organization`].
-	fn to_organization<O>(employee: &Employee, store: &'store Store)
-		-> Result<Organization, <O as OrganizationAdapter<'store>>::Error>
+	fn to_organization<O>(employee: &Employee, store: &Store)
+		-> Result<Organization, <O as OrganizationAdapter>::Error>
 	where
-		O : OrganizationAdapter<'store>,
+		O : OrganizationAdapter,
 	{
 		let results = O::retrieve(
 			query::Organization
@@ -118,10 +118,10 @@ pub trait EmployeeAdapter<'store> :
 	/// # Summary
 	///
 	/// Convert some `employee` into a [`Person`].
-	fn to_person<P>(employee: &Employee, store: &'store Store)
-		-> Result<Person, <P as PersonAdapter<'store>>::Error>
+	fn to_person<P>(employee: &Employee, store: &Store)
+		-> Result<Person, <P as PersonAdapter>::Error>
 	where
-		P : PersonAdapter<'store>,
+		P : PersonAdapter,
 	{
 		let results = P::retrieve(
 			query::Person

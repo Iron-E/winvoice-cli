@@ -8,10 +8,10 @@ use
 	clinvoice_data::{Employee, Location, Organization, views::OrganizationView},
 };
 
-pub trait OrganizationAdapter<'store>  :
-	Deletable<Error=<Self as OrganizationAdapter<'store>>::Error> +
-	Initializable<Error=<Self as OrganizationAdapter<'store>>::Error> +
-	Updatable<Error=<Self as OrganizationAdapter<'store>>::Error> +
+pub trait OrganizationAdapter  :
+	Deletable<Error=<Self as OrganizationAdapter>::Error> +
+	Initializable<Error=<Self as OrganizationAdapter>::Error> +
+	Updatable<Error=<Self as OrganizationAdapter>::Error> +
 {
 	type Error : From<super::Error> + Error;
 
@@ -26,15 +26,15 @@ pub trait OrganizationAdapter<'store>  :
 	/// # Returns
 	///
 	/// The newly created [`Organization`].
-	fn create(location: Location, name: &str, store: &'store Store) -> Result<Organization, <Self as OrganizationAdapter<'store>>::Error>;
+	fn create(location: Location, name: &str, store: &Store) -> Result<Organization, <Self as OrganizationAdapter>::Error>;
 
 	/// # Summary
 	///
 	/// Convert some `organization` into a [`OrganizationView`].
-	fn into_view<L>(organization: Organization, store: &'store Store)
-		-> Result<OrganizationView, <L as LocationAdapter<'store>>::Error>
+	fn into_view<L>(organization: Organization, store: &Store)
+		-> Result<OrganizationView, <L as LocationAdapter>::Error>
 	where
-		L : LocationAdapter<'store>,
+		L : LocationAdapter,
 	{
 		let location_result = Self::to_location::<L>(&organization, store)?;
 		let location_view_result = L::into_view(location_result, store);
@@ -62,15 +62,15 @@ pub trait OrganizationAdapter<'store>  :
 	fn retrieve(
 		query: query::Organization,
 		store: &Store,
-	) -> Result<Vec<Organization>, <Self as OrganizationAdapter<'store>>::Error>;
+	) -> Result<Vec<Organization>, <Self as OrganizationAdapter>::Error>;
 
 	/// # Summary
 	///
 	/// Get all of the [`Employee`]s which work at some `organization`.
-	fn to_employees<E>(organization: &Organization, store: &'store Store)
-		-> Result<Vec<Employee>, <E as EmployeeAdapter<'store>>::Error>
+	fn to_employees<E>(organization: &Organization, store: &Store)
+		-> Result<Vec<Employee>, <E as EmployeeAdapter>::Error>
 	where
-		E : EmployeeAdapter<'store>,
+		E : EmployeeAdapter,
 	{
 		E::retrieve(
 			query::Employee
@@ -89,10 +89,10 @@ pub trait OrganizationAdapter<'store>  :
 	/// # Summary
 	///
 	/// Convert some `organization` into a [`Location`] through it's `location_id` field.
-	fn to_location<L>(organization: &Organization, store: &'store Store)
-		-> Result<Location, <L as LocationAdapter<'store>>::Error>
+	fn to_location<L>(organization: &Organization, store: &Store)
+		-> Result<Location, <L as LocationAdapter>::Error>
 	where
-		L : LocationAdapter<'store>,
+		L : LocationAdapter,
 	{
 		let results = L::retrieve(
 			query::Location

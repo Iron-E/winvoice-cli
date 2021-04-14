@@ -23,8 +23,9 @@ use
 ///
 /// [P_retrieve]: clinvoice_adapter::data::PersonAdapter::retrieve
 /// [person]: clinvoice_data::Person
-pub(super) fn retrieve_or_err<'store, P>(store: &'store Store) -> DynResult<'store, Vec<PersonView>> where
-	P : PersonAdapter<'store> + 'store,
+pub(super) fn retrieve_or_err<'err, P>(store: &Store) -> DynResult<'err, Vec<PersonView>> where
+	P : PersonAdapter,
+	<P as PersonAdapter>::Error : 'err,
 {
 	let people = P::retrieve(Default::default(), store)?;
 
@@ -46,10 +47,11 @@ pub(super) fn retrieve_or_err<'store, P>(store: &'store Store) -> DynResult<'sto
 /// * If [`input::select_one`] fails.
 ///
 /// [person]: clinvoice_data::Person
-pub fn select_one<'store, P, S>(prompt: S, store: &'store Store) -> DynResult<'store, PersonView> where
-	P : PersonAdapter<'store> + 'store,
+pub fn select_one<'err, P, S>(prompt: S, store: &Store) -> DynResult<'err, PersonView> where
+	P : PersonAdapter,
+	<P as PersonAdapter>::Error : 'err,
 	S : Into<String>,
 {
-	input::select_one(&retrieve_or_err::<P>(store)?, prompt).map_err(|e| e.into())
+	let retrieved = retrieve_or_err::<P>(store)?;
+	input::select_one(&retrieved, prompt).map_err(|e| e.into())
 }
-

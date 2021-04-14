@@ -15,7 +15,7 @@ use
 	clinvoice_data::{Location, Organization},
 };
 
-impl<'store> OrganizationAdapter<'store> for BincodeOrganization<'_, 'store>
+impl OrganizationAdapter for BincodeOrganization<'_, '_>
 {
 	type Error = Error;
 
@@ -30,7 +30,7 @@ impl<'store> OrganizationAdapter<'store> for BincodeOrganization<'_, 'store>
 	/// # Returns
 	///
 	/// The newly created [`Organization`].
-	fn create(location: Location, name: &str, store: &'store Store) -> Result<Organization>
+	fn create(location: Location, name: &str, store: &Store) -> Result<Organization>
 	{
 		Self::init(&store)?;
 

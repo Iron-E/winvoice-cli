@@ -15,7 +15,7 @@ use
 	clinvoice_data::Location,
 };
 
-impl<'store> LocationAdapter<'store> for BincodeLocation<'_, 'store>
+impl LocationAdapter for BincodeLocation<'_, '_>
 {
 	type Error = Error;
 
@@ -32,7 +32,7 @@ impl<'store> LocationAdapter<'store> for BincodeLocation<'_, 'store>
 	/// ```ignore
 	/// Location {name, id: /* generated */};
 	/// ```
-	fn create(name: &str, store: &'store Store) -> Result<Location>
+	fn create(name: &str, store: &Store) -> Result<Location>
 	{
 		Self::init(&store)?;
 

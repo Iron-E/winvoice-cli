@@ -11,10 +11,10 @@ use
 /// # Summary
 ///
 /// Convert some `timesheet` into its referenced [`Employee`].
-pub fn to_employee<'store, E>(timesheet: &Timesheet, store: &'store Store)
-	-> Result<Employee, <E as EmployeeAdapter<'store>>::Error>
+pub fn to_employee<E>(timesheet: &Timesheet, store: &Store)
+	-> Result<Employee, <E as EmployeeAdapter>::Error>
 where
-	E : EmployeeAdapter<'store>,
+	E : EmployeeAdapter,
 {
 	match E::retrieve(
 		query::Employee

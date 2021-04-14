@@ -19,7 +19,7 @@ use
 	},
 };
 
-impl<'store> JobAdapter<'store> for BincodeJob<'_, 'store>
+impl JobAdapter for BincodeJob<'_, '_>
 {
 	type Error = Error;
 
@@ -39,7 +39,7 @@ impl<'store> JobAdapter<'store> for BincodeJob<'_, 'store>
 		date_open: DateTime<Utc>,
 		hourly_rate: Money,
 		objectives: &str,
-		store: &'store Store,
+		store: &Store,
 	) -> Result<Job>
 	{
 		Self::init(&store)?;

@@ -8,10 +8,10 @@ use
 	clinvoice_data::Person,
 };
 
-pub trait PersonAdapter<'store> :
-	Deletable<Error=<Self as PersonAdapter<'store>>::Error> +
-	Initializable<Error=<Self as PersonAdapter<'store>>::Error> +
-	Updatable<Error=<Self as PersonAdapter<'store>>::Error> +
+pub trait PersonAdapter :
+	Deletable<Error=<Self as PersonAdapter>::Error> +
+	Initializable<Error=<Self as PersonAdapter>::Error> +
+	Updatable<Error=<Self as PersonAdapter>::Error> +
 {
 	type Error : From<super::Error> + Error;
 
@@ -26,7 +26,7 @@ pub trait PersonAdapter<'store> :
 	/// # Returns
 	///
 	/// The newly created [`Person`].
-	fn create(name: &str, store: &'store Store) -> Result<Person, <Self as PersonAdapter<'store>>::Error>;
+	fn create(name: &str, store: &Store) -> Result<Person, <Self as PersonAdapter>::Error>;
 
 	/// # Summary
 	///
@@ -43,5 +43,5 @@ pub trait PersonAdapter<'store> :
 	fn retrieve(
 		query: query::Person,
 		store: &Store,
-	) -> Result<Vec<Person>, <Self as PersonAdapter<'store>>::Error>;
+	) -> Result<Vec<Person>, <Self as PersonAdapter>::Error>;
 }

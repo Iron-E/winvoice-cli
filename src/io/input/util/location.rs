@@ -23,8 +23,9 @@ use
 ///
 /// [L_retrieve]: clinvoice_adapter::data::LocationAdapter::retrieve
 /// [location]: clinvoice_data::Location
-pub(super) fn retrieve_or_err<'store, L>(store: &'store Store) -> DynResult<'store, Vec<LocationView>> where
-	L : LocationAdapter<'store> + 'store,
+pub(super) fn retrieve_or_err<'err, L>(store: &Store) -> DynResult<'err, Vec<LocationView>> where
+	L : LocationAdapter,
+	<L as LocationAdapter>::Error : 'err,
 {
 	let locations = L::retrieve(Default::default(), store)?;
 
@@ -36,7 +37,7 @@ pub(super) fn retrieve_or_err<'store, L>(store: &'store Store) -> DynResult<'sto
 	let locations_len = locations.len();
 	locations.into_iter().try_fold(
 		Vec::with_capacity(locations_len),
-		|mut v, l| -> DynResult<'store, Vec<LocationView>>
+		|mut v, l| -> DynResult<'err, Vec<LocationView>>
 		{
 			v.push(L::into_view(l, store)?);
 
@@ -55,9 +56,11 @@ pub(super) fn retrieve_or_err<'store, L>(store: &'store Store) -> DynResult<'sto
 /// * If [`input::select_one`] fails.
 ///
 /// [location]: clinvoice_data::Location
-pub fn select_one<'store, L, S>(prompt: S, store: &'store Store) -> DynResult<'store, LocationView> where
-	L : LocationAdapter<'store> + 'store,
+pub fn select_one<'err, L, S>(prompt: S, store: &Store) -> DynResult<'err, LocationView> where
+	L : LocationAdapter,
+	<L as LocationAdapter>::Error : 'err,
 	S : Into<String>,
 {
-	input::select_one(&retrieve_or_err::<L>(store)?, prompt).map_err(|e| e.into())
+	let retrieved = retrieve_or_err::<L>(store)?;
+	input::select_one(&retrieved, prompt).map_err(|e| e.into())
 }

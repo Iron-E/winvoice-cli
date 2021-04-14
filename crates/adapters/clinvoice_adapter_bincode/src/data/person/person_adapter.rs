@@ -15,7 +15,7 @@ use
 	clinvoice_data::Person,
 };
 
-impl<'store> PersonAdapter<'store> for BincodePerson<'_, 'store>
+impl PersonAdapter for BincodePerson<'_, '_>
 {
 	type Error = Error;
 
@@ -30,7 +30,7 @@ impl<'store> PersonAdapter<'store> for BincodePerson<'_, 'store>
 	/// # Returns
 	///
 	/// The newly created [`Person`].
-	fn create(name: &str, store: &'store Store,) -> Result<Person>
+	fn create(name: &str, store: &Store,) -> Result<Person>
 	{
 		Self::init(&store)?;
 

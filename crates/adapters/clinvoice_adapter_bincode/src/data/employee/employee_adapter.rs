@@ -17,7 +17,7 @@ use
 	clinvoice_data::{Contact, Employee, EmployeeStatus, Organization, Person},
 };
 
-impl<'store> EmployeeAdapter<'store> for BincodeEmployee<'_, 'store>
+impl EmployeeAdapter for BincodeEmployee<'_, '_>
 {
 	type Error = Error;
 
@@ -39,7 +39,7 @@ impl<'store> EmployeeAdapter<'store> for BincodeEmployee<'_, 'store>
 		person: Person,
 		status: EmployeeStatus,
 		title: &str,
-		store: &'store Store,
+		store: &Store,
 	) -> Result<Employee>
 	{
 		Self::init(&store)?;

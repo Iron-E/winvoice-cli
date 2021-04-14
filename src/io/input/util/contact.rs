@@ -53,8 +53,9 @@ fn add_menu(contact_info: &mut HashMap<String, ContactView>, locations: &[Locati
 /// # Summary
 ///
 /// Show a menu for creating [contact information](clinvoice_data::Contact).
-pub fn creation_menu<'store, L>(store: &'store Store) -> DynResult<'store, HashMap<String, ContactView>> where
-	L : LocationAdapter<'store> + 'store,
+pub fn creation_menu<'err, L>(store: &Store) -> DynResult<'err, HashMap<String, ContactView>> where
+	L : LocationAdapter,
+	<L as LocationAdapter>::Error : 'err,
 {
 	const ADD: &str = "Add";
 	const CONTINUE: &str = "Continue";

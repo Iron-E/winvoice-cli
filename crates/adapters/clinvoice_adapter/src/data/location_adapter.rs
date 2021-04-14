@@ -7,10 +7,10 @@ use
 	clinvoice_data::{Location, views::LocationView},
 };
 
-pub trait LocationAdapter<'store> :
-	Deletable<Error = <Self as LocationAdapter<'store>>::Error> +
-	Initializable<Error = <Self as LocationAdapter<'store>>::Error> +
-	Updatable<Error = <Self as LocationAdapter<'store>>::Error> +
+pub trait LocationAdapter :
+	Deletable<Error = <Self as LocationAdapter>::Error> +
+	Initializable<Error = <Self as LocationAdapter>::Error> +
+	Updatable<Error = <Self as LocationAdapter>::Error> +
 {
 	type Error : From<super::Error> + Error;
 
@@ -27,7 +27,7 @@ pub trait LocationAdapter<'store> :
 	/// ```ignore
 	/// Location {name, id: /* generated */};
 	/// ```
-	fn create(name: &str, store: &'store Store) -> Result<Location, <Self as LocationAdapter<'store>>::Error>;
+	fn create(name: &str, store: &Store) -> Result<Location, <Self as LocationAdapter>::Error>;
 
 	/// # Summary
 	///
@@ -42,12 +42,12 @@ pub trait LocationAdapter<'store> :
 	/// ```ignore
 	/// Location {name, id: /* generated */, outside_id: self.unroll().id};
 	/// ```
-	fn create_inner(&self, name: &str) -> Result<Location, <Self as LocationAdapter<'store>>::Error>;
+	fn create_inner(&self, name: &str) -> Result<Location, <Self as LocationAdapter>::Error>;
 
 	/// # Summary
 	///
 	/// Convert some `location` into a [`LocationView`].
-	fn into_view(location: Location, store: &'store Store) -> Result<LocationView, <Self as LocationAdapter<'store>>::Error>
+	fn into_view(location: Location, store: &Store) -> Result<LocationView, <Self as LocationAdapter>::Error>
 	{
 		let mut outer_locations = Self::outers(&location, store)?;
 		outer_locations.reverse();
@@ -115,5 +115,5 @@ pub trait LocationAdapter<'store> :
 	fn retrieve(
 		query: query::Location,
 		store: &Store,
-	) -> Result<Vec<Location>, <Self as LocationAdapter<'store>>::Error>;
+	) -> Result<Vec<Location>, <Self as LocationAdapter>::Error>;
 }

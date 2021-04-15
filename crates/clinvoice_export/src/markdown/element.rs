@@ -36,17 +36,21 @@ pub enum Element<'text>
 
 	/// # Summary
 	///
-	/// A heading.
+	/// A heading. `depth` is how many preceding `#`s there are.
 	Heading {depth: usize, text: &'text str},
 
 	/// # Summary
 	///
-	/// A list which ascends in number as the elements
+	/// A list which ascends in number as the elements.
+	///
+	/// `depth` is how many preceding `\t` to use.
 	OrderedList {depth: usize, text: &'text str},
 
 	/// # Summary
 	///
 	/// A list which has no inherent order.
+	///
+	/// `depth` is how many preceding `\t` to use.
 	UnorderedList {depth: usize, text: &'text str},
 }
 

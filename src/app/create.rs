@@ -6,6 +6,7 @@ use
 	{
 		Adapters, Error,
 		data::{EmployeeAdapter, JobAdapter, LocationAdapter, OrganizationAdapter, PersonAdapter},
+		Store,
 	},
 	clinvoice_data::
 	{
@@ -77,6 +78,114 @@ pub(super) enum Create
 
 impl Create
 {
+	fn create_employee<'err, E, L, O, P>(title: String, store: &Store) -> DynResult<'err, ()> where
+		E : EmployeeAdapter,
+		L : LocationAdapter,
+		O : OrganizationAdapter,
+		P : PersonAdapter,
+
+		<E as EmployeeAdapter>::Error : 'err,
+		<L as LocationAdapter>::Error : 'err,
+		<O as OrganizationAdapter>::Error : 'err,
+		<P as PersonAdapter>::Error : 'err,
+	{
+		let organization = input::util::organization::select_one::<L, O, &str>(
+			"Which organization does this employee work at?",
+			store,
+		)?.into();
+
+		let people = input::util::person::retrieve_views::<P>(store)?;
+		let selected_person = input::select_one(&people, "Which person is working for the organization?")?;
+
+		let contact_info = input::util::contact::creation_menu::<L>(store)?;
+		let employee_status = input::select_one(
+			&[EmployeeStatus::Employed, EmployeeStatus::NotEmployed, EmployeeStatus::Representative],
+			"What is the status of the employee?",
+		)?;
+
+		E::create(
+			contact_info.into_iter().map(|(label, contact)| (label, contact.into())).collect(),
+			organization,
+			selected_person.into(),
+			employee_status,
+			&title,
+			store,
+		)?;
+
+		Ok(())
+	}
+
+	fn create_job<'err, J, L, O>(
+		currency: String,
+		hourly_rate: Decimal,
+		year: Option<i32>,
+		month: Option<u32>,
+		day: Option<u32>,
+		hour: Option<u32>,
+		minute: Option<u32>,
+		store: &Store,
+	) -> DynResult<'err, ()> where
+		J : JobAdapter,
+		L : LocationAdapter,
+		O : OrganizationAdapter,
+
+		<J as JobAdapter>::Error : 'err,
+		<L as LocationAdapter>::Error : 'err,
+		<O as OrganizationAdapter>::Error : 'err,
+	{
+		let client = input::util::organization::select_one::<L, O, &str>(
+			"Select the client for this job",
+			store,
+		)?;
+
+		let objectives = input::edit_markdown("* List your objectives.\n* All markdown syntax works")?;
+
+		J::create(
+			client.into(),
+			DateTime::<Utc>::from(
+			{
+				let now = Local::now();
+
+				// This should be valid because of the `requires` on `Job`. Either all are present or none.
+				let date = Local.ymd(
+					year.unwrap_or_else(|| now.year()),
+					month.unwrap_or_else(|| now.month()),
+					day.unwrap_or_else(|| now.day()),
+				);
+
+				match year
+				{
+					Some(_) => date.and_hms(0, 0, 0),
+					None => date.and_hms(
+						hour.unwrap_or_else(|| now.hour()),
+						minute.unwrap_or_else(|| now.minute()),
+						0,
+					)
+				}
+			}),
+			Money {amount: hourly_rate, currency},
+			&objectives,
+			store,
+		)?;
+
+		Ok(())
+	}
+
+	fn create_organization<'err, L, O>(name: String, store: &Store) -> DynResult<'err, ()> where
+		L : LocationAdapter,
+		O : OrganizationAdapter,
+
+		<L as LocationAdapter>::Error : 'err,
+		<O as OrganizationAdapter>::Error : 'err,
+	{
+		let location_views = input::util::location::retrieve_views::<L>(store)?;
+		let selected_view = input::select_one(&location_views, format!("Select a location for {}", name))?;
+
+		O::create(selected_view.into(), &name, store)?;
+
+		Ok(())
+	}
+
 	pub(super) fn run<'config>(self, config: &'config Config, store_name: String) -> DynResult<'config, ()>
 	{
 		let store = config.get_store(&store_name).expect("Storage name not known");
@@ -87,90 +196,23 @@ impl Create
 			Adapters::Bincode => match self
 			{
 				Self::Employee {title} =>
-				{
-					let organization = input::util::organization::select_one::<BincodeLocation, BincodeOrganization, &str>(
-						"Which organization does this employee work at?",
-						store,
-					)?.into();
-
-					let people = input::util::person::retrieve_views::<BincodePerson>(store)?;
-					let selected_person = input::select_one(&people, "Which person is working for the organization?")?;
-
-					let contact_info = input::util::contact::creation_menu::<BincodeLocation>(store)?;
-					let employee_status = input::select_one(
-						&[EmployeeStatus::Employed, EmployeeStatus::NotEmployed, EmployeeStatus::Representative],
-						"What is the status of the employee?",
-					)?;
-
-					BincodeEmployee::create(
-						contact_info.into_iter().map(|(label, contact)| (label, contact.into())).collect(),
-						organization,
-						selected_person.into(),
-						employee_status,
-						&title,
-						store,
-					)?;
-
-					Ok(())
-				}
+					Self::create_employee::<BincodeEmployee, BincodeLocation, BincodeOrganization, BincodePerson>(title, store),
 
 				Self::Job {currency, hourly_rate, year, month, day, hour, minute} =>
-				{
-					let client = input::util::organization::select_one::<BincodeLocation, BincodeOrganization, &str>(
-						"Select the client for this job",
+					Self::create_job::<BincodeJob, BincodeLocation, BincodeOrganization>(
+						currency.unwrap_or_else(|| config.invoices.default_currency.into()),
+						hourly_rate, year, month, day, hour, minute,
 						store,
-					)?;
+					),
 
-					let objectives = input::edit_markdown("* List your objectives.\n* All markdown syntax works")?;
-
-					BincodeJob::create(
-						client.into(),
-						DateTime::<Utc>::from(
-						{
-							let now = Local::now();
-
-							// This should be valid because of the `requires` on `Job`. Either all are present or none.
-							let date = Local.ymd(
-								year.unwrap_or_else(|| now.year()),
-								month.unwrap_or_else(|| now.month()),
-								day.unwrap_or_else(|| now.day()),
-							);
-
-							match year
-							{
-								Some(_) => date.and_hms(0, 0, 0),
-								None => date.and_hms(
-									hour.unwrap_or_else(|| now.hour()),
-									minute.unwrap_or_else(|| now.minute()),
-									0,
-								)
-							}
-						}),
-						Money
-						{
-							amount: hourly_rate,
-							currency: currency.unwrap_or_else(|| config.invoices.default_currency.into()),
-						},
-						&objectives,
-						store,
-					)?;
-
-					Ok(())
-				}
-
-				Self::Location {name} => BincodeLocation::create(&name, store).and(Ok(())),
+				Self::Location {name} =>
+					BincodeLocation::create(&name, store).and(Ok(())).map_err(|e| e.into()),
 
 				Self::Organization {name} =>
-				{
-					let location_views = input::util::location::retrieve_views::<BincodeLocation>(store)?;
-					let selected_view = input::select_one(&location_views, format!("Select a location for {}", name))?;
+					Self::create_organization::<BincodeLocation, BincodeOrganization>(name, store),
 
-					BincodeOrganization::create(selected_view.into(), &name, store)?;
-
-					Ok(())
-				},
-
-				Self::Person {name} => BincodePerson::create(&name, store).and(Ok(())),
+				Self::Person {name} =>
+					BincodePerson::create(&name, store).and(Ok(())).map_err(|e| e.into()),
 			},
 
 			_ => return Err(Error::FeatureNotFound(store.adapter).into()),

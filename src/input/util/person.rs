@@ -1,7 +1,5 @@
 use
 {
-	crate::DynResult,
-
 	clinvoice_adapter::
 	{
 		data::{Error as DataError, PersonAdapter},
@@ -23,9 +21,8 @@ use
 ///
 /// [P_retrieve]: clinvoice_adapter::data::PersonAdapter::retrieve
 /// [person]: clinvoice_data::Person
-pub fn retrieve_views<'err, P>(store: &Store) -> DynResult<'err, Vec<PersonView>> where
+pub fn retrieve_views<P>(store: &Store) -> Result<Vec<PersonView>, <P as PersonAdapter>::Error> where
 	P : PersonAdapter,
-	<P as PersonAdapter>::Error : 'err,
 {
 	let people = P::retrieve(Default::default(), store)?;
 

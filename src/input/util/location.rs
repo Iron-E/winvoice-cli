@@ -1,7 +1,5 @@
 use
 {
-	crate::DynResult,
-
 	clinvoice_adapter::
 	{
 		data::{Error as DataError, LocationAdapter},
@@ -23,9 +21,8 @@ use
 ///
 /// [L_retrieve]: clinvoice_adapter::data::LocationAdapter::retrieve
 /// [location]: clinvoice_data::Location
-pub fn retrieve_views<'err, L>(store: &Store) -> DynResult<'err, Vec<LocationView>> where
+pub fn retrieve_views<L>(store: &Store) -> Result<Vec<LocationView>, <L as LocationAdapter>::Error> where
 	L : LocationAdapter,
-	<L as LocationAdapter>::Error : 'err,
 {
 	let locations = L::retrieve(Default::default(), store)?;
 
@@ -37,7 +34,7 @@ pub fn retrieve_views<'err, L>(store: &Store) -> DynResult<'err, Vec<LocationVie
 	let locations_len = locations.len();
 	locations.into_iter().try_fold(
 		Vec::with_capacity(locations_len),
-		|mut v, l| -> DynResult<'err, Vec<LocationView>>
+		|mut v, l| -> Result<Vec<LocationView>, <L as LocationAdapter>::Error>
 		{
 			v.push(L::into_view(l, store)?);
 

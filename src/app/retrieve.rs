@@ -56,8 +56,8 @@ pub(super) enum RetrieveCommand
 	#[structopt(about="Retrieve existing records about job")]
 	Job
 	{
-		#[structopt(default_value="markdown", help="Export retrieved entities to the specified format.\nSupported: markdown", long, short)]
-		export: Target,
+		#[structopt(help="Export retrieved entities to the specified format.\nSupported: markdown", long, short)]
+		export: Option<Target>,
 	},
 
 	#[structopt(about="Retrieve existing records about locations")]
@@ -115,9 +115,14 @@ impl Retrieve
 	/// # Summary
 	///
 	/// Execute the constructed command.
-	pub(super) fn run<'config>(self, config: &'config Config, store_name: String) -> DynResult<'config, ()>
+	pub(super) fn run<'err>(self, config: &Config, store_name: String) -> DynResult<'err, ()>
 	{
 		let store = config.get_store(&store_name).expect("Storage name not known");
+
+		let adapter_not_enabled = || -> DynResult<'err, ()>
+		{
+			Err(AdapterError::FeatureNotFound(store.adapter).into())
+		};
 
 		match self.command
 		{
@@ -172,7 +177,7 @@ impl Retrieve
 					#[cfg(feature="bincode")]
 					Adapters::Bincode => retrieve!(BincodeEmployee, BincodeLocation, BincodeOrganization, BincodePerson),
 
-					_ => return Err(AdapterError::FeatureNotFound(store.adapter).into()),
+					_ => return adapter_not_enabled(),
 				};
 			},
 
@@ -204,7 +209,14 @@ impl Retrieve
 						{
 							Self::update(&results_view, |j| $job {job: &(j.into()), store}.update())?;
 						}
-						else if !self.delete
+
+						if let Some(target) = export
+						{
+							input::select(&results_view, "Select which Jobs you want to export")?.into_iter().for_each(|job|
+								println!("{}", target.export_job(job))
+							);
+						}
+						else if !(self.delete || self.update)
 						{
 							results_view.iter().for_each(|j| println!("{}", j));
 						}
@@ -216,7 +228,7 @@ impl Retrieve
 					#[cfg(feature="bincode")]
 					Adapters::Bincode => retrieve!(BincodeEmployee, BincodeJob, BincodeLocation, BincodeOrganization, BincodePerson),
 
-					_ => return Err(AdapterError::FeatureNotFound(store.adapter).into()),
+					_ => return adapter_not_enabled(),
 				};
 			},
 
@@ -266,7 +278,7 @@ impl Retrieve
 					#[cfg(feature="bincode")]
 					Adapters::Bincode => retrieve!(BincodeLocation),
 
-					_ => return Err(AdapterError::FeatureNotFound(store.adapter).into()),
+					_ => return adapter_not_enabled(),
 				};
 			},
 
@@ -310,7 +322,7 @@ impl Retrieve
 					#[cfg(feature="bincode")]
 					Adapters::Bincode => retrieve!(BincodeLocation, BincodeOrganization),
 
-					_ => return Err(AdapterError::FeatureNotFound(store.adapter).into()),
+					_ => return adapter_not_enabled(),
 				};
 			},
 
@@ -346,7 +358,7 @@ impl Retrieve
 					#[cfg(feature="bincode")]
 					Adapters::Bincode => retrieve!(BincodePerson),
 
-					_ => return Err(AdapterError::FeatureNotFound(store.adapter).into()),
+					_ => return adapter_not_enabled(),
 				};
 			},
 		};

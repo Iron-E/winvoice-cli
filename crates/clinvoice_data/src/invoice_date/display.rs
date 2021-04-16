@@ -9,7 +9,7 @@ impl Display for InvoiceDate
 {
 	fn fmt(&self, formatter: &mut Formatter) -> Result
 	{
-		write!(formatter, "Issued on {}, {}",
+		write!(formatter, "Issued on {}; {}",
 			self.issued, match self.paid
 			{
 				Some(p) => format!("Paid on {}", p),
@@ -46,8 +46,8 @@ mod tests
 		};
 
 		let start = Instant::now();
-		assert_eq!(format!("{}", date), format!("Issued on {}, Outstanding", date.issued));
-		assert_eq!(format!("{}", other_date), format!("Issued on {}, Paid on {}", other_date.issued, other_date.paid.unwrap()));
+		assert_eq!(format!("{}", date), format!("Issued on {}; Outstanding", date.issued));
+		assert_eq!(format!("{}", other_date), format!("Issued on {}; Paid on {}", other_date.issued, other_date.paid.unwrap()));
 		println!("\n>>>>> InvoiceDate::fmt {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 2);
 	}
 }

@@ -9,25 +9,23 @@ impl Display for TimesheetView
 {
 	fn fmt(&self, formatter: &mut Formatter) -> Result
 	{
-		writeln!(formatter, "{} {} from {}: {} – {}",
+		writeln!(formatter, "{} – {}: {} {} from {}",
+			self.time_begin,
+			self.time_end.map(|time| time.to_string()).unwrap_or_else(|| "Current".into()),
 			self.employee.title,
 			self.employee.person.name,
-			self.employee.organization.name,
-			self.time_begin,
-			match self.time_end
-			{
-				Some(time) => time.to_string(),
-				_ => "Current".into(),
-			},
+			self.employee.organization,
 		)?;
 
-		if let Some(expenses) = &self.expenses
+		const DEPTH_2: &str = "\n\t\t";
+
+		if !self.expenses.is_empty()
 		{
 			writeln!(formatter, "\tExpenses:")?;
-			expenses.iter().try_for_each(|e| writeln!(formatter, "\t\t{}", e.to_string().replace('\n', "\n\t\t")))?;
+			self.expenses.iter().try_for_each(|e| writeln!(formatter, "\t\t{}", e.to_string().replace('\n', DEPTH_2)))?;
 		}
 
-		write!(formatter, "\tWork Notes:\n\t\t{}", self.work_notes.replace('\n', "\n\t\t"))
+		write!(formatter, "\tWork Notes:{}{}", DEPTH_2, self.work_notes.replace('\n', DEPTH_2))
 	}
 }
 
@@ -110,7 +108,7 @@ mod tests
 				status: EmployeeStatus::Representative,
 				title: "CEO of Tests".into(),
 			},
-			expenses: Some(vec![
+			expenses: vec![
 				Expense
 				{
 					category: ExpenseCategory::Food,
@@ -123,7 +121,7 @@ mod tests
 					cost: Money::new(Decimal::new(1000, 2), "USD"),
 					description: "Gas".into(),
 				},
-			]),
+			],
 			time_begin: Utc::now(),
 			time_end: Some(Utc::today().and_hms(23, 59, 59)),
 			work_notes: "Went to non-corporate fast food restaurant for business meeting".into(),
@@ -133,7 +131,7 @@ mod tests
 		assert_eq!(
 			format!("{}", timesheet),
 			format!(
-"CEO of Tests Testy McTesterson from Big Test Organization: {} – {}
+"{} – {}: CEO of Tests Testy McTesterson from Big Test Organization @ 1337 Some Street, Phoenix, Arizona, USA, Earth
 	Expenses:
 		Food – 20.50 USD
 			Fast Food™

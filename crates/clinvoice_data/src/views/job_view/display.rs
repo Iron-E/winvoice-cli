@@ -21,13 +21,17 @@ impl Display for JobView
 			},
 		)?;
 
-		writeln!(formatter, "\t{}", self.invoice.to_string().replace('\n', "\n\t"))?;
-		writeln!(formatter, "\tNotes:\n\t\t{}", self.notes.replace('\n', "\n\t\t"))?;
-		writeln!(formatter, "\tObjectives:\n\t\t{}", self.objectives.replace('\n', "\n\t\t"))?;
-		writeln!(formatter, "\tTimesheets:")?;
-		self.timesheets.iter().try_for_each(|t| writeln!(formatter, "\t\t{}", t.to_string().replace('\n', "\n\t\t")))?;
+		/// # Summary
+		///
+		/// Two indents in, with a newline.
+		const DEPTH_2: &str =  "\n\t\t";
 
-		write!(formatter, "\tTotal Amount Owed: {}", Job::from(self).total())
+		writeln!(formatter, "\tInvoice:{}{}", DEPTH_2, self.invoice.to_string().replace('\n', DEPTH_2))?;
+		writeln!(formatter, "\t\tTotal Amount Owed: {}", Job::from(self).total())?;
+		writeln!(formatter, "\tObjectives:{}{}", DEPTH_2, self.objectives.replace('\n', DEPTH_2))?;
+		writeln!(formatter, "\tNotes:{}{}", DEPTH_2, self.notes.replace('\n', DEPTH_2))?;
+		write!(formatter, "\tTimesheets:")?;
+		self.timesheets.iter().try_for_each(|t| write!(formatter, "{}{}", DEPTH_2, t.to_string().replace('\n', DEPTH_2)))
 	}
 }
 
@@ -91,7 +95,7 @@ mod tests
 			timesheets: vec![TimesheetView
 			{
 				employee: ceo_testy_view,
-				expenses: None,
+				expenses: Vec::new(),
 				time_begin: Utc::now(),
 				time_end: Some(Utc::today().and_hms(23, 59, 59)),
 				work_notes: "Went to non-corporate fast food restaurant for business meeting".into(),
@@ -103,23 +107,24 @@ mod tests
 			format!("{}", create_job_view),
 			format!(
 "Job #{} for Big Old Test: {} – {}
-	Hourly Rate: 20.00 USD
-	Invoice Status: Not issued
-	Notes:
-		Remember not to work with these guys again!
+	Invoice:
+		Hourly Rate: 20.00 USD
+		Status: Not issued
+		Total Amount Owed: {}
 	Objectives:
 		Get into the mainframe, or something like that
+	Notes:
+		Remember not to work with these guys again!
 	Timesheets:
-		CEO of Tests Testy McTesterson from Big Old Test: {} – {}
+		{} – {}: CEO of Tests Testy McTesterson from Big Old Test @ Earth
 			Work Notes:
-				Went to non-corporate fast food restaurant for business meeting
-	Total Amount Owed: {}",
+				Went to non-corporate fast food restaurant for business meeting",
 				create_job_view.id,
 				create_job_view.date_open,
 				create_job_view.date_close.unwrap(),
+				Job::from(&create_job_view).total(),
 				create_job_view.timesheets.first().unwrap().time_begin,
 				create_job_view.timesheets.first().unwrap().time_end.unwrap(),
-				Job::from(&create_job_view).total(),
 			),
 		);
 		println!("\n>>>>> JobView::fmt {}us <<<<<\n", Instant::now().duration_since(start).as_micros());

@@ -127,7 +127,7 @@ fn to_view()
 			timesheets: vec![TimesheetView
 			{
 				employee: ceo_testy_view,
-				expenses: None,
+				expenses: Vec::new(),
 				time_begin: create_job.timesheets.first().expect("Timesheet did not attach!").time_begin,
 				time_end: None,
 				work_notes: create_job.timesheets.first().expect("Timesheet did not attach!").work_notes.clone(),

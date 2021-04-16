@@ -11,7 +11,7 @@ impl Display for Invoice
 	{
 		writeln!(formatter, "Hourly Rate: {}", self.hourly_rate)?;
 
-		write!(formatter, "Invoice Status: {}", match &self.date
+		write!(formatter, "Status: {}", match &self.date
 		{
 			Some(date) => date.to_string(),
 			_ => "Not issued".into(),
@@ -48,7 +48,7 @@ mod tests
 			format!("{}", invoice),
 			format!(
 "Hourly Rate: 10.00 USD
-Invoice Status: Issued on {}, Outstanding",
+Status: Issued on {}; Outstanding",
 				invoice.date.unwrap().issued
 			),
 		);

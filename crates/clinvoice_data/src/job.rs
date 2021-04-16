@@ -107,7 +107,7 @@ impl Job
 	/// # Remarks
 	///
 	/// * This is intended to be used for reporting work which was done previously.
-	pub fn attach_timesheet(&mut self, employee: Id, expenses: Option<Vec<Expense>>, time_begin: DateTime<Utc>, time_end: Option<DateTime<Utc>>, work_notes: &str)
+	pub fn attach_timesheet(&mut self, employee: Id, expenses: Vec<Expense>, time_begin: DateTime<Utc>, time_end: Option<DateTime<Utc>>, work_notes: &str)
 	{
 		self.timesheets.push(
 			Timesheet
@@ -136,7 +136,7 @@ impl Job
 	/// * `employee`, the [`Id`] of the [`Employee`] who is working on this timesheet.
 	pub fn start_timesheet(&mut self, employee: Id)
 	{
-		self.attach_timesheet(employee, None, Utc::now(), None, "* Work which was done goes here.\n* Supports markdown formatting");
+		self.attach_timesheet(employee, Vec::new(), Utc::now(), None, "* Work which was done goes here.\n* Supports markdown formatting");
 	}
 
 	/// # Summary
@@ -156,32 +156,28 @@ impl Job
 		let minutes_per_hour = Decimal::from(MINUTES_PER_HOUR);
 		let seconds_per_minute = minutes_per_hour;
 
-		self.timesheets.iter().filter(|t| t.time_end.is_some()).fold(
-			Money
+		let mut total = self.timesheets.iter().filter(|t| t.time_end.is_some()).fold(
+			Money {amount: Decimal::new(0, 2), currency: self.invoice.hourly_rate.currency.clone()},
+			|mut m, t|
 			{
-				amount: Decimal::new(0, 2),
-				currency: self.invoice.hourly_rate.currency.clone(),
-			},
-			|mut total, timesheet|
-			{
-				let duration_seconds = Decimal::from(timesheet.time_end.unwrap().signed_duration_since(timesheet.time_begin).num_seconds());
-				total.amount += (duration_seconds / seconds_per_minute / minutes_per_hour) * self.invoice.hourly_rate.amount;
+				let duration_seconds = Decimal::from(t.time_end.unwrap().signed_duration_since(t.time_begin).num_seconds());
+				m.amount += (duration_seconds / seconds_per_minute / minutes_per_hour) * self.invoice.hourly_rate.amount;
 
-				if let Some(expenses) = &timesheet.expenses
+				t.expenses.iter().for_each(|e|
 				{
-					expenses.iter().for_each(|expense|
+					if e.cost.currency != m.currency
 					{
-						if expense.cost.currency != total.currency
-						{
-							panic!("Not all expenses were recorded in the same currency! There is currently no automatic currency conversion");
-						}
+						panic!("Not all expenses were recorded in the same currency! There is currently no automatic currency conversion");
+					}
 
-						total.amount += expense.cost.amount;
-					});
-				}
+					m.amount += e.cost.amount;
+				});
 
-				total
+				m
 			}
-		)
+		);
+
+		total.amount.rescale(2);
+		total
 	}
 }

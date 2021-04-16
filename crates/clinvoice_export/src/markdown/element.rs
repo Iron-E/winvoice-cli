@@ -1,3 +1,5 @@
+use core::fmt::{Display, Formatter, Result};
+
 /// # Summary
 ///
 /// Different elements of Markdown.
@@ -18,12 +20,12 @@
 /// 1. this is another OrderedList, below a Break.
 /// ```
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub enum Element<'text>
+pub enum Element<D> where D : Display
 {
 	/// # Summary
 	///
 	/// A text block.
-	BlockText(&'text str),
+	BlockText(D),
 
 	/// # Summary
 	///
@@ -37,38 +39,38 @@ pub enum Element<'text>
 	/// # Summary
 	///
 	/// A heading. `depth` is how many preceding `#`s there are.
-	Heading {depth: usize, text: &'text str},
+	Heading {depth: usize, text: D},
 
 	/// # Summary
 	///
 	/// A list which ascends in number as the elements.
 	///
 	/// `depth` is how many preceding `\t` to use.
-	OrderedList {depth: usize, text: &'text str},
+	OrderedList {depth: usize, text: D},
 
 	/// # Summary
 	///
 	/// A list which has no inherent order.
 	///
 	/// `depth` is how many preceding `\t` to use.
-	UnorderedList {depth: usize, text: &'text str},
+	UnorderedList {depth: usize, text: D},
 }
 
-impl Element<'_>
+impl<D> Display for Element<D> where D : Display
 {
 	/// # Summary
 	///
 	/// Turn a [`MarkdownElement`] into a [`String`] which is valid markdown.
-	pub fn render(self) -> String
+	fn fmt(&self, formatter: &mut Formatter<'_>) -> Result
 	{
-		(match self
+		write!(formatter, "{}\n", match self
 		{
 			Self::BlockText(text) => format!("{}\n", text),
 			Self::Break => String::with_capacity(1),
-			Self::Heading {depth, text} => format!("{} {}\n", "#".repeat(1.max(depth)), text),
-			Self::OrderedList {depth, text} => format!("{}1. {}", "\t".repeat(depth), text),
-			Self::UnorderedList {depth, text} => format!("{}- {}", "\t".repeat(depth), text),
-		}) + "\n"
+			Self::Heading {depth, text} => format!("{} {}\n", "#".repeat(1.max(*depth)), text),
+			Self::OrderedList {depth, text} => format!("{}1. {}", "\t".repeat(*depth), text),
+			Self::UnorderedList {depth, text} => format!("{}- {}", "\t".repeat(*depth), text),
+		})
 	}
 }
 
@@ -78,22 +80,22 @@ mod tests
 	use super::Element;
 
 	#[test]
-	fn render()
+	fn fmt()
 	{
-		assert_eq!(vec![
-			Element::Heading {depth: 1, text: "This is a test heading!"}.render(),
-			Element::Heading {depth: 2, text: "Paragraphs"}.render(),
-			Element::BlockText("I can create a paragraph.").render(),
-			Element::Heading {depth: 2, text: "Ordered Lists"}.render(),
-			Element::OrderedList {depth: 0, text: "Ordered lists are not a problem."}.render(),
-			Element::OrderedList {depth: 0, text: "Continuing is just fine."}.render(),
-			Element::Break.render(),
-			Element::Heading {depth: 2, text: "Break"}.render(),
-			Element::Heading {depth: 2, text: "Unordered List"}.render(),
-			Element::UnorderedList {depth: 0, text: "I can break at any point."}.render(),
-			Element::UnorderedList {depth: 1, text: "Indenting? Eazy breezy."}.render(),
-			Element::UnorderedList {depth: 0, text: "De-indenting? Easier!"}.render(),
-		].join(""),
+		assert_eq!(format!("{}{}{}{}{}{}{}{}{}{}{}{}",
+			Element::Heading {depth: 1, text: "This is a test heading!"}.to_string(),
+			Element::Heading {depth: 2, text: "Paragraphs"}.to_string(),
+			Element::BlockText("I can create a paragraph.").to_string(),
+			Element::Heading {depth: 2, text: "Ordered Lists"}.to_string(),
+			Element::OrderedList {depth: 0, text: "Ordered lists are not a problem."}.to_string(),
+			Element::OrderedList {depth: 0, text: "Continuing is just fine."}.to_string(),
+			Element::<String>::Break.to_string(),
+			Element::Heading {depth: 2, text: "Break"}.to_string(),
+			Element::Heading {depth: 2, text: "Unordered List"}.to_string(),
+			Element::UnorderedList {depth: 0, text: "I can break at any point."}.to_string(),
+			Element::UnorderedList {depth: 1, text: "Indenting? Eazy breezy."}.to_string(),
+			Element::UnorderedList {depth: 0, text: "De-indenting? Easier!"}.to_string(),
+		),
 "# This is a test heading!
 
 ## Paragraphs

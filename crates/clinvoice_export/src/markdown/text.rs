@@ -1,8 +1,10 @@
+use core::fmt::{Display, Formatter, Result};
+
 /// # Summary
 ///
 /// Types of text within a Markdown document.
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub enum Text<'text>
+pub enum Text<D> where D : Display
 {
 	/// # Summary
 	///
@@ -13,9 +15,9 @@ pub enum Text<'text>
 	/// ```
 	/// use clinvoice_export::markdown::Text::Bold;
 	///
-	/// assert_eq!(Bold("Something").render(), "**Something**");
+	/// assert_eq!(Bold("Something").to_string(), "**Something**");
 	/// ```
-	Bold(&'text str),
+	Bold(D),
 
 	/// # Summary
 	///
@@ -26,9 +28,9 @@ pub enum Text<'text>
 	/// ```
 	/// use clinvoice_export::markdown::Text::Italic;
 	///
-	/// assert_eq!(Italic("Something").render(), "*Something*");
+	/// assert_eq!(Italic("Something").to_string(), "*Something*");
 	/// ```
-	Italic(&'text str),
+	Italic(D),
 
 	/// # Summary
 	///
@@ -39,23 +41,23 @@ pub enum Text<'text>
 	/// ```
 	/// use clinvoice_export::markdown::Text::Math;
 	///
-	/// assert_eq!(Math("Something").render(), "$Something$");
+	/// assert_eq!(Math("Something").to_string(), "$Something$");
 	/// ```
-	Math(&'text str),
+	Math(D),
 }
 
-impl Text<'_>
+impl<D> Display for Text<D> where D : Display
 {
 	/// # Summary
 	///
 	/// Turn this enumeration representation of Markdown into actual Markdown.
-	pub fn render(self) -> String
+	fn fmt(&self, formatter: &mut Formatter<'_>) -> Result
 	{
 		match self
 		{
-			Self::Bold(text) => format!("**{}**", text),
-			Self::Italic(text) => format!("*{}*", text),
-			Self::Math(text) => format!("${}$", text),
+			Self::Bold(text) => write!(formatter, "**{}**", text),
+			Self::Italic(text) => write!(formatter, "*{}*", text),
+			Self::Math(text) => write!(formatter, "${}$", text),
 		}
 	}
 }

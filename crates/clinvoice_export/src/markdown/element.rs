@@ -63,7 +63,7 @@ impl<D> Display for Element<D> where D : Display
 	/// Turn a [`MarkdownElement`] into a [`String`] which is valid markdown.
 	fn fmt(&self, formatter: &mut Formatter<'_>) -> Result
 	{
-		write!(formatter, "{}\n", match self
+		writeln!(formatter, "{}", match self
 		{
 			Self::BlockText(text) => format!("{}\n", text),
 			Self::Break => String::with_capacity(1),

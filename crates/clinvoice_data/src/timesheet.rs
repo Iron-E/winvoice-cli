@@ -32,7 +32,7 @@ pub struct Timesheet
 	/// # Summary
 	///
 	/// [`Expense`]s which were incurred during this time.
-	pub expenses: Option<Vec<Expense>>,
+	pub expenses: Vec<Expense>,
 
 	/// # Summary
 	///

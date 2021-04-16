@@ -16,6 +16,10 @@ use serde::{Deserialize, Serialize};
 /// # Summary
 ///
 /// An [`Timesheet`](clinvoice_data::Timesheet) with [matchable](Match) fields.
+///
+/// # TODO
+///
+/// Add `expenses` and `work_notes`.
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 #[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
 pub struct Timesheet<'m>

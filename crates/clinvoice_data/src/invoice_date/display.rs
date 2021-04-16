@@ -3,19 +3,22 @@ use
 	core::fmt::{Display, Formatter, Result},
 
 	super::InvoiceDate,
+
+	chrono::{DateTime, Local},
 };
 
 impl Display for InvoiceDate
 {
 	fn fmt(&self, formatter: &mut Formatter) -> Result
 	{
-		write!(formatter, "Issued on {}; {}",
-			self.issued, match self.paid
-			{
-				Some(p) => format!("Paid on {}", p),
-				_ => "Outstanding".into(),
-			},
-		)
+		write!(formatter, "Issued on {}; ", DateTime::<Local>::from(self.issued))?;
+
+		if let Some(date) = self.paid
+		{
+			return write!(formatter, "Paid on {}", DateTime::<Local>::from(date));
+		}
+
+		write!(formatter, "Outstanding")
 	}
 }
 

@@ -63,58 +63,58 @@ impl<D> Display for Element<D> where D : Display
 	/// Turn a [`MarkdownElement`] into a [`String`] which is valid markdown.
 	fn fmt(&self, formatter: &mut Formatter<'_>) -> Result
 	{
-		writeln!(formatter, "{}", match self
+		match self
 		{
-			Self::BlockText(text) => format!("{}\n", text),
-			Self::Break => String::with_capacity(1),
-			Self::Heading {depth, text} => format!("{} {}\n", "#".repeat(1.max(*depth)), text),
-			Self::OrderedList {depth, text} => format!("{}1. {}", "\t".repeat(*depth), text),
-			Self::UnorderedList {depth, text} => format!("{}- {}", "\t".repeat(*depth), text),
-		})
+			Self::BlockText(text) => writeln!(formatter, "{}", text),
+			Self::Break => write!(formatter, ""),
+			Self::Heading {depth, text} => writeln!(formatter, "{} {}", "#".repeat(1.max(*depth)), text),
+			Self::OrderedList {depth, text} => write!(formatter, "{}1. {}", "\t".repeat(*depth), text),
+			Self::UnorderedList {depth, text} => write!(formatter, "{}- {}", "\t".repeat(*depth), text),
+		}
 	}
 }
 
 #[cfg(test)]
 mod tests
 {
-	use super::Element;
+	use
+	{
+		core::fmt::Write,
+
+		super::Element,
+	};
 
 	#[test]
 	fn fmt()
 	{
-		assert_eq!(format!("{}{}{}{}{}{}{}{}{}{}{}{}",
-			Element::Heading {depth: 1, text: "This is a test heading!"}.to_string(),
-			Element::Heading {depth: 2, text: "Paragraphs"}.to_string(),
-			Element::BlockText("I can create a paragraph.").to_string(),
-			Element::Heading {depth: 2, text: "Ordered Lists"}.to_string(),
-			Element::OrderedList {depth: 0, text: "Ordered lists are not a problem."}.to_string(),
-			Element::OrderedList {depth: 0, text: "Continuing is just fine."}.to_string(),
-			Element::<String>::Break.to_string(),
-			Element::Heading {depth: 2, text: "Break"}.to_string(),
-			Element::Heading {depth: 2, text: "Unordered List"}.to_string(),
-			Element::UnorderedList {depth: 0, text: "I can break at any point."}.to_string(),
-			Element::UnorderedList {depth: 1, text: "Indenting? Eazy breezy."}.to_string(),
-			Element::UnorderedList {depth: 0, text: "De-indenting? Easier!"}.to_string(),
-		),
+		let mut expected = String::new();
+
+		assert!(writeln!(expected, "{}", Element::Heading {depth: 1, text: "This is a test heading!"}).is_ok());
+		assert!(writeln!(expected, "{}", Element::Heading {depth: 2, text: "Paragraphs"}).is_ok());
+		assert!(writeln!(expected, "{}", Element::BlockText("I can create a paragraph.")).is_ok());
+		assert!(writeln!(expected, "{}", Element::Heading {depth: 2, text: "Lists"}).is_ok());
+		assert!(writeln!(expected, "{}", Element::OrderedList {depth: 0, text: "Ordered lists are not a problem."}).is_ok());
+		assert!(writeln!(expected, "{}", Element::OrderedList {depth: 0, text: "Continuing is just fine."}).is_ok());
+		assert!(writeln!(expected, "{}", Element::<String>::Break).is_ok());
+		assert!(writeln!(expected, "{}", Element::UnorderedList {depth: 0, text: "I can break at any point."}).is_ok());
+		assert!(writeln!(expected, "{}", Element::UnorderedList {depth: 1, text: "Indenting? Eazy breezy."}).is_ok());
+		assert!(write!(expected, "{}", Element::UnorderedList {depth: 0, text: "De-indenting? Easier!"}).is_ok());
+
+		assert_eq!(expected,
 "# This is a test heading!
 
 ## Paragraphs
 
 I can create a paragraph.
 
-## Ordered Lists
+## Lists
 
 1. Ordered lists are not a problem.
 1. Continuing is just fine.
 
-## Break
-
-## Unordered List
-
 - I can break at any point.
 	- Indenting? Eazy breezy.
-- De-indenting? Easier!
-"
+- De-indenting? Easier!"
 		);
 	}
 }

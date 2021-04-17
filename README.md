@@ -75,7 +75,7 @@ foo = {
 }
 
 [timesheets]
-interval = # amount of time; e.g. '5min', '3h', '10d 2s', etc
+interval = # amount of time; e.g. '5min', '3h', '10d 2s', etc. See https://github.com/tailhook/humantime
 ```
 
 ### Example

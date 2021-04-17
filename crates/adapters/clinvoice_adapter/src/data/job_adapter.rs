@@ -106,7 +106,7 @@ pub trait JobAdapter :
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`Job`]s.
 	fn retrieve(
-		query: query::Job,
+		query: &query::Job,
 		store: &Store,
 	) -> Result<Vec<Job>, <Self as JobAdapter>::Error>;
 
@@ -119,7 +119,7 @@ pub trait JobAdapter :
 		O : OrganizationAdapter,
 	{
 		let results = O::retrieve(
-			query::Organization
+			&query::Organization
 			{
 				id: Match::EqualTo(Cow::Borrowed(&job.client_id)),
 				..Default::default()

@@ -41,7 +41,7 @@ pub trait PersonAdapter :
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`Job`]s.
 	fn retrieve(
-		query: query::Person,
+		query: &query::Person,
 		store: &Store,
 	) -> Result<Vec<Person>, <Self as PersonAdapter>::Error>;
 }

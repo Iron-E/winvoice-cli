@@ -19,7 +19,7 @@ where
 	Ok(match contact
 	{
 		Contact::Address(address) => match L::retrieve(
-			query::Location
+			&query::Location
 			{
 				id: Match::EqualTo(Cow::Borrowed(&address)),
 				..Default::default()

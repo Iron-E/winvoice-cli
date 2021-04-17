@@ -78,7 +78,7 @@ pub trait LocationAdapter :
 		while let Some(id) = outer_id
 		{
 			if let Ok(results) = Self::retrieve(
-				query::Location
+				&query::Location
 				{
 					id: Match::EqualTo(Cow::Borrowed(&id)),
 					..Default::default()
@@ -113,7 +113,7 @@ pub trait LocationAdapter :
 	/// * An [`Error`], when something goes wrong.
 	/// * A list of matches, if there are any.
 	fn retrieve(
-		query: query::Location,
+		query: &query::Location,
 		store: &Store,
 	) -> Result<Vec<Location>, <Self as LocationAdapter>::Error>;
 }

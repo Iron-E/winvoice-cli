@@ -85,7 +85,7 @@ pub trait EmployeeAdapter :
 	/// * Any matching [`Employee`]s.
 	/// * An [`Error`], should something go wrong.
 	fn retrieve(
-		query: query::Employee,
+		query: &query::Employee,
 		store: &Store,
 	) -> Result<Vec<Employee>, <Self as EmployeeAdapter>::Error>;
 
@@ -98,7 +98,7 @@ pub trait EmployeeAdapter :
 		O : OrganizationAdapter,
 	{
 		let results = O::retrieve(
-			query::Organization
+			&query::Organization
 			{
 				id: Match::EqualTo(Cow::Borrowed(&employee.organization_id)),
 				..Default::default()
@@ -124,7 +124,7 @@ pub trait EmployeeAdapter :
 		P : PersonAdapter,
 	{
 		let results = P::retrieve(
-			query::Person
+			&query::Person
 			{
 				id: Match::EqualTo(Cow::Borrowed(&employee.person_id)),
 				..Default::default()

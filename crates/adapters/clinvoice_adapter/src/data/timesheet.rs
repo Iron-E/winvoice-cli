@@ -17,7 +17,7 @@ where
 	E : EmployeeAdapter,
 {
 	match E::retrieve(
-		query::Employee
+		&query::Employee
 		{
 			id: Match::EqualTo(Cow::Borrowed(&timesheet.employee_id)),
 			..Default::default()

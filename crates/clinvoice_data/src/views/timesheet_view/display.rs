@@ -3,6 +3,8 @@ use
 	core::fmt::{Display, Formatter, Result},
 
 	super::TimesheetView,
+
+	chrono::{DateTime, Local},
 };
 
 impl Display for TimesheetView
@@ -10,8 +12,8 @@ impl Display for TimesheetView
 	fn fmt(&self, formatter: &mut Formatter) -> Result
 	{
 		writeln!(formatter, "{} – {}: {} {} from {}",
-			self.time_begin,
-			self.time_end.map(|time| time.to_string()).unwrap_or_else(|| "Current".into()),
+			DateTime::<Local>::from(self.time_begin),
+			self.time_end.map(|time| DateTime::<Local>::from(time).to_string()).unwrap_or_else(|| "Current".into()),
 			self.employee.title,
 			self.employee.person.name,
 			self.employee.organization,
@@ -36,12 +38,14 @@ mod tests
 	{
 		std::{collections::HashMap, time::Instant},
 
-		super::TimesheetView,
+		super::{DateTime, Local, TimesheetView},
 		crate::
 		{
-			chrono::Utc, Decimal, EmployeeStatus, Expense, ExpenseCategory, Id, Money,
+			Decimal, EmployeeStatus, Expense, ExpenseCategory, Id, Money,
 			views::{ContactView, EmployeeView, LocationView, OrganizationView, PersonView}
 		},
+
+		chrono::Utc,
 	};
 
 	#[test]
@@ -139,8 +143,8 @@ mod tests
 			Gas
 	Work Notes:
 		Went to non-corporate fast food restaurant for business meeting",
-				timesheet.time_begin,
-				timesheet.time_end.unwrap()
+				DateTime::<Local>::from(timesheet.time_begin),
+				DateTime::<Local>::from(timesheet.time_end.unwrap()),
 			),
 		);
 		println!("\n>>>>> TimesheetView::fmt {}us <<<<<\n", Instant::now().duration_since(start).as_micros());

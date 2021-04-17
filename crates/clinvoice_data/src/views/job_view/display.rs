@@ -4,22 +4,28 @@ use
 
 	super::JobView,
 	crate::Job,
+
+	chrono::{DateTime, Local},
 };
 
 impl Display for JobView
 {
 	fn fmt(&self, formatter: &mut Formatter) -> Result
 	{
-		writeln!(formatter, "Job #{} for {}: {} – {}",
+		write!(formatter, "Job #{} for {}: {} – ",
 			self.id,
 			self.client.name,
-			self.date_open,
-			match self.date_close
-			{
-				Some(date) => date.to_string(),
-				_ => "Current".into(),
-			},
+			DateTime::<Local>::from(self.date_open),
 		)?;
+
+		if let Some(date) = self.date_close
+		{
+			writeln!(formatter, "{}", DateTime::<Local>::from(date))?;
+		}
+		else
+		{
+			writeln!(formatter, "Current")?;
+		}
 
 		/// # Summary
 		///
@@ -42,12 +48,14 @@ mod tests
 	{
 		std::time::Instant,
 
-		super::JobView,
+		super::{DateTime, JobView, Local},
 		crate::
 		{
-			chrono::Utc, Decimal, EmployeeStatus, Id, Invoice, Job, Money,
+			Decimal, EmployeeStatus, Id, Invoice, Job, Money,
 			views::{ContactView, EmployeeView, LocationView, OrganizationView, PersonView, TimesheetView},
 		},
+
+		chrono::Utc,
 	};
 
 	#[test]
@@ -120,11 +128,11 @@ mod tests
 			Work Notes:
 				Went to non-corporate fast food restaurant for business meeting",
 				create_job_view.id,
-				create_job_view.date_open,
-				create_job_view.date_close.unwrap(),
+				DateTime::<Local>::from(create_job_view.date_open),
+				DateTime::<Local>::from(create_job_view.date_close.unwrap()),
 				Job::from(&create_job_view).total(),
-				create_job_view.timesheets.first().unwrap().time_begin,
-				create_job_view.timesheets.first().unwrap().time_end.unwrap(),
+				DateTime::<Local>::from(create_job_view.timesheets.first().unwrap().time_begin),
+				DateTime::<Local>::from(create_job_view.timesheets.first().unwrap().time_end.unwrap()),
 			),
 		);
 		println!("\n>>>>> JobView::fmt {}us <<<<<\n", Instant::now().duration_since(start).as_micros());

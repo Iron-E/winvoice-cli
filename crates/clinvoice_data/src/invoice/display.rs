@@ -27,7 +27,9 @@ mod tests
 		std::time::Instant,
 
 		super::Invoice,
-		crate::{chrono::Utc, Decimal, InvoiceDate, Money},
+		crate::{Decimal, InvoiceDate, Money},
+
+		chrono::{DateTime, Local, Utc},
 	};
 
 	#[test]
@@ -49,7 +51,7 @@ mod tests
 			format!(
 "Hourly Rate: 10.00 USD
 Status: Issued on {}; Outstanding",
-				invoice.date.unwrap().issued
+				DateTime::<Local>::from(invoice.date.unwrap().issued),
 			),
 		);
 		println!("\n>>>>> Invoice::fmt {}us <<<<<\n", Instant::now().duration_since(start).as_micros());

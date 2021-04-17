@@ -20,6 +20,7 @@
 
 mod contact;
 mod employee;
+mod expense;
 mod invoice;
 mod invoice_date;
 mod job;
@@ -32,6 +33,7 @@ pub use
 {
 	contact::Contact,
 	employee::Employee,
+	expense::Expense,
 	invoice::Invoice,
 	invoice_date::InvoiceDate,
 	job::Job,

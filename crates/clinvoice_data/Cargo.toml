@@ -1,7 +1,7 @@
 # See https://doc.rust-lang.org/cargo/reference/manifest.html
 [package]
 name = "clinvoice_data"
-version = "0.3.0"
+version = "0.3.1"
 authors = ["Iron-E <code.iron.e@gmail.com>"]
 description = "Data structures for CLInvoice."
 

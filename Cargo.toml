@@ -17,8 +17,8 @@ repository = "https://www.github.com/Iron-E/clinvoice"
 structopt = "0.3"
 
 # CLInvoice
-clinvoice_adapter = {path='crates/adapters/clinvoice_adapter', version="0.4"}
-clinvoice_adapter_bincode = {path='crates/adapters/clinvoice_adapter_bincode', optional=true, version="0.4"}
+clinvoice_adapter = {path='crates/adapters/clinvoice_adapter', version="0.5"}
+clinvoice_adapter_bincode = {path='crates/adapters/clinvoice_adapter_bincode', optional=true, version="0.5"}
 clinvoice_config = {path='crates/clinvoice_config', version="0.1"}
 clinvoice_data = {path='crates/clinvoice_data', version="0.3"}
 clinvoice_error = {path='crates/clinvoice_error', version="0.1"}

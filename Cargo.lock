@@ -127,7 +127,7 @@ dependencies = [
 
 [[package]]
 name = "clinvoice_adapter"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
  "clinvoice_data",
  "clinvoice_error",
@@ -138,7 +138,7 @@ dependencies = [
 
 [[package]]
 name = "clinvoice_adapter_bincode"
-version = "0.5.0"
+version = "0.5.1"
 dependencies = [
  "bincode",
  "clinvoice_adapter",

@@ -57,7 +57,7 @@ impl PersonAdapter for BincodePerson<'_, '_>
 	///
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`Job`]s.
-	fn retrieve(query: query::Person, store: &Store) -> Result<Vec<Person>>
+	fn retrieve(query: &query::Person, store: &Store) -> Result<Vec<Person>>
 	{
 		Self::init(&store)?;
 
@@ -163,7 +163,7 @@ mod tests
 
 			// Retrieve bob
 			let only_bob = BincodePerson::retrieve(
-				query::Person
+				&query::Person
 				{
 					id: Match::EqualTo(Cow::Borrowed(&bob.id)),
 					..Default::default()
@@ -173,7 +173,7 @@ mod tests
 
 			// Retrieve longone and slimdi
 			let longone_slimdi = BincodePerson::retrieve(
-				query::Person
+				&query::Person
 				{
 					name: Match::HasAny(vec![Cow::Borrowed(&slimdi.name.clone()), Cow::Borrowed(&longone.name.clone())].into_iter().collect()),
 					..Default::default()

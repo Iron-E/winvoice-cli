@@ -71,7 +71,7 @@ impl EmployeeAdapter for BincodeEmployee<'_, '_>
 	///
 	/// * Any matching [`Employee`]s.
 	/// * An [`Error`], should something go wrong.
-	fn retrieve(query: query::Employee, store: &Store) -> Result<Vec<Employee>>
+	fn retrieve(query: &query::Employee, store: &Store) -> Result<Vec<Employee>>
 	{
 		Self::init(&store)?;
 
@@ -275,11 +275,11 @@ mod tests
 
 			let start = Instant::now();
 
-			let everything = BincodeEmployee::retrieve(Default::default(), &store).unwrap();
+			let everything = BincodeEmployee::retrieve(&Default::default(), &store).unwrap();
 
 			// Retrieve testy and gottard
 			let testy_gottard = BincodeEmployee::retrieve(
-				query::Employee
+				&query::Employee
 				{
 					id: Match::HasAny(vec![Cow::Borrowed(&testy_mctesterson.id), Cow::Borrowed(&gottard.id)].into_iter().collect()),
 					..Default::default()

@@ -79,7 +79,7 @@ impl JobAdapter for BincodeJob<'_, '_>
 	///
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`Job`]s.
-	fn retrieve(query: query::Job, store: &Store) -> Result<Vec<Job>>
+	fn retrieve(query: &query::Job, store: &Store) -> Result<Vec<Job>>
 	{
 		Self::init(&store)?;
 
@@ -219,7 +219,7 @@ mod tests
 
 			// retrieve everything
 			let everything = BincodeJob::retrieve(
-				query::Job
+				&query::Job
 				{
 					client: query::Organization
 					{
@@ -233,7 +233,7 @@ mod tests
 
 			// retrieve retrieval and assertion
 			let not_creation = BincodeJob::retrieve(
-				query::Job
+				&query::Job
 				{
 					date_open: Match::HasNone(vec![Cow::Borrowed(&DateTime::from(creation.date_open))].into_iter().collect()),
 					id: Match::HasAny(vec![Cow::Borrowed(&retrieval.id), Cow::Borrowed(&assertion.id)].into_iter().collect()),

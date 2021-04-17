@@ -18,7 +18,7 @@ impl Deletable for BincodeOrganization<'_, '_>
 		let associated_employees = || -> Result<Vec<Employee>>
 		{
 			BincodeEmployee::retrieve(
-				query::Employee
+				&query::Employee
 				{
 					organization: query::Organization
 					{
@@ -32,7 +32,7 @@ impl Deletable for BincodeOrganization<'_, '_>
 		};
 
 		let associated_jobs = BincodeJob::retrieve(
-			query::Job
+			&query::Job
 			{
 				client: query::Organization
 				{

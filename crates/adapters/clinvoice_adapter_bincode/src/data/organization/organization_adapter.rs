@@ -58,7 +58,7 @@ impl OrganizationAdapter for BincodeOrganization<'_, '_>
 	///
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`Job`]s.
-	fn retrieve(query: query::Organization, store: &Store) -> Result<Vec<Organization>>
+	fn retrieve(query: &query::Organization, store: &Store) -> Result<Vec<Organization>>
 	{
 		Self::init(&store)?;
 
@@ -168,7 +168,7 @@ mod tests
 			let start = Instant::now();
 			// retrieve `packing` and `eal`
 			let results = BincodeOrganization::retrieve(
-				query::Organization
+				&query::Organization
 				{
 					location: query::Location
 					{

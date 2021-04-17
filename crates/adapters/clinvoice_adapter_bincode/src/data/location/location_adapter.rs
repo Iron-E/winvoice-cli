@@ -87,7 +87,7 @@ impl LocationAdapter for BincodeLocation<'_, '_>
 	///
 	/// * An [`Error`], when something goes wrong.
 	/// * A list of matches, if there are any.
-	fn retrieve(query: query::Location, store: &Store) -> Result<Vec<Location>>
+	fn retrieve(query: &query::Location, store: &Store) -> Result<Vec<Location>>
 	{
 		Self::init(&store)?;
 
@@ -149,11 +149,11 @@ mod tests
 			let start = Instant::now();
 
 			// Retrieve everything.
-			let everything = BincodeLocation::retrieve(Default::default(), &store).unwrap();
+			let everything = BincodeLocation::retrieve(&Default::default(), &store).unwrap();
 
 			// Retrieve Arizona
 			let only_arizona = BincodeLocation::retrieve(
-				query::Location
+				&query::Location
 				{
 					id: Match::HasAny(vec![Cow::Borrowed(&earth.id), Cow::Borrowed(&arizona.id)].into_iter().collect()),
 					outer: query::OuterLocation::Some(query::Location::default().into()),

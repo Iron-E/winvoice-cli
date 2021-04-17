@@ -15,7 +15,7 @@ impl Deletable for BincodePerson<'_, '_>
 	fn delete(&self, cascade: bool) -> Result<()>
 	{
 		let associated_employees = BincodeEmployee::retrieve(
-			query::Employee
+			&query::Employee
 			{
 				person: query::Person
 				{

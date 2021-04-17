@@ -15,7 +15,7 @@ impl Deletable for BincodeEmployee<'_, '_>
 	fn delete(&self, cascade: bool) -> Result<()>
 	{
 		let associated_jobs = BincodeJob::retrieve(
-			query::Job
+			&query::Job
 			{
 				timesheets: query::Timesheet
 				{
@@ -146,7 +146,7 @@ mod tests
 			assert!(testy.filepath().is_file());
 
 			big_old_test = BincodeOrganization::retrieve(
-				query::Organization
+				&query::Organization
 				{
 					id: Match::EqualTo(Cow::Borrowed(&big_old_test.id)),
 					..Default::default()
@@ -155,7 +155,7 @@ mod tests
 			).unwrap().iter().next().unwrap().clone();
 
 			creation = BincodeJob::retrieve(
-				query::Job
+				&query::Job
 				{
 					client: query::Organization
 					{

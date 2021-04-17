@@ -18,7 +18,7 @@ impl Deletable for BincodeLocation<'_, '_>
 		let associated_locations = || -> Result<Vec<Location>>
 		{
 			BincodeLocation::retrieve(
-				query::Location
+				&query::Location
 				{
 					outer: query::OuterLocation::Some(
 						query::Location
@@ -34,7 +34,7 @@ impl Deletable for BincodeLocation<'_, '_>
 		};
 
 		let associated_organizations = BincodeOrganization::retrieve(
-			query::Organization
+			&query::Organization
 			{
 				location: query::Location
 				{

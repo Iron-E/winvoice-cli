@@ -45,22 +45,24 @@ impl Timesheet<'_>
 	/// # Summary
 	///
 	/// Return `true` if `timesheet` is a match.
-	pub fn any_matches_view(&self, timesheets: &[TimesheetView]) -> bool
+	pub fn set_matches<'item>(&self, mut timesheets: impl Iterator<Item=&'item clinvoice_data::Timesheet>) -> bool
 	{
-		timesheets.iter().map(|t| &t.employee).any(|e| self.employee.matches_view(e)) &&
-		self.time_begin.set_matches(&timesheets.iter().map(|t| DateTime::from(t.time_begin)).collect::<Vec<_>>().iter().collect()) &&
-		self.time_end.set_matches(&timesheets.iter().map(|t| t.time_end.map(DateTime::from)).collect::<Vec<_>>().iter().collect())
+		self.employee.id.set_matches(&timesheets.by_ref().map(|t| &t.employee_id).collect()) &&
+		self.expenses.set_matches(timesheets.by_ref().map(|t| &t.expenses).flatten()) &&
+		self.time_begin.set_matches(&timesheets.by_ref().map(|t| DateTime::from(t.time_begin)).collect::<Vec<_>>().iter().collect()) &&
+		self.time_end.set_matches(&timesheets.by_ref().map(|t| t.time_end.map(DateTime::from)).collect::<Vec<_>>().iter().collect()) &&
+		self.work_notes.set_matches(&timesheets.map(|t| &t.work_notes).collect())
 	}
 
 	/// # Summary
 	///
 	/// Return `true` if `timesheet` is a match.
-	pub fn set_matches(&self, timesheets: &[clinvoice_data::Timesheet]) -> bool
+	pub fn set_matches_view<'item>(&self, mut timesheets: impl Iterator<Item=&'item TimesheetView>) -> bool
 	{
-		self.employee.id.set_matches(&timesheets.iter().map(|t| &t.employee_id).collect()) &&
-		self.expenses.set_matches(timesheets.iter().map(|t| &t.expenses).flatten().collect::<Vec<_>>().as_slice()) &&
-		self.time_begin.set_matches(&timesheets.iter().map(|t| DateTime::from(t.time_begin)).collect::<Vec<_>>().iter().collect()) &&
-		self.time_end.set_matches(&timesheets.iter().map(|t| t.time_end.map(DateTime::from)).collect::<Vec<_>>().iter().collect()) &&
-		self.work_notes.set_matches(&timesheets.iter().map(|t| &t.work_notes).collect())
+		self.employee.set_matches_view(timesheets.by_ref().map(|t| &t.employee)) &&
+		self.expenses.set_matches(timesheets.by_ref().map(|t| &t.expenses).flatten()) &&
+		self.time_begin.set_matches(&timesheets.by_ref().map(|t| DateTime::from(t.time_begin)).collect::<Vec<_>>().iter().collect()) &&
+		self.time_end.set_matches(&timesheets.by_ref().map(|t| t.time_end.map(DateTime::from)).collect::<Vec<_>>().iter().collect()) &&
+		self.work_notes.set_matches(&timesheets.map(|t| &t.work_notes).collect())
 	}
 }

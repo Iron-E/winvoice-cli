@@ -60,7 +60,7 @@ impl Job<'_>
 		self.invoice.matches(&job.invoice) &&
 		self.notes.matches(&job.notes) &&
 		self.objectives.matches(&job.objectives) &&
-		self.timesheets.set_matches(job.timesheets.as_slice())
+		self.timesheets.set_matches(job.timesheets.iter())
 	}
 
 	/// # Summary
@@ -75,6 +75,6 @@ impl Job<'_>
 		self.invoice.matches(&job.invoice) &&
 		self.notes.matches(&job.notes) &&
 		self.objectives.matches(&job.objectives) &&
-		self.timesheets.any_matches_view(job.timesheets.as_slice())
+		self.timesheets.set_matches_view(job.timesheets.iter())
 	}
 }

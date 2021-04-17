@@ -53,13 +53,13 @@ impl Employee<'_>
 	/// # Summary
 	///
 	/// Return `true` if `employee` is a match.
-	pub fn matches_view(&self, employee: &EmployeeView) -> bool
+	pub fn set_matches_view<'item>(&self, mut employees: impl Iterator<Item=&'item EmployeeView>) -> bool
 	{
-		self.contact_info.any_matches_view(employee.contact_info.values()) &&
-		self.id.matches(&employee.id) &&
-		self.organization.matches_view(&employee.organization) &&
-		self.person.matches_view(&employee.person) &&
-		self.title.matches(&employee.title) &&
-		self.status.matches(&employee.status)
+		self.contact_info.set_matches_view(employees.by_ref().map(|e| e.contact_info.values()).flatten()) &&
+		self.id.set_matches(&employees.by_ref().map(|e| &e.id).collect()) &&
+		self.organization.set_matches_view(employees.by_ref().map(|e| &e.organization)) &&
+		self.person.set_matches_view(employees.by_ref().map(|e| &e.person)) &&
+		self.title.set_matches(&employees.by_ref().map(|e| &e.title).collect()) &&
+		self.status.set_matches(&employees.map(|e| &e.status).collect())
 	}
 }

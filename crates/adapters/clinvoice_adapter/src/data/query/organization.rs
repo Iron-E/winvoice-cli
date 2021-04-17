@@ -47,4 +47,14 @@ impl Organization<'_>
 		self.location.matches_view(&organization.location) &&
 		self.name.matches(&organization.name)
 	}
+
+	/// # Summary
+	///
+	/// Return `true` if `organizations` [`Match::set_matches`].
+	pub fn set_matches_view<'item>(&self, mut organizations: impl Iterator<Item=&'item OrganizationView>) -> bool
+	{
+		self.id.set_matches(&organizations.by_ref().map(|o| &o.id).collect()) &&
+		self.location.set_matches_view(organizations.by_ref().map(|o| &o.location)) &&
+		self.name.set_matches(&organizations.map(|o| &o.name).collect())
+	}
 }

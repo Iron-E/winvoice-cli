@@ -41,4 +41,13 @@ impl Person<'_>
 		self.id.matches(&person.id) &&
 		self.name.matches(&person.name)
 	}
+
+	/// # Summary
+	///
+	/// Return `true` if `people` [`Match::set_matches`].
+	pub fn set_matches_view<'item>(&self, mut people: impl Iterator<Item=&'item PersonView>) -> bool
+	{
+		self.id.set_matches(&people.by_ref().map(|p| &p.id).collect()) &&
+		self.name.set_matches(&people.map(|p| &p.name).collect())
+	}
 }

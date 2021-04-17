@@ -31,41 +31,16 @@ impl Contact<'_>
 	/// # Summary
 	///
 	/// Return `true` if `employee` is a match.
-	pub fn any_matches_view<'item>(&self, contact_info: impl Clone + Iterator<Item=&'item ContactView>) -> bool
-	{
-		contact_info.clone().flat_map(|c| match c
-		{
-			ContactView::Address(a) => Some(a),
-			_ => None,
-		}).any(|a| self.address.matches_view(a)) &&
-		self.email.set_matches(
-			&contact_info.clone().flat_map(|c| match c
-			{
-				ContactView::Email(e) => Some(e),
-				_ => None,
-			}).collect()
-		) && self.phone.set_matches(
-			&contact_info.flat_map(|c| match c
-			{
-				ContactView::Email(p) => Some(p),
-				_ => None,
-			}).collect()
-		)
-	}
-
-	/// # Summary
-	///
-	/// Return `true` if `employee` is a match.
-	pub fn set_matches<'item>(&self, contact_info: impl Clone + Iterator<Item=&'item clinvoice_data::Contact>) -> bool
+	pub fn set_matches<'item>(&self, mut contact_info: impl Iterator<Item=&'item clinvoice_data::Contact>) -> bool
 	{
 		self.address.id.set_matches(
-			&contact_info.clone().flat_map(|c| match c
+			&contact_info.by_ref().flat_map(|c| match c
 			{
 				clinvoice_data::Contact::Address(a) => Some(a),
 				_ => None,
 			}).collect()
 		) && self.email.set_matches(
-			&contact_info.clone().flat_map(|c| match c
+			&contact_info.by_ref().flat_map(|c| match c
 			{
 				clinvoice_data::Contact::Email(e) => Some(e),
 				_ => None,
@@ -74,6 +49,31 @@ impl Contact<'_>
 			&contact_info.flat_map(|c| match c
 			{
 				clinvoice_data::Contact::Phone(p) => Some(p),
+				_ => None,
+			}).collect()
+		)
+	}
+
+	/// # Summary
+	///
+	/// Return `true` if `employee` is a match.
+	pub fn set_matches_view<'item>(&self, mut contact_info: impl Iterator<Item=&'item ContactView>) -> bool
+	{
+		self.address.set_matches_view(contact_info.by_ref().flat_map(|c| match c
+		{
+			ContactView::Address(a) => Some(a),
+			_ => None,
+		})) &&
+		self.email.set_matches(
+			&contact_info.by_ref().flat_map(|c| match c
+			{
+				ContactView::Email(e) => Some(e),
+				_ => None,
+			}).collect()
+		) && self.phone.set_matches(
+			&contact_info.flat_map(|c| match c
+			{
+				ContactView::Email(p) => Some(p),
 				_ => None,
 			}).collect()
 		)

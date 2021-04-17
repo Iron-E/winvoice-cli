@@ -1,7 +1,7 @@
 use
 {
 	core::fmt::Display,
-	std::{borrow::Cow, error::Error, result},
+	std::{borrow::Cow, error::Error},
 
 	crate::{Config, DynResult, input, StructOpt},
 
@@ -17,14 +17,12 @@ use
 };
 
 #[cfg(feature="bincode")]
-use clinvoice_adapter_bincode::data::{BincodeEmployee, BincodeJob, BincodeLocation, BincodeOrganization, BincodePerson, Result as BincodeResult};
+use clinvoice_adapter_bincode::data::{BincodeEmployee, BincodeJob, BincodeLocation, BincodeOrganization, BincodePerson};
 
 /// # Summary
 ///
 /// The prompt for when editing a [query](clinvoice_adapter::data::query).
 const QUERY_PROMPT: &str = "See the documentation of this query at https://github.com/Iron-E/clinvoice/wiki/Query-Syntax#";
-
-type Result<E> = result::Result<(), E>;
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, StructOpt)]
 #[structopt(about="Retrieve information that was recorded with CLInvoice")]
@@ -81,7 +79,7 @@ impl Retrieve
 	/// Delete some `entities`
 	///
 	/// `delete_entity` determines how the entities are deleted.
-	fn delete<'err, E, T>(entities: &[T], delete_entity: impl Fn(T) -> Result<E>) -> DynResult<'err, ()> where
+	fn delete<'err, E, T>(entities: &[T], delete_entity: impl Fn(T) -> Result<(), E>) -> DynResult<'err, ()> where
 		E : Error + 'err,
 		T : Clone + Display,
 	{
@@ -94,7 +92,7 @@ impl Retrieve
 	/// Edit some `entities`, and then update them.
 	///
 	/// `update_entity` determines how the entities are updated.
-	fn update<'err, E, T>(entities: &[T], update_entity: impl Fn(T) -> Result<E>) -> DynResult<'err, ()> where
+	fn update<'err, E, T>(entities: &[T], update_entity: impl Fn(T) -> Result<(), E>) -> DynResult<'err, ()> where
 		E : Error + 'err,
 		T : Clone + DeserializeOwned + Display + RestorableSerde + Serialize,
 	{
@@ -145,16 +143,12 @@ impl Retrieve
 							input::edit_default(String::from(QUERY_PROMPT) + "employees")?
 						};
 
-						let results = $emp::retrieve(query, &store)?;
-						let results_len = results.len();
-						let results_view = results.into_iter().try_fold(
-							Vec::with_capacity(results_len),
-							|mut v, e| -> DynResult<'_, _>
-							{
-								v.push($emp::into_view::<$loc, $org, $per>(e, &store)?);
-								Ok(v)
-							}
-						)?;
+						let results = $emp::retrieve(&query, &store)?;
+						let results_view = results.into_iter().map(|e|
+							$emp::into_view::<$loc, $org, $per>(e, &store)
+						).filter(|view|
+							view.as_ref().map(|v| query.matches_view(v)).unwrap_or(true)
+						).collect::<Result<Vec<_>, _>>()?;
 
 						if self.delete
 						{
@@ -189,16 +183,12 @@ impl Retrieve
 					{{
 						let query: query::Job = input::edit_default(String::from(QUERY_PROMPT) + "jobs")?;
 
-						let results = $job::retrieve(query, &store)?;
-						let results_len = results.len();
-						let results_view = results.into_iter().try_fold(
-							Vec::with_capacity(results_len),
-							|mut v, j| -> BincodeResult<_>
-							{
-								v.push($job::into_view::<$emp, $loc, $org, $per>(j, &store)?);
-								Ok(v)
-							}
-						)?;
+						let results = $job::retrieve(&query, &store)?;
+						let results_view = results.into_iter().map(|j|
+							$job::into_view::<$emp, $loc, $org, $per>(j, &store)
+						).filter(|view|
+							view.as_ref().map(|v| query.matches_view(v)).unwrap_or(true)
+						).collect::<Result<Vec<_>, _>>()?;
 
 						if self.delete
 						{
@@ -240,16 +230,12 @@ impl Retrieve
 					{{
 						let query: query::Location = input::edit_default(String::from(QUERY_PROMPT) + "locations")?;
 
-						let results = $loc::retrieve(query, &store)?;
-						let results_len = results.len();
-						let results_view = results.into_iter().try_fold(
-							Vec::with_capacity(results_len),
-							|mut v, l| -> BincodeResult<_>
-							{
-								v.push($loc::into_view(l, &store)?);
-								Ok(v)
-							}
-						)?;
+						let results = $loc::retrieve(&query, &store)?;
+						let results_view = results.into_iter().map(|l|
+							$loc::into_view(l, &store)
+						).filter(|view|
+							view.as_ref().map(|v| query.matches_view(v)).unwrap_or(true)
+						).collect::<Result<Vec<_>, _>>()?;
 
 						if self.delete
 						{
@@ -290,16 +276,12 @@ impl Retrieve
 					{{
 						let query: query::Organization = input::edit_default(String::from(QUERY_PROMPT) + "organizations")?;
 
-						let results = $org::retrieve(query, &store)?;
-						let results_len = results.len();
-						let results_view = results.into_iter().try_fold(
-							Vec::with_capacity(results_len),
-							|mut v, o| -> DynResult<'_, _>
-							{
-								v.push($org::into_view::<$loc>(o, &store)?);
-								Ok(v)
-							}
-						)?;
+						let results = $org::retrieve(&query, &store)?;
+						let results_view = results.into_iter().map(|o|
+							$org::into_view::<$loc>(o, &store)
+						).filter(|view|
+							view.as_ref().map(|v| query.matches_view(v)).unwrap_or(true)
+						).collect::<Result<Vec<_>, _>>()?;
 
 						if self.delete
 						{
@@ -334,8 +316,8 @@ impl Retrieve
 					{{
 						let query: query::Person = input::edit_default(String::from(QUERY_PROMPT) + "persons")?;
 
-						let results = $per::retrieve(query, &store)?;
-						let results_view = results.into_iter().map(PersonView::from).collect::<Vec<_>>();
+						let results = $per::retrieve(&query, &store)?;
+						let results_view = results.into_iter().map(PersonView::from).filter(|view| query.matches_view(view)).collect::<Vec<_>>();
 
 						if self.delete
 						{

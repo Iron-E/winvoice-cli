@@ -24,7 +24,7 @@ use
 pub fn retrieve_views<L>(store: &Store) -> Result<Vec<LocationView>, <L as LocationAdapter>::Error> where
 	L : LocationAdapter,
 {
-	let locations = L::retrieve(Default::default(), store)?;
+	let locations = L::retrieve(&Default::default(), store)?;
 
 	if locations.is_empty()
 	{

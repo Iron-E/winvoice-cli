@@ -24,7 +24,7 @@ use
 pub fn retrieve_views<P>(store: &Store) -> Result<Vec<PersonView>, <P as PersonAdapter>::Error> where
 	P : PersonAdapter,
 {
-	let people = P::retrieve(Default::default(), store)?;
+	let people = P::retrieve(&Default::default(), store)?;
 
 	if people.is_empty()
 	{

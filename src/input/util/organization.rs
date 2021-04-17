@@ -28,7 +28,7 @@ pub(super) fn retrieve_views<'err, L, O>(store: &Store) -> DynResult<'err, Vec<O
 	O : OrganizationAdapter,
 	<O as OrganizationAdapter>::Error : 'err,
 {
-	let organizations = O::retrieve(Default::default(), store)?;
+	let organizations = O::retrieve(&Default::default(), store)?;
 
 	if organizations.is_empty()
 	{

@@ -11,8 +11,11 @@ impl Display for EmployeeView
 	{
 		writeln!(formatter, "{} {}", self.title, self.person.name)?;
 		writeln!(formatter, "\tEmployer: {}", self.organization)?;
-		writeln!(formatter, "\tEmployee Contact Info:")?;
+
+		if !self.contact_info.is_empty()
 		{
+			writeln!(formatter, "\tEmployee Contact Info:")?;
+
 			let mut sorted_employee_contact_info: Vec<String> = self.contact_info.keys().cloned().collect();
 			sorted_employee_contact_info.sort();
 			sorted_employee_contact_info.iter().try_for_each(|c| writeln!(formatter, "\t\t- {}: {}", c, self.contact_info[c]))?;

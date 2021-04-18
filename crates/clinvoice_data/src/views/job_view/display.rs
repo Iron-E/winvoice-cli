@@ -34,10 +34,24 @@ impl Display for JobView
 
 		writeln!(formatter, "\tInvoice:{}{}", DEPTH_2, self.invoice.to_string().replace('\n', DEPTH_2))?;
 		writeln!(formatter, "\t\tTotal Amount Owed: {}", Job::from(self).total())?;
-		writeln!(formatter, "\tObjectives:{}{}", DEPTH_2, self.objectives.replace('\n', DEPTH_2))?;
-		writeln!(formatter, "\tNotes:{}{}", DEPTH_2, self.notes.replace('\n', DEPTH_2))?;
-		write!(formatter, "\tTimesheets:")?;
-		self.timesheets.iter().try_for_each(|t| write!(formatter, "{}{}", DEPTH_2, t.to_string().replace('\n', DEPTH_2)))
+
+		if !self.objectives.is_empty()
+		{
+			writeln!(formatter, "\tObjectives:{}{}", DEPTH_2, self.objectives.replace('\n', DEPTH_2))?;
+		}
+
+		if !self.notes.is_empty()
+		{
+			writeln!(formatter, "\tNotes:{}{}", DEPTH_2, self.notes.replace('\n', DEPTH_2))?;
+		}
+
+		if !self.timesheets.is_empty()
+		{
+			write!(formatter, "\tTimesheets:")?;
+			self.timesheets.iter().try_for_each(|t| write!(formatter, "{}{}", DEPTH_2, t.to_string().replace('\n', DEPTH_2)))?;
+		}
+
+		Ok(())
 	}
 }
 

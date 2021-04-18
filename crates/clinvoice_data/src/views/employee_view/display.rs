@@ -16,9 +16,9 @@ impl Display for EmployeeView
 		{
 			writeln!(formatter, "\tEmployee Contact Info:")?;
 
-			let mut sorted_employee_contact_info: Vec<String> = self.contact_info.keys().cloned().collect();
+			let mut sorted_employee_contact_info: Vec<&String> = self.contact_info.keys().collect();
 			sorted_employee_contact_info.sort();
-			sorted_employee_contact_info.iter().try_for_each(|c| writeln!(formatter, "\t\t- {}: {}", c, self.contact_info[c]))?;
+			sorted_employee_contact_info.into_iter().try_for_each(|c| writeln!(formatter, "\t\t- {}: {}", c, self.contact_info[c]))?;
 		}
 
 		write!(formatter, "\tStatus: {}", self.status)

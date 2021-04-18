@@ -158,3 +158,132 @@ impl Target
 		output
 	}
 }
+
+#[cfg(all(feature="markdown", test))]
+mod tests
+{
+	use
+	{
+		std::collections::HashMap,
+
+		super::{JobView, Target, TimesheetView},
+
+		clinvoice_data::
+		{
+			chrono::Utc,
+			Decimal, EmployeeStatus, Expense, ExpenseCategory, Id, Invoice, Money,
+			views::{EmployeeView, LocationView, OrganizationView, PersonView},
+		},
+	};
+
+	#[test]
+	fn export_job()
+	{
+		let organization = OrganizationView
+		{
+			id: Id::new_v4(),
+			location: LocationView
+			{
+				id: Id::new_v4(),
+				outer: Some(LocationView
+				{
+					id: Id::new_v4(),
+					outer: Some(LocationView
+					{
+						id: Id::new_v4(),
+						outer: Some(LocationView
+						{
+							id: Id::new_v4(),
+							outer: Some(LocationView
+							{
+								id: Id::new_v4(),
+								outer: None,
+								name: "Earth".into(),
+							}.into()),
+							name: "USA".into(),
+						}.into()),
+						name: "Arizona".into(),
+					}.into()),
+					name: "Phoenix".into(),
+				}.into()),
+				name: "1337 Some Street".into(),
+			},
+			name: "Big Old Test".into(),
+		};
+
+		let testy_mctesterson = EmployeeView
+		{
+			contact_info: HashMap::new(),
+			id: Id::new_v4(),
+			organization: organization.clone(),
+			person: PersonView
+			{
+				id: Id::new_v4(),
+				name: "Testy McTesterson".into(),
+			},
+			status: EmployeeStatus::Representative,
+			title: "CEO of Tests".into(),
+		};
+
+		let bob = EmployeeView
+		{
+			contact_info: HashMap::new(),
+			id: Id::new_v4(),
+			organization: organization.clone(),
+			person: PersonView
+			{
+				id: Id::new_v4(),
+				name: "Bob".into(),
+			},
+			status: EmployeeStatus::Employed,
+			title: "Janitor".into(),
+		};
+
+		let mut job = JobView
+		{
+			client: organization,
+			date_close: None,
+			date_open: Utc::today().and_hms(0, 0, 0),
+			id: Id::new_v4(),
+			invoice: Invoice
+			{
+				date: None,
+				hourly_rate: Money::new(Decimal::new(2000, 2), "USD"),
+			},
+			notes: "* I tested the function.".into(),
+			objectives: "* I want to test this function.".into(),
+			timesheets: vec![],
+		};
+
+		assert_eq!(
+			Target::Markdown.export_job(job.clone()),
+"",
+		);
+
+		job.timesheets = vec![
+			TimesheetView
+			{
+				employee: testy_mctesterson,
+				expenses: Vec::new(),
+				time_begin: Utc::today().and_hms(2, 0, 0),
+				time_end: Some(Utc::today().and_hms(2, 3, 0)),
+				work_notes: "* Wrote the test.".into(),
+			},
+			TimesheetView
+			{
+				employee: bob,
+				expenses: vec![
+					Expense
+					{
+						category: ExpenseCategory::Item,
+						cost: Money::new(Decimal::new(2000, 2), "USD"),
+						description: "Paid for someone else to clean".into(),
+					},
+				],
+				time_begin: Utc::today().and_hms(3, 0, 0),
+				time_end: Some(Utc::today().and_hms(3, 3, 0)),
+				work_notes: "* Clean the deck.".into(),
+			},
+		];
+	}
+}

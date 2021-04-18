@@ -35,10 +35,6 @@ impl Target
 	/// # Summary
 	///
 	/// Export some `job` to the [`Target`] specified.
-	///
-	/// # TODO
-	///
-	/// Show better employee information.
 	fn export_timesheet(&self, output: &mut String, timesheet: &TimesheetView)
 	{
 		match self
@@ -57,7 +53,22 @@ impl Target
 				}).unwrap();
 
 				writeln!(output, "{}", markdown::Element::Heading {depth: 4, text: "Employee Information"}).unwrap();
-				writeln!(output, "{}", markdown::Element::BlockText(&timesheet.employee)).unwrap();
+				writeln!(output, "{}: {}",
+					markdown::Element::UnorderedList {depth: 0, text: markdown::Text::Bold("Employer")},
+					timesheet.employee.organization,
+				).unwrap();
+
+				if !timesheet.employee.contact_info.is_empty()
+				{
+					writeln!(output, "{}:", markdown::Element::UnorderedList {depth: 0, text: markdown::Text::Bold("Contact Information")}).unwrap();
+
+					let mut sorted_employee_contact_info: Vec<&String> = timesheet.employee.contact_info.keys().collect();
+					sorted_employee_contact_info.sort();
+					sorted_employee_contact_info.into_iter().try_for_each(|label| writeln!(output, "{}: {}",
+						markdown::Element::UnorderedList {depth: 1, text: markdown::Text::Bold(label)},
+						timesheet.employee.contact_info[label],
+					)).unwrap();
+				}
 
 				if !timesheet.expenses.is_empty()
 				{
@@ -69,8 +80,11 @@ impl Target
 					)).unwrap();
 				}
 
-				writeln!(output, "{}", markdown::Element::Heading {depth: 4, text: "Work Notes"}).unwrap();
-				writeln!(output, "{}", markdown::Element::BlockText(&timesheet.work_notes)).unwrap();
+				if !timesheet.work_notes.is_empty()
+				{
+					writeln!(output, "{}", markdown::Element::Heading {depth: 4, text: "Work Notes"}).unwrap();
+					writeln!(output, "{}", markdown::Element::BlockText(&timesheet.work_notes)).unwrap();
+				}
 			},
 		};
 	}
@@ -89,15 +103,15 @@ impl Target
 			{
 				writeln!(output, "{}", markdown::Element::Heading {depth: 1, text: format!("Job #{} for {}", job.id, job.client)}).unwrap();
 
-				writeln!(output, "{} {}",
-					markdown::Element::UnorderedList {depth: 0, text: markdown::Text::Bold("Date Opened:")},
+				writeln!(output, "{}: {}",
+					markdown::Element::UnorderedList {depth: 0, text: markdown::Text::Bold("Date Opened")},
 					DateTime::<Local>::from(job.date_open),
 				).unwrap();
 
 				if let Some(date) = job.date_close
 				{
-					writeln!(output, "{} {}",
-						markdown::Element::UnorderedList {depth: 0, text: markdown::Text::Bold("Date Closed:")},
+					writeln!(output, "{}: {}",
+						markdown::Element::UnorderedList {depth: 0, text: markdown::Text::Bold("Date Closed")},
 						DateTime::<Local>::from(date),
 					).unwrap();
 				}
@@ -106,20 +120,20 @@ impl Target
 
 				writeln!(output, "{}", markdown::Element::Heading {depth: 2, text: "Invoice"}).unwrap();
 				writeln!(output, "{} {}",
-					markdown::Element::UnorderedList {depth: 0, text: markdown::Text::Bold("Hourly Rate:")},
+					markdown::Element::UnorderedList {depth: 0, text: markdown::Text::Bold("Hourly Rate")},
 					job.invoice.hourly_rate,
 				).unwrap();
 
 				if let Some(date) = &job.invoice.date
 				{
-					writeln!(output, "{} {}",
-						markdown::Element::UnorderedList {depth: 0, text: markdown::Text::Bold("Status:")},
+					writeln!(output, "{}: {}",
+						markdown::Element::UnorderedList {depth: 0, text: markdown::Text::Bold("Status")},
 						date,
 					).unwrap();
 				}
 
-				writeln!(output, "{} {}",
-					markdown::Element::UnorderedList {depth: 0, text: markdown::Text::Bold("Total Amount Owed:")},
+				writeln!(output, "{}: {}",
+					markdown::Element::UnorderedList {depth: 0, text: markdown::Text::Bold("Total Amount Owed")},
 					Job::from(&job).total(),
 				).unwrap();
 				writeln!(output, "{}", markdown::Element::<&str>::Break).unwrap();
@@ -127,112 +141,20 @@ impl Target
 				writeln!(output, "{}", markdown::Element::Heading {depth: 2, text: "Objectives"}).unwrap();
 				writeln!(output, "{}", markdown::Element::BlockText(&job.objectives)).unwrap();
 
-				writeln!(output, "{}", markdown::Element::Heading {depth: 2, text: "Notes"}).unwrap();
-				writeln!(output, "{}", markdown::Element::BlockText(&job.notes)).unwrap();
+				if !job.notes.is_empty()
+				{
+					writeln!(output, "{}", markdown::Element::Heading {depth: 2, text: "Notes"}).unwrap();
+					writeln!(output, "{}", markdown::Element::BlockText(&job.notes)).unwrap();
+				}
 
-				writeln!(output, "{}", markdown::Element::Heading {depth: 2, text: "Timesheets"}).unwrap();
-				job.timesheets.iter().for_each(|t| self.export_timesheet(&mut output, t));
+				if !job.timesheets.is_empty()
+				{
+					writeln!(output, "{}", markdown::Element::Heading {depth: 2, text: "Timesheets"}).unwrap();
+					job.timesheets.iter().for_each(|t| self.export_timesheet(&mut output, t));
+				}
 			},
 		};
 
 		output
-	}
-}
-
-#[cfg(all(feature="markdown", test))]
-mod tests
-{
-	use
-	{
-		std::collections::HashMap,
-
-		super::{JobView, Target, TimesheetView},
-
-		clinvoice_data::
-		{
-			chrono::Utc,
-			Decimal, EmployeeStatus, Expense, ExpenseCategory, Id, Invoice, Money,
-			views::{EmployeeView, LocationView, OrganizationView, PersonView},
-		},
-	};
-
-	#[test]
-	fn export_job()
-	{
-		let organization = OrganizationView
-		{
-			id: Id::new_v4(),
-			location: LocationView
-			{
-				id: Id::new_v4(),
-				outer: Some(LocationView
-				{
-					id: Id::new_v4(),
-					outer: Some(LocationView
-					{
-						id: Id::new_v4(),
-						outer: Some(LocationView
-						{
-							id: Id::new_v4(),
-							outer: Some(LocationView
-							{
-								id: Id::new_v4(),
-								outer: None,
-								name: "Earth".into(),
-							}.into()),
-							name: "USA".into(),
-						}.into()),
-						name: "Arizona".into(),
-					}.into()),
-					name: "Phoenix".into(),
-				}.into()),
-				name: "1337 Some Street".into(),
-			},
-			name: "Big Old Test".into(),
-		};
-
-		let testy_mctesterson = EmployeeView
-		{
-			contact_info: HashMap::new(),
-			id: Id::new_v4(),
-			organization: organization.clone(),
-			person: PersonView
-			{
-				id: Id::new_v4(),
-				name: "Testy McTesterson".into(),
-			},
-			status: EmployeeStatus::Representative,
-			title: "CEO of Tests".into(),
-		};
-
-		let job = JobView
-		{
-			client: organization,
-			date_close: None,
-			date_open: Utc::today().and_hms(0, 0, 0),
-			id: Id::new_v4(),
-			invoice: Invoice
-			{
-				date: None,
-				hourly_rate: Money::new(Decimal::new(2000, 2), "USD"),
-			},
-			notes: "* I tested the function.".into(),
-			objectives: "* I want to test this function.".into(),
-			timesheets: vec![
-				TimesheetView
-				{
-					employee: testy_mctesterson,
-					expenses: Vec::new(),
-					time_begin: Utc::today().and_hms(2, 0, 0),
-					time_end: Some(Utc::today().and_hms(2, 3, 0)),
-					work_notes: "* Wrote the test.".into(),
-				},
-			],
-		};
-
-		assert_eq!(
-			Target::Markdown.export_job(job),
-"",
-		);
 	}
 }

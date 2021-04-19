@@ -26,7 +26,7 @@ pub enum Error
 	/// # Summary
 	///
 	/// At least one of some entity is necessary to perform an operation, but none were found.
-	#[error("There must be at least one `{0}` before this operation can be performed")]
+	#[error("No `{0}` could be retrieved for this operation, which required at least one")]
 	NoData(&'static str),
 }
 

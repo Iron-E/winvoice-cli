@@ -8,7 +8,7 @@ use
 	clinvoice_adapter::
 	{
 		Adapters, Error as AdapterError,
-		data::{Deletable, EmployeeAdapter, JobAdapter, LocationAdapter, Match, OrganizationAdapter, PersonAdapter, query, Updatable},
+		data::{Deletable, EmployeeAdapter, Error as DataError, JobAdapter, LocationAdapter, Match, OrganizationAdapter, PersonAdapter, query, Updatable},
 	},
 	clinvoice_data::views::{PersonView, RestorableSerde},
 	clinvoice_export::Target,
@@ -47,8 +47,11 @@ pub(super) enum RetrieveCommand
 	#[structopt(about="Retrieve existing records about employees")]
 	Employee
 	{
-		#[structopt(help="Select one of the employees as the default in your configuration", long, short)]
+		#[structopt(help="Retrieve the default employee as specified in your configuration", long, short)]
 		default: bool,
+
+		#[structopt(help="Set one of the employees as the default in your configuration", long, short)]
+		set_default: bool,
 	},
 
 	#[structopt(about="Retrieve existing records about job")]
@@ -124,7 +127,7 @@ impl Retrieve
 
 		match self.command
 		{
-			RetrieveCommand::Employee {default} =>
+			RetrieveCommand::Employee {default, set_default} =>
 			{
 				macro_rules! retrieve
 				{
@@ -159,7 +162,26 @@ impl Retrieve
 						{
 							Self::update(&results_view, |e| $emp {employee: &(e.into()), store}.update())?;
 						}
-						else if !self.delete
+
+						if set_default
+						{
+							let mut new_config = config.clone();
+							new_config.employees.default_id = if results_view.len() > 1
+							{
+								input::select_one(&results_view, "Which `Employee` should be the default?")?.id
+							}
+							else
+							{
+								match results_view.first()
+								{
+									Some(employee) => employee.id,
+									_ => return Err(DataError::NoData(stringify!(Employee)).into()),
+								}
+							};
+
+							new_config.update()?;
+						}
+						else if !(self.delete || self.update)
 						{
 							results_view.iter().for_each(|e| println!("{}", e));
 						}

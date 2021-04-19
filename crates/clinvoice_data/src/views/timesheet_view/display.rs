@@ -12,8 +12,8 @@ impl Display for TimesheetView
 	fn fmt(&self, formatter: &mut Formatter) -> Result
 	{
 		writeln!(formatter, "{} – {}: {} {} from {}",
-			DateTime::<Local>::from(self.time_begin),
-			self.time_end.map(|time| DateTime::<Local>::from(time).to_string()).unwrap_or_else(|| "Current".into()),
+			DateTime::<Local>::from(self.time_begin).naive_local(),
+			self.time_end.map(|time| DateTime::<Local>::from(time).naive_local().to_string()).unwrap_or_else(|| "Current".into()),
 			self.employee.title,
 			self.employee.person.name,
 			self.employee.organization,
@@ -148,8 +148,8 @@ mod tests
 			Gas
 	Work Notes:
 		Went to non-corporate fast food restaurant for business meeting",
-				DateTime::<Local>::from(timesheet.time_begin),
-				DateTime::<Local>::from(timesheet.time_end.unwrap()),
+				DateTime::<Local>::from(timesheet.time_begin).naive_local(),
+				DateTime::<Local>::from(timesheet.time_end.unwrap()).naive_local(),
 			),
 		);
 		println!("\n>>>>> TimesheetView::fmt {}us <<<<<\n", Instant::now().duration_since(start).as_micros());

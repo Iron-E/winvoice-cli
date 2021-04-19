@@ -15,12 +15,12 @@ impl Display for JobView
 		write!(formatter, "Job #{} for {}: {} – ",
 			self.id,
 			self.client.name,
-			DateTime::<Local>::from(self.date_open),
+			DateTime::<Local>::from(self.date_open).naive_local(),
 		)?;
 
 		if let Some(date) = self.date_close
 		{
-			writeln!(formatter, "{}", DateTime::<Local>::from(date))?;
+			writeln!(formatter, "{}", DateTime::<Local>::from(date).naive_local())?;
 		}
 		else
 		{
@@ -142,11 +142,11 @@ mod tests
 			Work Notes:
 				Went to non-corporate fast food restaurant for business meeting",
 				create_job_view.id,
-				DateTime::<Local>::from(create_job_view.date_open),
-				DateTime::<Local>::from(create_job_view.date_close.unwrap()),
+				DateTime::<Local>::from(create_job_view.date_open).naive_local(),
+				DateTime::<Local>::from(create_job_view.date_close.unwrap()).naive_local(),
 				Job::from(&create_job_view).total(),
-				DateTime::<Local>::from(create_job_view.timesheets.first().unwrap().time_begin),
-				DateTime::<Local>::from(create_job_view.timesheets.first().unwrap().time_end.unwrap()),
+				DateTime::<Local>::from(create_job_view.timesheets.first().unwrap().time_begin).naive_local(),
+				DateTime::<Local>::from(create_job_view.timesheets.first().unwrap().time_end.unwrap()).naive_local(),
 			),
 		);
 		println!("\n>>>>> JobView::fmt {}us <<<<<\n", Instant::now().duration_since(start).as_micros());

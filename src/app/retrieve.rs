@@ -8,7 +8,7 @@ use
 	clinvoice_adapter::
 	{
 		Adapters, Error as AdapterError,
-		data::{Deletable, EmployeeAdapter, Error as DataError, JobAdapter, LocationAdapter, Match, OrganizationAdapter, PersonAdapter, query, Updatable},
+		data::{Deletable, EmployeeAdapter, Error as DataError, JobAdapter, LocationAdapter, OrganizationAdapter, PersonAdapter, query, Updatable},
 	},
 	clinvoice_data::views::{PersonView, RestorableSerde},
 	clinvoice_export::Target,
@@ -137,7 +137,7 @@ impl Retrieve
 						{
 							query::Employee
 							{
-								id: Match::EqualTo(Cow::Borrowed(&config.employees.default_id)),
+								id: query::Match::EqualTo(Cow::Borrowed(&config.employees.default_id)),
 								..Default::default()
 							}
 						}
@@ -149,9 +149,16 @@ impl Retrieve
 						let results = $emp::retrieve(&query, &store)?;
 						let results_view = results.into_iter().map(|e|
 							$emp::into_view::<$loc, $org, $per>(e, &store)
-						).filter(|view|
-							view.as_ref().map(|v| query.matches_view(v)).unwrap_or(true)
-						).collect::<Result<Vec<_>, _>>()?;
+						).filter_map(|result| match result
+						{
+							Ok(t) => match query.matches_view(&t)
+							{
+								Ok(b) if b => Some(Ok(t)),
+								Err(e) => Some(Err(DataError::from(e).into())),
+								_ => None,
+							},
+							Err(e) => Some(Err(e)),
+						}).collect::<Result<Vec<_>, _>>()?;
 
 						if self.delete
 						{
@@ -208,9 +215,16 @@ impl Retrieve
 						let results = $job::retrieve(&query, &store)?;
 						let results_view = results.into_iter().map(|j|
 							$job::into_view::<$emp, $loc, $org, $per>(j, &store)
-						).filter(|view|
-							view.as_ref().map(|v| query.matches_view(v)).unwrap_or(true)
-						).collect::<Result<Vec<_>, _>>()?;
+						).filter_map(|result| match result
+						{
+							Ok(t) => match query.matches_view(&t)
+							{
+								Ok(b) if b => Some(Ok(t)),
+								Err(e) => Some(Err(DataError::from(e).into())),
+								_ => None,
+							},
+							Err(e) => Some(Err(e)),
+						}).collect::<Result<Vec<_>, _>>()?;
 
 						if self.delete
 						{
@@ -225,7 +239,7 @@ impl Retrieve
 						if let Some(target) = export
 						{
 							input::select(&results_view, "Select which Jobs you want to export")?.into_iter().for_each(|job|
-								println!("{}", target.export_job(job))
+								println!("{}", target.export_job(&job))
 							);
 						}
 						else if !(self.delete || self.update)
@@ -255,9 +269,16 @@ impl Retrieve
 						let results = $loc::retrieve(&query, &store)?;
 						let results_view = results.into_iter().map(|l|
 							$loc::into_view(l, &store)
-						).filter(|view|
-							view.as_ref().map(|v| query.matches_view(v)).unwrap_or(true)
-						).collect::<Result<Vec<_>, _>>()?;
+						).filter_map(|result| match result
+						{
+							Ok(t) => match query.matches_view(&t)
+							{
+								Ok(b) if b => Some(Ok(t)),
+								Err(e) => Some(Err(DataError::from(e).into())),
+								_ => None,
+							},
+							Err(e) => Some(Err(e)),
+						}).collect::<Result<Vec<_>, _>>()?;
 
 						if self.delete
 						{
@@ -301,9 +322,16 @@ impl Retrieve
 						let results = $org::retrieve(&query, &store)?;
 						let results_view = results.into_iter().map(|o|
 							$org::into_view::<$loc>(o, &store)
-						).filter(|view|
-							view.as_ref().map(|v| query.matches_view(v)).unwrap_or(true)
-						).collect::<Result<Vec<_>, _>>()?;
+						).filter_map(|result| match result
+						{
+							Ok(t) => match query.matches_view(&t)
+							{
+								Ok(b) if b => Some(Ok(t)),
+								Err(e) => Some(Err(DataError::from(e).into())),
+								_ => None,
+							},
+							Err(e) => Some(Err(e)),
+						}).collect::<Result<Vec<_>, _>>()?;
 
 						if self.delete
 						{
@@ -339,7 +367,14 @@ impl Retrieve
 						let query: query::Person = input::edit_default(String::from(QUERY_PROMPT) + "persons")?;
 
 						let results = $per::retrieve(&query, &store)?;
-						let results_view = results.into_iter().map(PersonView::from).filter(|view| query.matches_view(view)).collect::<Vec<_>>();
+						let results_view = results.into_iter().map(PersonView::from).filter_map(|view|
+							match query.matches_view(&view)
+							{
+								Ok(b) if b => Some(Ok(view)),
+								Err(e) => Some(Err(e)),
+								_ => None,
+							}
+						).collect::<Result<Vec<_>, _>>()?;
 
 						if self.delete
 						{

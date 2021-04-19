@@ -25,6 +25,8 @@ mod invoice;
 mod invoice_date;
 mod job;
 mod location;
+mod r#match;
+mod match_str;
 mod organization;
 mod person;
 mod timesheet;
@@ -38,6 +40,8 @@ pub use
 	invoice_date::InvoiceDate,
 	job::Job,
 	location::{Location, OuterLocation},
+	r#match::Match,
+	match_str::MatchStr,
 	organization::Organization,
 	person::Person,
 	timesheet::Timesheet,

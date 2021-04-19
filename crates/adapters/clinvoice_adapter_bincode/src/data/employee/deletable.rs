@@ -5,7 +5,7 @@ use
 	super::BincodeEmployee,
 	crate::data::{BincodeJob, Error, Result},
 
-	clinvoice_adapter::data::{Deletable, Error as DataError, JobAdapter, Match, query, Updatable},
+	clinvoice_adapter::data::{Deletable, Error as DataError, JobAdapter, query, Updatable},
 };
 
 impl Deletable for BincodeEmployee<'_, '_>
@@ -21,7 +21,7 @@ impl Deletable for BincodeEmployee<'_, '_>
 				{
 					employee: query::Employee
 					{
-						id: Match::HasAny(vec![Cow::Borrowed(&self.employee.id)].into_iter().collect()),
+						id: query::Match::HasAny(vec![Cow::Borrowed(&self.employee.id)].into_iter().collect()),
 						..Default::default()
 					},
 					..Default::default()
@@ -68,7 +68,7 @@ mod tests
 	{
 		std::time::Instant,
 
-		super::{BincodeEmployee, BincodeJob, Cow, Deletable, JobAdapter, Match, query, Updatable},
+		super::{BincodeEmployee, BincodeJob, Cow, Deletable, JobAdapter, query, Updatable},
 		crate::
 		{
 			data::{BincodeLocation, BincodeOrganization, BincodePerson},
@@ -148,7 +148,7 @@ mod tests
 			big_old_test = BincodeOrganization::retrieve(
 				&query::Organization
 				{
-					id: Match::EqualTo(Cow::Borrowed(&big_old_test.id)),
+					id: query::Match::EqualTo(Cow::Borrowed(&big_old_test.id)),
 					..Default::default()
 				},
 				&store,
@@ -159,10 +159,10 @@ mod tests
 				{
 					client: query::Organization
 					{
-						id: Match::EqualTo(Cow::Borrowed(&big_old_test.id)),
+						id: query::Match::EqualTo(Cow::Borrowed(&big_old_test.id)),
 						..Default::default()
 					},
-					id: Match::EqualTo(Cow::Borrowed(&creation.id)),
+					id: query::Match::EqualTo(Cow::Borrowed(&creation.id)),
 					..Default::default()
 				},
 				&store,

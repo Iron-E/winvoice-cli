@@ -2,7 +2,7 @@ use
 {
 	std::{borrow::Cow, error::Error},
 
-	super::{Deletable, EmployeeAdapter, Initializable, LocationAdapter, Match, OrganizationAdapter, PersonAdapter, query, timesheet, Updatable},
+	super::{Deletable, EmployeeAdapter, Initializable, LocationAdapter, OrganizationAdapter, PersonAdapter, query, timesheet, Updatable},
 	crate::Store,
 
 	clinvoice_data::
@@ -121,7 +121,7 @@ pub trait JobAdapter :
 		let results = O::retrieve(
 			&query::Organization
 			{
-				id: Match::EqualTo(Cow::Borrowed(&job.client_id)),
+				id: query::Match::EqualTo(Cow::Borrowed(&job.client_id)),
 				..Default::default()
 			},
 			store,

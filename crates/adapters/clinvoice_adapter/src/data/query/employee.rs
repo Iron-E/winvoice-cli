@@ -1,9 +1,10 @@
 use
 {
-	super::{Contact, Organization, Person},
-	crate::data::Match,
+	super::{Contact, Match, MatchStr, Organization, Person},
 
 	clinvoice_data::{EmployeeStatus, Id, views::EmployeeView},
+
+	regex::Error,
 };
 
 #[cfg(feature="serde_support")]
@@ -29,7 +30,7 @@ pub struct Employee<'m>
 	pub person: Person<'m>,
 
 	#[cfg_attr(feature="serde_support", serde(default))]
-	pub title: Match<'m, String>,
+	pub title: MatchStr<String>,
 
 	#[cfg_attr(feature="serde_support", serde(default))]
 	pub status: Match<'m, EmployeeStatus>,
@@ -40,39 +41,45 @@ impl Employee<'_>
 	/// # Summary
 	///
 	/// Return `true` if `employee` is a match.
-	pub fn matches(&self, employee: &clinvoice_data::Employee) -> bool
+	pub fn matches(&self, employee: &clinvoice_data::Employee) -> Result<bool, Error>
 	{
-		self.contact_info.set_matches(employee.contact_info.values()) &&
-		self.id.matches(&employee.id) &&
-		self.organization.id.matches(&employee.organization_id) &&
-		self.person.id.matches(&employee.person_id) &&
-		self.title.matches(&employee.title) &&
-		self.status.matches(&employee.status)
+		Ok(
+			self.contact_info.set_matches(employee.contact_info.values())? &&
+			self.id.matches(&employee.id) &&
+			self.organization.id.matches(&employee.organization_id) &&
+			self.person.id.matches(&employee.person_id) &&
+			self.title.matches(&employee.title)? &&
+			self.status.matches(&employee.status)
+		)
 	}
 
 	/// # Summary
 	///
 	/// Return `true` if `employee` is a match.
-	pub fn matches_view(&self, employee: &EmployeeView) -> bool
+	pub fn matches_view(&self, employee: &EmployeeView) -> Result<bool, Error>
 	{
-		self.contact_info.set_matches_view(employee.contact_info.values()) &&
-		self.id.matches(&employee.id) &&
-		self.organization.matches_view(&employee.organization) &&
-		self.person.matches_view(&employee.person) &&
-		self.title.matches(&employee.title) &&
-		self.status.matches(&employee.status)
+		Ok(
+			self.contact_info.set_matches_view(employee.contact_info.values())? &&
+			self.id.matches(&employee.id) &&
+			self.organization.matches_view(&employee.organization)? &&
+			self.person.matches_view(&employee.person)? &&
+			self.title.matches(&employee.title)? &&
+			self.status.matches(&employee.status)
+		)
 	}
 
 	/// # Summary
 	///
 	/// Return `true` if `employee` is a match.
-	pub fn set_matches_view<'item>(&self, mut employees: impl Iterator<Item=&'item EmployeeView>) -> bool
+	pub fn set_matches_view<'item>(&self, mut employees: impl Iterator<Item=&'item EmployeeView>) -> Result<bool, Error>
 	{
-		self.contact_info.set_matches_view(employees.by_ref().map(|e| e.contact_info.values()).flatten()) &&
-		self.id.set_matches(&employees.by_ref().map(|e| &e.id).collect()) &&
-		self.organization.set_matches_view(employees.by_ref().map(|e| &e.organization)) &&
-		self.person.set_matches_view(employees.by_ref().map(|e| &e.person)) &&
-		self.title.set_matches(&employees.by_ref().map(|e| &e.title).collect()) &&
-		self.status.set_matches(&employees.map(|e| &e.status).collect())
+		Ok(
+			self.contact_info.set_matches_view(employees.by_ref().map(|e| e.contact_info.values()).flatten())? &&
+			self.id.set_matches(&employees.by_ref().map(|e| &e.id).collect()) &&
+			self.organization.set_matches_view(employees.by_ref().map(|e| &e.organization))? &&
+			self.person.set_matches_view(employees.by_ref().map(|e| &e.person))? &&
+			self.title.set_matches(employees.by_ref().map(|e| e.title.as_ref()))? &&
+			self.status.set_matches(&employees.map(|e| &e.status).collect())
+		)
 	}
 }

@@ -1,6 +1,6 @@
 use
 {
-	crate::data::Match,
+	super::Match,
 
 	clinvoice_data::chrono::{DateTime, Local},
 };

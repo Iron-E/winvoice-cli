@@ -1,9 +1,10 @@
 use
 {
-	super::Location,
-	crate::data::Match,
+	super::{Location, Match, MatchStr},
 
 	clinvoice_data::{Id, views::OrganizationView},
+
+	regex::Error,
 };
 
 #[cfg(feature="serde_support")]
@@ -23,7 +24,7 @@ pub struct Organization<'m>
 	pub location: Location<'m>,
 
 	#[cfg_attr(feature="serde_support", serde(default))]
-	pub name: Match<'m, String>,
+	pub name: MatchStr<String>,
 }
 
 impl Organization<'_>
@@ -31,30 +32,36 @@ impl Organization<'_>
 	/// # Summary
 	///
 	/// Return `true` if `organization` is a match.
-	pub fn matches(&self, organization: &clinvoice_data::Organization) -> bool
+	pub fn matches(&self, organization: &clinvoice_data::Organization) -> Result<bool, Error>
 	{
-		self.id.matches(&organization.id) &&
-		self.location.id.matches(&organization.location_id) &&
-		self.name.matches(&organization.name)
+		Ok(
+			self.id.matches(&organization.id) &&
+			self.location.id.matches(&organization.location_id) &&
+			self.name.matches(&organization.name)?
+		)
 	}
 
 	/// # Summary
 	///
 	/// Return `true` if `organization` is a match.
-	pub fn matches_view(&self, organization: &OrganizationView) -> bool
+	pub fn matches_view(&self, organization: &OrganizationView) -> Result<bool, Error>
 	{
-		self.id.matches(&organization.id) &&
-		self.location.matches_view(&organization.location) &&
-		self.name.matches(&organization.name)
+		Ok(
+			self.id.matches(&organization.id) &&
+			self.location.matches_view(&organization.location)? &&
+			self.name.matches(&organization.name)?
+		)
 	}
 
 	/// # Summary
 	///
 	/// Return `true` if `organizations` [`Match::set_matches`].
-	pub fn set_matches_view<'item>(&self, mut organizations: impl Iterator<Item=&'item OrganizationView>) -> bool
+	pub fn set_matches_view<'item>(&self, mut organizations: impl Iterator<Item=&'item OrganizationView>) -> Result<bool, Error>
 	{
-		self.id.set_matches(&organizations.by_ref().map(|o| &o.id).collect()) &&
-		self.location.set_matches_view(organizations.by_ref().map(|o| &o.location)) &&
-		self.name.set_matches(&organizations.map(|o| &o.name).collect())
+		Ok(
+			self.id.set_matches(&organizations.by_ref().map(|o| &o.id).collect()) &&
+			self.location.set_matches_view(organizations.by_ref().map(|o| &o.location))? &&
+			self.name.set_matches(organizations.map(|o| o.name.as_ref()))?
+		)
 	}
 }

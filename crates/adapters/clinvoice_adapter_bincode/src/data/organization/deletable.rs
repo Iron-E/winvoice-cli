@@ -5,7 +5,7 @@ use
 	super::BincodeOrganization,
 	crate::data::{BincodeEmployee, BincodeJob, Error, Result},
 
-	clinvoice_adapter::data::{Deletable, EmployeeAdapter, Error as DataError, JobAdapter, Match, query},
+	clinvoice_adapter::data::{Deletable, EmployeeAdapter, Error as DataError, JobAdapter, query},
 	clinvoice_data::Employee,
 };
 
@@ -22,7 +22,7 @@ impl Deletable for BincodeOrganization<'_, '_>
 				{
 					organization: query::Organization
 					{
-						id: Match::EqualTo(Cow::Borrowed(&self.organization.id)),
+						id: query::Match::EqualTo(Cow::Borrowed(&self.organization.id)),
 						..Default::default()
 					},
 					..Default::default()
@@ -36,7 +36,7 @@ impl Deletable for BincodeOrganization<'_, '_>
 			{
 				client: query::Organization
 				{
-					id: Match::EqualTo(Cow::Borrowed(&self.organization.id)),
+					id: query::Match::EqualTo(Cow::Borrowed(&self.organization.id)),
 					..Default::default()
 				},
 				..Default::default()

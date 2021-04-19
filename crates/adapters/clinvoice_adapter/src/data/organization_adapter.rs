@@ -2,7 +2,7 @@ use
 {
 	std::{borrow::Cow, error::Error},
 
-	super::{Deletable, EmployeeAdapter, Initializable, LocationAdapter, Match, query, Updatable},
+	super::{Deletable, EmployeeAdapter, Initializable, LocationAdapter, query, Updatable},
 	crate::Store,
 
 	clinvoice_data::{Employee, Location, Organization, views::OrganizationView},
@@ -77,7 +77,7 @@ pub trait OrganizationAdapter  :
 			{
 				organization: query::Organization
 				{
-					id: Match::EqualTo(Cow::Borrowed(&organization.id)),
+					id: query::Match::EqualTo(Cow::Borrowed(&organization.id)),
 					..Default::default()
 				},
 				..Default::default()
@@ -97,7 +97,7 @@ pub trait OrganizationAdapter  :
 		let results = L::retrieve(
 			&query::Location
 			{
-				id: Match::EqualTo(Cow::Borrowed(&organization.location_id)),
+				id: query::Match::EqualTo(Cow::Borrowed(&organization.location_id)),
 				..Default::default()
 			},
 			store,

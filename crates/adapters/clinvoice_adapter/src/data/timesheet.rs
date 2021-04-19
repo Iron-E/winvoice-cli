@@ -2,7 +2,7 @@ use
 {
 	std::borrow::Cow,
 
-	super::{EmployeeAdapter, Error, Match, query},
+	super::{EmployeeAdapter, Error, query},
 	crate::Store,
 
 	clinvoice_data::{Employee, Timesheet},
@@ -19,7 +19,7 @@ where
 	match E::retrieve(
 		&query::Employee
 		{
-			id: Match::EqualTo(Cow::Borrowed(&timesheet.employee_id)),
+			id: query::Match::EqualTo(Cow::Borrowed(&timesheet.employee_id)),
 			..Default::default()
 		},
 		store,

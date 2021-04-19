@@ -11,7 +11,7 @@ use
 
 	clinvoice_adapter::
 	{
-		data::{EmployeeAdapter, Initializable, query, Updatable},
+		data::{EmployeeAdapter, Error as DataError, Initializable, query, Updatable},
 		Store,
 	},
 	clinvoice_data::{Contact, Employee, EmployeeStatus, Organization, Person},
@@ -75,7 +75,7 @@ impl EmployeeAdapter for BincodeEmployee<'_, '_>
 	{
 		Self::init(&store)?;
 
-		util::retrieve(Self::path(store), |e| query.matches(e))
+		util::retrieve(Self::path(store), |e| query.matches(e).map_err(|e| DataError::from(e).into()))
 	}
 }
 
@@ -88,7 +88,7 @@ mod tests
 
 		super::{BincodeEmployee, Contact, Employee, EmployeeAdapter, EmployeeStatus, Organization, Person, query, Store, util},
 
-		clinvoice_adapter::data::Match,
+		clinvoice_adapter::data::query::Match,
 		clinvoice_data::Id,
 	};
 

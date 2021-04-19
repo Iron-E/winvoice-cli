@@ -1,7 +1,6 @@
 use
 {
-	super::{Invoice, Organization, Timesheet},
-	crate::data::Match,
+	super::{Invoice, Match, MatchStr, Organization, Timesheet},
 
 	clinvoice_data::
 	{
@@ -9,6 +8,8 @@ use
 		Id,
 		views::JobView,
 	},
+
+	regex::Error,
 };
 
 #[cfg(feature="serde_support")]
@@ -37,10 +38,10 @@ pub struct Job<'m>
 	pub invoice: Invoice<'m>,
 
 	#[cfg_attr(feature="serde_support", serde(default))]
-	pub notes: Match<'m, String>,
+	pub notes: MatchStr<String>,
 
 	#[cfg_attr(feature="serde_support", serde(default))]
-	pub objectives: Match<'m, String>,
+	pub objectives: MatchStr<String>,
 
 	#[cfg_attr(feature="serde_support", serde(default))]
 	pub timesheets: Timesheet<'m>,
@@ -51,30 +52,34 @@ impl Job<'_>
 	/// # Summary
 	///
 	/// Return `true` if `job` is a match.
-	pub fn matches(&self, job: &clinvoice_data::Job) -> bool
+	pub fn matches(&self, job: &clinvoice_data::Job) -> Result<bool, Error>
 	{
-		self.client.id.matches(&job.client_id) &&
-		self.date_close.matches(&job.date_close.map(DateTime::from)) &&
-		self.date_open.matches(&DateTime::from(job.date_open)) &&
-		self.id.matches(&job.id) &&
-		self.invoice.matches(&job.invoice) &&
-		self.notes.matches(&job.notes) &&
-		self.objectives.matches(&job.objectives) &&
-		self.timesheets.set_matches(job.timesheets.iter())
+		Ok(
+			self.client.id.matches(&job.client_id) &&
+			self.date_close.matches(&job.date_close.map(DateTime::from)) &&
+			self.date_open.matches(&DateTime::from(job.date_open)) &&
+			self.id.matches(&job.id) &&
+			self.invoice.matches(&job.invoice) &&
+			self.notes.matches(&job.notes)? &&
+			self.objectives.matches(&job.objectives)? &&
+			self.timesheets.set_matches(job.timesheets.iter())?
+		)
 	}
 
 	/// # Summary
 	///
 	/// Return `true` if `job` is a match.
-	pub fn matches_view(&self, job: &JobView) -> bool
+	pub fn matches_view(&self, job: &JobView) -> Result<bool, Error>
 	{
-		self.client.matches_view(&job.client) &&
-		self.date_close.matches(&job.date_close.map(DateTime::from)) &&
-		self.date_open.matches(&DateTime::from(job.date_open)) &&
-		self.id.matches(&job.id) &&
-		self.invoice.matches(&job.invoice) &&
-		self.notes.matches(&job.notes) &&
-		self.objectives.matches(&job.objectives) &&
-		self.timesheets.set_matches_view(job.timesheets.iter())
+		Ok(
+			self.client.matches_view(&job.client)? &&
+			self.date_close.matches(&job.date_close.map(DateTime::from)) &&
+			self.date_open.matches(&DateTime::from(job.date_open)) &&
+			self.id.matches(&job.id) &&
+			self.invoice.matches(&job.invoice) &&
+			self.notes.matches(&job.notes)? &&
+			self.objectives.matches(&job.objectives)? &&
+			self.timesheets.set_matches_view(job.timesheets.iter())?
+		)
 	}
 }

@@ -6,6 +6,8 @@ use
 		path::{Path, PathBuf},
 	},
 
+	crate::data::Result as DataResult,
+
 	clinvoice_adapter::Store,
 	clinvoice_data::{Id, UUID_NAMESPACE},
 
@@ -64,8 +66,7 @@ pub fn expand_store_path(store: &Store) -> PathBuf
 /// * If some [`fs::File`] in `path` is not a (valid) [`T`].
 /// * When [`fs::read_dir`] does.
 /// * When [`fs::File::open`] does.
-pub fn retrieve<E, T>(path: impl AsRef<Path>, query: impl Fn(&T) -> bool) -> Result<Vec<T>, E> where
-	E : From<io::Error> + From<bincode::Error>,
+pub fn retrieve<T>(path: impl AsRef<Path>, query: impl Fn(&T) -> DataResult<bool>) -> DataResult<Vec<T>> where
 	T : DeserializeOwned,
 {
 	let nodes = fs::read_dir(path)?;
@@ -75,12 +76,19 @@ pub fn retrieve<E, T>(path: impl AsRef<Path>, query: impl Fn(&T) -> bool) -> Res
 	).map(|file_path|
 		fs::File::open(file_path).map(io::BufReader::new).map_err(|e| e.into()).and_then(|reader|
 		{
-			let employee: Result<T, E> = bincode::deserialize_from(reader).map_err(|e| e.into());
+			let employee: DataResult<T> = bincode::deserialize_from(reader).map_err(|e| e.into());
 			employee
 		})
-	).filter(|result|
-		result.as_ref().map(|r| query(r)).unwrap_or(true)
-	).collect()
+	).filter_map(|result| match result
+	{
+		Ok(t) => match query(&t)
+		{
+			Ok(b) if b => Some(Ok(t)),
+			Err(e) => Some(Err(e)),
+			_ => None,
+		},
+		Err(e) => Some(Err(e)),
+	}).collect()
 }
 
 /// # Summary

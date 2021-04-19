@@ -21,6 +21,9 @@ const_format = "0.2"
 # Errors
 thiserror = "1"
 
+# Matching Strings
+regex = "1"
+
 # Serialization
 serde = {version="1", optional=true}
 

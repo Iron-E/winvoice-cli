@@ -1,8 +1,10 @@
 use
 {
-	crate::data::Match,
+	super::{Match, MatchStr},
 
 	clinvoice_data::{Id, views::PersonView},
+
+	regex::Error,
 };
 
 #[cfg(feature="serde_support")]
@@ -19,7 +21,7 @@ pub struct Person<'m>
 	pub id: Match<'m, Id>,
 
 	#[cfg_attr(feature="serde_support", serde(default))]
-	pub name: Match<'m, String>,
+	pub name: MatchStr<String>,
 }
 
 impl Person<'_>
@@ -27,27 +29,33 @@ impl Person<'_>
 	/// # Summary
 	///
 	/// Return `true` if `person` is a match.
-	pub fn matches(&self, person: &clinvoice_data::Person) -> bool
+	pub fn matches(&self, person: &clinvoice_data::Person) -> Result<bool, Error>
 	{
-		self.id.matches(&person.id) &&
-		self.name.matches(&person.name)
+		Ok(
+			self.id.matches(&person.id) &&
+			self.name.matches(&person.name)?
+		)
 	}
 
 	/// # Summary
 	///
 	/// Return `true` if `person` is a match.
-	pub fn matches_view(&self, person: &PersonView) -> bool
+	pub fn matches_view(&self, person: &PersonView) -> Result<bool, Error>
 	{
-		self.id.matches(&person.id) &&
-		self.name.matches(&person.name)
+		Ok(
+			self.id.matches(&person.id) &&
+			self.name.matches(&person.name)?
+		)
 	}
 
 	/// # Summary
 	///
 	/// Return `true` if `people` [`Match::set_matches`].
-	pub fn set_matches_view<'item>(&self, mut people: impl Iterator<Item=&'item PersonView>) -> bool
+	pub fn set_matches_view<'item>(&self, mut people: impl Iterator<Item=&'item PersonView>) -> Result<bool, Error>
 	{
-		self.id.set_matches(&people.by_ref().map(|p| &p.id).collect()) &&
-		self.name.set_matches(&people.map(|p| &p.name).collect())
+		Ok(
+			self.id.set_matches(&people.by_ref().map(|p| &p.id).collect()) &&
+			self.name.set_matches(people.map(|p| p.name.as_ref()))?
+		)
 	}
 }

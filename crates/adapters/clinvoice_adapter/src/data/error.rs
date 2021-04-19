@@ -8,7 +8,7 @@ use
 /// # Summary
 ///
 /// Errors for the data
-#[derive(Copy, Clone, Debug, Eq, Error, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Error)]
 pub enum Error
 {
 	/// # Summary
@@ -22,6 +22,13 @@ pub enum Error
 	/// Some reference to an `id` was expected, but none was found.
 	#[error("Attempted to delete ID #{0}, but one or more other entities require it. Cascade delete to remove them")]
 	DeleteRestricted(Id),
+
+	/// # Summary
+	///
+	/// A query was attmepted with regular expressions, and the regular expression was malformed.
+	#[cfg_attr(debug_assertions,      error("{0:?}"))]
+	#[cfg_attr(not(debug_assertions), error("{0}"))]
+	MalformedRegex(#[from] regex::Error),
 
 	/// # Summary
 	///

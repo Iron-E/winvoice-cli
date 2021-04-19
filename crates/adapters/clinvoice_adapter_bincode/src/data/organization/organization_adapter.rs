@@ -9,7 +9,7 @@ use
 
 	clinvoice_adapter::
 	{
-		data::{Initializable, OrganizationAdapter, query, Updatable},
+		data::{Error as DataError, Initializable, OrganizationAdapter, query, Updatable},
 		Store,
 	},
 	clinvoice_data::{Location, Organization},
@@ -62,7 +62,7 @@ impl OrganizationAdapter for BincodeOrganization<'_, '_>
 	{
 		Self::init(&store)?;
 
-		util::retrieve(Self::path(store), |o| query.matches(o))
+		util::retrieve(Self::path(store), |o| query.matches(o).map_err(|e| DataError::from(e).into()))
 	}
 }
 
@@ -75,7 +75,7 @@ mod tests
 
 		super::{BincodeOrganization, Location, Organization, OrganizationAdapter, query, Store, util},
 
-		clinvoice_adapter::data::Match,
+		clinvoice_adapter::data::query::{Match, MatchStr},
 		clinvoice_data::Id,
 	};
 
@@ -166,6 +166,7 @@ mod tests
 			).unwrap();
 
 			let start = Instant::now();
+
 			// retrieve `packing` and `eal`
 			let results = BincodeOrganization::retrieve(
 				&query::Organization
@@ -175,7 +176,7 @@ mod tests
 						id: Match::HasAny(vec![Cow::Borrowed(&earth_id), Cow::Borrowed(&usa_id)].into_iter().collect()),
 						..Default::default()
 					},
-					name: Match::HasNone(vec![Cow::Borrowed(&aaa.name)].into_iter().collect()),
+					name: MatchStr::Regex(format!("^({}|{})$", packing.name, eal.name)),
 					..Default::default()
 				},
 				&store,

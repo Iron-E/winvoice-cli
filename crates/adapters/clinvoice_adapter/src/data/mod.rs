@@ -15,7 +15,6 @@ mod error;
 mod initializable;
 mod job_adapter;
 mod location_adapter;
-mod r#match;
 mod organization_adapter;
 mod person_adapter;
 mod updatable;
@@ -30,7 +29,6 @@ pub use
 	initializable::Initializable,
 	job_adapter::JobAdapter,
 	location_adapter::LocationAdapter,
-	r#match::Match,
 	organization_adapter::OrganizationAdapter,
 	person_adapter::PersonAdapter,
 	updatable::Updatable,

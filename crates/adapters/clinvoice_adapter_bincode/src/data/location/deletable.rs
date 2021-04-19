@@ -5,7 +5,7 @@ use
 	super::BincodeLocation,
 	crate::data::{BincodeOrganization, Error, Result},
 
-	clinvoice_adapter::data::{Deletable, Error as DataError, LocationAdapter, Match, OrganizationAdapter, query},
+	clinvoice_adapter::data::{Deletable, Error as DataError, LocationAdapter, OrganizationAdapter, query},
 	clinvoice_data::Location,
 };
 
@@ -23,7 +23,7 @@ impl Deletable for BincodeLocation<'_, '_>
 					outer: query::OuterLocation::Some(
 						query::Location
 						{
-							id: Match::EqualTo(Cow::Borrowed(&self.location.id)),
+							id: query::Match::EqualTo(Cow::Borrowed(&self.location.id)),
 							..Default::default()
 						}.into()
 					),
@@ -38,7 +38,7 @@ impl Deletable for BincodeLocation<'_, '_>
 			{
 				location: query::Location
 				{
-					id: Match::EqualTo(Cow::Borrowed(&self.location.id)),
+					id: query::Match::EqualTo(Cow::Borrowed(&self.location.id)),
 					..Default::default()
 				},
 				..Default::default()

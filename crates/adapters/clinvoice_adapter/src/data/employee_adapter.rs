@@ -2,7 +2,7 @@ use
 {
 	std::{borrow::Cow, collections::HashMap, error::Error},
 
-	super::{contact, Deletable, Initializable, LocationAdapter, Match, OrganizationAdapter, PersonAdapter, query, Updatable},
+	super::{contact, Deletable, Initializable, LocationAdapter, OrganizationAdapter, PersonAdapter, query, Updatable},
 	crate::Store,
 
 	clinvoice_data::
@@ -100,7 +100,7 @@ pub trait EmployeeAdapter :
 		let results = O::retrieve(
 			&query::Organization
 			{
-				id: Match::EqualTo(Cow::Borrowed(&employee.organization_id)),
+				id: query::Match::EqualTo(Cow::Borrowed(&employee.organization_id)),
 				..Default::default()
 			},
 			store,
@@ -126,7 +126,7 @@ pub trait EmployeeAdapter :
 		let results = P::retrieve(
 			&query::Person
 			{
-				id: Match::EqualTo(Cow::Borrowed(&employee.person_id)),
+				id: query::Match::EqualTo(Cow::Borrowed(&employee.person_id)),
 				..Default::default()
 			},
 			store,

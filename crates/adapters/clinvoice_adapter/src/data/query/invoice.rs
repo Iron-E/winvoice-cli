@@ -1,7 +1,6 @@
 use
 {
-	super::InvoiceDate,
-	crate::data::Match,
+	super::{InvoiceDate, Match},
 
 	clinvoice_data::Money,
 };

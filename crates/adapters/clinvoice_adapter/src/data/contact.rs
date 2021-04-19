@@ -2,7 +2,7 @@ use
 {
 	std::{borrow::Cow, collections::HashMap, hash::Hash},
 
-	super::{Error, LocationAdapter, Match, query},
+	super::{Error, LocationAdapter, query},
 	crate::Store,
 
 	clinvoice_data::{Contact, views::ContactView},
@@ -21,7 +21,7 @@ where
 		Contact::Address(address) => match L::retrieve(
 			&query::Location
 			{
-				id: Match::EqualTo(Cow::Borrowed(&address)),
+				id: query::Match::EqualTo(Cow::Borrowed(&address)),
 				..Default::default()
 			},
 			store,

@@ -5,7 +5,7 @@ use
 	super::BincodePerson,
 	crate::data::{BincodeEmployee, Error, Result},
 
-	clinvoice_adapter::data::{Deletable, EmployeeAdapter, Error as DataError, Match, query},
+	clinvoice_adapter::data::{Deletable, EmployeeAdapter, Error as DataError, query},
 };
 
 impl Deletable for BincodePerson<'_, '_>
@@ -19,7 +19,7 @@ impl Deletable for BincodePerson<'_, '_>
 			{
 				person: query::Person
 				{
-					id: Match::EqualTo(Cow::Borrowed(&self.person.id)),
+					id: query::Match::EqualTo(Cow::Borrowed(&self.person.id)),
 					..Default::default()
 				},
 				..Default::default()

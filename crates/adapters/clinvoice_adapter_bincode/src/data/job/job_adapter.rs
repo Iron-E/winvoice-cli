@@ -9,7 +9,7 @@ use
 
 	clinvoice_adapter::
 	{
-		data::{Initializable, JobAdapter, query, Updatable},
+		data::{Error as DataError, Initializable, JobAdapter, query, Updatable},
 		Store
 	},
 	clinvoice_data::
@@ -83,7 +83,7 @@ impl JobAdapter for BincodeJob<'_, '_>
 	{
 		Self::init(&store)?;
 
-		util::retrieve(Self::path(store), |j| query.matches(j))
+		util::retrieve(Self::path(store), |j| query.matches(j).map_err(|e| DataError::from(e).into()))
 	}
 }
 
@@ -96,7 +96,7 @@ mod tests
 
 		super::{BincodeJob, DateTime, Job, JobAdapter, Money, Organization, query, Store, Utc, util},
 
-		clinvoice_adapter::data::Match,
+		clinvoice_adapter::data::query::Match,
 		clinvoice_data::{Decimal, Id},
 	};
 

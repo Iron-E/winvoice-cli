@@ -1,7 +1,7 @@
 use
 {
 	std::{borrow::Cow, error::Error},
-	super::{Match, Deletable, Initializable, query, Updatable},
+	super::{Deletable, Initializable, query, Updatable},
 	crate::Store,
 
 	clinvoice_data::{Location, views::LocationView},
@@ -80,7 +80,7 @@ pub trait LocationAdapter :
 			if let Ok(results) = Self::retrieve(
 				&query::Location
 				{
-					id: Match::EqualTo(Cow::Borrowed(&id)),
+					id: query::Match::EqualTo(Cow::Borrowed(&id)),
 					..Default::default()
 				},
 				&store,

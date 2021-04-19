@@ -9,7 +9,7 @@ use
 
 	clinvoice_adapter::
 	{
-		data::{Initializable, PersonAdapter, query, Updatable},
+		data::{Error as DataError, Initializable, PersonAdapter, query, Updatable},
 		Store,
 	},
 	clinvoice_data::Person,
@@ -61,7 +61,7 @@ impl PersonAdapter for BincodePerson<'_, '_>
 	{
 		Self::init(&store)?;
 
-		util::retrieve(Self::path(store), |p| query.matches(p))
+		util::retrieve(Self::path(store), |p| query.matches(p).map_err(|e| DataError::from(e).into()))
 	}
 }
 
@@ -74,7 +74,7 @@ mod tests
 
 		super::{BincodePerson, Person, PersonAdapter, query, Store, util},
 
-		clinvoice_adapter::data::Match,
+		clinvoice_adapter::data::query::{Match, MatchStr},
 	};
 
 	#[test]
@@ -175,7 +175,7 @@ mod tests
 			let longone_slimdi = BincodePerson::retrieve(
 				&query::Person
 				{
-					name: Match::HasAny(vec![Cow::Borrowed(&slimdi.name.clone()), Cow::Borrowed(&longone.name.clone())].into_iter().collect()),
+					name: MatchStr::Regex(format!("^({}|{})$", longone.name, slimdi.name)),
 					..Default::default()
 				},
 				&store,

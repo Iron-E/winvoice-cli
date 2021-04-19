@@ -1,9 +1,10 @@
 use
 {
-	super::Location,
-	crate::data::Match,
+	super::{Location, MatchStr},
 
 	clinvoice_data::views::ContactView,
+
+	regex::Error,
 };
 
 #[cfg(feature="serde_support")]
@@ -20,10 +21,10 @@ pub struct Contact<'m>
 	pub address: Location<'m>,
 
 	#[cfg_attr(feature="serde_support", serde(default))]
-	pub email: Match<'m, String>,
+	pub email: MatchStr<String>,
 
 	#[cfg_attr(feature="serde_support", serde(default))]
-	pub phone: Match<'m, String>,
+	pub phone: MatchStr<String>,
 }
 
 impl Contact<'_>
@@ -31,51 +32,52 @@ impl Contact<'_>
 	/// # Summary
 	///
 	/// Return `true` if `employee` is a match.
-	pub fn set_matches<'item>(&self, mut contact_info: impl Iterator<Item=&'item clinvoice_data::Contact>) -> bool
+	pub fn set_matches<'item>(&self, mut contact_info: impl Iterator<Item=&'item clinvoice_data::Contact>) -> Result<bool, Error>
 	{
-		self.address.id.set_matches(
-			&contact_info.by_ref().flat_map(|c| match c
+		Ok(
+			self.address.id.set_matches(
+				&contact_info.by_ref().flat_map(|c| match c
+				{
+					clinvoice_data::Contact::Address(a) => Some(a),
+					_ => None,
+				}).collect()
+			) &&
+			self.email.set_matches(
+				contact_info.by_ref().flat_map(|c| match c
+				{
+					clinvoice_data::Contact::Email(e) => Some(e.as_ref()),
+					_ => None,
+				})
+			)? &&
+			self.phone.set_matches(contact_info.flat_map(|c| match c
 			{
-				clinvoice_data::Contact::Address(a) => Some(a),
+				clinvoice_data::Contact::Phone(p) => Some(p.as_ref()),
 				_ => None,
-			}).collect()
-		) && self.email.set_matches(
-			&contact_info.by_ref().flat_map(|c| match c
-			{
-				clinvoice_data::Contact::Email(e) => Some(e),
-				_ => None,
-			}).collect()
-		) && self.phone.set_matches(
-			&contact_info.flat_map(|c| match c
-			{
-				clinvoice_data::Contact::Phone(p) => Some(p),
-				_ => None,
-			}).collect()
+			}))?
 		)
 	}
 
 	/// # Summary
 	///
 	/// Return `true` if `employee` is a match.
-	pub fn set_matches_view<'item>(&self, mut contact_info: impl Iterator<Item=&'item ContactView>) -> bool
+	pub fn set_matches_view<'item>(&self, mut contact_info: impl Iterator<Item=&'item ContactView>) -> Result<bool, Error>
 	{
-		self.address.set_matches_view(contact_info.by_ref().flat_map(|c| match c
-		{
-			ContactView::Address(a) => Some(a),
-			_ => None,
-		})) &&
-		self.email.set_matches(
-			&contact_info.by_ref().flat_map(|c| match c
+		Ok(
+			self.address.set_matches_view(contact_info.by_ref().flat_map(|c| match c
 			{
-				ContactView::Email(e) => Some(e),
+				ContactView::Address(a) => Some(a),
 				_ => None,
-			}).collect()
-		) && self.phone.set_matches(
-			&contact_info.flat_map(|c| match c
+			}))? &&
+			self.email.set_matches(contact_info.by_ref().flat_map(|c| match c
 			{
-				ContactView::Email(p) => Some(p),
+				ContactView::Email(e) => Some(e.as_ref()),
 				_ => None,
-			}).collect()
+			}))? &&
+			self.phone.set_matches(contact_info.flat_map(|c| match c
+			{
+				ContactView::Email(p) => Some(p.as_ref()),
+				_ => None,
+			}))?
 		)
 	}
 }

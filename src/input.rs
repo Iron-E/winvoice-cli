@@ -157,12 +157,7 @@ pub fn select_one<T>(entities: &[T], prompt: impl Into<String>) -> io::Result<T>
 		return match selector.interact()
 		{
 			Ok(index) => Ok(entities[index].clone()),
-
-			// NOTE:
-			// Might have to be more specific than this in the future.
-			//  However, the error message we're referring to might change also.
-			//  Might be good to be general for now.
-			Err(e) if e.kind() != io::ErrorKind::Other => Err(e),
+			Err(e) if e.kind() != io::ErrorKind::Other || !e.to_string().contains("Quit not allowed") => Err(e),
 			_ =>
 			{
 				println!("Please select something, or press Ctrl+C to quit");

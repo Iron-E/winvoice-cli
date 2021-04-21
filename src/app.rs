@@ -14,6 +14,11 @@ use
 	dialoguer::Editor,
 };
 
+/// # Summary
+///
+/// The prompt for when editing a [query](clinvoice_adapter::data::query).
+const QUERY_PROMPT: &str = "See the documentation of this query at https://github.com/Iron-E/clinvoice/wiki/Query-Syntax#";
+
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, StructOpt)]
 #[structopt(name="clinvoice", about="CLInvoice is a tool to help with invoicing from the command line!")]
 pub struct App
@@ -34,6 +39,8 @@ enum AppCommand
 	Create(Create),
 
 	Retrieve(Retrieve),
+
+	Time(Time),
 }
 
 impl App
@@ -63,6 +70,7 @@ impl App
 			AppCommand::Config => Self::edit_config(config).map_err(|e| e.into()),
 			AppCommand::Create(cmd) => cmd.run(config, self.store),
 			AppCommand::Retrieve(cmd) => cmd.run(config, self.store),
+			AppCommand::Time(cmd) => cmd.run(config, self.store),
 		}
 	}
 }

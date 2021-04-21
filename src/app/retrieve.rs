@@ -3,6 +3,7 @@ use
 	core::fmt::Display,
 	std::{borrow::Cow, error::Error},
 
+	super::QUERY_PROMPT,
 	crate::{Config, DynResult, input, StructOpt},
 
 	clinvoice_adapter::
@@ -18,11 +19,6 @@ use
 
 #[cfg(feature="bincode")]
 use clinvoice_adapter_bincode::data::{BincodeEmployee, BincodeJob, BincodeLocation, BincodeOrganization, BincodePerson};
-
-/// # Summary
-///
-/// The prompt for when editing a [query](clinvoice_adapter::data::query).
-const QUERY_PROMPT: &str = "See the documentation of this query at https://github.com/Iron-E/clinvoice/wiki/Query-Syntax#";
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, StructOpt)]
 #[structopt(about="Retrieve information that was recorded with CLInvoice")]

@@ -192,13 +192,13 @@ mod tests
 {
 	use
 	{
-		std::collections::HashMap,
+		std::{collections::HashMap, time::Instant},
 
-		super::{JobView, Target, TimesheetView},
+		super::{ContactView, JobView, Target, TimesheetView},
 
 		clinvoice_data::
 		{
-			chrono::Utc,
+			chrono::{DateTime, Local, Utc},
 			Decimal, EmployeeStatus, Expense, ExpenseCategory, Id, Invoice, Money,
 			views::{EmployeeView, LocationView, OrganizationView, PersonView},
 		},
@@ -241,7 +241,8 @@ mod tests
 
 		let testy_mctesterson = EmployeeView
 		{
-			contact_info: HashMap::new(),
+			contact_info: vec![
+			].into_iter().collect(),
 			id: Id::new_v4(),
 			organization: organization.clone(),
 			person: PersonView
@@ -278,15 +279,39 @@ mod tests
 				date: None,
 				hourly_rate: Money::new(Decimal::new(2000, 2), "USD"),
 			},
-			notes: "* I tested the function.".into(),
-			objectives: "* I want to test this function.".into(),
+			notes: "- I tested the function.".into(),
+			objectives: "- I want to test this function.".into(),
 			timesheets: vec![],
 		};
 
+		let start = Instant::now();
 		assert_eq!(
-			Target::Markdown.export_job(job.clone()),
-"",
+			Target::Markdown.export_job(&job),
+			format!(
+"# Job #{}
+
+- **Client**: Big Old Test @ 1337 Some Street, Phoenix, Arizona, USA, Earth
+- **Date Opened**: {}
+
+## Invoice
+
+- **Hourly Rate** 20.00 USD
+- **Total Amount Owed**: 0.00 USD
+
+## Objectives
+
+- I want to test this function.
+
+## Notes
+
+- I tested the function.\n\n",
+				job.id,
+				DateTime::<Local>::from(job.date_open).naive_local(),
+			),
 		);
+		let middle = Instant::now().duration_since(start);
+
+		job.date_close = Some(Utc::today().and_hms(4, 30, 0));
 
 		job.timesheets = vec![
 			TimesheetView
@@ -294,8 +319,8 @@ mod tests
 				employee: testy_mctesterson,
 				expenses: Vec::new(),
 				time_begin: Utc::today().and_hms(2, 0, 0),
-				time_end: Some(Utc::today().and_hms(2, 3, 0)),
-				work_notes: "* Wrote the test.".into(),
+				time_end: Some(Utc::today().and_hms(2, 30, 0)),
+				work_notes: "- Wrote the test.".into(),
 			},
 			TimesheetView
 			{
@@ -303,15 +328,76 @@ mod tests
 				expenses: vec![
 					Expense
 					{
-						category: ExpenseCategory::Item,
+						category: ExpenseCategory::Service,
 						cost: Money::new(Decimal::new(2000, 2), "USD"),
 						description: "Paid for someone else to clean".into(),
 					},
 				],
 				time_begin: Utc::today().and_hms(3, 0, 0),
-				time_end: Some(Utc::today().and_hms(3, 3, 0)),
-				work_notes: "* Clean the deck.".into(),
+				time_end: Some(Utc::today().and_hms(3, 30, 0)),
+				work_notes: "- Clean the deck.".into(),
 			},
 		];
+
+		let second_start = Instant::now();
+		assert_eq!(
+			Target::Markdown.export_job(&job),
+			format!(
+"# Job #{}
+
+- **Client**: Big Old Test @ 1337 Some Street, Phoenix, Arizona, USA, Earth
+- **Date Opened**: {}
+- **Date Closed**: {}
+
+## Invoice
+
+- **Hourly Rate** 20.00 USD
+- **Total Amount Owed**: 40.00 USD
+
+## Objectives
+
+- I want to test this function.
+
+## Notes
+
+- I tested the function.
+
+## Timesheets
+
+### 2021-04-21 02:00:00 – 2021-04-21 02:30:00
+
+#### Employee Information
+
+- **Name**: Testy McTesterson
+- **Employer**: Big Old Test @ 1337 Some Street, Phoenix, Arizona, USA, Earth
+- **Title**: CEO of Tests
+
+#### Work Notes
+
+- Wrote the test.
+
+### 2021-04-21 03:00:00 – 2021-04-21 03:30:00
+
+#### Employee Information
+
+- **Name**: Bob
+- **Employer**: Big Old Test @ 1337 Some Street, Phoenix, Arizona, USA, Earth
+- **Title**: Janitor
+
+#### Expenses
+
+##### Service – 20.00 USD
+
+Paid for someone else to clean
+
+#### Work Notes
+
+- Clean the deck.\n\n",
+				job.id,
+				DateTime::<Local>::from(job.date_open).naive_local(),
+				DateTime::<Local>::from(job.date_close.unwrap()).naive_local(),
+			),
+		);
+		println!("\n>>>>> Target::Markdown.export_job {}us <<<<<\n", (Instant::now().duration_since(second_start) + middle).as_micros());
 	}
 }

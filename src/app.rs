@@ -1,10 +1,12 @@
 pub mod create;
 pub mod retrieve;
+pub mod time;
 
 use
 {
 	create::Create,
 	retrieve::Retrieve,
+	time::Time,
 
 	crate::{Config, DynResult, StructOpt},
 

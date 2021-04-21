@@ -181,3 +181,65 @@ impl Job
 		total
 	}
 }
+
+#[cfg(test)]
+mod tests
+{
+	use
+	{
+		std::time::Instant,
+
+		super::{Decimal, Expense, Id, Invoice, Job, Money, Timesheet},
+		crate::ExpenseCategory,
+
+		chrono::Utc,
+	};
+
+	#[test]
+	fn total()
+	{
+		let job = Job
+		{
+			client_id: Id::default(),
+			date_close: None,
+			date_open: Utc::now(),
+			id: Id::default(),
+			invoice: Invoice
+			{
+				date: None,
+				hourly_rate: Money::new(Decimal::new(2000, 2), "USD"),
+			},
+			notes: "".into(),
+			objectives: "".into(),
+			timesheets: vec![
+				Timesheet
+				{
+					employee_id: Id::default(),
+					expenses: Vec::new(),
+					time_begin: Utc::today().and_hms(2, 0, 0),
+					time_end: Some(Utc::today().and_hms(2, 30, 0)),
+					work_notes: "- Wrote the test.".into(),
+				},
+				Timesheet
+				{
+					employee_id: Id::default(),
+					expenses: vec![
+						Expense
+						{
+							category: ExpenseCategory::Item,
+							cost: Money::new(Decimal::new(2000, 2), "USD"),
+							description: "Paid for someone else to clean".into(),
+						},
+					],
+					time_begin: Utc::today().and_hms(3, 0, 0),
+					time_end: Some(Utc::today().and_hms(3, 30, 0)),
+					work_notes: "- Clean the deck.".into(),
+				},
+			],
+		};
+
+		let start = Instant::now();
+		assert_eq!(job.total(), Money::new(Decimal::new(4000, 2), "USD"));
+		println!("\n>>>>> Job::total {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+	}
+}

@@ -40,15 +40,15 @@ pub enum Match<'element, T> where
 	/// # Example
 	///
 	/// ```rust
-	/// use clinvoice_adapter::data::Match;
-	/// use std::borrow::Cow;
+	/// use std::borrow::Cow::Borrowed;
+	/// use clinvoice_adapter::data::query::Match;
 	///
-	/// let equal_to = Match::EqualTo(&5);
+	/// let equal_to = Match::EqualTo(Borrowed(&5));
 	///
 	/// assert!(equal_to.matches(&5));
-	/// assert!(equal_to.matches(&4) == false);
+	/// assert!(!equal_to.matches(&4));
 	/// assert!(equal_to.set_matches(&([5].iter().collect())));
-	/// assert!(equal_to.set_matches(&([1, 5].iter().collect())) == false);
+	/// assert!(!equal_to.set_matches(&([1, 5].iter().collect())));
 	/// ```
 	EqualTo(Cow<'element, T>),
 
@@ -62,14 +62,14 @@ pub enum Match<'element, T> where
 	/// # Example
 	///
 	/// ```rust
-	/// use clinvoice_adapter::data::Match;
-	/// use std::borrow::Cow;
+	/// use std::borrow::Cow::Borrowed;
+	/// use clinvoice_adapter::data::query::Match;
 	///
-	/// let has_all = Match::HasAll(vec![1, 5, 9].into_iter().collect());
+	/// let has_all = Match::HasAll(vec![Borrowed(&1), Borrowed(&5), Borrowed(&9)].into_iter().collect());
 	///
-	/// assert!(has_all.matches(&1) == false);
-	/// assert!(has_all.matches(&3) == false);
-	/// assert!(has_all.set_matches(&([1, 5].iter().collect())) == false);
+	/// assert!(!has_all.matches(&1));
+	/// assert!(!has_all.matches(&3));
+	/// assert!(!has_all.set_matches(&([1, 5].iter().collect())));
 	/// assert!(has_all.set_matches(&([1, 5, 9].iter().collect())));
 	/// ```
 	HasAll(HashSet<Cow<'element, T>>),
@@ -84,13 +84,13 @@ pub enum Match<'element, T> where
 	/// # Example
 	///
 	/// ```rust
-	/// use clinvoice_adapter::data::Match;
-	/// use std::borrow::Cow;
+	/// use std::borrow::Cow::Borrowed;
+	/// use clinvoice_adapter::data::query::Match;
 	///
-	/// let has_any = Match::HasAny(vec![1, 5, 7, 9].into_iter().collect());
+	/// let has_any = Match::HasAny(vec![Borrowed(&1), Borrowed(&5), Borrowed(&7), Borrowed(&9)].into_iter().collect());
 	///
 	/// assert!(has_any.matches(&1));
-	/// assert!(has_any.matches(&4) == false);
+	/// assert!(!has_any.matches(&4));
 	/// assert!(has_any.set_matches(&([1, 10, 20].iter().collect())));
 	/// ```
 	HasAny(HashSet<Cow<'element, T>>),
@@ -105,13 +105,13 @@ pub enum Match<'element, T> where
 	/// # Example
 	///
 	/// ```rust
-	/// use clinvoice_adapter::data::Match;
-	/// use std::borrow::Cow;
+	/// use std::borrow::Cow::Borrowed;
+	/// use clinvoice_adapter::data::query::Match;
 	///
-	/// let has_none = Match::HasNone(vec![1, 5, 7, 9].into_iter().collect());
+	/// let has_none = Match::HasNone(vec![Borrowed(&1), Borrowed(&5), Borrowed(&7), Borrowed(&9)].into_iter().collect());
 	///
 	/// assert!(has_none.matches(&8));
-	/// assert!(has_none.matches(9) == false);
+	/// assert!(!has_none.matches(&9));
 	/// assert!(has_none.set_matches(&([0, 2, 4, 6].iter().collect())));
 	/// ```
 	HasNone(HashSet<Cow<'element, T>>),
@@ -126,13 +126,13 @@ pub enum Match<'element, T> where
 	/// # Example
 	///
 	/// ```rust
-	/// use clinvoice_adapter::data::Match;
-	/// use std::borrow::Cow;
+	/// use std::borrow::Cow::Borrowed;
+	/// use clinvoice_adapter::data::query::Match;
 	///
-	/// let in_range = Match::InRange(Cow::Borrowed(&3),Cow::Borrowed(&5));
+	/// let in_range = Match::InRange(Borrowed(&3), Borrowed(&5));
 	///
 	/// assert!(in_range.matches(&4));
-	/// assert!(in_range.matches(&5) == false);
+	/// assert!(!in_range.matches(&5));
 	/// assert!(in_range.set_matches(&([0, 1, 3].iter().collect())));
 	/// ```
 	InRange(Cow<'element, T>, Cow<'element, T>),
@@ -141,7 +141,9 @@ pub enum Match<'element, T> where
 /// # Summary
 ///
 /// Return whether or not some [`Match::InRange`] is in range.
-fn is_in_range<T>(min: &T, max: &T, value: &T) -> bool where T : Ord {
+fn is_in_range<T>(min: &T, max: &T, value: &T) -> bool where
+	T : Ord,
+{
 	min <= value && value < max
 }
 
@@ -194,7 +196,7 @@ impl<'element, T> Match<'element, T> where
 			Self::HasAll(required_values) => required_values.iter().map(|v| v.as_ref()).collect::<HashSet<_>>().is_subset(values),
 			Self::HasAny(accepted_values) => !accepted_values.iter().map(|v| v.as_ref()).collect::<HashSet<_>>().is_disjoint(values),
 			Self::HasNone(denied_values) => denied_values.iter().map(|v| v.as_ref()).collect::<HashSet<_>>().is_disjoint(values),
-			Self::InRange(min, max) => values.iter().all(|v| is_in_range(min.as_ref(), max.as_ref(), v)),
+			Self::InRange(min, max) => values.iter().any(|v| is_in_range(min.as_ref(), max.as_ref(), v)),
 		}
 	}
 }

@@ -13,7 +13,7 @@ use
 	{
 		chrono::{DateTime, Local},
 		Job,
-		views::{JobView, TimesheetView},
+		views::{ContactView, JobView, TimesheetView},
 	},
 };
 
@@ -46,35 +46,58 @@ impl Target
 				writeln!(output, "{}", markdown::Element::Heading
 				{
 					depth: 3,
-					text: format!("{} – {}",
-						DateTime::<Local>::from(timesheet.time_begin),
-						timesheet.time_end.map(|time| DateTime::<Local>::from(time).to_string()).unwrap_or_else(|| "Current".into())
+					text: timesheet.time_end.map(|time_end|
+						format!("{} – {}", timesheet.time_begin.naive_local(), time_end.naive_local())
+					).unwrap_or_else(||
+						format!("{} – Current", timesheet.time_begin.naive_local())
 					),
 				}).unwrap();
 
 				writeln!(output, "{}", markdown::Element::Heading {depth: 4, text: "Employee Information"}).unwrap();
 				writeln!(output, "{}: {}",
+					markdown::Element::UnorderedList {depth: 0, text: markdown::Text::Bold("Name")},
+					timesheet.employee.person.name,
+				).unwrap();
+				writeln!(output, "{}: {}",
 					markdown::Element::UnorderedList {depth: 0, text: markdown::Text::Bold("Employer")},
 					timesheet.employee.organization,
 				).unwrap();
+				writeln!(output, "{}: {}",
+					markdown::Element::UnorderedList {depth: 0, text: markdown::Text::Bold("Title")},
+					timesheet.employee.title,
+				).unwrap();
 
-				if !timesheet.employee.contact_info.is_empty()
+				let employee_contact_info: Vec<_> = timesheet.employee.contact_info.iter().filter(|(_, c)| match c
 				{
-					writeln!(output, "{}:", markdown::Element::UnorderedList {depth: 0, text: markdown::Text::Bold("Contact Information")}).unwrap();
+					ContactView::Address {location: _, export} => *export,
+					ContactView::Email {email: _, export} => *export,
+					ContactView::Phone {phone: _, export} => *export,
+				}).collect();
 
-					let mut sorted_employee_contact_info: Vec<&String> = timesheet.employee.contact_info.keys().collect();
-					sorted_employee_contact_info.sort();
-					sorted_employee_contact_info.into_iter().try_for_each(|label| writeln!(output, "{}: {}",
+				if !employee_contact_info.is_empty()
+				{
+					writeln!(output, "{}:", markdown::Element::UnorderedList
+					{
+						depth: 0,
+						text: markdown::Text::Bold("Contact Information"),
+					}).unwrap();
+
+					let mut sorted_employee_contact_info = employee_contact_info;
+					sorted_employee_contact_info.sort_by_key(|(label, _)| *label);
+
+					sorted_employee_contact_info.into_iter().try_for_each(|(label, contact)| writeln!(output, "{}: {}",
 						markdown::Element::UnorderedList {depth: 1, text: markdown::Text::Bold(label)},
-						timesheet.employee.contact_info[label],
+						contact,
 					)).unwrap();
 				}
+
+				writeln!(output, "{}", markdown::Element::<&str>::Break).unwrap();
 
 				if !timesheet.expenses.is_empty()
 				{
 					writeln!(output, "{}", markdown::Element::Heading {depth: 4, text: "Expenses"}).unwrap();
 
-					timesheet.expenses.iter().try_for_each(|e| writeln!(output, "{}{}",
+					timesheet.expenses.iter().try_for_each(|e| writeln!(output, "{}\n{}",
 						markdown::Element::Heading {depth: 5, text: format!("{} – {}", e.category, e.cost)},
 						markdown::Element::BlockText(&e.description),
 					)).unwrap();
@@ -92,7 +115,7 @@ impl Target
 	/// # Summary
 	///
 	/// Export some `job` to the [`Target`] specified.
-	pub fn export_job(&self, job: JobView) -> String
+	pub fn export_job(&self, job: &JobView) -> String
 	{
 		let mut output = String::new();
 
@@ -101,18 +124,23 @@ impl Target
 			#[cfg(feature="markdown")]
 			Self::Markdown =>
 			{
-				writeln!(output, "{}", markdown::Element::Heading {depth: 1, text: format!("Job #{} for {}", job.id, job.client)}).unwrap();
+				writeln!(output, "{}", markdown::Element::Heading {depth: 1, text: format!("Job #{}", job.id)}).unwrap();
+
+				writeln!(output, "{}: {}",
+					markdown::Element::UnorderedList {depth: 0, text: markdown::Text::Bold("Client")},
+					job.client,
+				).unwrap();
 
 				writeln!(output, "{}: {}",
 					markdown::Element::UnorderedList {depth: 0, text: markdown::Text::Bold("Date Opened")},
-					DateTime::<Local>::from(job.date_open),
+					DateTime::<Local>::from(job.date_open).naive_local(),
 				).unwrap();
 
 				if let Some(date) = job.date_close
 				{
 					writeln!(output, "{}: {}",
 						markdown::Element::UnorderedList {depth: 0, text: markdown::Text::Bold("Date Closed")},
-						DateTime::<Local>::from(date),
+						DateTime::<Local>::from(date).naive_local(),
 					).unwrap();
 				}
 
@@ -134,7 +162,7 @@ impl Target
 
 				writeln!(output, "{}: {}",
 					markdown::Element::UnorderedList {depth: 0, text: markdown::Text::Bold("Total Amount Owed")},
-					Job::from(&job).total(),
+					Job::from(job).total(),
 				).unwrap();
 				writeln!(output, "{}", markdown::Element::<&str>::Break).unwrap();
 

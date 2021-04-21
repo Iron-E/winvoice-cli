@@ -26,10 +26,11 @@ pub enum MatchStr<S> where S : AsRef<str>
 	/// # Example
 	///
 	/// ```rust
-	/// use clinvoice_adapter::data::MatchStr;
+	/// use std::array::IntoIter as Iter;
+	/// use clinvoice_adapter::data::query::MatchStr;
 	///
-	/// assert!(MatchStr::EqualTo("Foo").matches("Foo"));
-	/// assert!(MatchStr::EqualTo("Foo").matches(["Foo", "Bar"]));
+	/// assert_eq!(MatchStr::EqualTo("Foo").matches("Foo"), Ok(true));
+	/// assert_eq!(MatchStr::EqualTo("Foo").set_matches(Iter::new(["Foo", "Bar"])), Ok(true));
 	/// ```
 	EqualTo(S),
 
@@ -43,11 +44,12 @@ pub enum MatchStr<S> where S : AsRef<str>
 	/// # Example
 	///
 	/// ```rust
-	/// use clinvoice_adapter::data::MatchStr;
+	/// use std::array::IntoIter as Iter;
+	/// use clinvoice_adapter::data::query::MatchStr;
 	///
-	/// assert!(MatchStr::Contains("Foo").matches("Foobar"));
-	/// assert!(MatchStr::Contains("Foo").matches("barfoo"));
-	/// assert!(MatchStr::Contains("Foo").matches(["bar", "foo"]));
+	/// assert_eq!(MatchStr::Contains("Foo").matches("Foobar"), Ok(true));
+	/// assert_eq!(MatchStr::Contains("Foo").matches("barfoo"), Ok(true));
+	/// assert_eq!(MatchStr::Contains("Foo").set_matches(Iter::new(["bar", "foo"])), Ok(true));
 	/// ```
 	Contains(S),
 
@@ -61,10 +63,11 @@ pub enum MatchStr<S> where S : AsRef<str>
 	/// # Example
 	///
 	/// ```rust
-	/// use clinvoice_adapter::data::MatchStr;
+	/// use std::array::IntoIter as Iter;
+	/// use clinvoice_adapter::data::query::MatchStr;
 	///
-	/// assert!(MatchStr::Regex("^Foo").matches("Foobar"));
-	/// assert!(MatchStr::Regex("foo$").matches(["Bar", "foo"]));
+	/// assert_eq!(MatchStr::Regex("^Foo").matches("Foobar"), Ok(true));
+	/// assert_eq!(MatchStr::Regex("foo$").set_matches(Iter::new(["Bar", "foo"])), Ok(true));
 	/// ```
 	Regex(S),
 }
@@ -89,7 +92,7 @@ impl<S> MatchStr<S> where S : AsRef<str> + Eq
 		{
 			Self::Any => true,
 			Self::EqualTo(equal_value) => equal_value.as_ref() == value,
-			Self::Contains(contained_value) => value.contains(contained_value.as_ref()),
+			Self::Contains(contained_value) => value.to_lowercase().contains(&contained_value.as_ref().to_lowercase()),
 			Self::Regex(expression) => Regex::new(expression.as_ref())?.is_match(value),
 		})
 	}
@@ -118,8 +121,8 @@ impl<S> MatchStr<S> where S : AsRef<str> + Eq
 			},
 			Self::Contains(contained_value) =>
 			{
-				let contained_str = contained_value.as_ref();
-				values.any(|v| v.contains(contained_str))
+				let contained_str = contained_value.as_ref().to_lowercase();
+				values.any(|v| v.to_lowercase().contains(&contained_str))
 			},
 			Self::Regex(expression) =>
 			{

@@ -43,7 +43,7 @@ fn to_vec_employee()
 		).unwrap();
 
 		let testy = BincodeEmployee::create(
-			vec![("Work Email".into(), Contact::Email("foo@bar.io".into()))].into_iter().collect(),
+			vec![("Work Email".into(), Contact::Email {email: "foo@bar.io".into(), export: false})].into_iter().collect(),
 			dogood.clone(),
 			Person
 			{
@@ -56,7 +56,7 @@ fn to_vec_employee()
 		).unwrap();
 
 		let mr_flu = BincodeEmployee::create(
-			vec![("Work Email".into(), Contact::Email("flu@bar.io".into()))].into_iter().collect(),
+			vec![("Work Email".into(), Contact::Email {email: "flu@bar.io".into(), export: false})].into_iter().collect(),
 			dogood.clone(),
 			Person
 			{

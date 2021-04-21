@@ -108,7 +108,7 @@ mod tests
 
 			create_assertion(
 				BincodeEmployee::create(
-					vec![("Work".into(), Contact::Address(Id::new_v4()))].into_iter().collect(),
+					vec![("Work".into(), Contact::Address {location: Id::new_v4(), export: false})].into_iter().collect(),
 					organization.clone(),
 					Person
 					{
@@ -124,7 +124,7 @@ mod tests
 
 			create_assertion(
 				BincodeEmployee::create(
-					vec![("Work Email".into(), Contact::Email("foo@bar.io".into()))].into_iter().collect(),
+					vec![("Work Email".into(), Contact::Email {email: "foo@bar.io".into(), export: false})].into_iter().collect(),
 					organization.clone(),
 					Person
 					{
@@ -140,7 +140,7 @@ mod tests
 
 			create_assertion(
 				BincodeEmployee::create(
-					vec![("Work Phone".into(), Contact::Phone("1-800-555-3600".into()))].into_iter().collect(),
+					vec![("Work Phone".into(), Contact::Phone {phone: "1-800-555-3600".into(), export: false})].into_iter().collect(),
 					organization.clone(),
 					Person
 					{
@@ -156,7 +156,7 @@ mod tests
 
 			create_assertion(
 				BincodeEmployee::create(
-					vec![("Work".into(), Contact::Address(Id::new_v4()))].into_iter().collect(),
+					vec![("Work".into(), Contact::Address {location: Id::new_v4(), export: false})].into_iter().collect(),
 					organization.clone(),
 					Person
 					{
@@ -172,7 +172,7 @@ mod tests
 
 			create_assertion(
 				BincodeEmployee::create(
-					vec![("Work Email".into(), Contact::Email("obviousemail@server.com".into()))].into_iter().collect(),
+					vec![("Work Email".into(), Contact::Email {email: "obviousemail@server.com".into(), export: false})].into_iter().collect(),
 					organization.clone(),
 					Person
 					{
@@ -209,7 +209,7 @@ mod tests
 		util::temp_store(|store|
 		{
 			let testy_mctesterson = BincodeEmployee::create(
-				vec![("Work Address".into(), Contact::Address(Id::new_v4()))].into_iter().collect(),
+				vec![("Work Address".into(), Contact::Address {location: Id::new_v4(), export: false})].into_iter().collect(),
 				organization.clone(),
 				Person
 				{
@@ -222,7 +222,7 @@ mod tests
 			).unwrap();
 
 			let nimron_macbeaver = BincodeEmployee::create(
-				vec![("Home Address".into(), Contact::Email("foo@bar.io".into()))].into_iter().collect(),
+				vec![("Home Address".into(), Contact::Email {email: "foo@bar.io".into(), export: false})].into_iter().collect(),
 				organization.clone(),
 				Person
 				{
@@ -235,7 +235,7 @@ mod tests
 			).unwrap();
 
 			let an_actual_tortust = BincodeEmployee::create(
-				vec![("Work Phone".into(), Contact::Phone("1-800-555-3600".into()))].into_iter().collect(),
+				vec![("Work Phone".into(), Contact::Phone {phone: "1-800-555-3600".into(), export: false})].into_iter().collect(),
 				organization.clone(),
 				Person
 				{
@@ -248,7 +248,7 @@ mod tests
 			).unwrap();
 
 			let gottard = BincodeEmployee::create(
-				vec![("Work Address".into(), Contact::Address(Id::new_v4()))].into_iter().collect(),
+				vec![("Work Address".into(), Contact::Address {location: Id::new_v4(), export: false})].into_iter().collect(),
 				organization.clone(),
 				Person
 				{
@@ -261,7 +261,7 @@ mod tests
 			).unwrap();
 
 			let duplicate_name = BincodeEmployee::create(
-				vec![("Work Email".into(), Contact::Email("obviousemail@server.com".into()))].into_iter().collect(),
+				vec![("Work Email".into(), Contact::Email {email: "obviousemail@server.com".into(), export: false})].into_iter().collect(),
 				organization.clone(),
 				Person
 				{

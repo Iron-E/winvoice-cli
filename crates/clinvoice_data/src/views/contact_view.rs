@@ -1,5 +1,4 @@
 mod display;
-mod from_location_view;
 mod restorable_serde;
 
 use super::LocationView;
@@ -12,13 +11,13 @@ use serde::{Deserialize, Serialize};
 /// A view of [`Location`](crate::Location).
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
-#[cfg_attr(feature="serde_support", serde(tag="type"))]
+#[cfg_attr(feature="serde_support", serde(untagged))]
 pub enum ContactView
 {
 	/// # Summary
 	///
 	/// A [`Location`](crate::Location).
-	Address(LocationView),
+	Address {location: LocationView, export: bool},
 
 	/// # Summary
 	///
@@ -27,7 +26,7 @@ pub enum ContactView
 	/// # Example
 	///
 	/// * 'foo@bar.io'
-	Email(String),
+	Email {email: String, export: bool},
 
 	/// # Summary
 	///
@@ -46,5 +45,5 @@ pub enum ContactView
 	/// * '(603) 555-1234'
 	/// * '603-555-1234'
 	/// * '6035551234'
-	Phone(String),
+	Phone {phone: String, export: bool},
 }

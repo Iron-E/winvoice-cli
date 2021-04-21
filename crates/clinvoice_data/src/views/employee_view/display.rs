@@ -81,8 +81,8 @@ mod tests
 		let employee = EmployeeView
 		{
 			contact_info: vec![
-				("Place of Work".into(), work_street_view.clone().into()),
-				("Work Email".into(), ContactView::Email("foo@bar.io".into())),
+				("Place of Work".into(), ContactView::Address {location: work_street_view.clone(), export: false}),
+				("Work Email".into(), ContactView::Email {email: "foo@bar.io".into(), export: false}),
 			].into_iter().collect(),
 			id: Id::new_v4(),
 			organization: OrganizationView

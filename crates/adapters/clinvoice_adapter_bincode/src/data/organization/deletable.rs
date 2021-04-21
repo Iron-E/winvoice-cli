@@ -112,8 +112,6 @@ mod tests
 				store,
 			};
 
-			// contact_info.push(Contact::Address(earth.location.id));
-
 			let testy = BincodePerson
 			{
 				person: &BincodePerson::create(
@@ -126,7 +124,7 @@ mod tests
 			let ceo_testy = BincodeEmployee
 			{
 				employee: &BincodeEmployee::create(
-					vec![("Work Address".into(), Contact::Address(earth.location.id))].into_iter().collect(),
+					vec![("Work Address".into(), Contact::Address {location: earth.location.id, export: false})].into_iter().collect(),
 					big_old_test.organization.clone(),
 					testy.person.clone(),
 					EmployeeStatus::Representative,

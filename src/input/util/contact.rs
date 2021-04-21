@@ -12,6 +12,10 @@ use
 /// # Summary
 ///
 /// Show a menu for adding [contact information](clinvoice_data::Contact).
+///
+/// # Errors
+///
+/// Will error whenever [`input::select_one`] or [`input::text`] does.
 fn add_menu(contact_info: &mut HashMap<String, ContactView>, locations: &[LocationView]) -> input::Result<()>
 {
 	const ADDRESS: &str = "Address";
@@ -19,9 +23,41 @@ fn add_menu(contact_info: &mut HashMap<String, ContactView>, locations: &[Locati
 	const PHONE: &str = "Phone";
 	const ALL_CONTACT_TYPES: [&str; 3] = [ADDRESS, EMAIL, PHONE];
 
+	const EXPORT_OPTS: [&str; 2] = ["No", "Yes"];
+	const FALSE: &str = EXPORT_OPTS[0];
+
+	/// # Summary
+	///
+	/// Get whether or not a user wants to export a piece of contact information.
+	fn get_export(entity: impl Display) -> io::Result<bool>
+	{
+		let export = input::select_one(&EXPORT_OPTS, format!("Do you want \"{}\" to be listed when exporting `Job`s?", entity))?;
+		Ok(match export
+		{
+			FALSE => false,
+			_ => true,
+		})
+	}
+
+	/// # Summary
+	///
+	/// Get what a user wants to call a piece of contact information.
 	fn get_label(entity: impl Display) -> io::Result<String>
 	{
 		input::text(format!("Please enter a label for \"{}\"", entity))
+	}
+
+	/// # Summary
+	///
+	/// Collect necessary pieces of contact information and insert them into the `contact_info`.
+	macro_rules! insert
+	{
+		($variant: ident, $var: ident) =>
+		{
+			let label = get_label(&$var)?;
+			let export = get_export(&$var)?;
+			contact_info.insert(label, ContactView::$variant {$var, export});
+		};
 	}
 
 	match input::select_one(&ALL_CONTACT_TYPES, "Select which type of contact info to add")?
@@ -29,19 +65,19 @@ fn add_menu(contact_info: &mut HashMap<String, ContactView>, locations: &[Locati
 		ADDRESS =>
 		{
 			let location = input::select_one(&locations, "Select the location to add")?;
-			contact_info.insert(get_label(&location)?, ContactView::Address(location));
+			insert!(Address, location);
 		}
 
 		EMAIL =>
 		{
 			let email = input::text("Enter an email address (e.g. `foo@gmail.com`)")?;
-			contact_info.insert(get_label(&email)?, ContactView::Email(email));
+			insert!(Email, email);
 		}
 
 		PHONE =>
 		{
 			let phone = input::text("Enter a phone number (e.g. `600-555-5555`)")?;
-			contact_info.insert(get_label(&phone)?, ContactView::Phone(phone));
+			insert!(Phone, phone);
 		}
 
 		_ => panic!("Unkown contact type"),
@@ -53,6 +89,16 @@ fn add_menu(contact_info: &mut HashMap<String, ContactView>, locations: &[Locati
 /// # Summary
 ///
 /// Show a menu for creating [contact information](clinvoice_data::Contact).
+///
+/// # Errors
+///
+/// Will error whenever [`input::select_one`], [`add_menu`], [`delete_menu`], or [`edit_menu`] does.
+///
+/// # Panics
+///
+/// If a user manages to select an action (e.g. `ADD`, `CONTINUE`, `DELETE`) which is unaccounted
+/// for. This is __theoretically not possible__ but must be present to account for the case of an
+/// unrecoverable state of the program.
 pub fn creation_menu<'err, L>(store: &Store) -> DynResult<'err, HashMap<String, ContactView>> where
 	L : LocationAdapter,
 	<L as LocationAdapter>::Error : 'err,
@@ -86,6 +132,10 @@ pub fn creation_menu<'err, L>(store: &Store) -> DynResult<'err, HashMap<String, 
 /// # Summary
 ///
 /// Show a menu for deleting [contact information](clinvoice_data::Contact).
+///
+/// # Errors
+///
+/// Will error whenever [`input::select_one`] does.
 fn delete_menu(contact_info: &mut HashMap<String, ContactView>) -> input::Result<()>
 {
 	if !contact_info.is_empty()
@@ -104,13 +154,18 @@ fn delete_menu(contact_info: &mut HashMap<String, ContactView>) -> input::Result
 /// # Summary
 ///
 /// Show a menu for editing [contact information](clinvoice_data::Contact).
+///
+/// # Errors
+///
+/// Will error whenever [`input::edit_and_restore`] and [`input::select_one`] does,
+/// but will ignore [`input::Error::NotEdited`].
 fn edit_menu(contact_info: &mut HashMap<String, ContactView>) -> input::Result<()>
 {
 	if !contact_info.is_empty()
 	{
 		let to_edit_key = input::select_one(
-			&contact_info.keys().filter(
-				|k| matches!(contact_info[*k], ContactView::Email(_) | ContactView::Phone(_))
+			&contact_info.keys().filter(|k|
+				matches!(contact_info[*k], ContactView::Email {email: _, export: _} | ContactView::Phone {phone: _, export: _})
 			).cloned().collect::<Vec<_>>(),
 			"Select a piece of contact information to edit.",
 		)?;

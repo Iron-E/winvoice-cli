@@ -38,20 +38,20 @@ impl Contact<'_>
 			self.address.id.set_matches(
 				&contact_info.by_ref().flat_map(|c| match c
 				{
-					clinvoice_data::Contact::Address(a) => Some(a),
+					clinvoice_data::Contact::Address {location, export: _} => Some(location),
 					_ => None,
 				}).collect()
 			) &&
 			self.email.set_matches(
 				contact_info.by_ref().flat_map(|c| match c
 				{
-					clinvoice_data::Contact::Email(e) => Some(e.as_ref()),
+					clinvoice_data::Contact::Email {email, export: _} => Some(email.as_ref()),
 					_ => None,
 				})
 			)? &&
 			self.phone.set_matches(contact_info.flat_map(|c| match c
 			{
-				clinvoice_data::Contact::Phone(p) => Some(p.as_ref()),
+				clinvoice_data::Contact::Phone {phone, export: _} => Some(phone.as_ref()),
 				_ => None,
 			}))?
 		)
@@ -65,17 +65,17 @@ impl Contact<'_>
 		Ok(
 			self.address.set_matches_view(contact_info.by_ref().flat_map(|c| match c
 			{
-				ContactView::Address(a) => Some(a),
+				ContactView::Address {location, export: _} => Some(location),
 				_ => None,
 			}))? &&
 			self.email.set_matches(contact_info.by_ref().flat_map(|c| match c
 			{
-				ContactView::Email(e) => Some(e.as_ref()),
+				ContactView::Email {email, export: _} => Some(email.as_ref()),
 				_ => None,
 			}))? &&
 			self.phone.set_matches(contact_info.flat_map(|c| match c
 			{
-				ContactView::Email(p) => Some(p.as_ref()),
+				ContactView::Phone {phone, export: _} => Some(phone.as_ref()),
 				_ => None,
 			}))?
 		)

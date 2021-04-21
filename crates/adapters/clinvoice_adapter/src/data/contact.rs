@@ -18,20 +18,20 @@ where
 {
 	Ok(match contact
 	{
-		Contact::Address(address) => match L::retrieve(
+		Contact::Address {location, export} => match L::retrieve(
 			&query::Location
 			{
-				id: query::Match::EqualTo(Cow::Borrowed(&address)),
+				id: query::Match::EqualTo(Cow::Borrowed(&location)),
 				..Default::default()
 			},
 			store,
 		)?.into_iter().next()
 		{
-			Some(result) => L::into_view(result, store)?.into(),
-			_ => return Err(Error::DataIntegrity(address).into()),
+			Some(result) => ContactView::Address {location: L::into_view(result, store)?, export},
+			_ => return Err(Error::DataIntegrity(location).into()),
 		},
-		Contact::Email(email) => ContactView::Email(email),
-		Contact::Phone(phone) => ContactView::Phone(phone),
+		Contact::Email {email, export} => ContactView::Email {email, export},
+		Contact::Phone {phone, export} => ContactView::Phone {phone, export},
 	})
 }
 

@@ -11,9 +11,9 @@ impl Display for ContactView
 	{
 		match self
 		{
-			ContactView::Address(location) => location.fmt(formatter),
-			ContactView::Email(email) => write!(formatter, "{}", email),
-			ContactView::Phone(phone) => write!(formatter, "{}", phone),
+			ContactView::Address {location, export: _} => location.fmt(formatter),
+			ContactView::Email {email, export: _} => write!(formatter, "{}", email),
+			ContactView::Phone {phone, export: _} => write!(formatter, "{}", phone),
 		}
 	}
 }
@@ -71,9 +71,9 @@ mod tests
 		};
 
 		let start = Instant::now();
-		assert_eq!(format!("{}", ContactView::from(street_view)), "1337 Some Street, Phoenix, Arizona, USA, Earth");
-		assert_eq!(format!("{}", ContactView::Email("foo@bar.io".into())), "foo@bar.io");
-		assert_eq!(format!("{}", ContactView::Phone("1-603-555-5555".into())), "1-603-555-5555");
+		assert_eq!(format!("{}", ContactView::Address {location: street_view, export: false}), "1337 Some Street, Phoenix, Arizona, USA, Earth");
+		assert_eq!(format!("{}", ContactView::Email {email: "foo@bar.io".into(), export: false}), "foo@bar.io");
+		assert_eq!(format!("{}", ContactView::Phone {phone: "1-603-555-5555".into(), export: false}), "1-603-555-5555");
 		println!("\n>>>>> ContactView::test_display {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 3);
 	}
 }

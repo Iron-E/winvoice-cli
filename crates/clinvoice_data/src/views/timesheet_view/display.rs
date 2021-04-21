@@ -92,9 +92,9 @@ mod tests
 		};
 
 		let contact_info: HashMap<String, ContactView> = vec![
-			("Street Address".into(), street_view.clone().into()),
-			("Email".into(), ContactView::Email("foo@bar.io".into())),
-			("Phone".into(), ContactView::Phone("1-800-555-5555".into())),
+			("Street Address".into(), ContactView::Address {location: street_view.clone(), export: false}),
+			("Email".into(), ContactView::Email {email: "foo@bar.io".into(), export: false}),
+			("Phone".into(), ContactView::Phone {phone: "1-800-555-5555".into(), export: false}),
 		].into_iter().collect();
 
 		let timesheet =  TimesheetView

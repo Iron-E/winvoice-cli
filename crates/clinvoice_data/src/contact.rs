@@ -15,7 +15,7 @@ pub enum Contact
 	/// # Summary
 	///
 	/// A [`Location`](crate::Location).
-	Address(Id),
+	Address {location: Id, export: bool},
 
 	/// # Summary
 	///
@@ -24,7 +24,7 @@ pub enum Contact
 	/// # Example
 	///
 	/// * 'foo@bar.io'
-	Email(String),
+	Email {email: String, export: bool},
 
 	/// # Summary
 	///
@@ -34,5 +34,5 @@ pub enum Contact
 	///
 	/// * '1-603-555-1234'
 	/// * '603-555-1234'
-	Phone(String),
+	Phone {phone: String, export: bool},
 }

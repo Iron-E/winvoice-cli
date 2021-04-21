@@ -84,7 +84,7 @@ mod tests
 
 		let ceo_testy_view = EmployeeView
 		{
-			contact_info: vec![("Office".into(), ContactView::Address(earth_view.clone()))].into_iter().collect(),
+			contact_info: vec![("Office".into(), ContactView::Address {location: earth_view.clone(), export: false})].into_iter().collect(),
 			id: Id::new_v4(),
 			organization: OrganizationView
 			{

@@ -66,7 +66,7 @@ fn to_view()
 		).unwrap();
 
 		let contact_info: HashMap<_, _> = vec![
-			("Address".into(), Contact::Address(earth.id))
+			("Address".into(), Contact::Address {location: earth.id, export: false})
 		].into_iter().collect();
 
 		let testy = BincodePerson::create(
@@ -91,7 +91,7 @@ fn to_view()
 		};
 
 		let contact_info_view: HashMap<String, ContactView> = vec![
-			("Address View".into(), earth_view.clone().into())
+			("Address View".into(), ContactView::Address {location: earth_view.clone(), export: false})
 		].into_iter().collect();
 
 		let ceo_testy_view = EmployeeView

@@ -136,17 +136,14 @@ impl Time
 				{
 					TimeCommand::Start =>
 					{
-						let query = if self.default
+						let query = match self.default
 						{
-							query::Employee
+							false => input::edit_default(String::from(QUERY_PROMPT) + "employees")?,
+							_ => query::Employee
 							{
 								id: query::Match::EqualTo(Borrowed(&config.employees.default_id)),
 								..Default::default()
-							}
-						}
-						else
-						{
-							input::edit_default(String::from(QUERY_PROMPT) + "employees")?
+							},
 						};
 
 						let results = $emp::retrieve(&query, &store)?;

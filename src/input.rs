@@ -80,15 +80,12 @@ pub fn edit_default<T>(prompt: impl AsRef<str>) -> Result<T> where
 	T : Default + DeserializeOwned + Serialize
 {
 	let default = T::default();
-	Ok(match edit(&default, prompt)
+	match edit(&default, prompt)
 	{
-		Ok(d) => d,
-		Err(e) => match e
-		{
-			Error::NotEdited => default,
-			_ => return Err(e),
-		},
-	})
+		Ok(d) => Ok(d),
+		Err(Error::NotEdited) => Ok(default),
+		Err(e) => Err(e),
+	}
 }
 
 /// # Summary

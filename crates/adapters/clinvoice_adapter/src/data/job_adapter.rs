@@ -127,12 +127,6 @@ pub trait JobAdapter :
 			store,
 		)?;
 
-		let organization = match results.get(0)
-		{
-			Some(org) => org,
-			_ => return Err(super::Error::DataIntegrity(job.client_id).into()),
-		};
-
-		Ok(organization.clone())
+		results.into_iter().next().ok_or_else(|| super::Error::DataIntegrity(job.client_id).into())
 	}
 }

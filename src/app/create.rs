@@ -97,7 +97,7 @@ impl Create
 		let people = input::util::person::retrieve_views::<P>(store)?;
 		let selected_person = input::select_one(&people, "Which person is working for the organization?")?;
 
-		let contact_info = input::util::contact::menure)?;
+		let contact_info = input::util::contact::menu::<L>(store)?;
 		let employee_status = input::select_one(
 			&[EmployeeStatus::Employed, EmployeeStatus::NotEmployed, EmployeeStatus::Representative],
 			"What is the status of the employee?",

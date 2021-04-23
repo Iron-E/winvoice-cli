@@ -1,7 +1,7 @@
 use
 {
 	core::fmt::Display,
-	std::{borrow::Cow, error::Error},
+	std::{borrow::Cow::Borrowed, error::Error},
 
 	super::QUERY_PROMPT,
 	crate::{Config, DynResult, input, StructOpt},
@@ -129,17 +129,14 @@ impl Retrieve
 				{
 					($emp: ident, $loc: ident, $org: ident, $per: ident) =>
 					{{
-						let query = if default
+						let query = match default
 						{
-							query::Employee
+							false => input::edit_default(String::from(QUERY_PROMPT) + "employees")?,
+							_ => query::Employee
 							{
-								id: query::Match::EqualTo(Cow::Borrowed(&config.employees.default_id)),
+								id: query::Match::EqualTo(Borrowed(&config.employees.default_id)),
 								..Default::default()
-							}
-						}
-						else
-						{
-							input::edit_default(String::from(QUERY_PROMPT) + "employees")?
+							},
 						};
 
 						let results = $emp::retrieve(&query, &store)?;
@@ -169,17 +166,10 @@ impl Retrieve
 						if set_default
 						{
 							let mut new_config = config.clone();
-							new_config.employees.default_id = if results_view.len() > 1
+							new_config.employees.default_id = match results_view.len() > 1
 							{
-								input::select_one(&results_view, "Which `Employee` should be the default?")?.id
-							}
-							else
-							{
-								match results_view.first()
-								{
-									Some(employee) => employee.id,
-									_ => return Err(DataError::NoData(stringify!(Employee)).into()),
-								}
+								false => results_view.first().ok_or(DataError::NoData(stringify!(Employee)))?.id,
+								_ => input::select_one(&results_view, "Which `Employee` should be the default?")?.id,
 							};
 
 							new_config.update()?;

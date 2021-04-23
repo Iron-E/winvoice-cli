@@ -103,12 +103,6 @@ pub trait OrganizationAdapter  :
 			store,
 		)?;
 
-		let location = match results.get(0)
-		{
-			Some(loc) => loc,
-			_ => return Err(super::Error::DataIntegrity(organization.location_id).into()),
-		};
-
-		Ok(location.clone())
+		results.into_iter().next().ok_or_else(|| super::Error::DataIntegrity(organization.location_id).into())
 	}
 }

@@ -106,13 +106,7 @@ pub trait EmployeeAdapter :
 			store,
 		)?;
 
-		let organization = match results.get(0)
-		{
-			Some(org) => org,
-			_ => return Err(super::Error::DataIntegrity(employee.organization_id).into()),
-		};
-
-		Ok(organization.clone())
+		results.into_iter().next().ok_or_else(|| super::Error::DataIntegrity(employee.organization_id).into())
 	}
 
 	/// # Summary
@@ -132,12 +126,6 @@ pub trait EmployeeAdapter :
 			store,
 		)?;
 
-		let person = match results.get(0)
-		{
-			Some(org) => org,
-			_ => return Err(super::Error::DataIntegrity(employee.organization_id).into()),
-		};
-
-		Ok(person.clone())
+		results.into_iter().next().ok_or_else(|| super::Error::DataIntegrity(employee.organization_id).into())
 	}
 }

@@ -3,6 +3,7 @@ use
 	core::fmt::Display,
 	std::{collections::HashMap, io},
 
+	super::menu::{ADD, ALL_ACTIONS, CONTINUE, DELETE, EDIT},
 	crate::{DynResult, input},
 
 	clinvoice_adapter::{data::LocationAdapter, Store},
@@ -85,51 +86,6 @@ fn add_menu(contact_info: &mut HashMap<String, ContactView>, locations: &[Locati
 
 	Ok(())
 }
-
-/// # Summary
-///
-/// Show a menu for creating [contact information](clinvoice_data::Contact).
-///
-/// # Errors
-///
-/// Will error whenever [`input::select_one`], [`add_menu`], [`delete_menu`], or [`edit_menu`] does.
-///
-/// # Panics
-///
-/// If a user manages to select an action (e.g. `ADD`, `CONTINUE`, `DELETE`) which is unaccounted
-/// for. This is __theoretically not possible__ but must be present to account for the case of an
-/// unrecoverable state of the program.
-pub fn creation_menu<'err, L>(store: &Store) -> DynResult<'err, HashMap<String, ContactView>> where
-	L : LocationAdapter,
-	<L as LocationAdapter>::Error : 'err,
-{
-	const ADD: &str = "Add";
-	const CONTINUE: &str = "Continue";
-	const DELETE: &str = "Delete";
-	const EDIT: &str = "Edit";
-	const ALL_ACTIONS: [&str; 4] = [ADD, CONTINUE, DELETE, EDIT];
-
-	let mut locations = super::location::retrieve_views::<L>(store)?;
-	locations.sort_by(|l1, l2| l1.name.cmp(&l2.name));
-
-	let mut contact_info = HashMap::<String, ContactView>::new();
-
-	loop
-	{
-		let action = input::select_one(&ALL_ACTIONS, "\nThis is the menu for creating contact information.\nWhat would you like to do?")?;
-		match action
-		{
-			ADD => add_menu(&mut contact_info, &locations)?,
-			CONTINUE => break,
-			DELETE => delete_menu(&mut contact_info)?,
-			EDIT => edit_menu(&mut contact_info)?,
-			_ => panic!("Unknown action"),
-		};
-	}
-
-	Ok(contact_info)
-}
-
 /// # Summary
 ///
 /// Show a menu for deleting [contact information](clinvoice_data::Contact).
@@ -180,4 +136,42 @@ fn edit_menu(contact_info: &mut HashMap<String, ContactView>) -> input::Result<(
 	}
 
 	Ok(())
+}
+
+/// # Summary
+///
+/// Show a menu for creating [contact information](clinvoice_data::Contact).
+///
+/// # Errors
+///
+/// Will error whenever [`input::select_one`], [`add_menu`], [`delete_menu`], or [`edit_menu`] does.
+///
+/// # Panics
+///
+/// If a user manages to select an action (e.g. `ADD`, `CONTINUE`, `DELETE`) which is unaccounted
+/// for. This is __theoretically not possible__ but must be present to account for the case of an
+/// unrecoverable state of the program.
+pub fn menu<'err, L>(store: &Store) -> DynResult<'err, HashMap<String, ContactView>> where
+	L : LocationAdapter,
+	<L as LocationAdapter>::Error : 'err,
+{
+	let mut locations = super::location::retrieve_views::<L>(store)?;
+	locations.sort_by(|l1, l2| l1.name.cmp(&l2.name));
+
+	let mut contact_info = HashMap::<String, ContactView>::new();
+
+	loop
+	{
+		let action = input::select_one(&ALL_ACTIONS, "\nThis is the menu for creating contact information.\nWhat would you like to do?")?;
+		match action
+		{
+			ADD => add_menu(&mut contact_info, &locations)?,
+			CONTINUE => break,
+			DELETE => delete_menu(&mut contact_info)?,
+			EDIT => edit_menu(&mut contact_info)?,
+			_ => panic!("Unknown action"),
+		};
+	}
+
+	Ok(contact_info)
 }

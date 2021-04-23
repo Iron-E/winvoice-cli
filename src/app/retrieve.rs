@@ -98,7 +98,7 @@ impl Retrieve
 		let selection = input::select(entities, "Select the entities you want to update")?;
 		selection.into_iter().try_for_each(|entity|
 		{
-			let edited = match input::edit_and_restore("Edit ", &entity)
+			let edited = match input::edit_and_restore(&entity, "Make any desired edits")
 			{
 				Ok(e) => e,
 				Err(input::Error::NotEdited) => entity,

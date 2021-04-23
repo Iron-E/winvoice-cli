@@ -28,7 +28,7 @@ use
 ///
 /// * The deserialized entity with values filled in by the user.
 /// * An [`Error`] encountered while creating, editing, or removing the temporary file.
-pub fn edit<T>(prompt: impl AsRef<str>, entity: &T) -> Result<T> where
+pub fn edit<T>(entity: &T, prompt: impl AsRef<str>) -> Result<T> where
 	T : DeserializeOwned + Serialize
 {
 	let serialized = yaml::to_string(&entity)?;
@@ -55,10 +55,10 @@ pub fn edit<T>(prompt: impl AsRef<str>, entity: &T) -> Result<T> where
 ///
 /// * The deserialized entity with values filled in by the user.
 /// * An [`Error`] encountered while creating, editing, or removing the temporary file.
-pub fn edit_and_restore<T>(prompt: impl AsRef<str>, entity: &T) -> Result<T> where
+pub fn edit_and_restore<T>(entity: &T, prompt: impl AsRef<str>) -> Result<T> where
 	T : DeserializeOwned + RestorableSerde + Serialize
 {
-	let mut edited = edit(prompt, entity)?;
+	let mut edited = edit(entity, prompt)?;
 	edited.restore(entity);
 	Ok(edited)
 }
@@ -80,7 +80,7 @@ pub fn edit_default<T>(prompt: impl AsRef<str>) -> Result<T> where
 	T : Default + DeserializeOwned + Serialize
 {
 	let default = T::default();
-	Ok(match edit(prompt, &default)
+	Ok(match edit(&default, prompt)
 	{
 		Ok(d) => d,
 		Err(e) => match e

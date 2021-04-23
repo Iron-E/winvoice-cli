@@ -2,7 +2,7 @@ mod display;
 
 use
 {
-	std::{borrow::Cow::Borrowed, cmp::Ordering, error::Error},
+	std::{borrow::Cow::Borrowed, cmp::Ordering},
 
 	super::QUERY_PROMPT,
 	crate::{Config, DynResult, input, StructOpt},
@@ -15,8 +15,7 @@ use
 	clinvoice_data::
 	{
 		chrono::{Duration, DurationRound, Utc},
-		Job,
-		views::{EmployeeView, JobView},
+		views::{EmployeeView, JobView, TimesheetView},
 	},
 };
 
@@ -46,42 +45,45 @@ pub(super) enum TimeCommand
 
 impl Time
 {
-	fn start<'err, E>(employee: EmployeeView, job: JobView, update_job: impl Fn(Job) -> Result<(), E>)
-		-> DynResult<'err, ()>
-	where
-		E : 'err + Error,
+	fn start(employee: EmployeeView, job: &mut JobView)
 	{
-		let mut job: Job = job.into();
-		job.start_timesheet(employee.id);
-		update_job(job).map_err(|e| e.into())
+		job.timesheets.push(TimesheetView
+		{
+			employee,
+			expenses: Vec::new(),
+			time_begin: Utc::now(),
+			time_end: None,
+			work_notes: "* Work which was done goes here.\n* Supports markdown formatting".into(),
+		})
 	}
 
-	fn stop<'err, E>(config: &Config, mut job: JobView, update_job: impl Fn(JobView) -> Result<(), E>)
-		-> DynResult<'err, ()>
-	where
-		E : 'err + Error,
+	fn stop<'err>(config: &Config, job: &mut JobView) -> DynResult<'err, ()>
 	{
-		let mut selected = input::select_one(
-			&job.timesheets.iter().filter(|t| t.time_end.is_none()).collect::<Vec<_>>(),
-			"Which `Timesheet` are you working on?",
-		)?.clone();
+		let index =
+		{
+			let selected = input::select_one(
+				&job.timesheets.iter().filter(|t| t.time_end.is_none()).collect::<Vec<_>>(),
+				"Which `Timesheet` are you working on?",
+			)?;
 
-		// We want to remove the `selected` timesheet from the set of timseheets; for now.
-		job.timesheets.remove(job.timesheets.iter().enumerate().fold(0, |i, enumeration|
-			if &selected == enumeration.1 { enumeration.0 }
-			else { i }
-		));
+			// We want to remove the `selected` timesheet from the set of timseheets; for now.
+			job.timesheets.iter().enumerate().fold(0, |i, enumeration|
+				if selected == enumeration.1 { enumeration.0 }
+				else { i }
+			)
+		};
 
-		// TODO: enter expenses, work notes, etc.
+		job.timesheets[index].work_notes = input::edit_markdown(&job.timesheets[index].work_notes)?;
+
+		// TODO: input::util::expense::menu(&mut job.timesheets[index].expenses)?;
 
 		// Stop time on the `Job` AFTER requiring users to enter information. Users shouldn't enter things for free ;)
 		let interval = Duration::from_std(config.timesheets.interval)?;
-		selected.time_begin = selected.time_begin.duration_trunc(interval)?;
-		selected.time_end = Some(Utc::now().duration_trunc(interval)?);
+		job.timesheets[index].time_begin = job.timesheets[index].time_begin.duration_trunc(interval)?;
+		job.timesheets[index].time_end = Some(Utc::now().duration_trunc(interval)?);
 
-		// Now that `selected` is done being ammended, we can insert it back.
-		job.timesheets.push(selected);
-		job.timesheets.sort_by(|t1, t2|
+		// Now that `job.timesheets[index]` is done being ammended, we can insert it back.
+		Ok(job.timesheets.sort_by(|t1, t2|
 			if t1.time_begin == t2.time_begin
 			{
 				t1.time_begin.cmp(&t2.time_begin)
@@ -98,9 +100,7 @@ impl Time
 					t2.time_end.and(Some(Ordering::Greater)).unwrap_or(Ordering::Equal)
 				)
 			}
-		);
-
-		update_job(job).map_err(|e| e.into())
+		))
 	}
 
 	/// # Summary
@@ -130,7 +130,7 @@ impl Time
 					Err(e) => Some(Err(e)),
 				}).collect::<Result<Vec<_>, _>>()?;
 
-				let selected_job = input::select_one(&job_results_view, format!("Select the job to {} working on", self.command))?;
+				let mut selected_job = input::select_one(&job_results_view, format!("Select the job to {} working on", self.command))?;
 
 				match self.command
 				{
@@ -165,11 +165,13 @@ impl Time
 
 						let selected = input::select_one(&results_view, format!("Select the `Employee` who is doing the work"))?;
 
-						Self::start(selected, selected_job, |j| $job {job: &j, store}.update())?
+						Self::start(selected, &mut selected_job)
 					},
 
-					TimeCommand::Stop => Self::stop(config, selected_job, |j| $job {job: &(j.into()), store}.update())?,
+					TimeCommand::Stop => Self::stop(config, &mut selected_job)?,
 				};
+
+				$job {job: &(selected_job.into()), store}.update()?;
 			}};
 		}
 

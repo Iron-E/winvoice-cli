@@ -194,7 +194,7 @@ mod tests
 	{
 		std::{collections::HashMap, time::Instant},
 
-		super::{ContactView, JobView, Target, TimesheetView},
+		super::{JobView, Target, TimesheetView},
 
 		clinvoice_data::
 		{

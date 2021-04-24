@@ -17,7 +17,7 @@ use
 /// # Summary
 ///
 /// Exit `clinvoice` with status code 1, printing some `error`.
-fn exit_with_err<E>(error: E) -> ! where E : Error
+fn exit_with_err(error: impl Error) -> !
 {
 	if cfg!(debug_assertions) { panic!("{:?}", error) }
 

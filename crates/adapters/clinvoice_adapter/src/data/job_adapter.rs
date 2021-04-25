@@ -1,6 +1,6 @@
 use
 {
-	std::{borrow::Cow, error::Error},
+	std::{borrow::Cow::Borrowed, error::Error},
 
 	super::{Deletable, EmployeeAdapter, Initializable, LocationAdapter, OrganizationAdapter, PersonAdapter, query, timesheet, Updatable},
 	crate::Store,
@@ -121,7 +121,7 @@ pub trait JobAdapter :
 		let results = O::retrieve(
 			&query::Organization
 			{
-				id: query::Match::EqualTo(Cow::Borrowed(&job.client_id)),
+				id: query::Match::EqualTo(Borrowed(&job.client_id)),
 				..Default::default()
 			},
 			store,

@@ -1,6 +1,6 @@
 use
 {
-	std::{borrow::Cow, error::Error},
+	std::{borrow::Cow::Borrowed, error::Error},
 
 	super::{Deletable, EmployeeAdapter, Initializable, LocationAdapter, query, Updatable},
 	crate::Store,
@@ -77,7 +77,7 @@ pub trait OrganizationAdapter  :
 			{
 				organization: query::Organization
 				{
-					id: query::Match::EqualTo(Cow::Borrowed(&organization.id)),
+					id: query::Match::EqualTo(Borrowed(&organization.id)),
 					..Default::default()
 				},
 				..Default::default()
@@ -97,7 +97,7 @@ pub trait OrganizationAdapter  :
 		let results = L::retrieve(
 			&query::Location
 			{
-				id: query::Match::EqualTo(Cow::Borrowed(&organization.location_id)),
+				id: query::Match::EqualTo(Borrowed(&organization.location_id)),
 				..Default::default()
 			},
 			store,

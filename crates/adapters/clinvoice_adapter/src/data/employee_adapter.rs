@@ -1,6 +1,6 @@
 use
 {
-	std::{borrow::Cow, collections::HashMap, error::Error},
+	std::{borrow::Cow::Borrowed, collections::HashMap, error::Error},
 
 	super::{contact, Deletable, Initializable, LocationAdapter, OrganizationAdapter, PersonAdapter, query, Updatable},
 	crate::Store,
@@ -100,7 +100,7 @@ pub trait EmployeeAdapter :
 		let results = O::retrieve(
 			&query::Organization
 			{
-				id: query::Match::EqualTo(Cow::Borrowed(&employee.organization_id)),
+				id: query::Match::EqualTo(Borrowed(&employee.organization_id)),
 				..Default::default()
 			},
 			store,
@@ -120,7 +120,7 @@ pub trait EmployeeAdapter :
 		let results = P::retrieve(
 			&query::Person
 			{
-				id: query::Match::EqualTo(Cow::Borrowed(&employee.person_id)),
+				id: query::Match::EqualTo(Borrowed(&employee.person_id)),
 				..Default::default()
 			},
 			store,

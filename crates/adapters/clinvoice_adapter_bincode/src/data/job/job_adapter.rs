@@ -92,7 +92,7 @@ mod tests
 {
 	use
 	{
-		std::{borrow::Cow, fs, time::Instant},
+		std::{borrow::Cow::Borrowed, fs, time::Instant},
 
 		super::{BincodeJob, DateTime, Job, JobAdapter, Money, Organization, query, Store, Utc, util},
 
@@ -223,7 +223,7 @@ mod tests
 				{
 					client: query::Organization
 					{
-						id: Match::EqualTo(Cow::Borrowed(&organization.id)),
+						id: Match::EqualTo(Borrowed(&organization.id)),
 						..Default::default()
 					},
 					..Default::default()
@@ -235,8 +235,8 @@ mod tests
 			let not_creation = BincodeJob::retrieve(
 				&query::Job
 				{
-					date_open: Match::HasNone(vec![Cow::Borrowed(&DateTime::from(creation.date_open))].into_iter().collect()),
-					id: Match::HasAny(vec![Cow::Borrowed(&retrieval.id), Cow::Borrowed(&assertion.id)].into_iter().collect()),
+					date_open: Match::HasNone(vec![Borrowed(&DateTime::from(creation.date_open))].into_iter().collect()),
+					id: Match::HasAny(vec![Borrowed(&retrieval.id), Borrowed(&assertion.id)].into_iter().collect()),
 					..Default::default()
 				},
 				&store,

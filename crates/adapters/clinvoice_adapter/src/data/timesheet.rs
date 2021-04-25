@@ -1,6 +1,6 @@
 use
 {
-	std::borrow::Cow,
+	std::borrow::Cow::Borrowed,
 
 	super::{EmployeeAdapter, Error, query},
 	crate::Store,
@@ -19,7 +19,7 @@ where
 	match E::retrieve(
 		&query::Employee
 		{
-			id: query::Match::EqualTo(Cow::Borrowed(&timesheet.employee_id)),
+			id: query::Match::EqualTo(Borrowed(&timesheet.employee_id)),
 			..Default::default()
 		},
 		store,

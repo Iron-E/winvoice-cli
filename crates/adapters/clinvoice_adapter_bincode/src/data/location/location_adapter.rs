@@ -100,7 +100,7 @@ mod tests
 {
 	use
 	{
-		std::{borrow::Cow, fs, time::Instant},
+		std::{borrow::Cow::Borrowed, fs, time::Instant},
 
 		super::{BincodeLocation, Location, LocationAdapter, query, Store, util},
 
@@ -155,7 +155,7 @@ mod tests
 			let only_arizona = BincodeLocation::retrieve(
 				&query::Location
 				{
-					id: Match::HasAny(vec![Cow::Borrowed(&earth.id), Cow::Borrowed(&arizona.id)].into_iter().collect()),
+					id: Match::HasAny(vec![Borrowed(&earth.id), Borrowed(&arizona.id)].into_iter().collect()),
 					outer: query::OuterLocation::Some(query::Location::default().into()),
 					..Default::default()
 				},

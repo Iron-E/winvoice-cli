@@ -1,6 +1,6 @@
 use
 {
-	std::{borrow::Cow, collections::HashMap, hash::Hash},
+	std::{borrow::Cow::Borrowed, collections::HashMap, hash::Hash},
 
 	super::{Error, LocationAdapter, query},
 	crate::Store,
@@ -23,7 +23,7 @@ where
 			let results = L::retrieve(
 				&query::Location
 				{
-					id: query::Match::EqualTo(Cow::Borrowed(&location)),
+					id: query::Match::EqualTo(Borrowed(&location)),
 					..Default::default()
 				},
 				store,

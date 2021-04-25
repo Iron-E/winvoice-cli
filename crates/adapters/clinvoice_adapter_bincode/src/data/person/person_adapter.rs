@@ -70,7 +70,7 @@ mod tests
 {
 	use
 	{
-		std::{borrow::Cow, fs, time::Instant},
+		std::{borrow::Cow::Borrowed, fs, time::Instant},
 
 		super::{BincodePerson, Person, PersonAdapter, query, Store, util},
 
@@ -165,7 +165,7 @@ mod tests
 			let only_bob = BincodePerson::retrieve(
 				&query::Person
 				{
-					id: Match::EqualTo(Cow::Borrowed(&bob.id)),
+					id: Match::EqualTo(Borrowed(&bob.id)),
 					..Default::default()
 				},
 				&store,

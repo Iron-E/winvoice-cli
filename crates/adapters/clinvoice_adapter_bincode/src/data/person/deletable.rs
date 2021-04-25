@@ -1,6 +1,6 @@
 use
 {
-	std::{borrow::Cow, fs, io::ErrorKind},
+	std::{borrow::Cow::Borrowed, fs, io::ErrorKind},
 
 	super::BincodePerson,
 	crate::data::{BincodeEmployee, Error, Result},
@@ -19,7 +19,7 @@ impl Deletable for BincodePerson<'_, '_>
 			{
 				person: query::Person
 				{
-					id: query::Match::EqualTo(Cow::Borrowed(&self.person.id)),
+					id: query::Match::EqualTo(Borrowed(&self.person.id)),
 					..Default::default()
 				},
 				..Default::default()

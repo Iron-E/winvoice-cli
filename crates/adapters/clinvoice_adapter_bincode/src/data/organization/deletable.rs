@@ -1,6 +1,6 @@
 use
 {
-	std::{borrow::Cow, fs, io::ErrorKind},
+	std::{borrow::Cow::Borrowed, fs, io::ErrorKind},
 
 	super::BincodeOrganization,
 	crate::data::{BincodeEmployee, BincodeJob, Error, Result},
@@ -22,7 +22,7 @@ impl Deletable for BincodeOrganization<'_, '_>
 				{
 					organization: query::Organization
 					{
-						id: query::Match::EqualTo(Cow::Borrowed(&self.organization.id)),
+						id: query::Match::EqualTo(Borrowed(&self.organization.id)),
 						..Default::default()
 					},
 					..Default::default()
@@ -36,7 +36,7 @@ impl Deletable for BincodeOrganization<'_, '_>
 			{
 				client: query::Organization
 				{
-					id: query::Match::EqualTo(Cow::Borrowed(&self.organization.id)),
+					id: query::Match::EqualTo(Borrowed(&self.organization.id)),
 					..Default::default()
 				},
 				..Default::default()

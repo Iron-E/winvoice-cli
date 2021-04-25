@@ -1,6 +1,6 @@
 use
 {
-	std::{borrow::Cow, fs, io::ErrorKind},
+	std::{borrow::Cow::Borrowed, fs, io::ErrorKind},
 
 	super::BincodeLocation,
 	crate::data::{BincodeOrganization, Error, Result},
@@ -23,7 +23,7 @@ impl Deletable for BincodeLocation<'_, '_>
 					outer: query::OuterLocation::Some(
 						query::Location
 						{
-							id: query::Match::EqualTo(Cow::Borrowed(&self.location.id)),
+							id: query::Match::EqualTo(Borrowed(&self.location.id)),
 							..Default::default()
 						}.into()
 					),
@@ -38,7 +38,7 @@ impl Deletable for BincodeLocation<'_, '_>
 			{
 				location: query::Location
 				{
-					id: query::Match::EqualTo(Cow::Borrowed(&self.location.id)),
+					id: query::Match::EqualTo(Borrowed(&self.location.id)),
 					..Default::default()
 				},
 				..Default::default()

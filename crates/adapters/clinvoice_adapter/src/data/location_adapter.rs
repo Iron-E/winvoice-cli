@@ -1,6 +1,6 @@
 use
 {
-	std::{borrow::Cow, error::Error},
+	std::{borrow::Cow::Borrowed, error::Error},
 	super::{Deletable, Initializable, query, Updatable},
 	crate::Store,
 
@@ -80,7 +80,7 @@ pub trait LocationAdapter :
 			if let Ok(results) = Self::retrieve(
 				&query::Location
 				{
-					id: query::Match::EqualTo(Cow::Borrowed(&id)),
+					id: query::Match::EqualTo(Borrowed(&id)),
 					..Default::default()
 				},
 				&store,

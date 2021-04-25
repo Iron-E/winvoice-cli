@@ -84,7 +84,7 @@ mod tests
 {
 	use
 	{
-		std::{borrow::Cow, fs, time::Instant},
+		std::{borrow::Cow::Borrowed, fs, time::Instant},
 
 		super::{BincodeEmployee, Contact, Employee, EmployeeAdapter, EmployeeStatus, Organization, Person, query, Store, util},
 
@@ -281,7 +281,7 @@ mod tests
 			let testy_gottard = BincodeEmployee::retrieve(
 				&query::Employee
 				{
-					id: Match::HasAny(vec![Cow::Borrowed(&testy_mctesterson.id), Cow::Borrowed(&gottard.id)].into_iter().collect()),
+					id: Match::HasAny(vec![Borrowed(&testy_mctesterson.id), Borrowed(&gottard.id)].into_iter().collect()),
 					..Default::default()
 				},
 				&store,

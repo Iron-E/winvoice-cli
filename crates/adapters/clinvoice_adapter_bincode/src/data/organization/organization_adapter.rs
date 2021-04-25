@@ -71,7 +71,7 @@ mod tests
 {
 	use
 	{
-		std::{borrow::Cow, fs, time::Instant},
+		std::{borrow::Cow::Borrowed, fs, time::Instant},
 
 		super::{BincodeOrganization, Location, Organization, OrganizationAdapter, query, Store, util},
 
@@ -173,7 +173,7 @@ mod tests
 				{
 					location: query::Location
 					{
-						id: Match::HasAny(vec![Cow::Borrowed(&earth_id), Cow::Borrowed(&usa_id)].into_iter().collect()),
+						id: Match::HasAny(vec![Borrowed(&earth_id), Borrowed(&usa_id)].into_iter().collect()),
 						..Default::default()
 					},
 					name: MatchStr::Regex(format!("^({}|{})$", packing.name, eal.name)),

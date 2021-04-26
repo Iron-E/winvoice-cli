@@ -47,9 +47,9 @@ impl Target
 				{
 					depth: 3,
 					text: timesheet.time_end.map(|time_end|
-						format!("{} – {}", timesheet.time_begin.naive_local(), time_end.naive_local())
+						format!("{} – {}", timesheet.time_begin, time_end.naive_local())
 					).unwrap_or_else(||
-						format!("{} – Current", timesheet.time_begin.naive_local())
+						format!("{} – Current", timesheet.time_begin)
 					),
 				}).unwrap();
 
@@ -133,7 +133,7 @@ impl Target
 
 				writeln!(output, "{}: {}",
 					markdown::Element::UnorderedList {depth: 0, text: markdown::Text::Bold("Date Opened")},
-					DateTime::<Local>::from(job.date_open).naive_local(),
+					DateTime::<Local>::from(job.date_open),
 				).unwrap();
 
 				if let Some(date) = job.date_close
@@ -306,7 +306,7 @@ mod tests
 
 - I tested the function.\n\n",
 				job.id,
-				DateTime::<Local>::from(job.date_open).naive_local(),
+				DateTime::<Local>::from(job.date_open),
 			),
 		);
 		let middle = Instant::now().duration_since(start);
@@ -364,7 +364,7 @@ mod tests
 
 ## Timesheets
 
-### 2021-04-21 02:00:00 – 2021-04-21 02:30:00
+### {} – {}
 
 #### Employee Information
 
@@ -376,7 +376,7 @@ mod tests
 
 - Wrote the test.
 
-### 2021-04-21 03:00:00 – 2021-04-21 03:30:00
+### {} – {}
 
 #### Employee Information
 
@@ -394,8 +394,12 @@ Paid for someone else to clean
 
 - Clean the deck.\n\n",
 				job.id,
-				DateTime::<Local>::from(job.date_open).naive_local(),
+				DateTime::<Local>::from(job.date_open),
 				DateTime::<Local>::from(job.date_close.unwrap()).naive_local(),
+				job.timesheets[0].time_begin,
+				job.timesheets[0].time_end.unwrap().naive_local(),
+				job.timesheets[1].time_begin,
+				job.timesheets[1].time_end.unwrap().naive_local(),
 			),
 		);
 		println!("\n>>>>> Target::Markdown.export_job {}us <<<<<\n", (Instant::now().duration_since(second_start) + middle).as_micros());

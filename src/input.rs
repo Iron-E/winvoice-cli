@@ -6,8 +6,9 @@ pub use error::{Error, Result};
 use
 {
 	core::fmt::Display,
-	std::io,
+	std::{any, io},
 
+	clinvoice_adapter::data::Error as DataError,
 	clinvoice_data::views::RestorableSerde,
 
 	dialoguer::{Editor, Input, MultiSelect, Select},
@@ -118,20 +119,20 @@ pub fn edit_markdown(prompt: &str) -> Result<String>
 pub fn select<T>(entities: &[T], prompt: impl Into<String>) -> io::Result<Vec<T>> where
 	T : Clone + Display
 {
-	if !entities.is_empty()
+	if entities.is_empty()
 	{
-		let selection = MultiSelect::new().items(entities).paged(true).with_prompt(prompt).interact()?;
-
-		return Ok(entities.iter().enumerate().filter_map(
-			|(i, entity)| match selection.binary_search(&i)
-			{
-				Ok(_) => Some(entity.clone()),
-				_ => None,
-			},
-		).collect());
+		return Ok(Vec::new());
 	}
 
-	Ok(Vec::new())
+	let selection = MultiSelect::new().items(entities).paged(true).with_prompt(prompt).interact()?;
+
+	Ok(entities.iter().enumerate().filter_map(
+		|(i, entity)| match selection.binary_search(&i)
+		{
+			Ok(_) => Some(entity.clone()),
+			_ => None,
+		},
+	).collect())
 }
 
 /// # Summary
@@ -142,19 +143,27 @@ pub fn select<T>(entities: &[T], prompt: impl Into<String>) -> io::Result<Vec<T>
 ///
 /// * The selected entity.
 /// * An [`Error`] incurred while selecting.
-pub fn select_one<T>(entities: &[T], prompt: impl Into<String>) -> io::Result<T> where
+pub fn select_one<T>(entities: &[T], prompt: impl Into<String>) -> Result<T> where
 	T : Clone + Display
 {
+	if entities.is_empty()
+	{
+		return Err(DataError::NoData(any::type_name::<T>()).into());
+	}
 
-	let mut selector = Select::new();
-	selector.items(entities).paged(true).with_prompt(prompt);
+	let selector =
+	{
+		let mut s = Select::new();
+		s.items(entities).paged(true).with_prompt(prompt);
+		s
+	};
 
 	loop
 	{
 		return match selector.interact()
 		{
 			Ok(index) => Ok(entities[index].clone()),
-			Err(e) if e.kind() != io::ErrorKind::Other || !e.to_string().contains("Quit not allowed") => Err(e),
+			Err(e) if !(e.kind() == io::ErrorKind::Other && e.to_string().contains("Quit not allowed")) => Err(e.into()),
 			_ =>
 			{
 				println!("Please select something, or press Ctrl+C to quit");

@@ -2,6 +2,8 @@ use
 {
 	std::io,
 
+	clinvoice_adapter::data,
+
 	serde_yaml as yaml,
 	thiserror::Error,
 };
@@ -12,6 +14,10 @@ use
 #[derive(Debug, Error)]
 pub enum Error
 {
+	#[cfg_attr(debug_assertions,      error("{0:?}"))]
+	#[cfg_attr(not(debug_assertions), error("{0}"))]
+	Data(#[from] data::Error),
+
 	#[cfg_attr(debug_assertions,      error("{0:?}"))]
 	#[cfg_attr(not(debug_assertions), error("{0}"))]
 	Io(#[from] io::Error),

@@ -30,7 +30,7 @@ fn add_menu(contact_info: &mut HashMap<String, ContactView>, locations: &[Locati
 	/// # Summary
 	///
 	/// Get whether or not a user wants to export a piece of contact information.
-	fn get_export(entity: impl Display) -> io::Result<bool>
+	fn get_export(entity: impl Display) -> input::Result<bool>
 	{
 		let export = input::select_one(&EXPORT_OPTS, format!("Do you want \"{}\" to be listed when exporting `Job`s?", entity))?;
 		Ok(match export

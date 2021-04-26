@@ -57,6 +57,24 @@ pub enum MatchStr<S> where S : AsRef<str>
 
 	/// # Summary
 	///
+	/// Negate a [`Match`].
+	///
+	/// # Example
+	///
+	/// ```rust
+	/// use std::borrow::Cow::Borrowed;
+	/// use clinvoice_query::MatchStr;
+	///
+	/// let not_contains = Match::Not(Match::Contains("Foo").into());
+	///
+	/// assert_eq!(not_contains.matches("Foobar"), Ok(false));
+	/// assert_eq!(not_contains.matches("barfoo"), Ok(false));
+	/// assert_eq!(not_contains.set_matches(Iter::new(["bar", "foo"])), Ok(false));
+	/// ```
+	Not(Box<Self>),
+
+	/// # Summary
+	///
 	/// Match if and only if:
 	///
 	/// * This regular expression matches some other string.
@@ -95,6 +113,7 @@ impl<S> MatchStr<S> where S : AsRef<str> + Eq
 			Self::Any => true,
 			Self::EqualTo(equal_value) => equal_value.as_ref() == value,
 			Self::Contains(contained_value) => value.to_lowercase().contains(&contained_value.as_ref().to_lowercase()),
+			Self::Not(m) => !m.matches(value)?,
 			Self::Regex(expression) => Regex::new(expression.as_ref())?.is_match(value),
 		})
 	}
@@ -121,6 +140,7 @@ impl<S> MatchStr<S> where S : AsRef<str> + Eq
 				let equal_str = equal_value.as_ref();
 				values.any(|v| v.contains(equal_str))
 			},
+			Self::Not(m) => !m.set_matches(values)?,
 			Self::Contains(contained_value) =>
 			{
 				let contained_str = contained_value.as_ref().to_lowercase();

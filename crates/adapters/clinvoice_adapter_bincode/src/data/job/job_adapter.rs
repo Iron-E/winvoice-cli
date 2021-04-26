@@ -235,7 +235,7 @@ mod tests
 			let not_creation = BincodeJob::retrieve(
 				&query::Job
 				{
-					date_open: Match::HasNone(vec![Borrowed(&DateTime::from(creation.date_open))].into_iter().collect()),
+					date_open: Match::Not(Match::HasAny(vec![Borrowed(&DateTime::from(creation.date_open))].into_iter().collect()).into()),
 					id: Match::HasAny(vec![Borrowed(&retrieval.id), Borrowed(&assertion.id)].into_iter().collect()),
 					..Default::default()
 				},

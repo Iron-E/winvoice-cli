@@ -99,27 +99,6 @@ pub enum Match<'element, T> where
 	///
 	/// For some value `v`, match if and only if:
 	///
-	/// * A set of `v`'s type has no values contained in this set.
-	/// * `v` is not contained within this set.
-	///
-	/// # Example
-	///
-	/// ```rust
-	/// use std::borrow::Cow::Borrowed;
-	/// use clinvoice_adapter::data::query::Match;
-	///
-	/// let has_none = Match::HasNone(vec![Borrowed(&1), Borrowed(&5), Borrowed(&7), Borrowed(&9)].into_iter().collect());
-	///
-	/// assert!(has_none.matches(&8));
-	/// assert!(!has_none.matches(&9));
-	/// assert!(has_none.set_matches(&([0, 2, 4, 6].iter().collect())));
-	/// ```
-	HasNone(HashSet<Cow<'element, T>>),
-
-	/// # Summary
-	///
-	/// For some value `v`, match if and only if:
-	///
 	/// * The value of `v` is greater than or equal to the first value.
 	/// * The value of `v` is less than the first value.
 	///
@@ -136,6 +115,25 @@ pub enum Match<'element, T> where
 	/// assert!(in_range.set_matches(&([0, 1, 3].iter().collect())));
 	/// ```
 	InRange(Cow<'element, T>, Cow<'element, T>),
+
+	/// # Summary
+	///
+	/// Negate a [`Match`].
+	///
+	/// # Example
+	///
+	/// ```rust
+	/// use std::borrow::Cow::Borrowed;
+	/// use clinvoice_adapter::data::query::Match;
+	///
+	/// let not_equal_to = Match::Not(Match::EqualTo(Borrowed(&5)).into());
+	///
+	/// assert!(!not_equal_to.matches(&5));
+	/// assert!(not_equal_to.matches(&4));
+	/// assert!(!not_equal_to.set_matches(&([5].iter().collect())));
+	/// assert!(not_equal_to.set_matches(&([1, 5].iter().collect())));
+	/// ```
+	Not(Box<Self>),
 }
 
 /// # Summary
@@ -170,8 +168,8 @@ impl<'element, T> Match<'element, T> where
 			Self::EqualTo(equal_value) => equal_value.as_ref() == value,
 			Self::HasAll(required_values) => required_values.len() == 1 && required_values.contains(value),
 			Self::HasAny(accepted_values) => accepted_values.contains(value),
-			Self::HasNone(denied_values) => !denied_values.contains(value),
 			Self::InRange(min, max) => is_in_range(min.as_ref(), max.as_ref(), value),
+			Self::Not(m) => !m.matches(value),
 		}
 	}
 
@@ -193,10 +191,10 @@ impl<'element, T> Match<'element, T> where
 		{
 			Self::Any => true,
 			Self::EqualTo(equal_value) => values.len() == 1 && values.contains(equal_value.as_ref()),
-			Self::HasAll(required_values) => required_values.iter().map(|v| v.as_ref()).collect::<HashSet<_>>().is_subset(values),
-			Self::HasAny(accepted_values) => !accepted_values.iter().map(|v| v.as_ref()).collect::<HashSet<_>>().is_disjoint(values),
-			Self::HasNone(denied_values) => denied_values.iter().map(|v| v.as_ref()).collect::<HashSet<_>>().is_disjoint(values),
+			Self::HasAll(required_values) => values.is_superset(&required_values.iter().map(|v| v.as_ref()).collect()),
+			Self::HasAny(accepted_values) => !values.is_disjoint(&accepted_values.iter().map(|v| v.as_ref()).collect()),
 			Self::InRange(min, max) => values.iter().any(|v| is_in_range(min.as_ref(), max.as_ref(), v)),
+			Self::Not(m) => !m.set_matches(values),
 		}
 	}
 }

@@ -2,12 +2,7 @@ use
 {
 	super::{Invoice, Match, MatchStr, Organization, Timesheet, Result},
 
-	clinvoice_data::
-	{
-		chrono::{DateTime, Local},
-		Id,
-		views::JobView,
-	},
+	clinvoice_data::{chrono::NaiveDateTime, Id, views::JobView},
 };
 
 #[cfg(feature="serde_support")]
@@ -24,10 +19,10 @@ pub struct Job<'m>
 	pub client: Organization<'m>,
 
 	#[cfg_attr(feature="serde_support", serde(default))]
-	pub date_close: Match<'m, Option<DateTime<Local>>>,
+	pub date_close: Match<'m, Option<NaiveDateTime>>,
 
 	#[cfg_attr(feature="serde_support", serde(default))]
-	pub date_open: Match<'m, DateTime<Local>>,
+	pub date_open: Match<'m, NaiveDateTime>,
 
 	#[cfg_attr(feature="serde_support", serde(default))]
 	pub id: Match<'m, Id>,
@@ -54,8 +49,8 @@ impl Job<'_>
 	{
 		Ok(
 			self.client.id.matches(&job.client_id) &&
-			self.date_close.matches(&job.date_close.map(DateTime::from)) &&
-			self.date_open.matches(&DateTime::from(job.date_open)) &&
+			self.date_close.matches(&job.date_close.map(|d| d.naive_local())) &&
+			self.date_open.matches(&job.date_open.naive_local()) &&
 			self.id.matches(&job.id) &&
 			self.invoice.matches(&job.invoice) &&
 			self.notes.matches(&job.notes)? &&
@@ -71,8 +66,8 @@ impl Job<'_>
 	{
 		Ok(
 			self.client.matches_view(&job.client)? &&
-			self.date_close.matches(&job.date_close.map(DateTime::from)) &&
-			self.date_open.matches(&DateTime::from(job.date_open)) &&
+			self.date_close.matches(&job.date_close.map(|d| d.naive_local())) &&
+			self.date_open.matches(&job.date_open.naive_local()) &&
 			self.id.matches(&job.id) &&
 			self.invoice.matches(&job.invoice) &&
 			self.notes.matches(&job.notes)? &&

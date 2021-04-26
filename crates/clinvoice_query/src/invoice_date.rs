@@ -2,7 +2,7 @@ use
 {
 	super::Match,
 
-	clinvoice_data::chrono::{DateTime, Local},
+	clinvoice_data::chrono::NaiveDateTime,
 };
 
 #[cfg(feature="serde_support")]
@@ -16,10 +16,10 @@ use serde::{Deserialize, Serialize};
 pub struct InvoiceDate<'m>
 {
 	#[cfg_attr(feature="serde_support", serde(default))]
-	pub issued: Match<'m, DateTime<Local>>,
+	pub issued: Match<'m, NaiveDateTime>,
 
 	#[cfg_attr(feature="serde_support", serde(default))]
-	pub paid: Match<'m, Option<DateTime<Local>>>,
+	pub paid: Match<'m, Option<NaiveDateTime>>,
 }
 
 impl InvoiceDate<'_>
@@ -29,7 +29,7 @@ impl InvoiceDate<'_>
 	/// Return `true` if `invoice_date` is a match.
 	pub fn matches(&self, invoice_date: &clinvoice_data::InvoiceDate) -> bool
 	{
-		self.issued.matches(&DateTime::from(invoice_date.issued)) &&
-		self.paid.matches(&invoice_date.paid.map(DateTime::from))
+		self.issued.matches(&invoice_date.issued.naive_local()) &&
+		self.paid.matches(&invoice_date.paid.map(|d| d.naive_local()))
 	}
 }

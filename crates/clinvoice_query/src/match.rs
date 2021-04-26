@@ -155,7 +155,7 @@ pub enum Match<'element, T> where
 
 	/// # Summary
 	///
-	/// Match if and only if all of the contained [`Match`]es also match.
+	/// Match if and only if any of the contained [`Match`]es also match.
 	///
 	/// # Example
 	///

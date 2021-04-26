@@ -30,12 +30,12 @@ impl Expense<'_>
 	/// # Summary
 	///
 	/// Return `true` if `invoice` is a match.
-	pub fn set_matches<'item>(&self, mut expenses: impl Iterator<Item=&'item clinvoice_data::Expense>) -> Result<bool>
+	pub fn set_matches<'item>(&self, expenses: &mut impl Iterator<Item=&'item clinvoice_data::Expense>) -> Result<bool>
 	{
 		Ok(
 			self.category.set_matches(&expenses.by_ref().map(|e| &e.category).collect()) &&
 			self.cost.set_matches(&expenses.by_ref().map(|e| &e.cost).collect()) &&
-			self.description.set_matches(expenses.map(|e| e.description.as_ref()))?
+			self.description.set_matches(&mut expenses.map(|e| e.description.as_ref()))?
 		)
 	}
 }

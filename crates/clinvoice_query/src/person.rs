@@ -49,11 +49,11 @@ impl Person<'_>
 	/// # Summary
 	///
 	/// Return `true` if `people` [`Match::set_matches`].
-	pub fn set_matches_view<'item>(&self, mut people: impl Iterator<Item=&'item PersonView>) -> Result<bool>
+	pub fn set_matches_view<'item>(&self, people: &mut impl Iterator<Item=&'item PersonView>) -> Result<bool>
 	{
 		Ok(
 			self.id.set_matches(&people.by_ref().map(|p| &p.id).collect()) &&
-			self.name.set_matches(people.map(|p| p.name.as_ref()))?
+			self.name.set_matches(&mut people.map(|p| p.name.as_ref()))?
 		)
 	}
 }

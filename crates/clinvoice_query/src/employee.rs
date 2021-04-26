@@ -42,7 +42,7 @@ impl Employee<'_>
 	pub fn matches(&self, employee: &clinvoice_data::Employee) -> Result<bool>
 	{
 		Ok(
-			self.contact_info.set_matches(employee.contact_info.values())? &&
+			self.contact_info.set_matches(&mut employee.contact_info.values())? &&
 			self.id.matches(&employee.id) &&
 			self.organization.id.matches(&employee.organization_id) &&
 			self.person.id.matches(&employee.person_id) &&
@@ -57,7 +57,7 @@ impl Employee<'_>
 	pub fn matches_view(&self, employee: &EmployeeView) -> Result<bool>
 	{
 		Ok(
-			self.contact_info.set_matches_view(employee.contact_info.values())? &&
+			self.contact_info.set_matches_view(&mut employee.contact_info.values())? &&
 			self.id.matches(&employee.id) &&
 			self.organization.matches_view(&employee.organization)? &&
 			self.person.matches_view(&employee.person)? &&
@@ -69,14 +69,14 @@ impl Employee<'_>
 	/// # Summary
 	///
 	/// Return `true` if `employee` is a match.
-	pub fn set_matches_view<'item>(&self, mut employees: impl Iterator<Item=&'item EmployeeView>) -> Result<bool>
+	pub fn set_matches_view<'item>(&self, employees: &mut impl Iterator<Item=&'item EmployeeView>) -> Result<bool>
 	{
 		Ok(
-			self.contact_info.set_matches_view(employees.by_ref().map(|e| e.contact_info.values()).flatten())? &&
+			self.contact_info.set_matches_view(&mut employees.by_ref().map(|e| e.contact_info.values()).flatten())? &&
 			self.id.set_matches(&employees.by_ref().map(|e| &e.id).collect()) &&
-			self.organization.set_matches_view(employees.by_ref().map(|e| &e.organization))? &&
-			self.person.set_matches_view(employees.by_ref().map(|e| &e.person))? &&
-			self.title.set_matches(employees.by_ref().map(|e| e.title.as_ref()))? &&
+			self.organization.set_matches_view(&mut employees.by_ref().map(|e| &e.organization))? &&
+			self.person.set_matches_view(&mut employees.by_ref().map(|e| &e.person))? &&
+			self.title.set_matches(&mut employees.by_ref().map(|e| e.title.as_ref()))? &&
 			self.status.set_matches(&employees.map(|e| &e.status).collect())
 		)
 	}

@@ -68,7 +68,7 @@ impl Location<'_>
 	/// # Summary
 	///
 	/// Return `true` if `locations` [`Match::set_matches`].
-	pub fn set_matches_view<'item>(&self, mut locations: impl Iterator<Item=&'item LocationView>) -> Result<bool>
+	pub fn set_matches_view<'item>(&self, locations: &mut impl Iterator<Item=&'item LocationView>) -> Result<bool>
 	{
 		Ok(
 			self.id.set_matches(&locations.by_ref().map(|l| &l.id).collect()) &&
@@ -85,7 +85,7 @@ impl Location<'_>
 				OuterLocation::None => locations.by_ref().any(|l| l.outer.is_none()),
 				_ => true,
 			} &&
-			self.name.set_matches(locations.map(|l| l.name.as_ref()))?
+			self.name.set_matches(&mut locations.map(|l| l.name.as_ref()))?
 		)
 	}
 }

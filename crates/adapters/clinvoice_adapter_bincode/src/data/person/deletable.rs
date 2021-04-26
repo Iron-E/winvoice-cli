@@ -5,7 +5,8 @@ use
 	super::BincodePerson,
 	crate::data::{BincodeEmployee, Error, Result},
 
-	clinvoice_adapter::data::{Deletable, EmployeeAdapter, Error as DataError, query},
+	clinvoice_adapter::data::{Deletable, EmployeeAdapter, Error as DataError},
+	clinvoice_query as query,
 };
 
 impl Deletable for BincodePerson<'_, '_>

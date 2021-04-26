@@ -20,21 +20,23 @@
 
 mod contact;
 mod employee;
+mod error;
 mod expense;
 mod invoice;
 mod invoice_date;
 mod job;
 mod location;
-mod r#match;
 mod match_str;
 mod organization;
 mod person;
+mod r#match;
 mod timesheet;
 
 pub use
 {
 	contact::Contact,
 	employee::Employee,
+	error::{Error, Result},
 	expense::Expense,
 	invoice::Invoice,
 	invoice_date::InvoiceDate,

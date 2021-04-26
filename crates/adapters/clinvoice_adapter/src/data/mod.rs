@@ -18,7 +18,6 @@ mod location_adapter;
 mod organization_adapter;
 mod person_adapter;
 mod updatable;
-pub mod query;
 pub mod timesheet;
 
 pub use

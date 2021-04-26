@@ -23,6 +23,7 @@ clinvoice_config = {path='crates/clinvoice_config', version="0.1"}
 clinvoice_data = {path='crates/clinvoice_data', version="0.3"}
 clinvoice_error = {path='crates/clinvoice_error', version="0.1"}
 clinvoice_export = {path='crates/clinvoice_export', version="0.1"}
+clinvoice_query = {path='crates/clinvoice_query', version="0.1"}
 
 # Dialogues
 dialoguer = "0.8"
@@ -47,4 +48,5 @@ members = [
 	"crates/clinvoice_data",
 	"crates/clinvoice_error",
 	"crates/clinvoice_export",
+	"crates/clinvoice_query",
 ]

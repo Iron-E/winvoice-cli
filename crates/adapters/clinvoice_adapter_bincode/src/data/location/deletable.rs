@@ -5,8 +5,9 @@ use
 	super::BincodeLocation,
 	crate::data::{BincodeOrganization, Error, Result},
 
-	clinvoice_adapter::data::{Deletable, Error as DataError, LocationAdapter, OrganizationAdapter, query},
+	clinvoice_adapter::data::{Deletable, Error as DataError, LocationAdapter, OrganizationAdapter},
 	clinvoice_data::Location,
+	clinvoice_query as query,
 };
 
 impl Deletable for BincodeLocation<'_, '_>

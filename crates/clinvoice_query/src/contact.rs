@@ -1,10 +1,8 @@
 use
 {
-	super::{Location, MatchStr},
+	super::{Location, MatchStr, Result},
 
 	clinvoice_data::views::ContactView,
-
-	regex::Error,
 };
 
 #[cfg(feature="serde_support")]
@@ -32,7 +30,7 @@ impl Contact<'_>
 	/// # Summary
 	///
 	/// Return `true` if `employee` is a match.
-	pub fn set_matches<'item>(&self, mut contact_info: impl Iterator<Item=&'item clinvoice_data::Contact>) -> Result<bool, Error>
+	pub fn set_matches<'item>(&self, mut contact_info: impl Iterator<Item=&'item clinvoice_data::Contact>) -> Result<bool>
 	{
 		Ok(
 			self.address.id.set_matches(
@@ -60,7 +58,7 @@ impl Contact<'_>
 	/// # Summary
 	///
 	/// Return `true` if `employee` is a match.
-	pub fn set_matches_view<'item>(&self, mut contact_info: impl Iterator<Item=&'item ContactView>) -> Result<bool, Error>
+	pub fn set_matches_view<'item>(&self, mut contact_info: impl Iterator<Item=&'item ContactView>) -> Result<bool>
 	{
 		Ok(
 			self.address.set_matches_view(contact_info.by_ref().flat_map(|c| match c

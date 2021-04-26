@@ -9,10 +9,11 @@ use
 
 	clinvoice_adapter::
 	{
-		data::{Error as DataError, Initializable, PersonAdapter, query, Updatable},
+		data::{Error as DataError, Initializable, PersonAdapter, Updatable},
 		Store,
 	},
 	clinvoice_data::Person,
+	clinvoice_query as query,
 };
 
 impl PersonAdapter for BincodePerson<'_, '_>
@@ -74,7 +75,7 @@ mod tests
 
 		super::{BincodePerson, Person, PersonAdapter, query, Store, util},
 
-		clinvoice_adapter::data::query::{Match, MatchStr},
+		clinvoice_query::{Match, MatchStr},
 	};
 
 	#[test]

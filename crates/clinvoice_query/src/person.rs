@@ -1,10 +1,8 @@
 use
 {
-	super::{Match, MatchStr},
+	super::{Match, MatchStr, Result},
 
 	clinvoice_data::{Id, views::PersonView},
-
-	regex::Error,
 };
 
 #[cfg(feature="serde_support")]
@@ -29,7 +27,7 @@ impl Person<'_>
 	/// # Summary
 	///
 	/// Return `true` if `person` is a match.
-	pub fn matches(&self, person: &clinvoice_data::Person) -> Result<bool, Error>
+	pub fn matches(&self, person: &clinvoice_data::Person) -> Result<bool>
 	{
 		Ok(
 			self.id.matches(&person.id) &&
@@ -40,7 +38,7 @@ impl Person<'_>
 	/// # Summary
 	///
 	/// Return `true` if `person` is a match.
-	pub fn matches_view(&self, person: &PersonView) -> Result<bool, Error>
+	pub fn matches_view(&self, person: &PersonView) -> Result<bool>
 	{
 		Ok(
 			self.id.matches(&person.id) &&
@@ -51,7 +49,7 @@ impl Person<'_>
 	/// # Summary
 	///
 	/// Return `true` if `people` [`Match::set_matches`].
-	pub fn set_matches_view<'item>(&self, mut people: impl Iterator<Item=&'item PersonView>) -> Result<bool, Error>
+	pub fn set_matches_view<'item>(&self, mut people: impl Iterator<Item=&'item PersonView>) -> Result<bool>
 	{
 		Ok(
 			self.id.set_matches(&people.by_ref().map(|p| &p.id).collect()) &&

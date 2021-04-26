@@ -11,10 +11,11 @@ use
 
 	clinvoice_adapter::
 	{
-		data::{EmployeeAdapter, Error as DataError, Initializable, query, Updatable},
+		data::{EmployeeAdapter, Error as DataError, Initializable, Updatable},
 		Store,
 	},
 	clinvoice_data::{Contact, Employee, EmployeeStatus, Organization, Person},
+	clinvoice_query as query,
 };
 
 impl EmployeeAdapter for BincodeEmployee<'_, '_>
@@ -88,8 +89,8 @@ mod tests
 
 		super::{BincodeEmployee, Contact, Employee, EmployeeAdapter, EmployeeStatus, Organization, Person, query, Store, util},
 
-		clinvoice_adapter::data::query::Match,
 		clinvoice_data::Id,
+		clinvoice_query::Match,
 	};
 
 	#[test]

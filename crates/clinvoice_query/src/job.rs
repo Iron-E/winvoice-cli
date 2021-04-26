@@ -1,6 +1,6 @@
 use
 {
-	super::{Invoice, Match, MatchStr, Organization, Timesheet},
+	super::{Invoice, Match, MatchStr, Organization, Timesheet, Result},
 
 	clinvoice_data::
 	{
@@ -8,8 +8,6 @@ use
 		Id,
 		views::JobView,
 	},
-
-	regex::Error,
 };
 
 #[cfg(feature="serde_support")]
@@ -52,7 +50,7 @@ impl Job<'_>
 	/// # Summary
 	///
 	/// Return `true` if `job` is a match.
-	pub fn matches(&self, job: &clinvoice_data::Job) -> Result<bool, Error>
+	pub fn matches(&self, job: &clinvoice_data::Job) -> Result<bool>
 	{
 		Ok(
 			self.client.id.matches(&job.client_id) &&
@@ -69,7 +67,7 @@ impl Job<'_>
 	/// # Summary
 	///
 	/// Return `true` if `job` is a match.
-	pub fn matches_view(&self, job: &JobView) -> Result<bool, Error>
+	pub fn matches_view(&self, job: &JobView) -> Result<bool>
 	{
 		Ok(
 			self.client.matches_view(&job.client)? &&

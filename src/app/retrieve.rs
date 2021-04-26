@@ -9,10 +9,11 @@ use
 	clinvoice_adapter::
 	{
 		Adapters, Error as AdapterError,
-		data::{Deletable, EmployeeAdapter, Error as DataError, JobAdapter, LocationAdapter, OrganizationAdapter, PersonAdapter, query, Updatable},
+		data::{Deletable, EmployeeAdapter, Error as DataError, JobAdapter, LocationAdapter, OrganizationAdapter, PersonAdapter, Updatable},
 	},
 	clinvoice_data::views::{PersonView, RestorableSerde},
 	clinvoice_export::Target,
+	clinvoice_query as query,
 
 	serde::{de::DeserializeOwned, Serialize},
 };

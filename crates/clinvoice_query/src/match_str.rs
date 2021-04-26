@@ -2,7 +2,9 @@ mod default;
 
 use
 {
-	regex::{Regex, Error},
+	super::Result,
+
+	regex::Regex,
 	serde::{Deserialize, Serialize},
 };
 
@@ -27,7 +29,7 @@ pub enum MatchStr<S> where S : AsRef<str>
 	///
 	/// ```rust
 	/// use std::array::IntoIter as Iter;
-	/// use clinvoice_adapter::data::query::MatchStr;
+	/// use clinvoice_query::MatchStr;
 	///
 	/// assert_eq!(MatchStr::EqualTo("Foo").matches("Foo"), Ok(true));
 	/// assert_eq!(MatchStr::EqualTo("Foo").set_matches(Iter::new(["Foo", "Bar"])), Ok(true));
@@ -45,7 +47,7 @@ pub enum MatchStr<S> where S : AsRef<str>
 	///
 	/// ```rust
 	/// use std::array::IntoIter as Iter;
-	/// use clinvoice_adapter::data::query::MatchStr;
+	/// use clinvoice_query::MatchStr;
 	///
 	/// assert_eq!(MatchStr::Contains("Foo").matches("Foobar"), Ok(true));
 	/// assert_eq!(MatchStr::Contains("Foo").matches("barfoo"), Ok(true));
@@ -64,7 +66,7 @@ pub enum MatchStr<S> where S : AsRef<str>
 	///
 	/// ```rust
 	/// use std::array::IntoIter as Iter;
-	/// use clinvoice_adapter::data::query::MatchStr;
+	/// use clinvoice_query::MatchStr;
 	///
 	/// assert_eq!(MatchStr::Regex("^Foo").matches("Foobar"), Ok(true));
 	/// assert_eq!(MatchStr::Regex("foo$").set_matches(Iter::new(["Bar", "foo"])), Ok(true));
@@ -86,7 +88,7 @@ impl<S> MatchStr<S> where S : AsRef<str> + Eq
 	///
 	/// * `true`, if the `value` matches the passed [`MatchStr`].
 	/// * `false`, if the `value` does not match.
-	pub fn matches(&self, value: &str) -> Result<bool, Error>
+	pub fn matches(&self, value: &str) -> Result<bool>
 	{
 		Ok(match self
 		{
@@ -109,7 +111,7 @@ impl<S> MatchStr<S> where S : AsRef<str> + Eq
 	///
 	/// * `true`, if the `values` match the passed [`MatchStr`].
 	/// * `false`, if the `values` do not match.
-	pub fn set_matches<'item>(&self, mut values: impl Iterator<Item=&'item str>) -> Result<bool, Error>
+	pub fn set_matches<'item>(&self, mut values: impl Iterator<Item=&'item str>) -> Result<bool>
 	{
 		Ok(match self
 		{

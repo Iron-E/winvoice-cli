@@ -1,10 +1,8 @@
 use
 {
-	super::{Contact, Match, MatchStr, Organization, Person},
+	super::{Contact, Match, MatchStr, Organization, Person, Result},
 
 	clinvoice_data::{EmployeeStatus, Id, views::EmployeeView},
-
-	regex::Error,
 };
 
 #[cfg(feature="serde_support")]
@@ -41,7 +39,7 @@ impl Employee<'_>
 	/// # Summary
 	///
 	/// Return `true` if `employee` is a match.
-	pub fn matches(&self, employee: &clinvoice_data::Employee) -> Result<bool, Error>
+	pub fn matches(&self, employee: &clinvoice_data::Employee) -> Result<bool>
 	{
 		Ok(
 			self.contact_info.set_matches(employee.contact_info.values())? &&
@@ -56,7 +54,7 @@ impl Employee<'_>
 	/// # Summary
 	///
 	/// Return `true` if `employee` is a match.
-	pub fn matches_view(&self, employee: &EmployeeView) -> Result<bool, Error>
+	pub fn matches_view(&self, employee: &EmployeeView) -> Result<bool>
 	{
 		Ok(
 			self.contact_info.set_matches_view(employee.contact_info.values())? &&
@@ -71,7 +69,7 @@ impl Employee<'_>
 	/// # Summary
 	///
 	/// Return `true` if `employee` is a match.
-	pub fn set_matches_view<'item>(&self, mut employees: impl Iterator<Item=&'item EmployeeView>) -> Result<bool, Error>
+	pub fn set_matches_view<'item>(&self, mut employees: impl Iterator<Item=&'item EmployeeView>) -> Result<bool>
 	{
 		Ok(
 			self.contact_info.set_matches_view(employees.by_ref().map(|e| e.contact_info.values()).flatten())? &&

@@ -2,10 +2,11 @@ use
 {
 	std::borrow::Cow::Borrowed,
 
-	super::{EmployeeAdapter, Error, query},
+	super::{EmployeeAdapter, Error},
 	crate::Store,
 
 	clinvoice_data::{Employee, Timesheet},
+	clinvoice_query as query,
 };
 
 /// # Summary

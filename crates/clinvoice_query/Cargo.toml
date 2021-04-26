@@ -1,9 +1,9 @@
 # See https://doc.rust-lang.org/cargo/reference/manifest.html
 [package]
-name = "clinvoice_adapter"
-version = "0.7.0"
+name = "clinvoice_query"
+version = "0.1.0"
 authors = ["Iron-E <code.iron.e@gmail.com>"]
-description = "Shared adapter definitions for CLInvoice."
+description = "Query language of CLInvoice."
 
 edition = "2018"
 license = "GPL3"
@@ -12,16 +12,21 @@ repository = "https://www.github.com/Iron-E/clinvoice"
 
 [dependencies]
 # CLInvoice
-clinvoice_data = {path="../../clinvoice_data", version="0.3"}
-clinvoice_error = {path="../../clinvoice_error", version="0.1"}
-clinvoice_query = {path="../../clinvoice_query", version="0.1"}
+clinvoice_data = {path="../clinvoice_data", version="0.3"}
+clinvoice_error = {path="../clinvoice_error", version="0.1"}
+
+# Const Contat
+const_format = "0.2"
 
 # Errors
 thiserror = "1"
+
+# Matching Strings
+regex = "1"
 
 # Serialization
 serde = {version="1", optional=true}
 
 [features]
 default = []
-serde_support = ["clinvoice_query/serde_support", "serde/derive"]
+serde_support = ["serde/derive"]

@@ -1,14 +1,12 @@
 use
 {
-	super::{Employee, Expense, Match, MatchStr},
+	super::{Employee, Expense, Match, MatchStr, Result},
 
 	clinvoice_data::
 	{
 		chrono::{DateTime, Local},
 		views::TimesheetView,
 	},
-
-	regex::Error,
 };
 
 #[cfg(feature="serde_support")]
@@ -17,10 +15,6 @@ use serde::{Deserialize, Serialize};
 /// # Summary
 ///
 /// An [`Timesheet`](clinvoice_data::Timesheet) with [matchable](Match) fields.
-///
-/// # TODO
-///
-/// Add `expenses` and `work_notes`.
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 #[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
 pub struct Timesheet<'m>
@@ -46,7 +40,7 @@ impl Timesheet<'_>
 	/// # Summary
 	///
 	/// Return `true` if `timesheet` is a match.
-	pub fn set_matches<'item>(&self, mut timesheets: impl Iterator<Item=&'item clinvoice_data::Timesheet>) -> Result<bool, Error>
+	pub fn set_matches<'item>(&self, mut timesheets: impl Iterator<Item=&'item clinvoice_data::Timesheet>) -> Result<bool>
 	{
 		Ok(
 			self.employee.id.set_matches(&timesheets.by_ref().map(|t| &t.employee_id).collect()) &&
@@ -60,7 +54,7 @@ impl Timesheet<'_>
 	/// # Summary
 	///
 	/// Return `true` if `timesheet` is a match.
-	pub fn set_matches_view<'item>(&self, mut timesheets: impl Iterator<Item=&'item TimesheetView>) -> Result<bool, Error>
+	pub fn set_matches_view<'item>(&self, mut timesheets: impl Iterator<Item=&'item TimesheetView>) -> Result<bool>
 	{
 		Ok(
 			self.employee.set_matches_view(timesheets.by_ref().map(|t| &t.employee))? &&

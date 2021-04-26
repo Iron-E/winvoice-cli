@@ -2,10 +2,11 @@ use
 {
 	std::error::Error,
 
-	super::{Deletable, Initializable, query, Updatable},
+	super::{Deletable, Initializable, Updatable},
 	crate::Store,
 
 	clinvoice_data::Person,
+	clinvoice_query as query,
 };
 
 pub trait PersonAdapter :

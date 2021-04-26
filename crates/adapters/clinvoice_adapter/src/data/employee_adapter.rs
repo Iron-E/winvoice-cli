@@ -2,7 +2,7 @@ use
 {
 	std::{borrow::Cow::Borrowed, collections::HashMap, error::Error},
 
-	super::{contact, Deletable, Initializable, LocationAdapter, OrganizationAdapter, PersonAdapter, query, Updatable},
+	super::{contact, Deletable, Initializable, LocationAdapter, OrganizationAdapter, PersonAdapter, Updatable},
 	crate::Store,
 
 	clinvoice_data::
@@ -10,6 +10,7 @@ use
 		Contact, Employee, EmployeeStatus, Organization, Person,
 		views::{EmployeeView, PersonView},
 	},
+	clinvoice_query as query,
 };
 
 pub trait EmployeeAdapter :

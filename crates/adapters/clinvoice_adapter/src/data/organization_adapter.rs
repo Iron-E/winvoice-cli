@@ -2,10 +2,11 @@ use
 {
 	std::{borrow::Cow::Borrowed, error::Error},
 
-	super::{Deletable, EmployeeAdapter, Initializable, LocationAdapter, query, Updatable},
+	super::{Deletable, EmployeeAdapter, Initializable, LocationAdapter, Updatable},
 	crate::Store,
 
 	clinvoice_data::{Employee, Location, Organization, views::OrganizationView},
+	clinvoice_query as query,
 };
 
 pub trait OrganizationAdapter  :

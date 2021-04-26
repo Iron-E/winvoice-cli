@@ -9,10 +9,11 @@ use
 
 	clinvoice_adapter::
 	{
-		data::{Error as DataError, Initializable, OrganizationAdapter, query, Updatable},
+		data::{Error as DataError, Initializable, OrganizationAdapter, Updatable},
 		Store,
 	},
 	clinvoice_data::{Location, Organization},
+	clinvoice_query as query,
 };
 
 impl OrganizationAdapter for BincodeOrganization<'_, '_>
@@ -75,7 +76,7 @@ mod tests
 
 		super::{BincodeOrganization, Location, Organization, OrganizationAdapter, query, Store, util},
 
-		clinvoice_adapter::data::query::{Match, MatchStr},
+		clinvoice_query::{Match, MatchStr},
 		clinvoice_data::Id,
 	};
 

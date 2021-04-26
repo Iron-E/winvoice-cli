@@ -1,10 +1,8 @@
 use
 {
-	super::{Location, Match, MatchStr},
+	super::{Location, Match, MatchStr, Result},
 
 	clinvoice_data::{Id, views::OrganizationView},
-
-	regex::Error,
 };
 
 #[cfg(feature="serde_support")]
@@ -32,7 +30,7 @@ impl Organization<'_>
 	/// # Summary
 	///
 	/// Return `true` if `organization` is a match.
-	pub fn matches(&self, organization: &clinvoice_data::Organization) -> Result<bool, Error>
+	pub fn matches(&self, organization: &clinvoice_data::Organization) -> Result<bool>
 	{
 		Ok(
 			self.id.matches(&organization.id) &&
@@ -44,7 +42,7 @@ impl Organization<'_>
 	/// # Summary
 	///
 	/// Return `true` if `organization` is a match.
-	pub fn matches_view(&self, organization: &OrganizationView) -> Result<bool, Error>
+	pub fn matches_view(&self, organization: &OrganizationView) -> Result<bool>
 	{
 		Ok(
 			self.id.matches(&organization.id) &&
@@ -56,7 +54,7 @@ impl Organization<'_>
 	/// # Summary
 	///
 	/// Return `true` if `organizations` [`Match::set_matches`].
-	pub fn set_matches_view<'item>(&self, mut organizations: impl Iterator<Item=&'item OrganizationView>) -> Result<bool, Error>
+	pub fn set_matches_view<'item>(&self, mut organizations: impl Iterator<Item=&'item OrganizationView>) -> Result<bool>
 	{
 		Ok(
 			self.id.set_matches(&organizations.by_ref().map(|o| &o.id).collect()) &&

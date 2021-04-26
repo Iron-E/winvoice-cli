@@ -41,7 +41,7 @@ pub enum Match<'element, T> where
 	///
 	/// ```rust
 	/// use std::borrow::Cow::Borrowed;
-	/// use clinvoice_adapter::data::query::Match;
+	/// use clinvoice_query::Match;
 	///
 	/// let equal_to = Match::EqualTo(Borrowed(&5));
 	///
@@ -63,7 +63,7 @@ pub enum Match<'element, T> where
 	///
 	/// ```rust
 	/// use std::borrow::Cow::Borrowed;
-	/// use clinvoice_adapter::data::query::Match;
+	/// use clinvoice_query::Match;
 	///
 	/// let has_all = Match::HasAll(vec![Borrowed(&1), Borrowed(&5), Borrowed(&9)].into_iter().collect());
 	///
@@ -85,7 +85,7 @@ pub enum Match<'element, T> where
 	///
 	/// ```rust
 	/// use std::borrow::Cow::Borrowed;
-	/// use clinvoice_adapter::data::query::Match;
+	/// use clinvoice_query::Match;
 	///
 	/// let has_any = Match::HasAny(vec![Borrowed(&1), Borrowed(&5), Borrowed(&7), Borrowed(&9)].into_iter().collect());
 	///
@@ -106,7 +106,7 @@ pub enum Match<'element, T> where
 	///
 	/// ```rust
 	/// use std::borrow::Cow::Borrowed;
-	/// use clinvoice_adapter::data::query::Match;
+	/// use clinvoice_query::Match;
 	///
 	/// let in_range = Match::InRange(Borrowed(&3), Borrowed(&5));
 	///
@@ -124,7 +124,7 @@ pub enum Match<'element, T> where
 	///
 	/// ```rust
 	/// use std::borrow::Cow::Borrowed;
-	/// use clinvoice_adapter::data::query::Match;
+	/// use clinvoice_query::Match;
 	///
 	/// let not_equal_to = Match::Not(Match::EqualTo(Borrowed(&5)).into());
 	///

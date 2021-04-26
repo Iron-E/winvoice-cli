@@ -2,11 +2,9 @@ mod outer_location;
 
 use
 {
-	super::{Match, MatchStr},
+	super::{Match, MatchStr, Result},
 
 	clinvoice_data::{Id, views::LocationView},
-
-	regex::Error,
 };
 
 #[cfg(feature="serde_support")]
@@ -36,7 +34,7 @@ impl Location<'_>
 	/// # Summary
 	///
 	/// Return `true` if `location` is a match.
-	pub fn matches(&self, location: &clinvoice_data::Location) -> Result<bool, Error>
+	pub fn matches(&self, location: &clinvoice_data::Location) -> Result<bool>
 	{
 		Ok(
 			self.id.matches(&location.id) &&
@@ -53,7 +51,7 @@ impl Location<'_>
 	/// # Summary
 	///
 	/// Return `true` if `location` is a match.
-	pub fn matches_view(&self, location: &LocationView) -> Result<bool, Error>
+	pub fn matches_view(&self, location: &LocationView) -> Result<bool>
 	{
 		Ok(
 			self.id.matches(&location.id) &&
@@ -70,7 +68,7 @@ impl Location<'_>
 	/// # Summary
 	///
 	/// Return `true` if `locations` [`Match::set_matches`].
-	pub fn set_matches_view<'item>(&self, mut locations: impl Iterator<Item=&'item LocationView>) -> Result<bool, Error>
+	pub fn set_matches_view<'item>(&self, mut locations: impl Iterator<Item=&'item LocationView>) -> Result<bool>
 	{
 		Ok(
 			self.id.set_matches(&locations.by_ref().map(|l| &l.id).collect()) &&
@@ -78,7 +76,7 @@ impl Location<'_>
 			{
 				OuterLocation::Some(outer) => locations.by_ref()
 					.filter_map(|l| l.outer.as_ref())
-					.try_fold(false, |mut b, o| -> Result<bool, Error>
+					.try_fold(false, |mut b, o| -> Result<bool>
 					{
 						if !b { b = outer.matches_view(&o)?; }
 

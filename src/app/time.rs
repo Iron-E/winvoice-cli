@@ -10,13 +10,14 @@ use
 	clinvoice_adapter::
 	{
 		Adapters, Error as AdapterError,
-		data::{EmployeeAdapter, Error as DataError, JobAdapter, query, Updatable},
+		data::{EmployeeAdapter, Error as DataError, JobAdapter, Updatable},
 	},
 	clinvoice_data::
 	{
 		chrono::{Duration, DurationRound, Utc},
 		views::{EmployeeView, JobView, TimesheetView},
 	},
+	clinvoice_query as query,
 };
 
 #[cfg(feature="bincode")]

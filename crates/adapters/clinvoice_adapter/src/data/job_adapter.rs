@@ -2,7 +2,7 @@ use
 {
 	std::{borrow::Cow::Borrowed, error::Error},
 
-	super::{Deletable, EmployeeAdapter, Initializable, LocationAdapter, OrganizationAdapter, PersonAdapter, query, timesheet, Updatable},
+	super::{Deletable, EmployeeAdapter, Initializable, LocationAdapter, OrganizationAdapter, PersonAdapter, timesheet, Updatable},
 	crate::Store,
 
 	clinvoice_data::
@@ -11,6 +11,7 @@ use
 		Job, Money, Organization,
 		views::{JobView, TimesheetView},
 	},
+	clinvoice_query as query,
 };
 
 pub trait JobAdapter :

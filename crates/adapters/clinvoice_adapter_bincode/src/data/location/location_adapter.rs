@@ -9,10 +9,11 @@ use
 
 	clinvoice_adapter::
 	{
-		data::{Error as DataError, Initializable, LocationAdapter, query, Updatable},
+		data::{Error as DataError, Initializable, LocationAdapter, Updatable},
 		Store,
 	},
 	clinvoice_data::Location,
+	clinvoice_query as query,
 };
 
 impl LocationAdapter for BincodeLocation<'_, '_>
@@ -104,7 +105,7 @@ mod tests
 
 		super::{BincodeLocation, Location, LocationAdapter, query, Store, util},
 
-		clinvoice_adapter::data::query::Match,
+		clinvoice_query::Match,
 	};
 
 	#[test]

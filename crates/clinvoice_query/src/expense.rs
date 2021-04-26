@@ -1,10 +1,8 @@
 use
 {
-	super::{Match, MatchStr},
+	super::{Match, MatchStr, Result},
 
 	clinvoice_data::{ExpenseCategory, Money},
-
-	regex::Error,
 };
 
 #[cfg(feature="serde_support")]
@@ -32,7 +30,7 @@ impl Expense<'_>
 	/// # Summary
 	///
 	/// Return `true` if `invoice` is a match.
-	pub fn set_matches<'item>(&self, mut expenses: impl Iterator<Item=&'item clinvoice_data::Expense>) -> Result<bool, Error>
+	pub fn set_matches<'item>(&self, mut expenses: impl Iterator<Item=&'item clinvoice_data::Expense>) -> Result<bool>
 	{
 		Ok(
 			self.category.set_matches(&expenses.by_ref().map(|e| &e.category).collect()) &&

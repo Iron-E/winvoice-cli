@@ -1,10 +1,11 @@
 use
 {
 	std::{borrow::Cow::Borrowed, error::Error},
-	super::{Deletable, Initializable, query, Updatable},
+	super::{Deletable, Initializable, Updatable},
 	crate::Store,
 
 	clinvoice_data::{Location, views::LocationView},
+	clinvoice_query as query,
 };
 
 pub trait LocationAdapter :

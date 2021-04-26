@@ -2,10 +2,11 @@ use
 {
 	std::{borrow::Cow::Borrowed, collections::HashMap, hash::Hash},
 
-	super::{Error, LocationAdapter, query},
+	super::{Error, LocationAdapter},
 	crate::Store,
 
 	clinvoice_data::{Contact, views::ContactView},
+	clinvoice_query as query,
 };
 
 /// # Summary

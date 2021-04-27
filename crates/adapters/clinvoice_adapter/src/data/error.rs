@@ -26,8 +26,7 @@ pub enum Error
 	/// # Summary
 	///
 	/// An error occurred while querying.
-	#[cfg_attr(debug_assertions,      error("{0:?}"))]
-	#[cfg_attr(not(debug_assertions), error("{0}"))]
+	#[error("{0}")]
 	Query(#[from] clinvoice_query::Error),
 
 	/// # Summary

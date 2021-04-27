@@ -14,12 +14,10 @@ use
 #[derive(Debug, Error)]
 pub enum Error
 {
-	#[cfg_attr(debug_assertions,      error("{0:?}"))]
-	#[cfg_attr(not(debug_assertions), error("{0}"))]
+	#[error("{0}")]
 	Data(#[from] data::Error),
 
-	#[cfg_attr(debug_assertions,      error("{0:?}"))]
-	#[cfg_attr(not(debug_assertions), error("{0}"))]
+	#[error("{0}")]
 	Io(#[from] io::Error),
 
 	/// # Summary
@@ -28,8 +26,7 @@ pub enum Error
 	#[error("The text was not edited")]
 	NotEdited,
 
-	#[cfg_attr(debug_assertions,      error("{0:?}"))]
-	#[cfg_attr(not(debug_assertions), error("{0}"))]
+	#[error("{0}")]
 	Yaml(#[from] yaml::Error),
 }
 

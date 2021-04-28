@@ -23,7 +23,6 @@ mod employee;
 mod error;
 mod expense;
 mod invoice;
-mod invoice_date;
 mod job;
 mod location;
 mod match_str;
@@ -39,7 +38,6 @@ pub use
 	error::{Error, Result},
 	expense::Expense,
 	invoice::Invoice,
-	invoice_date::InvoiceDate,
 	job::Job,
 	location::{Location, OuterLocation},
 	r#match::Match,

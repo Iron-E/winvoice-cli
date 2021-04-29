@@ -27,6 +27,74 @@ pub enum Match<'element, T> where
 
 	/// # Summary
 	///
+	/// For some value `v`, match if and only if:
+	///
+	/// * `v` equals this value.
+	/// * A set of `v`'s type has one element, and is equal to `v`.
+	///
+	/// # Example
+	///
+	/// ```rust
+	/// use std::borrow::Cow::Borrowed;
+	/// use clinvoice_query::Match::AllGreaterThan;
+	///
+	/// let greater_than = AllGreaterThan(Borrowed(&5));
+	///
+	/// assert!(!greater_than.matches(&4));
+	/// assert!(!greater_than.matches(&5));
+	/// assert!(greater_than.matches(&6));
+	/// assert!(!greater_than.set_matches(&([1, 6].iter().collect())));
+	/// assert!(greater_than.set_matches(&([6, 7].iter().collect())));
+	/// ```
+	AllGreaterThan(Cow<'element, T>),
+
+	/// # Summary
+	///
+	/// For some value `v`, match if and only if:
+	///
+	/// * `v` equals this value.
+	/// * A set of `v`'s type has one element, and is equal to `v`.
+	///
+	/// # Example
+	///
+	/// ```rust
+	/// use std::borrow::Cow::Borrowed;
+	/// use clinvoice_query::Match::AllLessThan;
+	///
+	/// let less_than = AllLessThan(Borrowed(&5));
+	///
+	/// assert!(less_than.matches(&4));
+	/// assert!(!less_than.matches(&5));
+	/// assert!(!less_than.matches(&6));
+	/// assert!(!less_than.set_matches(&([1, 6].iter().collect())));
+	/// assert!(less_than.set_matches(&([1, 4].iter().collect())));
+	/// ```
+	AllLessThan(Cow<'element, T>),
+
+	/// # Summary
+	///
+	/// For some value `v`, match if and only if:
+	///
+	/// * The value of `v` is greater than or equal to the first value.
+	/// * The value of `v` is less than the first value.
+	///
+	/// # Example
+	///
+	/// ```rust
+	/// use std::borrow::Cow::Borrowed;
+	/// use clinvoice_query::Match::AllInRange;
+	///
+	/// let in_range = AllInRange(Borrowed(&3), Borrowed(&5));
+	///
+	/// assert!(in_range.matches(&4));
+	/// assert!(!in_range.matches(&5));
+	/// assert!(!in_range.set_matches(&([0, 1, 3].iter().collect())));
+	/// assert!(in_range.set_matches(&([3, 4].iter().collect())));
+	/// ```
+	AllInRange(Cow<'element, T>, Cow<'element, T>),
+
+	/// # Summary
+	///
 	/// Match if and only if all of the contained [`Match`]es also match.
 	///
 	/// # Example
@@ -247,11 +315,11 @@ impl<'element, T> Match<'element, T> where
 			Self::And(matches) => matches.iter().all(|m| m.matches(value)),
 			Self::Any => true,
 			Self::EqualTo(equal_value) => value == equal_value.as_ref(),
-			Self::GreaterThan(lesser_value) => value > lesser_value.as_ref(),
+			Self::AllGreaterThan(lesser_value) | Self::GreaterThan(lesser_value) => value > lesser_value.as_ref(),
 			Self::HasAll(required_values) => required_values.len() == 1 && required_values.contains(value),
 			Self::HasAny(accepted_values) => accepted_values.contains(value),
-			Self::InRange(min, max) => is_in_range(min.as_ref(), max.as_ref(), value),
-			Self::LessThan(greater_value) => value < greater_value.as_ref(),
+			Self::AllInRange(min, max) | Self::InRange(min, max) => is_in_range(min.as_ref(), max.as_ref(), value),
+			Self::AllLessThan(greater_value) | Self::LessThan(greater_value) => value < greater_value.as_ref(),
 			Self::Not(m) => !m.matches(value),
 			Self::Or(matches) => matches.iter().any(|m| m.matches(value)),
 		}
@@ -273,6 +341,9 @@ impl<'element, T> Match<'element, T> where
 	{
 		match self
 		{
+			Self::AllGreaterThan(lesser_value) => values.iter().all(|v| *v > lesser_value.as_ref()),
+			Self::AllInRange(min, max) => values.iter().all(|v| is_in_range(min.as_ref(), max.as_ref(), v)),
+			Self::AllLessThan(greater_value) => values.iter().all(|v| *v < greater_value.as_ref()),
 			Self::And(matches) => matches.iter().all(|m| m.set_matches(values)),
 			Self::Any => true,
 			Self::EqualTo(equal_value) => values.len() == 1 && values.contains(equal_value.as_ref()),

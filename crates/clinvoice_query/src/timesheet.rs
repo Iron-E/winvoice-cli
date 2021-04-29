@@ -4,7 +4,7 @@ use
 
 	clinvoice_data::
 	{
-		chrono::{DateTime, Local},
+		chrono::NaiveDateTime,
 		views::TimesheetView,
 	},
 };
@@ -26,10 +26,10 @@ pub struct Timesheet<'m>
 	pub expenses: Expense<'m>,
 
 	#[cfg_attr(feature="serde_support", serde(default))]
-	pub time_begin: Match<'m, DateTime<Local>>,
+	pub time_begin: Match<'m, NaiveDateTime>,
 
 	#[cfg_attr(feature="serde_support", serde(default))]
-	pub time_end: Match<'m, Option<DateTime<Local>>>,
+	pub time_end: Match<'m, Option<NaiveDateTime>>,
 
 	#[cfg_attr(feature="serde_support", serde(default))]
 	pub work_notes: MatchStr<String>,
@@ -45,8 +45,8 @@ impl Timesheet<'_>
 		Ok(
 			self.employee.id.set_matches(&timesheets.by_ref().map(|t| &t.employee_id).collect()) &&
 			self.expenses.set_matches(&mut timesheets.by_ref().map(|t| &t.expenses).flatten())? &&
-			self.time_begin.set_matches(&timesheets.by_ref().map(|t| DateTime::from(t.time_begin)).collect::<Vec<_>>().iter().collect()) &&
-			self.time_end.set_matches(&timesheets.by_ref().map(|t| t.time_end.map(DateTime::from)).collect::<Vec<_>>().iter().collect()) &&
+			self.time_begin.set_matches(&timesheets.by_ref().map(|t| t.time_begin.naive_local()).collect::<Vec<_>>().iter().collect()) &&
+			self.time_end.set_matches(&timesheets.by_ref().map(|t| t.time_end.map(|time| time.naive_local())).collect::<Vec<_>>().iter().collect()) &&
 			self.work_notes.set_matches(&mut timesheets.map(|t| t.work_notes.as_ref()))?
 		)
 	}
@@ -59,8 +59,8 @@ impl Timesheet<'_>
 		Ok(
 			self.employee.set_matches_view(&mut timesheets.by_ref().map(|t| &t.employee))? &&
 			self.expenses.set_matches(&mut timesheets.by_ref().map(|t| &t.expenses).flatten())? &&
-			self.time_begin.set_matches(&timesheets.by_ref().map(|t| DateTime::from(t.time_begin)).collect::<Vec<_>>().iter().collect()) &&
-			self.time_end.set_matches(&timesheets.by_ref().map(|t| t.time_end.map(DateTime::from)).collect::<Vec<_>>().iter().collect()) &&
+			self.time_begin.set_matches(&timesheets.by_ref().map(|t| t.time_begin.naive_local()).collect::<Vec<_>>().iter().collect()) &&
+			self.time_end.set_matches(&timesheets.by_ref().map(|t| t.time_end.map(|time| time.naive_local())).collect::<Vec<_>>().iter().collect()) &&
 			self.work_notes.set_matches(&mut timesheets.map(|t| t.work_notes.as_ref()))?
 		)
 	}

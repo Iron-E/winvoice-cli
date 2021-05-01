@@ -11,7 +11,11 @@ use
 		Adapters, Error as AdapterError,
 		data::{Deletable, EmployeeAdapter, Error as DataError, JobAdapter, LocationAdapter, OrganizationAdapter, PersonAdapter, Updatable},
 	},
-	clinvoice_data::views::{PersonView, RestorableSerde},
+	clinvoice_data::
+	{
+		Location,
+		views::{PersonView, RestorableSerde}
+	},
 	clinvoice_export::Target,
 	clinvoice_query as query,
 
@@ -61,8 +65,8 @@ pub(super) enum RetrieveCommand
 	#[structopt(about="Retrieve existing records about locations")]
 	Location
 	{
-		#[structopt(help="Create a new location inside of some selected location. Argument is the name of the new location", long, short)]
-		create_inner: Option<String>,
+		#[structopt(help="Create a new location inside of some selected location. Argument is the same as `clinvoice create location`", long, short)]
+		create_inner: Vec<String>,
 	},
 
 	#[structopt(about="Retrieve existing records about organizations")]
@@ -277,10 +281,15 @@ impl Retrieve
 							Self::update(&results_view, |l| $loc {location: &(l.into()), store}.update())?;
 						}
 
-						if let Some(name) = create_inner
+						if let Some(name) = create_inner.first()
 						{
 							let location = input::select_one(&results_view, format!("Select the outer Location of {}", name))?;
-							$loc {location: &(location.into()), store}.create_inner(name.as_str())?;
+							create_inner.iter().try_fold(location.into(),
+								|loc: Location, name: &String| -> Result<Location, <$loc as LocationAdapter>::Error>
+								{
+									Ok($loc {location: &(loc.into()), store}.create_inner(name)?)
+								}
+							)?;
 						}
 						else if !(self.delete || self.update)
 						{

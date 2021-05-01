@@ -11,12 +11,12 @@ use
 	clinvoice_data::
 	{
 		chrono::{Datelike, DateTime, Local, Timelike, TimeZone, Utc},
-		Decimal, EmployeeStatus, Money,
+		Decimal, EmployeeStatus, Location, Money,
 	},
 };
 
 #[cfg(feature="bincode")]
-use clinvoice_adapter_bincode::data::{BincodeEmployee, BincodeJob, BincodeLocation, BincodeOrganization, BincodePerson};
+use clinvoice_adapter_bincode::data::{BincodeEmployee, BincodeJob, BincodeLocation, BincodeOrganization, BincodePerson, Error as BincodeError};
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, StructOpt)]
 #[structopt(about="Record information information with CLInvoice")]
@@ -57,8 +57,8 @@ pub(super) enum Create
 	#[structopt(about="Create a new location record")]
 	Location
 	{
-		#[structopt(help="The name of the location to create (e.g. 'Arizona')")]
-		name: String,
+		#[structopt(help="The name of the location to create (e.g. 'Arizona'). Provide multiple names to create a hierarchy (e.g. 'United States' 'Arizona')", required=true)]
+		names: Vec<String>,
 	},
 
 	#[structopt(about="Create a new organization record")]
@@ -171,6 +171,26 @@ impl Create
 		Ok(())
 	}
 
+	fn create_location<L>(
+		create_inner: fn(&Location, &str, &Store) -> Result<Location, <L as LocationAdapter>::Error>,
+		names: Vec<String>,
+		store: &Store,
+	) -> Result<(), <L as LocationAdapter>::Error>
+	where
+		L : LocationAdapter,
+	{
+		if let Some(name) = names.first()
+		{
+			let outer = L::create(&name, store)?;
+			names.into_iter().skip(1).try_fold(outer, |outer, name| -> Result<Location, <L as LocationAdapter>::Error>
+			{
+				Ok(create_inner(&outer, &name, store)?)
+			})?;
+		}
+
+		Ok(())
+	}
+
 	fn create_organization<'err, L, O>(name: String, store: &Store) -> DynResult<'err, ()> where
 		L : LocationAdapter,
 		O : OrganizationAdapter,
@@ -205,8 +225,15 @@ impl Create
 						store,
 					),
 
-				Self::Location {name} =>
-					BincodeLocation::create(&name, store).and(Ok(())).map_err(|e| e.into()),
+				Self::Location {names} =>
+				{
+					fn create_inner(location: &Location, name: &str, store: &Store) -> Result<Location, BincodeError>
+					{
+						BincodeLocation {location, store}.create_inner(name)
+					}
+
+					Self::create_location::<BincodeLocation>(create_inner, names, store).map_err(|e| e.into())
+				},
 
 				Self::Organization {name} =>
 					Self::create_organization::<BincodeLocation, BincodeOrganization>(name, store),

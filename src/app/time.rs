@@ -76,7 +76,7 @@ impl Time
 
 		job.timesheets[index].work_notes = input::edit_markdown(&job.timesheets[index].work_notes)?;
 
-		input::util::expense::menu(&mut job.timesheets[index].expenses)?;
+		input::util::expense::menu(&mut job.timesheets[index].expenses, config.invoices.default_currency)?;
 
 		// Stop time on the `Job` AFTER requiring users to enter information. Users shouldn't enter things for free ;)
 		let interval = Duration::from_std(config.timesheets.interval)?;

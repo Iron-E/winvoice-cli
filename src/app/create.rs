@@ -68,7 +68,7 @@ pub(super) enum Create
 		name: String,
 	},
 
-	#[structopt(about="Create a new organization record")]
+	#[structopt(about="Create a new person record")]
 	Person
 	{
 		#[structopt(help="The name of the person to create (e.g. 'John')")]

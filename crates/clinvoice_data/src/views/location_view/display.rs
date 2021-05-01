@@ -9,18 +9,16 @@ impl Display for LocationView
 {
 	fn fmt(&self, formatter: &mut Formatter) -> Result
 	{
-		let mut output = self.name.clone();
-		let mut outer = &self.outer;
+		write!(formatter, "{}", self.name)?;
 
+		let mut outer = &self.outer;
 		while let Some(o) = outer
 		{
-			output.push_str(", ");
-			output.push_str(&o.name);
-
+			write!(formatter, ", {}", o.name)?;
 			outer = &o.outer;
 		}
 
-		write!(formatter, "{}", output)
+		Ok(())
 	}
 }
 

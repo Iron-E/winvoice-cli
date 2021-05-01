@@ -39,13 +39,6 @@ There is a lack of programs for CLI invoice maintenance, especially those which 
 
 * `cargo`
 
-## Supported Storage Adapters
-
-Below is a list of supported storage adapters. If the adapter has a check next to it, the implementation is complete. If it has no check next to it, the implementation is either a WIP or planned.
-
-* [x] Bincode File System (__name:__ "Bincode")
-* [ ] PostgreSQL DB (__name:__ "Postgres")
-
 ## Configuration
 
 The first time that you run `clinvoice`, a configuration file will be created according to the table below:
@@ -56,7 +49,7 @@ The first time that you run `clinvoice`, a configuration file will be created ac
 | macOS    | `$HOME`__/Library/Application Support/clinvoice.toml__                                    |
 | Windows  | `{FOLDERID_RoamingAppData}`__/clinvoice/config.toml__                                     |
 
-This configuration file's supported options are:
+Below is a summary of the configuration file's supported options. For a guide on configuring `store` adapters, see [here](https://github.com/Iron-E/clinvoice/wiki/Usage#adapters).
 
 ```toml
 [employees]

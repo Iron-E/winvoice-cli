@@ -65,7 +65,7 @@ pub(super) enum RetrieveCommand
 	#[structopt(about="Retrieve existing records about locations")]
 	Location
 	{
-		#[structopt(help="Create a new location inside of some selected location. Argument is the same as `clinvoice create location`", long, short)]
+		#[structopt(help="Create a new location inside of some selected location.\nArgument is the same as `clinvoice create location`", long, short)]
 		create_inner: Vec<String>,
 	},
 

@@ -57,7 +57,7 @@ pub(super) enum Create
 	#[structopt(about="Create a new location record")]
 	Location
 	{
-		#[structopt(help="The name of the location to create (e.g. 'Arizona'). Provide multiple names to create a hierarchy (e.g. 'United States' 'Arizona')", required=true)]
+		#[structopt(help="The name of the location to create (e.g. 'Arizona').\nProvide multiple names to create a hierarchy (e.g. 'United States' 'Arizona')", required=true)]
 		names: Vec<String>,
 	},
 

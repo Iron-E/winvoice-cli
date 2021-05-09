@@ -24,9 +24,9 @@ where
 			..Default::default()
 		},
 		store,
-	)?.first()
+	)?.into_iter().next()
 	{
-		Some(employee) => Ok(employee.clone()),
+		Some(employee) => Ok(employee),
 		_ => Err(Error::DataIntegrity(timesheet.employee_id).into()),
 	}
 }

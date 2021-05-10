@@ -51,9 +51,10 @@ pub trait EmployeeAdapter :
 		O : OrganizationAdapter,
 		P : PersonAdapter,
 
-		<Self as EmployeeAdapter>::Error : From<<L as LocationAdapter>::Error>,
-		<Self as EmployeeAdapter>::Error : From<<O as OrganizationAdapter>::Error>,
-		<Self as EmployeeAdapter>::Error : From<<P as PersonAdapter>::Error>,
+		<Self as EmployeeAdapter>::Error :
+			From<<L as LocationAdapter>::Error> +
+			From<<O as OrganizationAdapter>::Error> +
+			From<<P as PersonAdapter>::Error>,
 	{
 		let organization = Self::to_organization::<O>(&employee, store)?;
 		let organization_view = O::into_view::<L>(organization, store)?;

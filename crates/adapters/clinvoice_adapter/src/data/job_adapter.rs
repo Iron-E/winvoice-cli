@@ -51,10 +51,10 @@ pub trait JobAdapter :
 		O : OrganizationAdapter,
 		P : PersonAdapter,
 
-		<E as EmployeeAdapter>::Error : From<<L as LocationAdapter>::Error>,
-		<E as EmployeeAdapter>::Error : From<<O as OrganizationAdapter>::Error>,
-		<E as EmployeeAdapter>::Error : From<<P as PersonAdapter>::Error>,
-
+		<E as EmployeeAdapter>::Error :
+			From<<L as LocationAdapter>::Error> +
+			From<<O as OrganizationAdapter>::Error> +
+			From<<P as PersonAdapter>::Error>,
 		<Self as JobAdapter>::Error : From<<E as EmployeeAdapter>::Error>,
 	{
 		let organization = Self::to_organization::<O>(&job, store).map_err(|e| e.into())?;

@@ -136,7 +136,7 @@ impl Job
 	/// * `employee`, the [`Id`] of the [`Employee`] who is working on this timesheet.
 	pub fn start_timesheet(&mut self, employee: Id)
 	{
-		self.attach_timesheet(employee, Vec::new(), Utc::now(), None, "* Work which was done goes here.\n* Supports markdown formatting");
+		self.attach_timesheet(employee, Vec::new(), Utc::now(), None, "* Work which was done goes here\n* Supports markdown formatting");
 	}
 
 	/// # Summary

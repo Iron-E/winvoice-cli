@@ -32,32 +32,32 @@ pub(super) enum Create
 	#[structopt(about="Create a new job record")]
 	Job
 	{
-		#[structopt(help="The currency which the hourly rate is stated in (e.g. 'USD')", long, short)]
+		#[structopt(help="The currency which the hourly rate is stated in (e.g. 'USD')\nDefaults to the value set in your config", long, short)]
 		currency: Option<String>,
 
 		#[structopt(help="The amount of money charged per hour for this job (e.g. 12.00)")]
 		hourly_rate: Decimal,
 
-		#[structopt(help="The year that the job was created (e.g. 2021). Defaults to current year", requires("month"))]
+		#[structopt(help="The year that the job was created (e.g. 2021)\nDefaults to current year", requires("month"))]
 		year: Option<i32>,
 
-		#[structopt(help="The month that the job was created (e.g. 4 for 'April'). Defaults to current month", requires("day"))]
+		#[structopt(help="The month that the job was created (e.g. 4 for 'April')\nDefaults to current month", requires("day"))]
 		month: Option<u32>,
 
-		#[structopt(help="The day that the job was created (e.g. 21). Defaults to current day")]
+		#[structopt(help="The day that the job was created (e.g. 21)\nDefaults to current day")]
 		day: Option<u32>,
 
-		#[structopt(help="The hour that the job was created (e.g. 13 for 1pm). Defaults to current hour", requires("minute"))]
+		#[structopt(help="The hour that the job was created (e.g. 13 for 1pm)\nDefaults to current hour", requires("minute"))]
 		hour: Option<u32>,
 
-		#[structopt(help="The minute that the job was created (e.g. 45). Defaults to current minute")]
+		#[structopt(help="The minute that the job was created (e.g. 45)\nDefaults to current minute")]
 		minute: Option<u32>,
 	},
 
 	#[structopt(about="Create a new location record")]
 	Location
 	{
-		#[structopt(help="The name of the location to create (e.g. 'Arizona').\nProvide multiple names to create a hierarchy (e.g. 'Arizona' 'United States')", required=true)]
+		#[structopt(help="The name of the location to create (e.g. 'Arizona')\nProvide multiple names to create a hierarchy (e.g. 'Arizona' 'United States')", required=true)]
 		names: Vec<String>,
 	},
 
@@ -134,7 +134,7 @@ impl Create
 		let organization_views = input::util::organization::retrieve_views::<L, O>(store)?;
 		let client = input::select_one(&organization_views, "Select the client for this job")?;
 
-		let objectives = input::edit_markdown("* List your objectives.\n* All markdown syntax works")?;
+		let objectives = input::edit_markdown("* List your objectives\n* All markdown syntax works")?;
 
 		J::create(
 			client.into(),

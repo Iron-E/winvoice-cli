@@ -49,7 +49,7 @@ pub fn menu(expenses: &mut Vec<Expense>, default_currency: &str) -> input::Resul
 {
 	loop
 	{
-		let action = input::select_one(&ALL_ACTIONS, "\nThis is the menu for entering expenses.\nWhat would you like to do?")?;
+		let action = input::select_one(&ALL_ACTIONS, "\nThis is the menu for entering expenses\nWhat would you like to do?")?;
 		match action
 		{
 			ADD => add_menu(expenses, default_currency)?,

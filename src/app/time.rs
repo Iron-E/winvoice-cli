@@ -49,7 +49,7 @@ impl Time
 			expenses: Vec::new(),
 			time_begin: Utc::now(),
 			time_end: None,
-			work_notes: "* Work which was done goes here.\n* Supports markdown formatting".into(),
+			work_notes: "* Work which was done goes here\n* Supports markdown formatting".into(),
 		})
 	}
 

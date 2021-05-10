@@ -162,7 +162,7 @@ pub fn menu<'err, L>(store: &Store) -> DynResult<'err, HashMap<String, ContactVi
 
 	loop
 	{
-		let action = input::select_one(&ALL_ACTIONS, "\nThis is the menu for creating contact information.\nWhat would you like to do?")?;
+		let action = input::select_one(&ALL_ACTIONS, "\nThis is the menu for creating contact information\nWhat would you like to do?")?;
 		match action
 		{
 			ADD => add_menu(&mut contact_info, &locations)?,

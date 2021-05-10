@@ -4,14 +4,9 @@ use
 {
 	std::{borrow::Cow::Borrowed, cmp::Ordering},
 
-	super::QUERY_PROMPT,
 	crate::{Config, DynResult, input, StructOpt},
 
-	clinvoice_adapter::
-	{
-		Adapters, Error as AdapterError,
-		data::{EmployeeAdapter, Error as DataError, JobAdapter, Updatable},
-	},
+	clinvoice_adapter::{Adapters, Error as AdapterError, data::Updatable},
 	clinvoice_data::
 	{
 		chrono::{Duration, DurationRound, Utc},
@@ -115,21 +110,7 @@ impl Time
 		{
 			($emp: ident, $job: ident, $loc: ident, $org: ident, $per: ident) =>
 			{{
-				let job_query: query::Job = input::edit_default(String::from(QUERY_PROMPT) + "jobs")?;
-
-				let job_results = $job::retrieve(&job_query, &store)?;
-				let job_results_view = job_results.into_iter().map(|j|
-					$job::into_view::<$emp, $loc, $org, $per>(j, &store)
-				).filter_map(|result| match result
-				{
-					Ok(t) => match job_query.matches_view(&t)
-					{
-						Ok(b) if b => Some(Ok(t)),
-						Err(e) => Some(Err(DataError::from(e).into())),
-						_ => None,
-					},
-					Err(e) => Some(Err(e)),
-				}).collect::<Result<Vec<_>, _>>()?;
+				let job_results_view = input::util::job::retrieve_views::<$emp, $job, $loc, $org, $per>(store)?;
 
 				let mut selected_job = input::select_one(&job_results_view, format!("Select the job to {} working on", self.command))?;
 
@@ -137,29 +118,17 @@ impl Time
 				{
 					TimeCommand::Start =>
 					{
-						let query = match self.default
-						{
-							false => input::edit_default(String::from(QUERY_PROMPT) + "employees")?,
-							_ => query::Employee
+						let results_view = input::util::employee::retrieve_views::<$emp, $loc, $org, $per>(
+							if self.default { None } else
 							{
-								id: query::Match::EqualTo(Borrowed(&config.employees.default_id)),
-								..Default::default()
+								Some(query::Employee
+								{
+									id: query::Match::EqualTo(Borrowed(&config.employees.default_id)),
+									..Default::default()
+								})
 							},
-						};
-
-						let results = $emp::retrieve(&query, &store)?;
-						let results_view = results.into_iter().map(|j|
-							$emp::into_view::<$loc, $org, $per>(j, &store)
-						).filter_map(|result| match result
-						{
-							Ok(t) => match query.matches_view(&t)
-							{
-								Ok(b) if b => Some(Ok(t)),
-								Err(e) => Some(Err(DataError::from(e).into())),
-								_ => None,
-							},
-							Err(e) => Some(Err(e)),
-						}).collect::<Result<Vec<_>, _>>()?;
+							store,
+						)?;
 
 						let selected = input::select_one(&results_view, format!("Select the `Employee` who is doing the work"))?;
 

@@ -1,11 +1,10 @@
 use
 {
-	clinvoice_adapter::
-	{
-		data::{Error as DataError, PersonAdapter},
-		Store,
-	},
+	crate::{app::QUERY_PROMPT, DynResult, input},
+
+	clinvoice_adapter::{data::PersonAdapter, Store},
 	clinvoice_data::views::PersonView,
+	clinvoice_query as query,
 };
 
 /// # Summary
@@ -21,15 +20,17 @@ use
 ///
 /// [P_retrieve]: clinvoice_adapter::data::PersonAdapter::retrieve
 /// [person]: clinvoice_data::Person
-pub fn retrieve_views<P>(store: &Store) -> Result<Vec<PersonView>, <P as PersonAdapter>::Error> where
+pub fn retrieve_views<'err, P>(store: &Store) -> DynResult<'err, Vec<PersonView>> where
 	P : PersonAdapter,
+	<P as PersonAdapter>::Error : 'err,
 {
-	let people = P::retrieve(&Default::default(), store)?;
+	let query: query::Person = input::edit_default(format!("{}persons", QUERY_PROMPT))?;
 
-	if people.is_empty()
+	let results = P::retrieve(&query, &store)?;
+	results.into_iter().map(PersonView::from).filter_map(|view| match query.matches_view(&view)
 	{
-		return Err(DataError::NoData(stringify!(Person)).into());
-	}
-
-	Ok(people.into_iter().map(|p| p.into()).collect())
+		Ok(b) if b => Some(Ok(view)),
+		Err(e) => Some(Err(e)),
+		_ => None,
+	}).collect::<Result<Vec<_>, _>>().map_err(|e| e.into())
 }

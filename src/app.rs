@@ -19,7 +19,7 @@ use
 /// # Summary
 ///
 /// The prompt for when editing a [query](clinvoice_query).
-const QUERY_PROMPT: &str = "See the documentation of this query at https://github.com/Iron-E/clinvoice/wiki/Query-Syntax#";
+pub const QUERY_PROMPT: &str = "See the documentation of this query at https://github.com/Iron-E/clinvoice/wiki/Query-Syntax#";
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, StructOpt)]
 #[structopt(name="clinvoice", about="CLInvoice is a tool to help with invoicing from the command line!")]

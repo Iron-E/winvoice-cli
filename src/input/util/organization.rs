@@ -1,12 +1,14 @@
 use
 {
-	crate::{DynResult, input},
+	crate::{app::QUERY_PROMPT, DynResult, input},
+
 	clinvoice_adapter::
 	{
 		data::{Error as DataError, LocationAdapter, OrganizationAdapter},
 		Store,
 	},
 	clinvoice_data::views::OrganizationView,
+	clinvoice_query as query,
 };
 
 /// # Summary
@@ -22,49 +24,24 @@ use
 ///
 /// [P_retrieve]: clinvoice_adapter::data::OrganizationAdapter::retrieve
 /// [organization]: clinvoice_data::Organization
-pub(super) fn retrieve_views<'err, L, O>(store: &Store) -> DynResult<'err, Vec<OrganizationView>> where
+pub fn retrieve_views<'err, L, O>(store: &Store) -> DynResult<'err, Vec<OrganizationView>> where
 	L : LocationAdapter,
-	<L as LocationAdapter>::Error : 'err,
 	O : OrganizationAdapter,
+
+	<L as LocationAdapter>::Error : 'err,
 	<O as OrganizationAdapter>::Error : 'err,
 {
-	let organizations = O::retrieve(&Default::default(), store)?;
+	let query: query::Organization = input::edit_default(format!("{}organizations", QUERY_PROMPT))?;
 
-	if organizations.is_empty()
+	let results = O::retrieve(&query, &store)?;
+	results.into_iter().map(|o| O::into_view::<L>(o, &store)).filter_map(|result| match result
 	{
-		return Err(DataError::NoData(stringify!(Organization)).into());
-	}
-
-	let organizations_len = organizations.len();
-	organizations.into_iter().try_fold(
-		Vec::with_capacity(organizations_len),
-		|mut v, o| -> DynResult<'err, Vec<OrganizationView>>
+		Ok(t) => match query.matches_view(&t)
 		{
-			v.push(O::into_view::<L>(o, store)?);
-
-			Ok(v)
+			Ok(b) if b => Some(Ok(t)),
+			Err(e) => Some(Err(DataError::from(e).into())),
+			_ => None,
 		},
-	)
+		Err(e) => Some(Err(e)),
+	}).collect::<Result<Vec<_>, _>>().map_err(|e| e.into())
 }
-
-/// # Summary
-///
-/// `prompt` the user to [select](input::select) one [`Location`][organization] from the specified `store`.
-///
-/// # Errors
-///
-/// * If [`retrieve_or_err`] fails.
-/// * If [`input::select_one`] fails.
-///
-/// [organization]: clinvoice_data::Organization
-pub fn select_one<'err, L, O, S>(prompt: S, store: &Store) -> DynResult<'err, OrganizationView> where
-	L : LocationAdapter,
-	<L as LocationAdapter>::Error : 'err,
-	O : OrganizationAdapter,
-	<O as OrganizationAdapter>::Error : 'err,
-	S : Into<String>,
-{
-	let retrieved = retrieve_views::<L, O>(store)?;
-	input::select_one(&retrieved, prompt).map_err(|e| e.into())
-}
-

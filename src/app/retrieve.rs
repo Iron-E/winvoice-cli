@@ -3,19 +3,14 @@ use
 	core::fmt::Display,
 	std::{borrow::Cow::Borrowed, error::Error},
 
-	super::QUERY_PROMPT,
 	crate::{Config, DynResult, input, StructOpt},
 
 	clinvoice_adapter::
 	{
 		Adapters, Error as AdapterError,
-		data::{Deletable, EmployeeAdapter, Error as DataError, JobAdapter, LocationAdapter, OrganizationAdapter, PersonAdapter, Updatable},
+		data::{Deletable, Error as DataError, LocationAdapter, Updatable},
 	},
-	clinvoice_data::
-	{
-		Location,
-		views::{PersonView, RestorableSerde}
-	},
+	clinvoice_data::{Location, views::RestorableSerde},
 	clinvoice_export::Target,
 	clinvoice_query as query,
 
@@ -134,29 +129,17 @@ impl Retrieve
 				{
 					($emp: ident, $loc: ident, $org: ident, $per: ident) =>
 					{{
-						let query = match default
-						{
-							false => input::edit_default(String::from(QUERY_PROMPT) + "employees")?,
-							_ => query::Employee
+						let results_view = input::util::employee::retrieve_views::<$emp, $loc, $org, $per>(
+							if default { None } else
 							{
-								id: query::Match::EqualTo(Borrowed(&config.employees.default_id)),
-								..Default::default()
+								Some(query::Employee
+								{
+									id: query::Match::EqualTo(Borrowed(&config.employees.default_id)),
+									..Default::default()
+								})
 							},
-						};
-
-						let results = $emp::retrieve(&query, &store)?;
-						let results_view = results.into_iter().map(|e|
-							$emp::into_view::<$loc, $org, $per>(e, &store)
-						).filter_map(|result| match result
-						{
-							Ok(t) => match query.matches_view(&t)
-							{
-								Ok(b) if b => Some(Ok(t)),
-								Err(e) => Some(Err(DataError::from(e).into())),
-								_ => None,
-							},
-							Err(e) => Some(Err(e)),
-						}).collect::<Result<Vec<_>, _>>()?;
+							store,
+						)?;
 
 						if self.delete
 						{
@@ -201,21 +184,7 @@ impl Retrieve
 				{
 					($emp: ident, $job: ident, $loc: ident, $org: ident, $per: ident) =>
 					{{
-						let query: query::Job = input::edit_default(String::from(QUERY_PROMPT) + "jobs")?;
-
-						let results = $job::retrieve(&query, &store)?;
-						let results_view = results.into_iter().map(|j|
-							$job::into_view::<$emp, $loc, $org, $per>(j, &store)
-						).filter_map(|result| match result
-						{
-							Ok(t) => match query.matches_view(&t)
-							{
-								Ok(b) if b => Some(Ok(t)),
-								Err(e) => Some(Err(DataError::from(e).into())),
-								_ => None,
-							},
-							Err(e) => Some(Err(e)),
-						}).collect::<Result<Vec<_>, _>>()?;
+						let results_view = input::util::job::retrieve_views::<$emp, $job, $loc, $org, $per>(store)?;
 
 						if self.delete
 						{
@@ -255,21 +224,7 @@ impl Retrieve
 				{
 					($loc: ident) =>
 					{{
-						let query: query::Location = input::edit_default(String::from(QUERY_PROMPT) + "locations")?;
-
-						let results = $loc::retrieve(&query, &store)?;
-						let results_view = results.into_iter().map(|l|
-							$loc::into_view(l, &store)
-						).filter_map(|result| match result
-						{
-							Ok(t) => match query.matches_view(&t)
-							{
-								Ok(b) if b => Some(Ok(t)),
-								Err(e) => Some(Err(DataError::from(e).into())),
-								_ => None,
-							},
-							Err(e) => Some(Err(e)),
-						}).collect::<Result<Vec<_>, _>>()?;
+						let results_view = input::util::location::retrieve_views::<$loc>(store)?;
 
 						if self.delete
 						{
@@ -314,21 +269,7 @@ impl Retrieve
 				{
 					($loc: ident, $org: ident) =>
 					{{
-						let query: query::Organization = input::edit_default(String::from(QUERY_PROMPT) + "organizations")?;
-
-						let results = $org::retrieve(&query, &store)?;
-						let results_view = results.into_iter().map(|o|
-							$org::into_view::<$loc>(o, &store)
-						).filter_map(|result| match result
-						{
-							Ok(t) => match query.matches_view(&t)
-							{
-								Ok(b) if b => Some(Ok(t)),
-								Err(e) => Some(Err(DataError::from(e).into())),
-								_ => None,
-							},
-							Err(e) => Some(Err(e)),
-						}).collect::<Result<Vec<_>, _>>()?;
+						let results_view = input::util::organization::retrieve_views::<$loc, $org>(store)?;
 
 						if self.delete
 						{
@@ -361,17 +302,7 @@ impl Retrieve
 				{
 					($per: ident) =>
 					{{
-						let query: query::Person = input::edit_default(String::from(QUERY_PROMPT) + "persons")?;
-
-						let results = $per::retrieve(&query, &store)?;
-						let results_view = results.into_iter().map(PersonView::from).filter_map(|view|
-							match query.matches_view(&view)
-							{
-								Ok(b) if b => Some(Ok(view)),
-								Err(e) => Some(Err(e)),
-								_ => None,
-							}
-						).collect::<Result<Vec<_>, _>>()?;
+						let results_view = input::util::person::retrieve_views::<$per>(store)?;
 
 						if self.delete
 						{

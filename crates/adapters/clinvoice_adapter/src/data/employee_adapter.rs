@@ -37,7 +37,7 @@ pub trait EmployeeAdapter :
 		organization: Organization,
 		person: Person,
 		status: EmployeeStatus,
-		title: &str,
+		title: String,
 		store: &Store,
 	) -> Result<Employee, <Self as EmployeeAdapter>::Error>;
 

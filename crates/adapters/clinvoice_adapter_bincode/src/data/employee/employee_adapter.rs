@@ -39,7 +39,7 @@ impl EmployeeAdapter for BincodeEmployee<'_, '_>
 		organization: Organization,
 		person: Person,
 		status: EmployeeStatus,
-		title: &str,
+		title: String,
 		store: &Store,
 	) -> Result<Employee>
 	{
@@ -117,7 +117,7 @@ mod tests
 						name: "Testy Mćtesterson".into(),
 					},
 					EmployeeStatus::Employed,
-					"CEO of Tests",
+					"CEO of Tests".into(),
 					&store,
 				).unwrap(),
 				&store,
@@ -133,7 +133,7 @@ mod tests
 						name: "Nimron MacBeaver".into(),
 					},
 					EmployeeStatus::NotEmployed,
-					"Oblong Shape Holder",
+					"Oblong Shape Holder".into(),
 					&store,
 				).unwrap(),
 				&store,
@@ -149,7 +149,7 @@ mod tests
 						name: "An Actual «Tor♯tust".into(),
 					},
 					EmployeeStatus::Representative,
-					"Mixer of Soups",
+					"Mixer of Soups".into(),
 					&store,
 				).unwrap(),
 				&store,
@@ -165,7 +165,7 @@ mod tests
 						name: "Jimmy Neutron, Boy Genius' Dog 'Gottard'".into(),
 					},
 					EmployeeStatus::Employed,
-					"Sidekick",
+					"Sidekick".into(),
 					&store,
 				).unwrap(),
 				&store,
@@ -181,7 +181,7 @@ mod tests
 						name: "Testy Mćtesterson".into(),
 					},
 					EmployeeStatus::NotEmployed,
-					"Lazy No-good Duplicate Name User",
+					"Lazy No-good Duplicate Name User".into(),
 					&store,
 				).unwrap(),
 				&store,
@@ -218,7 +218,7 @@ mod tests
 					name: "Testy Mćtesterson".into(),
 				},
 				EmployeeStatus::NotEmployed,
-				"CEO of Tests",
+				"CEO of Tests".into(),
 				&store,
 			).unwrap();
 
@@ -231,7 +231,7 @@ mod tests
 					name: "Nimron MacBeaver".into(),
 				},
 				EmployeeStatus::Employed,
-				"Oblong Shape Holder",
+				"Oblong Shape Holder".into(),
 				&store,
 			).unwrap();
 
@@ -244,7 +244,7 @@ mod tests
 					name: "An Actual «Tor♯tust".into(),
 				},
 				EmployeeStatus::Representative,
-				"Mixer of Soups",
+				"Mixer of Soups".into(),
 				&store,
 			).unwrap();
 
@@ -257,7 +257,7 @@ mod tests
 					name: "Jimmy Neutron, Boy Genius' Dog 'Gottard'".into(),
 				},
 				EmployeeStatus::Employed,
-				"Sidekick",
+				"Sidekick".into(),
 				&store,
 			).unwrap();
 
@@ -270,7 +270,7 @@ mod tests
 					name: "Testy Mćtesterson".into(),
 				},
 				EmployeeStatus::NotEmployed,
-				"Lazy No-good Duplicate Name User",
+				"Lazy No-good Duplicate Name User".into(),
 				&store,
 			).unwrap();
 

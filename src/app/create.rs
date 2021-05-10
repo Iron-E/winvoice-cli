@@ -108,7 +108,7 @@ impl Create
 			organization,
 			selected_person.into(),
 			employee_status,
-			&title,
+			title,
 			store,
 		)?;
 
@@ -164,7 +164,7 @@ impl Create
 				}
 			}),
 			Money {amount: hourly_rate, currency},
-			&objectives,
+			objectives,
 			store,
 		)?;
 
@@ -172,7 +172,7 @@ impl Create
 	}
 
 	fn create_location<L>(
-		create_inner: fn(&Location, &str, &Store) -> Result<Location, <L as LocationAdapter>::Error>,
+		create_inner: fn(&Location, String, &Store) -> Result<Location, <L as LocationAdapter>::Error>,
 		names: Vec<String>,
 		store: &Store,
 	) -> Result<(), <L as LocationAdapter>::Error>
@@ -181,10 +181,10 @@ impl Create
 	{
 		if let Some(name) = names.first()
 		{
-			let outer = L::create(&name, store)?;
+			let outer = L::create(name.clone(), store)?;
 			names.into_iter().skip(1).try_fold(outer, |outer, name| -> Result<Location, <L as LocationAdapter>::Error>
 			{
-				Ok(create_inner(&outer, &name, store)?)
+				create_inner(&outer, name, store)
 			})?;
 		}
 
@@ -201,7 +201,7 @@ impl Create
 		let location_views = input::util::location::retrieve_views::<L>(store)?;
 		let selected_view = input::select_one(&location_views, format!("Select a location for {}", name))?;
 
-		O::create(selected_view.into(), &name, store)?;
+		O::create(selected_view.into(), name, store)?;
 
 		Ok(())
 	}
@@ -227,7 +227,7 @@ impl Create
 
 				Self::Location {names} =>
 				{
-					fn create_inner(location: &Location, name: &str, store: &Store) -> Result<Location, BincodeError>
+					fn create_inner(location: &Location, name: String, store: &Store) -> Result<Location, BincodeError>
 					{
 						BincodeLocation {location, store}.create_inner(name)
 					}
@@ -239,7 +239,7 @@ impl Create
 					Self::create_organization::<BincodeLocation, BincodeOrganization>(name, store),
 
 				Self::Person {name} =>
-					BincodePerson::create(&name, store).and(Ok(())).map_err(|e| e.into()),
+					BincodePerson::create(name, store).and(Ok(())).map_err(|e| e.into()),
 			},
 
 			_ => return Err(Error::FeatureNotFound(store.adapter).into()),

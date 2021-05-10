@@ -96,25 +96,25 @@ mod tests
 		{
 			let earth = BincodeLocation
 			{
-				location: &BincodeLocation::create("Earth", store).unwrap(),
+				location: &BincodeLocation::create("Earth".into(), store).unwrap(),
 				store,
 			};
 
 			let usa = BincodeLocation
 			{
-				location: &earth.create_inner("USA").unwrap(),
+				location: &earth.create_inner("USA".into()).unwrap(),
 				store,
 			};
 
 			let arizona = BincodeLocation
 			{
-				location: &usa.create_inner("Arizona").unwrap(),
+				location: &usa.create_inner("Arizona".into()).unwrap(),
 				store,
 			};
 
 			let phoenix = BincodeLocation
 			{
-				location: &arizona.create_inner("Phoenix").unwrap(),
+				location: &arizona.create_inner("Phoenix".into()).unwrap(),
 				store,
 			};
 
@@ -122,7 +122,7 @@ mod tests
 			{
 				organization: &BincodeOrganization::create(
 					arizona.location.clone(),
-					"DoGood Inc",
+					"DoGood Inc".into(),
 					&store
 				).unwrap(),
 				store,

@@ -21,7 +21,7 @@ fn to_organization()
 	{
 		let dogood = BincodeOrganization::create(
 			Location {name: "Earth".into(), id: Id::new_v4(), outer_id: None},
-			"DoGood Inc",
+			"DoGood Inc".into(),
 			&store
 		).unwrap();
 
@@ -29,7 +29,7 @@ fn to_organization()
 			dogood.clone(),
 			Utc::now(),
 			Money::new(Decimal::new(200, 2), ""),
-			"Test the job creation function",
+			"Test the job creation function".into(),
 			&store,
 		).unwrap();
 
@@ -61,7 +61,7 @@ fn to_view()
 			big_test.clone(),
 			Utc::now(),
 			Money::new(Decimal::new(200, 2), ""),
-			"Test the job creation function",
+			"Test the job creation function".into(),
 			&store,
 		).unwrap();
 
@@ -70,7 +70,7 @@ fn to_view()
 		].into_iter().collect();
 
 		let testy = BincodePerson::create(
-			"Testy Mćtesterson",
+			"Testy Mćtesterson".into(),
 			&store,
 		).unwrap();
 
@@ -79,7 +79,7 @@ fn to_view()
 			big_test.clone(),
 			testy.clone(),
 			EmployeeStatus::Employed,
-			"CEO of Tests",
+			"CEO of Tests".into(),
 			&store,
 		).unwrap();
 

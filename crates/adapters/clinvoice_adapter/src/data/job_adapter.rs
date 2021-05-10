@@ -36,7 +36,7 @@ pub trait JobAdapter :
 		client: Organization,
 		date_open: DateTime<Utc>,
 		hourly_rate: Money,
-		objectives: &str,
+		objectives: String,
 		store: &Store,
 	) -> Result<Job, <Self as JobAdapter>::Error>;
 

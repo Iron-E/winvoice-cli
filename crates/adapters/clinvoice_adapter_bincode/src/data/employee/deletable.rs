@@ -87,20 +87,20 @@ mod tests
 		{
 			let earth = BincodeLocation
 			{
-				location: &BincodeLocation::create("Earth", &store).unwrap(),
+				location: &BincodeLocation::create("Earth".into(), &store).unwrap(),
 				store,
 			};
 
 			let mut big_old_test = BincodeOrganization::create(
 				earth.location.clone(),
-				"Big Old Test Corporation",
+				"Big Old Test Corporation".into(),
 				&store,
 			).unwrap();
 
 			let testy = BincodePerson
 			{
 				person: &BincodePerson::create(
-					"Testy Mćtesterson",
+					"Testy Mćtesterson".into(),
 					&store,
 				).unwrap(),
 				store,
@@ -113,7 +113,7 @@ mod tests
 					big_old_test.clone(),
 					testy.person.clone(),
 					EmployeeStatus::Employed,
-					"CEO of Tests",
+					"CEO of Tests".into(),
 					&store,
 				).unwrap(),
 				store,
@@ -123,7 +123,7 @@ mod tests
 				big_old_test.clone(),
 				Utc::now(),
 				Money::new(Decimal::new(200, 2), "USD"),
-				"Test the job creation function",
+				"Test the job creation function".into(),
 				&store,
 			).unwrap();
 

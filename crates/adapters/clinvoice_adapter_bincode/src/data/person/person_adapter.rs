@@ -31,7 +31,7 @@ impl PersonAdapter for BincodePerson<'_, '_>
 	/// # Returns
 	///
 	/// The newly created [`Person`].
-	fn create(name: &str, store: &Store,) -> Result<Person>
+	fn create(name: String, store: &Store,) -> Result<Person>
 	{
 		Self::init(&store)?;
 
@@ -87,7 +87,7 @@ mod tests
 
 			create_assertion(
 				BincodePerson::create(
-					"Widdle",
+					"Widdle".into(),
 					&store,
 				).unwrap(),
 				&store,
@@ -95,7 +95,7 @@ mod tests
 
 			create_assertion(
 				BincodePerson::create(
-					"Long",
+					"Long".into(),
 					&store,
 				).unwrap(),
 				&store,
@@ -103,7 +103,7 @@ mod tests
 
 			create_assertion(
 				BincodePerson::create(
-					"Steven",
+					"Steven".into(),
 					&store,
 				).unwrap(),
 				&store,
@@ -111,7 +111,7 @@ mod tests
 
 			create_assertion(
 				BincodePerson::create(
-					"JingleBob",
+					"JingleBob".into(),
 					&store,
 				).unwrap(),
 				&store,
@@ -119,7 +119,7 @@ mod tests
 
 			create_assertion(
 				BincodePerson::create(
-					"asldkj jdsoai",
+					"asldkj jdsoai".into(),
 					&store,
 				).unwrap(),
 				&store,
@@ -141,22 +141,22 @@ mod tests
 		util::temp_store(|store|
 		{
 			let flingo = BincodePerson::create(
-				"flingo",
+				"flingo".into(),
 				&store
 			).unwrap();
 
 			let bob = BincodePerson::create(
-				"bob",
+				"bob".into(),
 				&store
 			).unwrap();
 
 			let slimdi = BincodePerson::create(
-				"slimdi",
+				"slimdi".into(),
 				&store
 			).unwrap();
 
 			let longone = BincodePerson::create(
-				"longone",
+				"longone".into(),
 				&store
 			).unwrap();
 

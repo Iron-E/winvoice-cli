@@ -31,7 +31,7 @@ impl OrganizationAdapter for BincodeOrganization<'_, '_>
 	/// # Returns
 	///
 	/// The newly created [`Organization`].
-	fn create(location: Location, name: &str, store: &Store) -> Result<Organization>
+	fn create(location: Location, name: String, store: &Store) -> Result<Organization>
 	{
 		Self::init(&store)?;
 
@@ -96,7 +96,7 @@ mod tests
 			create_assertion(
 				BincodeOrganization::create(
 					Location {name: "Earth".into(), id: Id::new_v4(), outer_id: None},
-					"alsdkjaldkj", &store
+					"alsdkjaldkj".into(), &store
 				).unwrap(),
 				&store,
 			);
@@ -104,7 +104,7 @@ mod tests
 			create_assertion(
 				BincodeOrganization::create(
 					Location {name: "USA".into(), id: usa_id, outer_id: Some(earth_id)},
-					"alskdjalgkh  ladhkj EAL ISdh", &store
+					"alskdjalgkh  ladhkj EAL ISdh".into(), &store
 				).unwrap(),
 				&store,
 			);
@@ -112,7 +112,7 @@ mod tests
 			create_assertion(
 				BincodeOrganization::create(
 					Location {name: "Arizona".into(), id: arizona_id, outer_id: Some(earth_id)},
-					" AAA – 44 %%", &store
+					" AAA – 44 %%".into(), &store
 				).unwrap(),
 				&store,
 			);
@@ -120,7 +120,7 @@ mod tests
 			create_assertion(
 				BincodeOrganization::create(
 					Location {name: "Phoenix".into(), id: phoenix_id, outer_id: Some(arizona_id)},
-					" ^^^ ADSLKJDLASKJD FOCJCI", &store
+					" ^^^ ADSLKJDLASKJD FOCJCI".into(), &store
 				).unwrap(),
 				&store,
 			);
@@ -128,7 +128,7 @@ mod tests
 			create_assertion(
 				BincodeOrganization::create(
 					Location {name: "Some Road".into(), id: some_id, outer_id: Some(phoenix_id)},
-					"aldkj doiciuc giguy &&", &store
+					"aldkj doiciuc giguy &&".into(), &store
 				).unwrap(),
 				&store,
 			);
@@ -151,19 +151,19 @@ mod tests
 			let earth_id = Id::new_v4();
 			let packing = BincodeOrganization::create(
 				Location {name: "Earth".into(), id: earth_id, outer_id: None},
-				"Packing Co", &store
+				"Packing Co".into(), &store
 			).unwrap();
 
 			let usa_id = Id::new_v4();
 			let eal = BincodeOrganization::create(
 				Location {name: "USA".into(), id: usa_id, outer_id: Some(earth_id)},
-				"alskdjalgkh  ladhkj EAL ISdh", &store
+				"alskdjalgkh  ladhkj EAL ISdh".into(), &store
 			).unwrap();
 
 			let arizona_id = Id::new_v4();
 			let aaa = BincodeOrganization::create(
 				Location {name: "Arizona".into(), id: arizona_id, outer_id: Some(usa_id)},
-				" AAA – 44 %%", &store
+				" AAA – 44 %%".into(), &store
 			).unwrap();
 
 			let start = Instant::now();

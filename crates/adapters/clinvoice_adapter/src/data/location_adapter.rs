@@ -28,7 +28,7 @@ pub trait LocationAdapter :
 	/// ```ignore
 	/// Location {name, id: /* generated */};
 	/// ```
-	fn create(name: &str, store: &Store) -> Result<Location, <Self as LocationAdapter>::Error>;
+	fn create(name: String, store: &Store) -> Result<Location, <Self as LocationAdapter>::Error>;
 
 	/// # Summary
 	///
@@ -43,7 +43,7 @@ pub trait LocationAdapter :
 	/// ```ignore
 	/// Location {name, id: /* generated */, outside_id: self.unroll().id};
 	/// ```
-	fn create_inner(&self, name: &str) -> Result<Location, <Self as LocationAdapter>::Error>;
+	fn create_inner(&self, name: String) -> Result<Location, <Self as LocationAdapter>::Error>;
 
 	/// # Summary
 	///

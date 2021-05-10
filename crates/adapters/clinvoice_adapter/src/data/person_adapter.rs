@@ -27,7 +27,7 @@ pub trait PersonAdapter :
 	/// # Returns
 	///
 	/// The newly created [`Person`].
-	fn create(name: &str, store: &Store) -> Result<Person, <Self as PersonAdapter>::Error>;
+	fn create(name: String, store: &Store) -> Result<Person, <Self as PersonAdapter>::Error>;
 
 	/// # Summary
 	///

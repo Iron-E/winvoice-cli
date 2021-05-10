@@ -39,7 +39,7 @@ impl JobAdapter for BincodeJob<'_, '_>
 		client: Organization,
 		date_open: DateTime<Utc>,
 		hourly_rate: Money,
-		objectives: &str,
+		objectives: String,
 		store: &Store,
 	) -> Result<Job>
 	{
@@ -120,7 +120,7 @@ mod tests
 					organization.clone(),
 					Utc::now(),
 					Money::new(Decimal::new(200, 2), ""),
-					"Test the job creation function",
+					"Test the job creation function".into(),
 					&store,
 				).unwrap(),
 				&store,
@@ -131,7 +131,7 @@ mod tests
 					organization.clone(),
 					Utc::now(),
 					Money::new(Decimal::new(200, 2), "USD"),
-					"Test the job creation function",
+					"Test the job creation function".into(),
 					&store,
 				).unwrap(),
 				&store,
@@ -142,7 +142,7 @@ mod tests
 					organization.clone(),
 					Utc::now(),
 					Money::new(Decimal::new(20000, 0), "YEN"),
-					"TEST THE JOB CREATION FUNCTION",
+					"TEST THE JOB CREATION FUNCTION".into(),
 					&store,
 				).unwrap(),
 				&store,
@@ -153,7 +153,7 @@ mod tests
 					organization.clone(),
 					Utc::now(),
 					Money::new(Decimal::new(500, 2), "CDN"),
-					"test the job creation function",
+					"test the job creation function".into(),
 					&store,
 				).unwrap(),
 				&store,
@@ -164,7 +164,7 @@ mod tests
 					organization.clone(),
 					Utc::now(),
 					Money::new(Decimal::new(1000, 2), "EUR"),
-					"TeSt ThE jOb CrEaTiOn FuNcTiOn",
+					"TeSt ThE jOb CrEaTiOn FuNcTiOn".into(),
 					&store,
 				).unwrap(),
 				&store,
@@ -196,7 +196,7 @@ mod tests
 				organization.clone(),
 				Utc::now(),
 				Money::new(Decimal::new(200, 2), "USD"),
-				"Test the job creation function",
+				"Test the job creation function".into(),
 				&store,
 			).unwrap();
 
@@ -204,7 +204,7 @@ mod tests
 				organization.clone(),
 				Utc::now(),
 				Money::new(Decimal::new(200, 2), "USD"),
-				"Test the job retrieval function",
+				"Test the job retrieval function".into(),
 				&store,
 			).unwrap();
 
@@ -212,7 +212,7 @@ mod tests
 				organization.clone(),
 				Utc::now(),
 				Money::new(Decimal::new(20000, 0), "YEN"),
-				"Assert something",
+				"Assert something".into(),
 				&store,
 			).unwrap();
 

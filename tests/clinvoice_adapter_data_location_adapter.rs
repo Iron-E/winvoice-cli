@@ -14,25 +14,25 @@ fn to_view()
 {
 	util::temp_store(|store|
 	{
-		let earth = BincodeLocation::create("Earth", &store).unwrap();
+		let earth = BincodeLocation::create("Earth".into(), &store).unwrap();
 
 		let usa = BincodeLocation
 		{
 			location: &earth,
 			store,
-		}.create_inner("USA").unwrap();
+		}.create_inner("USA".into()).unwrap();
 
 		let arizona = BincodeLocation
 		{
 			location: &usa,
 			store,
-		}.create_inner("Arizona").unwrap();
+		}.create_inner("Arizona".into()).unwrap();
 
 		let phoenix = BincodeLocation
 		{
 			location: &arizona,
 			store,
-		}.create_inner("Phoenix").unwrap();
+		}.create_inner("Phoenix".into()).unwrap();
 
 		let phoenix_view = LocationView
 		{

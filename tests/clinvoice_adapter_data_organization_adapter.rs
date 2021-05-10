@@ -14,10 +14,10 @@ fn to_location()
 {
 	util::temp_store(|store|
 	{
-		let arizona = BincodeLocation::create("Arizona", &store).unwrap();
+		let arizona = BincodeLocation::create("Arizona".into(), &store).unwrap();
 		let dogood = BincodeOrganization::create(
 			arizona.clone(),
-			"DoGood Inc",
+			"DoGood Inc".into(),
 			&store
 		).unwrap();
 
@@ -38,7 +38,7 @@ fn to_vec_employee()
 	{
 		let dogood = BincodeOrganization::create(
 			Location {name: "Earth".into(), id: Id::new_v4(), outer_id: None},
-			"DoGood Inc",
+			"DoGood Inc".into(),
 			&store
 		).unwrap();
 
@@ -51,7 +51,7 @@ fn to_vec_employee()
 				name: "Testy Mćtesterson".into(),
 			},
 			EmployeeStatus::Representative,
-			"CEO of Tests",
+			"CEO of Tests".into(),
 			&store,
 		).unwrap();
 
@@ -64,7 +64,7 @@ fn to_vec_employee()
 				name: "Mr. Flu".into(),
 			},
 			EmployeeStatus::Employed,
-			"Janitor",
+			"Janitor".into(),
 			&store,
 		).unwrap();
 

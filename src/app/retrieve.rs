@@ -249,7 +249,7 @@ impl Retrieve
 				};
 			},
 
-			RetrieveCommand::Location {ref create_inner} =>
+			RetrieveCommand::Location {create_inner} =>
 			{
 				macro_rules! retrieve
 				{
@@ -273,7 +273,8 @@ impl Retrieve
 
 						if self.delete
 						{
-							Self::delete(&results_view, |l| $loc {location: &(l.into()), store}.delete(self.cascade))?;
+							let cascade = self.cascade;
+							Self::delete(&results_view, |l| $loc {location: &(l.into()), store}.delete(cascade))?;
 						}
 
 						if self.update
@@ -284,8 +285,8 @@ impl Retrieve
 						if let Some(name) = create_inner.first()
 						{
 							let location = input::select_one(&results_view, format!("Select the outer Location of {}", name))?;
-							create_inner.iter().try_fold(location.into(),
-								|loc: Location, name: &String| -> Result<Location, <$loc as LocationAdapter>::Error>
+							create_inner.into_iter().try_fold(location.into(),
+								|loc: Location, name: String| -> Result<Location, <$loc as LocationAdapter>::Error>
 								{
 									Ok($loc {location: &(loc.into()), store}.create_inner(name)?)
 								}

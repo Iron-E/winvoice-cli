@@ -33,7 +33,7 @@ impl LocationAdapter for BincodeLocation<'_, '_>
 	/// ```ignore
 	/// Location {name, id: /* generated */};
 	/// ```
-	fn create(name: &str, store: &Store) -> Result<Location>
+	fn create(name: String, store: &Store) -> Result<Location>
 	{
 		Self::init(&store)?;
 
@@ -62,7 +62,7 @@ impl LocationAdapter for BincodeLocation<'_, '_>
 	/// ```ignore
 	/// Location {name, id: /* generated */, outside_id: self.unroll().id};
 	/// ```
-	fn create_inner(&self, name: &str) -> Result<Location>
+	fn create_inner(&self, name: String) -> Result<Location>
 	{
 		let inner_location = Location
 		{
@@ -114,10 +114,10 @@ mod tests
 		util::temp_store(|store|
 		{
 			let start = Instant::now();
-			let earth = BincodeLocation::create("Earth", &store).unwrap();
-			let usa = BincodeLocation {location: &earth, store}.create_inner("USA").unwrap();
-			let arizona = BincodeLocation {location: &usa, store}.create_inner("Arizona").unwrap();
-			let phoenix = BincodeLocation {location: &arizona, store}.create_inner("Phoenix").unwrap();
+			let earth = BincodeLocation::create("Earth".into(), &store).unwrap();
+			let usa = BincodeLocation {location: &earth, store}.create_inner("USA".into()).unwrap();
+			let arizona = BincodeLocation {location: &usa, store}.create_inner("Arizona".into()).unwrap();
+			let phoenix = BincodeLocation {location: &arizona, store}.create_inner("Phoenix".into()).unwrap();
 			println!("\n>>>>> BincodeLocation::start {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 4);
 
 			assert_eq!(usa.outer_id, Some(earth.id));
@@ -142,10 +142,10 @@ mod tests
 	{
 		util::temp_store(|store|
 		{
-			let earth = BincodeLocation::create("Earth", &store).unwrap();
-			let usa = BincodeLocation {location: &earth, store}.create_inner("USA").unwrap();
-			let arizona = BincodeLocation {location: &usa, store}.create_inner("Arizona").unwrap();
-			let phoenix = BincodeLocation {location: &arizona, store}.create_inner("Phoenix").unwrap();
+			let earth = BincodeLocation::create("Earth".into(), &store).unwrap();
+			let usa = BincodeLocation {location: &earth, store}.create_inner("USA".into()).unwrap();
+			let arizona = BincodeLocation {location: &usa, store}.create_inner("Arizona".into()).unwrap();
+			let phoenix = BincodeLocation {location: &arizona, store}.create_inner("Phoenix".into()).unwrap();
 
 			let start = Instant::now();
 

@@ -38,7 +38,7 @@ pub fn edit<T>(entity: &T, prompt: impl AsRef<str>) -> Result<T> where
 	// Write the entity to the `temp_path` and then edit that file.
 	match Editor::new().extension(".yaml").edit(&to_edit)?
 	{
-		Some(edited) => Ok(yaml::from_str(&edited)?),
+		Some(edited) => yaml::from_str(&edited).map_err(|e| e.into()),
 		_ => Err(Error::NotEdited),
 	}
 }

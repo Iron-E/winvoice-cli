@@ -57,7 +57,7 @@ pub(super) enum Create
 	#[structopt(about="Create a new location record")]
 	Location
 	{
-		#[structopt(help="The name of the location to create (e.g. 'Arizona').\nProvide multiple names to create a hierarchy (e.g. 'United States' 'Arizona')", required=true)]
+		#[structopt(help="The name of the location to create (e.g. 'Arizona').\nProvide multiple names to create a hierarchy (e.g. 'Arizona' 'United States')", required=true)]
 		names: Vec<String>,
 	},
 
@@ -175,10 +175,10 @@ impl Create
 	where
 		L : LocationAdapter,
 	{
-		if let Some(name) = names.first()
+		if let Some(name) = names.last()
 		{
 			let outer = L::create(name.clone(), store)?;
-			names.into_iter().skip(1).try_fold(outer, |outer, name| -> Result<Location, <L as LocationAdapter>::Error>
+			names.into_iter().rev().skip(1).try_fold(outer, |outer, name| -> Result<Location, <L as LocationAdapter>::Error>
 			{
 				create_inner(&outer, name, store)
 			})?;

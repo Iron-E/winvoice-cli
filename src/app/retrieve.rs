@@ -10,7 +10,7 @@ use
 		Adapters, Error as AdapterError,
 		data::{Deletable, Error as DataError, LocationAdapter, Updatable},
 	},
-	clinvoice_data::{Location, views::RestorableSerde},
+	clinvoice_data::{chrono::Utc, Location, views::RestorableSerde},
 	clinvoice_export::Target,
 	clinvoice_query as query,
 
@@ -53,6 +53,9 @@ pub(super) enum RetrieveCommand
 	#[structopt(about="Retrieve existing records about job")]
 	Job
 	{
+		#[structopt(help="Select jobs to be closed", long, short)]
+		close: bool,
+
 		#[structopt(help="Export retrieved entities to the specified format\nSupported: markdown", long, short)]
 		export: Option<Target>,
 	},
@@ -178,13 +181,23 @@ impl Retrieve
 				};
 			},
 
-			RetrieveCommand::Job {export} =>
+			RetrieveCommand::Job {close, export} =>
 			{
 				macro_rules! retrieve
 				{
 					($emp: ident, $job: ident, $loc: ident, $org: ident, $per: ident) =>
 					{{
-						let results_view = input::util::job::retrieve_views::<$emp, $job, $loc, $org, $per>(store)?;
+						let results_view = input::util::job::retrieve_views::<$emp, $job, $loc, $org, $per>(
+							if !close { None } else
+							{
+								Some(query::Job
+								{
+									date_close: query::Match::EqualTo(Borrowed(&None)),
+									..Default::default()
+								})
+							},
+							store,
+						)?;
 
 						if self.delete
 						{
@@ -196,13 +209,23 @@ impl Retrieve
 							Self::update(&results_view, |j| $job {job: &(j.into()), store}.update())?;
 						}
 
+						if close
+						{
+							let selected = input::select(&results_view, "Select the Jobs you want to close")?;
+							selected.into_iter().try_for_each(|mut j|
+							{
+								j.date_close = Some(Utc::now());
+								$job {job: &(j.into()), store}.update()
+							})?;
+						}
+
 						if let Some(target) = export
 						{
 							input::select(&results_view, "Select which Jobs you want to export")?.into_iter().for_each(|job|
 								println!("{}", target.export_job(&job))
 							);
 						}
-						else if !(self.delete || self.update)
+						else if !(close || self.delete || self.update)
 						{
 							results_view.iter().for_each(|j| println!("{}", j));
 						}

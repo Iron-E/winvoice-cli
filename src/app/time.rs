@@ -110,7 +110,14 @@ impl Time
 		{
 			($emp: ident, $job: ident, $loc: ident, $org: ident, $per: ident) =>
 			{{
-				let job_results_view = input::util::job::retrieve_views::<$emp, $job, $loc, $org, $per>(store)?;
+				let job_results_view = input::util::job::retrieve_views::<$emp, $job, $loc, $org, $per>(
+					Some(query::Job
+					{
+						date_close: query::Match::EqualTo(Borrowed(&None)),
+						..Default::default()
+					}),
+					store,
+				)?;
 
 				let mut selected_job = input::select_one(&job_results_view, format!("Select the job to {} working on", self.command))?;
 

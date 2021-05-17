@@ -148,7 +148,7 @@ pub fn select_one<T>(entities: &[T], prompt: impl Into<String>) -> Result<T> whe
 {
 	if entities.is_empty()
 	{
-		return Err(DataError::NoData(any::type_name::<T>()).into());
+		return Err(DataError::NoData(format!("`{}`", any::type_name::<T>())).into());
 	}
 
 	let selector =

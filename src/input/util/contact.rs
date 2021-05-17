@@ -23,6 +23,7 @@ fn add_menu(contact_info: &mut HashMap<String, ContactView>, locations: &[Locati
 	const EMAIL: &str = "Email";
 	const PHONE: &str = "Phone";
 	const ALL_CONTACT_TYPES: [&str; 3] = [ADDRESS, EMAIL, PHONE];
+	const EMAIL_AND_PHONE: [&str; 2] = [EMAIL, PHONE];
 
 	const EXPORT_OPTS: [&str; 2] = ["No", "Yes"];
 	const FALSE: &str = EXPORT_OPTS[0];
@@ -61,7 +62,11 @@ fn add_menu(contact_info: &mut HashMap<String, ContactView>, locations: &[Locati
 		};
 	}
 
-	match input::select_one(&ALL_CONTACT_TYPES, "Select which type of contact info to add")?
+	let contact_type = input::select_one(
+		if locations.is_empty() {&EMAIL_AND_PHONE} else {&ALL_CONTACT_TYPES},
+		"Select which type of contact info to add",
+	)?;
+	match contact_type
 	{
 		ADDRESS =>
 		{
@@ -118,15 +123,13 @@ fn delete_menu(contact_info: &mut HashMap<String, ContactView>) -> input::Result
 /// but will ignore [`input::Error::NotEdited`].
 fn edit_menu(contact_info: &mut HashMap<String, ContactView>) -> input::Result<()>
 {
-	if !contact_info.is_empty()
-	{
-		let to_edit_key = input::select_one(
-			&contact_info.keys().filter(|k|
-				matches!(contact_info[*k], ContactView::Email {email: _, export: _} | ContactView::Phone {phone: _, export: _})
-			).cloned().collect::<Vec<_>>(),
-			"Select a piece of contact information to edit.",
-		)?;
+	let email_or_phones: Vec<_> = contact_info.keys().filter(|k|
+		matches!(contact_info[*k], ContactView::Email {email: _, export: _} | ContactView::Phone {phone: _, export: _})
+	).cloned().collect();
 
+	if !email_or_phones.is_empty()
+	{
+		let to_edit_key = input::select_one(&email_or_phones, "Select a piece of contact information to edit.")?;
 		match input::edit_and_restore(&contact_info[&to_edit_key], format!("Please edit the {}", to_edit_key))
 		{
 			Ok(edit) => { contact_info.insert(to_edit_key, edit); }

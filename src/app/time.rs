@@ -6,7 +6,11 @@ use
 
 	crate::{Config, DynResult, input, StructOpt},
 
-	clinvoice_adapter::{Adapters, Error as AdapterError, data::Updatable},
+	clinvoice_adapter::
+	{
+		Adapters, Error as AdapterError,
+		data::{Error as DataError, Updatable},
+	},
 	clinvoice_data::
 	{
 		chrono::{Duration, DurationRound, Utc},
@@ -57,10 +61,14 @@ impl Time
 	{
 		let index =
 		{
-			let selected = input::select_one(
-				&job.timesheets.iter().filter(|t| t.time_end.is_none()).collect::<Vec<_>>(),
-				"Which `Timesheet` are you working on?",
-			)?;
+			let timesheets: Vec<_> = job.timesheets.iter().filter(|t| t.time_end.is_none()).collect();
+
+			if timesheets.is_empty()
+			{
+				return Err(DataError::NoData(format!("active `{}`s", stringify!(Timesheet))).into());
+			}
+
+			let selected = input::select_one(&timesheets, "Which `Timesheet` are you working on?")?;
 
 			// We want to remove the `selected` timesheet from the set of timseheets; for now.
 			job.timesheets.iter().enumerate().fold(0, |i, enumeration|

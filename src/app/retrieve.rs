@@ -58,6 +58,9 @@ pub(super) enum RetrieveCommand
 
 		#[structopt(help="Export retrieved entities to the specified format\nSupported: markdown", long, short)]
 		export: Option<Target>,
+
+		#[structopt(help="Select jobs to be reopened", long, short)]
+		reopen: bool,
 	},
 
 	#[structopt(about="Retrieve existing records about locations")]
@@ -181,7 +184,7 @@ impl Retrieve
 				};
 			},
 
-			RetrieveCommand::Job {close, export} =>
+			RetrieveCommand::Job {close, export, reopen} =>
 			{
 				macro_rules! retrieve
 				{
@@ -210,13 +213,24 @@ impl Retrieve
 							})?;
 						}
 
+						if reopen
+						{
+							let closed: Vec<_> = results_view.iter().filter(|j| j.date_close.is_some()).cloned().collect();
+							let selected = input::select(&closed, "Select the Jobs you want to reopen")?;
+							selected.into_iter().try_for_each(|mut j|
+							{
+								j.date_close = None;
+								$job {job: &(j.into()), store}.update()
+							})?;
+						}
+
 						if let Some(target) = export
 						{
 							input::select(&results_view, "Select which Jobs you want to export")?.into_iter().for_each(|job|
 								println!("{}", target.export_job(&job))
 							);
 						}
-						else if !(close || self.delete || self.update)
+						else if !(close || self.delete || reopen || self.update)
 						{
 							results_view.iter().for_each(|j| println!("{}", j));
 						}

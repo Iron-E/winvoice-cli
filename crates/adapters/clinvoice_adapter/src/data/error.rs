@@ -32,8 +32,8 @@ pub enum Error
 	/// # Summary
 	///
 	/// At least one of some entity is necessary to perform an operation, but none were found.
-	#[error("No `{0}` could be retrieved for this operation, which required at least one")]
-	NoData(&'static str),
+	#[error("No {0} could be selected for this operation, and at least one was required")]
+	NoData(String),
 }
 
 clinvoice_error::AliasResult!();

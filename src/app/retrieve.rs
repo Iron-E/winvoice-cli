@@ -187,17 +187,7 @@ impl Retrieve
 				{
 					($emp: ident, $job: ident, $loc: ident, $org: ident, $per: ident) =>
 					{{
-						let results_view = input::util::job::retrieve_views::<$emp, $job, $loc, $org, $per>(
-							if !close { None } else
-							{
-								Some(query::Job
-								{
-									date_close: query::Match::EqualTo(Borrowed(&None)),
-									..Default::default()
-								})
-							},
-							store,
-						)?;
+						let results_view = input::util::job::retrieve_views::<$emp, $job, $loc, $org, $per>(store)?;
 
 						if self.delete
 						{
@@ -211,7 +201,8 @@ impl Retrieve
 
 						if close
 						{
-							let selected = input::select(&results_view, "Select the Jobs you want to close")?;
+							let unclosed: Vec<_> = results_view.iter().filter(|j| j.date_close.is_none()).cloned().collect();
+							let selected = input::select(&unclosed, "Select the Jobs you want to close")?;
 							selected.into_iter().try_for_each(|mut j|
 							{
 								j.date_close = Some(Utc::now());

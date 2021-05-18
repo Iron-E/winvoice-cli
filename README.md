@@ -30,9 +30,10 @@ There is a lack of programs for CLI invoice maintenance, especially those which 
 	```sh
 	git clone https://github.com/Iron-E/clinvoice
 	```
-2. Use `cargo` to build and install the cloned repo:
+2. `cd` to the directory which `git` just created.
+3. Use `cargo` to build and install the cloned repo:
 	```sh
-	cargo install --path=./clinvoice
+	cargo install --features=<adapters> --path=. --root=<desired install folder>
 	```
 
 #### Requirements

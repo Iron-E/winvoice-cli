@@ -1,7 +1,7 @@
 use
 {
 	core::fmt::Display,
-	std::{borrow::Cow::Borrowed, error::Error},
+	std::{borrow::Cow::Borrowed, error::Error, fs},
 
 	crate::{Config, DynResult, input, StructOpt},
 
@@ -162,7 +162,7 @@ impl Retrieve
 							let mut new_config = config.clone();
 							new_config.employees.default_id = match results_view.len() > 1
 							{
-								false => results_view.first().ok_or(DataError::NoData(stringify!(Employee)))?.id,
+								false => results_view.first().ok_or(DataError::NoData(format!("`{}`", stringify!(Employee))))?.id,
 								_ => input::select_one(&results_view, "Which `Employee` should be the default?")?.id,
 							};
 
@@ -226,9 +226,9 @@ impl Retrieve
 
 						if let Some(target) = export
 						{
-							input::select(&results_view, "Select which Jobs you want to export")?.into_iter().for_each(|job|
-								println!("{}", target.export_job(&job))
-							);
+							input::select(&results_view, "Select which Jobs you want to export")?.into_iter().try_for_each(|job|
+								fs::write(format!("{}--{}.md", job.client.name, job.id), target.export_job(&job))
+							)?;
 						}
 						else if !(close || self.delete || reopen || self.update)
 						{

@@ -66,7 +66,7 @@ fn to_view()
 		).unwrap();
 
 		let contact_info: HashMap<_, _> = vec![
-			("Address".into(), Contact::Address {location: earth.id, export: false})
+			("Address".into(), Contact::Address {location_id: earth.id, export: false})
 		].into_iter().collect();
 
 		let testy = BincodePerson::create(

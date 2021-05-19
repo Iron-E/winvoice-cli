@@ -103,7 +103,7 @@ mod tests
 			let ceo_testy = BincodeEmployee
 			{
 				employee: &BincodeEmployee::create(
-					vec![("Office".into(), Contact::Address {location: earth.location.id, export: false})].into_iter().collect(),
+					vec![("Office".into(), Contact::Address {location_id: earth.location.id, export: false})].into_iter().collect(),
 					big_old_test.organization.clone(),
 					testy.person.clone(),
 					EmployeeStatus::Employed,

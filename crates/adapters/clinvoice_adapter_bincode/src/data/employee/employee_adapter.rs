@@ -109,7 +109,7 @@ mod tests
 
 			create_assertion(
 				BincodeEmployee::create(
-					vec![("Work".into(), Contact::Address {location: Id::new_v4(), export: false})].into_iter().collect(),
+					vec![("Work".into(), Contact::Address {location_id: Id::new_v4(), export: false})].into_iter().collect(),
 					organization.clone(),
 					Person
 					{
@@ -157,7 +157,7 @@ mod tests
 
 			create_assertion(
 				BincodeEmployee::create(
-					vec![("Work".into(), Contact::Address {location: Id::new_v4(), export: false})].into_iter().collect(),
+					vec![("Work".into(), Contact::Address {location_id: Id::new_v4(), export: false})].into_iter().collect(),
 					organization.clone(),
 					Person
 					{
@@ -210,7 +210,7 @@ mod tests
 		util::temp_store(|store|
 		{
 			let testy_mctesterson = BincodeEmployee::create(
-				vec![("Work Address".into(), Contact::Address {location: Id::new_v4(), export: false})].into_iter().collect(),
+				vec![("Work Address".into(), Contact::Address {location_id: Id::new_v4(), export: false})].into_iter().collect(),
 				organization.clone(),
 				Person
 				{
@@ -249,7 +249,7 @@ mod tests
 			).unwrap();
 
 			let gottard = BincodeEmployee::create(
-				vec![("Work Address".into(), Contact::Address {location: Id::new_v4(), export: false})].into_iter().collect(),
+				vec![("Work Address".into(), Contact::Address {location_id: Id::new_v4(), export: false})].into_iter().collect(),
 				organization.clone(),
 				Person
 				{

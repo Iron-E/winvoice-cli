@@ -96,7 +96,7 @@ fn to_view()
 		).unwrap();
 
 		let ceo_testy = BincodeEmployee::create(
-			vec![("Work".into(), Contact::Address {location: earth.id, export: false})].into_iter().collect(),
+			vec![("Work".into(), Contact::Address {location_id: earth.id, export: false})].into_iter().collect(),
 			big_old_test.clone(),
 			testy.clone(),
 			EmployeeStatus::Employed,

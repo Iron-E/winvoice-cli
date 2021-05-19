@@ -36,7 +36,7 @@ impl Contact<'_>
 			self.address.id.set_matches(
 				&contact_info.by_ref().flat_map(|c| match c
 				{
-					clinvoice_data::Contact::Address {location, export: _} => Some(location),
+					clinvoice_data::Contact::Address {location_id, export: _} => Some(location_id),
 					_ => None,
 				}).collect()
 			) &&

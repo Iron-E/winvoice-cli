@@ -15,7 +15,7 @@ pub enum Contact
 	/// # Summary
 	///
 	/// A [`Location`](crate::Location).
-	Address {location: Id, export: bool},
+	Address {location_id: Id, export: bool},
 
 	/// # Summary
 	///

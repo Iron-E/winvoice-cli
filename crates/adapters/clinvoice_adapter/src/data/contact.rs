@@ -19,18 +19,18 @@ where
 {
 	Ok(match contact
 	{
-		Contact::Address {location, export} =>
+		Contact::Address {location_id, export} =>
 		{
 			let results = L::retrieve(
 				&query::Location
 				{
-					id: query::Match::EqualTo(Borrowed(&location)),
+					id: query::Match::EqualTo(Borrowed(&location_id)),
 					..Default::default()
 				},
 				store,
 			)?;
 
-			let location = results.into_iter().next().ok_or(Error::DataIntegrity(location))?;
+			let location = results.into_iter().next().ok_or_else(|| Error::DataIntegrity(location_id))?;
 
 			ContactView::Address
 			{

@@ -2,7 +2,7 @@ mod display;
 
 use
 {
-	std::{borrow::Cow::Borrowed, cmp::Ordering},
+	std::cmp::Ordering,
 
 	crate::{Config, DynResult, input, StructOpt},
 
@@ -16,7 +16,6 @@ use
 		chrono::{Duration, DurationRound, Utc},
 		views::{EmployeeView, JobView, TimesheetView},
 	},
-	clinvoice_query as query,
 };
 
 #[cfg(feature="bincode")]
@@ -129,14 +128,7 @@ impl Time
 					TimeCommand::Start =>
 					{
 						let results_view = input::util::employee::retrieve_views::<$emp, $loc, $org, $per>(
-							if self.default { None } else
-							{
-								Some(query::Employee
-								{
-									id: query::Match::EqualTo(Borrowed(&config.employees.default_id)),
-									..Default::default()
-								})
-							},
+							if self.default { Some(config.employees.default_id) } else { None },
 							store,
 						)?;
 

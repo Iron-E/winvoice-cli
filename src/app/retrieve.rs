@@ -1,7 +1,7 @@
 use
 {
 	core::fmt::Display,
-	std::{borrow::Cow::Borrowed, error::Error, fs},
+	std::{error::Error, fs},
 
 	crate::{Config, DynResult, input, StructOpt},
 
@@ -12,7 +12,6 @@ use
 	},
 	clinvoice_data::{chrono::Utc, Location, views::RestorableSerde},
 	clinvoice_export::Target,
-	clinvoice_query as query,
 
 	serde::{de::DeserializeOwned, Serialize},
 };
@@ -136,14 +135,7 @@ impl Retrieve
 					($emp: ident, $loc: ident, $org: ident, $per: ident) =>
 					{{
 						let results_view = input::util::employee::retrieve_views::<$emp, $loc, $org, $per>(
-							if default { None } else
-							{
-								Some(query::Employee
-								{
-									id: query::Match::EqualTo(Borrowed(&config.employees.default_id)),
-									..Default::default()
-								})
-							},
+							if default { Some(config.employees.default_id) } else { None },
 							store,
 						)?;
 

@@ -1,5 +1,7 @@
 use
 {
+	std::borrow::Cow::Owned,
+
 	crate::{app::QUERY_PROMPT, DynResult, input},
 
 	clinvoice_adapter::
@@ -7,7 +9,7 @@ use
 		data::{Error as DataError, EmployeeAdapter, LocationAdapter, OrganizationAdapter, PersonAdapter},
 		Store,
 	},
-	clinvoice_data::views::EmployeeView,
+	clinvoice_data::{Id, views::EmployeeView},
 	clinvoice_query as query,
 };
 
@@ -24,7 +26,7 @@ use
 ///
 /// [L_retrieve]: clinvoice_adapter::data::EmployeeAdapter::retrieve
 /// [location]: clinvoice_data::Employee
-pub fn retrieve_views<'err, E, L, O, P>(query: Option<query::Employee>, store: &Store) -> DynResult<'err, Vec<EmployeeView>> where
+pub fn retrieve_views<'err, E, L, O, P>(default_id: Option<Id>, store: &Store) -> DynResult<'err, Vec<EmployeeView>> where
 	E : EmployeeAdapter,
 	L : LocationAdapter,
 	O : OrganizationAdapter,
@@ -38,9 +40,13 @@ pub fn retrieve_views<'err, E, L, O, P>(query: Option<query::Employee>, store: &
 	<O as OrganizationAdapter>::Error : 'err,
 	<P as PersonAdapter>::Error : 'err,
 {
-	let query = match query
+	let query = match default_id
 	{
-		Some(q) => q,
+		Some(id) => query::Employee
+		{
+			id: query::Match::EqualTo(Owned(id)),
+			..Default::default()
+		},
 		_ => input::edit_default(format!("{}employees", QUERY_PROMPT))?,
 	};
 

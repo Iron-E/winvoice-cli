@@ -6,8 +6,12 @@ use
 	super::menu::{ADD, ALL_ACTIONS, CONTINUE, DELETE, EDIT},
 	crate::{DynResult, input},
 
-	clinvoice_adapter::{data::LocationAdapter, Store},
-	clinvoice_data::views::{ContactView, LocationView},
+	clinvoice_adapter::
+	{
+		data::{Error as DataError, LocationAdapter},
+		Store,
+	},
+	clinvoice_data::views::ContactView,
 };
 
 /// # Summary
@@ -17,13 +21,14 @@ use
 /// # Errors
 ///
 /// Will error whenever [`input::select_one`] or [`input::text`] does.
-fn add_menu(contact_info: &mut HashMap<String, ContactView>, locations: &[LocationView]) -> input::Result<()>
+fn add_menu<'err, L>(contact_info: &mut HashMap<String, ContactView>, store: &Store) -> DynResult<'err, ()> where
+	L : LocationAdapter,
+	<L as LocationAdapter>::Error : 'err,
 {
 	const ADDRESS: &str = "Address";
 	const EMAIL: &str = "Email";
 	const PHONE: &str = "Phone";
 	const ALL_CONTACT_TYPES: [&str; 3] = [ADDRESS, EMAIL, PHONE];
-	const EMAIL_AND_PHONE: [&str; 2] = [EMAIL, PHONE];
 
 	const EXPORT_OPTS: [&str; 2] = ["No", "Yes"];
 	const FALSE: &str = EXPORT_OPTS[0];
@@ -62,16 +67,22 @@ fn add_menu(contact_info: &mut HashMap<String, ContactView>, locations: &[Locati
 		};
 	}
 
-	let contact_type = input::select_one(
-		if locations.is_empty() {&EMAIL_AND_PHONE} else {&ALL_CONTACT_TYPES},
-		"Select which type of contact info to add",
-	)?;
+	let contact_type = input::select_one(&ALL_CONTACT_TYPES, "Select which type of contact info to add")?;
 	match contact_type
 	{
 		ADDRESS =>
 		{
-			let location = input::select_one(&locations, "Select the location to add")?;
-			insert!(Address, location);
+			let locations = input::util::location::retrieve_views::<L>(store)?;
+
+			if locations.is_empty()
+			{
+				eprintln!("{}", DataError::NoData(stringify!(Location).into()));
+			}
+			else
+			{
+				let location = input::select_one(&locations, "Select the location to add")?;
+				insert!(Address, location);
+			}
 		}
 
 		EMAIL =>
@@ -86,7 +97,7 @@ fn add_menu(contact_info: &mut HashMap<String, ContactView>, locations: &[Locati
 			insert!(Phone, phone);
 		}
 
-		_ => panic!("Unkown contact type"),
+		_ => unreachable!("Unkown contact type. This should not have happened, please file an issue at https://github.com/Iron-E/clinvoice/issues"),
 	};
 
 	Ok(())
@@ -158,9 +169,6 @@ pub fn menu<'err, L>(store: &Store) -> DynResult<'err, HashMap<String, ContactVi
 	L : LocationAdapter,
 	<L as LocationAdapter>::Error : 'err,
 {
-	let mut locations = super::location::retrieve_views::<L>(store)?;
-	locations.sort_by(|l1, l2| l1.name.cmp(&l2.name));
-
 	let mut contact_info = HashMap::<String, ContactView>::new();
 
 	loop
@@ -168,11 +176,11 @@ pub fn menu<'err, L>(store: &Store) -> DynResult<'err, HashMap<String, ContactVi
 		let action = input::select_one(&ALL_ACTIONS, "\nThis is the menu for creating contact information\nWhat would you like to do?")?;
 		match action
 		{
-			ADD => add_menu(&mut contact_info, &locations)?,
+			ADD => add_menu::<L>(&mut contact_info, store)?,
 			CONTINUE => break,
 			DELETE => delete_menu(&mut contact_info)?,
 			EDIT => edit_menu(&mut contact_info)?,
-			_ => panic!("Unknown action"),
+			_ => unreachable!("Unknown action. This should not have happened, please file an issue at https://github.com/Iron-E/clinvoice/issues"),
 		};
 	}
 

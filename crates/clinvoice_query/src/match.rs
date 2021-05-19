@@ -35,10 +35,10 @@ pub enum Match<'element, T> where
 	/// # Example
 	///
 	/// ```rust
-	/// use std::borrow::Cow::Borrowed;
+	/// use std::borrow::Cow::Owned;
 	/// use clinvoice_query::Match::AllGreaterThan;
 	///
-	/// let greater_than = AllGreaterThan(Borrowed(&5));
+	/// let greater_than = AllGreaterThan(Owned(5));
 	///
 	/// assert!(!greater_than.matches(&4));
 	/// assert!(!greater_than.matches(&5));
@@ -58,10 +58,10 @@ pub enum Match<'element, T> where
 	/// # Example
 	///
 	/// ```rust
-	/// use std::borrow::Cow::Borrowed;
+	/// use std::borrow::Cow::Owned;
 	/// use clinvoice_query::Match::AllLessThan;
 	///
-	/// let less_than = AllLessThan(Borrowed(&5));
+	/// let less_than = AllLessThan(Owned(5));
 	///
 	/// assert!(less_than.matches(&4));
 	/// assert!(!less_than.matches(&5));
@@ -81,10 +81,10 @@ pub enum Match<'element, T> where
 	/// # Example
 	///
 	/// ```rust
-	/// use std::borrow::Cow::Borrowed;
+	/// use std::borrow::Cow::Owned;
 	/// use clinvoice_query::Match::AllInRange;
 	///
-	/// let in_range = AllInRange(Borrowed(&3), Borrowed(&5));
+	/// let in_range = AllInRange(Owned(3), Owned(5));
 	///
 	/// assert!(in_range.matches(&4));
 	/// assert!(!in_range.matches(&5));
@@ -100,10 +100,10 @@ pub enum Match<'element, T> where
 	/// # Example
 	///
 	/// ```rust
-	/// use std::borrow::Cow::Borrowed;
+	/// use std::borrow::Cow::Owned;
 	/// use clinvoice_query::Match::{And, EqualTo, InRange, Not};
 	///
-	/// let and = And(vec![InRange(Borrowed(&1), Borrowed(&100)), Not(EqualTo(Borrowed(&5)).into())]);
+	/// let and = And(vec![InRange(Owned(1), Owned(100)), Not(EqualTo(Owned(5)).into())]);
 	///
 	/// assert!(and.matches(&4));
 	/// assert!(!and.matches(&5));
@@ -126,10 +126,10 @@ pub enum Match<'element, T> where
 	/// # Example
 	///
 	/// ```rust
-	/// use std::borrow::Cow::Borrowed;
+	/// use std::borrow::Cow::Owned;
 	/// use clinvoice_query::Match::EqualTo;
 	///
-	/// let equal_to = EqualTo(Borrowed(&5));
+	/// let equal_to = EqualTo(Owned(5));
 	///
 	/// assert!(equal_to.matches(&5));
 	/// assert!(!equal_to.matches(&4));
@@ -148,10 +148,10 @@ pub enum Match<'element, T> where
 	/// # Example
 	///
 	/// ```rust
-	/// use std::borrow::Cow::Borrowed;
+	/// use std::borrow::Cow::Owned;
 	/// use clinvoice_query::Match::GreaterThan;
 	///
-	/// let greater_than = GreaterThan(Borrowed(&5));
+	/// let greater_than = GreaterThan(Owned(5));
 	///
 	/// assert!(!greater_than.matches(&4));
 	/// assert!(!greater_than.matches(&5));
@@ -170,10 +170,10 @@ pub enum Match<'element, T> where
 	/// # Example
 	///
 	/// ```rust
-	/// use std::borrow::Cow::Borrowed;
+	/// use std::borrow::Cow::Owned;
 	/// use clinvoice_query::Match::HasAll;
 	///
-	/// let has_all = HasAll(vec![Borrowed(&1), Borrowed(&5), Borrowed(&9)].into_iter().collect());
+	/// let has_all = HasAll(vec![Owned(1), Owned(5), Owned(9)].into_iter().collect());
 	///
 	/// assert!(!has_all.matches(&1));
 	/// assert!(!has_all.matches(&3));
@@ -192,10 +192,10 @@ pub enum Match<'element, T> where
 	/// # Example
 	///
 	/// ```rust
-	/// use std::borrow::Cow::Borrowed;
+	/// use std::borrow::Cow::Owned;
 	/// use clinvoice_query::Match::HasAny;
 	///
-	/// let has_any = HasAny(vec![Borrowed(&1), Borrowed(&5), Borrowed(&7), Borrowed(&9)].into_iter().collect());
+	/// let has_any = HasAny(vec![Owned(1), Owned(5), Owned(7), Owned(9)].into_iter().collect());
 	///
 	/// assert!(has_any.matches(&1));
 	/// assert!(!has_any.matches(&4));
@@ -213,10 +213,10 @@ pub enum Match<'element, T> where
 	/// # Example
 	///
 	/// ```rust
-	/// use std::borrow::Cow::Borrowed;
+	/// use std::borrow::Cow::Owned;
 	/// use clinvoice_query::Match::InRange;
 	///
-	/// let in_range = InRange(Borrowed(&3), Borrowed(&5));
+	/// let in_range = InRange(Owned(3), Owned(5));
 	///
 	/// assert!(in_range.matches(&4));
 	/// assert!(!in_range.matches(&5));
@@ -234,10 +234,10 @@ pub enum Match<'element, T> where
 	/// # Example
 	///
 	/// ```rust
-	/// use std::borrow::Cow::Borrowed;
+	/// use std::borrow::Cow::Owned;
 	/// use clinvoice_query::Match::LessThan;
 	///
-	/// let less_than = LessThan(Borrowed(&5));
+	/// let less_than = LessThan(Owned(5));
 	///
 	/// assert!(less_than.matches(&4));
 	/// assert!(!less_than.matches(&5));
@@ -253,10 +253,10 @@ pub enum Match<'element, T> where
 	/// # Example
 	///
 	/// ```rust
-	/// use std::borrow::Cow::Borrowed;
+	/// use std::borrow::Cow::Owned;
 	/// use clinvoice_query::Match::{EqualTo, Not};
 	///
-	/// let not_equal_to = Not(EqualTo(Borrowed(&5)).into());
+	/// let not_equal_to = Not(EqualTo(Owned(5)).into());
 	///
 	/// assert!(!not_equal_to.matches(&5));
 	/// assert!(not_equal_to.matches(&4));
@@ -272,10 +272,10 @@ pub enum Match<'element, T> where
 	/// # Example
 	///
 	/// ```rust
-	/// use std::borrow::Cow::Borrowed;
+	/// use std::borrow::Cow::Owned;
 	/// use clinvoice_query::Match::{EqualTo, InRange, Not, Or};
 	///
-	/// let or = Or(vec![InRange(Borrowed(&1), Borrowed(&100)), Not(EqualTo(Borrowed(&5)).into())]);
+	/// let or = Or(vec![InRange(Owned(1), Owned(100)), Not(EqualTo(Owned(5)).into())]);
 	///
 	/// assert!(or.matches(&110));
 	/// assert!(or.matches(&5));

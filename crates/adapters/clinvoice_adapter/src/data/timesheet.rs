@@ -17,16 +17,12 @@ pub fn to_employee<E>(timesheet: &Timesheet, store: &Store)
 where
 	E : EmployeeAdapter,
 {
-	match E::retrieve(
+	E::retrieve(
 		&query::Employee
 		{
 			id: query::Match::EqualTo(Borrowed(&timesheet.employee_id)),
 			..Default::default()
 		},
 		store,
-	)?.into_iter().next()
-	{
-		Some(employee) => Ok(employee),
-		_ => Err(Error::DataIntegrity(timesheet.employee_id).into()),
-	}
+	)?.into_iter().next().ok_or_else(|| Error::DataIntegrity(timesheet.employee_id).into())
 }

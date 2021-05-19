@@ -154,7 +154,7 @@ impl Retrieve
 							let mut new_config = config.clone();
 							new_config.employees.default_id = match results_view.len() > 1
 							{
-								false => results_view.first().ok_or(DataError::NoData(format!("`{}`", stringify!(Employee))))?.id,
+								false => results_view.first().ok_or_else(|| DataError::NoData(format!("`{}`", stringify!(Employee))))?.id,
 								_ => input::select_one(&results_view, "Which `Employee` should be the default?")?.id,
 							};
 

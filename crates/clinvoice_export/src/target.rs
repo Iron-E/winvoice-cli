@@ -5,6 +5,7 @@ pub use error::{Error, Result};
 
 use
 {
+	std::collections::HashSet,
 	core::fmt::Write,
 
 	crate::markdown,
@@ -12,7 +13,7 @@ use
 	clinvoice_data::
 	{
 		chrono::{DateTime, Local},
-		Job,
+		Id, Job,
 		views::{ContactView, JobView, TimesheetView},
 	},
 };
@@ -34,8 +35,12 @@ impl Target
 {
 	/// # Summary
 	///
-	/// Export some `job` to the [`Target`] specified.
-	fn export_timesheet(&self, output: &mut String, timesheet: &TimesheetView)
+	/// Export some `job` to the [`Target`] specified. Appends to some pre-existing `output`, in
+	/// case multiple [`TimesheetView`]s must be exported sequentially.
+	///
+	/// Tracks the previously `exported_employees` so that their contact information is not
+	/// reiterated every time.
+	fn export_timesheet(&self, exported_employees: &mut HashSet<Id>, output: &mut String, timesheet: &TimesheetView)
 	{
 		match self
 		{
@@ -67,28 +72,31 @@ impl Target
 					timesheet.employee.title,
 				).unwrap();
 
-				let employee_contact_info: Vec<_> = timesheet.employee.contact_info.iter().filter(|(_, c)| match c
+				if exported_employees.contains(&timesheet.employee.id)
 				{
-					ContactView::Address {location: _, export} => *export,
-					ContactView::Email {email: _, export} => *export,
-					ContactView::Phone {phone: _, export} => *export,
-				}).collect();
-
-				if !employee_contact_info.is_empty()
-				{
-					writeln!(output, "{}:", markdown::Element::UnorderedList
+					let employee_contact_info: Vec<_> = timesheet.employee.contact_info.iter().filter(|(_, c)| match c
 					{
-						depth: 0,
-						text: markdown::Text::Bold("Contact Information"),
-					}).unwrap();
+						ContactView::Address {location: _, export} => *export,
+						ContactView::Email {email: _, export} => *export,
+						ContactView::Phone {phone: _, export} => *export,
+					}).collect();
 
-					let mut sorted_employee_contact_info = employee_contact_info;
-					sorted_employee_contact_info.sort_by_key(|(label, _)| *label);
+					if !employee_contact_info.is_empty()
+					{
+						writeln!(output, "{}:", markdown::Element::UnorderedList
+						{
+							depth: 0,
+							text: markdown::Text::Bold("Contact Information"),
+						}).unwrap();
 
-					sorted_employee_contact_info.into_iter().try_for_each(|(label, contact)| writeln!(output, "{}: {}",
-						markdown::Element::UnorderedList {depth: 1, text: markdown::Text::Bold(label)},
-						contact,
-					)).unwrap();
+						let mut sorted_employee_contact_info = employee_contact_info;
+						sorted_employee_contact_info.sort_by_key(|(label, _)| *label);
+
+						sorted_employee_contact_info.into_iter().try_for_each(|(label, contact)| writeln!(output, "{}: {}",
+							markdown::Element::UnorderedList {depth: 1, text: markdown::Text::Bold(label)},
+							contact,
+						)).unwrap();
+					}
 				}
 
 				writeln!(output, "{}", markdown::Element::<&str>::Break).unwrap();
@@ -110,6 +118,8 @@ impl Target
 				}
 			},
 		};
+
+		exported_employees.insert(timesheet.employee.id);
 	}
 
 	/// # Summary
@@ -178,7 +188,8 @@ impl Target
 				if !job.timesheets.is_empty()
 				{
 					writeln!(output, "{}", markdown::Element::Heading {depth: 2, text: "Timesheets"}).unwrap();
-					job.timesheets.iter().for_each(|t| self.export_timesheet(&mut output, t));
+					let mut employees = HashSet::new();
+					job.timesheets.iter().for_each(|t| self.export_timesheet(&mut employees, &mut output, t));
 				}
 			},
 		};

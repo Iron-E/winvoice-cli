@@ -185,6 +185,17 @@ impl Target
 
 		output
 	}
+
+	/// # Summary
+	///
+	/// Return the file extension of an export [`Target`].
+	pub fn extension(&self) -> &'static str
+	{
+		match self
+		{
+			Self::Markdown => ".md",
+		}
+	}
 }
 
 #[cfg(all(feature="markdown", test))]

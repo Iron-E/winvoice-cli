@@ -5,7 +5,11 @@ pub use error::{Error, Result};
 
 use
 {
-	core::fmt::Display,
+	core::
+	{
+		fmt::{Display, Debug},
+		str::FromStr,
+	},
 	std::{any, io},
 
 	clinvoice_adapter::data::Error as DataError,
@@ -170,7 +174,15 @@ pub fn select_one<T>(entities: &[T], prompt: impl Into<String>) -> Result<T> whe
 /// # Summary
 ///
 /// `prompt` the user to enter text.
-pub fn text(prompt: impl Into<String>) -> io::Result<String>
+pub fn text<S, T>(default_text: Option<T>, prompt: S) -> io::Result<T> where
+	S : Into<String>,
+	T : Clone + FromStr + Display,
+	T::Err : Display + Debug,
 {
-	Input::new().with_prompt(prompt).interact_text()
+	let mut input = Input::new();
+	input.with_prompt(prompt);
+
+	if let Some(text) = default_text { input.default(text); }
+
+	input.interact_text()
 }

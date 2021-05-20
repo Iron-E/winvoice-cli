@@ -39,11 +39,7 @@ fn add_menu<'err, L>(contact_info: &mut HashMap<String, ContactView>, store: &St
 	fn get_export(entity: impl Display) -> input::Result<bool>
 	{
 		let export = input::select_one(&EXPORT_OPTS, format!("Do you want \"{}\" to be listed when exporting `Job`s?", entity))?;
-		Ok(match export
-		{
-			FALSE => false,
-			_ => true,
-		})
+		Ok(match export {FALSE => false, _ => true})
 	}
 
 	/// # Summary
@@ -51,7 +47,7 @@ fn add_menu<'err, L>(contact_info: &mut HashMap<String, ContactView>, store: &St
 	/// Get what a user wants to call a piece of contact information.
 	fn get_label(entity: impl Display) -> io::Result<String>
 	{
-		input::text(format!("Please enter a label for \"{}\"", entity))
+		input::text(None, format!("Please enter a label for \"{}\"", entity))
 	}
 
 	/// # Summary
@@ -87,13 +83,13 @@ fn add_menu<'err, L>(contact_info: &mut HashMap<String, ContactView>, store: &St
 
 		EMAIL =>
 		{
-			let email = input::text("Enter an email address (e.g. `foo@gmail.com`)")?;
+			let email = input::text(None, "Enter an email address (e.g. `foo@gmail.com`)")?;
 			insert!(Email, email);
 		}
 
 		PHONE =>
 		{
-			let phone = input::text("Enter a phone number (e.g. `600-555-5555`)")?;
+			let phone = input::text(None, "Enter a phone number (e.g. `600-555-5555`)")?;
 			insert!(Phone, phone);
 		}
 
@@ -134,20 +130,44 @@ fn delete_menu(contact_info: &mut HashMap<String, ContactView>) -> input::Result
 /// but will ignore [`input::Error::NotEdited`].
 fn edit_menu(contact_info: &mut HashMap<String, ContactView>) -> input::Result<()>
 {
-	let email_or_phones: Vec<_> = contact_info.keys().filter(|k|
-		matches!(contact_info[*k], ContactView::Email {email: _, export: _} | ContactView::Phone {phone: _, export: _})
-	).cloned().collect();
+	if contact_info.is_empty() { return Ok(()); }
 
-	if !email_or_phones.is_empty()
+	let selected_key = input::select_one(&contact_info.keys().cloned().collect::<Vec<_>>(), "Select a piece of contact information to edit.")?;
+	let typed_key = input::text(Some(selected_key.clone()), format!("Edit the label for \"{}\" (optional)", contact_info[&selected_key]))?;
+	let keys_differ = selected_key != typed_key;
+
+	/* This section is a little complicated, so there is some annotation to explain what is happening. */
+
+	// If the user edited the selected key, it must be that the new key does not already exist.
+	if keys_differ && contact_info.contains_key(&typed_key)
 	{
-		let to_edit_key = input::select_one(&email_or_phones, "Select a piece of contact information to edit.")?;
-		match input::edit_and_restore(&contact_info[&to_edit_key], format!("Please edit the {}", to_edit_key))
+		eprintln!("The label \"{}\" is already being used by \"{}\"", typed_key, contact_info[&typed_key]);
+		return Ok(());
+	}
+
+	// We allow users to edit email addresses and phone numebrs during this process, but not addresses.
+	// Users can only ever relabel an address, thus we have to gate addresses for below.
+	if matches!(contact_info[&selected_key], ContactView::Email {email: _, export: _} | ContactView::Phone {phone: _, export: _})
+	{
+		match input::edit_and_restore(&contact_info[&selected_key], format!("Please edit the {}", selected_key))
 		{
-			Ok(edit) => { contact_info.insert(to_edit_key, edit); }
-			Err(input::Error::NotEdited) => (),
+			Ok(edit) => contact_info.insert(typed_key, edit),
+			Err(input::Error::NotEdited) => None,
 			Err(e) => return Err(e),
 		};
 	}
+	// This check must come after, because the keys could differ but not be an `Address`.
+	// Further, we want an `else if` to avoid an unecessary clone of `typed_key`.
+	else if keys_differ // `&& let`, but that syntax isn't available yet
+	{
+		if let ContactView::Address {location, export} = contact_info[&selected_key].clone()
+		{
+			contact_info.insert(typed_key, ContactView::Address {location, export});
+		}
+	}
+
+	// Finally we have to check _again_ if the keys differ, so that we can remove the old key if need-be.
+	if keys_differ { contact_info.remove(&selected_key); }
 
 	Ok(())
 }

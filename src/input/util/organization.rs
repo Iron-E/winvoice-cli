@@ -1,5 +1,7 @@
 use
 {
+	core::fmt::Display,
+
 	crate::{app::QUERY_PROMPT, DynResult, input},
 
 	clinvoice_adapter::
@@ -24,14 +26,15 @@ use
 ///
 /// [P_retrieve]: clinvoice_adapter::data::OrganizationAdapter::retrieve
 /// [organization]: clinvoice_data::Organization
-pub fn retrieve_views<'err, L, O>(store: &Store) -> DynResult<'err, Vec<OrganizationView>> where
+pub fn retrieve_views<'err, D, L, O>(prompt: D, store: &Store) -> DynResult<'err, Vec<OrganizationView>> where
+	D : Display,
 	L : LocationAdapter,
 	O : OrganizationAdapter,
 
 	<L as LocationAdapter>::Error : 'err,
 	<O as OrganizationAdapter>::Error : 'err,
 {
-	let query: query::Organization = input::edit_default(format!("{}organizations", QUERY_PROMPT))?;
+	let query: query::Organization = input::edit_default(format!("{}\n{}organizations", prompt, QUERY_PROMPT))?;
 
 	let results = O::retrieve(&query, &store)?;
 	results.into_iter().map(|o| O::into_view::<L>(o, &store)).filter_map(|result| match result

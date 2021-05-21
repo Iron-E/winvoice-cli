@@ -33,14 +33,11 @@ pub fn edit<T>(entity: &T, prompt: impl AsRef<str>) -> Result<T> where
 	T : DeserializeOwned + Serialize
 {
 	let serialized = yaml::to_string(&entity)?;
-	let to_edit = format!("# {}\n\n{}", prompt.as_ref(), serialized);
+	let to_edit = format!("# {}\n\n{}", prompt.as_ref().replace('\n', "\n# "), serialized);
 
-	// Write the entity to the `temp_path` and then edit that file.
-	match Editor::new().extension(".yaml").edit(&to_edit)?
-	{
-		Some(edited) => yaml::from_str(&edited).map_err(|e| e.into()),
-		_ => Err(Error::NotEdited),
-	}
+	let result = Editor::new().extension(".yaml").edit(&to_edit)?;
+	let edited = result.ok_or(Error::NotEdited)?;
+	yaml::from_str(&edited).map_err(|e| e.into())
 }
 
 /// # Summary

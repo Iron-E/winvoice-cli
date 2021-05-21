@@ -72,7 +72,7 @@ fn add_menu<'err, L>(contact_info: &mut HashMap<String, ContactView>, store: &St
 	{
 		ADDRESS =>
 		{
-			let locations = input::util::location::retrieve_views::<L>(store)?;
+			let locations = input::util::location::retrieve_views::<&str, L>("Query the `Location` which can be used to reach this `Employee`", store)?;
 
 			if locations.is_empty()
 			{

@@ -1,5 +1,7 @@
 use
 {
+	core::fmt::Display,
+
 	crate::{app::QUERY_PROMPT, DynResult, input},
 
 	clinvoice_adapter::
@@ -24,7 +26,8 @@ use
 ///
 /// [L_retrieve]: clinvoice_adapter::data::LocationAdapter::retrieve
 /// [location]: clinvoice_data::Location
-pub fn retrieve_views<'err, E, J, L, O, P>(store: &Store) -> DynResult<'err, Vec<JobView>> where
+pub fn retrieve_views<'err, D, E, J, L, O, P>(prompt: D, store: &Store) -> DynResult<'err, Vec<JobView>> where
+	D : Display,
 	E : EmployeeAdapter,
 	J : JobAdapter,
 	L : LocationAdapter,
@@ -37,7 +40,7 @@ pub fn retrieve_views<'err, E, J, L, O, P>(store: &Store) -> DynResult<'err, Vec
 		From<<P as PersonAdapter>::Error>,
 	<J as JobAdapter>::Error : 'err + From<<E as EmployeeAdapter>::Error>,
 {
-	let query: query::Job = input::edit_default(String::from(QUERY_PROMPT) + "jobs")?;
+	let query: query::Job = input::edit_default(format!("{}\n{}jobs", prompt, QUERY_PROMPT))?;
 
 	let results = J::retrieve(&query, &store)?;
 	results.into_iter().map(|j|

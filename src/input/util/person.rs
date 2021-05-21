@@ -1,5 +1,7 @@
 use
 {
+	core::fmt::Display,
+
 	crate::{app::QUERY_PROMPT, DynResult, input},
 
 	clinvoice_adapter::{data::PersonAdapter, Store},
@@ -20,11 +22,13 @@ use
 ///
 /// [P_retrieve]: clinvoice_adapter::data::PersonAdapter::retrieve
 /// [person]: clinvoice_data::Person
-pub fn retrieve_views<'err, P>(store: &Store) -> DynResult<'err, Vec<PersonView>> where
+pub fn retrieve_views<'err, D, P>(prompt: D, store: &Store) -> DynResult<'err, Vec<PersonView>> where
+	D : Display,
 	P : PersonAdapter,
+
 	<P as PersonAdapter>::Error : 'err,
 {
-	let query: query::Person = input::edit_default(format!("{}persons", QUERY_PROMPT))?;
+	let query: query::Person = input::edit_default(format!("{}\n{}persons", prompt, QUERY_PROMPT))?;
 
 	let results = P::retrieve(&query, &store)?;
 	results.into_iter().map(PersonView::from).filter_map(|view| match query.matches_view(&view)

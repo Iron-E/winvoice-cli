@@ -1,5 +1,7 @@
 use
 {
+	core::fmt::Display,
+
 	crate::{app::QUERY_PROMPT, DynResult, input},
 
 	clinvoice_adapter::
@@ -24,11 +26,13 @@ use
 ///
 /// [L_retrieve]: clinvoice_adapter::data::LocationAdapter::retrieve
 /// [location]: clinvoice_data::Location
-pub fn retrieve_views<'err, L>(store: &Store) -> DynResult<'err, Vec<LocationView>> where
+pub fn retrieve_views<'err, D, L>(prompt: D, store: &Store) -> DynResult<'err, Vec<LocationView>> where
+	D : Display,
 	L : LocationAdapter,
+
 	<L as LocationAdapter>::Error : 'err,
 {
-	let query: query::Location = input::edit_default(format!("{}locations", QUERY_PROMPT))?;
+	let query: query::Location = input::edit_default(format!("{}\n{}locations", prompt, QUERY_PROMPT))?;
 
 	let results = L::retrieve(&query, &store)?;
 	results.into_iter().map(|l|

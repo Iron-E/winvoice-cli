@@ -1,5 +1,6 @@
 use
 {
+	core::fmt::Display,
 	std::borrow::Cow::Owned,
 
 	crate::{app::QUERY_PROMPT, DynResult, input},
@@ -26,7 +27,8 @@ use
 ///
 /// [L_retrieve]: clinvoice_adapter::data::EmployeeAdapter::retrieve
 /// [location]: clinvoice_data::Employee
-pub fn retrieve_views<'err, E, L, O, P>(default_id: Option<Id>, store: &Store) -> DynResult<'err, Vec<EmployeeView>> where
+pub fn retrieve_views<'err, D, E, L, O, P>(default_id: Option<Id>, prompt: D, store: &Store) -> DynResult<'err, Vec<EmployeeView>> where
+	D : Display,
 	E : EmployeeAdapter,
 	L : LocationAdapter,
 	O : OrganizationAdapter,
@@ -47,7 +49,7 @@ pub fn retrieve_views<'err, E, L, O, P>(default_id: Option<Id>, store: &Store) -
 			id: query::Match::EqualTo(Owned(id)),
 			..Default::default()
 		},
-		_ => input::edit_default(format!("{}employees", QUERY_PROMPT))?,
+		_ => input::edit_default(format!("{}\n{}employees", prompt, QUERY_PROMPT))?,
 	};
 
 	let results = E::retrieve(&query, &store)?;

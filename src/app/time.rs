@@ -117,9 +117,10 @@ impl Time
 		{
 			($emp: ident, $job: ident, $loc: ident, $org: ident, $per: ident) =>
 			{{
-				let job_results_view: Vec<_> = input::util::job::retrieve_views::<$emp, $job, $loc, $org, $per>(store)?
-					.into_iter().filter(|j| j.date_close.is_none()).collect()
-				;
+				let job_results_view: Vec<_> = input::util::job::retrieve_views::<&str, $emp, $job, $loc, $org, $per>(
+					"Query the `Job` which you are working on",
+					store,
+				)?.into_iter().filter(|j| j.date_close.is_none()).collect();
 
 				let mut selected_job = input::select_one(&job_results_view, format!("Select the job to {} working on", self.command))?;
 
@@ -127,8 +128,9 @@ impl Time
 				{
 					TimeCommand::Start =>
 					{
-						let results_view = input::util::employee::retrieve_views::<$emp, $loc, $org, $per>(
+						let results_view = input::util::employee::retrieve_views::<&str, $emp, $loc, $org, $per>(
 							if self.default { Some(config.employees.default_id) } else { None },
+							"Query the `Employee` who will be doing the work",
 							store,
 						)?;
 

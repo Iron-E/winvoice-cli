@@ -89,11 +89,15 @@ impl Create
 		<O as OrganizationAdapter>::Error : 'err,
 		<P as PersonAdapter>::Error : 'err,
 	{
-		let organization_views = input::util::organization::retrieve_views::<L, O>(store)?;
+		let organization_views = input::util::organization::retrieve_views::<&str, L, O>(
+			"Query the `Organization` where this `Employee` works",
+			store,
+		)?;
+
 		let organization = input::select_one(&organization_views, "Which organization does this employee work at?")?;
 
-		let person_views = input::util::person::retrieve_views::<P>(store)?;
-		let person = input::select_one(&person_views, "Which person is working for the organization?")?;
+		let person_views = input::util::person::retrieve_views::<&str, P>("Query the `Person` who this `Employee` is", store)?;
+		let person = input::select_one(&person_views, "Which `Person` is this `Employee`?")?;
 
 		let contact_info = input::util::contact::menu::<L>(store)?;
 		let employee_status = input::select_one(
@@ -131,7 +135,7 @@ impl Create
 		<L as LocationAdapter>::Error : 'err,
 		<O as OrganizationAdapter>::Error : 'err,
 	{
-		let organization_views = input::util::organization::retrieve_views::<L, O>(store)?;
+		let organization_views = input::util::organization::retrieve_views::<&str, L, O>("Query the client `Organization` for this `Job`", store)?;
 		let client = input::select_one(&organization_views, "Select the client for this job")?;
 
 		let objectives = input::edit_markdown("* List your objectives\n* All markdown syntax works")?;
@@ -194,7 +198,7 @@ impl Create
 		<L as LocationAdapter>::Error : 'err,
 		<O as OrganizationAdapter>::Error : 'err,
 	{
-		let location_views = input::util::location::retrieve_views::<L>(store)?;
+		let location_views = input::util::location::retrieve_views::<&str, L>("Query the `Location` of this `Organization`", store)?;
 		let selected_view = input::select_one(&location_views, format!("Select a location for {}", name))?;
 
 		O::create(selected_view.into(), name, store)?;

@@ -132,7 +132,7 @@ fn edit_menu(contact_info: &mut HashMap<String, ContactView>) -> input::Result<(
 {
 	if contact_info.is_empty() { return Ok(()); }
 
-	let selected_key = input::select_one(&contact_info.keys().cloned().collect::<Vec<_>>(), "Select a piece of contact information to edit.")?;
+	let selected_key = input::select_one(&contact_info.keys().cloned().collect::<Vec<_>>(), "Select a piece of contact information to edit")?;
 	let typed_key = input::text(Some(selected_key.clone()), format!("Edit the label for \"{}\" (optional)", contact_info[&selected_key]))?;
 	let keys_differ = selected_key != typed_key;
 

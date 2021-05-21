@@ -56,7 +56,7 @@ pub fn menu(expenses: &mut Vec<Expense>, default_currency: &str) -> input::Resul
 			CONTINUE => return Ok(()),
 			DELETE => delete_menu(expenses)?,
 			EDIT => edit_menu(expenses)?,
-			_ => panic!("Unknown action"),
+			_ => unreachable!("Unknown action. This should not have happened, please file an issue at https://github.com/Iron-E/clinvoice/issues"),
 		};
 	}
 }

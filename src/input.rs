@@ -98,11 +98,8 @@ pub fn edit_default<T>(prompt: impl AsRef<str>) -> Result<T> where
 /// [edit_func]: Editor::edit
 pub fn edit_markdown(prompt: &str) -> Result<String>
 {
-	match Editor::new().extension(".md").edit(prompt)?
-	{
-		Some(edited) => Ok(edited),
-		_ => Err(Error::NotEdited),
-	}
+	let result = Editor::new().extension(".md").edit(prompt)?;
+	result.ok_or(Error::NotEdited)
 }
 
 /// # Summary

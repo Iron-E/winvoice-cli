@@ -50,11 +50,7 @@ pub fn create_store_dir(store_dir: &Path) -> io::Result<bool>
 /// Expand the `store`'s specified path and join the provided `subdir`.
 pub fn expand_store_path(store: &Store) -> PathBuf
 {
-	match shellexpand::full(&store.path)
-	{
-		Ok(p) => p.as_ref().into(),
-		_ => store.path.as_str().into(),
-	}
+	shellexpand::full(&store.path).map(|p| p.as_ref().into()).unwrap_or_else(|_| store.path.as_str().into())
 }
 
 /// # Summary

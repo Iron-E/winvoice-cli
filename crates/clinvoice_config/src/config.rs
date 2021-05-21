@@ -90,15 +90,11 @@ impl Config<'_, '_, '_>
 	/// The [`Store`] which corresponds to `name`.
 	pub fn get_store(&self, name: &str) -> Option<&Store>
 	{
-		match self.stores.get(name)
+		self.stores.get(name).and_then(|value| match value
 		{
-			Some(value) => match value
-			{
-				StoreValue::Alias(alias) => self.get_store(alias),
-				StoreValue::Storage(store) => Some(store),
-			},
-			_ => None,
-		}
+			StoreValue::Alias(alias) => self.get_store(alias),
+			StoreValue::Storage(store) => Some(store),
+		})
 	}
 
 	pub fn path() -> PathBuf

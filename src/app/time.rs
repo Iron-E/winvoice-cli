@@ -122,6 +122,7 @@ impl Time
 			{{
 				let job_results_view: Vec<_> = input::util::job::retrieve_views::<&str, $emp, $job, $loc, $org, $per>(
 					"Query the `Job` which you are working on",
+					false,
 					store,
 				)?.into_iter().filter(|j| j.date_close.is_none()).collect();
 
@@ -134,6 +135,7 @@ impl Time
 						let results_view = input::util::employee::retrieve_views::<&str, $emp, $loc, $org, $per>(
 							if self.default { Some(config.employees.default_id) } else { None },
 							"Query the `Employee` who will be doing the work",
+							true,
 							store,
 						)?;
 

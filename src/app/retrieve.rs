@@ -137,6 +137,7 @@ impl Retrieve
 						let results_view = input::util::employee::retrieve_views::<&str, $emp, $loc, $org, $per>(
 							if default { Some(config.employees.default_id) } else { None },
 							"Query the `Employee` you are looking for",
+							false,
 							store,
 						)?;
 
@@ -185,6 +186,7 @@ impl Retrieve
 					{{
 						let results_view = input::util::job::retrieve_views::<&str, $emp, $job, $loc, $org, $per>(
 							"Query the `Job` you are looking for",
+							false,
 							store,
 						)?;
 
@@ -248,7 +250,7 @@ impl Retrieve
 				{
 					($loc: ident) =>
 					{{
-						let results_view = input::util::location::retrieve_views::<&str, $loc>("Query the `Location` you are looking for", store)?;
+						let results_view = input::util::location::retrieve_views::<&str, $loc>("Query the `Location` you are looking for", false, store)?;
 
 						if self.delete
 						{
@@ -295,6 +297,7 @@ impl Retrieve
 					{{
 						let results_view = input::util::organization::retrieve_views::<&str, $loc, $org>(
 							"Query the `Organization` you are looking for",
+							false,
 							store,
 						)?;
 
@@ -329,7 +332,7 @@ impl Retrieve
 				{
 					($per: ident) =>
 					{{
-						let results_view = input::util::person::retrieve_views::<&str, $per>("Query the `Person` you are looking for", store)?;
+						let results_view = input::util::person::retrieve_views::<&str, $per>("Query the `Person` you are looking for", false, store)?;
 
 						if self.delete
 						{

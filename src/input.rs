@@ -117,10 +117,7 @@ pub fn edit_markdown(prompt: &str) -> Result<String>
 pub fn select<T>(entities: &[T], prompt: impl Into<String>) -> io::Result<Vec<T>> where
 	T : Clone + Display
 {
-	if entities.is_empty()
-	{
-		return Ok(Vec::new());
-	}
+	if entities.is_empty() { return Ok(Vec::new()); }
 
 	let selection = MultiSelect::new().items(entities).paged(true).with_prompt(prompt).interact()?;
 

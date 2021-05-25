@@ -68,17 +68,14 @@ fn add_menu<'err, L>(contact_info: &mut HashMap<String, ContactView>, store: &St
 	{
 		ADDRESS =>
 		{
-			let locations = input::util::location::retrieve_views::<&str, L>("Query the `Location` which can be used to reach this `Employee`", store)?;
+			let locations = input::util::location::retrieve_views::<&str, L>(
+				"Query the `Location` which can be used to reach this `Employee`",
+				true,
+				store,
+			)?;
 
-			if locations.is_empty()
-			{
-				eprintln!("{}", DataError::NoData(stringify!(Location).into()));
-			}
-			else
-			{
-				let location = input::select_one(&locations, "Select the location to add")?;
-				insert!(Address, location);
-			}
+			let location = input::select_one(&locations, "Select the location to add")?;
+			insert!(Address, location);
 		}
 
 		EMAIL =>

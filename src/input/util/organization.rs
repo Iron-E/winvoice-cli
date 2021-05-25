@@ -2,7 +2,7 @@ use
 {
 	core::fmt::Display,
 
-	crate::{app::QUERY_PROMPT, DynResult, input},
+	crate::{app::QUERY_PROMPT, DynResult, filter_map_view, input},
 
 	clinvoice_adapter::
 	{
@@ -26,7 +26,7 @@ use
 ///
 /// [P_retrieve]: clinvoice_adapter::data::OrganizationAdapter::retrieve
 /// [organization]: clinvoice_data::Organization
-pub fn retrieve_views<'err, D, L, O>(prompt: D, store: &Store) -> DynResult<'err, Vec<OrganizationView>> where
+pub fn retrieve_views<'err, D, L, O>(prompt: D, retry_on_empty: bool, store: &Store) -> DynResult<'err, Vec<OrganizationView>> where
 	D : Display,
 	L : LocationAdapter,
 	O : OrganizationAdapter,
@@ -37,14 +37,14 @@ pub fn retrieve_views<'err, D, L, O>(prompt: D, store: &Store) -> DynResult<'err
 	let query: query::Organization = input::edit_default(format!("{}\n{}organizations", prompt, QUERY_PROMPT))?;
 
 	let results = O::retrieve(&query, &store)?;
-	results.into_iter().map(|o| O::into_view::<L>(o, &store)).filter_map(|result| match result
+	let results_view: Result<Vec<_>, _> = results.into_iter().map(|o| O::into_view::<L>(o, &store)).filter_map(|result|
+		filter_map_view!(query, result)
+	).collect();
+
+	if retry_on_empty && results_view.as_ref().map(|r| r.is_empty()).unwrap_or(false)
 	{
-		Ok(t) => match query.matches_view(&t)
-		{
-			Ok(b) if b => Some(Ok(t)),
-			Err(e) => Some(Err(DataError::from(e).into())),
-			_ => None,
-		},
-		Err(e) => Some(Err(e)),
-	}).collect::<Result<Vec<_>, _>>().map_err(|e| e.into())
+		todo!("raise retry menu");
+	}
+
+	results_view.map_err(|e| e.into())
 }

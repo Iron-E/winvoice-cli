@@ -2,7 +2,7 @@ use
 {
 	core::fmt::Display,
 
-	crate::{app::QUERY_PROMPT, DynResult, input},
+	crate::{app::QUERY_PROMPT, DynResult, filter_map_view, input},
 
 	clinvoice_adapter::
 	{
@@ -26,7 +26,7 @@ use
 ///
 /// [L_retrieve]: clinvoice_adapter::data::LocationAdapter::retrieve
 /// [location]: clinvoice_data::Location
-pub fn retrieve_views<'err, D, E, J, L, O, P>(prompt: D, store: &Store) -> DynResult<'err, Vec<JobView>> where
+pub fn retrieve_views<'err, D, E, J, L, O, P>(prompt: D, retry_on_empty: bool, store: &Store) -> DynResult<'err, Vec<JobView>> where
 	D : Display,
 	E : EmployeeAdapter,
 	J : JobAdapter,
@@ -43,16 +43,14 @@ pub fn retrieve_views<'err, D, E, J, L, O, P>(prompt: D, store: &Store) -> DynRe
 	let query: query::Job = input::edit_default(format!("{}\n{}jobs", prompt, QUERY_PROMPT))?;
 
 	let results = J::retrieve(&query, &store)?;
-	results.into_iter().map(|j|
+	let results_view: Result<Vec<_>, _> =results.into_iter().map(|j|
 		J::into_view::<E, L, O, P>(j, &store)
-	).filter_map(|result| match result
+	).filter_map(|result| filter_map_view!(query, result)).collect();
+
+	if retry_on_empty && results_view.as_ref().map(|r| r.is_empty()).unwrap_or(false)
 	{
-		Ok(t) => match query.matches_view(&t)
-		{
-			Ok(b) if b => Some(Ok(t)),
-			Err(e) => Some(Err(DataError::from(e).into())),
-			_ => None,
-		},
-		Err(e) => Some(Err(e)),
-	}).collect::<Result<Vec<_>, _>>().map_err(|e| e.into())
+		todo!("raise retry menu");
+	}
+
+	results_view.map_err(|e| e.into())
 }

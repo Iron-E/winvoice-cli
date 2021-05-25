@@ -22,7 +22,7 @@ use
 ///
 /// [P_retrieve]: clinvoice_adapter::data::PersonAdapter::retrieve
 /// [person]: clinvoice_data::Person
-pub fn retrieve_views<'err, D, P>(prompt: D, store: &Store) -> DynResult<'err, Vec<PersonView>> where
+pub fn retrieve_views<'err, D, P>(prompt: D, retry_on_empty: bool, store: &Store) -> DynResult<'err, Vec<PersonView>> where
 	D : Display,
 	P : PersonAdapter,
 
@@ -31,10 +31,17 @@ pub fn retrieve_views<'err, D, P>(prompt: D, store: &Store) -> DynResult<'err, V
 	let query: query::Person = input::edit_default(format!("{}\n{}persons", prompt, QUERY_PROMPT))?;
 
 	let results = P::retrieve(&query, &store)?;
-	results.into_iter().map(PersonView::from).filter_map(|view| match query.matches_view(&view)
+	let results_view: Result<Vec<_>, _> = results.into_iter().map(PersonView::from).filter_map(|view| match query.matches_view(&view)
 	{
 		Ok(b) if b => Some(Ok(view)),
 		Err(e) => Some(Err(e)),
 		_ => None,
-	}).collect::<Result<Vec<_>, _>>().map_err(|e| e.into())
+	}).collect();
+
+	if retry_on_empty && results_view.as_ref().map(|r| r.is_empty()).unwrap_or(false)
+	{
+		todo!("raise retry menu");
+	}
+
+	results_view.map_err(|e| e.into())
 }

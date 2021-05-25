@@ -56,11 +56,15 @@ impl Time
 		})
 	}
 
-	fn stop<'err>(config: &Config, job: &mut JobView) -> DynResult<'err, ()>
+	fn stop<'err>(config: &Config, default: bool, job: &mut JobView) -> DynResult<'err, ()>
 	{
 		let index =
 		{
-			let timesheets: Vec<_> = job.timesheets.iter().filter(|t| t.time_end.is_none()).collect();
+			let timesheets: Vec<_> = job.timesheets.iter().filter(|t|
+			{
+				let b = t.time_end.is_none();
+				if !default { b } else { b && t.employee.id == config.employees.default_id }
+			}).collect();
 
 			if timesheets.is_empty()
 			{
@@ -69,7 +73,6 @@ impl Time
 
 			let selected = input::select_one(&timesheets, "Which `Timesheet` are you working on?")?;
 
-			// We want to remove the `selected` timesheet from the set of timseheets; for now.
 			job.timesheets.iter().enumerate().fold(0, |i, enumeration|
 				if selected == enumeration.1 { enumeration.0 }
 				else { i }
@@ -139,7 +142,7 @@ impl Time
 						Self::start(selected, &mut selected_job)
 					},
 
-					TimeCommand::Stop => Self::stop(config, &mut selected_job)?,
+					TimeCommand::Stop => Self::stop(config, self.default, &mut selected_job)?,
 				};
 
 				$job {job: &(selected_job.into()), store}.update()?;

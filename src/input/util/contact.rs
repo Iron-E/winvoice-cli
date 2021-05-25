@@ -3,14 +3,10 @@ use
 	core::fmt::Display,
 	std::{collections::HashMap, io},
 
-	super::menu::{ADD, ALL_ACTIONS, CONTINUE, DELETE, EDIT},
+	super::menu,
 	crate::{DynResult, input},
 
-	clinvoice_adapter::
-	{
-		data::{Error as DataError, LocationAdapter},
-		Store,
-	},
+	clinvoice_adapter::{data::LocationAdapter, Store},
 	clinvoice_data::views::ContactView,
 };
 
@@ -30,16 +26,12 @@ fn add_menu<'err, L>(contact_info: &mut HashMap<String, ContactView>, store: &St
 	const PHONE: &str = "Phone";
 	const ALL_CONTACT_TYPES: [&str; 3] = [ADDRESS, EMAIL, PHONE];
 
-	const EXPORT_OPTS: [&str; 2] = ["No", "Yes"];
-	const FALSE: &str = EXPORT_OPTS[0];
-
 	/// # Summary
 	///
 	/// Get whether or not a user wants to export a piece of contact information.
 	fn get_export(entity: impl Display) -> input::Result<bool>
 	{
-		let export = input::select_one(&EXPORT_OPTS, format!("Do you want \"{}\" to be listed when exporting `Job`s?", entity))?;
-		Ok(match export {FALSE => false, _ => true})
+		menu::confirm(format!("Do you want \"{}\" to be listed when exporting `Job`s?", entity))
 	}
 
 	/// # Summary
@@ -190,13 +182,13 @@ pub fn menu<'err, L>(store: &Store) -> DynResult<'err, HashMap<String, ContactVi
 
 	loop
 	{
-		let action = input::select_one(&ALL_ACTIONS, "\nThis is the menu for creating contact information\nWhat would you like to do?")?;
+		let action = input::select_one(&menu::ALL_ACTIONS, "\nThis is the menu for creating contact information\nWhat would you like to do?")?;
 		match action
 		{
-			ADD => add_menu::<L>(&mut contact_info, store)?,
-			CONTINUE => break,
-			DELETE => delete_menu(&mut contact_info)?,
-			EDIT => edit_menu(&mut contact_info)?,
+			menu::ADD => add_menu::<L>(&mut contact_info, store)?,
+			menu::CONTINUE => break,
+			menu::DELETE => delete_menu(&mut contact_info)?,
+			menu::EDIT => edit_menu(&mut contact_info)?,
 			_ => unreachable!("Unknown action. This should not have happened, please file an issue at https://github.com/Iron-E/clinvoice/issues"),
 		};
 	}

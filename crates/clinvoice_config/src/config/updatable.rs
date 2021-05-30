@@ -3,6 +3,7 @@ use
 	std::fs,
 
 	super::{Config, Error, Result},
+
 	clinvoice_adapter::data::Updatable,
 };
 

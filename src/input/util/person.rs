@@ -2,6 +2,7 @@ use
 {
 	core::fmt::Display,
 
+	super::menu,
 	crate::{app::QUERY_PROMPT, DynResult, input},
 
 	clinvoice_adapter::{data::PersonAdapter, Store},
@@ -38,9 +39,9 @@ pub fn retrieve_views<'err, D, P>(prompt: D, retry_on_empty: bool, store: &Store
 		_ => None,
 	}).collect();
 
-	if retry_on_empty && results_view.as_ref().map(|r| r.is_empty()).unwrap_or(false)
+	if retry_on_empty && results_view.as_ref().map(|r| r.is_empty()).unwrap_or(false) && menu::retry_query()?
 	{
-		todo!("raise retry menu");
+		return retrieve_views::<D, P>(prompt, true, store);
 	}
 
 	results_view.map_err(|e| e.into())

@@ -13,11 +13,10 @@ impl RestorableSerde for ContactView
 			if let ContactView::Address {location: original_location, export: _} = original
 			{
 				location.restore(original_location);
+				return;
 			}
-			else
-			{
-				panic!("`original` {} was not an {}!", stringify!(ContactView), stringify!(Address))
-			}
+
+			panic!("`original` {} was not an {}!", stringify!(ContactView), stringify!(Address))
 		}
 	}
 }

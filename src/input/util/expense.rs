@@ -32,8 +32,9 @@ fn add_menu(expenses: &mut Vec<Expense>, default_currency: Currency) -> input::R
 	let category = input::select_one(&ALL_EXPENSE_CATEGORIES, "Select which type of `Expense` to add")?;
 	let cost = input::edit(&Money::new(2000, 2, default_currency), format!("What is the cost of the {}?", category))?;
 	let description = input::edit_markdown(&format!("* Describe the {}\n* All markdown syntax is valid", category))?;
+	expenses.push(Expense {category, cost, description});
 
-	Ok(expenses.push(Expense {category, cost, description}))
+	Ok(())
 }
 
 /// # Summary

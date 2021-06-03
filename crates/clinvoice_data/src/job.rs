@@ -158,7 +158,7 @@ impl Job
 		let seconds_per_minute = minutes_per_hour;
 
 		let mut total = self.timesheets.iter().filter(|t| t.time_end.is_some()).fold(
-			Money {amount: Decimal::new(0, 2), currency: self.invoice.hourly_rate.currency.clone()},
+			Money {amount: Decimal::new(0, 2), currency: self.invoice.hourly_rate.currency},
 			|mut m, t|
 			{
 				let duration_seconds = Decimal::from(t.time_end.unwrap().signed_duration_since(t.time_begin).num_seconds());

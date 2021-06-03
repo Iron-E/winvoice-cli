@@ -30,7 +30,7 @@ where
 				store,
 			)?;
 
-			let location = results.into_iter().next().ok_or_else(|| Error::DataIntegrity(location_id))?;
+			let location = results.into_iter().next().ok_or(Error::DataIntegrity(location_id))?;
 
 			ContactView::Address
 			{

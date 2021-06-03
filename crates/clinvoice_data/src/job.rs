@@ -5,7 +5,6 @@ mod partial_eq;
 use
 {
 	crate::{Expense, Id, Invoice, Timesheet},
-
 	clinvoice_finance::{Decimal, Money},
 
 	chrono::{DateTime, Utc},
@@ -191,8 +190,9 @@ mod tests
 	{
 		std::time::Instant,
 
-		super::{Decimal, Expense, Id, Invoice, Job, Money, Timesheet},
+		super::{Expense, Id, Invoice, Job, Money, Timesheet},
 		crate::ExpenseCategory,
+		clinvoice_finance::Currency,
 
 		chrono::Utc,
 	};
@@ -209,7 +209,7 @@ mod tests
 			invoice: Invoice
 			{
 				date: None,
-				hourly_rate: Money::new(Decimal::new(2000, 2), "USD"),
+				hourly_rate: Money::new(2000, 2, Currency::USD),
 			},
 			notes: "".into(),
 			objectives: "".into(),
@@ -229,7 +229,7 @@ mod tests
 						Expense
 						{
 							category: ExpenseCategory::Item,
-							cost: Money::new(Decimal::new(2000, 2), "USD"),
+							cost: Money::new(2000, 2, Currency::USD),
 							description: "Paid for someone else to clean".into(),
 						},
 					],
@@ -241,7 +241,7 @@ mod tests
 		};
 
 		let start = Instant::now();
-		assert_eq!(job.total(), Money::new(Decimal::new(4000, 2), "USD"));
+		assert_eq!(job.total(), Money::new(4000, 2, Currency::USD));
 		println!("\n>>>>> Job::total {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 	}
 }

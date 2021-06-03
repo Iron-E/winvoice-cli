@@ -221,7 +221,8 @@ mod tests
 		clinvoice_data::
 		{
 			chrono::{DateTime, Local, Utc},
-			Decimal, EmployeeStatus, Expense, ExpenseCategory, Id, Invoice, Money,
+			finance::{Currency, Money},
+			EmployeeStatus, Expense, ExpenseCategory, Id, Invoice,
 			views::{EmployeeView, LocationView, OrganizationView, PersonView},
 		},
 	};
@@ -299,7 +300,7 @@ mod tests
 			invoice: Invoice
 			{
 				date: None,
-				hourly_rate: Money::new(Decimal::new(2000, 2), "USD"),
+				hourly_rate: Money::new(2000, 2, Currency::USD),
 			},
 			notes: "- I tested the function.".into(),
 			objectives: "- I want to test this function.".into(),
@@ -351,7 +352,7 @@ mod tests
 					Expense
 					{
 						category: ExpenseCategory::Service,
-						cost: Money::new(Decimal::new(2000, 2), "USD"),
+						cost: Money::new(2000, 2, Currency::USD),
 						description: "Paid for someone else to clean".into(),
 					},
 				],

@@ -11,7 +11,7 @@ use
 	clinvoice_data::
 	{
 		chrono::{Datelike, DateTime, Local, Timelike, TimeZone, Utc},
-		finance::{Decimal, Money},
+		finance::{Currency, Decimal, Money},
 		EmployeeStatus, Location,
 	},
 };
@@ -34,7 +34,7 @@ pub(super) enum Create
 	Job
 	{
 		#[structopt(help="The currency which the hourly rate is stated in (e.g. 'USD')\nDefaults to the value set in your config", long, short)]
-		currency: Option<String>,
+		currency: Option<Currency>,
 
 		#[structopt(help="The amount of money charged per hour for this job (e.g. 12.00)")]
 		hourly_rate: Decimal,
@@ -120,8 +120,7 @@ impl Create
 	}
 
 	fn create_job<'err, J, L, O>(
-		currency: String,
-		hourly_rate: Decimal,
+		hourly_rate: Money,
 		year: Option<i32>,
 		month: Option<u32>,
 		day: Option<u32>,
@@ -153,24 +152,25 @@ impl Create
 			{
 				let now = Local::now();
 
-				// This should be valid because of the `requires` on `Job`. Either all are present or none.
+				// [null]                               = current date and time
+				// <year> <month> <day>                 = that day, midnight
+				// <year> <month> <day> <hour> <minute> = that day and time
 				let date = Local.ymd(
 					year.unwrap_or_else(|| now.year()),
 					month.unwrap_or_else(|| now.month()),
 					day.unwrap_or_else(|| now.day()),
 				);
 
-				match year
+				if year.is_some() && hour.is_none()
 				{
-					Some(_) => date.and_hms(0, 0, 0),
-					None => date.and_hms(
-						hour.unwrap_or_else(|| now.hour()),
-						minute.unwrap_or_else(|| now.minute()),
-						0,
-					)
+					date.and_hms(0, 0, 0)
+				}
+				else
+				{
+					date.and_hms(hour.unwrap_or_else(|| now.hour()), minute.unwrap_or_else(|| now.minute()), 0)
 				}
 			}),
-			Money {amount: hourly_rate, currency},
+			hourly_rate,
 			objectives,
 			store,
 		)?;
@@ -227,8 +227,12 @@ impl Create
 
 				Self::Job {currency, hourly_rate, year, month, day, hour, minute} =>
 					Self::create_job::<BincodeJob, BincodeLocation, BincodeOrganization>(
-						currency.unwrap_or_else(|| config.invoices.default_currency.into()),
-						hourly_rate, year, month, day, hour, minute,
+						Money
+						{
+							amount: hourly_rate,
+							currency: currency.unwrap_or_else(|| config.invoices.default_currency),
+						},
+						year, month, day, hour, minute,
 						store,
 					),
 

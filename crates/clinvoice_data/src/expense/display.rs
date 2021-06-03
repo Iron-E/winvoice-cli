@@ -22,7 +22,9 @@ mod tests
 		std::time::Instant,
 
 		super::Expense,
-		crate::{Decimal, ExpenseCategory, Money},
+		crate::ExpenseCategory,
+
+		clinvoice_finance::{Currency, Money},
 	};
 
 	#[test]
@@ -31,7 +33,7 @@ mod tests
 		let expense = Expense
 		{
 			category: ExpenseCategory::Food,
-			cost: Money::new(Decimal::new(2000, 2), "USD"),
+			cost: Money::new(2000, 2, Currency::USD),
 			description: "Take-out for 2".into(),
 		};
 

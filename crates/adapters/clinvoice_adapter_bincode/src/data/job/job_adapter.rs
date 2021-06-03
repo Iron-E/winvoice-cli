@@ -98,7 +98,7 @@ mod tests
 		super::{BincodeJob, Job, JobAdapter, Money, Organization, query, Store, Utc, util},
 
 		clinvoice_query::Match,
-		clinvoice_data::{Decimal, Id},
+		clinvoice_data::{finance::Currency, Id},
 	};
 
 	#[test]
@@ -119,7 +119,7 @@ mod tests
 				BincodeJob::create(
 					organization.clone(),
 					Utc::now(),
-					Money::new(Decimal::new(200, 2), ""),
+					Money::new(200, 2, Currency::USD),
 					"Test the job creation function".into(),
 					&store,
 				).unwrap(),
@@ -130,7 +130,7 @@ mod tests
 				BincodeJob::create(
 					organization.clone(),
 					Utc::now(),
-					Money::new(Decimal::new(200, 2), "USD"),
+					Money::new(200, 2, Currency::USD),
 					"Test the job creation function".into(),
 					&store,
 				).unwrap(),
@@ -141,7 +141,7 @@ mod tests
 				BincodeJob::create(
 					organization.clone(),
 					Utc::now(),
-					Money::new(Decimal::new(20000, 0), "YEN"),
+					Money::new(20000, 0, Currency::JPY),
 					"TEST THE JOB CREATION FUNCTION".into(),
 					&store,
 				).unwrap(),
@@ -152,7 +152,7 @@ mod tests
 				BincodeJob::create(
 					organization.clone(),
 					Utc::now(),
-					Money::new(Decimal::new(500, 2), "CDN"),
+					Money::new(500, 2, Currency::CAD),
 					"test the job creation function".into(),
 					&store,
 				).unwrap(),
@@ -163,7 +163,7 @@ mod tests
 				BincodeJob::create(
 					organization.clone(),
 					Utc::now(),
-					Money::new(Decimal::new(1000, 2), "EUR"),
+					Money::new(1000, 2, Currency::EUR),
 					"TeSt ThE jOb CrEaTiOn FuNcTiOn".into(),
 					&store,
 				).unwrap(),
@@ -195,7 +195,7 @@ mod tests
 			let creation = BincodeJob::create(
 				organization.clone(),
 				Utc::now(),
-				Money::new(Decimal::new(200, 2), "USD"),
+				Money::new(200, 2, Currency::USD),
 				"Test the job creation function".into(),
 				&store,
 			).unwrap();
@@ -203,7 +203,7 @@ mod tests
 			let retrieval = BincodeJob::create(
 				organization.clone(),
 				Utc::now(),
-				Money::new(Decimal::new(200, 2), "USD"),
+				Money::new(200, 2, Currency::USD),
 				"Test the job retrieval function".into(),
 				&store,
 			).unwrap();
@@ -211,7 +211,7 @@ mod tests
 			let assertion = BincodeJob::create(
 				organization.clone(),
 				Utc::now(),
-				Money::new(Decimal::new(20000, 0), "YEN"),
+				Money::new(20000, 0, Currency::JPY),
 				"Assert something".into(),
 				&store,
 			).unwrap();

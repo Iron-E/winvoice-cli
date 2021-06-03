@@ -38,7 +38,12 @@ mod tests
 		crate::{data::BincodeOrganization, util},
 
 		clinvoice_adapter::data::{JobAdapter, OrganizationAdapter},
-		clinvoice_data::{chrono::Utc, Decimal, Id, Location, Money},
+		clinvoice_data::
+		{
+			chrono::Utc,
+			finance::{Currency, Money},
+			Id, Location,
+		},
 	};
 
 	#[test]
@@ -61,7 +66,7 @@ mod tests
 				job: &BincodeJob::create(
 					big_test.organization.clone(),
 					Utc::now(),
-					Money::new(Decimal::new(200, 2), ""),
+					Money::new(200, 2, Currency::USD),
 					"Test the job creation function".into(),
 					&store,
 				).unwrap(),
@@ -73,7 +78,7 @@ mod tests
 				job: &BincodeJob::create(
 					big_test.organization.clone(),
 					Utc::now(),
-					Money::new(Decimal::new(200, 2), "USD"),
+					Money::new(200, 2, Currency::USD),
 					"Assert that this stuff works".into(),
 					&store,
 				).unwrap(),

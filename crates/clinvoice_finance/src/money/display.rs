@@ -21,16 +21,16 @@ mod tests
 		std::time::Instant,
 
 		super::Money,
-		crate::Decimal,
+		crate::Currency,
 	};
 
 	#[test]
 	fn display()
 	{
 		let start = Instant::now();
-		assert_eq!(format!("{}", Money::new(Decimal::new(5000, 2), "USD")), "50.00 USD");
-		assert_eq!(format!("{}", Money::new(Decimal::new(9000, 2), "EUR")), "90.00 EUR");
-		assert_eq!(format!("{}", Money::new(Decimal::new(20000, 0), "JPY")), "20000 JPY");
+		assert_eq!(format!("{}", Money::new(5000, 2, Currency::USD)), "50.00 USD");
+		assert_eq!(format!("{}", Money::new(9000, 2, Currency::EUR)), "90.00 EUR");
+		assert_eq!(format!("{}", Money::new(20000, 0, Currency::JPY)), "20000 JPY");
 		println!("\n>>>>> Money::fmt {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 3);
 	}
 }

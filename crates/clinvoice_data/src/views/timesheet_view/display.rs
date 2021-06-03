@@ -46,9 +46,10 @@ mod tests
 		super::{DateTime, Local, TimesheetView},
 		crate::
 		{
-			Decimal, EmployeeStatus, Expense, ExpenseCategory, Id, Money,
+			EmployeeStatus, Expense, ExpenseCategory, Id,
 			views::{ContactView, EmployeeView, LocationView, OrganizationView, PersonView}
 		},
+		clinvoice_finance::{Currency, Money},
 
 		chrono::Utc,
 	};
@@ -121,13 +122,13 @@ mod tests
 				Expense
 				{
 					category: ExpenseCategory::Food,
-					cost: Money::new(Decimal::new(2050, 2), "USD"),
+					cost: Money::new(2050, 2, Currency::USD),
 					description: "Fast Food™".into(),
 				},
 				Expense
 				{
 					category: ExpenseCategory::Travel,
-					cost: Money::new(Decimal::new(1000, 2), "USD"),
+					cost: Money::new(1000, 2, Currency::USD),
 					description: "Gas".into(),
 				},
 			],

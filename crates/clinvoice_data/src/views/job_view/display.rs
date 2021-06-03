@@ -65,9 +65,10 @@ mod tests
 		super::{DateTime, JobView, Local},
 		crate::
 		{
-			Decimal, EmployeeStatus, Id, Invoice, Job, Money,
+			EmployeeStatus, Id, Invoice, Job,
 			views::{ContactView, EmployeeView, LocationView, OrganizationView, PersonView, TimesheetView},
 		},
+		clinvoice_finance::{Currency, Money},
 
 		chrono::Utc,
 	};
@@ -110,7 +111,7 @@ mod tests
 			invoice: Invoice
 			{
 				date: None,
-				hourly_rate: Money::new(Decimal::new(2000, 2), "USD"),
+				hourly_rate: Money::new(2000, 2, Currency::USD),
 			},
 			notes: "Remember not to work with these guys again!".into(),
 			objectives: "Get into the mainframe, or something like that".into(),

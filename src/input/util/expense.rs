@@ -5,7 +5,7 @@ use
 
 	clinvoice_data::
 	{
-		finance::{Decimal, Money},
+		finance::{Currency, Money},
 		Expense, ExpenseCategory,
 	},
 };
@@ -17,7 +17,7 @@ use
 /// # Errors
 ///
 /// Will error whenever [`input::select_one`] or [`input::text`] does.
-fn add_menu(expenses: &mut Vec<Expense>, default_currency: &str) -> input::Result<()>
+fn add_menu(expenses: &mut Vec<Expense>, default_currency: Currency) -> input::Result<()>
 {
 	const ALL_EXPENSE_CATEGORIES: [ExpenseCategory; 6] =
 	[
@@ -30,7 +30,7 @@ fn add_menu(expenses: &mut Vec<Expense>, default_currency: &str) -> input::Resul
 	];
 
 	let category = input::select_one(&ALL_EXPENSE_CATEGORIES, "Select which type of `Expense` to add")?;
-	let cost = input::edit(&Money::new(Decimal::new(2000, 2), default_currency), format!("What is the cost of the {}?", category))?;
+	let cost = input::edit(&Money::new(2000, 2, default_currency), format!("What is the cost of the {}?", category))?;
 	let description = input::edit_markdown(&format!("* Describe the {}\n* All markdown syntax is valid", category))?;
 
 	Ok(expenses.push(Expense {category, cost, description}))
@@ -49,7 +49,7 @@ fn add_menu(expenses: &mut Vec<Expense>, default_currency: &str) -> input::Resul
 /// If a user manages to select an action (e.g. `ADD`, `CONTINUE`, `DELETE`) which is unaccounted
 /// for. This is __theoretically not possible__ but must be present to account for the case of an
 /// unrecoverable state of the program.
-pub fn menu(expenses: &mut Vec<Expense>, default_currency: &str) -> input::Result<()>
+pub fn menu(expenses: &mut Vec<Expense>, default_currency: Currency) -> input::Result<()>
 {
 	loop
 	{

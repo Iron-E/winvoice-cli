@@ -77,7 +77,12 @@ mod tests
 		},
 
 		clinvoice_adapter::data::{EmployeeAdapter, LocationAdapter, OrganizationAdapter, PersonAdapter},
-		clinvoice_data::{chrono::Utc, Contact, Decimal, EmployeeStatus, Money},
+		clinvoice_data::
+		{
+			chrono::Utc,
+			finance::{Currency, Money},
+			Contact, EmployeeStatus,
+		},
 	};
 
 	#[test]
@@ -122,7 +127,7 @@ mod tests
 			let mut creation = BincodeJob::create(
 				big_old_test.clone(),
 				Utc::now(),
-				Money::new(Decimal::new(200, 2), "USD"),
+				Money::new(200, 2, Currency::USD),
 				"Test the job creation function".into(),
 				&store,
 			).unwrap();

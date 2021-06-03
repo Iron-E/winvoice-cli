@@ -7,7 +7,7 @@ use
 	clinvoice_adapter::data::Updatable,
 };
 
-impl Updatable for Config<'_, '_, '_>
+impl Updatable for Config<'_, '_,>
 {
 	type Error = Error;
 

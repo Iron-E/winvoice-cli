@@ -9,7 +9,8 @@ use
 	clinvoice_data::
 	{
 		chrono::Utc,
-		Contact, Decimal, EmployeeStatus, Id, Location, Money,
+		finance::{Currency, Money},
+		Contact, EmployeeStatus, Id, Location,
 		views::{ContactView, EmployeeView, JobView, LocationView, OrganizationView, PersonView, TimesheetView},
 	},
 };
@@ -28,7 +29,7 @@ fn to_organization()
 		let test_job = BincodeJob::create(
 			dogood.clone(),
 			Utc::now(),
-			Money::new(Decimal::new(200, 2), ""),
+			Money::new(200, 2, Currency::USD),
 			"Test the job creation function".into(),
 			&store,
 		).unwrap();
@@ -60,7 +61,7 @@ fn to_view()
 		let mut create_job = BincodeJob::create(
 			big_test.clone(),
 			Utc::now(),
-			Money::new(Decimal::new(200, 2), ""),
+			Money::new(200, 2, Currency::USD),
 			"Test the job creation function".into(),
 			&store,
 		).unwrap();

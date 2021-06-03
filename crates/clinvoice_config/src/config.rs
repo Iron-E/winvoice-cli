@@ -9,9 +9,8 @@ use
 	std::{collections::BTreeMap, path::PathBuf},
 
 	crate::{Employees, Invoices, StoreValue, Timesheets},
-
 	clinvoice_adapter::{Adapters, data::Updatable, Store},
-	clinvoice_data::Id,
+	clinvoice_data::{Id, finance::Currency},
 
 	serde::{Deserialize, Serialize},
 };
@@ -20,7 +19,7 @@ use
 ///
 /// The `Config` contains settings that affect all areas of the application.
 #[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
-pub struct Config<'alias, 'currency, 'name>
+pub struct Config<'alias, 'name>
 {
 	/// # Summary
 	///
@@ -30,8 +29,7 @@ pub struct Config<'alias, 'currency, 'name>
 	/// # Summary
 	///
 	/// Configurations for [`Invoice`](clinvoice_data::invoice::Invoice)s.
-	#[serde(borrow)]
-	pub invoices: Invoices<'currency>,
+	pub invoices: Invoices,
 
 	/// # Summary
 	///
@@ -45,7 +43,7 @@ pub struct Config<'alias, 'currency, 'name>
 	pub timesheets: Timesheets,
 }
 
-impl Config<'_, '_, '_>
+impl Config<'_, '_>
 {
 	/// # Summary
 	///
@@ -57,7 +55,7 @@ impl Config<'_, '_, '_>
 			let config = Self
 			{
 				employees: Employees {default_id: Id::default()},
-				invoices: Invoices {default_currency: "USD"},
+				invoices: Invoices {default_currency: Currency::USD},
 				stores: vec![
 					("default", StoreValue::Alias("foo")),
 					("foo", StoreValue::Storage(Store
@@ -110,7 +108,7 @@ mod tests
 	{
 		std::time::{Duration, Instant},
 
-		super::{Config, Employees, BTreeMap, Invoices, Store, StoreValue, Timesheets},
+		super::{Config, Currency, Employees, BTreeMap, Invoices, Store, StoreValue, Timesheets},
 
 		clinvoice_adapter::Adapters,
 		clinvoice_data::Id,
@@ -140,7 +138,7 @@ mod tests
 		let conf = Config
 		{
 			employees: Employees {default_id: Id::new_v4()},
-			invoices: Invoices {default_currency: "USD"},
+			invoices: Invoices {default_currency: Currency::USD},
 			stores,
 			timesheets: Timesheets {interval: Duration::new(100, 0)},
 		};

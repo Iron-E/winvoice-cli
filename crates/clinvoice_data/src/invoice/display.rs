@@ -23,7 +23,8 @@ mod tests
 		std::time::Instant,
 
 		super::Invoice,
-		crate::{Decimal, InvoiceDate, Money},
+		crate::InvoiceDate,
+		clinvoice_finance::{Currency, Money},
 
 		chrono::{DateTime, Local, Utc},
 	};
@@ -38,7 +39,7 @@ mod tests
 				issued: Utc::now(),
 				paid: None,
 			}),
-			hourly_rate: Money::new(Decimal::new(1000, 2), "USD"),
+			hourly_rate: Money::new(1000, 2, Currency::USD),
 		};
 
 		let start = Instant::now();

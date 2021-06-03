@@ -19,6 +19,7 @@
 #![allow(clippy::suspicious_else_formatting)]
 
 mod contact;
+mod currency;
 mod employee;
 mod employee_status;
 mod expense;
@@ -37,6 +38,7 @@ pub mod views;
 pub use
 {
 	contact::Contact,
+	currency::Currency,
 	employee::Employee,
 	employee_status::EmployeeStatus,
 	expense::Expense,

@@ -230,7 +230,7 @@ impl Create
 						Money
 						{
 							amount: hourly_rate,
-							currency: currency.unwrap_or_else(|| config.invoices.default_currency),
+							currency: currency.unwrap_or(config.invoices.default_currency),
 						},
 						year, month, day, hour, minute,
 						store,

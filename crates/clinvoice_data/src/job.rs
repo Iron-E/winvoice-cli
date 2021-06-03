@@ -13,7 +13,7 @@ use
 #[cfg(feature="serde_support")]
 use serde::{Deserialize, Serialize};
 
-const MINUTES_PER_HOUR: i8 = 60;
+const SECONDS_PER_HOUR: i16 = 3600;
 
 /// # Summary
 ///
@@ -150,31 +150,21 @@ impl Job
 	///
 	/// # TODO
 	///
-	/// * Add currency conversion method.
 	/// * Add tests.
 	pub fn total(&self) -> Money
 	{
-		let minutes_per_hour = Decimal::from(MINUTES_PER_HOUR);
-		let seconds_per_minute = minutes_per_hour;
+		let seconds_per_hour: Decimal = SECONDS_PER_HOUR.into();
 
 		let mut total = self.timesheets.iter().filter(|t| t.time_end.is_some()).fold(
-			Money {amount: Decimal::new(0, 2), currency: self.invoice.hourly_rate.currency},
-			|mut m, t|
+			Money::new(0, 2, self.invoice.hourly_rate.currency),
+			|mut total, timesheet|
 			{
-				let duration_seconds = Decimal::from(t.time_end.unwrap().signed_duration_since(t.time_begin).num_seconds());
-				m.amount += (duration_seconds / seconds_per_minute / minutes_per_hour) * self.invoice.hourly_rate.amount;
+				let duration_seconds: Decimal = timesheet.time_end.unwrap().signed_duration_since(timesheet.time_begin).num_seconds().into();
+				total.amount += (duration_seconds / seconds_per_hour) * self.invoice.hourly_rate.amount;
 
-				t.expenses.iter().for_each(|e|
-				{
-					if e.cost.currency != m.currency
-					{
-						panic!("Not all expenses were recorded in the same currency! There is currently no automatic currency conversion");
-					}
+				timesheet.expenses.iter().for_each(|e| total.amount += e.cost.exchange(total.currency).amount);
 
-					m.amount += e.cost.amount;
-				});
-
-				m
+				total
 			}
 		);
 

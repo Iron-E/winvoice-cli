@@ -38,7 +38,7 @@ impl PersonAdapter for BincodePerson<'_, '_>
 		let person = Person
 		{
 			id: util::unique_id(&Self::path(&store))?,
-			name: name.into(),
+			name,
 		};
 
 		BincodePerson {person: &person, store}.update()?;

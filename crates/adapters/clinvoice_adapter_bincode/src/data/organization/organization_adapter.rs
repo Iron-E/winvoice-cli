@@ -39,7 +39,7 @@ impl OrganizationAdapter for BincodeOrganization<'_, '_>
 		{
 			id: util::unique_id(&Self::path(&store))?,
 			location_id: location.id,
-			name: name.into(),
+			name,
 		};
 
 		BincodeOrganization {organization: &organization, store}.update()?;

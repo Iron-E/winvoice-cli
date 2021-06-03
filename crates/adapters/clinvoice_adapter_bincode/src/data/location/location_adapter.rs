@@ -40,7 +40,7 @@ impl LocationAdapter for BincodeLocation<'_, '_>
 		let location = Location
 		{
 			id: util::unique_id(&Self::path(&store))?,
-			name: name.into(),
+			name,
 			outer_id: None,
 		};
 
@@ -67,7 +67,7 @@ impl LocationAdapter for BincodeLocation<'_, '_>
 		let inner_location = Location
 		{
 			id: util::unique_id(&Self::path(&self.store))?,
-			name: name.into(),
+			name,
 			outer_id: Some(self.location.id),
 		};
 

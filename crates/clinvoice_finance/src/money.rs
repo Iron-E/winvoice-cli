@@ -45,6 +45,6 @@ impl Money
 	/// A new [`Money`].
 	pub fn new(amount: i64, decimal_places: u32, currency: Currency) -> Self
 	{
-		Self {amount: Decimal::new(amount, decimal_places), currency: currency.into()}
+		Self {amount: Decimal::new(amount, decimal_places), currency}
 	}
 }

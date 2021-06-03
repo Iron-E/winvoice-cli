@@ -4,7 +4,9 @@ mod partial_eq;
 
 use
 {
-	crate::{Decimal, Expense, Id, Invoice, Money, Timesheet},
+	crate::{Expense, Id, Invoice, Timesheet},
+
+	clinvoice_finance::{Decimal, Money},
 
 	chrono::{DateTime, Utc},
 };

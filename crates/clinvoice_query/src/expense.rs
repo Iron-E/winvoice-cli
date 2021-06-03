@@ -2,7 +2,7 @@ use
 {
 	super::{Match, MatchStr, Result},
 
-	clinvoice_data::{ExpenseCategory, Money},
+	clinvoice_data::{ExpenseCategory, finance::Money},
 };
 
 #[cfg(feature="serde_support")]

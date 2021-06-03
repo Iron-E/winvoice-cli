@@ -15,7 +15,7 @@ use
 	clinvoice_data::
 	{
 		chrono::{DateTime, Utc},
-		Invoice, Job, Money, Organization
+		Invoice, Job, finance::Money, Organization
 	},
 	clinvoice_query as query,
 };

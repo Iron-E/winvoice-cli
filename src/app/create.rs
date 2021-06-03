@@ -11,7 +11,8 @@ use
 	clinvoice_data::
 	{
 		chrono::{Datelike, DateTime, Local, Timelike, TimeZone, Utc},
-		Decimal, EmployeeStatus, Location, Money,
+		finance::{Decimal, Money},
+		EmployeeStatus, Location,
 	},
 };
 

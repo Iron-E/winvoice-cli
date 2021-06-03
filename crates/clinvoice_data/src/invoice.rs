@@ -1,6 +1,11 @@
 mod display;
 
-use crate::{InvoiceDate, Money};
+use
+{
+	crate::InvoiceDate,
+
+	clinvoice_finance::Money,
+};
 
 #[cfg(feature="serde_support")]
 use serde::{Deserialize, Serialize};

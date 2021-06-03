@@ -13,7 +13,7 @@ repository = "https://www.github.com/Iron-E/clinvoice"
 [dependencies]
 # CLInvoice
 clinvoice_adapter = {path="../adapters/clinvoice_adapter", features=["serde_support"], version="0.8"}
-clinvoice_data = {path="../clinvoice_data", version="0.4"}
+clinvoice_data = {path="../clinvoice_data", version="0.5"}
 clinvoice_error = {path="../clinvoice_error", version="0.2"}
 
 # Directories

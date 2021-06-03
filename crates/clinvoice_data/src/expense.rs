@@ -1,6 +1,11 @@
 mod display;
 
-use crate::{ExpenseCategory, Money};
+use
+{
+	crate::ExpenseCategory,
+
+	clinvoice_finance::Money,
+};
 
 #[cfg(feature="serde_support")]
 use serde::{Deserialize, Serialize};

@@ -153,10 +153,10 @@ dependencies = [
 
 [[package]]
 name = "clinvoice_data"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "chrono",
- "rust_decimal",
+ "clinvoice_finance",
  "serde",
  "uuid",
 ]
@@ -172,6 +172,14 @@ dependencies = [
  "clinvoice_data",
  "clinvoice_error",
  "thiserror",
+]
+
+[[package]]
+name = "clinvoice_finance"
+version = "0.1.0"
+dependencies = [
+ "rust_decimal",
+ "serde",
 ]
 
 [[package]]

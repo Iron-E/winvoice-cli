@@ -2,7 +2,7 @@ use
 {
 	super::Match,
 
-	clinvoice_data::{chrono::NaiveDateTime, Money},
+	clinvoice_data::{chrono::NaiveDateTime, finance::Money},
 };
 
 #[cfg(feature="serde_support")]

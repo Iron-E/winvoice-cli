@@ -8,7 +8,7 @@ use
 	clinvoice_data::
 	{
 		chrono::{DateTime, Utc},
-		Job, Money, Organization,
+		Job, finance::Money, Organization,
 		views::{JobView, TimesheetView},
 	},
 	clinvoice_query as query,

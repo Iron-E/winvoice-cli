@@ -1,8 +1,8 @@
 //! # Summary
 //!
 //! This crate provides a complete resource for data items which are to be stored in a database (or
-//! other permanent storage fixture). It is independent of all other crates in the `clinvoice`
-//! suite, so the definitions can be used apart from any other project-local crate.
+//! other permanent storage fixture). It is only dependent on `clinvoice_finance` for currency
+//! conversions, and is otherwise independent of the CLInvoice project.
 //!
 //! Consequently, most other parts of `clinvoice` depend on this crate.
 //!
@@ -19,7 +19,6 @@
 #![allow(clippy::suspicious_else_formatting)]
 
 mod contact;
-mod currency;
 mod employee;
 mod employee_status;
 mod expense;
@@ -29,7 +28,6 @@ mod invoice;
 mod invoice_date;
 mod job;
 mod location;
-mod money;
 mod organization;
 mod person;
 mod timesheet;
@@ -38,7 +36,6 @@ pub mod views;
 pub use
 {
 	contact::Contact,
-	currency::Currency,
 	employee::Employee,
 	employee_status::EmployeeStatus,
 	expense::Expense,
@@ -48,19 +45,19 @@ pub use
 	invoice_date::InvoiceDate,
 	job::Job,
 	location::Location,
-	money::Money,
 	organization::Organization,
 	person::Person,
 	timesheet::Timesheet,
 };
 
 pub use chrono;
-pub use rust_decimal::Decimal;
+pub use clinvoice_finance as finance;
 
 /// # Summary
 ///
 /// The namespace for a v5 [`Uuid`](uuid::Uuid) containing CLInvoice data.
-pub const UUID_NAMESPACE: Id = Id::from_bytes([
+pub const UUID_NAMESPACE: Id = Id::from_bytes(
+[
 	0x1a, 0x88, 0xb1, 0xde,
 	0xe8, 0x0d, 0x4e, 0xca,
 	0x92, 0x08, 0xe5, 0x6b,

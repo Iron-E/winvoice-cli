@@ -3,7 +3,11 @@ use
 	super::menu::{ADD, ALL_ACTIONS, CONTINUE, DELETE, EDIT},
 	crate::input,
 
-	clinvoice_data::{Decimal, Expense, ExpenseCategory, Money},
+	clinvoice_data::
+	{
+		finance::{Decimal, Money},
+		Expense, ExpenseCategory,
+	},
 };
 
 /// # Summary

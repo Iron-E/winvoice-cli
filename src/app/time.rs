@@ -89,12 +89,8 @@ impl Time
 		job.timesheets[index].time_end = Some(Utc::now().duration_trunc(interval)?);
 
 		// Now that `job.timesheets[index]` is done being ammended, we can insert it back.
-		Ok(job.timesheets.sort_by(|t1, t2|
-			if t1.time_begin == t2.time_begin
-			{
-				t1.time_begin.cmp(&t2.time_begin)
-			}
-			else
+		job.timesheets.sort_by(|t1, t2|
+			if t1.time_begin != t2.time_begin {t1.time_begin.cmp(&t2.time_begin)} else
 			{
 				t1.time_end.map(|time|
 					// If they both have a time, compare it. Otherwise, `t1` has ended and `t2` has not, so
@@ -106,7 +102,9 @@ impl Time
 					t2.time_end.and(Some(Ordering::Greater)).unwrap_or(Ordering::Equal)
 				)
 			}
-		))
+		);
+
+		Ok(())
 	}
 
 	/// # Summary

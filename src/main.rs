@@ -1,3 +1,5 @@
+#![allow(clippy::suspicious_else_formatting)]
+
 mod app;
 mod dyn_result;
 mod input;

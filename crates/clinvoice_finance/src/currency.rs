@@ -1,3 +1,9 @@
+mod display;
+mod from_str;
+
+#[cfg(feature="serde_support")]
+use serde::{Deserialize, Serialize};
+
 /// # Summary
 ///
 /// [ISO-4217][iso] currency codes which are reported by the [European Central Bank][ecb] for
@@ -5,6 +11,8 @@
 ///
 /// [ecb]: https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/
 /// [iso]: https://www.iso.org/iso-4217-currency-codes.html
+#[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
 pub enum Currency
 {
 	/// # Summary

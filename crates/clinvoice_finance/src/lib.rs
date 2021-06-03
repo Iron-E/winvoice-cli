@@ -15,11 +15,13 @@
 
 mod currency;
 mod money;
+mod unsupported_currency_error;
 
 pub use
 {
 	currency::Currency,
 	money::Money,
+	unsupported_currency_error::UnsupportedCurrencyError,
 };
 
 pub use rust_decimal::Decimal;

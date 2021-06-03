@@ -1,6 +1,11 @@
 mod display;
 
-use rust_decimal::Decimal;
+use
+{
+	crate::Currency,
+
+	rust_decimal::Decimal,
+};
 
 #[cfg(feature="serde_support")]
 use serde::{Deserialize, Serialize};
@@ -20,7 +25,7 @@ pub struct Money
 	/// # Summary
 	///
 	/// The `currency` that this [`Money`] is in.
-	pub currency: String,
+	pub currency: Currency,
 }
 
 impl Money
@@ -31,13 +36,15 @@ impl Money
 	///
 	/// # Paramters
 	///
-	/// See [`Money`]'s fields.
+	/// * `amount`, the amount of [`Money`] __without decimals__ (e.g. '$30.00' => 3000).
+	/// * `currency`, the ISO currency code which this `amount` is represented in.
+	/// * `scale`, the number of decimal places (e.g. '$30.00' => 2).
 	///
 	/// # Returns
 	///
 	/// A new [`Money`].
-	pub fn new(amount: Decimal, currency: &str) -> Self
+	pub fn new(amount: i64, decimal_places: u32, currency: Currency) -> Self
 	{
-		Self {amount, currency: currency.into()}
+		Self {amount: Decimal::new(amount, decimal_places), currency: currency.into()}
 	}
 }

@@ -12,7 +12,7 @@ repository = "https://www.github.com/Iron-E/clinvoice"
 
 [dependencies]
 # CLInvoice
-clinvoice_finance = {path='../clinvoice_finance', version="0.1"}
+clinvoice_finance = {path='../clinvoice_finance', version="0.2"}
 
 # Date/Time
 chrono = {version="0.4", features=["serde"]}

@@ -13,7 +13,7 @@ use serde::{Deserialize, Serialize};
 /// # Summary
 ///
 /// Some `amount` of `currency`.
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
 pub struct Money
 {
@@ -30,6 +30,17 @@ pub struct Money
 
 impl Money
 {
+	/// # Summary
+	///
+	/// Exchange some [`Money`] into another `currency`.
+	pub fn exchange(self, currency: Currency) -> Self
+	{
+		// noop for same currency
+		if self.currency == currency { return self; }
+
+		todo!("1. `GET` ECB data\n2. Convert current currency to EUR\n3. Convert EUR to desired currency")
+	}
+
 	/// # Summary
 	///
 	/// Create a new [`Money`] struct.

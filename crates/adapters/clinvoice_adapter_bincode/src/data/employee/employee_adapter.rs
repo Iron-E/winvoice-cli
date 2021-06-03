@@ -51,7 +51,7 @@ impl EmployeeAdapter for BincodeEmployee<'_, '_>
 			id: util::unique_id(&Self::path(&store))?,
 			organization_id: organization.id,
 			person_id: person.id,
-			title: title.into(),
+			title,
 			status,
 		};
 

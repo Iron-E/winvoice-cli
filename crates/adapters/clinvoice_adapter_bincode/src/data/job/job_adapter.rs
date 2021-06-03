@@ -56,7 +56,7 @@ impl JobAdapter for BincodeJob<'_, '_>
 				date: None,
 				hourly_rate,
 			},
-			objectives: objectives.into(),
+			objectives,
 			notes: "".into(),
 			timesheets: Vec::new(),
 		};

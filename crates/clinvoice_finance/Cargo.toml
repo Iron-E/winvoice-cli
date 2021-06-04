@@ -14,8 +14,14 @@ repository = "https://www.github.com/Iron-E/clinvoice"
 # Currency
 rust_decimal = "1"
 
+# Date/Time
+chrono = "0.4"
+
 # Serialization
-serde = {version="1", optional=true}
+serde = {optional=true, version="1"}
+
+# Web Scraping
+reqwest = {features=["blocking"], version="0.11"}
 
 [features]
 default = []

@@ -3,15 +3,15 @@ mod try_from_path;
 
 use
 {
-	std::{convert::TryInto, collections::HashMap, io, env, path::PathBuf},
+	std::{convert::TryInto, collections::HashMap, env, path::PathBuf},
 
-	crate::Currency,
+	crate::{Currency, Result},
 
 	chrono::{Datelike, Local},
 	rust_decimal::Decimal,
 };
 
-pub(crate) struct ExchangeRates(HashMap<Currency, Decimal>);
+pub struct ExchangeRates(HashMap<Currency, Decimal>);
 
 impl ExchangeRates
 {
@@ -26,30 +26,19 @@ impl ExchangeRates
 
 	/// # Summary
 	///
-	/// Returns `true` if there are locally-stored exchange rates that are from the past day.
-	fn is_missing_or_outdated() -> io::Result<bool>
-	{
-		todo!(
-"1. Read temporary storage for file
-2. If file is found, continue. Else, return `false`
-3. If date is correct, return `true`. Else, `false`"
-		)
-	}
-
-	/// # Summary
-	///
 	/// Create a new [`ExchangeRates`] instance, which uses the [European Central Bank][ecb] to
 	/// determine how to convert between currencies.
 	///
 	/// [ecb]: https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/
-	pub fn new() -> io::Result<Self>
+	pub fn new() -> Result<Self>
 	{
-		if Self::is_missing_or_outdated()?
+		let filepath = Self::filepath();
+		if !filepath.is_file()
 		{
 			Self::scrape();
 		}
 
-		Self::filepath().as_path().try_into()
+		filepath.as_path().try_into()
 	}
 
 	/// # Summary

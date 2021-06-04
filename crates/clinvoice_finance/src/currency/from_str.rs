@@ -3,14 +3,14 @@ use
 	core::str::FromStr,
 
 	super::Currency,
-	crate::UnsupportedCurrencyError,
+	crate::{Error, Result},
 };
 
 impl FromStr for Currency
 {
-	type Err = UnsupportedCurrencyError;
+	type Err = Error;
 
-	fn from_str(s: &str) -> Result<Self, UnsupportedCurrencyError>
+	fn from_str(s: &str) -> Result<Self>
 	{
 		let uppercase = s.to_ascii_uppercase();
 		Ok(match uppercase.as_str()
@@ -48,7 +48,7 @@ impl FromStr for Currency
 			"TRY" => Self::TRY,
 			"USD" => Self::USD,
 			"ZAR" => Self::ZAR,
-			_ => return Err(UnsupportedCurrencyError(uppercase)),
+			_ => return Err(Error::UnsupportedCurrency(uppercase)),
 		})
 	}
 }

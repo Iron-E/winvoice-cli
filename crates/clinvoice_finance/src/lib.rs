@@ -14,17 +14,16 @@
 #![allow(clippy::suspicious_else_formatting)]
 
 mod currency;
+mod error;
 mod exchange_rates;
 mod money;
-mod unsupported_currency_error;
-
-use exchange_rates::ExchangeRates;
 
 pub use
 {
 	currency::Currency,
+	error::{Error, Result},
+	exchange_rates::ExchangeRates,
 	money::Money,
-	unsupported_currency_error::UnsupportedCurrencyError,
 };
 
 pub use rust_decimal::Decimal;

@@ -1,18 +1,18 @@
 use
 {
-	std::{collections::HashMap, convert::TryFrom, fs, io, path::Path},
+	std::{collections::HashMap, convert::TryFrom, fs, path::Path},
 
 	super::ExchangeRates,
-	crate::{Currency, UnsupportedCurrencyError},
+	crate::{Currency, Error, Result},
 
-	rust_decimal::{Decimal, Error as DecimalError},
+	rust_decimal::Decimal,
 };
 
 impl TryFrom<&Path> for ExchangeRates
 {
-	type Error = io::Error;
+	type Error = Error;
 
-	fn try_from(path: &Path) -> io::Result<Self>
+	fn try_from(path: &Path) -> Result<Self>
 	{
 		let contents = fs::read_to_string(path)?;
 		let (currencies, rates) =
@@ -21,15 +21,15 @@ impl TryFrom<&Path> for ExchangeRates
 			(csv.next().unwrap(), csv.next().unwrap())
 		};
 
-		let mut map: HashMap<_, _> = currencies.zip(rates).skip(1).filter(|(c, _)| !c.is_empty()).map(|(c, r)|
-		(
-			c.parse::<Currency>().unwrap_or_else(|_| panic!("{}", UnsupportedCurrencyError(c.into()))),
-			r.parse::<Decimal>().unwrap_or_else(|_| panic!("{}", DecimalError::ErrorString(r.into()))),
-		)).collect();
+		let mut exchange_rates = ExchangeRates(HashMap::new());
+		exchange_rates.0.insert(Currency::EUR, 1.into());
 
-		map.insert(Currency::EUR, 1.into());
-
-		Ok(ExchangeRates(map))
+		currencies.zip(rates).skip(1).filter(|(c, _)| !c.is_empty()).try_for_each(|(c, r)| -> Result<()>
+		{
+			let currency = c.parse::<Currency>()?;
+			exchange_rates.0.insert(currency, r.parse::<Decimal>()?);
+			Ok(())
+		}).and(Ok(exchange_rates))
 	}
 }
 
@@ -60,41 +60,41 @@ mod tests
 		assert!(filepath.is_file());
 
 		let start = Instant::now();
-		let rates = ExchangeRates::try_from(filepath.as_path()).unwrap();
+		let exchange_rates = ExchangeRates::try_from(filepath.as_path()).unwrap();
 		println!("\n>>>>> ExchangeRates::try_from {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 
-		assert_eq!(rates[Currency::AUD], Decimal::new(15792, 4));
-		assert_eq!(rates[Currency::BGN], Decimal::new(19558, 4));
-		assert_eq!(rates[Currency::BRL], Decimal::new(61894, 4));
-		assert_eq!(rates[Currency::CAD], Decimal::new(14710, 4));
-		assert_eq!(rates[Currency::CHF], Decimal::new(10961, 4));
-		assert_eq!(rates[Currency::CNY], Decimal::new(77910, 4));
-		assert_eq!(rates[Currency::CZK], Decimal::new(25448, 3));
-		assert_eq!(rates[Currency::DKK], Decimal::new(74365, 4));
-		assert_eq!(rates[Currency::EUR], Decimal::new(1, 0));
-		assert_eq!(rates[Currency::GBP], Decimal::new(85955, 5));
-		assert_eq!(rates[Currency::HKD], Decimal::new(94551, 4));
-		assert_eq!(rates[Currency::HRK], Decimal::new(75013, 4));
-		assert_eq!(rates[Currency::HUF], Decimal::new(34582, 2));
-		assert_eq!(rates[Currency::IDR], Decimal::new(1742091, 2));
-		assert_eq!(rates[Currency::ILS], Decimal::new(39598, 4));
-		assert_eq!(rates[Currency::INR], Decimal::new(888755, 4));
-		assert_eq!(rates[Currency::ISK], Decimal::new(14630, 2));
-		assert_eq!(rates[Currency::JPY], Decimal::new(13381, 2));
-		assert_eq!(rates[Currency::KRW], Decimal::new(135775, 2));
-		assert_eq!(rates[Currency::MXN], Decimal::new(243300, 4));
-		assert_eq!(rates[Currency::MYR], Decimal::new(50241, 4));
-		assert_eq!(rates[Currency::NOK], Decimal::new(101501, 4));
-		assert_eq!(rates[Currency::NZD], Decimal::new(16915, 4));
-		assert_eq!(rates[Currency::PHP], Decimal::new(58208, 3));
-		assert_eq!(rates[Currency::PLN], Decimal::new(44520, 4));
-		assert_eq!(rates[Currency::RON], Decimal::new(49220, 4));
-		assert_eq!(rates[Currency::RUB], Decimal::new(892163, 4));
-		assert_eq!(rates[Currency::SEK], Decimal::new(101145, 4));
-		assert_eq!(rates[Currency::SGD], Decimal::new(16141, 4));
-		assert_eq!(rates[Currency::THB], Decimal::new(37938, 3));
-		assert_eq!(rates[Currency::TRY], Decimal::new(105650, 4));
-		assert_eq!(rates[Currency::USD], Decimal::new(12187, 4));
-		assert_eq!(rates[Currency::ZAR], Decimal::new(165218, 4));
+		assert_eq!(exchange_rates[Currency::AUD], Decimal::new(15792, 4));
+		assert_eq!(exchange_rates[Currency::BGN], Decimal::new(19558, 4));
+		assert_eq!(exchange_rates[Currency::BRL], Decimal::new(61894, 4));
+		assert_eq!(exchange_rates[Currency::CAD], Decimal::new(14710, 4));
+		assert_eq!(exchange_rates[Currency::CHF], Decimal::new(10961, 4));
+		assert_eq!(exchange_rates[Currency::CNY], Decimal::new(77910, 4));
+		assert_eq!(exchange_rates[Currency::CZK], Decimal::new(25448, 3));
+		assert_eq!(exchange_rates[Currency::DKK], Decimal::new(74365, 4));
+		assert_eq!(exchange_rates[Currency::EUR], Decimal::new(1, 0));
+		assert_eq!(exchange_rates[Currency::GBP], Decimal::new(85955, 5));
+		assert_eq!(exchange_rates[Currency::HKD], Decimal::new(94551, 4));
+		assert_eq!(exchange_rates[Currency::HRK], Decimal::new(75013, 4));
+		assert_eq!(exchange_rates[Currency::HUF], Decimal::new(34582, 2));
+		assert_eq!(exchange_rates[Currency::IDR], Decimal::new(1742091, 2));
+		assert_eq!(exchange_rates[Currency::ILS], Decimal::new(39598, 4));
+		assert_eq!(exchange_rates[Currency::INR], Decimal::new(888755, 4));
+		assert_eq!(exchange_rates[Currency::ISK], Decimal::new(14630, 2));
+		assert_eq!(exchange_rates[Currency::JPY], Decimal::new(13381, 2));
+		assert_eq!(exchange_rates[Currency::KRW], Decimal::new(135775, 2));
+		assert_eq!(exchange_rates[Currency::MXN], Decimal::new(243300, 4));
+		assert_eq!(exchange_rates[Currency::MYR], Decimal::new(50241, 4));
+		assert_eq!(exchange_rates[Currency::NOK], Decimal::new(101501, 4));
+		assert_eq!(exchange_rates[Currency::NZD], Decimal::new(16915, 4));
+		assert_eq!(exchange_rates[Currency::PHP], Decimal::new(58208, 3));
+		assert_eq!(exchange_rates[Currency::PLN], Decimal::new(44520, 4));
+		assert_eq!(exchange_rates[Currency::RON], Decimal::new(49220, 4));
+		assert_eq!(exchange_rates[Currency::RUB], Decimal::new(892163, 4));
+		assert_eq!(exchange_rates[Currency::SEK], Decimal::new(101145, 4));
+		assert_eq!(exchange_rates[Currency::SGD], Decimal::new(16141, 4));
+		assert_eq!(exchange_rates[Currency::THB], Decimal::new(37938, 3));
+		assert_eq!(exchange_rates[Currency::TRY], Decimal::new(105650, 4));
+		assert_eq!(exchange_rates[Currency::USD], Decimal::new(12187, 4));
+		assert_eq!(exchange_rates[Currency::ZAR], Decimal::new(165218, 4));
 	}
 }

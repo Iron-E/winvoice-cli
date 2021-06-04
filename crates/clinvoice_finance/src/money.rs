@@ -33,13 +33,16 @@ impl Money
 	/// # Summary
 	///
 	/// Exchange some [`Money`] into another `currency`.
-	pub fn exchange(self, currency: Currency) -> Self
+	pub fn exchange(self, currency: Currency, exchange_rates: &ExchangeRates) -> Self
 	{
 		// noop for same currency
 		if self.currency == currency { return self; }
 
-		let rates = ExchangeRates::new();
-		todo!("1. Convert current currency to EUR\n2. Convert EUR to desired currency")
+		let eur = self.amount / exchange_rates[self.currency];
+		let mut exchanged = eur * exchange_rates[currency];
+		exchanged.rescale(2);
+
+		Self {amount: exchanged, currency}
 	}
 
 	/// # Summary
@@ -59,4 +62,11 @@ impl Money
 	{
 		Self {amount: Decimal::new(amount, decimal_places), currency}
 	}
+}
+
+#[cfg(test)]
+mod tests
+{
+	#[test]
+	fn exchange() {}
 }

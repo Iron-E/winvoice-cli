@@ -47,7 +47,7 @@ members = [
 	"crates/clinvoice_config",
 	"crates/clinvoice_data",
 	"crates/clinvoice_error",
-	"crates/clinvoice_finance",
 	"crates/clinvoice_export",
+	"crates/clinvoice_finance",
 	"crates/clinvoice_query",
 ]

@@ -14,8 +14,11 @@
 #![allow(clippy::suspicious_else_formatting)]
 
 mod currency;
+mod exchange_rates;
 mod money;
 mod unsupported_currency_error;
+
+use exchange_rates::ExchangeRates;
 
 pub use
 {

@@ -48,7 +48,7 @@ impl FromStr for Currency
 			"TRY" => Self::TRY,
 			"USD" => Self::USD,
 			"ZAR" => Self::ZAR,
-			_ => return Err(UnsupportedCurrencyError{currency: uppercase}),
+			_ => return Err(UnsupportedCurrencyError(uppercase)),
 		})
 	}
 }

@@ -2,7 +2,7 @@ mod display;
 
 use
 {
-	crate::Currency,
+	crate::{Currency, ExchangeRates},
 
 	rust_decimal::Decimal,
 };
@@ -38,7 +38,8 @@ impl Money
 		// noop for same currency
 		if self.currency == currency { return self; }
 
-		todo!("1. `GET` ECB data\n2. Convert current currency to EUR\n3. Convert EUR to desired currency")
+		let rates = ExchangeRates::new();
+		todo!("1. Convert current currency to EUR\n2. Convert EUR to desired currency")
 	}
 
 	/// # Summary

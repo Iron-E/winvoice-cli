@@ -5,7 +5,7 @@ mod partial_eq;
 use
 {
 	crate::{Expense, Id, Invoice, Timesheet},
-	clinvoice_finance::{Decimal, Money},
+	clinvoice_finance::{Decimal, ExchangeRates, Money, Result},
 
 	chrono::{DateTime, Utc},
 };
@@ -151,25 +151,44 @@ impl Job
 	/// # TODO
 	///
 	/// * Add tests.
-	pub fn total(&self) -> Money
+	pub fn total(&self) -> Result<Money>
 	{
 		let seconds_per_hour: Decimal = SECONDS_PER_HOUR.into();
 
-		let mut total = self.timesheets.iter().filter(|t| t.time_end.is_some()).fold(
+		let mut exchange_rates = None;
+
+		let mut total = self.timesheets.iter().filter(|timesheet| timesheet.time_end.is_some()).try_fold(
 			Money::new(0, 2, self.invoice.hourly_rate.currency),
-			|mut total, timesheet|
+			|mut total, timesheet| -> Result<Money>
 			{
 				let duration_seconds: Decimal = timesheet.time_end.unwrap().signed_duration_since(timesheet.time_begin).num_seconds().into();
 				total.amount += (duration_seconds / seconds_per_hour) * self.invoice.hourly_rate.amount;
 
-				timesheet.expenses.iter().for_each(|e| total.amount += e.cost.exchange(total.currency).amount);
+				timesheet.expenses.iter().try_for_each(|expense| -> Result<()>
+				{
+					if expense.cost.currency == total.currency
+					{
+						total.amount += expense.cost.amount;
+					}
+					else
+					{
+						if exchange_rates.is_none()
+						{
+							exchange_rates = Some(ExchangeRates::new()?);
+						}
 
-				total
-			}
-		);
+						total.amount += expense.cost.exchange(total.currency, exchange_rates.as_ref().unwrap()).amount;
+					}
+
+					Ok(())
+				})?;
+
+				Ok(total)
+			},
+		)?;
 
 		total.amount.rescale(2);
-		total
+		Ok(total)
 	}
 }
 
@@ -231,7 +250,7 @@ mod tests
 		};
 
 		let start = Instant::now();
-		assert_eq!(job.total(), Money::new(4000, 2, Currency::USD));
+		assert_eq!(job.total().unwrap(), Money::new(4000, 2, Currency::USD));
 		println!("\n>>>>> Job::total {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 	}
 }

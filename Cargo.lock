@@ -203,9 +203,11 @@ name = "clinvoice_finance"
 version = "0.2.0"
 dependencies = [
  "chrono",
+ "clinvoice_error",
  "reqwest",
  "rust_decimal",
  "serde",
+ "thiserror",
 ]
 
 [[package]]

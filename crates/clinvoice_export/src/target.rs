@@ -13,6 +13,7 @@ use
 	clinvoice_data::
 	{
 		chrono::{DateTime, Local},
+		finance::Result as FinanceResult,
 		Id, Job,
 		views::{ContactView, JobView, TimesheetView},
 	},
@@ -125,7 +126,7 @@ impl Target
 	/// # Summary
 	///
 	/// Export some `job` to the [`Target`] specified.
-	pub fn export_job(&self, job: &JobView) -> String
+	pub fn export_job(&self, job: &JobView) -> FinanceResult<String>
 	{
 		let mut output = String::new();
 
@@ -172,7 +173,7 @@ impl Target
 
 				writeln!(output, "{}: {}",
 					markdown::Element::UnorderedList {depth: 0, text: markdown::Text::Bold("Total Amount Owed")},
-					Job::from(job).total(),
+					Job::from(job).total()?,
 				).unwrap();
 				writeln!(output, "{}", markdown::Element::<&str>::Break).unwrap();
 
@@ -194,7 +195,7 @@ impl Target
 			},
 		};
 
-		output
+		Ok(output)
 	}
 
 	/// # Summary
@@ -309,7 +310,7 @@ mod tests
 
 		let start = Instant::now();
 		assert_eq!(
-			Target::Markdown.export_job(&job),
+			Target::Markdown.export_job(&job).unwrap(),
 			format!(
 "# Job #{}
 
@@ -364,7 +365,7 @@ mod tests
 
 		let second_start = Instant::now();
 		assert_eq!(
-			Target::Markdown.export_job(&job),
+			Target::Markdown.export_job(&job).unwrap(),
 			format!(
 "# Job #{}
 

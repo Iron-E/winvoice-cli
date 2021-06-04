@@ -224,9 +224,12 @@ impl Retrieve
 
 						if let Some(target) = export
 						{
-							input::select(&results_view, "Select which Jobs you want to export")?.into_iter().try_for_each(|job|
-								fs::write(format!("{}--{}{}", job.client.name.replace(' ', "-"), job.id, target.extension()), target.export_job(&job))
-							)?;
+							input::select(&results_view, "Select which Jobs you want to export")?.into_iter().try_for_each(|job| -> DynResult<()>
+							{
+								let exported = target.export_job(&job)?;
+								fs::write(format!("{}--{}{}", job.client.name.replace(' ', "-"), job.id, target.extension()), exported)?;
+								Ok(())
+							})?;
 						}
 						else if !(close || self.delete || reopen || self.update)
 						{

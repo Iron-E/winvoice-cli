@@ -1,6 +1,6 @@
 use
 {
-	core::fmt::{Display, Formatter, Result},
+	core::fmt::{Display, Error, Formatter, Result},
 
 	super::JobView,
 	crate::Job,
@@ -33,7 +33,8 @@ impl Display for JobView
 		const DEPTH_2: &str =  "\n\t\t";
 
 		writeln!(formatter, "\tInvoice:{}{}", DEPTH_2, self.invoice.to_string().replace('\n', DEPTH_2))?;
-		writeln!(formatter, "\t\tTotal Amount Owed: {}", Job::from(self).total())?;
+		let total = Job::from(self).total().map_err(|_| Error)?;
+		writeln!(formatter, "\t\tTotal Amount Owed: {}", total)?;
 
 		if !self.objectives.is_empty()
 		{
@@ -145,7 +146,7 @@ mod tests
 				create_job_view.id,
 				DateTime::<Local>::from(create_job_view.date_open).naive_local(),
 				DateTime::<Local>::from(create_job_view.date_close.unwrap()).naive_local(),
-				Job::from(&create_job_view).total(),
+				Job::from(&create_job_view).total().unwrap(),
 				DateTime::<Local>::from(create_job_view.timesheets.first().unwrap().time_begin).naive_local(),
 				DateTime::<Local>::from(create_job_view.timesheets.first().unwrap().time_end.unwrap()).naive_local(),
 			),

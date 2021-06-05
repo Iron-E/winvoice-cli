@@ -33,7 +33,7 @@ mod tests
 		let expense = Expense
 		{
 			category: ExpenseCategory::Food,
-			cost: Money::new(2000, 2, Currency::USD),
+			cost: Money::new(20_00, 2, Currency::USD),
 			description: "Take-out for 2".into(),
 		};
 

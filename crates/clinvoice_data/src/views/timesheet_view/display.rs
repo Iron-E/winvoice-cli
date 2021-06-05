@@ -122,13 +122,13 @@ mod tests
 				Expense
 				{
 					category: ExpenseCategory::Food,
-					cost: Money::new(2050, 2, Currency::USD),
+					cost: Money::new(20_50, 2, Currency::USD),
 					description: "Fast Food™".into(),
 				},
 				Expense
 				{
 					category: ExpenseCategory::Travel,
-					cost: Money::new(1000, 2, Currency::USD),
+					cost: Money::new(10_00, 2, Currency::USD),
 					description: "Gas".into(),
 				},
 			],

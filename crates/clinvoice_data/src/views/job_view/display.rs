@@ -112,7 +112,7 @@ mod tests
 			invoice: Invoice
 			{
 				date: None,
-				hourly_rate: Money::new(2000, 2, Currency::USD),
+				hourly_rate: Money::new(20_00, 2, Currency::USD),
 			},
 			notes: "Remember not to work with these guys again!".into(),
 			objectives: "Get into the mainframe, or something like that".into(),

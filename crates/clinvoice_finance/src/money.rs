@@ -92,7 +92,7 @@ mod tests
 
 		let exchange_rates = ExchangeRates::try_from(filepath.as_path()).unwrap();
 
-		let usd = Money::new(2000, 2, Currency::USD);
+		let usd = Money::new(20_00, 2, Currency::USD);
 
 		let start = Instant::now();
 		let usd_to_jpy = usd.exchange(Currency::JPY, &exchange_rates);

@@ -66,7 +66,7 @@ mod tests
 				job: &BincodeJob::create(
 					big_test.organization.clone(),
 					Utc::now(),
-					Money::new(200, 2, Currency::USD),
+					Money::new(2_00, 2, Currency::USD),
 					"Test the job creation function".into(),
 					&store,
 				).unwrap(),
@@ -78,7 +78,7 @@ mod tests
 				job: &BincodeJob::create(
 					big_test.organization.clone(),
 					Utc::now(),
-					Money::new(200, 2, Currency::USD),
+					Money::new(2_00, 2, Currency::USD),
 					"Assert that this stuff works".into(),
 					&store,
 				).unwrap(),

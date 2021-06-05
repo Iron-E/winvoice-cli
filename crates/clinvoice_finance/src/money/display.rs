@@ -28,8 +28,8 @@ mod tests
 	fn display()
 	{
 		let start = Instant::now();
-		assert_eq!(format!("{}", Money::new(5000, 2, Currency::USD)), "50.00 USD");
-		assert_eq!(format!("{}", Money::new(9000, 2, Currency::EUR)), "90.00 EUR");
+		assert_eq!(format!("{}", Money::new(50_00, 2, Currency::USD)), "50.00 USD");
+		assert_eq!(format!("{}", Money::new(90_00, 2, Currency::EUR)), "90.00 EUR");
 		assert_eq!(format!("{}", Money::new(20000, 0, Currency::JPY)), "20000 JPY");
 		println!("\n>>>>> Money::fmt {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 3);
 	}

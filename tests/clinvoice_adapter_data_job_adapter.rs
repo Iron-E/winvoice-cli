@@ -29,7 +29,7 @@ fn to_organization()
 		let test_job = BincodeJob::create(
 			dogood.clone(),
 			Utc::now(),
-			Money::new(200, 2, Currency::USD),
+			Money::new(2_00, 2, Currency::USD),
 			"Test the job creation function".into(),
 			&store,
 		).unwrap();
@@ -61,7 +61,7 @@ fn to_view()
 		let mut create_job = BincodeJob::create(
 			big_test.clone(),
 			Utc::now(),
-			Money::new(200, 2, Currency::USD),
+			Money::new(2_00, 2, Currency::USD),
 			"Test the job creation function".into(),
 			&store,
 		).unwrap();

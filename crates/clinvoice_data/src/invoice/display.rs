@@ -39,7 +39,7 @@ mod tests
 				issued: Utc::now(),
 				paid: None,
 			}),
-			hourly_rate: Money::new(1000, 2, Currency::USD),
+			hourly_rate: Money::new(10_00, 2, Currency::USD),
 		};
 
 		let start = Instant::now();

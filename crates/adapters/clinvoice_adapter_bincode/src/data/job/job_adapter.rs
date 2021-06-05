@@ -119,7 +119,7 @@ mod tests
 				BincodeJob::create(
 					organization.clone(),
 					Utc::now(),
-					Money::new(200, 2, Currency::USD),
+					Money::new(2_00, 2, Currency::USD),
 					"Test the job creation function".into(),
 					&store,
 				).unwrap(),
@@ -130,7 +130,7 @@ mod tests
 				BincodeJob::create(
 					organization.clone(),
 					Utc::now(),
-					Money::new(200, 2, Currency::USD),
+					Money::new(2_00, 2, Currency::USD),
 					"Test the job creation function".into(),
 					&store,
 				).unwrap(),
@@ -152,7 +152,7 @@ mod tests
 				BincodeJob::create(
 					organization.clone(),
 					Utc::now(),
-					Money::new(500, 2, Currency::CAD),
+					Money::new(5_00, 2, Currency::CAD),
 					"test the job creation function".into(),
 					&store,
 				).unwrap(),
@@ -163,7 +163,7 @@ mod tests
 				BincodeJob::create(
 					organization.clone(),
 					Utc::now(),
-					Money::new(1000, 2, Currency::EUR),
+					Money::new(10_00, 2, Currency::EUR),
 					"TeSt ThE jOb CrEaTiOn FuNcTiOn".into(),
 					&store,
 				).unwrap(),
@@ -195,7 +195,7 @@ mod tests
 			let creation = BincodeJob::create(
 				organization.clone(),
 				Utc::now(),
-				Money::new(200, 2, Currency::USD),
+				Money::new(2_00, 2, Currency::USD),
 				"Test the job creation function".into(),
 				&store,
 			).unwrap();
@@ -203,7 +203,7 @@ mod tests
 			let retrieval = BincodeJob::create(
 				organization.clone(),
 				Utc::now(),
-				Money::new(200, 2, Currency::USD),
+				Money::new(2_00, 2, Currency::USD),
 				"Test the job retrieval function".into(),
 				&store,
 			).unwrap();

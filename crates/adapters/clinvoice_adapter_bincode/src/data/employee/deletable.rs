@@ -127,7 +127,7 @@ mod tests
 			let mut creation = BincodeJob::create(
 				big_old_test.clone(),
 				Utc::now(),
-				Money::new(200, 2, Currency::USD),
+				Money::new(2_00, 2, Currency::USD),
 				"Test the job creation function".into(),
 				&store,
 			).unwrap();

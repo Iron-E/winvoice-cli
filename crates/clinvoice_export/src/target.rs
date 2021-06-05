@@ -301,7 +301,7 @@ mod tests
 			invoice: Invoice
 			{
 				date: None,
-				hourly_rate: Money::new(2000, 2, Currency::USD),
+				hourly_rate: Money::new(20_00, 2, Currency::USD),
 			},
 			notes: "- I tested the function.".into(),
 			objectives: "- I want to test this function.".into(),
@@ -353,7 +353,7 @@ mod tests
 					Expense
 					{
 						category: ExpenseCategory::Service,
-						cost: Money::new(2000, 2, Currency::USD),
+						cost: Money::new(20_00, 2, Currency::USD),
 						description: "Paid for someone else to clean".into(),
 					},
 				],

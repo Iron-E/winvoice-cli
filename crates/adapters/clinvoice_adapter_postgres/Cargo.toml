@@ -1,0 +1,27 @@
+# See https://doc.rust-lang.org/cargo/reference/manifest.html
+[package]
+name = "clinvoice_adapter_postgres"
+version = "0.1.0"
+authors = ["Iron-E <code.iron.e@gmail.com>"]
+description = "Postgres filesystem support for `clinvoice_adapter` 0.8"
+
+edition = "2018"
+license = "GPL3"
+readme = "../../README.md"
+repository = "https://www.github.com/Iron-E/clinvoice"
+
+[dependencies]
+# CLInvoice
+clinvoice_adapter = {path="../clinvoice_adapter", version="0.8"}
+clinvoice_data = {path="../../clinvoice_data", version="0.5"}
+clinvoice_error = {path="../../clinvoice_error", version="0.2"}
+clinvoice_query = {path="../../clinvoice_query", version="0.2"}
+
+# Database
+postgres = {features=["with-chrono-0_4", "with-uuid-0_8"], version="0.19"}
+
+# Environment Variable Expansion
+shellexpand = "2"
+
+# Errors
+thiserror = "1"

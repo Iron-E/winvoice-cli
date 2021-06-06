@@ -27,6 +27,9 @@ use tokio::fs;
 
 use crate::{input, Config, DynResult, StructOpt};
 
+#[cfg(feature="postgres")]
+use clinvoice_adapter_postgres::data::{PostgresEmployee, PostgresJob, PostgresLocation, PostgresOrganization, PostgresPerson};
+
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, StructOpt)]
 #[structopt(about = "Retrieve information that was recorded with CLInvoice")]
 pub(super) struct Retrieve
@@ -270,6 +273,9 @@ impl Retrieve
 						BincodePerson
 					),
 
+					#[cfg(feature="postgres")]
+					Adapters::Postgres => retrieve!(PostgresEmployee, PostgresLocation, PostgresOrganization, PostgresPerson),
+
 					_ => return adapter_not_enabled(),
 				};
 			},
@@ -401,6 +407,9 @@ impl Retrieve
 						BincodePerson
 					),
 
+					#[cfg(feature="postgres")]
+					Adapters::Postgres => retrieve!(PostgresEmployee, PostgresJob, PostgresLocation, PostgresOrganization, PostgresPerson),
+
 					_ => return adapter_not_enabled(),
 				};
 			},
@@ -472,6 +481,9 @@ impl Retrieve
 					#[cfg(feature = "bincode")]
 					Adapters::Bincode => retrieve!(BincodeLocation),
 
+					#[cfg(feature="postgres")]
+					Adapters::Postgres => retrieve!(PostgresLocation),
+
 					_ => return adapter_not_enabled(),
 				};
 			},
@@ -524,6 +536,9 @@ impl Retrieve
 					#[cfg(feature = "bincode")]
 					Adapters::Bincode => retrieve!(BincodeLocation, BincodeOrganization),
 
+					#[cfg(feature="postgres")]
+					Adapters::Postgres => retrieve!(PostgresLocation, PostgresOrganization),
+
 					_ => return adapter_not_enabled(),
 				};
 			},
@@ -575,6 +590,9 @@ impl Retrieve
 				{
 					#[cfg(feature = "bincode")]
 					Adapters::Bincode => retrieve!(BincodePerson),
+
+					#[cfg(feature="postgres")]
+					Adapters::Postgres => retrieve!(PostgresPerson),
 
 					_ => return adapter_not_enabled(),
 				};

@@ -26,6 +26,9 @@ use futures::{
 
 use crate::{input, Config, DynResult, StructOpt};
 
+#[cfg(feature="postgres")]
+use clinvoice_adapter_postgres::data::{PostgresEmployee, PostgresJob, PostgresLocation, PostgresOrganization, PostgresPerson, Error as PostgresError};
+
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, StructOpt)]
 #[structopt(about = "Record information information with CLInvoice")]
 pub(super) enum Create
@@ -357,6 +360,40 @@ impl Create
 					.err_into()
 					.await
 					.and(Ok(())),
+			},
+
+			#[cfg(feature="postgres")]
+			Adapters::Postgres => match self
+			{
+				Self::Employee {title} =>
+					Self::create_employee::<PostgresEmployee, PostgresLocation, PostgresOrganization, PostgresPerson>(title, store),
+
+				Self::Job {currency, hourly_rate, year, month, day, hour, minute} =>
+					Self::create_job::<PostgresJob, PostgresLocation, PostgresOrganization>(
+						Money
+						{
+							amount: hourly_rate,
+							currency: currency.unwrap_or(config.invoices.default_currency),
+						},
+						year, month, day, hour, minute,
+						store,
+					),
+
+				Self::Location {names} =>
+				{
+					fn create_inner(location: &Location, name: String, store: &Store) -> Result<Location, PostgresError>
+					{
+						PostgresLocation {location, store}.create_inner(name)
+					}
+
+					Self::create_location::<PostgresLocation>(create_inner, names, store).map_err(|e| e.into())
+				},
+
+				Self::Organization {name} =>
+					Self::create_organization::<PostgresLocation, PostgresOrganization>(name, store),
+
+				Self::Person {name} =>
+					PostgresPerson::create(name, store).and(Ok(())).map_err(|e| e.into()),
 			},
 
 			_ => return Err(Error::FeatureNotFound(store.adapter).into()),

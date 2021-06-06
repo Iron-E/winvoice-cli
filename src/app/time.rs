@@ -62,8 +62,8 @@ impl Time
 		{
 			let timesheets: Vec<_> = job.timesheets.iter().filter(|t|
 			{
-				let b = t.time_end.is_none();
-				if !default { b } else { b && t.employee.id == config.employees.default_id }
+				let is_active = t.time_end.is_none();
+				if !default { is_active } else { is_active && t.employee.id == config.employees.default_id }
 			}).collect();
 
 			if timesheets.is_empty()
@@ -88,7 +88,7 @@ impl Time
 		job.timesheets[index].time_begin = job.timesheets[index].time_begin.duration_trunc(interval)?;
 		job.timesheets[index].time_end = Some(Utc::now().duration_trunc(interval)?);
 
-		// Now that `job.timesheets[index]` is done being ammended, we can insert it back.
+		// Now that `job.timesheets[index]` is done being ammended, we can resort the timesheets.
 		job.timesheets.sort_by(|t1, t2|
 			if t1.time_begin != t2.time_begin {t1.time_begin.cmp(&t2.time_begin)} else
 			{

@@ -18,7 +18,7 @@ clinvoice_error = {path="../../clinvoice_error", version="0.2"}
 clinvoice_query = {path="../../clinvoice_query", version="0.2"}
 
 # Database
-postgres = {features=["with-chrono-0_4", "with-uuid-0_8"], version="0.19"}
+sqlx = {features=["chrono", "decimal", "macros", "postgres", "runtime-actix-native-tls", "tls", "uuid"], version="0.5"}
 
 # Environment Variable Expansion
 shellexpand = "2"

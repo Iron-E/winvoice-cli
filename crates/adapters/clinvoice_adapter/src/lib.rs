@@ -21,5 +21,5 @@ mod macros;
 mod store;
 
 pub use adapters::Adapters;
-pub use error::Error;
+pub use error::{Error, Result};
 pub use store::Store;

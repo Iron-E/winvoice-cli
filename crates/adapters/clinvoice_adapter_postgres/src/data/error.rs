@@ -17,7 +17,7 @@ pub enum Error
 	Io(#[from] io::Error),
 
 	#[error("{0}")]
-	Postgres(#[from] postgres::Error),
+	Sqlx(#[from] sqlx::Error),
 }
 
 clinvoice_error::AliasResult!();

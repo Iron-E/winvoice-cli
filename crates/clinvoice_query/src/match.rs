@@ -10,9 +10,10 @@ use
 		iter::Iterator,
 	},
 	std::{borrow::Cow, collections::HashSet},
-
-	serde::{Deserialize, Serialize},
 };
+
+#[cfg(feature="serde_support")]
+use serde::{Deserialize, Serialize};
 
 /// # Summary
 ///

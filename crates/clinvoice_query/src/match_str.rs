@@ -5,8 +5,11 @@ use
 	super::Result,
 
 	regex::Regex,
-	serde::{Deserialize, Serialize},
 };
+
+
+#[cfg(feature="serde_support")]
+use serde::{Deserialize, Serialize};
 
 /// # Summary
 ///

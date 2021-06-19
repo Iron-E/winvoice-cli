@@ -1,42 +1,43 @@
 use
 {
-	std::{borrow::Cow::Borrowed, collections::HashMap, hash::Hash},
+	std::{borrow::Cow::Borrowed, collections::HashMap, hash::Hash, marker::Send},
 
 	super::{Error, LocationAdapter},
 	crate::Store,
 
 	clinvoice_data::{Contact, views::ContactView},
 	clinvoice_query as query,
+
+	futures::
+	{
+		FutureExt, TryFutureExt,
+		stream::{self, StreamExt, TryStreamExt},
+	},
 };
 
 /// # Summary
 ///
 /// Convert some [`Contact`] into a [`ContactView`].
-pub fn to_view<L>(contact: Contact, store: &Store)
+pub async fn to_view<L>(contact: Contact, store: &Store)
 	-> Result<ContactView, <L as LocationAdapter>::Error>
 where
-	L : LocationAdapter
+	L : LocationAdapter + Send,
 {
 	Ok(match contact
 	{
 		Contact::Address {location_id, export} =>
 		{
-			let results = L::retrieve(
-				&query::Location
-				{
-					id: query::Match::EqualTo(Borrowed(&location_id)),
-					..Default::default()
-				},
-				store,
-			)?;
-
-			let location = results.into_iter().next().ok_or(Error::DataIntegrity(location_id))?;
-
-			ContactView::Address
+			let query = query::Location
 			{
-				location: L::into_view(location, store)?,
-				export,
-			}
+				id: query::Match::EqualTo(Borrowed(&location_id)),
+				..Default::default()
+			};
+
+			let location = L::retrieve(&query, store).map(|result| result.and_then(|retrieved|
+				retrieved.into_iter().next().ok_or(Error::DataIntegrity(location_id)).map_err(|e| e.into())
+			)).and_then(|location| L::into_view(location, store));
+
+			ContactView::Address {location: location.await?, export}
 		},
 
 		Contact::Email {email, export} => ContactView::Email {email, export},
@@ -47,13 +48,14 @@ where
 /// # Summary
 ///
 /// Convert some [`Contact`] into a [`ContactView`].
-pub fn to_views<L, T>(contact_info: HashMap<T, Contact>, store: &Store)
+pub async fn to_views<L, T>(contact_info: HashMap<T, Contact>, store: &Store)
 	-> Result<HashMap<T, ContactView>, <L as LocationAdapter>::Error>
 where
-	L : LocationAdapter,
+	L : LocationAdapter + Send,
 	T : Eq + Hash,
 {
-	contact_info.into_iter().map(|(key, contact)|
-		to_view::<L>(contact, store).map(|view| (key, view))
-	).collect()
+	stream::iter(contact_info.into_iter()).then(|(key, contact)| async move
+	{
+		to_view::<L>(contact, store).await.map(|view| (key, view))
+	}).try_collect().await
 }

@@ -1,8 +1,14 @@
-use std::error::Error;
+use
+{
+	std::error::Error,
+
+	async_trait::async_trait,
+};
 
 /// # Summary
 ///
 /// A structure which can be deleted from a remote [`Store`](crate::Store).
+#[async_trait]
 pub trait Deletable
 {
 	type Error : Error;
@@ -27,5 +33,5 @@ pub trait Deletable
 	/// * An [`Error`] when:
 	///   * `self.id` had not already been `create`d.
 	///   * Something goes wrong.
-	fn delete(&self, cascade: bool) -> Result<(), Self::Error>;
+	async fn delete(&self, cascade: bool) -> Result<(), Self::Error>;
 }

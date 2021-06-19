@@ -3,8 +3,11 @@ use
 	std::error::Error,
 
 	crate::Store,
+
+	async_trait::async_trait,
 };
 
+#[async_trait]
 pub trait Initializable
 {
 	type Error : Error;
@@ -12,5 +15,5 @@ pub trait Initializable
 	/// # Summary
 	///
 	/// Initialize the database for a given [`Store`].
-	fn init(store: &Store) -> Result<(), Self::Error>;
+	async fn init(store: &Store) -> Result<(), Self::Error>;
 }

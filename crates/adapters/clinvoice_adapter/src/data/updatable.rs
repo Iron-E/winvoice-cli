@@ -1,8 +1,14 @@
-use std::error::Error;
+use
+{
+	std::error::Error,
+
+	async_trait::async_trait,
+};
 
 /// # Summary
 ///
 /// A structure which can be updated on some remote [`Store`][store].
+#[async_trait]
 pub trait Updatable
 {
 	type Error : Error;
@@ -25,5 +31,5 @@ pub trait Updatable
 	/// * An `Error`, when something goes wrong.
 	///
 	/// [store]: crate::Store
-	fn update(&self) -> Result<(), Self::Error>;
+	async fn update(&self) -> Result<(), Self::Error>;
 }

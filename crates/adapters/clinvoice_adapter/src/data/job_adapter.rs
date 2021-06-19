@@ -2,7 +2,7 @@
 
 use
 {
-	std::{borrow::Cow::Borrowed, error::Error},
+	std::{borrow::Cow::Borrowed, error::Error, marker::Send},
 
 	super::{Deletable, EmployeeAdapter, Initializable, LocationAdapter, OrganizationAdapter, PersonAdapter, timesheet, Updatable},
 	crate::Store,
@@ -14,8 +14,17 @@ use
 		views::{JobView, TimesheetView},
 	},
 	clinvoice_query as query,
+
+	async_trait::async_trait,
+	futures::
+	{
+		FutureExt,
+		stream::{self, TryStreamExt},
+		TryFutureExt,
+	},
 };
 
+#[async_trait]
 pub trait JobAdapter :
 	Deletable<Error=<Self as JobAdapter>::Error> +
 	Initializable<Error=<Self as JobAdapter>::Error> +
@@ -34,7 +43,7 @@ pub trait JobAdapter :
 	/// # Returns
 	///
 	/// The newly created [`Person`].
-	fn create(
+	async fn create(
 		client: Organization,
 		date_open: DateTime<Utc>,
 		hourly_rate: Money,
@@ -45,54 +54,51 @@ pub trait JobAdapter :
 	/// # Summary
 	///
 	/// Convert some `job` into a [`JobView`].
-	fn into_view<E, L, O, P>(job: Job, store: &Store)
+	async fn into_view<E, L, O, P>(job: Job, store: &Store)
 		-> Result<JobView, <Self as JobAdapter>::Error>
 	where
-		E : EmployeeAdapter,
-		L : LocationAdapter,
-		O : OrganizationAdapter,
+		E : EmployeeAdapter + Send,
+		L : LocationAdapter + Send,
+		O : OrganizationAdapter + Send,
 		P : PersonAdapter,
 
 		<E as EmployeeAdapter>::Error :
 			From<<L as LocationAdapter>::Error> +
 			From<<O as OrganizationAdapter>::Error> +
-			From<<P as PersonAdapter>::Error>,
+			From<<P as PersonAdapter>::Error> +
+			Send,
+		<L as LocationAdapter>::Error : Send,
 		<Self as JobAdapter>::Error : From<<E as EmployeeAdapter>::Error>,
 	{
-		let organization = Self::to_organization::<O>(&job, store).map_err(|e| e.into())?;
-		let organization_view = O::into_view::<L>(organization, store).map_err(|e| e.into())?;
+		let organization_view = Self::to_organization::<O>(&job, store).err_into().and_then(|organization|
+			O::into_view::<L>(organization, store).err_into()
+		);
 
-		let timesheets_len = job.timesheets.len();
-		let timesheet_views = job.timesheets.into_iter().try_fold(
-			Vec::with_capacity(timesheets_len),
-			|mut v, t| -> Result<_, <E as EmployeeAdapter>::Error>
-			{
-				let employee = timesheet::to_employee::<E>(&t, store)?;
-				let employee_view = E::into_view::<L, O, P>(employee, store)?;
-
-				v.push(TimesheetView
+		let timesheet_views = stream::iter(job.timesheets.iter().map(|t| Ok(t))).and_then(|t|
+			timesheet::to_employee::<E>(&t, store).and_then(|employee|
+				E::into_view::<L, O, P>(employee, store)
+			).map_ok(move |employee_view|
+				TimesheetView
 				{
 					employee: employee_view,
-					expenses: t.expenses,
+					expenses: t.expenses.clone(),
 					time_begin: t.time_begin,
 					time_end: t.time_end,
-					work_notes: t.work_notes,
-				});
-
-				Ok(v)
-			},
-		)?;
+					work_notes: t.work_notes.clone(),
+				}
+			)
+		).try_collect();
 
 		Ok(JobView
 		{
-			client: organization_view,
+			client: organization_view.await?,
 			date_close: job.date_close,
 			date_open: job.date_open,
 			id: job.id,
 			invoice: job.invoice,
 			notes: job.notes,
 			objectives: job.objectives,
-			timesheets: timesheet_views,
+			timesheets: timesheet_views.await?,
 		})
 	}
 
@@ -108,7 +114,7 @@ pub trait JobAdapter :
 	///
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`Job`]s.
-	fn retrieve(
+	async fn retrieve(
 		query: &query::Job,
 		store: &Store,
 	) -> Result<Vec<Job>, <Self as JobAdapter>::Error>;
@@ -116,20 +122,19 @@ pub trait JobAdapter :
 	/// # Summary
 	///
 	/// Convert some `employee` into a [`Person`].
-	fn to_organization<O>(job: &Job, store: &Store)
+	async fn to_organization<O>(job: &Job, store: &Store)
 		-> Result<Organization, <O as OrganizationAdapter>::Error>
 	where
-		O : OrganizationAdapter,
+		O : OrganizationAdapter + Send,
 	{
-		let results = O::retrieve(
-			&query::Organization
-			{
-				id: query::Match::EqualTo(Borrowed(&job.client_id)),
-				..Default::default()
-			},
-			store,
-		)?;
+		let query = query::Organization
+		{
+			id: query::Match::EqualTo(Borrowed(&job.client_id)),
+			..Default::default()
+		};
 
-		results.into_iter().next().ok_or_else(|| super::Error::DataIntegrity(job.client_id).into())
+		O::retrieve(&query, store).map(|result| result.and_then(|retrieved|
+			retrieved.into_iter().next().ok_or_else(|| super::Error::DataIntegrity(job.client_id).into())
+		)).await
 	}
 }

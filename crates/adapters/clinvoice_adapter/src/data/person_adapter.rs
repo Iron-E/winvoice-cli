@@ -9,8 +9,11 @@ use
 
 	clinvoice_data::Person,
 	clinvoice_query as query,
+
+	async_trait::async_trait,
 };
 
+#[async_trait]
 pub trait PersonAdapter :
 	Deletable<Error=<Self as PersonAdapter>::Error> +
 	Initializable<Error=<Self as PersonAdapter>::Error> +
@@ -29,7 +32,7 @@ pub trait PersonAdapter :
 	/// # Returns
 	///
 	/// The newly created [`Person`].
-	fn create(name: String, store: &Store) -> Result<Person, <Self as PersonAdapter>::Error>;
+	async fn create(name: String, store: &Store) -> Result<Person, <Self as PersonAdapter>::Error>;
 
 	/// # Summary
 	///
@@ -43,7 +46,7 @@ pub trait PersonAdapter :
 	///
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`Job`]s.
-	fn retrieve(
+	async fn retrieve(
 		query: &query::Person,
 		store: &Store,
 	) -> Result<Vec<Person>, <Self as PersonAdapter>::Error>;

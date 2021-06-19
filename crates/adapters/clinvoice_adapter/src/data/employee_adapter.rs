@@ -2,19 +2,19 @@
 
 use
 {
-	std::{borrow::Cow::Borrowed, collections::HashMap, error::Error},
+	std::{borrow::Cow::Borrowed, collections::HashMap, error::Error, marker::Send},
 
 	super::{contact, Deletable, Initializable, LocationAdapter, OrganizationAdapter, PersonAdapter, Updatable},
 	crate::Store,
 
-	clinvoice_data::
-	{
-		Contact, Employee, EmployeeStatus, Organization, Person,
-		views::{EmployeeView, PersonView},
-	},
+	clinvoice_data::{Contact, Employee, EmployeeStatus, Organization, Person, views::EmployeeView},
 	clinvoice_query as query,
+
+	async_trait::async_trait,
+	futures::{FutureExt, TryFutureExt},
 };
 
+#[async_trait]
 pub trait EmployeeAdapter :
 	Deletable<Error=<Self as EmployeeAdapter>::Error> +
 	Initializable<Error=<Self as EmployeeAdapter>::Error> +
@@ -34,7 +34,7 @@ pub trait EmployeeAdapter :
 	///
 	/// * The created [`Employee`], if there were no errors.
 	/// * An [`Error`], if something goes wrong.
-	fn create(
+	async fn create(
 		contact_info: HashMap<String, Contact>,
 		organization: Organization,
 		person: Person,
@@ -46,31 +46,34 @@ pub trait EmployeeAdapter :
 	/// # Summary
 	///
 	/// Convert some `employee` into a [`EmployeeView`].
-	fn into_view<L, O, P>(employee: Employee, store: &Store)
+	async fn into_view<L, O, P>(employee: Employee, store: &Store)
 		-> Result<EmployeeView, <Self as EmployeeAdapter>::Error>
 	where
-		L : LocationAdapter,
-		O : OrganizationAdapter,
+		L : LocationAdapter + Send,
+		O : OrganizationAdapter + Send,
 		P : PersonAdapter,
 
+		<L as LocationAdapter>::Error : Send,
 		<Self as EmployeeAdapter>::Error :
 			From<<L as LocationAdapter>::Error> +
 			From<<O as OrganizationAdapter>::Error> +
-			From<<P as PersonAdapter>::Error>,
+			From<<P as PersonAdapter>::Error> +
+			Send,
 	{
-		let organization = Self::to_organization::<O>(&employee, store)?;
-		let organization_view = O::into_view::<L>(organization, store)?;
+		let organization_view = Self::to_organization::<O>(&employee, store).map_err(|e|
+			<Self as EmployeeAdapter>::Error::from(e)
+		).and_then(|organization| O::into_view::<L>(organization, store).err_into());
 
-		let person_view: PersonView = Self::to_person::<P>(&employee, store)?.into();
+		let person_view = Self::to_person::<P>(&employee, store);
 
-		let contact_info_view = contact::to_views::<L, String>(employee.contact_info, store)?;
+		let contact_info_view = contact::to_views::<L, String>(employee.contact_info.clone(), store);
 
 		Ok(EmployeeView
 		{
-			contact_info: contact_info_view,
+			contact_info: contact_info_view.await?,
 			id: employee.id,
-			organization: organization_view,
-			person: person_view,
+			organization: organization_view.await?,
+			person: person_view.await?.into(),
 			status: employee.status,
 			title: employee.title,
 		})
@@ -88,7 +91,7 @@ pub trait EmployeeAdapter :
 	///
 	/// * Any matching [`Employee`]s.
 	/// * An [`Error`], should something go wrong.
-	fn retrieve(
+	async fn retrieve(
 		query: &query::Employee,
 		store: &Store,
 	) -> Result<Vec<Employee>, <Self as EmployeeAdapter>::Error>;
@@ -96,40 +99,38 @@ pub trait EmployeeAdapter :
 	/// # Summary
 	///
 	/// Convert some `employee` into a [`Organization`].
-	fn to_organization<O>(employee: &Employee, store: &Store)
+	async fn to_organization<O>(employee: &Employee, store: &Store)
 		-> Result<Organization, <O as OrganizationAdapter>::Error>
 	where
 		O : OrganizationAdapter,
 	{
-		let results = O::retrieve(
-			&query::Organization
-			{
-				id: query::Match::EqualTo(Borrowed(&employee.organization_id)),
-				..Default::default()
-			},
-			store,
-		)?;
+		let query = query::Organization
+		{
+			id: query::Match::EqualTo(Borrowed(&employee.organization_id)),
+			..Default::default()
+		};
 
-		results.into_iter().next().ok_or_else(|| super::Error::DataIntegrity(employee.organization_id).into())
+		O::retrieve(&query, store).map(|result| result.and_then(|retrieved|
+			retrieved.into_iter().next().ok_or_else(|| super::Error::DataIntegrity(employee.organization_id).into())
+		)).await
 	}
 
 	/// # Summary
 	///
 	/// Convert some `employee` into a [`Person`].
-	fn to_person<P>(employee: &Employee, store: &Store)
+	async fn to_person<P>(employee: &Employee, store: &Store)
 		-> Result<Person, <P as PersonAdapter>::Error>
 	where
 		P : PersonAdapter,
 	{
-		let results = P::retrieve(
-			&query::Person
-			{
-				id: query::Match::EqualTo(Borrowed(&employee.person_id)),
-				..Default::default()
-			},
-			store,
-		)?;
+		let query = query::Person
+		{
+			id: query::Match::EqualTo(Borrowed(&employee.person_id)),
+			..Default::default()
+		};
 
-		results.into_iter().next().ok_or_else(|| super::Error::DataIntegrity(employee.organization_id).into())
+		P::retrieve(&query, store).map(|result| result.and_then(|retrieved|
+			retrieved.into_iter().next().ok_or_else(|| super::Error::DataIntegrity(employee.organization_id).into())
+		)).await
 	}
 }

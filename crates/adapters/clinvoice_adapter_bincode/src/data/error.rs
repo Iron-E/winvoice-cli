@@ -1,7 +1,5 @@
 use
 {
-	std::io,
-
 	clinvoice_adapter::data,
 
 	thiserror::Error,
@@ -17,7 +15,7 @@ pub enum Error
 	Data(#[from] data::Error),
 
 	#[error("{0}")]
-	Io(#[from] io::Error),
+	Io(#[from] std::io::Error),
 }
 
 clinvoice_error::AliasResult!();

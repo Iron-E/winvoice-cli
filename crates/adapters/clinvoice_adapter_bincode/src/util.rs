@@ -2,23 +2,29 @@ use
 {
 	std::
 	{
-		fs, io,
+		io,
 		path::{Path, PathBuf},
 	},
 
-	crate::data::Result as DataResult,
+	crate::data::{Error as DataError, Result as DataResult},
 
 	clinvoice_adapter::Store,
 	clinvoice_data::{Id, UUID_NAMESPACE},
 
+	futures::{future, stream::TryStreamExt, TryFutureExt},
 	serde::de::DeserializeOwned,
+	tokio::{fs, io::AsyncReadExt},
+	tokio_stream::wrappers::ReadDirStream,
 };
 
 #[cfg(test)]
 use
 {
-	clinvoice_adapter::Adapters,
 	std::env,
+
+	clinvoice_adapter::Adapters,
+
+	futures::Future,
 };
 
 /// # Summary
@@ -34,15 +40,14 @@ use
 /// * `true`, if the directory was created.
 /// * `false`, if the directory already existed.
 /// * An `Error`, if `store_dir` couldn't be created.
-pub fn create_store_dir(store_dir: &Path) -> io::Result<bool>
+pub async fn create_store_dir(store_dir: &Path) -> io::Result<()>
 {
 	if !store_dir.is_dir()
 	{
-		fs::create_dir_all(store_dir)?;
-		return Ok(true);
+		fs::create_dir_all(store_dir).await?;
 	}
 
-	Ok(false)
+	Ok(())
 }
 
 /// # Summary
@@ -50,7 +55,7 @@ pub fn create_store_dir(store_dir: &Path) -> io::Result<bool>
 /// Expand the `store`'s specified path and join the provided `subdir`.
 pub fn expand_store_path(store: &Store) -> PathBuf
 {
-	shellexpand::full(&store.path).map(|p| p.as_ref().into()).unwrap_or_else(|_| store.path.as_str().into())
+	shellexpand::full(&store.path).map(|p| p.as_ref().into()).unwrap_or_else(|_| store.path.into())
 }
 
 /// # Summary
@@ -62,29 +67,26 @@ pub fn expand_store_path(store: &Store) -> PathBuf
 /// * If some [`fs::File`] in `path` is not a (valid) [`T`].
 /// * When [`fs::read_dir`] does.
 /// * When [`fs::File::open`] does.
-pub fn retrieve<T>(path: impl AsRef<Path>, query: impl Fn(&T) -> DataResult<bool>) -> DataResult<Vec<T>> where
+pub async fn retrieve<T>(path: impl AsRef<Path>, query: impl Fn(&T) -> DataResult<bool>) -> DataResult<Vec<T>> where
 	T : DeserializeOwned,
 {
-	let nodes = fs::read_dir(path)?;
-
-	nodes.filter_map(|node|
-		node.ok().map(|n| n.path()).filter(|node_path| node_path.is_file())
-	).map(|file_path|
-		fs::File::open(file_path).map(io::BufReader::new).map_err(|e| e.into()).and_then(|reader|
-		{
-			let employee: DataResult<T> = bincode::deserialize_from(reader).map_err(|e| e.into());
-			employee
-		})
-	).filter_map(|result| match result
+	let node_results = fs::read_dir(path).map_err(DataError::from).await?;
+	ReadDirStream::new(node_results).try_filter_map(|node|
 	{
-		Ok(t) => match query(&t)
-		{
-			Ok(b) if b => Some(Ok(t)),
-			Err(e) => Some(Err(e)),
-			_ => None,
-		},
-		Err(e) => Some(Err(e)),
-	}).collect()
+		let path = node.path();
+		future::ok(if path.is_file() { Some(path) } else { None })
+	}).err_into().and_then(|file_path| async move
+	{
+		let mut file = fs::File::open(file_path).await?;
+		let mut contents = Vec::new();
+		file.read_to_end(&mut contents).await?;
+		bincode::deserialize::<T>(&contents).map_err(DataError::from)
+	}).try_filter_map(|retrieval| match query(&retrieval)
+	{
+		Ok(b) if b => future::ok(Some(retrieval)),
+		Err(e) => future::err(e),
+		_ => future::ok(None),
+	}).try_collect().await
 }
 
 /// # Summary
@@ -102,7 +104,9 @@ pub fn retrieve<T>(path: impl AsRef<Path>, query: impl Fn(&T) -> DataResult<bool
 ///
 /// [fn_temp_dir]: std::env::temp_dir
 #[cfg(test)]
-pub fn temp_store(assertion: impl FnOnce(&Store))
+pub fn temp_store<F, Fut>(assertion: F) where
+	F: FnOnce(&Store) -> Fut,
+	Fut: Future<Output=()>,
 {
 	let temp_path = env::temp_dir().join("clinvoice_adapter_bincode_data");
 
@@ -156,38 +160,35 @@ mod tests
 		super::{fs, PathBuf},
 	};
 
-	#[test]
-	fn unique_id()
+	#[tokio::test]
+	async fn unique_id()
 	{
 		const LOOPS: usize = 1000;
 
-		super::temp_store(|store|
+		super::temp_store(|store| async move
 		{
 			let test_path = PathBuf::new().join(&store.path).join("test_next_id");
 
 			if test_path.is_dir()
 			{
-				fs::remove_dir_all(&test_path).unwrap();
+				fs::remove_dir_all(&test_path).await.unwrap();
 			}
 
 			// Create the `test_path`.
-			super::create_store_dir(&test_path).unwrap();
+			super::create_store_dir(&test_path).await.unwrap();
 
 			let start = Instant::now();
 
-			let ids = (0..LOOPS).fold(
-				HashSet::with_capacity(LOOPS),
-				|mut s, _|
-				{
-					let id = super::unique_id(&test_path).unwrap();
-					s.insert(id);
+			use futures::stream::StreamExt;
+			let ids = HashSet::with_capacity(LOOPS);
+			futures::stream::iter(0..LOOPS).for_each_concurrent(None, |_| async move
+			{
+				let id = super::unique_id(&test_path).unwrap();
+				ids.insert(id);
 
-					// Creating the next file worked.
-					assert!(fs::write(&test_path.join(id.to_string()), "TEST").is_ok());
-
-					s
-				}
-			);
+				// Creating the next file worked.
+				assert!(fs::write(&test_path.join(id.to_string()), "TEST").await.is_ok());
+			}).await;
 
 			println!("\n>>>>> util::unique_id {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / (LOOPS as u128));
 

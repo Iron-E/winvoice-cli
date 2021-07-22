@@ -1,14 +1,9 @@
-use
-{
-	std::error::Error,
-
-	async_trait::async_trait,
-};
+use std::error::Error;
 
 /// # Summary
 ///
 /// A structure which can be deleted from a remote [`Store`](crate::Store).
-#[async_trait]
+#[async_trait::async_trait]
 pub trait Deletable
 {
 	type Error : Error;

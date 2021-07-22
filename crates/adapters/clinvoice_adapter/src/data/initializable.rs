@@ -3,11 +3,9 @@ use
 	std::error::Error,
 
 	crate::Store,
-
-	async_trait::async_trait,
 };
 
-#[async_trait]
+#[async_trait::async_trait]
 pub trait Initializable
 {
 	type Error : Error;

@@ -9,6 +9,7 @@ use
 	clinvoice_query as query,
 };
 
+#[async_trait::async_trait]
 impl Deletable for BincodeEmployee<'_, '_>
 {
 	type Error = Error;

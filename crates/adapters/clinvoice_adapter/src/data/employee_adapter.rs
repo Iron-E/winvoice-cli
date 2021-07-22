@@ -10,11 +10,10 @@ use
 	clinvoice_data::{Contact, Employee, EmployeeStatus, Organization, Person, views::EmployeeView},
 	clinvoice_query as query,
 
-	async_trait::async_trait,
 	futures::{FutureExt, TryFutureExt},
 };
 
-#[async_trait]
+#[async_trait::async_trait]
 pub trait EmployeeAdapter :
 	Deletable<Error=<Self as EmployeeAdapter>::Error> +
 	Initializable<Error=<Self as EmployeeAdapter>::Error> +

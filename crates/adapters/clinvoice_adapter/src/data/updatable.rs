@@ -1,14 +1,9 @@
-use
-{
-	std::error::Error,
-
-	async_trait::async_trait,
-};
+use std::error::Error;
 
 /// # Summary
 ///
 /// A structure which can be updated on some remote [`Store`][store].
-#[async_trait]
+#[async_trait::async_trait]
 pub trait Updatable
 {
 	type Error : Error;

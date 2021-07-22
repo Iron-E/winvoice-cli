@@ -9,11 +9,10 @@ use
 	clinvoice_data::{Location, views::LocationView},
 	clinvoice_query as query,
 
-	async_trait::async_trait,
 	futures::{FutureExt, TryFutureExt},
 };
 
-#[async_trait]
+#[async_trait::async_trait]
 pub trait LocationAdapter :
 	Deletable<Error = <Self as LocationAdapter>::Error> +
 	Initializable<Error = <Self as LocationAdapter>::Error> +

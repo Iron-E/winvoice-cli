@@ -9,11 +9,9 @@ use
 
 	clinvoice_data::Person,
 	clinvoice_query as query,
-
-	async_trait::async_trait,
 };
 
-#[async_trait]
+#[async_trait::async_trait]
 pub trait PersonAdapter :
 	Deletable<Error=<Self as PersonAdapter>::Error> +
 	Initializable<Error=<Self as PersonAdapter>::Error> +

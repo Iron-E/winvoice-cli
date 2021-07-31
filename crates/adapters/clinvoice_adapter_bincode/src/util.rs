@@ -158,6 +158,8 @@ mod tests
 		std::{collections::HashSet, time::Instant},
 
 		super::{fs, PathBuf},
+
+		futures::stream::{self, StreamExt},
 	};
 
 	#[tokio::test]
@@ -179,9 +181,8 @@ mod tests
 
 			let start = Instant::now();
 
-			use futures::stream::StreamExt;
 			let ids = HashSet::with_capacity(LOOPS);
-			futures::stream::iter(0..LOOPS).for_each_concurrent(None, |_| async move
+			stream::iter(0..LOOPS).for_each_concurrent(None, |_| async move
 			{
 				let id = super::unique_id(&test_path).unwrap();
 				ids.insert(id);

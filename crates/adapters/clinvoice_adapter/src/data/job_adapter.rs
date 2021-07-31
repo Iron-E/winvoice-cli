@@ -73,7 +73,7 @@ pub trait JobAdapter :
 			O::into_view::<L>(organization, store).err_into()
 		);
 
-		let timesheet_views = stream::iter(job.timesheets.iter().map(|t| Ok(t))).and_then(|t|
+		let timesheet_views = stream::iter(job.timesheets.iter().map(Ok)).and_then(|t|
 			timesheet::to_employee::<E>(&t, store).and_then(|employee|
 				E::into_view::<L, O, P>(employee, store)
 			).map_ok(move |employee_view|

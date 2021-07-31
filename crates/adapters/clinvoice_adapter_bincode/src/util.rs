@@ -104,7 +104,7 @@ pub async fn retrieve<T>(path: impl AsRef<Path>, query: impl Fn(&T) -> DataResul
 ///
 /// [fn_temp_dir]: std::env::temp_dir
 #[cfg(test)]
-pub fn temp_store<F, Fut>(assertion: F) where
+pub async fn temp_store<F, Fut>(assertion: F) where
 	F: FnOnce(&Store) -> Fut,
 	Fut: Future<Output=()>,
 {
@@ -123,7 +123,7 @@ pub fn temp_store<F, Fut>(assertion: F) where
 			)).unwrap(),
 		},
 		username: None,
-	});
+	}).await;
 }
 
 /// # Summary
@@ -194,6 +194,6 @@ mod tests
 
 			// Assert that the number of unique IDs created is equal to the number of times looped.
 			assert_eq!(ids.len(), LOOPS);
-		});
+		}).await
 	}
 }

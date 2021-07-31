@@ -10,6 +10,7 @@ use
 	},
 };
 
+#[async_trait::async_trait]
 impl Initializable for BincodeEmployee<'_, '_>
 {
 	type Error = Error;
@@ -17,9 +18,9 @@ impl Initializable for BincodeEmployee<'_, '_>
 	/// # Summary
 	///
 	/// Initialize the database for a given [`Store`].
-	fn init(store: &Store) -> Result<()>
+	async fn init(store: &Store) -> Result<()>
 	{
-		util::create_store_dir(&Self::path(store))?;
+		util::create_store_dir(&Self::path(store)).await?;
 		Ok(())
 	}
 }

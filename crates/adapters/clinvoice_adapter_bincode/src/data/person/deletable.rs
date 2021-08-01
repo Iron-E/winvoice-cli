@@ -1,19 +1,23 @@
 use
 {
-	std::{borrow::Cow::Borrowed, fs, io::ErrorKind},
+	std::{borrow::Cow::Borrowed, io::ErrorKind},
 
 	super::BincodePerson,
 	crate::data::{BincodeEmployee, Error, Result},
 
 	clinvoice_adapter::data::{Deletable, EmployeeAdapter, Error as DataError},
 	clinvoice_query as query,
+
+	futures::stream::{self, TryStreamExt},
+	tokio::fs,
 };
 
+#[async_trait::async_trait]
 impl Deletable for BincodePerson<'_, '_>
 {
 	type Error = Error;
 
-	fn delete(&self, cascade: bool) -> Result<()>
+	async fn delete(&self, cascade: bool) -> Result<()>
 	{
 		let associated_employees = BincodeEmployee::retrieve(
 			&query::Employee
@@ -26,20 +30,20 @@ impl Deletable for BincodePerson<'_, '_>
 				..Default::default()
 			},
 			self.store,
-		)?;
+		).await?;
 
 		if cascade
 		{
-			associated_employees.into_iter().try_for_each(
-				|e| BincodeEmployee {employee: &e, store: self.store}.delete(true)
-			)?;
+			stream::iter(associated_employees.into_iter().map(Ok)).try_for_each_concurrent(None,
+				|e| BincodeEmployee {employee: &e, store: self.store}.delete(cascade)
+			).await?;
 		}
 		else if !associated_employees.is_empty()
 		{
 			return Err(DataError::DeleteRestricted(self.person.id).into());
 		}
 
-		if let Err(e) = fs::remove_file(self.filepath())
+		if let Err(e) = fs::remove_file(self.filepath()).await
 		{
 			// We don't care if a file is missing; we want it deleted anyway.
 			if e.kind() != ErrorKind::NotFound
@@ -70,14 +74,14 @@ mod tests
 		clinvoice_data::{Contact, EmployeeStatus},
 	};
 
-	#[test]
-	fn delete()
+	#[tokio::test]
+	async fn delete()
 	{
-		util::temp_store(|store|
+		util::temp_store(|store| async move
 		{
 			let earth = BincodeLocation
 			{
-				location: &BincodeLocation::create("Earth".into(), &store).unwrap(),
+				location: &BincodeLocation::create("Earth".into(), &store).await.unwrap(),
 				store,
 			};
 
@@ -87,7 +91,7 @@ mod tests
 					earth.location.clone(),
 					"Big Old Test Corporation".into(),
 					&store,
-				).unwrap(),
+				).await.unwrap(),
 				store,
 			};
 
@@ -96,7 +100,7 @@ mod tests
 				person: &BincodePerson::create(
 					"Testy Mćtesterson".into(),
 					&store,
-				).unwrap(),
+				).await.unwrap(),
 				store,
 			};
 
@@ -109,15 +113,15 @@ mod tests
 					EmployeeStatus::Employed,
 					"CEO of Tests".into(),
 					&store,
-				).unwrap(),
+				).await.unwrap(),
 				store,
 			};
 
 			let start = Instant::now();
 			// Assert that the deletion fails when restricted
-			assert!(testy.delete(false).is_err());
+			assert!(testy.delete(false).await.is_err());
 			// Assert that the deletion works when cascading
-			assert!(testy.delete(true).is_ok());
+			assert!(testy.delete(true).await.is_ok());
 			println!("\n>>>>> BincodePerson::delete {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 2);
 
 			// Assert that `testy` and its referencing employee is gone.
@@ -127,6 +131,6 @@ mod tests
 			// Assert that the independent files still exist.
 			assert!(big_old_test.filepath().is_file());
 			assert!(earth.filepath().is_file());
-		});
+		}).await;
 	}
 }

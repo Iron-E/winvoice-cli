@@ -1,23 +1,25 @@
 use
 {
-	std::{borrow::Cow::Borrowed, fs, io::ErrorKind},
+	std::{borrow::Cow::Borrowed, io::ErrorKind},
 
 	super::BincodeLocation,
 	crate::data::{BincodeOrganization, Error, Result},
 
 	clinvoice_adapter::data::{Deletable, Error as DataError, LocationAdapter, OrganizationAdapter},
-	clinvoice_data::Location,
 	clinvoice_query as query,
+
+	futures::stream::{self, TryStreamExt},
+	tokio::fs,
 };
 
+#[async_trait::async_trait]
 impl Deletable for BincodeLocation<'_, '_>
 {
 	type Error = Error;
 
-	fn delete(&self, cascade: bool) -> Result<()>
+	async fn delete(&self, cascade: bool) -> Result<()>
 	{
-		let associated_locations = || -> Result<Vec<Location>>
-		{
+		let (associated_locations, associated_organizations) = futures::try_join!(
 			BincodeLocation::retrieve(
 				&query::Location
 				{
@@ -31,39 +33,38 @@ impl Deletable for BincodeLocation<'_, '_>
 					..Default::default()
 				},
 				self.store,
-			)
-		};
+			),
 
-		let associated_organizations = BincodeOrganization::retrieve(
-			&query::Organization
-			{
-				location: query::Location
+			BincodeOrganization::retrieve(
+				&query::Organization
 				{
-					id: query::Match::EqualTo(Borrowed(&self.location.id)),
+					location: query::Location
+					{
+						id: query::Match::EqualTo(Borrowed(&self.location.id)),
+						..Default::default()
+					},
 					..Default::default()
 				},
-				..Default::default()
-			},
-			self.store,
+				self.store,
+			),
 		)?;
 
 		if cascade
 		{
-			associated_organizations.into_iter().try_for_each(
+			stream::iter(associated_organizations.into_iter().map(Ok)).try_for_each_concurrent(None,
 				|o| BincodeOrganization {organization: &o, store: self.store}.delete(cascade)
-			)?;
+			).await?;
 
-			let associated_locations = associated_locations()?;
-			associated_locations.into_iter().try_for_each(
+			stream::iter(associated_locations.into_iter().map(Ok)).try_for_each_concurrent(None,
 				|l| BincodeLocation {location: &l, store: self.store}.delete(cascade)
-			)?;
+			).await?;
 		}
-		else if !(associated_organizations.is_empty() || associated_locations()?.is_empty())
+		else if !(associated_locations.is_empty() || associated_organizations.is_empty())
 		{
 			return Err(DataError::DeleteRestricted(self.location.id).into());
 		}
 
-		if let Err(e) = fs::remove_file(self.filepath())
+		if let Err(e) = fs::remove_file(self.filepath()).await
 		{
 			// We don't care if a file is missing; we want it deleted anyway.
 			if e.kind() != ErrorKind::NotFound
@@ -89,32 +90,32 @@ mod tests
 		clinvoice_adapter::data::OrganizationAdapter,
 	};
 
-	#[test]
-	fn delete()
+	#[tokio::test]
+	async fn delete()
 	{
-		util::temp_store(|store|
+		util::temp_store(|store| async move
 		{
 			let earth = BincodeLocation
 			{
-				location: &BincodeLocation::create("Earth".into(), store).unwrap(),
+				location: &BincodeLocation::create("Earth".into(), store).await.unwrap(),
 				store,
 			};
 
 			let usa = BincodeLocation
 			{
-				location: &earth.create_inner("USA".into()).unwrap(),
+				location: &earth.create_inner("USA".into()).await.unwrap(),
 				store,
 			};
 
 			let arizona = BincodeLocation
 			{
-				location: &usa.create_inner("Arizona".into()).unwrap(),
+				location: &usa.create_inner("Arizona".into()).await.unwrap(),
 				store,
 			};
 
 			let phoenix = BincodeLocation
 			{
-				location: &arizona.create_inner("Phoenix".into()).unwrap(),
+				location: &arizona.create_inner("Phoenix".into()).await.unwrap(),
 				store,
 			};
 
@@ -124,14 +125,14 @@ mod tests
 					arizona.location.clone(),
 					"DoGood Inc".into(),
 					&store
-				).unwrap(),
+				).await.unwrap(),
 				store,
 			};
 
 			let start = Instant::now();
 
 			// delete just phoenix.
-			phoenix.delete(false).unwrap();
+			phoenix.delete(false).await.unwrap();
 
 			// assert that phoenix is gone.
 			assert!(!phoenix.filepath().is_file());
@@ -145,7 +146,7 @@ mod tests
 			assert!(dogood.filepath().is_file());
 
 			// delete the usa and everything in it.
-			usa.delete(true).unwrap();
+			usa.delete(true).await.unwrap();
 
 			println!("\n>>>>> BincodeLocation::delete {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 2);
 
@@ -156,6 +157,6 @@ mod tests
 
 			// assert that `dogood`, located in arizona, is gone.
 			assert!(!dogood.filepath().is_file());
-		});
+		}).await;
 	}
 }

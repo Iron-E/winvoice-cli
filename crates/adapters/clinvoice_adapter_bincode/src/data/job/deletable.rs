@@ -1,20 +1,23 @@
 use
 {
-	std::{fs, io::ErrorKind},
+	std::io::ErrorKind,
 
 	super::BincodeJob,
 	crate::data::{Error, Result},
 
 	clinvoice_adapter::data::Deletable,
+
+	tokio::fs,
 };
 
+#[async_trait::async_trait]
 impl Deletable for BincodeJob<'_, '_>
 {
 	type Error = Error;
 
-	fn delete(&self, _cascade: bool) -> Result<()>
+	async fn delete(&self, _cascade: bool) -> Result<()>
 	{
-		if let Err(e) = fs::remove_file(self.filepath())
+		if let Err(e) = fs::remove_file(self.filepath()).await
 		{
 			// We don't care if a file is missing; we want it deleted anyway.
 			if e.kind() != ErrorKind::NotFound
@@ -46,10 +49,10 @@ mod tests
 		},
 	};
 
-	#[test]
-	fn delete()
+	#[tokio::test]
+	async fn delete()
 	{
-		util::temp_store(|store|
+		util::temp_store(|store| async move
 		{
 			let big_test = BincodeOrganization
 			{
@@ -57,7 +60,7 @@ mod tests
 					Location {id: Id::new_v4(), name: "".into(), outer_id: None},
 					"Big Old Test Corporation".into(),
 					&store,
-				).unwrap(),
+				).await.unwrap(),
 				store,
 			};
 
@@ -69,7 +72,7 @@ mod tests
 					Money::new(2_00, 2, Currency::USD),
 					"Test the job creation function".into(),
 					&store,
-				).unwrap(),
+				).await.unwrap(),
 				store,
 			};
 
@@ -81,20 +84,20 @@ mod tests
 					Money::new(2_00, 2, Currency::USD),
 					"Assert that this stuff works".into(),
 					&store,
-				).unwrap(),
+				).await.unwrap(),
 				store,
 			};
 
 			let start = Instant::now();
 			// Delete both jobs
-			create_job.delete(true).unwrap();
-			assert_job.delete(true).unwrap();
+			create_job.delete(true).await.unwrap();
+			assert_job.delete(true).await.unwrap();
 			println!("\n>>>>> BincodeJob::delete {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 2);
 
 			// Assert that all jobs are gone but the organization exists
 			assert!(!&assert_job.filepath().is_file());
 			assert!(&big_test.filepath().is_file());
 			assert!(!&create_job.filepath().is_file());
-		});
+		}).await;
 	}
 }

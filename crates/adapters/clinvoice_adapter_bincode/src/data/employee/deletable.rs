@@ -1,12 +1,15 @@
 use
 {
-	std::{borrow::Cow::Borrowed, fs, io::ErrorKind},
+	std::{borrow::Cow::Borrowed, io::ErrorKind},
 
 	super::BincodeEmployee,
 	crate::data::{BincodeJob, Error, Result},
 
 	clinvoice_adapter::data::{Deletable, Error as DataError, JobAdapter, Updatable},
 	clinvoice_query as query,
+
+	futures::stream::{self as stream, TryStreamExt},
+	tokio::fs,
 };
 
 #[async_trait::async_trait]
@@ -14,7 +17,7 @@ impl Deletable for BincodeEmployee<'_, '_>
 {
 	type Error = Error;
 
-	fn delete(&self, cascade: bool) -> Result<()>
+	async fn delete(&self, cascade: bool) -> Result<()>
 	{
 		let associated_jobs = BincodeJob::retrieve(
 			&query::Job
@@ -31,26 +34,28 @@ impl Deletable for BincodeEmployee<'_, '_>
 				..Default::default()
 			},
 			self.store,
-		)?;
+		).await?;
 
 		if cascade
 		{
-			associated_jobs.into_iter().try_for_each(|mut result|
-			{
-				result.timesheets = result.timesheets.into_iter()
-					.filter(|t| t.employee_id != self.employee.id)
-					.collect()
-				;
+			stream::iter(associated_jobs.into_iter().map(Ok)).try_for_each_concurrent(None,
+				|mut result| async move
+				{
+					result.timesheets = result.timesheets.into_iter()
+						.filter(|t| t.employee_id != self.employee.id)
+						.collect()
+					;
 
-				BincodeJob {job: &result, store: self.store}.update()
-			})?;
+					BincodeJob {job: &result, store: self.store}.update().await
+				}
+			).await?;
 		}
 		else if !associated_jobs.is_empty()
 		{
 			return Err(DataError::DeleteRestricted(self.employee.id).into());
 		}
 
-		if let Err(e) = fs::remove_file(self.filepath())
+		if let Err(e) = fs::remove_file(self.filepath()).await
 		{
 			// We don't care if a file is missing; we want it deleted anyway.
 			if e.kind() != ErrorKind::NotFound
@@ -86,14 +91,14 @@ mod tests
 		},
 	};
 
-	#[test]
-	fn delete()
+	#[tokio::test]
+	async fn delete()
 	{
-		util::temp_store(|store|
+		util::temp_store(|store| async move
 		{
 			let earth = BincodeLocation
 			{
-				location: &BincodeLocation::create("Earth".into(), &store).unwrap(),
+				location: &BincodeLocation::create("Earth".into(), &store).await.unwrap(),
 				store,
 			};
 
@@ -101,14 +106,14 @@ mod tests
 				earth.location.clone(),
 				"Big Old Test Corporation".into(),
 				&store,
-			).unwrap();
+			).await.unwrap();
 
 			let testy = BincodePerson
 			{
 				person: &BincodePerson::create(
 					"Testy Mćtesterson".into(),
 					&store,
-				).unwrap(),
+				).await.unwrap(),
 				store,
 			};
 
@@ -121,7 +126,7 @@ mod tests
 					EmployeeStatus::Employed,
 					"CEO of Tests".into(),
 					&store,
-				).unwrap(),
+				).await.unwrap(),
 				store,
 			};
 
@@ -131,16 +136,16 @@ mod tests
 				Money::new(2_00, 2, Currency::USD),
 				"Test the job creation function".into(),
 				&store,
-			).unwrap();
+			).await.unwrap();
 
 			creation.start_timesheet(ceo_testy.employee.id);
-			BincodeJob {job: &creation, store}.update().unwrap();
+			BincodeJob {job: &creation, store}.update().await.unwrap();
 
 			let start = Instant::now();
 			// Assert that the deletion fails when restricted
-			assert!(ceo_testy.delete(false).is_err());
+			assert!(ceo_testy.delete(false).await.is_err());
 			// Assert that the deletion works when cascading
-			assert!(ceo_testy.delete(true).is_ok());
+			assert!(ceo_testy.delete(true).await.is_ok());
 			println!("\n>>>>> BincodeEmployee::delete {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 2);
 
 			// Assert the deleted file is gone.
@@ -152,6 +157,7 @@ mod tests
 			assert!(earth.filepath().is_file());
 			assert!(testy.filepath().is_file());
 
+			// NOTE: I don't know if this statement is really necessary.
 			big_old_test = BincodeOrganization::retrieve(
 				&query::Organization
 				{
@@ -159,7 +165,7 @@ mod tests
 					..Default::default()
 				},
 				&store,
-			).unwrap().iter().next().unwrap().clone();
+			).await.unwrap().iter().next().unwrap().clone();
 
 			creation = BincodeJob::retrieve(
 				&query::Job
@@ -173,10 +179,10 @@ mod tests
 					..Default::default()
 				},
 				&store,
-			).unwrap().iter().next().unwrap().clone();
+			).await.unwrap().iter().next().unwrap().clone();
 
 			// Assert that no references to the deleted entity remain.
 			assert!(creation.timesheets.iter().all(|t| t.employee_id != ceo_testy.employee.id));
-		});
+		}).await;
 	}
 }

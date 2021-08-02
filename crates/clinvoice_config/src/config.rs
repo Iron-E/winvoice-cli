@@ -48,7 +48,7 @@ impl Config<'_, '_>
 	/// # Summary
 	///
 	/// Create a configuration file with some defaults.
-	pub fn init() -> Result<()>
+	pub async fn init() -> Result<()>
 	{
 		if !Self::path().is_file()
 		{
@@ -63,13 +63,13 @@ impl Config<'_, '_>
 						adapter: Adapters::Bincode,
 						password: Some("Optional password. May or may not be accompanied by a username".into()),
 						username: Some("Optional username. May or may not be accompanied by a password".into()),
-						path: "Place where data can be found. Depends on the adapter— may be a path to a folder on a filesystem, or a schema on a database".into(),
+						path: "See https://github.com/Iron-E/clinvoice/wiki/Usage#adapters".into(),
 					})),
 				].into_iter().collect(),
 				timesheets: Timesheets {interval: Duration::from_secs(300)},
 			};
 
-			config.update()?;
+			config.update().await?;
 		}
 
 		Ok(())

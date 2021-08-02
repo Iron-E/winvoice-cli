@@ -16,6 +16,7 @@ use
 	clinvoice_query as query,
 };
 
+#[async_trait::async_trait]
 impl OrganizationAdapter for BincodeOrganization<'_, '_>
 {
 	type Error = Error;
@@ -31,9 +32,9 @@ impl OrganizationAdapter for BincodeOrganization<'_, '_>
 	/// # Returns
 	///
 	/// The newly created [`Organization`].
-	fn create(location: Location, name: String, store: &Store) -> Result<Organization>
+	async fn create(location: Location, name: String, store: &Store) -> Result<Organization>
 	{
-		Self::init(&store)?;
+		let init_fut = Self::init(&store);
 
 		let organization = Organization
 		{
@@ -42,7 +43,8 @@ impl OrganizationAdapter for BincodeOrganization<'_, '_>
 			name,
 		};
 
-		BincodeOrganization {organization: &organization, store}.update()?;
+		init_fut.await?;
+		BincodeOrganization {organization: &organization, store}.update().await?;
 
 		Ok(organization)
 	}
@@ -59,11 +61,13 @@ impl OrganizationAdapter for BincodeOrganization<'_, '_>
 	///
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`Job`]s.
-	fn retrieve(query: &query::Organization, store: &Store) -> Result<Vec<Organization>>
+	async fn retrieve(query: &query::Organization, store: &Store) -> Result<Vec<Organization>>
 	{
-		Self::init(&store)?;
+		Self::init(&store).await?;
 
-		util::retrieve(Self::path(store), |o| query.matches(o).map_err(|e| DataError::from(e).into()))
+		util::retrieve(Self::path(store),
+			|o| query.matches(o).map_err(|e| DataError::from(e).into())
+		).await
 	}
 }
 
@@ -72,18 +76,20 @@ mod tests
 {
 	use
 	{
-		std::{borrow::Cow::Borrowed, fs, time::Instant},
+		std::{borrow::Cow::Borrowed, time::Instant},
 
 		super::{BincodeOrganization, Location, Organization, OrganizationAdapter, query, Store, util},
 
 		clinvoice_query::{Match, MatchStr},
 		clinvoice_data::Id,
+
+		tokio::fs,
 	};
 
-	#[test]
-	fn create()
+	#[tokio::test]
+	async fn create()
 	{
-		util::temp_store(|store|
+		util::temp_store(|store| async move
 		{
 			let earth_id = Id::new_v4();
 			let usa_id = Id::new_v4();
@@ -93,77 +99,75 @@ mod tests
 
 			let start = Instant::now();
 
-			create_assertion(
+			let (alsd, eal, aaa, focj, giguy) = futures::try_join!(
 				BincodeOrganization::create(
 					Location {name: "Earth".into(), id: Id::new_v4(), outer_id: None},
 					"alsdkjaldkj".into(), &store
-				).unwrap(),
-				&store,
-			);
+				),
 
-			create_assertion(
 				BincodeOrganization::create(
 					Location {name: "USA".into(), id: usa_id, outer_id: Some(earth_id)},
 					"alskdjalgkh  ladhkj EAL ISdh".into(), &store
-				).unwrap(),
-				&store,
-			);
+				),
 
-			create_assertion(
 				BincodeOrganization::create(
 					Location {name: "Arizona".into(), id: arizona_id, outer_id: Some(earth_id)},
 					" AAA – 44 %%".into(), &store
-				).unwrap(),
-				&store,
-			);
+				),
 
-			create_assertion(
 				BincodeOrganization::create(
 					Location {name: "Phoenix".into(), id: phoenix_id, outer_id: Some(arizona_id)},
 					" ^^^ ADSLKJDLASKJD FOCJCI".into(), &store
-				).unwrap(),
-				&store,
-			);
+				),
 
-			create_assertion(
 				BincodeOrganization::create(
 					Location {name: "Some Road".into(), id: some_id, outer_id: Some(phoenix_id)},
 					"aldkj doiciuc giguy &&".into(), &store
-				).unwrap(),
-				&store,
-			);
+				),
+			).unwrap();
 
 			println!("\n>>>>> BincodeOrganization::create {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 5);
+
+			futures::join!(
+				create_assertion(alsd, store),
+				create_assertion(eal, store),
+				create_assertion(aaa, store),
+				create_assertion(focj, store),
+				create_assertion(giguy, store),
+			);
 		});
 	}
 
-	fn create_assertion(organization: Organization, store: &Store)
+	async fn create_assertion(organization: Organization, store: &Store)
 	{
-		let read_result = fs::read(BincodeOrganization {organization: &organization, store}.filepath()).unwrap();
+		let read_result = fs::read(BincodeOrganization {organization: &organization, store}.filepath()).await.unwrap();
 		assert_eq!(organization, bincode::deserialize(&read_result).unwrap());
 	}
 
-	#[test]
-	fn retrieve()
+	#[tokio::test]
+	async fn retrieve()
 	{
-		util::temp_store(|store|
+		util::temp_store(|store| async move
 		{
 			let earth_id = Id::new_v4();
-			let packing = BincodeOrganization::create(
-				Location {name: "Earth".into(), id: earth_id, outer_id: None},
-				"Packing Co".into(), &store
-			).unwrap();
-
 			let usa_id = Id::new_v4();
-			let eal = BincodeOrganization::create(
-				Location {name: "USA".into(), id: usa_id, outer_id: Some(earth_id)},
-				"alskdjalgkh  ladhkj EAL ISdh".into(), &store
-			).unwrap();
-
 			let arizona_id = Id::new_v4();
-			let aaa = BincodeOrganization::create(
-				Location {name: "Arizona".into(), id: arizona_id, outer_id: Some(usa_id)},
-				" AAA – 44 %%".into(), &store
+
+			let (packing, eal, aaa) =  futures::try_join!(
+				BincodeOrganization::create(
+					Location {name: "Earth".into(), id: earth_id, outer_id: None},
+					"Packing Co".into(), &store
+				),
+
+				BincodeOrganization::create(
+					Location {name: "USA".into(), id: usa_id, outer_id: Some(earth_id)},
+					"alskdjalgkh  ladhkj EAL ISdh".into(), &store
+				),
+
+				BincodeOrganization::create(
+					Location {name: "Arizona".into(), id: arizona_id, outer_id: Some(usa_id)},
+					" AAA – 44 %%".into(), &store
+				),
 			).unwrap();
 
 			let start = Instant::now();
@@ -181,7 +185,8 @@ mod tests
 					..Default::default()
 				},
 				&store,
-			).unwrap();
+			).await.unwrap();
+
 			println!("\n>>>>> BincodeOrganization::retrieve {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 
 			// test if `packing` and `eal` were retrieved

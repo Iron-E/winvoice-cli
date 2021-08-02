@@ -16,6 +16,7 @@ use
 	clinvoice_query as query,
 };
 
+#[async_trait::async_trait]
 impl PersonAdapter for BincodePerson<'_, '_>
 {
 	type Error = Error;
@@ -31,9 +32,9 @@ impl PersonAdapter for BincodePerson<'_, '_>
 	/// # Returns
 	///
 	/// The newly created [`Person`].
-	fn create(name: String, store: &Store,) -> Result<Person>
+	async fn create(name: String, store: &Store,) -> Result<Person>
 	{
-		Self::init(&store)?;
+		let init_fut = Self::init(&store);
 
 		let person = Person
 		{
@@ -41,7 +42,8 @@ impl PersonAdapter for BincodePerson<'_, '_>
 			name,
 		};
 
-		BincodePerson {person: &person, store}.update()?;
+		init_fut.await?;
+		BincodePerson {person: &person, store}.update().await?;
 
 		Ok(person)
 	}
@@ -58,11 +60,13 @@ impl PersonAdapter for BincodePerson<'_, '_>
 	///
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`Job`]s.
-	fn retrieve(query: &query::Person, store: &Store) -> Result<Vec<Person>>
+	async fn retrieve(query: &query::Person, store: &Store) -> Result<Vec<Person>>
 	{
-		Self::init(&store)?;
+		Self::init(&store).await?;
 
-		util::retrieve(Self::path(store), |p| query.matches(p).map_err(|e| DataError::from(e).into()))
+		util::retrieve(Self::path(store),
+			|p| query.matches(p).map_err(|e| DataError::from(e).into())
+		).await
 	}
 }
 
@@ -71,115 +75,82 @@ mod tests
 {
 	use
 	{
-		std::{borrow::Cow::Borrowed, fs, time::Instant},
+		std::{borrow::Cow::Borrowed, time::Instant},
 
 		super::{BincodePerson, Person, PersonAdapter, query, Store, util},
 
 		clinvoice_query::{Match, MatchStr},
+
+		tokio::fs,
 	};
 
-	#[test]
-	fn create()
+	#[tokio::test]
+	async fn create()
 	{
-		util::temp_store(|store|
+		util::temp_store(|store| async move
 		{
 			let start = Instant::now();
 
-			create_assertion(
-				BincodePerson::create(
-					"Widdle".into(),
-					&store,
-				).unwrap(),
-				&store,
-			);
-
-			create_assertion(
-				BincodePerson::create(
-					"Long".into(),
-					&store,
-				).unwrap(),
-				&store,
-			);
-
-			create_assertion(
-				BincodePerson::create(
-					"Steven".into(),
-					&store,
-				).unwrap(),
-				&store,
-			);
-
-			create_assertion(
-				BincodePerson::create(
-					"JingleBob".into(),
-					&store,
-				).unwrap(),
-				&store,
-			);
-
-			create_assertion(
-				BincodePerson::create(
-					"asldkj jdsoai".into(),
-					&store,
-				).unwrap(),
-				&store,
-			);
+			let (widdle, long, steven, jingle_bob, asldkj_jdsoai) = futures::try_join!(
+				BincodePerson::create("Widdle".into(), &store),
+				BincodePerson::create("Long".into(), &store),
+				BincodePerson::create("Steven".into(), &store),
+				BincodePerson::create("JingleBob".into(), &store),
+				BincodePerson::create("asldkj jdsoai".into(), &store),
+			).unwrap();
 
 			println!("\n>>>>> BincodePerson::create {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 5);
-		});
+
+			futures::join!(
+				create_assertion(widdle, &store),
+				create_assertion(long, &store),
+				create_assertion(steven, &store),
+				create_assertion(jingle_bob, &store),
+				create_assertion(asldkj_jdsoai, &store),
+			);
+		}).await;
 	}
 
-	fn create_assertion(person: Person, store: &Store)
+	async fn create_assertion(person: Person, store: &Store)
 	{
-		let read_result = fs::read(BincodePerson {person: &person, store}.filepath()).unwrap();
+		let read_result = fs::read(BincodePerson {person: &person, store}.filepath()).await.unwrap();
 		assert_eq!(person, bincode::deserialize(&read_result).unwrap());
 	}
 
-	#[test]
-	fn retrieve()
+	#[tokio::test]
+	async fn retrieve()
 	{
-		util::temp_store(|store|
+		util::temp_store(|store| async move
 		{
-			let flingo = BincodePerson::create(
-				"flingo".into(),
-				&store
-			).unwrap();
-
-			let bob = BincodePerson::create(
-				"bob".into(),
-				&store
-			).unwrap();
-
-			let slimdi = BincodePerson::create(
-				"slimdi".into(),
-				&store
-			).unwrap();
-
-			let longone = BincodePerson::create(
-				"longone".into(),
-				&store
+			let (flingo, bob, slimdi, longone) = futures::try_join!(
+				BincodePerson::create("flingo".into(), &store),
+				BincodePerson::create("bob".into(), &store),
+				BincodePerson::create("slimdi".into(), &store),
+				BincodePerson::create("longone".into(), &store),
 			).unwrap();
 
 			let start = Instant::now();
 
-			// Retrieve bob
-			let only_bob = BincodePerson::retrieve(
-				&query::Person
-				{
-					id: Match::EqualTo(Borrowed(&bob.id)),
-					..Default::default()
-				},
-				&store,
-			).unwrap();
+			let (only_bob, longone_slimdi) = futures::try_join!(
+				// Retrieve bob
+				BincodePerson::retrieve(
+					&query::Person
+					{
+						id: Match::EqualTo(Borrowed(&bob.id)),
+						..Default::default()
+					},
+					&store,
+				),
 
-			// Retrieve longone and slimdi
-			let longone_slimdi = BincodePerson::retrieve(
-				&query::Person
-				{
-					name: MatchStr::Regex(format!("^({}|{})$", longone.name, slimdi.name)),
-					..Default::default()
-				},
-				&store,
+				// Retrieve longone and slimdi
+				BincodePerson::retrieve(
+					&query::Person
+					{
+						name: MatchStr::Regex(format!("^({}|{})$", longone.name, slimdi.name)),
+						..Default::default()
+					},
+					&store,
+				),
 			).unwrap();
 
 			println!("\n>>>>> BincodePerson::retrieve {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 2);
@@ -195,6 +166,6 @@ mod tests
 			assert!(!longone_slimdi.contains(&bob));
 			assert!(longone_slimdi.contains(&slimdi));
 			assert!(longone_slimdi.contains(&longone));
-		});
+		}).await;
 	}
 }

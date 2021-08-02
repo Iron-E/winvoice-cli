@@ -18,6 +18,7 @@ use
 	clinvoice_query as query,
 };
 
+#[async_trait::async_trait]
 impl EmployeeAdapter for BincodeEmployee<'_, '_>
 {
 	type Error = Error;
@@ -34,7 +35,7 @@ impl EmployeeAdapter for BincodeEmployee<'_, '_>
 	///
 	/// * The created [`Employee`], if there were no errors.
 	/// * An [`Error`], if something goes wrong.
-	fn create(
+	async fn create(
 		contact_info: HashMap<String, Contact>,
 		organization: Organization,
 		person: Person,
@@ -43,7 +44,7 @@ impl EmployeeAdapter for BincodeEmployee<'_, '_>
 		store: &Store,
 	) -> Result<Employee>
 	{
-		Self::init(&store)?;
+		let init_fut = Self::init(&store);
 
 		let employee = Employee
 		{
@@ -55,7 +56,8 @@ impl EmployeeAdapter for BincodeEmployee<'_, '_>
 			status,
 		};
 
-		BincodeEmployee {employee: &employee, store}.update()?;
+		init_fut.await?;
+		BincodeEmployee {employee: &employee, store}.update().await?;
 
 		Ok(employee)
 	}
@@ -72,11 +74,13 @@ impl EmployeeAdapter for BincodeEmployee<'_, '_>
 	///
 	/// * Any matching [`Employee`]s.
 	/// * An [`Error`], should something go wrong.
-	fn retrieve(query: &query::Employee, store: &Store) -> Result<Vec<Employee>>
+	async fn retrieve(query: &query::Employee, store: &Store) -> Result<Vec<Employee>>
 	{
-		Self::init(&store)?;
+		Self::init(&store).await?;
 
-		util::retrieve(Self::path(store), |e| query.matches(e).map_err(|e| DataError::from(e).into()))
+		util::retrieve(Self::path(store),
+			|e| query.matches(e).map_err(|e| DataError::from(e).into())
+		).await
 	}
 }
 
@@ -85,16 +89,18 @@ mod tests
 {
 	use
 	{
-		std::{borrow::Cow::Borrowed, fs, time::Instant},
+		std::{borrow::Cow::Borrowed, time::Instant},
 
 		super::{BincodeEmployee, Contact, Employee, EmployeeAdapter, EmployeeStatus, Organization, Person, query, Store, util},
 
 		clinvoice_data::Id,
 		clinvoice_query::Match,
+
+		tokio::fs,
 	};
 
-	#[test]
-	fn create()
+	#[tokio::test]
+	async fn create()
 	{
 		let organization = Organization
 		{
@@ -103,11 +109,11 @@ mod tests
 			name: "Big Old Test Corporation".into(),
 		};
 
-		util::temp_store(|store|
+		util::temp_store(|store| async move
 		{
 			let start = Instant::now();
 
-			create_assertion(
+			let (testy, nimron, tortust, gottard, duplicate) = futures::try_join!(
 				BincodeEmployee::create(
 					vec![("Work".into(), Contact::Address {location_id: Id::new_v4(), export: false})].into_iter().collect(),
 					organization.clone(),
@@ -119,11 +125,8 @@ mod tests
 					EmployeeStatus::Employed,
 					"CEO of Tests".into(),
 					&store,
-				).unwrap(),
-				&store,
-			);
+				),
 
-			create_assertion(
 				BincodeEmployee::create(
 					vec![("Work Email".into(), Contact::Email {email: "foo@bar.io".into(), export: false})].into_iter().collect(),
 					organization.clone(),
@@ -135,11 +138,8 @@ mod tests
 					EmployeeStatus::NotEmployed,
 					"Oblong Shape Holder".into(),
 					&store,
-				).unwrap(),
-				&store,
-			);
+				),
 
-			create_assertion(
 				BincodeEmployee::create(
 					vec![("Work Phone".into(), Contact::Phone {phone: "1-800-555-3600".into(), export: false})].into_iter().collect(),
 					organization.clone(),
@@ -151,11 +151,8 @@ mod tests
 					EmployeeStatus::Representative,
 					"Mixer of Soups".into(),
 					&store,
-				).unwrap(),
-				&store,
-			);
+				),
 
-			create_assertion(
 				BincodeEmployee::create(
 					vec![("Work".into(), Contact::Address {location_id: Id::new_v4(), export: false})].into_iter().collect(),
 					organization.clone(),
@@ -167,11 +164,8 @@ mod tests
 					EmployeeStatus::Employed,
 					"Sidekick".into(),
 					&store,
-				).unwrap(),
-				&store,
-			);
+				),
 
-			create_assertion(
 				BincodeEmployee::create(
 					vec![("Work Email".into(), Contact::Email {email: "obviousemail@server.com".into(), export: false})].into_iter().collect(),
 					organization.clone(),
@@ -183,22 +177,29 @@ mod tests
 					EmployeeStatus::NotEmployed,
 					"Lazy No-good Duplicate Name User".into(),
 					&store,
-				).unwrap(),
-				&store,
-			);
+				),
+			).unwrap();
 
 			println!("\n>>>>> BincodeEmployee::create {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 5);
-		});
+
+			futures::join!(
+				create_assertion(testy, store),
+				create_assertion(nimron, store),
+				create_assertion(tortust, store),
+				create_assertion(gottard, store),
+				create_assertion(duplicate, store),
+			);
+		}).await;
 	}
 
-	fn create_assertion(employee: Employee, store: &Store)
+	async fn create_assertion(employee: Employee, store: &Store)
 	{
-		let read_result = fs::read(BincodeEmployee {employee: &employee, store}.filepath()).unwrap();
+		let read_result = fs::read(BincodeEmployee {employee: &employee, store}.filepath()).await.unwrap();
 		assert_eq!(employee, bincode::deserialize(&read_result).unwrap());
 	}
 
-	#[test]
-	fn retrieve()
+	#[tokio::test]
+	async fn retrieve()
 	{
 		let organization = Organization
 		{
@@ -207,102 +208,107 @@ mod tests
 			name: "Big Old Test Corporation".into(),
 		};
 
-		util::temp_store(|store|
+		util::temp_store(|store| async move
 		{
-			let testy_mctesterson = BincodeEmployee::create(
-				vec![("Work Address".into(), Contact::Address {location_id: Id::new_v4(), export: false})].into_iter().collect(),
-				organization.clone(),
-				Person
-				{
-					id: Id::new_v4(),
-					name: "Testy Mćtesterson".into(),
-				},
-				EmployeeStatus::NotEmployed,
-				"CEO of Tests".into(),
-				&store,
-			).unwrap();
+			let (testy, nimron, tortust, gottard, duplicate) = futures::try_join!(
+				BincodeEmployee::create(
+					vec![("Work Address".into(), Contact::Address {location_id: Id::new_v4(), export: false})].into_iter().collect(),
+					organization.clone(),
+					Person
+					{
+						id: Id::new_v4(),
+						name: "Testy Mćtesterson".into(),
+					},
+					EmployeeStatus::NotEmployed,
+					"CEO of Tests".into(),
+					&store,
+				),
 
-			let nimron_macbeaver = BincodeEmployee::create(
-				vec![("Home Address".into(), Contact::Email {email: "foo@bar.io".into(), export: false})].into_iter().collect(),
-				organization.clone(),
-				Person
-				{
-					id: Id::new_v4(),
-					name: "Nimron MacBeaver".into(),
-				},
-				EmployeeStatus::Employed,
-				"Oblong Shape Holder".into(),
-				&store,
-			).unwrap();
+				BincodeEmployee::create(
+					vec![("Home Address".into(), Contact::Email {email: "foo@bar.io".into(), export: false})].into_iter().collect(),
+					organization.clone(),
+					Person
+					{
+						id: Id::new_v4(),
+						name: "Nimron MacBeaver".into(),
+					},
+					EmployeeStatus::Employed,
+					"Oblong Shape Holder".into(),
+					&store,
+				),
 
-			let an_actual_tortust = BincodeEmployee::create(
-				vec![("Work Phone".into(), Contact::Phone {phone: "1-800-555-3600".into(), export: false})].into_iter().collect(),
-				organization.clone(),
-				Person
-				{
-					id: Id::new_v4(),
-					name: "An Actual «Tor♯tust".into(),
-				},
-				EmployeeStatus::Representative,
-				"Mixer of Soups".into(),
-				&store,
-			).unwrap();
+				BincodeEmployee::create(
+					vec![("Work Phone".into(), Contact::Phone {phone: "1-800-555-3600".into(), export: false})].into_iter().collect(),
+					organization.clone(),
+					Person
+					{
+						id: Id::new_v4(),
+						name: "An Actual «Tor♯tust".into(),
+					},
+					EmployeeStatus::Representative,
+					"Mixer of Soups".into(),
+					&store,
+				),
 
-			let gottard = BincodeEmployee::create(
-				vec![("Work Address".into(), Contact::Address {location_id: Id::new_v4(), export: false})].into_iter().collect(),
-				organization.clone(),
-				Person
-				{
-					id: Id::new_v4(),
-					name: "Jimmy Neutron, Boy Genius' Dog 'Gottard'".into(),
-				},
-				EmployeeStatus::Employed,
-				"Sidekick".into(),
-				&store,
-			).unwrap();
+				BincodeEmployee::create(
+					vec![("Work Address".into(), Contact::Address {location_id: Id::new_v4(), export: false})].into_iter().collect(),
+					organization.clone(),
+					Person
+					{
+						id: Id::new_v4(),
+						name: "Jimmy Neutron, Boy Genius' Dog 'Gottard'".into(),
+					},
+					EmployeeStatus::Employed,
+					"Sidekick".into(),
+					&store,
+				),
 
-			let duplicate_name = BincodeEmployee::create(
-				vec![("Work Email".into(), Contact::Email {email: "obviousemail@server.com".into(), export: false})].into_iter().collect(),
-				organization.clone(),
-				Person
-				{
-					id: Id::new_v4(),
-					name: "Testy Mćtesterson".into(),
-				},
-				EmployeeStatus::NotEmployed,
-				"Lazy No-good Duplicate Name User".into(),
-				&store,
+				BincodeEmployee::create(
+					vec![("Work Email".into(), Contact::Email {email: "obviousemail@server.com".into(), export: false})].into_iter().collect(),
+					organization.clone(),
+					Person
+					{
+						id: Id::new_v4(),
+						name: "Testy Mćtesterson".into(),
+					},
+					EmployeeStatus::NotEmployed,
+					"Lazy No-good Duplicate Name User".into(),
+					&store,
+				),
 			).unwrap();
 
 			let start = Instant::now();
 
-			let everything = BincodeEmployee::retrieve(&Default::default(), &store).unwrap();
+			let (everything, testy_gottard) = futures::try_join!(
+				// retrieve everything
+				BincodeEmployee::retrieve(&Default::default(), &store),
 
-			// Retrieve testy and gottard
-			let testy_gottard = BincodeEmployee::retrieve(
-				&query::Employee
-				{
-					id: Match::HasAny(vec![Borrowed(&testy_mctesterson.id), Borrowed(&gottard.id)].into_iter().collect()),
-					..Default::default()
-				},
-				&store,
+				// Retrieve testy and gottard
+				BincodeEmployee::retrieve(
+					&query::Employee
+					{
+						id: Match::HasAny(vec![Borrowed(&testy.id), Borrowed(&gottard.id)].into_iter().collect()),
+						..Default::default()
+					},
+					&store,
+				),
 			).unwrap();
 
 			println!("\n>>>>> BincodeEmployee::retrieve {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 2);
 
 			// Assert the results contains all values
-			assert!(everything.contains(&an_actual_tortust));
-			assert!(everything.contains(&duplicate_name));
+			assert!(everything.contains(&tortust));
+			assert!(everything.contains(&duplicate));
 			assert!(everything.contains(&gottard));
-			assert!(everything.contains(&nimron_macbeaver));
-			assert!(everything.contains(&testy_mctesterson));
+			assert!(everything.contains(&nimron));
+			assert!(everything.contains(&testy));
 
 			// Assert the results contains all expected values
-			assert!(!testy_gottard.contains(&an_actual_tortust));
-			assert!(!testy_gottard.contains(&duplicate_name));
+			assert!(!testy_gottard.contains(&tortust));
+			assert!(!testy_gottard.contains(&duplicate));
 			assert!(testy_gottard.contains(&gottard));
-			assert!(!testy_gottard.contains(&nimron_macbeaver));
-			assert!(testy_gottard.contains(&testy_mctesterson));
+			assert!(!testy_gottard.contains(&nimron));
+			assert!(testy_gottard.contains(&testy));
 		});
 	}
 }

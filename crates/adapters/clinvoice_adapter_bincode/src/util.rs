@@ -55,7 +55,7 @@ pub async fn create_store_dir(store_dir: &Path) -> io::Result<()>
 /// Expand the `store`'s specified path and join the provided `subdir`.
 pub fn expand_store_path(store: &Store) -> PathBuf
 {
-	shellexpand::full(&store.path).map(|p| p.as_ref().into()).unwrap_or_else(|_| store.path.into())
+	shellexpand::full(&store.path).map(|p| p.as_ref().into()).unwrap_or_else(|_| store.path.as_str().into())
 }
 
 /// # Summary

@@ -42,12 +42,12 @@ pub trait OrganizationAdapter  :
 	where
 		L : LocationAdapter + Send,
 	{
-		let location_view = Self::to_location::<L>(&organization, store).and_then(|result| L::into_view(result, store));
+		let location_fut = Self::to_location::<L>(&organization, store).and_then(|result| L::into_view(result, store));
 
 		Ok(OrganizationView
 		{
 			id: organization.id,
-			location: location_view.await?,
+			location: location_fut.await?,
 			name: organization.name,
 		})
 	}
@@ -106,7 +106,9 @@ pub trait OrganizationAdapter  :
 		};
 
 		L::retrieve(&query, store).map(|result| result.and_then(|retrieved|
-			retrieved.into_iter().next().ok_or_else(|| super::Error::DataIntegrity(organization.location_id).into())
+			retrieved.into_iter().next().ok_or_else(||
+				super::Error::DataIntegrity(organization.location_id).into()
+			)
 		)).await
 	}
 }

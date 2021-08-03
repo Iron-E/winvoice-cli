@@ -69,11 +69,11 @@ pub trait JobAdapter :
 		<L as LocationAdapter>::Error : Send,
 		<Self as JobAdapter>::Error : From<<E as EmployeeAdapter>::Error>,
 	{
-		let organization_view = Self::to_organization::<O>(&job, store).err_into().and_then(|organization|
+		let organization_fut = Self::to_organization::<O>(&job, store).err_into().and_then(|organization|
 			O::into_view::<L>(organization, store).err_into()
 		);
 
-		let timesheet_views = stream::iter(job.timesheets.iter().map(Ok)).and_then(|t|
+		let timesheet_fut = stream::iter(job.timesheets.iter().map(Ok)).and_then(|t|
 			timesheet::to_employee::<E>(&t, store).and_then(|employee|
 				E::into_view::<L, O, P>(employee, store)
 			).map_ok(move |employee_view|
@@ -90,14 +90,14 @@ pub trait JobAdapter :
 
 		Ok(JobView
 		{
-			client: organization_view.await?,
+			client: organization_fut.await?,
 			date_close: job.date_close,
 			date_open: job.date_open,
 			id: job.id,
 			invoice: job.invoice,
 			notes: job.notes,
 			objectives: job.objectives,
-			timesheets: timesheet_views.await?,
+			timesheets: timesheet_fut.await?,
 		})
 	}
 
@@ -133,7 +133,9 @@ pub trait JobAdapter :
 		};
 
 		O::retrieve(&query, store).map(|result| result.and_then(|retrieved|
-			retrieved.into_iter().next().ok_or_else(|| super::Error::DataIntegrity(job.client_id).into())
+			retrieved.into_iter().next().ok_or_else(||
+				super::Error::DataIntegrity(job.client_id).into()
+			)
 		)).await
 	}
 }

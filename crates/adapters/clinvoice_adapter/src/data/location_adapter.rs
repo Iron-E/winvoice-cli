@@ -56,7 +56,7 @@ pub trait LocationAdapter :
 	async fn into_view(location: Location, store: &Store) -> Result<LocationView, <Self as LocationAdapter>::Error> where
 		Self : Send,
 	{
-		let outer_location = Self::outers(&location, store).map_ok(|mut outers|
+		let outer_location_fut = Self::outers(&location, store).map_ok(|mut outers|
 		{
 			outers.reverse();
 			outers.into_iter().fold(None::<LocationView>, |previous, outer_location| Some(LocationView
@@ -71,7 +71,7 @@ pub trait LocationAdapter :
 		{
 			id: location.id,
 			name: location.name.clone(),
-			outer: outer_location.await?,
+			outer: outer_location_fut.await?,
 		})
 	}
 

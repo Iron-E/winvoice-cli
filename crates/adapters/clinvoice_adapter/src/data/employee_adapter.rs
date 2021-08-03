@@ -59,20 +59,20 @@ pub trait EmployeeAdapter :
 			From<<P as PersonAdapter>::Error> +
 			Send,
 	{
-		let organization_view = Self::to_organization::<O>(&employee, store).map_err(|e|
+		let organization_fut = Self::to_organization::<O>(&employee, store).map_err(|e|
 			<Self as EmployeeAdapter>::Error::from(e)
 		).and_then(|organization| O::into_view::<L>(organization, store).err_into());
 
-		let person_view = Self::to_person::<P>(&employee, store);
+		let person_fut = Self::to_person::<P>(&employee, store);
 
-		let contact_info_view = contact::to_views::<L, String>(employee.contact_info.clone(), store);
+		let contact_info_fut = contact::to_views::<L, String>(employee.contact_info.clone(), store);
 
 		Ok(EmployeeView
 		{
-			contact_info: contact_info_view.await?,
+			contact_info: contact_info_fut.await?,
 			id: employee.id,
-			organization: organization_view.await?,
-			person: person_view.await?.into(),
+			organization: organization_fut.await?,
+			person: person_fut.await?.into(),
 			status: employee.status,
 			title: employee.title,
 		})
@@ -110,7 +110,9 @@ pub trait EmployeeAdapter :
 		};
 
 		O::retrieve(&query, store).map(|result| result.and_then(|retrieved|
-			retrieved.into_iter().next().ok_or_else(|| super::Error::DataIntegrity(employee.organization_id).into())
+			retrieved.into_iter().next().ok_or_else(||
+				super::Error::DataIntegrity(employee.organization_id).into()
+			)
 		)).await
 	}
 
@@ -129,7 +131,9 @@ pub trait EmployeeAdapter :
 		};
 
 		P::retrieve(&query, store).map(|result| result.and_then(|retrieved|
-			retrieved.into_iter().next().ok_or_else(|| super::Error::DataIntegrity(employee.organization_id).into())
+			retrieved.into_iter().next().ok_or_else(||
+				super::Error::DataIntegrity(employee.organization_id).into()
+			)
 		)).await
 	}
 }

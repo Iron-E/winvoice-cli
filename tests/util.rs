@@ -19,12 +19,11 @@ use
 /// * An [`Error`](io::Error), if [temp dir][fn_temp_dir] could not be read.
 ///
 /// [fn_temp_dir]: std::env::temp_dir
-#[cfg(test)]
-pub fn temp_store(assertion: impl FnOnce(&Store))
+pub fn temp_store() -> Store
 {
 	let temp_path = env::temp_dir().join("clinvoice_adapter_bincode_data");
 
-	assertion(&Store
+	Store
 	{
 		adapter: Adapters::Bincode,
 		password: None,
@@ -37,5 +36,5 @@ pub fn temp_store(assertion: impl FnOnce(&Store))
 			)).unwrap(),
 		},
 		username: None,
-	});
+	}
 }

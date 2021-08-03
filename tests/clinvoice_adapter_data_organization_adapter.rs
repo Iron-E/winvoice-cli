@@ -9,73 +9,71 @@ use
 	clinvoice_data::{Contact, Id, EmployeeStatus, Location, Person},
 };
 
-#[test]
-fn to_location()
+#[tokio::test]
+async fn to_location()
 {
-	util::temp_store(|store|
-	{
-		let arizona = BincodeLocation::create("Arizona".into(), &store).unwrap();
-		let dogood = BincodeOrganization::create(
-			arizona.clone(),
-			"DoGood Inc".into(),
-			&store
-		).unwrap();
+	let store = util::temp_store();
 
-		let start = Instant::now();
-		// Retrieve the written employees back into the `Employee` structure.
-		let dogood_location = BincodeOrganization::to_location::<BincodeLocation>(&dogood, store);
-		println!("\n>>>>> BincodeOrganization::to_location {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+	let arizona = BincodeLocation::create("Arizona".into(), &store).await.unwrap();
+	let dogood = BincodeOrganization::create(
+		arizona.clone(),
+		"DoGood Inc".into(),
+		&store
+	).await.unwrap();
 
-		// Assert that the location retrieved is the location expected
-		assert_eq!(arizona, dogood_location.unwrap());
-	});
+	let start = Instant::now();
+	// Retrieve the written employees back into the `Employee` structure.
+	let dogood_location = BincodeOrganization::to_location::<BincodeLocation>(&dogood, store).await;
+	println!("\n>>>>> BincodeOrganization::to_location {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+
+	// Assert that the location retrieved is the location expected
+	assert_eq!(arizona, dogood_location.unwrap());
 }
 
-#[test]
-fn to_vec_employee()
+#[tokio::test]
+async fn to_vec_employee()
 {
-	util::temp_store(|store|
-	{
-		let dogood = BincodeOrganization::create(
-			Location {name: "Earth".into(), id: Id::new_v4(), outer_id: None},
-			"DoGood Inc".into(),
-			&store
-		).unwrap();
+	let store = util::temp_store();
 
-		let testy = BincodeEmployee::create(
-			vec![("Work Email".into(), Contact::Email {email: "foo@bar.io".into(), export: false})].into_iter().collect(),
-			dogood.clone(),
-			Person
-			{
-				id: Id::new_v4(),
-				name: "Testy Mćtesterson".into(),
-			},
-			EmployeeStatus::Representative,
-			"CEO of Tests".into(),
-			&store,
-		).unwrap();
+	let dogood = BincodeOrganization::create(
+		Location {name: "Earth".into(), id: Id::new_v4(), outer_id: None},
+		"DoGood Inc".into(),
+		&store
+	).await.unwrap();
 
-		let mr_flu = BincodeEmployee::create(
-			vec![("Work Email".into(), Contact::Email {email: "flu@bar.io".into(), export: false})].into_iter().collect(),
-			dogood.clone(),
-			Person
-			{
-				id: Id::new_v4(),
-				name: "Mr. Flu".into(),
-			},
-			EmployeeStatus::Employed,
-			"Janitor".into(),
-			&store,
-		).unwrap();
+	let testy = BincodeEmployee::create(
+		vec![("Work Email".into(), Contact::Email {email: "foo@bar.io".into(), export: false})].into_iter().collect(),
+		dogood.clone(),
+		Person
+		{
+			id: Id::new_v4(),
+			name: "Testy Mćtesterson".into(),
+		},
+		EmployeeStatus::Representative,
+		"CEO of Tests".into(),
+		&store,
+	).await.unwrap();
 
-		let start = Instant::now();
-		// Retrieve the written employees back into the `Employee` structure.
-		let reps = BincodeOrganization::to_employees::<BincodeEmployee>(&dogood, store);
-		println!("\n>>>>> BincodeOrganization::to_vec_employee {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+	let mr_flu = BincodeEmployee::create(
+		vec![("Work Email".into(), Contact::Email {email: "flu@bar.io".into(), export: false})].into_iter().collect(),
+		dogood.clone(),
+		Person
+		{
+			id: Id::new_v4(),
+			name: "Mr. Flu".into(),
+		},
+		EmployeeStatus::Employed,
+		"Janitor".into(),
+		&store,
+	).await.unwrap();
 
-		assert_eq!(
-			reps.unwrap().into_iter().collect::<HashSet<_>>(),
-			[mr_flu, testy].iter().cloned().collect::<HashSet<_>>()
-		);
-	});
+	let start = Instant::now();
+	// Retrieve the written employees back into the `Employee` structure.
+	let reps = BincodeOrganization::to_employees::<BincodeEmployee>(&dogood, store).await;
+	println!("\n>>>>> BincodeOrganization::to_vec_employee {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+
+	assert_eq!(
+		reps.unwrap().into_iter().collect::<HashSet<_>>(),
+		[mr_flu, testy].iter().cloned().collect::<HashSet<_>>()
+	);
 }

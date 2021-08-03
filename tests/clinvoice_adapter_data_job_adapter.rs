@@ -15,130 +15,128 @@ use
 	},
 };
 
-#[test]
-fn to_organization()
+#[tokio::test]
+async fn to_organization()
 {
-	util::temp_store(|store|
-	{
-		let dogood = BincodeOrganization::create(
-			Location {name: "Earth".into(), id: Id::new_v4(), outer_id: None},
-			"DoGood Inc".into(),
-			&store
-		).unwrap();
+	let store = util::temp_store();
 
-		let test_job = BincodeJob::create(
-			dogood.clone(),
-			Utc::now(),
-			Money::new(2_00, 2, Currency::USD),
-			"Test the job creation function".into(),
-			&store,
-		).unwrap();
+	let dogood = BincodeOrganization::create(
+		Location {name: "Earth".into(), id: Id::new_v4(), outer_id: None},
+		"DoGood Inc".into(),
+		&store
+	).await.unwrap();
 
-		let start = Instant::now();
-		let test_org = BincodeJob::to_organization::<BincodeOrganization>(&test_job, store);
-		println!("\n>>>>> BincodeJob::to_organization {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+	let test_job = BincodeJob::create(
+		dogood.clone(),
+		Utc::now(),
+		Money::new(2_00, 2, Currency::USD),
+		"Test the job creation function".into(),
+		&store,
+	).await.unwrap();
 
-		assert_eq!(dogood, test_org.unwrap());
-	});
+	let start = Instant::now();
+	let test_org = BincodeJob::to_organization::<BincodeOrganization>(&test_job, store).await;
+	println!("\n>>>>> BincodeJob::to_organization {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+
+	assert_eq!(dogood, test_org.unwrap());
 }
 
-#[test]
-fn to_view()
+#[tokio::test]
+async fn to_view()
 {
-	util::temp_store(|store|
+	let store = util::temp_store();
+
+	let earth = BincodeLocation::create(
+		"Earth".into(),
+		&store,
+	).await.unwrap();
+
+	let big_test = BincodeOrganization::create(
+		earth.clone(),
+		"Big Old Test Corporation".into(),
+		&store,
+	).await.unwrap();
+
+	let mut create_job = BincodeJob::create(
+		big_test.clone(),
+		Utc::now(),
+		Money::new(2_00, 2, Currency::USD),
+		"Test the job creation function".into(),
+		&store,
+	).await.unwrap();
+
+	let contact_info: HashMap<_, _> = vec![
+		("Address".into(), Contact::Address {location_id: earth.id, export: false})
+	].into_iter().collect();
+
+	let testy = BincodePerson::create(
+		"Testy Mćtesterson".into(),
+		&store,
+	).await.unwrap();
+
+	let ceo_testy = BincodeEmployee::create(
+		contact_info.clone(),
+		big_test.clone(),
+		testy.clone(),
+		EmployeeStatus::Employed,
+		"CEO of Tests".into(),
+		&store,
+	).await.unwrap();
+
+	let earth_view = LocationView
 	{
-		let earth = BincodeLocation::create(
-			"Earth".into(),
-			&store,
-		).unwrap();
+		id: earth.id,
+		name: earth.name,
+		outer: None,
+	};
 
-		let big_test = BincodeOrganization::create(
-			earth.clone(),
-			"Big Old Test Corporation".into(),
-			&store,
-		).unwrap();
+	let contact_info_view: HashMap<String, ContactView> = vec![
+		("Address View".into(), ContactView::Address {location: earth_view.clone(), export: false})
+	].into_iter().collect();
 
-		let mut create_job = BincodeJob::create(
-			big_test.clone(),
-			Utc::now(),
-			Money::new(2_00, 2, Currency::USD),
-			"Test the job creation function".into(),
-			&store,
-		).unwrap();
-
-		let contact_info: HashMap<_, _> = vec![
-			("Address".into(), Contact::Address {location_id: earth.id, export: false})
-		].into_iter().collect();
-
-		let testy = BincodePerson::create(
-			"Testy Mćtesterson".into(),
-			&store,
-		).unwrap();
-
-		let ceo_testy = BincodeEmployee::create(
-			contact_info.clone(),
-			big_test.clone(),
-			testy.clone(),
-			EmployeeStatus::Employed,
-			"CEO of Tests".into(),
-			&store,
-		).unwrap();
-
-		let earth_view = LocationView
+	let ceo_testy_view = EmployeeView
+	{
+		contact_info: contact_info_view.clone(),
+		id: ceo_testy.id,
+		organization: OrganizationView
 		{
-			id: earth.id,
-			name: earth.name,
-			outer: None,
-		};
-
-		let contact_info_view: HashMap<String, ContactView> = vec![
-			("Address View".into(), ContactView::Address {location: earth_view.clone(), export: false})
-		].into_iter().collect();
-
-		let ceo_testy_view = EmployeeView
+			id: big_test.id,
+			location: earth_view,
+			name: big_test.name,
+		},
+		person: PersonView
 		{
-			contact_info: contact_info_view.clone(),
-			id: ceo_testy.id,
-			organization: OrganizationView
-			{
-				id: big_test.id,
-				location: earth_view,
-				name: big_test.name,
-			},
-			person: PersonView
-			{
-				id: testy.id,
-				name: testy.name,
-			},
-			title: ceo_testy.title.clone(),
-			status: ceo_testy.status,
-		};
+			id: testy.id,
+			name: testy.name,
+		},
+		title: ceo_testy.title.clone(),
+		status: ceo_testy.status,
+	};
 
-		create_job.start_timesheet(ceo_testy.id);
+	create_job.start_timesheet(ceo_testy.id);
 
-		let create_job_view = JobView
+	let create_job_view = JobView
+	{
+		client: ceo_testy_view.organization.clone(),
+		date_close: create_job.date_close,
+		date_open: create_job.date_open,
+		id: create_job.id,
+		invoice: create_job.invoice.clone(),
+		notes: create_job.notes.clone(),
+		objectives: create_job.objectives.clone(),
+		timesheets: vec![TimesheetView
 		{
-			client: ceo_testy_view.organization.clone(),
-			date_close: create_job.date_close,
-			date_open: create_job.date_open,
-			id: create_job.id,
-			invoice: create_job.invoice.clone(),
-			notes: create_job.notes.clone(),
-			objectives: create_job.objectives.clone(),
-			timesheets: vec![TimesheetView
-			{
-				employee: ceo_testy_view,
-				expenses: Vec::new(),
-				time_begin: create_job.timesheets.first().expect("Timesheet did not attach!").time_begin,
-				time_end: None,
-				work_notes: create_job.timesheets.first().expect("Timesheet did not attach!").work_notes.clone(),
-			}],
-		};
+			employee: ceo_testy_view,
+			expenses: Vec::new(),
+			time_begin: create_job.timesheets.first().expect("Timesheet did not attach!").time_begin,
+			time_end: None,
+			work_notes: create_job.timesheets.first().expect("Timesheet did not attach!").work_notes.clone(),
+		}],
+	};
 
-		let start = Instant::now();
-		let create_job_view_result = BincodeJob::into_view::<BincodeEmployee, BincodeLocation, BincodeOrganization, BincodePerson>(create_job, store);
-		println!("\n>>>>> BincodeJob::to_view {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+	let start = Instant::now();
+	let create_job_view_result = BincodeJob::into_view::<BincodeEmployee, BincodeLocation, BincodeOrganization, BincodePerson>(create_job, store).await;
+	println!("\n>>>>> BincodeJob::to_view {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 
-		assert_eq!(create_job_view, create_job_view_result.unwrap());
-	});
+	assert_eq!(create_job_view, create_job_view_result.unwrap());
 }

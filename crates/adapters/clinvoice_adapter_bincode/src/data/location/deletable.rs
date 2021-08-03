@@ -19,34 +19,31 @@ impl Deletable for BincodeLocation<'_, '_>
 
 	async fn delete(&self, cascade: bool) -> Result<()>
 	{
-		let (associated_locations, associated_organizations) = futures::try_join!(
-			BincodeLocation::retrieve(
-				&query::Location
+		let location_query = query::Location
+		{
+			outer: query::OuterLocation::Some(
+				query::Location
 				{
-					outer: query::OuterLocation::Some(
-						query::Location
-						{
-							id: query::Match::EqualTo(Borrowed(&self.location.id)),
-							..Default::default()
-						}.into()
-					),
+					id: query::Match::EqualTo(Borrowed(&self.location.id)),
 					..Default::default()
-				},
-				self.store,
+				}.into()
 			),
+			..Default::default()
+		};
 
-			BincodeOrganization::retrieve(
-				&query::Organization
-				{
-					location: query::Location
-					{
-						id: query::Match::EqualTo(Borrowed(&self.location.id)),
-						..Default::default()
-					},
-					..Default::default()
-				},
-				self.store,
-			),
+		let organization_query = query::Organization
+		{
+			location: query::Location
+			{
+				id: query::Match::EqualTo(Borrowed(&self.location.id)),
+				..Default::default()
+			},
+			..Default::default()
+		};
+
+		let (associated_locations, associated_organizations) = futures::try_join!(
+			BincodeLocation::retrieve(&location_query, self.store),
+			BincodeOrganization::retrieve(&organization_query, self.store),
 		)?;
 
 		if cascade

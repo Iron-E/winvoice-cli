@@ -220,35 +220,30 @@ mod tests
 			),
 		).unwrap();
 
+		let everything_query = query::Job
+		{
+			client: query::Organization
+			{
+				id: Match::EqualTo(Borrowed(&organization.id)),
+				..Default::default()
+			},
+			..Default::default()
+		};
+
+		let retrieval_and_assertion_query = query::Job
+		{
+			date_open: Match::Not(Match::HasAny(vec![
+			  Owned(creation.date_open.naive_local()),
+			].into_iter().collect()).into()),
+			id: Match::HasAny(vec![Borrowed(&retrieval.id), Borrowed(&assertion.id)].into_iter().collect()),
+			..Default::default()
+		};
+
 		let start = Instant::now();
 
 		let (everything, not_creation) = futures::try_join!(
-			// retrieve everything
-			BincodeJob::retrieve(
-				&query::Job
-				{
-					client: query::Organization
-					{
-						id: Match::EqualTo(Borrowed(&organization.id)),
-						..Default::default()
-					},
-					..Default::default()
-				},
-				&store,
-			),
-
-			// retrieve retrieval and assertion
-			BincodeJob::retrieve(
-				&query::Job
-				{
-					date_open: Match::Not(Match::HasAny(vec![
-					  Owned(creation.date_open.naive_local()),
-					].into_iter().collect()).into()),
-					id: Match::HasAny(vec![Borrowed(&retrieval.id), Borrowed(&assertion.id)].into_iter().collect()),
-					..Default::default()
-				},
-				&store,
-			),
+			BincodeJob::retrieve(&everything_query, &store),
+			BincodeJob::retrieve(&retrieval_and_assertion_query, &store),
 		).unwrap();
 
 		println!("\n>>>>> BincodeJob::retrieve {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 2);

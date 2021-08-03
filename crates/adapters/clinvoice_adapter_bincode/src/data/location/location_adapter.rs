@@ -156,22 +156,19 @@ mod tests
 		let arizona = BincodeLocation {location: &usa, store: &store}.create_inner("Arizona".into()).await.unwrap();
 		let phoenix = BincodeLocation {location: &arizona, store: &store}.create_inner("Phoenix".into()).await.unwrap();
 
+		let everything_query = query::Location::default();
+		let arizona_query = query::Location
+		{
+			id: Match::HasAny(vec![Borrowed(&earth.id), Borrowed(&arizona.id)].into_iter().collect()),
+			outer: query::OuterLocation::Some(query::Location::default().into()),
+			..Default::default()
+		};
+
 		let start = Instant::now();
 
 		let (everything, only_arizona) = futures::try_join!(
-			// Retrieve everything.
-			BincodeLocation::retrieve(&Default::default(), &store),
-
-			// Retrieve Arizona
-			BincodeLocation::retrieve(
-				&query::Location
-				{
-					id: Match::HasAny(vec![Borrowed(&earth.id), Borrowed(&arizona.id)].into_iter().collect()),
-					outer: query::OuterLocation::Some(query::Location::default().into()),
-					..Default::default()
-				},
-				&store,
-			),
+			BincodeLocation::retrieve(&everything_query, &store),
+			BincodeLocation::retrieve(&arizona_query, &store),
 		).unwrap();
 
 		println!("\n>>>>> BincodeLocation::retrieve {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 2);

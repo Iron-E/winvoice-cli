@@ -276,21 +276,18 @@ mod tests
 			),
 		).unwrap();
 
+		let everything_query = query::Employee::default();
+		let testy_and_gottard_query = query::Employee
+		{
+			id: Match::HasAny(vec![Borrowed(&testy.id), Borrowed(&gottard.id)].into_iter().collect()),
+			..Default::default()
+		};
+
 		let start = Instant::now();
 
 		let (everything, testy_gottard) = futures::try_join!(
-			// retrieve everything
-			BincodeEmployee::retrieve(&Default::default(), &store),
-
-			// Retrieve testy and gottard
-			BincodeEmployee::retrieve(
-				&query::Employee
-				{
-					id: Match::HasAny(vec![Borrowed(&testy.id), Borrowed(&gottard.id)].into_iter().collect()),
-					..Default::default()
-				},
-				&store,
-			),
+			BincodeEmployee::retrieve(&everything_query, &store),
+			BincodeEmployee::retrieve(&testy_and_gottard_query, &store),
 		).unwrap();
 
 		println!("\n>>>>> BincodeEmployee::retrieve {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 2);

@@ -19,32 +19,29 @@ impl Deletable for BincodeOrganization<'_, '_>
 
 	async fn delete(&self, cascade: bool) -> Result<()>
 	{
-		let (associated_employees, associated_jobs) = futures::try_join!(
-			BincodeEmployee::retrieve(
-				&query::Employee
-				{
-					organization: query::Organization
-					{
-						id: query::Match::EqualTo(Borrowed(&self.organization.id)),
-						..Default::default()
-					},
-					..Default::default()
-				},
-				self.store,
-			),
+		let employee_query = query::Employee
+		{
+			organization: query::Organization
+			{
+				id: query::Match::EqualTo(Borrowed(&self.organization.id)),
+				..Default::default()
+			},
+			..Default::default()
+		};
 
-			BincodeJob::retrieve(
-				&query::Job
-				{
-					client: query::Organization
-					{
-						id: query::Match::EqualTo(Borrowed(&self.organization.id)),
-						..Default::default()
-					},
-					..Default::default()
-				},
-				self.store,
-			),
+		let job_query = query::Job
+		{
+			client: query::Organization
+			{
+				id: query::Match::EqualTo(Borrowed(&self.organization.id)),
+				..Default::default()
+			},
+			..Default::default()
+		};
+
+		let (associated_employees, associated_jobs) = futures::try_join!(
+			BincodeEmployee::retrieve(&employee_query, self.store),
+			BincodeJob::retrieve(&job_query, self.store),
 		)?;
 
 		if cascade

@@ -128,28 +128,23 @@ mod tests
 			BincodePerson::create("longone".into(), &store),
 		).unwrap();
 
+		let bob_query = query::Person
+		{
+			id: Match::EqualTo(Borrowed(&bob.id)),
+			..Default::default()
+		};
+
+		let longone_slimdi_query = query::Person
+		{
+			name: MatchStr::Regex(format!("^({}|{})$", longone.name, slimdi.name)),
+			..Default::default()
+		};
+
 		let start = Instant::now();
 
 		let (only_bob, longone_slimdi) = futures::try_join!(
-			// Retrieve bob
-			BincodePerson::retrieve(
-				&query::Person
-				{
-					id: Match::EqualTo(Borrowed(&bob.id)),
-					..Default::default()
-				},
-				&store,
-			),
-
-			// Retrieve longone and slimdi
-			BincodePerson::retrieve(
-				&query::Person
-				{
-					name: MatchStr::Regex(format!("^({}|{})$", longone.name, slimdi.name)),
-					..Default::default()
-				},
-				&store,
-			),
+			BincodePerson::retrieve(&bob_query, &store),
+			BincodePerson::retrieve(&longone_slimdi_query, &store),
 		).unwrap();
 
 		println!("\n>>>>> BincodePerson::retrieve {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 2);

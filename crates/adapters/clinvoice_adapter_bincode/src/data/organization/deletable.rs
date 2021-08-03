@@ -101,72 +101,71 @@ mod tests
 	#[tokio::test]
 	async fn delete()
 	{
-		util::temp_store(|store| async move
+		let store = util::temp_store();
+
+		let earth = BincodeLocation
 		{
-			let earth = BincodeLocation
-			{
-				location: &BincodeLocation::create("Earth".into(), &store).await.unwrap(),
-				store,
-			};
+			location: &BincodeLocation::create("Earth".into(), &store).await.unwrap(),
+			store: &store,
+		};
 
-			let big_old_test = BincodeOrganization
-			{
-				organization: &BincodeOrganization::create(
-					earth.location.clone(),
-					"Big Old Test Corporation".into(),
-					&store,
-				).await.unwrap(),
-				store,
-			};
-
-			let testy = BincodePerson
-			{
-				person: &BincodePerson::create(
-					"Testy McTesterson".into(),
-					&store,
-				).await.unwrap(),
-				store,
-			};
-
-			let ceo_testy = BincodeEmployee
-			{
-				employee: &BincodeEmployee::create(
-					vec![("Work Address".into(), Contact::Address {location_id: earth.location.id, export: false})].into_iter().collect(),
-					big_old_test.organization.clone(),
-					testy.person.clone(),
-					EmployeeStatus::Representative,
-					"CEO of Tests".into(),
-					&store,
-				).await.unwrap(),
-				store,
-			};
-
-			let mut creation = BincodeJob::create(
-				big_old_test.organization.clone(),
-				Utc::now(),
-				Money::new(2_00, 2, Currency::USD),
-				"Test the job creation function".into(),
+		let big_old_test = BincodeOrganization
+		{
+			organization: &BincodeOrganization::create(
+				earth.location.clone(),
+				"Big Old Test Corporation".into(),
 				&store,
-			).await.unwrap();
+			).await.unwrap(),
+			store: &store,
+		};
 
-			creation.start_timesheet(ceo_testy.employee.id);
-			BincodeJob {job: &creation, store}.update().await.unwrap();
+		let testy = BincodePerson
+		{
+			person: &BincodePerson::create(
+				"Testy McTesterson".into(),
+				&store,
+			).await.unwrap(),
+			store: &store,
+		};
 
-			let start = Instant::now();
-			// Assert that the deletion fails with restriction
-			assert!(big_old_test.delete(false).await.is_err());
-			// Assert that the deletion works when cascading
-			assert!(big_old_test.delete(true).await.is_ok());
-			println!("\n>>>>> BincodeOrganization::delete {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 2);
+		let ceo_testy = BincodeEmployee
+		{
+			employee: &BincodeEmployee::create(
+				vec![("Work Address".into(), Contact::Address {location_id: earth.location.id, export: false})].into_iter().collect(),
+				big_old_test.organization.clone(),
+				testy.person.clone(),
+				EmployeeStatus::Representative,
+				"CEO of Tests".into(),
+				&store,
+			).await.unwrap(),
+			store: &store,
+		};
 
-			// Assert that the dependent files are gone
-			assert!(!big_old_test.filepath().is_file());
-			assert!(!ceo_testy.filepath().is_file());
-			assert!(!BincodeJob {job: &creation, store}.filepath().is_file());
+		let mut creation = BincodeJob::create(
+			big_old_test.organization.clone(),
+			Utc::now(),
+			Money::new(2_00, 2, Currency::USD),
+			"Test the job creation function".into(),
+			&store,
+		).await.unwrap();
 
-			// Assert that the independent files are present
-			assert!(earth.filepath().is_file());
-			assert!(testy.filepath().is_file());
-		}).await;
+		creation.start_timesheet(ceo_testy.employee.id);
+		BincodeJob {job: &creation, store: &store}.update().await.unwrap();
+
+		let start = Instant::now();
+		// Assert that the deletion fails with restriction
+		assert!(big_old_test.delete(false).await.is_err());
+		// Assert that the deletion works when cascading
+		assert!(big_old_test.delete(true).await.is_ok());
+		println!("\n>>>>> BincodeOrganization::delete {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 2);
+
+		// Assert that the dependent files are gone
+		assert!(!big_old_test.filepath().is_file());
+		assert!(!ceo_testy.filepath().is_file());
+		assert!(!BincodeJob {job: &creation, store: &store}.filepath().is_file());
+
+		// Assert that the independent files are present
+		assert!(earth.filepath().is_file());
+		assert!(testy.filepath().is_file());
 	}
 }

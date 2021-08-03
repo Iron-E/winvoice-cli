@@ -95,7 +95,11 @@ mod tests
 {
 	use
 	{
-		std::{borrow::Cow::Borrowed, time::Instant},
+		std::
+		{
+			borrow::Cow::{Borrowed, Owned},
+			time::Instant,
+		},
 
 		super::{BincodeJob, Job, JobAdapter, Money, Organization, query, Store, Utc, util},
 
@@ -115,62 +119,61 @@ mod tests
 			name: "Big Old Test Corporation".into(),
 		};
 
-		util::temp_store(|store| async move
-		{
-			let start = Instant::now();
+		let store = util::temp_store();
 
-			let (test1, test2, test3, test4, test5) = futures::try_join!(
-				BincodeJob::create(
-					organization.clone(),
-					Utc::now(),
-					Money::new(2_00, 2, Currency::USD),
-					"Test the job creation function".into(),
-					&store,
-				),
+		let start = Instant::now();
 
-				BincodeJob::create(
-					organization.clone(),
-					Utc::now(),
-					Money::new(2_00, 2, Currency::USD),
-					"Test the job creation function".into(),
-					&store,
-				),
+		let (test1, test2, test3, test4, test5) = futures::try_join!(
+			BincodeJob::create(
+				organization.clone(),
+				Utc::now(),
+				Money::new(2_00, 2, Currency::USD),
+				"Test the job creation function".into(),
+				&store,
+			),
 
-				BincodeJob::create(
-					organization.clone(),
-					Utc::now(),
-					Money::new(20000, 0, Currency::JPY),
-					"TEST THE JOB CREATION FUNCTION".into(),
-					&store,
-				),
+			BincodeJob::create(
+				organization.clone(),
+				Utc::now(),
+				Money::new(2_00, 2, Currency::USD),
+				"Test the job creation function".into(),
+				&store,
+			),
 
-				BincodeJob::create(
-					organization.clone(),
-					Utc::now(),
-					Money::new(5_00, 2, Currency::CAD),
-					"test the job creation function".into(),
-					&store,
-				),
+			BincodeJob::create(
+				organization.clone(),
+				Utc::now(),
+				Money::new(20000, 0, Currency::JPY),
+				"TEST THE JOB CREATION FUNCTION".into(),
+				&store,
+			),
 
-				BincodeJob::create(
-					organization.clone(),
-					Utc::now(),
-					Money::new(10_00, 2, Currency::EUR),
-					"TeSt ThE jOb CrEaTiOn FuNcTiOn".into(),
-					&store,
-				),
-			).unwrap();
+			BincodeJob::create(
+				organization.clone(),
+				Utc::now(),
+				Money::new(5_00, 2, Currency::CAD),
+				"test the job creation function".into(),
+				&store,
+			),
 
-			println!("\n>>>>> BincodeJob::create {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 5);
+			BincodeJob::create(
+				organization.clone(),
+				Utc::now(),
+				Money::new(10_00, 2, Currency::EUR),
+				"TeSt ThE jOb CrEaTiOn FuNcTiOn".into(),
+				&store,
+			),
+		).unwrap();
 
-			futures::join!(
-				create_assertion(test1, store),
-				create_assertion(test2, store),
-				create_assertion(test3, store),
-				create_assertion(test4, store),
-				create_assertion(test5, store),
-			);
-		});
+		println!("\n>>>>> BincodeJob::create {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 5);
+
+		futures::join!(
+			create_assertion(test1, &store),
+			create_assertion(test2, &store),
+			create_assertion(test3, &store),
+			create_assertion(test4, &store),
+			create_assertion(test5, &store),
+		);
 	}
 
 	async fn create_assertion(job: Job, store: &Store)
@@ -189,76 +192,75 @@ mod tests
 			name: "Big Old Test Corporation".into(),
 		};
 
-		util::temp_store(|store| async move
-		{
-			let (creation, retrieval, assertion) =  futures::try_join!(
-				BincodeJob::create(
-					organization.clone(),
-					Utc::now(),
-					Money::new(2_00, 2, Currency::USD),
-					"Test the job creation function".into(),
-					&store,
-				),
+		let store = util::temp_store();
 
-				BincodeJob::create(
-					organization.clone(),
-					Utc::now(),
-					Money::new(2_00, 2, Currency::USD),
-					"Test the job retrieval function".into(),
-					&store,
-				),
+		let (creation, retrieval, assertion) =  futures::try_join!(
+			BincodeJob::create(
+				organization.clone(),
+				Utc::now(),
+				Money::new(2_00, 2, Currency::USD),
+				"Test the job creation function".into(),
+				&store,
+			),
 
-				BincodeJob::create(
-					organization.clone(),
-					Utc::now(),
-					Money::new(20000, 0, Currency::JPY),
-					"Assert something".into(),
-					&store,
-				),
-			).unwrap();
+			BincodeJob::create(
+				organization.clone(),
+				Utc::now(),
+				Money::new(2_00, 2, Currency::USD),
+				"Test the job retrieval function".into(),
+				&store,
+			),
 
-			let start = Instant::now();
+			BincodeJob::create(
+				organization.clone(),
+				Utc::now(),
+				Money::new(20000, 0, Currency::JPY),
+				"Assert something".into(),
+				&store,
+			),
+		).unwrap();
 
-			let (everything, not_creation) = futures::try_join!(
-				// retrieve everything
-				BincodeJob::retrieve(
-					&query::Job
+		let start = Instant::now();
+
+		let (everything, not_creation) = futures::try_join!(
+			// retrieve everything
+			BincodeJob::retrieve(
+				&query::Job
+				{
+					client: query::Organization
 					{
-						client: query::Organization
-						{
-							id: Match::EqualTo(Borrowed(&organization.id)),
-							..Default::default()
-						},
+						id: Match::EqualTo(Borrowed(&organization.id)),
 						..Default::default()
 					},
-					&store,
-				),
+					..Default::default()
+				},
+				&store,
+			),
 
-				// retrieve retrieval and assertion
-				BincodeJob::retrieve(
-					&query::Job
-					{
-						date_open: Match::Not(Match::HasAny(vec![
-						  Borrowed(&creation.date_open.naive_local()),
-						].into_iter().collect()).into()),
-						id: Match::HasAny(vec![Borrowed(&retrieval.id), Borrowed(&assertion.id)].into_iter().collect()),
-						..Default::default()
-					},
-					&store,
-				),
-			).unwrap();
+			// retrieve retrieval and assertion
+			BincodeJob::retrieve(
+				&query::Job
+				{
+					date_open: Match::Not(Match::HasAny(vec![
+					  Owned(creation.date_open.naive_local()),
+					].into_iter().collect()).into()),
+					id: Match::HasAny(vec![Borrowed(&retrieval.id), Borrowed(&assertion.id)].into_iter().collect()),
+					..Default::default()
+				},
+				&store,
+			),
+		).unwrap();
 
-			println!("\n>>>>> BincodeJob::retrieve {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 2);
+		println!("\n>>>>> BincodeJob::retrieve {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 2);
 
-			// assert the results are as expected
-			assert!(everything.contains(&assertion));
-			assert!(everything.contains(&creation));
-			assert!(everything.contains(&retrieval));
+		// assert the results are as expected
+		assert!(everything.contains(&assertion));
+		assert!(everything.contains(&creation));
+		assert!(everything.contains(&retrieval));
 
-			// assert the results are as expected
-			assert!(not_creation.contains(&assertion));
-			assert!(!not_creation.contains(&creation));
-			assert!(not_creation.contains(&retrieval));
-		}).await;
+		// assert the results are as expected
+		assert!(not_creation.contains(&assertion));
+		assert!(!not_creation.contains(&creation));
+		assert!(not_creation.contains(&retrieval));
 	}
 }

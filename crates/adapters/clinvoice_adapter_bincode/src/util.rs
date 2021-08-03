@@ -23,8 +23,6 @@ use
 	std::env,
 
 	clinvoice_adapter::Adapters,
-
-	futures::Future,
 };
 
 /// # Summary
@@ -104,13 +102,11 @@ pub async fn retrieve<T>(path: impl AsRef<Path>, query: impl Fn(&T) -> DataResul
 ///
 /// [fn_temp_dir]: std::env::temp_dir
 #[cfg(test)]
-pub async fn temp_store<F, Fut>(assertion: F) where
-	F: FnOnce(&Store) -> Fut,
-	Fut: Future<Output=()>,
+pub fn temp_store() -> Store
 {
 	let temp_path = env::temp_dir().join("clinvoice_adapter_bincode_data");
 
-	assertion(&Store
+	Store
 	{
 		adapter: Adapters::Bincode,
 		password: None,
@@ -123,7 +119,7 @@ pub async fn temp_store<F, Fut>(assertion: F) where
 			)).unwrap(),
 		},
 		username: None,
-	}).await;
+	}
 }
 
 /// # Summary
@@ -166,35 +162,33 @@ mod tests
 	async fn unique_id()
 	{
 		const LOOPS: usize = 1000;
+		let store = super::temp_store();
 
-		super::temp_store(|store| async move
+		let test_path = PathBuf::new().join(&store.path).join("test_next_id");
+
+		if test_path.is_dir()
 		{
-			let test_path = PathBuf::new().join(&store.path).join("test_next_id");
+			fs::remove_dir_all(&test_path).await.unwrap();
+		}
 
-			if test_path.is_dir()
-			{
-				fs::remove_dir_all(&test_path).await.unwrap();
-			}
+		// Create the `test_path`.
+		super::create_store_dir(&test_path).await.unwrap();
 
-			// Create the `test_path`.
-			super::create_store_dir(&test_path).await.unwrap();
+		let start = Instant::now();
 
-			let start = Instant::now();
+		let ids = HashSet::with_capacity(LOOPS);
+		stream::iter(0..LOOPS).for_each_concurrent(None, |_| async move
+		{
+			let id = super::unique_id(&test_path).unwrap();
+			ids.insert(id);
 
-			let ids = HashSet::with_capacity(LOOPS);
-			stream::iter(0..LOOPS).for_each_concurrent(None, |_| async move
-			{
-				let id = super::unique_id(&test_path).unwrap();
-				ids.insert(id);
+			// Creating the next file worked.
+			assert!(fs::write(&test_path.join(id.to_string()), "TEST").await.is_ok());
+		}).await;
 
-				// Creating the next file worked.
-				assert!(fs::write(&test_path.join(id.to_string()), "TEST").await.is_ok());
-			}).await;
+		println!("\n>>>>> util::unique_id {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / (LOOPS as u128));
 
-			println!("\n>>>>> util::unique_id {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / (LOOPS as u128));
-
-			// Assert that the number of unique IDs created is equal to the number of times looped.
-			assert_eq!(ids.len(), LOOPS);
-		}).await
+		// Assert that the number of unique IDs created is equal to the number of times looped.
+		assert_eq!(ids.len(), LOOPS);
 	}
 }

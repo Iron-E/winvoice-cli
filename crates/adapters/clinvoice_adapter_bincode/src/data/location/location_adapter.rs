@@ -117,27 +117,26 @@ mod tests
 	#[tokio::test]
 	async fn create()
 	{
-		util::temp_store(|store| async move
-		{
-			let start = Instant::now();
+		let store = util::temp_store();
 
-			let earth = BincodeLocation::create("Earth".into(), &store).await.unwrap();
-			let usa = BincodeLocation {location: &earth, store}.create_inner("USA".into()).await.unwrap();
-			let arizona = BincodeLocation {location: &usa, store}.create_inner("Arizona".into()).await.unwrap();
-			let phoenix = BincodeLocation {location: &arizona, store}.create_inner("Phoenix".into()).await.unwrap();
+		let start = Instant::now();
 
-			println!("\n>>>>> BincodeLocation::start {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 4);
+		let earth = BincodeLocation::create("Earth".into(), &store).await.unwrap();
+		let usa = BincodeLocation {location: &earth, store: &store}.create_inner("USA".into()).await.unwrap();
+		let arizona = BincodeLocation {location: &usa, store: &store}.create_inner("Arizona".into()).await.unwrap();
+		let phoenix = BincodeLocation {location: &arizona, store: &store}.create_inner("Phoenix".into()).await.unwrap();
 
-			assert_eq!(usa.outer_id, Some(earth.id));
-			assert_eq!(arizona.outer_id, Some(usa.id));
-			assert_eq!(phoenix.outer_id, Some(arizona.id));
-			futures::join!(
-				create_assertion(earth, &store),
-				create_assertion(usa, &store),
-				create_assertion(arizona, &store),
-				create_assertion(phoenix, &store),
-			);
-		}).await;
+		println!("\n>>>>> BincodeLocation::start {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 4);
+
+		assert_eq!(usa.outer_id, Some(earth.id));
+		assert_eq!(arizona.outer_id, Some(usa.id));
+		assert_eq!(phoenix.outer_id, Some(arizona.id));
+		futures::join!(
+			create_assertion(earth, &store),
+			create_assertion(usa, &store),
+			create_assertion(arizona, &store),
+			create_assertion(phoenix, &store),
+		);
 	}
 
 	/// The assertion most commonly used for the [`create` test](test_create).
@@ -150,44 +149,43 @@ mod tests
 	#[tokio::test]
 	async fn retrieve()
 	{
-		util::temp_store(|store| async move
-		{
-			let earth = BincodeLocation::create("Earth".into(), &store).await.unwrap();
-			let usa = BincodeLocation {location: &earth, store}.create_inner("USA".into()).await.unwrap();
-			let arizona = BincodeLocation {location: &usa, store}.create_inner("Arizona".into()).await.unwrap();
-			let phoenix = BincodeLocation {location: &arizona, store}.create_inner("Phoenix".into()).await.unwrap();
+		let store = util::temp_store();
 
-			let start = Instant::now();
+		let earth = BincodeLocation::create("Earth".into(), &store).await.unwrap();
+		let usa = BincodeLocation {location: &earth, store: &store}.create_inner("USA".into()).await.unwrap();
+		let arizona = BincodeLocation {location: &usa, store: &store}.create_inner("Arizona".into()).await.unwrap();
+		let phoenix = BincodeLocation {location: &arizona, store: &store}.create_inner("Phoenix".into()).await.unwrap();
 
-			let (everything, only_arizona) = futures::try_join!(
-				// Retrieve everything.
-				BincodeLocation::retrieve(&Default::default(), &store),
+		let start = Instant::now();
 
-				// Retrieve Arizona
-				BincodeLocation::retrieve(
-					&query::Location
-					{
-						id: Match::HasAny(vec![Borrowed(&earth.id), Borrowed(&arizona.id)].into_iter().collect()),
-						outer: query::OuterLocation::Some(query::Location::default().into()),
-						..Default::default()
-					},
-					&store,
-				),
-			).unwrap();
+		let (everything, only_arizona) = futures::try_join!(
+			// Retrieve everything.
+			BincodeLocation::retrieve(&Default::default(), &store),
 
-			println!("\n>>>>> BincodeLocation::retrieve {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 2);
+			// Retrieve Arizona
+			BincodeLocation::retrieve(
+				&query::Location
+				{
+					id: Match::HasAny(vec![Borrowed(&earth.id), Borrowed(&arizona.id)].into_iter().collect()),
+					outer: query::OuterLocation::Some(query::Location::default().into()),
+					..Default::default()
+				},
+				&store,
+			),
+		).unwrap();
 
-			// Assert the results contains all values
-			assert!(everything.contains(&earth));
-			assert!(everything.contains(&usa));
-			assert!(everything.contains(&arizona));
-			assert!(everything.contains(&phoenix));
+		println!("\n>>>>> BincodeLocation::retrieve {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 2);
 
-			// Assert the results contains all values
-			assert!(!only_arizona.contains(&earth));
-			assert!(!only_arizona.contains(&usa));
-			assert!(only_arizona.contains(&arizona));
-			assert!(!only_arizona.contains(&phoenix));
-		}).await
+		// Assert the results contains all values
+		assert!(everything.contains(&earth));
+		assert!(everything.contains(&usa));
+		assert!(everything.contains(&arizona));
+		assert!(everything.contains(&phoenix));
+
+		// Assert the results contains all values
+		assert!(!only_arizona.contains(&earth));
+		assert!(!only_arizona.contains(&usa));
+		assert!(only_arizona.contains(&arizona));
+		assert!(!only_arizona.contains(&phoenix));
 	}
 }

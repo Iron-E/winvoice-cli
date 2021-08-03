@@ -77,60 +77,59 @@ mod tests
 	#[tokio::test]
 	async fn delete()
 	{
-		util::temp_store(|store| async move
+		let store = util::temp_store();
+
+		let earth = BincodeLocation
 		{
-			let earth = BincodeLocation
-			{
-				location: &BincodeLocation::create("Earth".into(), &store).await.unwrap(),
-				store,
-			};
+			location: &BincodeLocation::create("Earth".into(), &store).await.unwrap(),
+			store: &store,
+		};
 
-			let big_old_test = BincodeOrganization
-			{
-				organization: &BincodeOrganization::create(
-					earth.location.clone(),
-					"Big Old Test Corporation".into(),
-					&store,
-				).await.unwrap(),
-				store,
-			};
+		let big_old_test = BincodeOrganization
+		{
+			organization: &BincodeOrganization::create(
+				earth.location.clone(),
+				"Big Old Test Corporation".into(),
+				&store,
+			).await.unwrap(),
+			store: &store,
+		};
 
-			let testy = BincodePerson
-			{
-				person: &BincodePerson::create(
-					"Testy Mćtesterson".into(),
-					&store,
-				).await.unwrap(),
-				store,
-			};
+		let testy = BincodePerson
+		{
+			person: &BincodePerson::create(
+				"Testy Mćtesterson".into(),
+				&store,
+			).await.unwrap(),
+			store: &store,
+		};
 
-			let ceo_testy = BincodeEmployee
-			{
-				employee: &BincodeEmployee::create(
-					vec![("Office".into(), Contact::Address {location_id: earth.location.id, export: false})].into_iter().collect(),
-					big_old_test.organization.clone(),
-					testy.person.clone(),
-					EmployeeStatus::Employed,
-					"CEO of Tests".into(),
-					&store,
-				).await.unwrap(),
-				store,
-			};
+		let ceo_testy = BincodeEmployee
+		{
+			employee: &BincodeEmployee::create(
+				vec![("Office".into(), Contact::Address {location_id: earth.location.id, export: false})].into_iter().collect(),
+				big_old_test.organization.clone(),
+				testy.person.clone(),
+				EmployeeStatus::Employed,
+				"CEO of Tests".into(),
+				&store,
+			).await.unwrap(),
+			store: &store,
+		};
 
-			let start = Instant::now();
-			// Assert that the deletion fails when restricted
-			assert!(testy.delete(false).await.is_err());
-			// Assert that the deletion works when cascading
-			assert!(testy.delete(true).await.is_ok());
-			println!("\n>>>>> BincodePerson::delete {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 2);
+		let start = Instant::now();
+		// Assert that the deletion fails when restricted
+		assert!(testy.delete(false).await.is_err());
+		// Assert that the deletion works when cascading
+		assert!(testy.delete(true).await.is_ok());
+		println!("\n>>>>> BincodePerson::delete {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 2);
 
-			// Assert that `testy` and its referencing employee is gone.
-			assert!(!testy.filepath().is_file());
-			assert!(!ceo_testy.filepath().is_file());
+		// Assert that `testy` and its referencing employee is gone.
+		assert!(!testy.filepath().is_file());
+		assert!(!ceo_testy.filepath().is_file());
 
-			// Assert that the independent files still exist.
-			assert!(big_old_test.filepath().is_file());
-			assert!(earth.filepath().is_file());
-		}).await;
+		// Assert that the independent files still exist.
+		assert!(big_old_test.filepath().is_file());
+		assert!(earth.filepath().is_file());
 	}
 }

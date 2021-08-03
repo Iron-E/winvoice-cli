@@ -94,95 +94,94 @@ mod tests
 	#[tokio::test]
 	async fn delete()
 	{
-		util::temp_store(|store| async move
+		let store = util::temp_store();
+
+		let earth = BincodeLocation
 		{
-			let earth = BincodeLocation
-			{
-				location: &BincodeLocation::create("Earth".into(), &store).await.unwrap(),
-				store,
-			};
+			location: &BincodeLocation::create("Earth".into(), &store).await.unwrap(),
+			store: &store,
+		};
 
-			let mut big_old_test = BincodeOrganization::create(
-				earth.location.clone(),
-				"Big Old Test Corporation".into(),
+		let mut big_old_test = BincodeOrganization::create(
+			earth.location.clone(),
+			"Big Old Test Corporation".into(),
+			&store,
+		).await.unwrap();
+
+		let testy = BincodePerson
+		{
+			person: &BincodePerson::create(
+				"Testy Mćtesterson".into(),
 				&store,
-			).await.unwrap();
+			).await.unwrap(),
+			store: &store,
+		};
 
-			let testy = BincodePerson
-			{
-				person: &BincodePerson::create(
-					"Testy Mćtesterson".into(),
-					&store,
-				).await.unwrap(),
-				store,
-			};
-
-			let ceo_testy = BincodeEmployee
-			{
-				employee: &BincodeEmployee::create(
-					vec![("Work".into(), Contact::Address {location_id: earth.location.id, export: false})].into_iter().collect(),
-					big_old_test.clone(),
-					testy.person.clone(),
-					EmployeeStatus::Employed,
-					"CEO of Tests".into(),
-					&store,
-				).await.unwrap(),
-				store,
-			};
-
-			let mut creation = BincodeJob::create(
+		let ceo_testy = BincodeEmployee
+		{
+			employee: &BincodeEmployee::create(
+				vec![("Work".into(), Contact::Address {location_id: earth.location.id, export: false})].into_iter().collect(),
 				big_old_test.clone(),
-				Utc::now(),
-				Money::new(2_00, 2, Currency::USD),
-				"Test the job creation function".into(),
+				testy.person.clone(),
+				EmployeeStatus::Employed,
+				"CEO of Tests".into(),
 				&store,
-			).await.unwrap();
+			).await.unwrap(),
+			store: &store,
+		};
 
-			creation.start_timesheet(ceo_testy.employee.id);
-			BincodeJob {job: &creation, store}.update().await.unwrap();
+		let mut creation = BincodeJob::create(
+			big_old_test.clone(),
+			Utc::now(),
+			Money::new(2_00, 2, Currency::USD),
+			"Test the job creation function".into(),
+			&store,
+		).await.unwrap();
 
-			let start = Instant::now();
-			// Assert that the deletion fails when restricted
-			assert!(ceo_testy.delete(false).await.is_err());
-			// Assert that the deletion works when cascading
-			assert!(ceo_testy.delete(true).await.is_ok());
-			println!("\n>>>>> BincodeEmployee::delete {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 2);
+		creation.start_timesheet(ceo_testy.employee.id);
+		BincodeJob {job: &creation, store: &store}.update().await.unwrap();
 
-			// Assert the deleted file is gone.
-			assert!(!ceo_testy.filepath().is_file());
+		let start = Instant::now();
+		// Assert that the deletion fails when restricted
+		assert!(ceo_testy.delete(false).await.is_err());
+		// Assert that the deletion works when cascading
+		assert!(ceo_testy.delete(true).await.is_ok());
+		println!("\n>>>>> BincodeEmployee::delete {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 2);
 
-			// Assert that the relevant files still exist
-			assert!(BincodeOrganization {organization: &big_old_test, store}.filepath().is_file());
-			assert!(BincodeJob {job: &creation, store}.filepath().is_file());
-			assert!(earth.filepath().is_file());
-			assert!(testy.filepath().is_file());
+		// Assert the deleted file is gone.
+		assert!(!ceo_testy.filepath().is_file());
 
-			// NOTE: I don't know if this statement is really necessary.
-			big_old_test = BincodeOrganization::retrieve(
-				&query::Organization
+		// Assert that the relevant files still exist
+		assert!(BincodeOrganization {organization: &big_old_test, store: &store}.filepath().is_file());
+		assert!(BincodeJob {job: &creation, store: &store}.filepath().is_file());
+		assert!(earth.filepath().is_file());
+		assert!(testy.filepath().is_file());
+
+		// NOTE: I don't know if this statement is really necessary.
+		big_old_test = BincodeOrganization::retrieve(
+			&query::Organization
+			{
+				id: query::Match::EqualTo(Borrowed(&big_old_test.id)),
+				..Default::default()
+			},
+			&store,
+		).await.unwrap().iter().next().unwrap().clone();
+
+		creation = BincodeJob::retrieve(
+			&query::Job
+			{
+				client: query::Organization
 				{
 					id: query::Match::EqualTo(Borrowed(&big_old_test.id)),
 					..Default::default()
 				},
-				&store,
-			).await.unwrap().iter().next().unwrap().clone();
+				id: query::Match::EqualTo(Borrowed(&creation.id)),
+				..Default::default()
+			},
+			&store,
+		).await.unwrap().iter().next().unwrap().clone();
 
-			creation = BincodeJob::retrieve(
-				&query::Job
-				{
-					client: query::Organization
-					{
-						id: query::Match::EqualTo(Borrowed(&big_old_test.id)),
-						..Default::default()
-					},
-					id: query::Match::EqualTo(Borrowed(&creation.id)),
-					..Default::default()
-				},
-				&store,
-			).await.unwrap().iter().next().unwrap().clone();
-
-			// Assert that no references to the deleted entity remain.
-			assert!(creation.timesheets.iter().all(|t| t.employee_id != ceo_testy.employee.id));
-		}).await;
+		// Assert that no references to the deleted entity remain.
+		assert!(creation.timesheets.iter().all(|t| t.employee_id != ceo_testy.employee.id));
 	}
 }

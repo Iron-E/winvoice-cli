@@ -87,28 +87,27 @@ mod tests
 	#[tokio::test]
 	async fn create()
 	{
-		util::temp_store(|store| async move
-		{
-			let start = Instant::now();
+		let store = util::temp_store();
 
-			let (widdle, long, steven, jingle_bob, asldkj_jdsoai) = futures::try_join!(
-				BincodePerson::create("Widdle".into(), &store),
-				BincodePerson::create("Long".into(), &store),
-				BincodePerson::create("Steven".into(), &store),
-				BincodePerson::create("JingleBob".into(), &store),
-				BincodePerson::create("asldkj jdsoai".into(), &store),
-			).unwrap();
+		let start = Instant::now();
 
-			println!("\n>>>>> BincodePerson::create {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 5);
+		let (widdle, long, steven, jingle_bob, asldkj_jdsoai) = futures::try_join!(
+			BincodePerson::create("Widdle".into(), &store),
+			BincodePerson::create("Long".into(), &store),
+			BincodePerson::create("Steven".into(), &store),
+			BincodePerson::create("JingleBob".into(), &store),
+			BincodePerson::create("asldkj jdsoai".into(), &store),
+		).unwrap();
 
-			futures::join!(
-				create_assertion(widdle, &store),
-				create_assertion(long, &store),
-				create_assertion(steven, &store),
-				create_assertion(jingle_bob, &store),
-				create_assertion(asldkj_jdsoai, &store),
-			);
-		}).await;
+		println!("\n>>>>> BincodePerson::create {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 5);
+
+		futures::join!(
+			create_assertion(widdle, &store),
+			create_assertion(long, &store),
+			create_assertion(steven, &store),
+			create_assertion(jingle_bob, &store),
+			create_assertion(asldkj_jdsoai, &store),
+		);
 	}
 
 	async fn create_assertion(person: Person, store: &Store)
@@ -120,52 +119,51 @@ mod tests
 	#[tokio::test]
 	async fn retrieve()
 	{
-		util::temp_store(|store| async move
-		{
-			let (flingo, bob, slimdi, longone) = futures::try_join!(
-				BincodePerson::create("flingo".into(), &store),
-				BincodePerson::create("bob".into(), &store),
-				BincodePerson::create("slimdi".into(), &store),
-				BincodePerson::create("longone".into(), &store),
-			).unwrap();
+		let store = util::temp_store();
 
-			let start = Instant::now();
+		let (flingo, bob, slimdi, longone) = futures::try_join!(
+			BincodePerson::create("flingo".into(), &store),
+			BincodePerson::create("bob".into(), &store),
+			BincodePerson::create("slimdi".into(), &store),
+			BincodePerson::create("longone".into(), &store),
+		).unwrap();
 
-			let (only_bob, longone_slimdi) = futures::try_join!(
-				// Retrieve bob
-				BincodePerson::retrieve(
-					&query::Person
-					{
-						id: Match::EqualTo(Borrowed(&bob.id)),
-						..Default::default()
-					},
-					&store,
-				),
+		let start = Instant::now();
 
-				// Retrieve longone and slimdi
-				BincodePerson::retrieve(
-					&query::Person
-					{
-						name: MatchStr::Regex(format!("^({}|{})$", longone.name, slimdi.name)),
-						..Default::default()
-					},
-					&store,
-				),
-			).unwrap();
+		let (only_bob, longone_slimdi) = futures::try_join!(
+			// Retrieve bob
+			BincodePerson::retrieve(
+				&query::Person
+				{
+					id: Match::EqualTo(Borrowed(&bob.id)),
+					..Default::default()
+				},
+				&store,
+			),
 
-			println!("\n>>>>> BincodePerson::retrieve {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 2);
+			// Retrieve longone and slimdi
+			BincodePerson::retrieve(
+				&query::Person
+				{
+					name: MatchStr::Regex(format!("^({}|{})$", longone.name, slimdi.name)),
+					..Default::default()
+				},
+				&store,
+			),
+		).unwrap();
 
-			// Assert bob is the only one retrieved
-			assert!(!only_bob.contains(&flingo));
-			assert!(only_bob.contains(&bob));
-			assert!(!only_bob.contains(&slimdi));
-			assert!(!only_bob.contains(&longone));
+		println!("\n>>>>> BincodePerson::retrieve {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 2);
 
-			// Assert bob is the only one retrieved
-			assert!(!longone_slimdi.contains(&flingo));
-			assert!(!longone_slimdi.contains(&bob));
-			assert!(longone_slimdi.contains(&slimdi));
-			assert!(longone_slimdi.contains(&longone));
-		}).await;
+		// Assert bob is the only one retrieved
+		assert!(!only_bob.contains(&flingo));
+		assert!(only_bob.contains(&bob));
+		assert!(!only_bob.contains(&slimdi));
+		assert!(!only_bob.contains(&longone));
+
+		// Assert bob is the only one retrieved
+		assert!(!longone_slimdi.contains(&flingo));
+		assert!(!longone_slimdi.contains(&bob));
+		assert!(longone_slimdi.contains(&slimdi));
+		assert!(longone_slimdi.contains(&longone));
 	}
 }

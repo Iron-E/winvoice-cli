@@ -89,53 +89,52 @@ mod tests
 	#[tokio::test]
 	async fn create()
 	{
-		util::temp_store(|store| async move
-		{
-			let earth_id = Id::new_v4();
-			let usa_id = Id::new_v4();
-			let arizona_id = Id::new_v4();
-			let phoenix_id = Id::new_v4();
-			let some_id = Id::new_v4();
+		let store = util::temp_store();
 
-			let start = Instant::now();
+		let earth_id = Id::new_v4();
+		let usa_id = Id::new_v4();
+		let arizona_id = Id::new_v4();
+		let phoenix_id = Id::new_v4();
+		let some_id = Id::new_v4();
 
-			let (alsd, eal, aaa, focj, giguy) = futures::try_join!(
-				BincodeOrganization::create(
-					Location {name: "Earth".into(), id: Id::new_v4(), outer_id: None},
-					"alsdkjaldkj".into(), &store
-				),
+		let start = Instant::now();
 
-				BincodeOrganization::create(
-					Location {name: "USA".into(), id: usa_id, outer_id: Some(earth_id)},
-					"alskdjalgkh  ladhkj EAL ISdh".into(), &store
-				),
+		let (alsd, eal, aaa, focj, giguy) = futures::try_join!(
+			BincodeOrganization::create(
+				Location {name: "Earth".into(), id: Id::new_v4(), outer_id: None},
+				"alsdkjaldkj".into(), &store
+			),
 
-				BincodeOrganization::create(
-					Location {name: "Arizona".into(), id: arizona_id, outer_id: Some(earth_id)},
-					" AAA – 44 %%".into(), &store
-				),
+			BincodeOrganization::create(
+				Location {name: "USA".into(), id: usa_id, outer_id: Some(earth_id)},
+				"alskdjalgkh  ladhkj EAL ISdh".into(), &store
+			),
 
-				BincodeOrganization::create(
-					Location {name: "Phoenix".into(), id: phoenix_id, outer_id: Some(arizona_id)},
-					" ^^^ ADSLKJDLASKJD FOCJCI".into(), &store
-				),
+			BincodeOrganization::create(
+				Location {name: "Arizona".into(), id: arizona_id, outer_id: Some(earth_id)},
+				" AAA – 44 %%".into(), &store
+			),
 
-				BincodeOrganization::create(
-					Location {name: "Some Road".into(), id: some_id, outer_id: Some(phoenix_id)},
-					"aldkj doiciuc giguy &&".into(), &store
-				),
-			).unwrap();
+			BincodeOrganization::create(
+				Location {name: "Phoenix".into(), id: phoenix_id, outer_id: Some(arizona_id)},
+				" ^^^ ADSLKJDLASKJD FOCJCI".into(), &store
+			),
 
-			println!("\n>>>>> BincodeOrganization::create {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 5);
+			BincodeOrganization::create(
+				Location {name: "Some Road".into(), id: some_id, outer_id: Some(phoenix_id)},
+				"aldkj doiciuc giguy &&".into(), &store
+			),
+		).unwrap();
 
-			futures::join!(
-				create_assertion(alsd, store),
-				create_assertion(eal, store),
-				create_assertion(aaa, store),
-				create_assertion(focj, store),
-				create_assertion(giguy, store),
-			);
-		});
+		println!("\n>>>>> BincodeOrganization::create {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 5);
+
+		futures::join!(
+			create_assertion(alsd, &store),
+			create_assertion(eal, &store),
+			create_assertion(aaa, &store),
+			create_assertion(focj, &store),
+			create_assertion(giguy, &store),
+		);
 	}
 
 	async fn create_assertion(organization: Organization, store: &Store)
@@ -147,52 +146,51 @@ mod tests
 	#[tokio::test]
 	async fn retrieve()
 	{
-		util::temp_store(|store| async move
-		{
-			let earth_id = Id::new_v4();
-			let usa_id = Id::new_v4();
-			let arizona_id = Id::new_v4();
+		let store = util::temp_store();
 
-			let (packing, eal, aaa) =  futures::try_join!(
-				BincodeOrganization::create(
-					Location {name: "Earth".into(), id: earth_id, outer_id: None},
-					"Packing Co".into(), &store
-				),
+		let earth_id = Id::new_v4();
+		let usa_id = Id::new_v4();
+		let arizona_id = Id::new_v4();
 
-				BincodeOrganization::create(
-					Location {name: "USA".into(), id: usa_id, outer_id: Some(earth_id)},
-					"alskdjalgkh  ladhkj EAL ISdh".into(), &store
-				),
+		let (packing, eal, aaa) =  futures::try_join!(
+			BincodeOrganization::create(
+				Location {name: "Earth".into(), id: earth_id, outer_id: None},
+				"Packing Co".into(), &store
+			),
 
-				BincodeOrganization::create(
-					Location {name: "Arizona".into(), id: arizona_id, outer_id: Some(usa_id)},
-					" AAA – 44 %%".into(), &store
-				),
-			).unwrap();
+			BincodeOrganization::create(
+				Location {name: "USA".into(), id: usa_id, outer_id: Some(earth_id)},
+				"alskdjalgkh  ladhkj EAL ISdh".into(), &store
+			),
 
-			let start = Instant::now();
+			BincodeOrganization::create(
+				Location {name: "Arizona".into(), id: arizona_id, outer_id: Some(usa_id)},
+				" AAA – 44 %%".into(), &store
+			),
+		).unwrap();
 
-			// retrieve `packing` and `eal`
-			let results = BincodeOrganization::retrieve(
-				&query::Organization
+		let start = Instant::now();
+
+		// retrieve `packing` and `eal`
+		let results = BincodeOrganization::retrieve(
+			&query::Organization
+			{
+				location: query::Location
 				{
-					location: query::Location
-					{
-						id: Match::HasAny(vec![Borrowed(&earth_id), Borrowed(&usa_id)].into_iter().collect()),
-						..Default::default()
-					},
-					name: MatchStr::Regex(format!("^({}|{})$", packing.name, eal.name)),
+					id: Match::HasAny(vec![Borrowed(&earth_id), Borrowed(&usa_id)].into_iter().collect()),
 					..Default::default()
 				},
-				&store,
-			).await.unwrap();
+				name: MatchStr::Regex(format!("^({}|{})$", packing.name, eal.name)),
+				..Default::default()
+			},
+			&store,
+		).await.unwrap();
 
-			println!("\n>>>>> BincodeOrganization::retrieve {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+		println!("\n>>>>> BincodeOrganization::retrieve {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 
-			// test if `packing` and `eal` were retrieved
-			assert!(results.contains(&packing));
-			assert!(results.contains(&eal));
-			assert!(!results.contains(&aaa));
-		});
+		// test if `packing` and `eal` were retrieved
+		assert!(results.contains(&packing));
+		assert!(results.contains(&eal));
+		assert!(!results.contains(&aaa));
 	}
 }

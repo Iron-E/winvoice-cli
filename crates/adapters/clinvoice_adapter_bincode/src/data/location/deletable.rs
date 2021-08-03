@@ -93,70 +93,69 @@ mod tests
 	#[tokio::test]
 	async fn delete()
 	{
-		util::temp_store(|store| async move
+		let store = util::temp_store();
+
+		let earth = BincodeLocation
 		{
-			let earth = BincodeLocation
-			{
-				location: &BincodeLocation::create("Earth".into(), store).await.unwrap(),
-				store,
-			};
+			location: &BincodeLocation::create("Earth".into(), &store).await.unwrap(),
+			store: &store,
+		};
 
-			let usa = BincodeLocation
-			{
-				location: &earth.create_inner("USA".into()).await.unwrap(),
-				store,
-			};
+		let usa = BincodeLocation
+		{
+			location: &earth.create_inner("USA".into()).await.unwrap(),
+			store: &store,
+		};
 
-			let arizona = BincodeLocation
-			{
-				location: &usa.create_inner("Arizona".into()).await.unwrap(),
-				store,
-			};
+		let arizona = BincodeLocation
+		{
+			location: &usa.create_inner("Arizona".into()).await.unwrap(),
+			store: &store,
+		};
 
-			let phoenix = BincodeLocation
-			{
-				location: &arizona.create_inner("Phoenix".into()).await.unwrap(),
-				store,
-			};
+		let phoenix = BincodeLocation
+		{
+			location: &arizona.create_inner("Phoenix".into()).await.unwrap(),
+			store: &store,
+		};
 
-			let dogood = BincodeOrganization
-			{
-				organization: &BincodeOrganization::create(
-					arizona.location.clone(),
-					"DoGood Inc".into(),
-					&store
-				).await.unwrap(),
-				store,
-			};
+		let dogood = BincodeOrganization
+		{
+			organization: &BincodeOrganization::create(
+				arizona.location.clone(),
+				"DoGood Inc".into(),
+				&store
+			).await.unwrap(),
+			store: &store,
+		};
 
-			let start = Instant::now();
+		let start = Instant::now();
 
-			// delete just phoenix.
-			phoenix.delete(false).await.unwrap();
+		// delete just phoenix.
+		phoenix.delete(false).await.unwrap();
 
-			// assert that phoenix is gone.
-			assert!(!phoenix.filepath().is_file());
+		// assert that phoenix is gone.
+		assert!(!phoenix.filepath().is_file());
 
-			// Assert that every location inside the USA is there
-			assert!(earth.filepath().is_file());
-			assert!(usa.filepath().is_file());
-			assert!(arizona.filepath().is_file());
+		// Assert that every location inside the USA is there
+		assert!(earth.filepath().is_file());
+		assert!(usa.filepath().is_file());
+		assert!(arizona.filepath().is_file());
 
-			// assert that `dogood`, located in arizona, is there
-			assert!(dogood.filepath().is_file());
+		// assert that `dogood`, located in arizona, is there
+		assert!(dogood.filepath().is_file());
 
-			// delete the usa and everything in it.
-			usa.delete(true).await.unwrap();
+		// delete the usa and everything in it.
+		usa.delete(true).await.unwrap();
 
-			println!("\n>>>>> BincodeLocation::delete {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 2);
+		println!("\n>>>>> BincodeLocation::delete {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 2);
 
-			// Assert that every location inside the USA is gone
-			assert!(earth.filepath().is_file());
-			assert!(!usa.filepath().is_file());
-			assert!(!arizona.filepath().is_file());
+		// Assert that every location inside the USA is gone
+		assert!(earth.filepath().is_file());
+		assert!(!usa.filepath().is_file());
+		assert!(!arizona.filepath().is_file());
 
-			// assert that `dogood`, located in arizona, is gone.
-			assert!(!dogood.filepath().is_file());
-		}).await;
+		// assert that `dogood`, located in arizona, is gone.
+		assert!(!dogood.filepath().is_file());
 	}
 }

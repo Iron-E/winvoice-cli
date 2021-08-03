@@ -35,7 +35,10 @@ impl Deletable for BincodePerson<'_, '_>
 		if cascade
 		{
 			stream::iter(associated_employees.into_iter().map(Ok)).try_for_each_concurrent(None,
-				|e| BincodeEmployee {employee: &e, store: self.store}.delete(cascade)
+				|e| async move
+				{
+					BincodeEmployee {employee: &e, store: self.store}.delete(cascade).await
+				}
 			).await?;
 		}
 		else if !associated_employees.is_empty()

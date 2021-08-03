@@ -49,11 +49,17 @@ impl Deletable for BincodeLocation<'_, '_>
 		if cascade
 		{
 			stream::iter(associated_organizations.into_iter().map(Ok)).try_for_each_concurrent(None,
-				|o| BincodeOrganization {organization: &o, store: self.store}.delete(cascade)
+				|o| async move
+				{
+					BincodeOrganization {organization: &o, store: self.store}.delete(cascade).await
+				}
 			).await?;
 
 			stream::iter(associated_locations.into_iter().map(Ok)).try_for_each_concurrent(None,
-				|l| BincodeLocation {location: &l, store: self.store}.delete(cascade)
+				|l| async move
+				{
+					BincodeLocation {location: &l, store: self.store}.delete(cascade).await
+				}
 			).await?;
 		}
 		else if !(associated_locations.is_empty() || associated_organizations.is_empty())

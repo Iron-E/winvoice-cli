@@ -47,11 +47,17 @@ impl Deletable for BincodeOrganization<'_, '_>
 		if cascade
 		{
 			stream::iter(associated_jobs.into_iter().map(Ok)).try_for_each_concurrent(None,
-				|j| BincodeJob {job: &j, store: self.store}.delete(cascade)
+				|j| async move
+				{
+					BincodeJob {job: &j, store: self.store}.delete(cascade).await
+				}
 			).await?;
 
 			stream::iter(associated_employees.into_iter().map(Ok)).try_for_each_concurrent(None,
-				|e| BincodeEmployee {employee: &e, store: self.store}.delete(cascade)
+				|e| async move
+				{
+					BincodeEmployee {employee: &e, store: self.store}.delete(cascade).await
+				}
 			).await?;
 		}
 		else if !(associated_jobs.is_empty() && associated_employees.is_empty())

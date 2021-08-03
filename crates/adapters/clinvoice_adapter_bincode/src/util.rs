@@ -151,13 +151,13 @@ mod tests
 {
 	use
 	{
-		std::{collections::HashSet, time::Instant},
+		std::{collections::HashSet, fs, time::Instant},
 
-		super::{fs, PathBuf},
-
-		futures::stream::{self, StreamExt},
+		super::PathBuf,
 	};
 
+	/// NOTE: this test is `async` because of the single `create_store_dir` call.
+	/// TODO: see if `Stream`ing to an `Arc<Mutex<HashSet>>` would make this faster
 	#[tokio::test]
 	async fn unique_id()
 	{
@@ -168,7 +168,7 @@ mod tests
 
 		if test_path.is_dir()
 		{
-			fs::remove_dir_all(&test_path).await.unwrap();
+			fs::remove_dir_all(&test_path).unwrap();
 		}
 
 		// Create the `test_path`.
@@ -176,15 +176,19 @@ mod tests
 
 		let start = Instant::now();
 
-		let ids = HashSet::with_capacity(LOOPS);
-		stream::iter(0..LOOPS).for_each_concurrent(None, |_| async move
-		{
-			let id = super::unique_id(&test_path).unwrap();
-			ids.insert(id);
+		let ids = (0..LOOPS).fold(
+			HashSet::with_capacity(LOOPS),
+			|mut s, _|
+			{
+				let id = super::unique_id(&test_path).unwrap();
+				s.insert(id);
 
-			// Creating the next file worked.
-			assert!(fs::write(&test_path.join(id.to_string()), "TEST").await.is_ok());
-		}).await;
+				// Creating the next file worked.
+				assert!(fs::write(&test_path.join(id.to_string()), "TEST").is_ok());
+
+				s
+			}
+		);
 
 		println!("\n>>>>> util::unique_id {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / (LOOPS as u128));
 

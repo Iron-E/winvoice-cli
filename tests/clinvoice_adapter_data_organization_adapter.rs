@@ -23,7 +23,7 @@ async fn to_location()
 
 	let start = Instant::now();
 	// Retrieve the written employees back into the `Employee` structure.
-	let dogood_location = BincodeOrganization::to_location::<BincodeLocation>(&dogood, store).await;
+	let dogood_location = BincodeOrganization::to_location::<BincodeLocation>(&dogood, &store).await;
 	println!("\n>>>>> BincodeOrganization::to_location {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 
 	// Assert that the location retrieved is the location expected

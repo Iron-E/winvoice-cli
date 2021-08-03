@@ -35,7 +35,7 @@ async fn to_organization()
 	).await.unwrap();
 
 	let start = Instant::now();
-	let test_org = BincodeJob::to_organization::<BincodeOrganization>(&test_job, store).await;
+	let test_org = BincodeJob::to_organization::<BincodeOrganization>(&test_job, &store).await;
 	println!("\n>>>>> BincodeJob::to_organization {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 
 	assert_eq!(dogood, test_org.unwrap());
@@ -135,7 +135,7 @@ async fn to_view()
 	};
 
 	let start = Instant::now();
-	let create_job_view_result = BincodeJob::into_view::<BincodeEmployee, BincodeLocation, BincodeOrganization, BincodePerson>(create_job, store).await;
+	let create_job_view_result = BincodeJob::into_view::<BincodeEmployee, BincodeLocation, BincodeOrganization, BincodePerson>(create_job, &store).await;
 	println!("\n>>>>> BincodeJob::to_view {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
 
 	assert_eq!(create_job_view, create_job_view_result.unwrap());

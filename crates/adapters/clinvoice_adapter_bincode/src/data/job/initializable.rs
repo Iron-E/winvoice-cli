@@ -1,13 +1,15 @@
-use
-{
-	super::BincodeJob,
-	crate::
-	{
-		data::{Error, Result},
-		util,
-	},
+use clinvoice_adapter::{
+	data::Initializable,
+	Store,
+};
 
-	clinvoice_adapter::{data::Initializable, Store},
+use super::BincodeJob;
+use crate::{
+	data::{
+		Error,
+		Result,
+	},
+	util,
 };
 
 #[async_trait::async_trait]

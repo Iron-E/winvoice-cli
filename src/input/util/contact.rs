@@ -1,13 +1,19 @@
-use
-{
-	core::fmt::Display,
-	std::{collections::HashMap, io},
+use core::fmt::Display;
+use std::{
+	collections::HashMap,
+	io,
+};
 
-	super::menu,
-	crate::{DynResult, input},
+use clinvoice_adapter::{
+	data::LocationAdapter,
+	Store,
+};
+use clinvoice_data::views::ContactView;
 
-	clinvoice_adapter::{data::LocationAdapter, Store},
-	clinvoice_data::views::ContactView,
+use super::menu;
+use crate::{
+	input,
+	DynResult,
 };
 
 /// # Summary
@@ -17,9 +23,13 @@ use
 /// # Errors
 ///
 /// Will error whenever [`input::select_one`] or [`input::text`] does.
-fn add_menu<'err, L>(contact_info: &mut HashMap<String, ContactView>, store: &Store) -> DynResult<'err, ()> where
-	L : LocationAdapter,
-	<L as LocationAdapter>::Error : 'err,
+fn add_menu<'err, L>(
+	contact_info: &mut HashMap<String, ContactView>,
+	store: &Store,
+) -> DynResult<'err, ()>
+where
+	L: LocationAdapter,
+	<L as LocationAdapter>::Error: 'err,
 {
 	const ADDRESS: &str = "Address";
 	const EMAIL: &str = "Email";
@@ -31,7 +41,10 @@ fn add_menu<'err, L>(contact_info: &mut HashMap<String, ContactView>, store: &St
 	/// Get whether or not a user wants to export a piece of contact information.
 	fn get_export(entity: impl Display) -> input::Result<bool>
 	{
-		menu::confirm(format!("Do you want \"{}\" to be listed when exporting `Job`s?", entity))
+		menu::confirm(format!(
+			"Do you want \"{}\" to be listed when exporting `Job`s?",
+			entity
+		))
 	}
 
 	/// # Summary
@@ -45,17 +58,18 @@ fn add_menu<'err, L>(contact_info: &mut HashMap<String, ContactView>, store: &St
 	/// # Summary
 	///
 	/// Collect necessary pieces of contact information and insert them into the `contact_info`.
-	macro_rules! insert
-	{
-		($variant: ident, $var: ident) =>
-		{
+	macro_rules! insert {
+		($variant:ident, $var:ident) => {
 			let label = get_label(&$var)?;
 			let export = get_export(&$var)?;
-			contact_info.insert(label, ContactView::$variant {$var, export});
+			contact_info.insert(label, ContactView::$variant { $var, export });
 		};
 	}
 
-	let contact_type = input::select_one(&ALL_CONTACT_TYPES, "Select which type of contact info to add")?;
+	let contact_type = input::select_one(
+		&ALL_CONTACT_TYPES,
+		"Select which type of contact info to add",
+	)?;
 	match contact_type
 	{
 		ADDRESS =>
@@ -98,12 +112,10 @@ fn delete_menu(contact_info: &mut HashMap<String, ContactView>) -> input::Result
 {
 	if !contact_info.is_empty()
 	{
-		contact_info.remove(
-			&input::select_one(
-				&contact_info.keys().cloned().collect::<Vec<_>>(),
-				"Select a piece of contact information to remove",
-			)?
-		);
+		contact_info.remove(&input::select_one(
+			&contact_info.keys().cloned().collect::<Vec<_>>(),
+			"Select a piece of contact information to remove",
+		)?);
 	}
 
 	Ok(())
@@ -119,10 +131,22 @@ fn delete_menu(contact_info: &mut HashMap<String, ContactView>) -> input::Result
 /// but will ignore [`input::Error::NotEdited`].
 fn edit_menu(contact_info: &mut HashMap<String, ContactView>) -> input::Result<()>
 {
-	if contact_info.is_empty() { return Ok(()); }
+	if contact_info.is_empty()
+	{
+		return Ok(());
+	}
 
-	let selected_key = input::select_one(&contact_info.keys().cloned().collect::<Vec<_>>(), "Select a piece of contact information to edit")?;
-	let typed_key = input::text(Some(selected_key.clone()), format!("Edit the label for \"{}\" (optional)", contact_info[&selected_key]))?;
+	let selected_key = input::select_one(
+		&contact_info.keys().cloned().collect::<Vec<_>>(),
+		"Select a piece of contact information to edit",
+	)?;
+	let typed_key = input::text(
+		Some(selected_key.clone()),
+		format!(
+			"Edit the label for \"{}\" (optional)",
+			contact_info[&selected_key]
+		),
+	)?;
 	let keys_differ = selected_key != typed_key;
 
 	/* This section is a little complicated, so there is some annotation to explain what is happening. */
@@ -130,15 +154,30 @@ fn edit_menu(contact_info: &mut HashMap<String, ContactView>) -> input::Result<(
 	// If the user edited the selected key, it must be that the new key does not already exist.
 	if keys_differ && contact_info.contains_key(&typed_key)
 	{
-		eprintln!("The label \"{}\" is already being used by \"{}\"", typed_key, contact_info[&typed_key]);
+		eprintln!(
+			"The label \"{}\" is already being used by \"{}\"",
+			typed_key, contact_info[&typed_key]
+		);
 		return Ok(());
 	}
 
 	// We allow users to edit email addresses and phone numebrs during this process, but not addresses.
 	// Users can only ever relabel an address, thus we have to gate addresses for below.
-	if matches!(contact_info[&selected_key], ContactView::Email {email: _, export: _} | ContactView::Phone {phone: _, export: _})
+	if matches!(
+		contact_info[&selected_key],
+		ContactView::Email {
+			email:  _,
+			export: _,
+		} | ContactView::Phone {
+			phone:  _,
+			export: _,
+		}
+	)
 	{
-		match input::edit_and_restore(&contact_info[&selected_key], format!("Please edit the {}", selected_key))
+		match input::edit_and_restore(
+			&contact_info[&selected_key],
+			format!("Please edit the {}", selected_key),
+		)
 		{
 			Ok(edit) => contact_info.insert(typed_key, edit),
 			Err(input::Error::NotEdited) => None,
@@ -147,16 +186,20 @@ fn edit_menu(contact_info: &mut HashMap<String, ContactView>) -> input::Result<(
 	}
 	// This check must come after, because the keys could differ but not be an `Address`.
 	// Further, we want an `else if` to avoid an unecessary clone of `typed_key`.
-	else if keys_differ // `&& let`, but that syntax isn't available yet
+	else if keys_differ
+	// `&& let`, but that syntax isn't available yet
 	{
-		if let ContactView::Address {location, export} = contact_info[&selected_key].clone()
+		if let ContactView::Address { location, export } = contact_info[&selected_key].clone()
 		{
-			contact_info.insert(typed_key, ContactView::Address {location, export});
+			contact_info.insert(typed_key, ContactView::Address { location, export });
 		}
 	}
 
 	// Finally we have to check _again_ if the keys differ, so that we can remove the old key if need-be.
-	if keys_differ { contact_info.remove(&selected_key); }
+	if keys_differ
+	{
+		contact_info.remove(&selected_key);
+	}
 
 	Ok(())
 }
@@ -174,15 +217,19 @@ fn edit_menu(contact_info: &mut HashMap<String, ContactView>) -> input::Result<(
 /// If a user manages to select an action (e.g. `ADD`, `CONTINUE`, `DELETE`) which is unaccounted
 /// for. This is __theoretically not possible__ but must be present to account for the case of an
 /// unrecoverable state of the program.
-pub fn menu<'err, L>(store: &Store) -> DynResult<'err, HashMap<String, ContactView>> where
-	L : LocationAdapter,
-	<L as LocationAdapter>::Error : 'err,
+pub fn menu<'err, L>(store: &Store) -> DynResult<'err, HashMap<String, ContactView>>
+where
+	L: LocationAdapter,
+	<L as LocationAdapter>::Error: 'err,
 {
 	let mut contact_info = HashMap::<String, ContactView>::new();
 
 	loop
 	{
-		let action = input::select_one(&menu::ALL_ACTIONS, "\nThis is the menu for creating contact information\nWhat would you like to do?")?;
+		let action = input::select_one(
+			&menu::ALL_ACTIONS,
+			"\nThis is the menu for creating contact information\nWhat would you like to do?",
+		)?;
 		match action
 		{
 			menu::ADD => add_menu::<L>(&mut contact_info, store)?,

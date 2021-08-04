@@ -1,14 +1,11 @@
-use
-{
-	std::error::Error,
+use std::error::Error;
 
-	crate::Store,
-};
+use crate::Store;
 
 #[async_trait::async_trait]
 pub trait Initializable
 {
-	type Error : Error;
+	type Error: Error;
 
 	/// # Summary
 	///

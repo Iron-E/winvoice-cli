@@ -1,8 +1,7 @@
-use
-{
-	clinvoice_data::Id,
-
-	serde::{Deserialize, Serialize},
+use clinvoice_data::Id;
+use serde::{
+	Deserialize,
+	Serialize,
 };
 
 /// # Summary
@@ -16,4 +15,3 @@ pub struct Employees
 	/// The [`Id`] of the employee which should be defaulted to when attaching to a timesheet.
 	pub default_id: Id,
 }
-

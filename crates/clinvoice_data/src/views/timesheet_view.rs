@@ -1,14 +1,17 @@
 mod display;
 
-use
-{
-	super::EmployeeView,
-	crate::Expense,
-	chrono::{DateTime, Utc},
+use chrono::{
+	DateTime,
+	Utc,
+};
+#[cfg(feature = "serde_support")]
+use serde::{
+	Deserialize,
+	Serialize,
 };
 
-#[cfg(feature="serde_support")]
-use serde::{Deserialize, Serialize};
+use super::EmployeeView;
+use crate::Expense;
 
 /// # Summary
 ///
@@ -21,7 +24,7 @@ use serde::{Deserialize, Serialize};
 /// it is proposed that the container for business logic contain an array of `Timesheet`, rather
 /// than only one.
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
-#[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
+#[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 pub struct TimesheetView
 {
 	/// # Summary

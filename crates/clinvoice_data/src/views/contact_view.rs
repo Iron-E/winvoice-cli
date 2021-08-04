@@ -1,23 +1,30 @@
 mod display;
 mod restorable_serde;
 
-use super::LocationView;
+#[cfg(feature = "serde_support")]
+use serde::{
+	Deserialize,
+	Serialize,
+};
 
-#[cfg(feature="serde_support")]
-use serde::{Deserialize, Serialize};
+use super::LocationView;
 
 /// # Summary
 ///
 /// A view of [`Location`](crate::Location).
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-#[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
-#[cfg_attr(feature="serde_support", serde(untagged))]
+#[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
+#[cfg_attr(feature = "serde_support", serde(untagged))]
 pub enum ContactView
 {
 	/// # Summary
 	///
 	/// A [`Location`](crate::Location).
-	Address {location: LocationView, export: bool},
+	Address
+	{
+		location: LocationView,
+		export:   bool,
+	},
 
 	/// # Summary
 	///
@@ -26,7 +33,10 @@ pub enum ContactView
 	/// # Example
 	///
 	/// * 'foo@bar.io'
-	Email {email: String, export: bool},
+	Email
+	{
+		email: String, export: bool
+	},
 
 	/// # Summary
 	///
@@ -45,5 +55,8 @@ pub enum ContactView
 	/// * '(603) 555-1234'
 	/// * '603-555-1234'
 	/// * '6035551234'
-	Phone {phone: String, export: bool},
+	Phone
+	{
+		phone: String, export: bool
+	},
 }

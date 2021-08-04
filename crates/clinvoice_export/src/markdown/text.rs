@@ -1,10 +1,16 @@
-use core::fmt::{Display, Formatter, Result};
+use core::fmt::{
+	Display,
+	Formatter,
+	Result,
+};
 
 /// # Summary
 ///
 /// Types of text within a Markdown document.
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub enum Text<D> where D : Display
+pub enum Text<D>
+where
+	D: Display,
 {
 	/// # Summary
 	///
@@ -46,7 +52,9 @@ pub enum Text<D> where D : Display
 	Math(D),
 }
 
-impl<D> Display for Text<D> where D : Display
+impl<D> Display for Text<D>
+where
+	D: Display,
 {
 	/// # Summary
 	///

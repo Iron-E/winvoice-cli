@@ -1,19 +1,22 @@
-use
-{
-	super::BincodePerson,
-	crate::
-	{
-		data::{Error, Result},
-		util,
+use clinvoice_adapter::{
+	data::{
+		Error as DataError,
+		Initializable,
+		PersonAdapter,
+		Updatable,
 	},
+	Store,
+};
+use clinvoice_data::Person;
+use clinvoice_query as query;
 
-	clinvoice_adapter::
-	{
-		data::{Error as DataError, Initializable, PersonAdapter, Updatable},
-		Store,
+use super::BincodePerson;
+use crate::{
+	data::{
+		Error,
+		Result,
 	},
-	clinvoice_data::Person,
-	clinvoice_query as query,
+	util,
 };
 
 #[async_trait::async_trait]
@@ -32,18 +35,22 @@ impl PersonAdapter for BincodePerson<'_, '_>
 	/// # Returns
 	///
 	/// The newly created [`Person`].
-	async fn create(name: String, store: &Store,) -> Result<Person>
+	async fn create(name: String, store: &Store) -> Result<Person>
 	{
 		let init_fut = Self::init(&store);
 
-		let person = Person
-		{
+		let person = Person {
 			id: util::unique_id(&Self::path(&store))?,
 			name,
 		};
 
 		init_fut.await?;
-		BincodePerson {person: &person, store}.update().await?;
+		BincodePerson {
+			person: &person,
+			store,
+		}
+		.update()
+		.await?;
 
 		Ok(person)
 	}
@@ -64,27 +71,37 @@ impl PersonAdapter for BincodePerson<'_, '_>
 	{
 		Self::init(&store).await?;
 
-		util::retrieve(Self::path(store),
-			|p| query.matches(p).map_err(|e| DataError::from(e).into())
-		).await
+		util::retrieve(Self::path(store), |p| {
+			query.matches(p).map_err(|e| DataError::from(e).into())
+		})
+		.await
 	}
 }
 
 #[cfg(test)]
 mod tests
 {
-	use
-	{
-		std::{borrow::Cow::Borrowed, time::Instant},
-
-		super::{BincodePerson, Person, PersonAdapter, query, Store, util},
-
-		clinvoice_query::{Match, MatchStr},
-
-		tokio::fs,
+	use std::{
+		borrow::Cow::Borrowed,
+		time::Instant,
 	};
 
-	#[tokio::test(flavor="multi_thread", worker_threads=10)]
+	use clinvoice_query::{
+		Match,
+		MatchStr,
+	};
+	use tokio::fs;
+
+	use super::{
+		query,
+		util,
+		BincodePerson,
+		Person,
+		PersonAdapter,
+		Store,
+	};
+
+	#[tokio::test(flavor = "multi_thread", worker_threads = 10)]
 	async fn create()
 	{
 		let store = util::temp_store();
@@ -97,9 +114,13 @@ mod tests
 			BincodePerson::create("Steven".into(), &store),
 			BincodePerson::create("JingleBob".into(), &store),
 			BincodePerson::create("asldkj jdsoai".into(), &store),
-		).unwrap();
+		)
+		.unwrap();
 
-		println!("\n>>>>> BincodePerson::create {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 5);
+		println!(
+			"\n>>>>> BincodePerson::create {}us <<<<<\n",
+			Instant::now().duration_since(start).as_micros() / 5
+		);
 
 		futures::join!(
 			create_assertion(widdle, &store),
@@ -112,11 +133,19 @@ mod tests
 
 	async fn create_assertion(person: Person, store: &Store)
 	{
-		let read_result = fs::read(BincodePerson {person: &person, store}.filepath()).await.unwrap();
+		let read_result = fs::read(
+			BincodePerson {
+				person: &person,
+				store,
+			}
+			.filepath(),
+		)
+		.await
+		.unwrap();
 		assert_eq!(person, bincode::deserialize(&read_result).unwrap());
 	}
 
-	#[tokio::test(flavor="multi_thread", worker_threads=10)]
+	#[tokio::test(flavor = "multi_thread", worker_threads = 10)]
 	async fn retrieve()
 	{
 		let store = util::temp_store();
@@ -126,16 +155,15 @@ mod tests
 			BincodePerson::create("bob".into(), &store),
 			BincodePerson::create("slimdi".into(), &store),
 			BincodePerson::create("longone".into(), &store),
-		).unwrap();
+		)
+		.unwrap();
 
-		let bob_query = query::Person
-		{
+		let bob_query = query::Person {
 			id: Match::EqualTo(Borrowed(&bob.id)),
 			..Default::default()
 		};
 
-		let longone_slimdi_query = query::Person
-		{
+		let longone_slimdi_query = query::Person {
 			name: MatchStr::Regex(format!("^({}|{})$", longone.name, slimdi.name)),
 			..Default::default()
 		};
@@ -145,9 +173,13 @@ mod tests
 		let (only_bob, longone_slimdi) = futures::try_join!(
 			BincodePerson::retrieve(&bob_query, &store),
 			BincodePerson::retrieve(&longone_slimdi_query, &store),
-		).unwrap();
+		)
+		.unwrap();
 
-		println!("\n>>>>> BincodePerson::retrieve {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 2);
+		println!(
+			"\n>>>>> BincodePerson::retrieve {}us <<<<<\n",
+			Instant::now().duration_since(start).as_micros() / 2
+		);
 
 		// Assert bob is the only one retrieved
 		assert!(!only_bob.contains(&flingo));

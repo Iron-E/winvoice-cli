@@ -1,28 +1,36 @@
-use
-{
-	std::
-	{
-		io,
-		path::{Path, PathBuf},
+use std::{
+	io,
+	path::{
+		Path,
+		PathBuf,
 	},
-
-	crate::data::{Error as DataError, Result as DataResult},
-
-	clinvoice_adapter::Store,
-	clinvoice_data::{Id, UUID_NAMESPACE},
-
-	futures::{future, stream::TryStreamExt, TryFutureExt},
-	serde::de::DeserializeOwned,
-	tokio::{fs, io::AsyncReadExt},
-	tokio_stream::wrappers::ReadDirStream,
 };
 
+use clinvoice_adapter::Store;
+use clinvoice_data::{
+	Id,
+	UUID_NAMESPACE,
+};
+use futures::{
+	future,
+	stream::TryStreamExt,
+	TryFutureExt,
+};
+use serde::de::DeserializeOwned;
+use tokio::{
+	fs,
+	io::AsyncReadExt,
+};
+use tokio_stream::wrappers::ReadDirStream;
 #[cfg(test)]
-use
-{
-	std::env,
-
+use {
 	clinvoice_adapter::Adapters,
+	std::env,
+};
+
+use crate::data::{
+	Error as DataError,
+	Result as DataResult,
 };
 
 /// # Summary
@@ -53,7 +61,9 @@ pub async fn create_store_dir(store_dir: &Path) -> io::Result<()>
 /// Expand the `store`'s specified path and join the provided `subdir`.
 pub fn expand_store_path(store: &Store) -> PathBuf
 {
-	shellexpand::full(&store.path).map(|p| p.as_ref().into()).unwrap_or_else(|_| store.path.as_str().into())
+	shellexpand::full(&store.path)
+		.map(|p| p.as_ref().into())
+		.unwrap_or_else(|_| store.path.as_str().into())
 }
 
 /// # Summary
@@ -65,26 +75,34 @@ pub fn expand_store_path(store: &Store) -> PathBuf
 /// * If some [`fs::File`] in `path` is not a (valid) [`T`].
 /// * When [`fs::read_dir`] does.
 /// * When [`fs::File::open`] does.
-pub async fn retrieve<T>(path: impl AsRef<Path>, query: impl Fn(&T) -> DataResult<bool>) -> DataResult<Vec<T>> where
-	T : DeserializeOwned,
+pub async fn retrieve<T>(
+	path: impl AsRef<Path>,
+	query: impl Fn(&T) -> DataResult<bool>,
+) -> DataResult<Vec<T>>
+where
+	T: DeserializeOwned,
 {
 	let node_results = fs::read_dir(path).map_err(DataError::from).await?;
-	ReadDirStream::new(node_results).try_filter_map(|node|
-	{
-		let path = node.path();
-		future::ok(if path.is_file() { Some(path) } else { None })
-	}).err_into().and_then(|file_path| async move
-	{
-		let mut file = fs::File::open(file_path).await?;
-		let mut contents = Vec::new();
-		file.read_to_end(&mut contents).await?;
-		bincode::deserialize::<T>(&contents).map_err(DataError::from)
-	}).try_filter_map(|retrieval| match query(&retrieval)
-	{
-		Ok(b) if b => future::ok(Some(retrieval)),
-		Err(e) => future::err(e),
-		_ => future::ok(None),
-	}).try_collect().await
+	ReadDirStream::new(node_results)
+		.try_filter_map(|node| {
+			let path = node.path();
+			future::ok(if path.is_file() { Some(path) } else { None })
+		})
+		.err_into()
+		.and_then(|file_path| async move {
+			let mut file = fs::File::open(file_path).await?;
+			let mut contents = Vec::new();
+			file.read_to_end(&mut contents).await?;
+			bincode::deserialize::<T>(&contents).map_err(DataError::from)
+		})
+		.try_filter_map(|retrieval| match query(&retrieval)
+		{
+			Ok(b) if b => future::ok(Some(retrieval)),
+			Err(e) => future::err(e),
+			_ => future::ok(None),
+		})
+		.try_collect()
+		.await
 }
 
 /// # Summary
@@ -106,17 +124,17 @@ pub fn temp_store() -> Store
 {
 	let temp_path = env::temp_dir().join("clinvoice_adapter_bincode_data");
 
-	Store
-	{
-		adapter: Adapters::Bincode,
+	Store {
+		adapter:  Adapters::Bincode,
 		password: None,
-		path: match temp_path.to_str()
+		path:     match temp_path.to_str()
 		{
 			Some(s) => s.into(),
 			_ => Err(io::Error::new(
 				io::ErrorKind::InvalidInput,
-				"`env::temp_path` did not resolve to a valid path"
-			)).unwrap(),
+				"`env::temp_path` did not resolve to a valid path",
+			))
+			.unwrap(),
 		},
 		username: None,
 	}
@@ -149,16 +167,17 @@ pub fn unique_id(store_dir: &Path) -> io::Result<Id>
 #[cfg(test)]
 mod tests
 {
-	use
-	{
-		std::{collections::HashSet, fs, time::Instant},
-
-		super::PathBuf,
+	use std::{
+		collections::HashSet,
+		fs,
+		time::Instant,
 	};
+
+	use super::PathBuf;
 
 	/// NOTE: this test is `async` because of the single `create_store_dir` call.
 	/// TODO: see if `Stream`ing to an `Arc<Mutex<HashSet>>` would make this faster
-	#[tokio::test(flavor="multi_thread", worker_threads=10)]
+	#[tokio::test(flavor = "multi_thread", worker_threads = 10)]
 	async fn unique_id()
 	{
 		const LOOPS: usize = 1000;
@@ -176,21 +195,20 @@ mod tests
 
 		let start = Instant::now();
 
-		let ids = (0..LOOPS).fold(
-			HashSet::with_capacity(LOOPS),
-			|mut s, _|
-			{
-				let id = super::unique_id(&test_path).unwrap();
-				s.insert(id);
+		let ids = (0..LOOPS).fold(HashSet::with_capacity(LOOPS), |mut s, _| {
+			let id = super::unique_id(&test_path).unwrap();
+			s.insert(id);
 
-				// Creating the next file worked.
-				assert!(fs::write(&test_path.join(id.to_string()), "TEST").is_ok());
+			// Creating the next file worked.
+			assert!(fs::write(&test_path.join(id.to_string()), "TEST").is_ok());
 
-				s
-			}
+			s
+		});
+
+		println!(
+			"\n>>>>> util::unique_id {}us <<<<<\n",
+			Instant::now().duration_since(start).as_micros() / (LOOPS as u128)
 		);
-
-		println!("\n>>>>> util::unique_id {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / (LOOPS as u128));
 
 		// Assert that the number of unique IDs created is equal to the number of times looped.
 		assert_eq!(ids.len(), LOOPS);

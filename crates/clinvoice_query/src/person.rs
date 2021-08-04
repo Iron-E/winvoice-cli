@@ -1,24 +1,30 @@
-use
-{
-	super::{Match, MatchStr, Result},
-
-	clinvoice_data::{Id, views::PersonView},
+use clinvoice_data::{
+	views::PersonView,
+	Id,
+};
+#[cfg(feature = "serde_support")]
+use serde::{
+	Deserialize,
+	Serialize,
 };
 
-#[cfg(feature="serde_support")]
-use serde::{Deserialize, Serialize};
+use super::{
+	Match,
+	MatchStr,
+	Result,
+};
 
 /// # Summary
 ///
 /// An [`Location`](clinvoice_data::Location) with [matchable](Match) fields.
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
-#[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
+#[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 pub struct Person<'m>
 {
-	#[cfg_attr(feature="serde_support", serde(default))]
+	#[cfg_attr(feature = "serde_support", serde(default))]
 	pub id: Match<'m, Id>,
 
-	#[cfg_attr(feature="serde_support", serde(default))]
+	#[cfg_attr(feature = "serde_support", serde(default))]
 	pub name: MatchStr<String>,
 }
 
@@ -29,10 +35,7 @@ impl Person<'_>
 	/// Return `true` if `person` is a match.
 	pub fn matches(&self, person: &clinvoice_data::Person) -> Result<bool>
 	{
-		Ok(
-			self.id.matches(&person.id) &&
-			self.name.matches(&person.name)?
-		)
+		Ok(self.id.matches(&person.id) && self.name.matches(&person.name)?)
 	}
 
 	/// # Summary
@@ -40,20 +43,22 @@ impl Person<'_>
 	/// Return `true` if `person` is a match.
 	pub fn matches_view(&self, person: &PersonView) -> Result<bool>
 	{
-		Ok(
-			self.id.matches(&person.id) &&
-			self.name.matches(&person.name)?
-		)
+		Ok(self.id.matches(&person.id) && self.name.matches(&person.name)?)
 	}
 
 	/// # Summary
 	///
 	/// Return `true` if `people` [`Match::set_matches`].
-	pub fn set_matches_view<'item>(&self, people: &mut impl Iterator<Item=&'item PersonView>) -> Result<bool>
+	pub fn set_matches_view<'item>(
+		&self,
+		people: &mut impl Iterator<Item = &'item PersonView>,
+	) -> Result<bool>
 	{
-		Ok(
-			self.id.set_matches(&people.by_ref().map(|p| &p.id).collect()) &&
-			self.name.set_matches(&mut people.map(|p| p.name.as_ref()))?
-		)
+		Ok(self
+			.id
+			.set_matches(&people.by_ref().map(|p| &p.id).collect()) &&
+			self
+				.name
+				.set_matches(&mut people.map(|p| p.name.as_ref()))?)
 	}
 }

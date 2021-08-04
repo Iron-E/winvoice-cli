@@ -1,9 +1,12 @@
 mod from_view;
 
-use crate::Id;
+#[cfg(feature = "serde_support")]
+use serde::{
+	Deserialize,
+	Serialize,
+};
 
-#[cfg(feature="serde_support")]
-use serde::{Deserialize, Serialize};
+use crate::Id;
 
 /// # Summary
 ///
@@ -17,7 +20,7 @@ use serde::{Deserialize, Serialize};
 /// An `Organization` has no specific affitilation to the user, and as such can be both a
 /// Client and an Emlpoyer at the same time.
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-#[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
+#[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 pub struct Organization
 {
 	/// # Summary

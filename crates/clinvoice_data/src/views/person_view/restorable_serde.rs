@@ -1,8 +1,5 @@
-use
-{
-	super::PersonView,
-	crate::views::RestorableSerde,
-};
+use super::PersonView;
+use crate::views::RestorableSerde;
 
 impl RestorableSerde for PersonView
 {

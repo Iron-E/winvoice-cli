@@ -1,12 +1,9 @@
-use
-{
-	std::ops::Index,
+use std::ops::Index;
 
-	super::ExchangeRates,
-	crate::Currency,
+use rust_decimal::Decimal;
 
-	rust_decimal::Decimal,
-};
+use super::ExchangeRates;
+use crate::Currency;
 
 impl Index<Currency> for ExchangeRates
 {
@@ -14,6 +11,9 @@ impl Index<Currency> for ExchangeRates
 
 	fn index(&self, index: Currency) -> &Self::Output
 	{
-		self.0.get(&index).expect(&format!("{} was not found in this set of exchange rates", index))
+		self.0.get(&index).expect(&format!(
+			"{} was not found in this set of exchange rates",
+			index
+		))
 	}
 }

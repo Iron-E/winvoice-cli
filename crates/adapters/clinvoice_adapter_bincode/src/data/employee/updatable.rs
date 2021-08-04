@@ -1,11 +1,10 @@
-use
-{
-	super::BincodeEmployee,
-	crate::data::{Error, Result},
+use clinvoice_adapter::data::Updatable;
+use tokio::fs;
 
-	clinvoice_adapter::data::Updatable,
-
-	tokio::fs,
+use super::BincodeEmployee;
+use crate::data::{
+	Error,
+	Result,
 };
 
 #[async_trait::async_trait]

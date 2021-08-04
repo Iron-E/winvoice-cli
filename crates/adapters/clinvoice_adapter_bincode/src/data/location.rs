@@ -3,12 +3,9 @@ mod initializable;
 mod location_adapter;
 mod updatable;
 
-use
-{
-	std::path::PathBuf,
+use std::path::PathBuf;
 
-	crate::util,
-};
+use crate::util;
 
 clinvoice_adapter::Adapt!(Location => BincodeLocation);
 

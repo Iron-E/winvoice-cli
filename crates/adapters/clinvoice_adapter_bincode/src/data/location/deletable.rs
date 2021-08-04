@@ -1,15 +1,26 @@
-use
-{
-	std::{borrow::Cow::Borrowed, io::ErrorKind},
+use std::{
+	borrow::Cow::Borrowed,
+	io::ErrorKind,
+};
 
-	super::BincodeLocation,
-	crate::data::{BincodeOrganization, Error, Result},
+use clinvoice_adapter::data::{
+	Deletable,
+	Error as DataError,
+	LocationAdapter,
+	OrganizationAdapter,
+};
+use clinvoice_query as query;
+use futures::stream::{
+	self,
+	TryStreamExt,
+};
+use tokio::fs;
 
-	clinvoice_adapter::data::{Deletable, Error as DataError, LocationAdapter, OrganizationAdapter},
-	clinvoice_query as query,
-
-	futures::stream::{self, TryStreamExt},
-	tokio::fs,
+use super::BincodeLocation;
+use crate::data::{
+	BincodeOrganization,
+	Error,
+	Result,
 };
 
 #[async_trait::async_trait]
@@ -19,22 +30,19 @@ impl Deletable for BincodeLocation<'_, '_>
 
 	async fn delete(&self, cascade: bool) -> Result<()>
 	{
-		let location_query = query::Location
-		{
+		let location_query = query::Location {
 			outer: query::OuterLocation::Some(
-				query::Location
-				{
+				query::Location {
 					id: query::Match::EqualTo(Borrowed(&self.location.id)),
 					..Default::default()
-				}.into()
+				}
+				.into(),
 			),
 			..Default::default()
 		};
 
-		let organization_query = query::Organization
-		{
-			location: query::Location
-			{
+		let organization_query = query::Organization {
+			location: query::Location {
 				id: query::Match::EqualTo(Borrowed(&self.location.id)),
 				..Default::default()
 			},
@@ -48,19 +56,27 @@ impl Deletable for BincodeLocation<'_, '_>
 
 		if cascade
 		{
-			stream::iter(associated_organizations.into_iter().map(Ok)).try_for_each_concurrent(None,
-				|o| async move
-				{
-					BincodeOrganization {organization: &o, store: self.store}.delete(cascade).await
-				}
-			).await?;
+			stream::iter(associated_organizations.into_iter().map(Ok))
+				.try_for_each_concurrent(None, |o| async move {
+					BincodeOrganization {
+						organization: &o,
+						store: self.store,
+					}
+					.delete(cascade)
+					.await
+				})
+				.await?;
 
-			stream::iter(associated_locations.into_iter().map(Ok)).try_for_each_concurrent(None,
-				|l| async move
-				{
-					BincodeLocation {location: &l, store: self.store}.delete(cascade).await
-				}
-			).await?;
+			stream::iter(associated_locations.into_iter().map(Ok))
+				.try_for_each_concurrent(None, |l| async move {
+					BincodeLocation {
+						location: &l,
+						store:    self.store,
+					}
+					.delete(cascade)
+					.await
+				})
+				.await?;
 		}
 		else if !(associated_locations.is_empty() || associated_organizations.is_empty())
 		{
@@ -83,52 +99,55 @@ impl Deletable for BincodeLocation<'_, '_>
 #[cfg(test)]
 mod tests
 {
-	use
-	{
-		std::time::Instant,
+	use std::time::Instant;
 
-		super::{BincodeLocation, Deletable, LocationAdapter},
-		crate::{data::BincodeOrganization, util},
+	use clinvoice_adapter::data::OrganizationAdapter;
 
-		clinvoice_adapter::data::OrganizationAdapter,
+	use super::{
+		BincodeLocation,
+		Deletable,
+		LocationAdapter,
+	};
+	use crate::{
+		data::BincodeOrganization,
+		util,
 	};
 
-	#[tokio::test(flavor="multi_thread", worker_threads=10)]
+	#[tokio::test(flavor = "multi_thread", worker_threads = 10)]
 	async fn delete()
 	{
 		let store = util::temp_store();
 
-		let earth = BincodeLocation
-		{
-			location: &BincodeLocation::create("Earth".into(), &store).await.unwrap(),
-			store: &store,
+		let earth = BincodeLocation {
+			location: &BincodeLocation::create("Earth".into(), &store)
+				.await
+				.unwrap(),
+			store:    &store,
 		};
 
-		let usa = BincodeLocation
-		{
+		let usa = BincodeLocation {
 			location: &earth.create_inner("USA".into()).await.unwrap(),
-			store: &store,
+			store:    &store,
 		};
 
-		let arizona = BincodeLocation
-		{
+		let arizona = BincodeLocation {
 			location: &usa.create_inner("Arizona".into()).await.unwrap(),
-			store: &store,
+			store:    &store,
 		};
 
-		let phoenix = BincodeLocation
-		{
+		let phoenix = BincodeLocation {
 			location: &arizona.create_inner("Phoenix".into()).await.unwrap(),
-			store: &store,
+			store:    &store,
 		};
 
-		let dogood = BincodeOrganization
-		{
+		let dogood = BincodeOrganization {
 			organization: &BincodeOrganization::create(
 				arizona.location.clone(),
 				"DoGood Inc".into(),
-				&store
-			).await.unwrap(),
+				&store,
+			)
+			.await
+			.unwrap(),
 			store: &store,
 		};
 
@@ -151,7 +170,10 @@ mod tests
 		// delete the usa and everything in it.
 		usa.delete(true).await.unwrap();
 
-		println!("\n>>>>> BincodeLocation::delete {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 2);
+		println!(
+			"\n>>>>> BincodeLocation::delete {}us <<<<<\n",
+			Instant::now().duration_since(start).as_micros() / 2
+		);
 
 		// Assert that every location inside the USA is gone
 		assert!(earth.filepath().is_file());

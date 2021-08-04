@@ -33,33 +33,25 @@ mod person;
 mod timesheet;
 pub mod views;
 
-pub use
-{
-	contact::Contact,
-	employee::Employee,
-	employee_status::EmployeeStatus,
-	expense::Expense,
-	expense_category::ExpenseCategory,
-	id::Id,
-	invoice::Invoice,
-	invoice_date::InvoiceDate,
-	job::Job,
-	location::Location,
-	organization::Organization,
-	person::Person,
-	timesheet::Timesheet,
-};
-
 pub use chrono;
 pub use clinvoice_finance as finance;
+pub use contact::Contact;
+pub use employee::Employee;
+pub use employee_status::EmployeeStatus;
+pub use expense::Expense;
+pub use expense_category::ExpenseCategory;
+pub use id::Id;
+pub use invoice::Invoice;
+pub use invoice_date::InvoiceDate;
+pub use job::Job;
+pub use location::Location;
+pub use organization::Organization;
+pub use person::Person;
+pub use timesheet::Timesheet;
 
 /// # Summary
 ///
 /// The namespace for a v5 [`Uuid`](uuid::Uuid) containing CLInvoice data.
-pub const UUID_NAMESPACE: Id = Id::from_bytes(
-[
-	0x1a, 0x88, 0xb1, 0xde,
-	0xe8, 0x0d, 0x4e, 0xca,
-	0x92, 0x08, 0xe5, 0x6b,
-	0x09, 0x9a, 0x6f, 0x4b
+pub const UUID_NAMESPACE: Id = Id::from_bytes([
+	0x1a, 0x88, 0xb1, 0xde, 0xe8, 0x0d, 0x4e, 0xca, 0x92, 0x08, 0xe5, 0x6b, 0x09, 0x9a, 0x6f, 0x4b,
 ]);

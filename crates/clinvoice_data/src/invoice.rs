@@ -1,20 +1,19 @@
 mod display;
 
-use
-{
-	crate::InvoiceDate,
-
-	clinvoice_finance::Money,
+use clinvoice_finance::Money;
+#[cfg(feature = "serde_support")]
+use serde::{
+	Deserialize,
+	Serialize,
 };
 
-#[cfg(feature="serde_support")]
-use serde::{Deserialize, Serialize};
+use crate::InvoiceDate;
 
 /// # Summary
 ///
 /// An `Invoice` represents the accounts receivable for the user or their employer.
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-#[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
+#[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 pub struct Invoice
 {
 	/// # Summary

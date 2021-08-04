@@ -6,7 +6,7 @@ use std::error::Error;
 #[async_trait::async_trait]
 pub trait Updatable
 {
-	type Error : Error;
+	type Error: Error;
 
 	/// # Summary
 	///

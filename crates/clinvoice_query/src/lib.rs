@@ -25,24 +25,27 @@ mod expense;
 mod invoice;
 mod job;
 mod location;
+mod r#match;
 mod match_str;
 mod organization;
 mod person;
-mod r#match;
 mod timesheet;
 
-pub use
-{
-	contact::Contact,
-	employee::Employee,
-	error::{Error, Result},
-	expense::Expense,
-	invoice::Invoice,
-	job::Job,
-	location::{Location, OuterLocation},
-	r#match::Match,
-	match_str::MatchStr,
-	organization::Organization,
-	person::Person,
-	timesheet::Timesheet,
+pub use contact::Contact;
+pub use employee::Employee;
+pub use error::{
+	Error,
+	Result,
 };
+pub use expense::Expense;
+pub use invoice::Invoice;
+pub use job::Job;
+pub use location::{
+	Location,
+	OuterLocation,
+};
+pub use match_str::MatchStr;
+pub use organization::Organization;
+pub use person::Person;
+pub use r#match::Match;
+pub use timesheet::Timesheet;

@@ -1,17 +1,15 @@
-use
-{
-	super::BincodePerson,
-	crate::
-	{
-		data::{Error, Result},
-		util,
-	},
+use clinvoice_adapter::{
+	data::Initializable,
+	Store,
+};
 
-	clinvoice_adapter::
-	{
-		data::Initializable,
-		Store,
+use super::BincodePerson;
+use crate::{
+	data::{
+		Error,
+		Result,
 	},
+	util,
 };
 
 #[async_trait::async_trait]

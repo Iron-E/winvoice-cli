@@ -1,21 +1,27 @@
 mod from_view;
 
-use crate::Id;
+#[cfg(feature = "serde_support")]
+use serde::{
+	Deserialize,
+	Serialize,
+};
 
-#[cfg(feature="serde_support")]
-use serde::{Deserialize, Serialize};
+use crate::Id;
 
 /// # Summary
 ///
 /// A method through which something can be communicated with.
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-#[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
+#[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 pub enum Contact
 {
 	/// # Summary
 	///
 	/// A [`Location`](crate::Location).
-	Address {location_id: Id, export: bool},
+	Address
+	{
+		location_id: Id, export: bool
+	},
 
 	/// # Summary
 	///
@@ -24,7 +30,10 @@ pub enum Contact
 	/// # Example
 	///
 	/// * 'foo@bar.io'
-	Email {email: String, export: bool},
+	Email
+	{
+		email: String, export: bool
+	},
 
 	/// # Summary
 	///
@@ -34,5 +43,8 @@ pub enum Contact
 	///
 	/// * '1-603-555-1234'
 	/// * '603-555-1234'
-	Phone {phone: String, export: bool},
+	Phone
+	{
+		phone: String, export: bool
+	},
 }

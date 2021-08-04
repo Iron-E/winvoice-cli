@@ -1,10 +1,10 @@
-
-use
-{
-	core::fmt::{Display, Formatter, Result},
-
-	super::ExpenseCategory,
+use core::fmt::{
+	Display,
+	Formatter,
+	Result,
 };
+
+use super::ExpenseCategory;
 
 impl Display for ExpenseCategory
 {
@@ -25,12 +25,9 @@ impl Display for ExpenseCategory
 #[cfg(test)]
 mod tests
 {
-	use
-	{
-		std::time::Instant,
+	use std::time::Instant;
 
-		super::ExpenseCategory,
-	};
+	use super::ExpenseCategory;
 
 	#[test]
 	fn display()
@@ -42,6 +39,9 @@ mod tests
 		assert_eq!(format!("{}", ExpenseCategory::Service), "Service");
 		assert_eq!(format!("{}", ExpenseCategory::Software), "Software");
 		assert_eq!(format!("{}", ExpenseCategory::Travel), "Travel");
-		println!("\n>>>>> ExpenseCategory::fmt {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 6);
+		println!(
+			"\n>>>>> ExpenseCategory::fmt {}us <<<<<\n",
+			Instant::now().duration_since(start).as_micros() / 6
+		);
 	}
 }

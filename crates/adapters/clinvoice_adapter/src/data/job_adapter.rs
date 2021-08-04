@@ -1,35 +1,53 @@
 #![allow(clippy::wrong_self_convention)]
 
-use
-{
-	std::{borrow::Cow::Borrowed, error::Error, marker::Send},
-
-	super::{Deletable, EmployeeAdapter, Initializable, LocationAdapter, OrganizationAdapter, PersonAdapter, timesheet, Updatable},
-	crate::Store,
-
-	clinvoice_data::
-	{
-		chrono::{DateTime, Utc},
-		Job, finance::Money, Organization,
-		views::{JobView, TimesheetView},
-	},
-	clinvoice_query as query,
-
-	futures::
-	{
-		FutureExt,
-		stream::{self, TryStreamExt},
-		TryFutureExt,
-	},
+use std::{
+	borrow::Cow::Borrowed,
+	error::Error,
+	marker::Send,
 };
 
+use clinvoice_data::{
+	chrono::{
+		DateTime,
+		Utc,
+	},
+	finance::Money,
+	views::{
+		JobView,
+		TimesheetView,
+	},
+	Job,
+	Organization,
+};
+use clinvoice_query as query;
+use futures::{
+	stream::{
+		self,
+		TryStreamExt,
+	},
+	FutureExt,
+	TryFutureExt,
+};
+
+use super::{
+	timesheet,
+	Deletable,
+	EmployeeAdapter,
+	Initializable,
+	LocationAdapter,
+	OrganizationAdapter,
+	PersonAdapter,
+	Updatable,
+};
+use crate::Store;
+
 #[async_trait::async_trait]
-pub trait JobAdapter :
-	Deletable<Error=<Self as JobAdapter>::Error> +
-	Initializable<Error=<Self as JobAdapter>::Error> +
-	Updatable<Error=<Self as JobAdapter>::Error> +
+pub trait JobAdapter:
+	Deletable<Error = <Self as JobAdapter>::Error>
+	+ Initializable<Error = <Self as JobAdapter>::Error>
+	+ Updatable<Error = <Self as JobAdapter>::Error>
 {
-	type Error : From<super::Error> + Error;
+	type Error: From<super::Error> + Error;
 
 	/// # Summary
 	///
@@ -53,43 +71,42 @@ pub trait JobAdapter :
 	/// # Summary
 	///
 	/// Convert some `job` into a [`JobView`].
-	async fn into_view<E, L, O, P>(job: Job, store: &Store)
-		-> Result<JobView, <Self as JobAdapter>::Error>
+	async fn into_view<E, L, O, P>(
+		job: Job,
+		store: &Store,
+	) -> Result<JobView, <Self as JobAdapter>::Error>
 	where
-		E : EmployeeAdapter + Send,
-		L : LocationAdapter + Send,
-		O : OrganizationAdapter + Send,
-		P : PersonAdapter,
+		E: EmployeeAdapter + Send,
+		L: LocationAdapter + Send,
+		O: OrganizationAdapter + Send,
+		P: PersonAdapter,
 
-		<E as EmployeeAdapter>::Error :
-			From<<L as LocationAdapter>::Error> +
-			From<<O as OrganizationAdapter>::Error> +
-			From<<P as PersonAdapter>::Error> +
-			Send,
-		<L as LocationAdapter>::Error : Send,
-		<Self as JobAdapter>::Error : From<<E as EmployeeAdapter>::Error>,
+		<E as EmployeeAdapter>::Error: From<<L as LocationAdapter>::Error>
+			+ From<<O as OrganizationAdapter>::Error>
+			+ From<<P as PersonAdapter>::Error>
+			+ Send,
+		<L as LocationAdapter>::Error: Send,
+		<Self as JobAdapter>::Error: From<<E as EmployeeAdapter>::Error>,
 	{
-		let organization_fut = Self::to_organization::<O>(&job, store).err_into().and_then(|organization|
-			O::into_view::<L>(organization, store).err_into()
-		);
+		let organization_fut = Self::to_organization::<O>(&job, store)
+			.err_into()
+			.and_then(|organization| O::into_view::<L>(organization, store).err_into());
 
-		let timesheet_fut = stream::iter(job.timesheets.iter().map(Ok)).and_then(|t|
-			timesheet::to_employee::<E>(&t, store).and_then(|employee|
-				E::into_view::<L, O, P>(employee, store)
-			).map_ok(move |employee_view|
-				TimesheetView
-				{
-					employee: employee_view,
-					expenses: t.expenses.clone(),
-					time_begin: t.time_begin,
-					time_end: t.time_end,
-					work_notes: t.work_notes.clone(),
-				}
-			)
-		).try_collect();
+		let timesheet_fut = stream::iter(job.timesheets.iter().map(Ok))
+			.and_then(|t| {
+				timesheet::to_employee::<E>(&t, store)
+					.and_then(|employee| E::into_view::<L, O, P>(employee, store))
+					.map_ok(move |employee_view| TimesheetView {
+						employee:   employee_view,
+						expenses:   t.expenses.clone(),
+						time_begin: t.time_begin,
+						time_end:   t.time_end,
+						work_notes: t.work_notes.clone(),
+					})
+			})
+			.try_collect();
 
-		Ok(JobView
-		{
+		Ok(JobView {
 			client: organization_fut.await?,
 			date_close: job.date_close,
 			date_open: job.date_open,
@@ -121,21 +138,27 @@ pub trait JobAdapter :
 	/// # Summary
 	///
 	/// Convert some `employee` into a [`Person`].
-	async fn to_organization<O>(job: &Job, store: &Store)
-		-> Result<Organization, <O as OrganizationAdapter>::Error>
+	async fn to_organization<O>(
+		job: &Job,
+		store: &Store,
+	) -> Result<Organization, <O as OrganizationAdapter>::Error>
 	where
-		O : OrganizationAdapter + Send,
+		O: OrganizationAdapter + Send,
 	{
-		let query = query::Organization
-		{
+		let query = query::Organization {
 			id: query::Match::EqualTo(Borrowed(&job.client_id)),
 			..Default::default()
 		};
 
-		O::retrieve(&query, store).map(|result| result.and_then(|retrieved|
-			retrieved.into_iter().next().ok_or_else(||
-				super::Error::DataIntegrity(job.client_id).into()
-			)
-		)).await
+		O::retrieve(&query, store)
+			.map(|result| {
+				result.and_then(|retrieved| {
+					retrieved
+						.into_iter()
+						.next()
+						.ok_or_else(|| super::Error::DataIntegrity(job.client_id).into())
+				})
+			})
+			.await
 	}
 }

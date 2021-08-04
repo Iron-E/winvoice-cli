@@ -1,15 +1,18 @@
 mod display;
 
-use crate::Error;
+#[cfg(feature = "serde_support")]
+use serde::{
+	Deserialize,
+	Serialize,
+};
 
-#[cfg(feature="serde_support")]
-use serde::{Deserialize, Serialize};
+use crate::Error;
 
 /// # Summary
 ///
 /// Currently supported file systems / DBMS.
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-#[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
+#[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 pub enum Adapters
 {
 	/// # Summary
@@ -40,7 +43,10 @@ impl Adapters
 	{
 		if self != actual
 		{
-			return Err(Error::AdapterMismatch {expected: *self, actual: *actual});
+			return Err(Error::AdapterMismatch {
+				expected: *self,
+				actual:   *actual,
+			});
 		}
 
 		Ok(())

@@ -1,14 +1,14 @@
-use
-{
-	super::{Config, Error, Result},
+use clinvoice_adapter::data::Updatable;
+use tokio::fs;
 
-	clinvoice_adapter::data::Updatable,
-
-	tokio::fs,
+use super::{
+	Config,
+	Error,
+	Result,
 };
 
 #[async_trait::async_trait]
-impl Updatable for Config<'_, '_,>
+impl Updatable for Config<'_, '_>
 {
 	type Error = Error;
 

@@ -1,9 +1,10 @@
-use
-{
-	core::fmt::{Display, Formatter, Result},
-
-	super::EmployeeView,
+use core::fmt::{
+	Display,
+	Formatter,
+	Result,
 };
+
+use super::EmployeeView;
 
 impl Display for EmployeeView
 {
@@ -18,7 +19,9 @@ impl Display for EmployeeView
 
 			let mut sorted_employee_contact_info: Vec<&String> = self.contact_info.keys().collect();
 			sorted_employee_contact_info.sort();
-			sorted_employee_contact_info.into_iter().try_for_each(|c| writeln!(formatter, "\t\t- {}: {}", c, self.contact_info[c]))?;
+			sorted_employee_contact_info
+				.into_iter()
+				.try_for_each(|c| writeln!(formatter, "\t\t- {}: {}", c, self.contact_info[c]))?;
 		}
 
 		write!(formatter, "\tStatus: {}", self.status)
@@ -28,72 +31,74 @@ impl Display for EmployeeView
 #[cfg(test)]
 mod tests
 {
-	use
-	{
-		std::time::Instant,
+	use std::time::Instant;
 
-		super::EmployeeView,
-		crate::
-		{
-			Id, EmployeeStatus,
-			views::{ContactView, LocationView, OrganizationView, PersonView},
+	use super::EmployeeView;
+	use crate::{
+		views::{
+			ContactView,
+			LocationView,
+			OrganizationView,
+			PersonView,
 		},
+		EmployeeStatus,
+		Id,
 	};
 
 	#[test]
 	fn display()
 	{
-		let earth_view = LocationView
-		{
-			name: "Earth".into(),
-			id: Id::new_v4(),
+		let earth_view = LocationView {
+			name:  "Earth".into(),
+			id:    Id::new_v4(),
 			outer: None,
 		};
 
-		let usa_view = LocationView
-		{
-			name: "USA".into(),
-			id: Id::new_v4(),
+		let usa_view = LocationView {
+			name:  "USA".into(),
+			id:    Id::new_v4(),
 			outer: Some(earth_view.into()),
 		};
 
-		let arizona_view = LocationView
-		{
-			name: "Arizona".into(),
-			id: Id::new_v4(),
-			outer: Some(usa_view.into())
+		let arizona_view = LocationView {
+			name:  "Arizona".into(),
+			id:    Id::new_v4(),
+			outer: Some(usa_view.into()),
 		};
 
-		let phoenix_view = LocationView
-		{
-			name: "Phoenix".into(),
-			id: Id::new_v4(),
+		let phoenix_view = LocationView {
+			name:  "Phoenix".into(),
+			id:    Id::new_v4(),
 			outer: Some(arizona_view.into()),
 		};
 
-		let work_street_view = LocationView
-		{
-			name: "1234 Work Street".into(),
-			id: Id::new_v4(),
+		let work_street_view = LocationView {
+			name:  "1234 Work Street".into(),
+			id:    Id::new_v4(),
 			outer: Some(phoenix_view.into()),
 		};
 
-		let employee = EmployeeView
-		{
+		let employee = EmployeeView {
 			contact_info: vec![
-				("Place of Work".into(), ContactView::Address {location: work_street_view.clone(), export: false}),
-				("Work Email".into(), ContactView::Email {email: "foo@bar.io".into(), export: false}),
-			].into_iter().collect(),
+				("Place of Work".into(), ContactView::Address {
+					location: work_street_view.clone(),
+					export:   false,
+				}),
+				("Work Email".into(), ContactView::Email {
+					email:  "foo@bar.io".into(),
+					export: false,
+				}),
+			]
+			.into_iter()
+			.collect(),
 			id: Id::new_v4(),
-			organization: OrganizationView
-			{
+			organization: OrganizationView {
 				id: Id::new_v4(),
 				location: work_street_view,
 				name: "Big Old Test".into(),
 			},
-			person: PersonView
-			{
-				id: Id::new_v4(),
+			person: PersonView {
+				id:   Id::new_v4(),
 				name: "Testy McTesterson".into(),
 			},
 			status: EmployeeStatus::Representative,
@@ -103,13 +108,16 @@ mod tests
 		let start = Instant::now();
 		assert_eq!(
 			format!("{}", employee),
-"CEO of Tests Testy McTesterson
+			"CEO of Tests Testy McTesterson
 	Employer: Big Old Test @ 1234 Work Street, Phoenix, Arizona, USA, Earth
 	Employee Contact Info:
 		- Place of Work: 1234 Work Street, Phoenix, Arizona, USA, Earth
 		- Work Email: foo@bar.io
 	Status: Representative",
 		);
-		println!("\n>>>>> EmployeeView::fmt {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+		println!(
+			"\n>>>>> EmployeeView::fmt {}us <<<<<\n",
+			Instant::now().duration_since(start).as_micros()
+		);
 	}
 }

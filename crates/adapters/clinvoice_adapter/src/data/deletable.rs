@@ -6,7 +6,7 @@ use std::error::Error;
 #[async_trait::async_trait]
 pub trait Deletable
 {
-	type Error : Error;
+	type Error: Error;
 
 	/// # Summary
 	///

@@ -1,9 +1,10 @@
-use
-{
-	core::fmt::{Display, Formatter, Result},
-
-	super::Invoice,
+use core::fmt::{
+	Display,
+	Formatter,
+	Result,
 };
+
+use super::Invoice;
 
 impl Display for Invoice
 {
@@ -11,33 +12,43 @@ impl Display for Invoice
 	{
 		writeln!(formatter, "Hourly Rate: {}", self.hourly_rate)?;
 
-		write!(formatter, "Status: {}", self.date.as_ref().map(|date| date.to_string()).unwrap_or_else(|| "Not issued".into()))
+		write!(
+			formatter,
+			"Status: {}",
+			self
+				.date
+				.as_ref()
+				.map(|date| date.to_string())
+				.unwrap_or_else(|| "Not issued".into())
+		)
 	}
 }
 
 #[cfg(test)]
 mod tests
 {
-	use
-	{
-		std::time::Instant,
+	use std::time::Instant;
 
-		super::Invoice,
-		crate::InvoiceDate,
-		clinvoice_finance::{Currency, Money},
-
-		chrono::{DateTime, Local, Utc},
+	use chrono::{
+		DateTime,
+		Local,
+		Utc,
 	};
+	use clinvoice_finance::{
+		Currency,
+		Money,
+	};
+
+	use super::Invoice;
+	use crate::InvoiceDate;
 
 	#[test]
 	fn display()
 	{
-		let invoice = Invoice
-		{
-			date: Some(InvoiceDate
-			{
+		let invoice = Invoice {
+			date: Some(InvoiceDate {
 				issued: Utc::now(),
-				paid: None,
+				paid:   None,
 			}),
 			hourly_rate: Money::new(10_00, 2, Currency::USD),
 		};
@@ -46,11 +57,14 @@ mod tests
 		assert_eq!(
 			format!("{}", invoice),
 			format!(
-"Hourly Rate: 10.00 USD
+				"Hourly Rate: 10.00 USD
 Status: Issued on {}; Outstanding",
 				DateTime::<Local>::from(invoice.date.unwrap().issued),
 			),
 		);
-		println!("\n>>>>> Invoice::fmt {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+		println!(
+			"\n>>>>> Invoice::fmt {}us <<<<<\n",
+			Instant::now().duration_since(start).as_micros()
+		);
 	}
 }

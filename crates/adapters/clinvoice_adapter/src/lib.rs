@@ -20,9 +20,6 @@ mod error;
 mod macros;
 mod store;
 
-pub use
-{
-	adapters::Adapters,
-	error::Error,
-	store::Store,
-};
+pub use adapters::Adapters;
+pub use error::Error;
+pub use store::Store;

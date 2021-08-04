@@ -1,9 +1,6 @@
-use
-{
-	std::io,
+use std::io;
 
-	thiserror::Error,
-};
+use thiserror::Error;
 
 /// # Summary
 ///

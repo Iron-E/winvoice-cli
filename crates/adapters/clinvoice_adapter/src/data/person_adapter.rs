@@ -1,23 +1,24 @@
 #![allow(clippy::wrong_self_convention)]
 
-use
-{
-	std::error::Error,
+use std::error::Error;
 
-	super::{Deletable, Initializable, Updatable},
-	crate::Store,
+use clinvoice_data::Person;
+use clinvoice_query as query;
 
-	clinvoice_data::Person,
-	clinvoice_query as query,
+use super::{
+	Deletable,
+	Initializable,
+	Updatable,
 };
+use crate::Store;
 
 #[async_trait::async_trait]
-pub trait PersonAdapter :
-	Deletable<Error=<Self as PersonAdapter>::Error> +
-	Initializable<Error=<Self as PersonAdapter>::Error> +
-	Updatable<Error=<Self as PersonAdapter>::Error> +
+pub trait PersonAdapter:
+	Deletable<Error = <Self as PersonAdapter>::Error>
+	+ Initializable<Error = <Self as PersonAdapter>::Error>
+	+ Updatable<Error = <Self as PersonAdapter>::Error>
 {
-	type Error : From<super::Error> + Error;
+	type Error: From<super::Error> + Error;
 
 	/// # Summary
 	///

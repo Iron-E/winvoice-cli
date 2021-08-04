@@ -3,22 +3,29 @@ mod hash;
 mod partial_eq;
 mod restorable_serde;
 
-use
-{
-	std::collections::HashMap,
+use std::collections::HashMap;
 
-	super::{ContactView, OrganizationView, PersonView},
-	crate::{EmployeeStatus, Id},
+#[cfg(feature = "serde_support")]
+use serde::{
+	Deserialize,
+	Serialize,
 };
 
-#[cfg(feature="serde_support")]
-use serde::{Deserialize, Serialize};
+use super::{
+	ContactView,
+	OrganizationView,
+	PersonView,
+};
+use crate::{
+	EmployeeStatus,
+	Id,
+};
 
 /// # Summary
 ///
 /// A view of [`Employee`](crate::Employee).
 #[derive(Clone, Debug, Eq)]
-#[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
+#[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 pub struct EmployeeView
 {
 	/// # Summary
@@ -34,7 +41,7 @@ pub struct EmployeeView
 	///
 	/// The reference number of this [`Employee`], which can be used instead of the compound key
 	/// {`organization`, `person_id`}.
-	#[cfg_attr(feature="serde_support", serde(skip))]
+	#[cfg_attr(feature = "serde_support", serde(skip))]
 	pub id: Id,
 
 	/// # Summary

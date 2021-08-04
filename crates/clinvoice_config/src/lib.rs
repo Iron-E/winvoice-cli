@@ -8,11 +8,12 @@ mod invoices;
 mod store_value;
 mod timesheets;
 
-pub use
-{
-	config::{Config, Error, Result},
-	employees::Employees,
-	invoices::Invoices,
-	store_value::StoreValue,
-	timesheets::Timesheets,
+pub use config::{
+	Config,
+	Error,
+	Result,
 };
+pub use employees::Employees;
+pub use invoices::Invoices;
+pub use store_value::StoreValue;
+pub use timesheets::Timesheets;

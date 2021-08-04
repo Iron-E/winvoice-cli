@@ -1,8 +1,10 @@
-use
-{
-	core::fmt::{Display, Formatter, Result},
-	super::TimeCommand,
+use core::fmt::{
+	Display,
+	Formatter,
+	Result,
 };
+
+use super::TimeCommand;
 
 impl Display for TimeCommand
 {

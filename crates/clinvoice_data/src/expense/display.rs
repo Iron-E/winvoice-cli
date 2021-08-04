@@ -1,9 +1,10 @@
-use
-{
-	core::fmt::{Display, Formatter, Result},
-
-	super::Expense,
+use core::fmt::{
+	Display,
+	Formatter,
+	Result,
 };
+
+use super::Expense;
 
 impl Display for Expense
 {
@@ -17,21 +18,20 @@ impl Display for Expense
 #[cfg(test)]
 mod tests
 {
-	use
-	{
-		std::time::Instant,
+	use std::time::Instant;
 
-		super::Expense,
-		crate::ExpenseCategory,
-
-		clinvoice_finance::{Currency, Money},
+	use clinvoice_finance::{
+		Currency,
+		Money,
 	};
+
+	use super::Expense;
+	use crate::ExpenseCategory;
 
 	#[test]
 	fn display()
 	{
-		let expense = Expense
-		{
+		let expense = Expense {
 			category: ExpenseCategory::Food,
 			cost: Money::new(20_00, 2, Currency::USD),
 			description: "Take-out for 2".into(),
@@ -40,9 +40,12 @@ mod tests
 		let start = Instant::now();
 		assert_eq!(
 			format!("{}", expense),
-"Food – 20.00 USD
+			"Food – 20.00 USD
 	Take-out for 2",
 		);
-		println!("\n>>>>> Expense::fmt {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+		println!(
+			"\n>>>>> Expense::fmt {}us <<<<<\n",
+			Instant::now().duration_since(start).as_micros()
+		);
 	}
 }

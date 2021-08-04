@@ -1,19 +1,22 @@
-use
-{
-	super::BincodeLocation,
-	crate::
-	{
-		data::{Error, Result},
-		util,
+use clinvoice_adapter::{
+	data::{
+		Error as DataError,
+		Initializable,
+		LocationAdapter,
+		Updatable,
 	},
+	Store,
+};
+use clinvoice_data::Location;
+use clinvoice_query as query;
 
-	clinvoice_adapter::
-	{
-		data::{Error as DataError, Initializable, LocationAdapter, Updatable},
-		Store,
+use super::BincodeLocation;
+use crate::{
+	data::{
+		Error,
+		Result,
 	},
-	clinvoice_data::Location,
-	clinvoice_query as query,
+	util,
 };
 
 #[async_trait::async_trait]
@@ -38,15 +41,19 @@ impl LocationAdapter for BincodeLocation<'_, '_>
 	{
 		let init_fut = Self::init(&store);
 
-		let location = Location
-		{
+		let location = Location {
 			id: util::unique_id(&Self::path(&store))?,
 			name,
 			outer_id: None,
 		};
 
 		init_fut.await?;
-		BincodeLocation {location: &location, store}.update().await?;
+		BincodeLocation {
+			location: &location,
+			store,
+		}
+		.update()
+		.await?;
 
 		Ok(location)
 	}
@@ -66,14 +73,18 @@ impl LocationAdapter for BincodeLocation<'_, '_>
 	/// ```
 	async fn create_inner(&self, name: String) -> Result<Location>
 	{
-		let inner_location = Location
-		{
+		let inner_location = Location {
 			id: util::unique_id(&Self::path(&self.store))?,
 			name,
 			outer_id: Some(self.location.id),
 		};
 
-		BincodeLocation {location: &inner_location, store: self.store}.update().await?;
+		BincodeLocation {
+			location: &inner_location,
+			store:    self.store,
+		}
+		.update()
+		.await?;
 
 		Ok(inner_location)
 	}
@@ -94,39 +105,69 @@ impl LocationAdapter for BincodeLocation<'_, '_>
 	{
 		Self::init(&store).await?;
 
-		util::retrieve(Self::path(store),
-			|l| query.matches(l).map_err(|e| DataError::from(e).into()),
-		).await
+		util::retrieve(Self::path(store), |l| {
+			query.matches(l).map_err(|e| DataError::from(e).into())
+		})
+		.await
 	}
 }
 
 #[cfg(test)]
 mod tests
 {
-	use
-	{
-		std::{borrow::Cow::Borrowed, time::Instant},
-
-		super::{BincodeLocation, Location, LocationAdapter, query, Store, util},
-
-		clinvoice_query::Match,
-
-		tokio::fs,
+	use std::{
+		borrow::Cow::Borrowed,
+		time::Instant,
 	};
 
-	#[tokio::test(flavor="multi_thread", worker_threads=10)]
+	use clinvoice_query::Match;
+	use tokio::fs;
+
+	use super::{
+		query,
+		util,
+		BincodeLocation,
+		Location,
+		LocationAdapter,
+		Store,
+	};
+
+	#[tokio::test(flavor = "multi_thread", worker_threads = 10)]
 	async fn create()
 	{
 		let store = util::temp_store();
 
 		let start = Instant::now();
 
-		let earth = BincodeLocation::create("Earth".into(), &store).await.unwrap();
-		let usa = BincodeLocation {location: &earth, store: &store}.create_inner("USA".into()).await.unwrap();
-		let arizona = BincodeLocation {location: &usa, store: &store}.create_inner("Arizona".into()).await.unwrap();
-		let phoenix = BincodeLocation {location: &arizona, store: &store}.create_inner("Phoenix".into()).await.unwrap();
+		let earth = BincodeLocation::create("Earth".into(), &store)
+			.await
+			.unwrap();
+		let usa = BincodeLocation {
+			location: &earth,
+			store:    &store,
+		}
+		.create_inner("USA".into())
+		.await
+		.unwrap();
+		let arizona = BincodeLocation {
+			location: &usa,
+			store:    &store,
+		}
+		.create_inner("Arizona".into())
+		.await
+		.unwrap();
+		let phoenix = BincodeLocation {
+			location: &arizona,
+			store:    &store,
+		}
+		.create_inner("Phoenix".into())
+		.await
+		.unwrap();
 
-		println!("\n>>>>> BincodeLocation::start {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 4);
+		println!(
+			"\n>>>>> BincodeLocation::start {}us <<<<<\n",
+			Instant::now().duration_since(start).as_micros() / 4
+		);
 
 		assert_eq!(usa.outer_id, Some(earth.id));
 		assert_eq!(arizona.outer_id, Some(usa.id));
@@ -142,24 +183,55 @@ mod tests
 	/// The assertion most commonly used for the [`create` test](test_create).
 	async fn create_assertion(location: Location, store: &Store)
 	{
-		let read_result = fs::read(BincodeLocation {location: &location, store}.filepath()).await.unwrap();
+		let read_result = fs::read(
+			BincodeLocation {
+				location: &location,
+				store,
+			}
+			.filepath(),
+		)
+		.await
+		.unwrap();
 		assert_eq!(location, bincode::deserialize(&read_result).unwrap());
 	}
 
-	#[tokio::test(flavor="multi_thread", worker_threads=10)]
+	#[tokio::test(flavor = "multi_thread", worker_threads = 10)]
 	async fn retrieve()
 	{
 		let store = util::temp_store();
 
-		let earth = BincodeLocation::create("Earth".into(), &store).await.unwrap();
-		let usa = BincodeLocation {location: &earth, store: &store}.create_inner("USA".into()).await.unwrap();
-		let arizona = BincodeLocation {location: &usa, store: &store}.create_inner("Arizona".into()).await.unwrap();
-		let phoenix = BincodeLocation {location: &arizona, store: &store}.create_inner("Phoenix".into()).await.unwrap();
+		let earth = BincodeLocation::create("Earth".into(), &store)
+			.await
+			.unwrap();
+		let usa = BincodeLocation {
+			location: &earth,
+			store:    &store,
+		}
+		.create_inner("USA".into())
+		.await
+		.unwrap();
+		let arizona = BincodeLocation {
+			location: &usa,
+			store:    &store,
+		}
+		.create_inner("Arizona".into())
+		.await
+		.unwrap();
+		let phoenix = BincodeLocation {
+			location: &arizona,
+			store:    &store,
+		}
+		.create_inner("Phoenix".into())
+		.await
+		.unwrap();
 
 		let everything_query = query::Location::default();
-		let arizona_query = query::Location
-		{
-			id: Match::HasAny(vec![Borrowed(&earth.id), Borrowed(&arizona.id)].into_iter().collect()),
+		let arizona_query = query::Location {
+			id: Match::HasAny(
+				vec![Borrowed(&earth.id), Borrowed(&arizona.id)]
+					.into_iter()
+					.collect(),
+			),
 			outer: query::OuterLocation::Some(query::Location::default().into()),
 			..Default::default()
 		};
@@ -169,9 +241,13 @@ mod tests
 		let (everything, only_arizona) = futures::try_join!(
 			BincodeLocation::retrieve(&everything_query, &store),
 			BincodeLocation::retrieve(&arizona_query, &store),
-		).unwrap();
+		)
+		.unwrap();
 
-		println!("\n>>>>> BincodeLocation::retrieve {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 2);
+		println!(
+			"\n>>>>> BincodeLocation::retrieve {}us <<<<<\n",
+			Instant::now().duration_since(start).as_micros() / 2
+		);
 
 		// Assert the results contains all values
 		assert!(everything.contains(&earth));

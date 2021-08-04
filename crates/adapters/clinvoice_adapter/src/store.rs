@@ -1,7 +1,10 @@
-use crate::Adapters;
+#[cfg(feature = "serde_support")]
+use serde::{
+	Deserialize,
+	Serialize,
+};
 
-#[cfg(feature="serde_support")]
-use serde::{Deserialize, Serialize};
+use crate::Adapters;
 
 /// # Summary
 ///
@@ -12,7 +15,7 @@ use serde::{Deserialize, Serialize};
 /// A `Store` can be either on a local or remote filesystem. This filesystem may or may not be a
 /// database.
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-#[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
+#[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 pub struct Store
 {
 	/// # Summary

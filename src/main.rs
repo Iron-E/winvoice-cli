@@ -4,24 +4,26 @@ mod app;
 mod dyn_result;
 mod input;
 
-use
-{
-	std::{error::Error, fs, process},
-
-	app::App,
-	dyn_result::DynResult,
-
-	clinvoice_config::Config,
-
-	structopt::StructOpt,
+use std::{
+	error::Error,
+	fs,
+	process,
 };
+
+use app::App;
+use clinvoice_config::Config;
+use dyn_result::DynResult;
+use structopt::StructOpt;
 
 /// # Summary
 ///
 /// Exit `clinvoice` with status code 1, printing some `error`.
 fn exit_with_err(error: impl Error) -> !
 {
-	if cfg!(debug_assertions) { panic!("{:?}", error) }
+	if cfg!(debug_assertions)
+	{
+		panic!("{:?}", error)
+	}
 
 	eprintln!("\nERROR: {}", error);
 	process::exit(1)
@@ -40,5 +42,7 @@ fn main()
 	let config: Config = toml::from_slice(&config_bytes).unwrap_or_else(|e| exit_with_err(e));
 
 	// Run the CLInvoice application.
-	App::from_args().run(&config).unwrap_or_else(|e| exit_with_err(e.as_ref()));
+	App::from_args()
+		.run(&config)
+		.unwrap_or_else(|e| exit_with_err(e.as_ref()));
 }

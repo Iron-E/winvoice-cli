@@ -1,13 +1,15 @@
-use
-{
-	super::BincodeLocation,
-	crate::
-	{
-		data::{Error, Result},
-		util,
-	},
+use clinvoice_adapter::{
+	data::Initializable,
+	Store,
+};
 
-	clinvoice_adapter::{data::Initializable, Store},
+use super::BincodeLocation;
+use crate::{
+	data::{
+		Error,
+		Result,
+	},
+	util,
 };
 
 #[async_trait::async_trait]
@@ -24,4 +26,3 @@ impl Initializable for BincodeLocation<'_, '_>
 		Ok(())
 	}
 }
-

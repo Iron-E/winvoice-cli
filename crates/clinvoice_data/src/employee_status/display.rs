@@ -1,9 +1,10 @@
-use
-{
-	core::fmt::{Display, Formatter, Result},
-
-	super::EmployeeStatus,
+use core::fmt::{
+	Display,
+	Formatter,
+	Result,
 };
+
+use super::EmployeeStatus;
 
 impl Display for EmployeeStatus
 {
@@ -21,12 +22,9 @@ impl Display for EmployeeStatus
 #[cfg(test)]
 mod tests
 {
-	use
-	{
-		std::time::Instant,
+	use std::time::Instant;
 
-		super::EmployeeStatus,
-	};
+	use super::EmployeeStatus;
 
 	#[test]
 	fn display()
@@ -34,7 +32,13 @@ mod tests
 		let start = Instant::now();
 		assert_eq!(format!("{}", EmployeeStatus::Employed), "Employed");
 		assert_eq!(format!("{}", EmployeeStatus::NotEmployed), "Not employed");
-		assert_eq!(format!("{}", EmployeeStatus::Representative), "Representative");
-		println!("\n>>>>> EmployeeStatus::fmt {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 3);
+		assert_eq!(
+			format!("{}", EmployeeStatus::Representative),
+			"Representative"
+		);
+		println!(
+			"\n>>>>> EmployeeStatus::fmt {}us <<<<<\n",
+			Instant::now().duration_since(start).as_micros() / 3
+		);
 	}
 }

@@ -1,21 +1,20 @@
 mod display;
 
-use
-{
-	crate::ExpenseCategory,
-
-	clinvoice_finance::Money,
+use clinvoice_finance::Money;
+#[cfg(feature = "serde_support")]
+use serde::{
+	Deserialize,
+	Serialize,
 };
 
-#[cfg(feature="serde_support")]
-use serde::{Deserialize, Serialize};
+use crate::ExpenseCategory;
 
 /// # Summary
 ///
 /// A representation of some item or service which a [client](crate::Organization)'s money was
 /// spent to acquire for a [`Job`](crate::Job) on a [`Timesheet`](crate::Timesheet).
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-#[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
+#[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 pub struct Expense
 {
 	/// # Summary

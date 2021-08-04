@@ -1,12 +1,8 @@
-use
-{
-	std::io,
+use std::io;
 
-	clinvoice_adapter::data,
-
-	serde_yaml as yaml,
-	thiserror::Error,
-};
+use clinvoice_adapter::data;
+use serde_yaml as yaml;
+use thiserror::Error;
 
 /// # Summary
 ///

@@ -1,11 +1,11 @@
-use
-{
-	std::fs,
+use std::fs;
 
-	super::BincodePerson,
-	crate::data::{Error, Result},
+use clinvoice_adapter::data::Updatable;
 
-	clinvoice_adapter::data::Updatable,
+use super::BincodePerson;
+use crate::data::{
+	Error,
+	Result,
 };
 
 impl Updatable for BincodePerson<'_, '_>

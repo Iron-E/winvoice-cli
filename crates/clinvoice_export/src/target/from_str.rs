@@ -1,8 +1,9 @@
-use
-{
-	core::str::FromStr,
+use core::str::FromStr;
 
-	super::{Error, Result, Target},
+use super::{
+	Error,
+	Result,
+	Target,
 };
 
 impl FromStr for Target

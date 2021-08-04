@@ -1,9 +1,5 @@
-use
-{
-	clinvoice_data::Id,
-
-	thiserror::Error,
-};
+use clinvoice_data::Id;
+use thiserror::Error;
 
 /// # Summary
 ///
@@ -20,7 +16,10 @@ pub enum Error
 	/// # Summary
 	///
 	/// Some reference to an `id` was expected, but none was found.
-	#[error("Attempted to delete ID #{0}, but one or more other entities require it. Cascade delete to remove them")]
+	#[error(
+		"Attempted to delete ID #{0}, but one or more other entities require it. Cascade delete to \
+		 remove them"
+	)]
 	DeleteRestricted(Id),
 
 	/// # Summary

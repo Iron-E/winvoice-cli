@@ -1,11 +1,7 @@
-use
-{
-	std::io,
+use std::io;
 
-	clinvoice_adapter::data,
-
-	thiserror::Error,
-};
+use clinvoice_adapter::data;
+use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum Error

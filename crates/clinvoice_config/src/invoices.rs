@@ -1,8 +1,7 @@
-use
-{
-	clinvoice_data::finance::Currency,
-
-	serde::{Deserialize, Serialize},
+use clinvoice_data::finance::Currency;
+use serde::{
+	Deserialize,
+	Serialize,
 };
 
 /// # Summary

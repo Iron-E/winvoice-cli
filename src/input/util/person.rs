@@ -1,13 +1,17 @@
-use
-{
-	core::fmt::Display,
+use core::fmt::Display;
 
-	super::menu,
-	crate::{app::QUERY_PROMPT, DynResult, input},
+use clinvoice_adapter::{
+	data::PersonAdapter,
+	Store,
+};
+use clinvoice_data::views::PersonView;
+use clinvoice_query as query;
 
-	clinvoice_adapter::{data::PersonAdapter, Store},
-	clinvoice_data::views::PersonView,
-	clinvoice_query as query,
+use super::menu;
+use crate::{
+	app::QUERY_PROMPT,
+	input,
+	DynResult,
 };
 
 /// # Summary
@@ -23,23 +27,34 @@ use
 ///
 /// [P_retrieve]: clinvoice_adapter::data::PersonAdapter::retrieve
 /// [person]: clinvoice_data::Person
-pub fn retrieve_views<'err, D, P>(prompt: D, retry_on_empty: bool, store: &Store) -> DynResult<'err, Vec<PersonView>> where
-	D : Display,
-	P : PersonAdapter,
+pub fn retrieve_views<'err, D, P>(
+	prompt: D,
+	retry_on_empty: bool,
+	store: &Store,
+) -> DynResult<'err, Vec<PersonView>>
+where
+	D: Display,
+	P: PersonAdapter,
 
-	<P as PersonAdapter>::Error : 'err,
+	<P as PersonAdapter>::Error: 'err,
 {
 	let query: query::Person = input::edit_default(format!("{}\n{}persons", prompt, QUERY_PROMPT))?;
 
 	let results = P::retrieve(&query, &store)?;
-	let results_view: Result<Vec<_>, _> = results.into_iter().map(PersonView::from).filter_map(|view| match query.matches_view(&view)
-	{
-		Ok(b) if b => Some(Ok(view)),
-		Err(e) => Some(Err(e)),
-		_ => None,
-	}).collect();
+	let results_view: Result<Vec<_>, _> = results
+		.into_iter()
+		.map(PersonView::from)
+		.filter_map(|view| match query.matches_view(&view)
+		{
+			Ok(b) if b => Some(Ok(view)),
+			Err(e) => Some(Err(e)),
+			_ => None,
+		})
+		.collect();
 
-	if retry_on_empty && results_view.as_ref().map(|r| r.is_empty()).unwrap_or(false) && menu::retry_query()?
+	if retry_on_empty &&
+		results_view.as_ref().map(|r| r.is_empty()).unwrap_or(false) &&
+		menu::retry_query()?
 	{
 		return retrieve_views::<D, P>(prompt, true, store);
 	}

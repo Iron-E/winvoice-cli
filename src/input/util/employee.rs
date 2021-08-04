@@ -1,18 +1,28 @@
-use
-{
-	core::fmt::Display,
-	std::borrow::Cow::Owned,
+use core::fmt::Display;
+use std::borrow::Cow::Owned;
 
-	super::menu,
-	crate::{app::QUERY_PROMPT, DynResult, filter_map_view, input},
-
-	clinvoice_adapter::
-	{
-		data::{Error as DataError, EmployeeAdapter, LocationAdapter, OrganizationAdapter, PersonAdapter},
-		Store,
+use clinvoice_adapter::{
+	data::{
+		EmployeeAdapter,
+		Error as DataError,
+		LocationAdapter,
+		OrganizationAdapter,
+		PersonAdapter,
 	},
-	clinvoice_data::{Id, views::EmployeeView},
-	clinvoice_query as query,
+	Store,
+};
+use clinvoice_data::{
+	views::EmployeeView,
+	Id,
+};
+use clinvoice_query as query;
+
+use super::menu;
+use crate::{
+	app::QUERY_PROMPT,
+	filter_map_view,
+	input,
+	DynResult,
 };
 
 /// # Summary
@@ -28,27 +38,30 @@ use
 ///
 /// [L_retrieve]: clinvoice_adapter::data::EmployeeAdapter::retrieve
 /// [location]: clinvoice_data::Employee
-pub fn retrieve_views<'err, D, E, L, O, P>(default_id: Option<Id>, prompt: D, retry_on_empty: bool, store: &Store)
-	-> DynResult<'err, Vec<EmployeeView>>
+pub fn retrieve_views<'err, D, E, L, O, P>(
+	default_id: Option<Id>,
+	prompt: D,
+	retry_on_empty: bool,
+	store: &Store,
+) -> DynResult<'err, Vec<EmployeeView>>
 where
-	D : Display,
-	E : EmployeeAdapter,
-	L : LocationAdapter,
-	O : OrganizationAdapter,
-	P : PersonAdapter,
+	D: Display,
+	E: EmployeeAdapter,
+	L: LocationAdapter,
+	O: OrganizationAdapter,
+	P: PersonAdapter,
 
-	<E as EmployeeAdapter>::Error : 'err +
-		From<<L as LocationAdapter>::Error> +
-		From<<O as OrganizationAdapter>::Error> +
-		From<<P as PersonAdapter>::Error>,
-	<L as LocationAdapter>::Error : 'err,
-	<O as OrganizationAdapter>::Error : 'err,
-	<P as PersonAdapter>::Error : 'err,
+	<E as EmployeeAdapter>::Error: 'err
+		+ From<<L as LocationAdapter>::Error>
+		+ From<<O as OrganizationAdapter>::Error>
+		+ From<<P as PersonAdapter>::Error>,
+	<L as LocationAdapter>::Error: 'err,
+	<O as OrganizationAdapter>::Error: 'err,
+	<P as PersonAdapter>::Error: 'err,
 {
 	let query = match default_id
 	{
-		Some(id) => query::Employee
-		{
+		Some(id) => query::Employee {
 			id: query::Match::EqualTo(Owned(id)),
 			..Default::default()
 		},
@@ -56,11 +69,15 @@ where
 	};
 
 	let results = E::retrieve(&query, &store)?;
-	let results_view: Result<Vec<_>, _> = results.into_iter().map(|e|
-		E::into_view::<L, O, P>(e, &store)
-	).filter_map(|result| filter_map_view!(query, result)).collect();
+	let results_view: Result<Vec<_>, _> = results
+		.into_iter()
+		.map(|e| E::into_view::<L, O, P>(e, &store))
+		.filter_map(|result| filter_map_view!(query, result))
+		.collect();
 
-	if retry_on_empty && results_view.as_ref().map(|r| r.is_empty()).unwrap_or(false) && menu::retry_query()?
+	if retry_on_empty &&
+		results_view.as_ref().map(|r| r.is_empty()).unwrap_or(false) &&
+		menu::retry_query()?
 	{
 		return retrieve_views::<D, E, L, O, P>(default_id, prompt, true, store);
 	}

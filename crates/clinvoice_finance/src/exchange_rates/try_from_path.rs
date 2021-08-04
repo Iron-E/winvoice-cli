@@ -1,11 +1,17 @@
-use
-{
-	std::{collections::HashMap, convert::TryFrom, fs, path::Path},
+use std::{
+	collections::HashMap,
+	convert::TryFrom,
+	fs,
+	path::Path,
+};
 
-	super::ExchangeRates,
-	crate::{Currency, Error, Result},
+use rust_decimal::Decimal;
 
-	rust_decimal::Decimal,
+use super::ExchangeRates;
+use crate::{
+	Currency,
+	Error,
+	Result,
 };
 
 impl TryFrom<&Path> for ExchangeRates
@@ -15,8 +21,7 @@ impl TryFrom<&Path> for ExchangeRates
 	fn try_from(path: &Path) -> Result<Self>
 	{
 		let contents = fs::read_to_string(path)?;
-		let (currencies, rates) =
-		{
+		let (currencies, rates) = {
 			let mut csv = contents.split('\n').map(|line| line.split(", "));
 			(csv.next().unwrap(), csv.next().unwrap())
 		};
@@ -24,44 +29,75 @@ impl TryFrom<&Path> for ExchangeRates
 		let mut exchange_rates = ExchangeRates(HashMap::new());
 		exchange_rates.0.insert(Currency::EUR, 1.into());
 
-		currencies.zip(rates).skip(1).filter(|(c, _)| !c.is_empty()).try_for_each(|(c, r)| -> Result<()>
-		{
-			let currency = c.parse::<Currency>()?;
-			exchange_rates.0.insert(currency, r.parse::<Decimal>()?);
-			Ok(())
-		}).and(Ok(exchange_rates))
+		currencies
+			.zip(rates)
+			.skip(1)
+			.filter(|(c, _)| !c.is_empty())
+			.try_for_each(|(c, r)| -> Result<()> {
+				let currency = c.parse::<Currency>()?;
+				exchange_rates.0.insert(currency, r.parse::<Decimal>()?);
+				Ok(())
+			})
+			.and(Ok(exchange_rates))
 	}
 }
 
 #[cfg(test)]
 mod tests
 {
-	use
-	{
-		std::{env, time::Instant},
+	use std::{
+		env,
+		time::Instant,
+	};
 
-		super::{Currency, Decimal, ExchangeRates, fs, TryFrom},
+	use super::{
+		fs,
+		Currency,
+		Decimal,
+		ExchangeRates,
+		TryFrom,
 	};
 
 	#[test]
 	fn try_from()
 	{
-		let filepath = env::temp_dir().join("clinvoice_finance").join("exchange-rates").join("try-from.csv");
+		let filepath = env::temp_dir()
+			.join("clinvoice_finance")
+			.join("exchange-rates")
+			.join("try-from.csv");
 
-		if filepath.is_file() { fs::remove_file(&filepath).unwrap(); }
+		if filepath.is_file()
+		{
+			fs::remove_file(&filepath).unwrap();
+		}
 
 		assert!(ExchangeRates::try_from(filepath.as_path()).is_err());
 
 		let parent = filepath.parent().unwrap();
-		if !parent.is_dir() { fs::create_dir_all(parent).unwrap(); }
+		if !parent.is_dir()
+		{
+			fs::create_dir_all(parent).unwrap();
+		}
 
-		fs::write(&filepath, "Date, USD, JPY, BGN, CZK, DKK, GBP, HUF, PLN, RON, SEK, CHF, ISK, NOK, HRK, RUB, TRY, AUD, BRL, CAD, CNY, HKD, IDR, ILS, INR, KRW, MXN, MYR, NZD, PHP, SGD, THB, ZAR, \n03 June 2021, 1.2187, 133.81, 1.9558, 25.448, 7.4365, 0.85955, 345.82, 4.4520, 4.9220, 10.1145, 1.0961, 146.30, 10.1501, 7.5013, 89.2163, 10.5650, 1.5792, 6.1894, 1.4710, 7.7910, 9.4551, 17420.91, 3.9598, 88.8755, 1357.75, 24.3300, 5.0241, 1.6915, 58.208, 1.6141, 37.938, 16.5218, ").unwrap();
+		fs::write(
+			&filepath,
+			"Date, USD, JPY, BGN, CZK, DKK, GBP, HUF, PLN, RON, SEK, CHF, ISK, NOK, HRK, RUB, TRY, \
+			 AUD, BRL, CAD, CNY, HKD, IDR, ILS, INR, KRW, MXN, MYR, NZD, PHP, SGD, THB, ZAR, \n03 \
+			 June 2021, 1.2187, 133.81, 1.9558, 25.448, 7.4365, 0.85955, 345.82, 4.4520, 4.9220, \
+			 10.1145, 1.0961, 146.30, 10.1501, 7.5013, 89.2163, 10.5650, 1.5792, 6.1894, 1.4710, \
+			 7.7910, 9.4551, 17420.91, 3.9598, 88.8755, 1357.75, 24.3300, 5.0241, 1.6915, 58.208, \
+			 1.6141, 37.938, 16.5218, ",
+		)
+		.unwrap();
 
 		assert!(filepath.is_file());
 
 		let start = Instant::now();
 		let exchange_rates = ExchangeRates::try_from(filepath.as_path()).unwrap();
-		println!("\n>>>>> ExchangeRates::try_from {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+		println!(
+			"\n>>>>> ExchangeRates::try_from {}us <<<<<\n",
+			Instant::now().duration_since(start).as_micros()
+		);
 
 		assert_eq!(exchange_rates[Currency::AUD], Decimal::new(1_5792, 4));
 		assert_eq!(exchange_rates[Currency::BGN], Decimal::new(1_9558, 4));

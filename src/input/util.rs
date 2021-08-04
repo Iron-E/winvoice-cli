@@ -20,10 +20,8 @@ pub mod person;
 ///   * `None` if the `$query` does not match.
 /// * `Err(e)` => `Some(Err(_))`
 #[macro_export]
-macro_rules! filter_map_view
-{
-	($query: ident, $result: ident) =>
-	{
+macro_rules! filter_map_view {
+	($query:ident, $result:ident) => {
 		match $result
 		{
 			Ok(val) => match $query.matches_view(&val)
@@ -32,7 +30,7 @@ macro_rules! filter_map_view
 				Err(e) => Some(Err(DataError::from(e).into())),
 				_ => None,
 			},
-			Err(e) => Some(Err(e))
+			Err(e) => Some(Err(e)),
 		}
-	}
+	};
 }

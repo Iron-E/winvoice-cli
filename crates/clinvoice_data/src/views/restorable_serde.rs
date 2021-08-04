@@ -1,8 +1,5 @@
-use
-{
-	core::hash::Hash,
-	std::collections::HashMap,
-};
+use core::hash::Hash;
+use std::collections::HashMap;
 
 /// # Summary
 ///
@@ -17,17 +14,18 @@ pub trait RestorableSerde
 	fn restore(&mut self, original: &Self);
 }
 
-impl<K, V> RestorableSerde for HashMap<K, V> where
-	K : Eq + Hash,
-	V : RestorableSerde,
+impl<K, V> RestorableSerde for HashMap<K, V>
+where
+	K: Eq + Hash,
+	V: RestorableSerde,
 {
 	fn restore(&mut self, original: &Self)
 	{
-		self.iter_mut().for_each(|(key, value)|
+		self.iter_mut().for_each(|(key, value)| {
 			if let Some(original_value) = original.get(key)
 			{
 				value.restore(original_value)
 			}
-		);
+		});
 	}
 }

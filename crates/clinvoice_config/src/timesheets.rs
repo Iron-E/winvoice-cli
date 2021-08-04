@@ -1,8 +1,8 @@
-use
-{
-	core::time::Duration,
+use core::time::Duration;
 
-	serde::{Deserialize, Serialize},
+use serde::{
+	Deserialize,
+	Serialize,
 };
 
 /// # Summary
@@ -18,12 +18,15 @@ pub struct Timesheets
 	/// # Example
 	///
 	/// ```rust
-	/// use clinvoice_config::Timesheets;
 	/// use std::time::Duration;
 	///
+	/// use clinvoice_config::Timesheets;
+	///
 	/// // 5 minute interval
-	/// Timesheets {interval: Duration::new(300, 0)};
+	/// Timesheets {
+	/// 	interval: Duration::new(300, 0),
+	/// };
 	/// ```
-	#[serde(with="humantime_serde")]
+	#[serde(with = "humantime_serde")]
 	pub interval: Duration,
 }

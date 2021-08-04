@@ -1,21 +1,29 @@
 #![allow(clippy::wrong_self_convention)]
 
-use
-{
-	std::{borrow::Cow::Borrowed, error::Error},
-	super::{Deletable, Initializable, Updatable},
-	crate::Store,
-
-	clinvoice_data::{Location, views::LocationView},
-	clinvoice_query as query,
+use std::{
+	borrow::Cow::Borrowed,
+	error::Error,
 };
 
-pub trait LocationAdapter :
-	Deletable<Error = <Self as LocationAdapter>::Error> +
-	Initializable<Error = <Self as LocationAdapter>::Error> +
-	Updatable<Error = <Self as LocationAdapter>::Error> +
+use clinvoice_data::{
+	views::LocationView,
+	Location,
+};
+use clinvoice_query as query;
+
+use super::{
+	Deletable,
+	Initializable,
+	Updatable,
+};
+use crate::Store;
+
+pub trait LocationAdapter:
+	Deletable<Error = <Self as LocationAdapter>::Error>
+	+ Initializable<Error = <Self as LocationAdapter>::Error>
+	+ Updatable<Error = <Self as LocationAdapter>::Error>
 {
-	type Error : From<super::Error> + Error;
+	type Error: From<super::Error> + Error;
 
 	/// # Summary
 	///
@@ -50,23 +58,27 @@ pub trait LocationAdapter :
 	/// # Summary
 	///
 	/// Convert some `location` into a [`LocationView`].
-	fn into_view(location: Location, store: &Store) -> Result<LocationView, <Self as LocationAdapter>::Error>
+	fn into_view(
+		location: Location,
+		store: &Store,
+	) -> Result<LocationView, <Self as LocationAdapter>::Error>
 	{
 		let mut outer_locations = Self::outers(&location, store)?;
 		outer_locations.reverse();
 
-		Ok(LocationView
-		{
-			id: location.id,
-			name: location.name,
-			outer: outer_locations.into_iter().fold(None,
-				|previous: Option<LocationView>, outer_location| Some(LocationView
-				{
-					id: outer_location.id,
-					name: outer_location.name,
-					outer: previous.map(|l| l.into()),
-				}),
-			).map(|l| l.into()),
+		Ok(LocationView {
+			id:    location.id,
+			name:  location.name,
+			outer: outer_locations
+				.into_iter()
+				.fold(None, |previous: Option<LocationView>, outer_location| {
+					Some(LocationView {
+						id:    outer_location.id,
+						name:  outer_location.name,
+						outer: previous.map(|l| l.into()),
+					})
+				})
+				.map(|l| l.into()),
 		})
 	}
 
@@ -81,8 +93,7 @@ pub trait LocationAdapter :
 		while let Some(id) = outer_id
 		{
 			if let Ok(results) = Self::retrieve(
-				&query::Location
-				{
+				&query::Location {
 					id: query::Match::EqualTo(Borrowed(&id)),
 					..Default::default()
 				},

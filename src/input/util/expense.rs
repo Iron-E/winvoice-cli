@@ -1,14 +1,20 @@
-use
-{
-	super::menu::{ADD, ALL_ACTIONS, CONTINUE, DELETE, EDIT},
-	crate::input,
-
-	clinvoice_data::
-	{
-		finance::{Currency, Money},
-		Expense, ExpenseCategory,
+use clinvoice_data::{
+	finance::{
+		Currency,
+		Money,
 	},
+	Expense,
+	ExpenseCategory,
 };
+
+use super::menu::{
+	ADD,
+	ALL_ACTIONS,
+	CONTINUE,
+	DELETE,
+	EDIT,
+};
+use crate::input;
 
 /// # Summary
 ///
@@ -19,8 +25,7 @@ use
 /// Will error whenever [`input::select_one`] or [`input::text`] does.
 fn add_menu(expenses: &mut Vec<Expense>, default_currency: Currency) -> input::Result<()>
 {
-	const ALL_EXPENSE_CATEGORIES: [ExpenseCategory; 6] =
-	[
+	const ALL_EXPENSE_CATEGORIES: [ExpenseCategory; 6] = [
 		ExpenseCategory::Food,
 		ExpenseCategory::Item,
 		ExpenseCategory::Other,
@@ -29,10 +34,23 @@ fn add_menu(expenses: &mut Vec<Expense>, default_currency: Currency) -> input::R
 		ExpenseCategory::Travel,
 	];
 
-	let category = input::select_one(&ALL_EXPENSE_CATEGORIES, "Select which type of `Expense` to add")?;
-	let cost = input::edit(&Money::new(20_00, 2, default_currency), format!("What is the cost of the {}?", category))?;
-	let description = input::edit_markdown(&format!("* Describe the {}\n* All markdown syntax is valid", category))?;
-	expenses.push(Expense {category, cost, description});
+	let category = input::select_one(
+		&ALL_EXPENSE_CATEGORIES,
+		"Select which type of `Expense` to add",
+	)?;
+	let cost = input::edit(
+		&Money::new(20_00, 2, default_currency),
+		format!("What is the cost of the {}?", category),
+	)?;
+	let description = input::edit_markdown(&format!(
+		"* Describe the {}\n* All markdown syntax is valid",
+		category
+	))?;
+	expenses.push(Expense {
+		category,
+		cost,
+		description,
+	});
 
 	Ok(())
 }
@@ -54,7 +72,10 @@ pub fn menu(expenses: &mut Vec<Expense>, default_currency: Currency) -> input::R
 {
 	loop
 	{
-		let action = input::select_one(&ALL_ACTIONS, "\nThis is the menu for entering expenses\nWhat would you like to do?")?;
+		let action = input::select_one(
+			&ALL_ACTIONS,
+			"\nThis is the menu for entering expenses\nWhat would you like to do?",
+		)?;
 		match action
 		{
 			ADD => add_menu(expenses, default_currency)?,
@@ -79,10 +100,16 @@ fn delete_menu(expenses: &mut Vec<Expense>) -> input::Result<()>
 	{
 		let remove = input::select_one(&expenses, "Select an expense to remove")?;
 
-		expenses.remove(expenses.iter().enumerate().fold(0, |i, enumeration|
-			if &remove == enumeration.1 { enumeration.0 }
-			else { i }
-		));
+		expenses.remove(expenses.iter().enumerate().fold(0, |i, enumeration| {
+			if &remove == enumeration.1
+			{
+				enumeration.0
+			}
+			else
+			{
+				i
+			}
+		}));
 	}
 
 	Ok(())
@@ -102,14 +129,26 @@ fn edit_menu(expenses: &mut Vec<Expense>) -> input::Result<()>
 	{
 		let edit = input::select_one(&expenses, "Select an expense to edit")?;
 
-		let edit_index = expenses.iter().enumerate().fold(0, |i, enumeration|
-			if &edit == enumeration.1 { enumeration.0 }
-			else { i }
-		);
+		let edit_index = expenses.iter().enumerate().fold(0, |i, enumeration| {
+			if &edit == enumeration.1
+			{
+				enumeration.0
+			}
+			else
+			{
+				i
+			}
+		});
 
-		match input::edit(&edit, format!("Add any changes desired to the {}", edit.category))
+		match input::edit(
+			&edit,
+			format!("Add any changes desired to the {}", edit.category),
+		)
 		{
-			Ok(edited) => { expenses[edit_index] = edited; }
+			Ok(edited) =>
+			{
+				expenses[edit_index] = edited;
+			},
 			Err(input::Error::NotEdited) => (),
 			Err(e) => return Err(e),
 		};

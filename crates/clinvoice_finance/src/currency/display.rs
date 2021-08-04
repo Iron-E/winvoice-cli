@@ -1,9 +1,10 @@
-use
-{
-	core::fmt::{Display, Formatter, Result},
-
-	super::Currency,
+use core::fmt::{
+	Display,
+	Formatter,
+	Result,
 };
+
+use super::Currency;
 
 impl Display for Currency
 {

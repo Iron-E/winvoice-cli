@@ -1,22 +1,33 @@
 #![allow(clippy::wrong_self_convention)]
 
-use
-{
-	std::{borrow::Cow::Borrowed, error::Error},
-
-	super::{Deletable, EmployeeAdapter, Initializable, LocationAdapter, Updatable},
-	crate::Store,
-
-	clinvoice_data::{Employee, Location, Organization, views::OrganizationView},
-	clinvoice_query as query,
+use std::{
+	borrow::Cow::Borrowed,
+	error::Error,
 };
 
-pub trait OrganizationAdapter  :
-	Deletable<Error=<Self as OrganizationAdapter>::Error> +
-	Initializable<Error=<Self as OrganizationAdapter>::Error> +
-	Updatable<Error=<Self as OrganizationAdapter>::Error> +
+use clinvoice_data::{
+	views::OrganizationView,
+	Employee,
+	Location,
+	Organization,
+};
+use clinvoice_query as query;
+
+use super::{
+	Deletable,
+	EmployeeAdapter,
+	Initializable,
+	LocationAdapter,
+	Updatable,
+};
+use crate::Store;
+
+pub trait OrganizationAdapter:
+	Deletable<Error = <Self as OrganizationAdapter>::Error>
+	+ Initializable<Error = <Self as OrganizationAdapter>::Error>
+	+ Updatable<Error = <Self as OrganizationAdapter>::Error>
 {
-	type Error : From<super::Error> + Error;
+	type Error: From<super::Error> + Error;
 
 	/// # Summary
 	///
@@ -29,21 +40,26 @@ pub trait OrganizationAdapter  :
 	/// # Returns
 	///
 	/// The newly created [`Organization`].
-	fn create(location: Location, name: String, store: &Store) -> Result<Organization, <Self as OrganizationAdapter>::Error>;
+	fn create(
+		location: Location,
+		name: String,
+		store: &Store,
+	) -> Result<Organization, <Self as OrganizationAdapter>::Error>;
 
 	/// # Summary
 	///
 	/// Convert some `organization` into a [`OrganizationView`].
-	fn into_view<L>(organization: Organization, store: &Store)
-		-> Result<OrganizationView, <L as LocationAdapter>::Error>
+	fn into_view<L>(
+		organization: Organization,
+		store: &Store,
+	) -> Result<OrganizationView, <L as LocationAdapter>::Error>
 	where
-		L : LocationAdapter,
+		L: LocationAdapter,
 	{
 		let location_result = Self::to_location::<L>(&organization, store)?;
 		let location_view_result = L::into_view(location_result, store);
 
-		Ok(OrganizationView
-		{
+		Ok(OrganizationView {
 			id: organization.id,
 			location: location_view_result?,
 			name: organization.name,
@@ -70,16 +86,16 @@ pub trait OrganizationAdapter  :
 	/// # Summary
 	///
 	/// Get all of the [`Employee`]s which work at some `organization`.
-	fn to_employees<E>(organization: &Organization, store: &Store)
-		-> Result<Vec<Employee>, <E as EmployeeAdapter>::Error>
+	fn to_employees<E>(
+		organization: &Organization,
+		store: &Store,
+	) -> Result<Vec<Employee>, <E as EmployeeAdapter>::Error>
 	where
-		E : EmployeeAdapter,
+		E: EmployeeAdapter,
 	{
 		E::retrieve(
-			&query::Employee
-			{
-				organization: query::Organization
-				{
+			&query::Employee {
+				organization: query::Organization {
 					id: query::Match::EqualTo(Borrowed(&organization.id)),
 					..Default::default()
 				},
@@ -92,20 +108,24 @@ pub trait OrganizationAdapter  :
 	/// # Summary
 	///
 	/// Convert some `organization` into a [`Location`] through it's `location_id` field.
-	fn to_location<L>(organization: &Organization, store: &Store)
-		-> Result<Location, <L as LocationAdapter>::Error>
+	fn to_location<L>(
+		organization: &Organization,
+		store: &Store,
+	) -> Result<Location, <L as LocationAdapter>::Error>
 	where
-		L : LocationAdapter,
+		L: LocationAdapter,
 	{
 		let results = L::retrieve(
-			&query::Location
-			{
+			&query::Location {
 				id: query::Match::EqualTo(Borrowed(&organization.location_id)),
 				..Default::default()
 			},
 			store,
 		)?;
 
-		results.into_iter().next().ok_or_else(|| super::Error::DataIntegrity(organization.location_id).into())
+		results
+			.into_iter()
+			.next()
+			.ok_or_else(|| super::Error::DataIntegrity(organization.location_id).into())
 	}
 }

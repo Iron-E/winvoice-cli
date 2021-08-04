@@ -1,11 +1,14 @@
-use
-{
-	std::{fs, io::ErrorKind},
+use std::{
+	fs,
+	io::ErrorKind,
+};
 
-	super::BincodeJob,
-	crate::data::{Error, Result},
+use clinvoice_adapter::data::Deletable;
 
-	clinvoice_adapter::data::Deletable,
+use super::BincodeJob;
+use crate::data::{
+	Error,
+	Result,
 };
 
 impl Deletable for BincodeJob<'_, '_>
@@ -30,58 +33,70 @@ impl Deletable for BincodeJob<'_, '_>
 #[cfg(test)]
 mod tests
 {
-	use
-	{
-		std::time::Instant,
+	use std::time::Instant;
 
-		super::{BincodeJob, Deletable},
-		crate::{data::BincodeOrganization, util},
-
-		clinvoice_adapter::data::{JobAdapter, OrganizationAdapter},
-		clinvoice_data::
-		{
-			chrono::Utc,
-			finance::{Currency, Money},
-			Id, Location,
+	use clinvoice_adapter::data::{
+		JobAdapter,
+		OrganizationAdapter,
+	};
+	use clinvoice_data::{
+		chrono::Utc,
+		finance::{
+			Currency,
+			Money,
 		},
+		Id,
+		Location,
+	};
+
+	use super::{
+		BincodeJob,
+		Deletable,
+	};
+	use crate::{
+		data::BincodeOrganization,
+		util,
 	};
 
 	#[test]
 	fn delete()
 	{
-		util::temp_store(|store|
-		{
-			let big_test = BincodeOrganization
-			{
+		util::temp_store(|store| {
+			let big_test = BincodeOrganization {
 				organization: &BincodeOrganization::create(
-					Location {id: Id::new_v4(), name: "".into(), outer_id: None},
+					Location {
+						id: Id::new_v4(),
+						name: "".into(),
+						outer_id: None,
+					},
 					"Big Old Test Corporation".into(),
 					&store,
-				).unwrap(),
+				)
+				.unwrap(),
 				store,
 			};
 
-			let create_job = BincodeJob
-			{
+			let create_job = BincodeJob {
 				job: &BincodeJob::create(
 					big_test.organization.clone(),
 					Utc::now(),
 					Money::new(2_00, 2, Currency::USD),
 					"Test the job creation function".into(),
 					&store,
-				).unwrap(),
+				)
+				.unwrap(),
 				store,
 			};
 
-			let assert_job = BincodeJob
-			{
+			let assert_job = BincodeJob {
 				job: &BincodeJob::create(
 					big_test.organization.clone(),
 					Utc::now(),
 					Money::new(2_00, 2, Currency::USD),
 					"Assert that this stuff works".into(),
 					&store,
-				).unwrap(),
+				)
+				.unwrap(),
 				store,
 			};
 
@@ -89,7 +104,10 @@ mod tests
 			// Delete both jobs
 			create_job.delete(true).unwrap();
 			assert_job.delete(true).unwrap();
-			println!("\n>>>>> BincodeJob::delete {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 2);
+			println!(
+				"\n>>>>> BincodeJob::delete {}us <<<<<\n",
+				Instant::now().duration_since(start).as_micros() / 2
+			);
 
 			// Assert that all jobs are gone but the organization exists
 			assert!(!&assert_job.filepath().is_file());

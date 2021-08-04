@@ -1,23 +1,31 @@
 mod index;
 mod try_from_path;
 
-use
-{
-	std::
-	{
-		convert::TryInto,
-		collections::HashMap,
-		env,
-		fs,
-		io::{Cursor, Read},
-		path::{Path, PathBuf},
+use std::{
+	collections::HashMap,
+	convert::TryInto,
+	env,
+	fs,
+	io::{
+		Cursor,
+		Read,
 	},
+	path::{
+		Path,
+		PathBuf,
+	},
+};
 
-	crate::{Currency, Result},
+use chrono::{
+	Datelike,
+	Local,
+};
+use rust_decimal::Decimal;
+use zip::ZipArchive;
 
-	chrono::{Datelike, Local},
-	rust_decimal::Decimal,
-	zip::ZipArchive,
+use crate::{
+	Currency,
+	Result,
 };
 
 pub struct ExchangeRates(HashMap<Currency, Decimal>);
@@ -29,7 +37,8 @@ impl ExchangeRates
 	/// Get the latest [`ExchangeRates`] from the ECB.
 	fn download(filepath: &Path) -> Result<()>
 	{
-		let response = reqwest::blocking::get("https://www.ecb.europa.eu/stats/eurofxref/eurofxref.zip")?;
+		let response =
+			reqwest::blocking::get("https://www.ecb.europa.eu/stats/eurofxref/eurofxref.zip")?;
 		let bytes = response.bytes()?;
 
 		let mut archive = ZipArchive::new(Cursor::new(bytes))?;
@@ -47,7 +56,12 @@ impl ExchangeRates
 	fn filepath() -> PathBuf
 	{
 		let today = Local::now();
-		env::temp_dir().join(format!("clinvoice_finance--{}-{}-{}.csv", today.year(), today.month(), today.day()))
+		env::temp_dir().join(format!(
+			"clinvoice_finance--{}-{}-{}.csv",
+			today.year(),
+			today.month(),
+			today.day()
+		))
 	}
 
 	/// # Summary
@@ -59,7 +73,10 @@ impl ExchangeRates
 	pub fn new() -> Result<Self>
 	{
 		let filepath = Self::filepath();
-		if !filepath.is_file() { Self::download(&filepath)?; }
+		if !filepath.is_file()
+		{
+			Self::download(&filepath)?;
+		}
 
 		filepath.as_path().try_into()
 	}
@@ -68,25 +85,42 @@ impl ExchangeRates
 #[cfg(test)]
 mod tests
 {
-	use
-	{
-		std::{convert::TryFrom, time::Instant},
-		super::{env, ExchangeRates, fs},
+	use std::{
+		convert::TryFrom,
+		time::Instant,
+	};
+
+	use super::{
+		env,
+		fs,
+		ExchangeRates,
 	};
 
 	#[test]
 	fn download()
 	{
-		let filepath = env::temp_dir().join("clinvoice_finance").join("exchange-rates").join("download.csv");
+		let filepath = env::temp_dir()
+			.join("clinvoice_finance")
+			.join("exchange-rates")
+			.join("download.csv");
 
-		if filepath.is_file() { fs::remove_file(&filepath).unwrap(); }
+		if filepath.is_file()
+		{
+			fs::remove_file(&filepath).unwrap();
+		}
 
 		let parent = filepath.parent().unwrap();
-		if !parent.is_dir() { fs::create_dir_all(parent).unwrap(); }
+		if !parent.is_dir()
+		{
+			fs::create_dir_all(parent).unwrap();
+		}
 
 		let start = Instant::now();
 		ExchangeRates::download(&filepath).unwrap();
-		println!("\n>>>>> ExchangeRates::download {}s <<<<<\n", Instant::now().duration_since(start).as_secs_f64());
+		println!(
+			"\n>>>>> ExchangeRates::download {}s <<<<<\n",
+			Instant::now().duration_since(start).as_secs_f64()
+		);
 
 		assert!(filepath.is_file());
 		assert!(ExchangeRates::try_from(filepath.as_path()).is_ok());
@@ -96,14 +130,20 @@ mod tests
 	fn new()
 	{
 		let filepath = ExchangeRates::filepath();
-		if filepath.is_file() { fs::remove_file(&filepath).unwrap(); }
+		if filepath.is_file()
+		{
+			fs::remove_file(&filepath).unwrap();
+		}
 
 		let start = Instant::now();
 		// First ::new downloads the file
 		ExchangeRates::new().unwrap();
 		// Second ::new reads it
 		ExchangeRates::new().unwrap();
-		println!("\n>>>>> ExchangeRates::new {}s <<<<<\n", Instant::now().duration_since(start).as_secs_f64() / 2.0);
+		println!(
+			"\n>>>>> ExchangeRates::new {}s <<<<<\n",
+			Instant::now().duration_since(start).as_secs_f64() / 2.0
+		);
 
 		assert!(filepath.is_file());
 	}

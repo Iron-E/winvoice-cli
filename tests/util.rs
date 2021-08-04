@@ -1,8 +1,11 @@
-use
-{
-	std::{env, io},
+use std::{
+	env,
+	io,
+};
 
-	clinvoice_adapter::{Adapters, Store},
+use clinvoice_adapter::{
+	Adapters,
+	Store,
 };
 
 /// # Summary
@@ -24,17 +27,17 @@ pub fn temp_store(assertion: impl FnOnce(&Store))
 {
 	let temp_path = env::temp_dir().join("clinvoice_adapter_bincode_data");
 
-	assertion(&Store
-	{
-		adapter: Adapters::Bincode,
+	assertion(&Store {
+		adapter:  Adapters::Bincode,
 		password: None,
-		path: match temp_path.to_str()
+		path:     match temp_path.to_str()
 		{
 			Some(s) => s.into(),
 			_ => Err(io::Error::new(
 				io::ErrorKind::InvalidInput,
-				"`env::temp_path` did not resolve to a valid path"
-			)).unwrap(),
+				"`env::temp_path` did not resolve to a valid path",
+			))
+			.unwrap(),
 		},
 		username: None,
 	});

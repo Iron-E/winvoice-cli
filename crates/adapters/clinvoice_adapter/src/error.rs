@@ -1,9 +1,6 @@
-use
-{
-	crate::Adapters,
+use thiserror::Error;
 
-	thiserror::Error,
-};
+use crate::Adapters;
 
 /// # Summary
 ///
@@ -18,7 +15,11 @@ pub enum Error
 	///
 	/// [adapter]: crate::Adapters
 	#[error("Expected the {expected} adapter, but got the {actual} adapter")]
-	AdapterMismatch {expected: Adapters, actual: Adapters},
+	AdapterMismatch
+	{
+		expected: Adapters,
+		actual:   Adapters,
+	},
 
 	/// # Summary
 	///

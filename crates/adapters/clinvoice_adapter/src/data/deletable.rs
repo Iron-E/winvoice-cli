@@ -5,7 +5,7 @@ use std::error::Error;
 /// A structure which can be deleted from a remote [`Store`](crate::Store).
 pub trait Deletable
 {
-	type Error : Error;
+	type Error: Error;
 
 	/// # Summary
 	///

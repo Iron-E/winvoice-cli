@@ -6,16 +6,12 @@
 ///
 /// See any of the `clinvoice` custom [`Error`] types.
 #[macro_export]
-macro_rules! AliasResult
-{
-	() =>
-	{
+macro_rules! AliasResult {
+	() => {
 		clinvoice_error::AliasResult!(Error);
 	};
 
-	($error: ident) =>
-	{
+	($error:ident) => {
 		pub type Result<T> = std::result::Result<T, $error>;
 	};
 }
-

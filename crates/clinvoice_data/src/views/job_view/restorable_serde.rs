@@ -1,8 +1,5 @@
-use
-{
-	super::JobView,
-	crate::views::RestorableSerde,
-};
+use super::JobView;
+use crate::views::RestorableSerde;
 
 impl RestorableSerde for JobView
 {

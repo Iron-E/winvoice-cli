@@ -1,13 +1,16 @@
 mod display;
 
-#[cfg(feature="serde_support")]
-use serde::{Deserialize, Serialize};
+#[cfg(feature = "serde_support")]
+use serde::{
+	Deserialize,
+	Serialize,
+};
 
 /// # Summary
 ///
 /// The status of an [`Employee`](crate::Employee)
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-#[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
+#[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 pub enum EmployeeStatus
 {
 	/// # Summary

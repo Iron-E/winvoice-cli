@@ -1,8 +1,5 @@
-use
-{
-	super::EmployeeView,
-	crate::views::RestorableSerde,
-};
+use super::EmployeeView;
+use crate::views::RestorableSerde;
 
 impl RestorableSerde for EmployeeView
 {

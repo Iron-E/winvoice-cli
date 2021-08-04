@@ -2,22 +2,26 @@ mod from_view;
 mod hash;
 mod partial_eq;
 
-use
-{
-	std::collections::HashMap,
+use std::collections::HashMap;
 
-	crate::{Contact, EmployeeStatus, Id},
+#[cfg(feature = "serde_support")]
+use serde::{
+	Deserialize,
+	Serialize,
 };
 
-#[cfg(feature="serde_support")]
-use serde::{Deserialize, Serialize};
+use crate::{
+	Contact,
+	EmployeeStatus,
+	Id,
+};
 
 /// # Summary
 ///
 /// An `Employee` is a [`Person`](super::person::Person) who completes [`Job`](super::job::Job)s
 /// for an [employer](crate::Organization).
 #[derive(Clone, Debug, Eq)]
-#[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
+#[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 pub struct Employee
 {
 	/// # Summary

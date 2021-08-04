@@ -1,22 +1,30 @@
 mod display;
 mod restorable_serde;
 
-use
-{
-	super::{OrganizationView, TimesheetView},
-	crate::{Id, Invoice},
-
-	chrono::{DateTime, Utc},
+use chrono::{
+	DateTime,
+	Utc,
+};
+#[cfg(feature = "serde_support")]
+use serde::{
+	Deserialize,
+	Serialize,
 };
 
-#[cfg(feature="serde_support")]
-use serde::{Deserialize, Serialize};
+use super::{
+	OrganizationView,
+	TimesheetView,
+};
+use crate::{
+	Id,
+	Invoice,
+};
 
 /// # Summary
 ///
 /// A view of [`Job`](crate::Job).
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
-#[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
+#[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 pub struct JobView
 {
 	/// # Summary
@@ -37,7 +45,7 @@ pub struct JobView
 	/// # Summary
 	///
 	/// The [`Job`] number.
-	#[cfg_attr(feature="serde_support", serde(skip))]
+	#[cfg_attr(feature = "serde_support", serde(skip))]
 	pub id: Id,
 
 	/// # Summary

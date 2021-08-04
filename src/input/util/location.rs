@@ -1,17 +1,21 @@
-use
-{
-	core::fmt::Display,
+use core::fmt::Display;
 
-	super::menu,
-	crate::{app::QUERY_PROMPT, DynResult, filter_map_view, input},
-
-	clinvoice_adapter::
-	{
-		data::{Error as DataError, LocationAdapter},
-		Store,
+use clinvoice_adapter::{
+	data::{
+		Error as DataError,
+		LocationAdapter,
 	},
-	clinvoice_data::views::LocationView,
-	clinvoice_query as query,
+	Store,
+};
+use clinvoice_data::views::LocationView;
+use clinvoice_query as query;
+
+use super::menu;
+use crate::{
+	app::QUERY_PROMPT,
+	filter_map_view,
+	input,
+	DynResult,
 };
 
 /// # Summary
@@ -27,20 +31,30 @@ use
 ///
 /// [L_retrieve]: clinvoice_adapter::data::LocationAdapter::retrieve
 /// [location]: clinvoice_data::Location
-pub fn retrieve_views<'err, D, L>(prompt: D, retry_on_empty: bool, store: &Store) -> DynResult<'err, Vec<LocationView>> where
-	D : Display,
-	L : LocationAdapter,
+pub fn retrieve_views<'err, D, L>(
+	prompt: D,
+	retry_on_empty: bool,
+	store: &Store,
+) -> DynResult<'err, Vec<LocationView>>
+where
+	D: Display,
+	L: LocationAdapter,
 
-	<L as LocationAdapter>::Error : 'err,
+	<L as LocationAdapter>::Error: 'err,
 {
-	let query: query::Location = input::edit_default(format!("{}\n{}locations", prompt, QUERY_PROMPT))?;
+	let query: query::Location =
+		input::edit_default(format!("{}\n{}locations", prompt, QUERY_PROMPT))?;
 
 	let results = L::retrieve(&query, &store)?;
-	let results_view: Result<Vec<_>, _> =results.into_iter().map(|l|
-		L::into_view(l, &store)
-	).filter_map(|result| filter_map_view!(query, result)).collect();
+	let results_view: Result<Vec<_>, _> = results
+		.into_iter()
+		.map(|l| L::into_view(l, &store))
+		.filter_map(|result| filter_map_view!(query, result))
+		.collect();
 
-	if retry_on_empty && results_view.as_ref().map(|r| r.is_empty()).unwrap_or(false) && menu::retry_query()?
+	if retry_on_empty &&
+		results_view.as_ref().map(|r| r.is_empty()).unwrap_or(false) &&
+		menu::retry_query()?
 	{
 		return retrieve_views::<D, L>(prompt, true, store);
 	}

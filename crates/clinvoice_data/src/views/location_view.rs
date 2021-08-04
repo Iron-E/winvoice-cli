@@ -1,22 +1,25 @@
 mod display;
 mod restorable_serde;
 
-use crate::Id;
+#[cfg(feature = "serde_support")]
+use serde::{
+	Deserialize,
+	Serialize,
+};
 
-#[cfg(feature="serde_support")]
-use serde::{Deserialize, Serialize};
+use crate::Id;
 
 /// # Summary
 ///
 /// A view of [`Location`](crate::Location).
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-#[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
+#[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 pub struct LocationView
 {
 	/// # Summary
 	///
 	/// The reference number of the [`Location`].
-	#[cfg_attr(feature="serde_support", serde(skip))]
+	#[cfg_attr(feature = "serde_support", serde(skip))]
 	pub id: Id,
 
 	/// # Summary
@@ -41,8 +44,7 @@ impl LocationView
 	/// Create a new [`LocationView`].
 	pub fn new(id: Id, name: String, outer: Option<&Self>) -> Self
 	{
-		Self
-		{
+		Self {
 			id,
 			name,
 			outer: outer.map(|l| l.clone().into()),

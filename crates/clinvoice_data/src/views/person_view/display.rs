@@ -1,9 +1,10 @@
-use
-{
-	core::fmt::{Display, Formatter, Result},
-
-	super::PersonView,
+use core::fmt::{
+	Display,
+	Formatter,
+	Result,
 };
+
+use super::PersonView;
 
 impl Display for PersonView
 {
@@ -16,25 +17,27 @@ impl Display for PersonView
 #[cfg(test)]
 mod tests
 {
-	use
-	{
-		std::time::Instant,
+	use std::time::Instant;
 
-		super::PersonView,
-		crate::Id,
-	};
+	use super::PersonView;
+	use crate::Id;
 
 	#[test]
 	fn display()
 	{
-		let person_view = PersonView
-		{
-			id: Id::new_v4(),
+		let person_view = PersonView {
+			id:   Id::new_v4(),
 			name: "Someone".into(),
 		};
 
 		let start = Instant::now();
-		assert_eq!(format!("{}", person_view), format!("#{}: Someone", person_view.id));
-		println!("\n>>>>> PersonView::fmt {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+		assert_eq!(
+			format!("{}", person_view),
+			format!("#{}: Someone", person_view.id)
+		);
+		println!(
+			"\n>>>>> PersonView::fmt {}us <<<<<\n",
+			Instant::now().duration_since(start).as_micros()
+		);
 	}
 }

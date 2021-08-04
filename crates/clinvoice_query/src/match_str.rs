@@ -1,23 +1,23 @@
 mod default;
 
-use
-{
-	super::Result,
-
-	regex::Regex,
+use regex::Regex;
+#[cfg(feature = "serde_support")]
+use serde::{
+	Deserialize,
+	Serialize,
 };
 
-
-#[cfg(feature="serde_support")]
-use serde::{Deserialize, Serialize};
+use super::Result;
 
 /// # Summary
 ///
 /// A value in a retrieval operation.
 #[derive(Clone, Debug, Eq, PartialEq)]
-#[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
-#[cfg_attr(feature="serde_support", serde(content="value", tag="condition"))]
-pub enum MatchStr<S> where S : AsRef<str>
+#[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
+#[cfg_attr(feature = "serde_support", serde(content = "value", tag = "condition"))]
+pub enum MatchStr<S>
+where
+	S: AsRef<str>,
 {
 	/// # Summary
 	///
@@ -27,7 +27,11 @@ pub enum MatchStr<S> where S : AsRef<str>
 	///
 	/// ```rust
 	/// use std::borrow::Cow::Borrowed;
-	/// use clinvoice_query::MatchStr::{And, Contains};
+	///
+	/// use clinvoice_query::MatchStr::{
+	/// 	And,
+	/// 	Contains,
+	/// };
 	///
 	/// let and = And(vec![Contains("foo"), Contains("bar")]);
 	///
@@ -50,10 +54,14 @@ pub enum MatchStr<S> where S : AsRef<str>
 	///
 	/// ```rust
 	/// use std::array::IntoIter as Iter;
+	///
 	/// use clinvoice_query::MatchStr;
 	///
 	/// assert_eq!(MatchStr::EqualTo("Foo").matches("Foo"), Ok(true));
-	/// assert_eq!(MatchStr::EqualTo("Foo").set_matches(&mut Iter::new(["Foo", "Bar"])), Ok(true));
+	/// assert_eq!(
+	/// 	MatchStr::EqualTo("Foo").set_matches(&mut Iter::new(["Foo", "Bar"])),
+	/// 	Ok(true)
+	/// );
 	/// ```
 	EqualTo(S),
 
@@ -68,11 +76,15 @@ pub enum MatchStr<S> where S : AsRef<str>
 	///
 	/// ```rust
 	/// use std::array::IntoIter as Iter;
+	///
 	/// use clinvoice_query::MatchStr;
 	///
 	/// assert_eq!(MatchStr::Contains("Foo").matches("Foobar"), Ok(true));
 	/// assert_eq!(MatchStr::Contains("Foo").matches("barfoo"), Ok(true));
-	/// assert_eq!(MatchStr::Contains("Foo").set_matches(&mut Iter::new(["bar", "foo"])), Ok(true));
+	/// assert_eq!(
+	/// 	MatchStr::Contains("Foo").set_matches(&mut Iter::new(["bar", "foo"])),
+	/// 	Ok(true)
+	/// );
 	/// ```
 	Contains(S),
 
@@ -84,13 +96,20 @@ pub enum MatchStr<S> where S : AsRef<str>
 	///
 	/// ```rust
 	/// use std::array::IntoIter as Iter;
-	/// use clinvoice_query::MatchStr::{Contains, Not};
+	///
+	/// use clinvoice_query::MatchStr::{
+	/// 	Contains,
+	/// 	Not,
+	/// };
 	///
 	/// let not_contains = Not(Contains("Foo").into());
 	///
 	/// assert_eq!(not_contains.matches("Foobar"), Ok(false));
 	/// assert_eq!(not_contains.matches("barfoo"), Ok(false));
-	/// assert_eq!(not_contains.set_matches(&mut Iter::new(["bar", "foo"])), Ok(false));
+	/// assert_eq!(
+	/// 	not_contains.set_matches(&mut Iter::new(["bar", "foo"])),
+	/// 	Ok(false)
+	/// );
 	/// ```
 	Not(Box<Self>),
 
@@ -102,7 +121,11 @@ pub enum MatchStr<S> where S : AsRef<str>
 	///
 	/// ```rust
 	/// use std::borrow::Cow::Borrowed;
-	/// use clinvoice_query::MatchStr::{Contains, Or};
+	///
+	/// use clinvoice_query::MatchStr::{
+	/// 	Contains,
+	/// 	Or,
+	/// };
 	///
 	/// let or = Or(vec![Contains("foo"), Contains("bar")]);
 	///
@@ -123,15 +146,21 @@ pub enum MatchStr<S> where S : AsRef<str>
 	///
 	/// ```rust
 	/// use std::array::IntoIter as Iter;
+	///
 	/// use clinvoice_query::MatchStr;
 	///
 	/// assert_eq!(MatchStr::Regex("^Foo").matches("Foobar"), Ok(true));
-	/// assert_eq!(MatchStr::Regex("foo$").set_matches(&mut Iter::new(["Bar", "foo"])), Ok(true));
+	/// assert_eq!(
+	/// 	MatchStr::Regex("foo$").set_matches(&mut Iter::new(["Bar", "foo"])),
+	/// 	Ok(true)
+	/// );
 	/// ```
 	Regex(S),
 }
 
-impl<S> MatchStr<S> where S : AsRef<str> + Eq
+impl<S> MatchStr<S>
+where
+	S: AsRef<str> + Eq,
 {
 	/// # Summary
 	///
@@ -149,19 +178,19 @@ impl<S> MatchStr<S> where S : AsRef<str> + Eq
 	{
 		Ok(match self
 		{
-			Self::And(matches) => matches.iter().try_fold(true, |b, m| -> Result<bool>
-			{
-				Ok(b && m.matches(value)?)
-			})?,
+			Self::And(matches) => matches
+				.iter()
+				.try_fold(true, |b, m| -> Result<bool> { Ok(b && m.matches(value)?) })?,
 			Self::Any => true,
 			Self::EqualTo(equal_value) => equal_value.as_ref() == value,
-			Self::Contains(contained_value) => value.to_lowercase().contains(&contained_value.as_ref().to_lowercase()),
+			Self::Contains(contained_value) => value
+				.to_lowercase()
+				.contains(&contained_value.as_ref().to_lowercase()),
 			Self::Not(m) => !m.matches(value)?,
 			Self::Regex(expression) => Regex::new(expression.as_ref())?.is_match(value),
-			Self::Or(matches) => matches.iter().try_fold(false, |b, m| -> Result<bool>
-			{
-				Ok(b || m.matches(value)?)
-			})?,
+			Self::Or(matches) => matches
+				.iter()
+				.try_fold(false, |b, m| -> Result<bool> { Ok(b || m.matches(value)?) })?,
 		})
 	}
 
@@ -177,12 +206,11 @@ impl<S> MatchStr<S> where S : AsRef<str> + Eq
 	///
 	/// * `true`, if the `values` match the passed [`MatchStr`].
 	/// * `false`, if the `values` do not match.
-	pub fn set_matches<'item>(&self, values: &mut impl Iterator<Item=&'item str>) -> Result<bool>
+	pub fn set_matches<'item>(&self, values: &mut impl Iterator<Item = &'item str>) -> Result<bool>
 	{
 		Ok(match self
 		{
-			Self::And(matches) => matches.iter().try_fold(true, |b, m| -> Result<bool>
-			{
+			Self::And(matches) => matches.iter().try_fold(true, |b, m| -> Result<bool> {
 				Ok(b && m.set_matches(values.by_ref())?)
 			})?,
 			Self::Any => true,
@@ -202,8 +230,7 @@ impl<S> MatchStr<S> where S : AsRef<str> + Eq
 				let regex = Regex::new(expression.as_ref())?;
 				values.any(|v| regex.is_match(v))
 			},
-			Self::Or(matches) => matches.iter().try_fold(false, |b, m| -> Result<bool>
-			{
+			Self::Or(matches) => matches.iter().try_fold(false, |b, m| -> Result<bool> {
 				Ok(b || m.set_matches(values.by_ref())?)
 			})?,
 		})

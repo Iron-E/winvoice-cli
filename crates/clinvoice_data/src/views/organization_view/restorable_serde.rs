@@ -1,8 +1,5 @@
-use
-{
-	super::OrganizationView,
-	crate::views::RestorableSerde,
-};
+use super::OrganizationView;
+use crate::views::RestorableSerde;
 
 impl RestorableSerde for OrganizationView
 {

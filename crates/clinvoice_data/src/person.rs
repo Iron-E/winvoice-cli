@@ -2,16 +2,19 @@ mod from_view;
 mod hash;
 mod partial_eq;
 
-use crate::Id;
+#[cfg(feature = "serde_support")]
+use serde::{
+	Deserialize,
+	Serialize,
+};
 
-#[cfg(feature="serde_support")]
-use serde::{Deserialize, Serialize};
+use crate::Id;
 
 /// # Summary
 ///
 /// A person is a physical human being.
 #[derive(Clone, Debug, Eq)]
-#[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
+#[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 pub struct Person
 {
 	/// # Summary

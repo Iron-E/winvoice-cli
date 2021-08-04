@@ -1,9 +1,9 @@
-use
-{
-	core::str::FromStr,
+use core::str::FromStr;
 
-	super::Currency,
-	crate::{Error, Result},
+use super::Currency;
+use crate::{
+	Error,
+	Result,
 };
 
 impl FromStr for Currency

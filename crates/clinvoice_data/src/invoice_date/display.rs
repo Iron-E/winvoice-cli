@@ -1,17 +1,25 @@
-use
-{
-	core::fmt::{Display, Formatter, Result},
-
-	super::InvoiceDate,
-
-	chrono::{DateTime, Local},
+use core::fmt::{
+	Display,
+	Formatter,
+	Result,
 };
+
+use chrono::{
+	DateTime,
+	Local,
+};
+
+use super::InvoiceDate;
 
 impl Display for InvoiceDate
 {
 	fn fmt(&self, formatter: &mut Formatter) -> Result
 	{
-		write!(formatter, "Issued on {}; ", DateTime::<Local>::from(self.issued))?;
+		write!(
+			formatter,
+			"Issued on {}; ",
+			DateTime::<Local>::from(self.issued)
+		)?;
 
 		if let Some(date) = self.paid
 		{
@@ -25,38 +33,48 @@ impl Display for InvoiceDate
 #[cfg(test)]
 mod tests
 {
-	use
-	{
-		std::time::Instant,
+	use std::time::Instant;
 
-		super::{DateTime, InvoiceDate, Local},
+	use chrono::Utc;
 
-		chrono::Utc,
+	use super::{
+		DateTime,
+		InvoiceDate,
+		Local,
 	};
 
 	#[test]
 	fn display()
 	{
-		let date = InvoiceDate
-		{
+		let date = InvoiceDate {
 			issued: Utc::now(),
-			paid: None,
+			paid:   None,
 		};
 
-		let other_date = InvoiceDate
-		{
+		let other_date = InvoiceDate {
 			issued: Utc::now(),
-			paid: Some(Utc::now()),
+			paid:   Some(Utc::now()),
 		};
 
 		let start = Instant::now();
-		assert_eq!(format!("{}", date), format!("Issued on {}; Outstanding",
-			DateTime::<Local>::from(date.issued),
-		));
-		assert_eq!(format!("{}", other_date), format!("Issued on {}; Paid on {}",
-			DateTime::<Local>::from(other_date.issued),
-			DateTime::<Local>::from(other_date.paid.unwrap()),
-		));
-		println!("\n>>>>> InvoiceDate::fmt {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 2);
+		assert_eq!(
+			format!("{}", date),
+			format!(
+				"Issued on {}; Outstanding",
+				DateTime::<Local>::from(date.issued),
+			)
+		);
+		assert_eq!(
+			format!("{}", other_date),
+			format!(
+				"Issued on {}; Paid on {}",
+				DateTime::<Local>::from(other_date.issued),
+				DateTime::<Local>::from(other_date.paid.unwrap()),
+			)
+		);
+		println!(
+			"\n>>>>> InvoiceDate::fmt {}us <<<<<\n",
+			Instant::now().duration_since(start).as_micros() / 2
+		);
 	}
 }

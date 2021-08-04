@@ -1,27 +1,29 @@
-use
-{
-	super::Match,
-
-	clinvoice_data::{chrono::NaiveDateTime, finance::Money},
+use clinvoice_data::{
+	chrono::NaiveDateTime,
+	finance::Money,
+};
+#[cfg(feature = "serde_support")]
+use serde::{
+	Deserialize,
+	Serialize,
 };
 
-#[cfg(feature="serde_support")]
-use serde::{Deserialize, Serialize};
+use super::Match;
 
 /// # Summary
 ///
 /// An [`Invoice`](clinvoice_data::Invoice) with [matchable](Match) fields.
 #[derive(Clone, Default, Debug, Eq, PartialEq)]
-#[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
+#[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 pub struct Invoice<'m>
 {
-	#[cfg_attr(feature="serde_support", serde(default))]
+	#[cfg_attr(feature = "serde_support", serde(default))]
 	pub issued: Match<'m, Option<NaiveDateTime>>,
 
-	#[cfg_attr(feature="serde_support", serde(default))]
+	#[cfg_attr(feature = "serde_support", serde(default))]
 	pub paid: Match<'m, Option<NaiveDateTime>>,
 
-	#[cfg_attr(feature="serde_support", serde(default))]
+	#[cfg_attr(feature = "serde_support", serde(default))]
 	pub hourly_rate: Match<'m, Money>,
 }
 
@@ -33,7 +35,14 @@ impl Invoice<'_>
 	pub fn matches(&self, invoice: &clinvoice_data::Invoice) -> bool
 	{
 		self.hourly_rate.matches(&invoice.hourly_rate) &&
-		self.issued.matches(&invoice.date.as_ref().map(|d| d.issued.naive_local())) &&
-		self.paid.matches(&invoice.date.as_ref().and_then(|d| d.paid.map(|p| p.naive_local())))
+			self
+				.issued
+				.matches(&invoice.date.as_ref().map(|d| d.issued.naive_local())) &&
+			self.paid.matches(
+				&invoice
+					.date
+					.as_ref()
+					.and_then(|d| d.paid.map(|p| p.naive_local())),
+			)
 	}
 }

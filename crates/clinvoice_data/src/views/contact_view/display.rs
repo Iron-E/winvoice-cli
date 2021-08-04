@@ -1,9 +1,10 @@
-use
-{
-	core::fmt::{Display, Formatter, Result},
-
-	super::ContactView,
+use core::fmt::{
+	Display,
+	Formatter,
+	Result,
 };
+
+use super::ContactView;
 
 impl Display for ContactView
 {
@@ -11,9 +12,12 @@ impl Display for ContactView
 	{
 		match self
 		{
-			ContactView::Address {location, export: _} => location.fmt(formatter),
-			ContactView::Email {email, export: _} => write!(formatter, "{}", email),
-			ContactView::Phone {phone, export: _} => write!(formatter, "{}", phone),
+			ContactView::Address {
+				location,
+				export: _,
+			} => location.fmt(formatter),
+			ContactView::Email { email, export: _ } => write!(formatter, "{}", email),
+			ContactView::Phone { phone, export: _ } => write!(formatter, "{}", phone),
 		}
 	}
 }
@@ -21,12 +25,12 @@ impl Display for ContactView
 #[cfg(test)]
 mod tests
 {
-	use
-	{
-		std::time::Instant,
+	use std::time::Instant;
 
-		super::ContactView,
-		crate::{Id, views::LocationView},
+	use super::ContactView;
+	use crate::{
+		views::LocationView,
+		Id,
 	};
 
 	/// # Summary
@@ -35,45 +39,61 @@ mod tests
 	#[test]
 	fn display()
 	{
-		let earth_view = LocationView
-		{
-			name: "Earth".into(),
-			id: Id::new_v4(),
+		let earth_view = LocationView {
+			name:  "Earth".into(),
+			id:    Id::new_v4(),
 			outer: None,
 		};
 
-		let usa_view = LocationView
-		{
-			name: "USA".into(),
-			id: Id::new_v4(),
+		let usa_view = LocationView {
+			name:  "USA".into(),
+			id:    Id::new_v4(),
 			outer: Some(earth_view.into()),
 		};
 
-		let arizona_view = LocationView
-		{
-			name: "Arizona".into(),
-			id: Id::new_v4(),
-			outer: Some(usa_view.into())
+		let arizona_view = LocationView {
+			name:  "Arizona".into(),
+			id:    Id::new_v4(),
+			outer: Some(usa_view.into()),
 		};
 
-		let phoenix_view = LocationView
-		{
-			name: "Phoenix".into(),
-			id: Id::new_v4(),
+		let phoenix_view = LocationView {
+			name:  "Phoenix".into(),
+			id:    Id::new_v4(),
 			outer: Some(arizona_view.into()),
 		};
 
-		let street_view = LocationView
-		{
-			name: "1337 Some Street".into(),
-			id: Id::new_v4(),
+		let street_view = LocationView {
+			name:  "1337 Some Street".into(),
+			id:    Id::new_v4(),
 			outer: Some(phoenix_view.into()),
 		};
 
 		let start = Instant::now();
-		assert_eq!(format!("{}", ContactView::Address {location: street_view, export: false}), "1337 Some Street, Phoenix, Arizona, USA, Earth");
-		assert_eq!(format!("{}", ContactView::Email {email: "foo@bar.io".into(), export: false}), "foo@bar.io");
-		assert_eq!(format!("{}", ContactView::Phone {phone: "1-603-555-5555".into(), export: false}), "1-603-555-5555");
-		println!("\n>>>>> ContactView::test_display {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / 3);
+		assert_eq!(
+			format!("{}", ContactView::Address {
+				location: street_view,
+				export:   false,
+			}),
+			"1337 Some Street, Phoenix, Arizona, USA, Earth"
+		);
+		assert_eq!(
+			format!("{}", ContactView::Email {
+				email:  "foo@bar.io".into(),
+				export: false,
+			}),
+			"foo@bar.io"
+		);
+		assert_eq!(
+			format!("{}", ContactView::Phone {
+				phone:  "1-603-555-5555".into(),
+				export: false,
+			}),
+			"1-603-555-5555"
+		);
+		println!(
+			"\n>>>>> ContactView::test_display {}us <<<<<\n",
+			Instant::now().duration_since(start).as_micros() / 3
+		);
 	}
 }

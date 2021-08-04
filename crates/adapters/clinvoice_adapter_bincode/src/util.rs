@@ -1,25 +1,25 @@
-use
-{
-	std::
-	{
-		fs, io,
-		path::{Path, PathBuf},
+use std::{
+	fs,
+	io,
+	path::{
+		Path,
+		PathBuf,
 	},
-
-	crate::data::Result as DataResult,
-
-	clinvoice_adapter::Store,
-	clinvoice_data::{Id, UUID_NAMESPACE},
-
-	serde::de::DeserializeOwned,
 };
 
+use clinvoice_adapter::Store;
+use clinvoice_data::{
+	Id,
+	UUID_NAMESPACE,
+};
+use serde::de::DeserializeOwned;
 #[cfg(test)]
-use
-{
+use {
 	clinvoice_adapter::Adapters,
 	std::env,
 };
+
+use crate::data::Result as DataResult;
 
 /// # Summary
 ///
@@ -50,7 +50,9 @@ pub fn create_store_dir(store_dir: &Path) -> io::Result<bool>
 /// Expand the `store`'s specified path and join the provided `subdir`.
 pub fn expand_store_path(store: &Store) -> PathBuf
 {
-	shellexpand::full(&store.path).map(|p| p.as_ref().into()).unwrap_or_else(|_| store.path.as_str().into())
+	shellexpand::full(&store.path)
+		.map(|p| p.as_ref().into())
+		.unwrap_or_else(|_| store.path.as_str().into())
 }
 
 /// # Summary
@@ -62,29 +64,43 @@ pub fn expand_store_path(store: &Store) -> PathBuf
 /// * If some [`fs::File`] in `path` is not a (valid) [`T`].
 /// * When [`fs::read_dir`] does.
 /// * When [`fs::File::open`] does.
-pub fn retrieve<T>(path: impl AsRef<Path>, query: impl Fn(&T) -> DataResult<bool>) -> DataResult<Vec<T>> where
-	T : DeserializeOwned,
+pub fn retrieve<T>(
+	path: impl AsRef<Path>,
+	query: impl Fn(&T) -> DataResult<bool>,
+) -> DataResult<Vec<T>>
+where
+	T: DeserializeOwned,
 {
 	let nodes = fs::read_dir(path)?;
 
-	nodes.filter_map(|node|
-		node.ok().map(|n| n.path()).filter(|node_path| node_path.is_file())
-	).map(|file_path|
-		fs::File::open(file_path).map(io::BufReader::new).map_err(|e| e.into()).and_then(|reader|
-		{
-			let employee: DataResult<T> = bincode::deserialize_from(reader).map_err(|e| e.into());
-			employee
+	nodes
+		.filter_map(|node| {
+			node
+				.ok()
+				.map(|n| n.path())
+				.filter(|node_path| node_path.is_file())
 		})
-	).filter_map(|result| match result
-	{
-		Ok(t) => match query(&t)
+		.map(|file_path| {
+			fs::File::open(file_path)
+				.map(io::BufReader::new)
+				.map_err(|e| e.into())
+				.and_then(|reader| {
+					let employee: DataResult<T> =
+						bincode::deserialize_from(reader).map_err(|e| e.into());
+					employee
+				})
+		})
+		.filter_map(|result| match result
 		{
-			Ok(b) if b => Some(Ok(t)),
+			Ok(t) => match query(&t)
+			{
+				Ok(b) if b => Some(Ok(t)),
+				Err(e) => Some(Err(e)),
+				_ => None,
+			},
 			Err(e) => Some(Err(e)),
-			_ => None,
-		},
-		Err(e) => Some(Err(e)),
-	}).collect()
+		})
+		.collect()
 }
 
 /// # Summary
@@ -106,17 +122,17 @@ pub fn temp_store(assertion: impl FnOnce(&Store))
 {
 	let temp_path = env::temp_dir().join("clinvoice_adapter_bincode_data");
 
-	assertion(&Store
-	{
-		adapter: Adapters::Bincode,
+	assertion(&Store {
+		adapter:  Adapters::Bincode,
 		password: None,
-		path: match temp_path.to_str()
+		path:     match temp_path.to_str()
 		{
 			Some(s) => s.into(),
 			_ => Err(io::Error::new(
 				io::ErrorKind::InvalidInput,
-				"`env::temp_path` did not resolve to a valid path"
-			)).unwrap(),
+				"`env::temp_path` did not resolve to a valid path",
+			))
+			.unwrap(),
 		},
 		username: None,
 	});
@@ -149,11 +165,14 @@ pub fn unique_id(store_dir: &Path) -> io::Result<Id>
 #[cfg(test)]
 mod tests
 {
-	use
-	{
-		std::{collections::HashSet, time::Instant},
+	use std::{
+		collections::HashSet,
+		time::Instant,
+	};
 
-		super::{fs, PathBuf},
+	use super::{
+		fs,
+		PathBuf,
 	};
 
 	#[test]
@@ -161,8 +180,7 @@ mod tests
 	{
 		const LOOPS: usize = 1000;
 
-		super::temp_store(|store|
-		{
+		super::temp_store(|store| {
 			let test_path = PathBuf::new().join(&store.path).join("test_next_id");
 
 			if test_path.is_dir()
@@ -175,21 +193,20 @@ mod tests
 
 			let start = Instant::now();
 
-			let ids = (0..LOOPS).fold(
-				HashSet::with_capacity(LOOPS),
-				|mut s, _|
-				{
-					let id = super::unique_id(&test_path).unwrap();
-					s.insert(id);
+			let ids = (0..LOOPS).fold(HashSet::with_capacity(LOOPS), |mut s, _| {
+				let id = super::unique_id(&test_path).unwrap();
+				s.insert(id);
 
-					// Creating the next file worked.
-					assert!(fs::write(&test_path.join(id.to_string()), "TEST").is_ok());
+				// Creating the next file worked.
+				assert!(fs::write(&test_path.join(id.to_string()), "TEST").is_ok());
 
-					s
-				}
+				s
+			});
+
+			println!(
+				"\n>>>>> util::unique_id {}us <<<<<\n",
+				Instant::now().duration_since(start).as_micros() / (LOOPS as u128)
 			);
-
-			println!("\n>>>>> util::unique_id {}us <<<<<\n", Instant::now().duration_since(start).as_micros() / (LOOPS as u128));
 
 			// Assert that the number of unique IDs created is equal to the number of times looped.
 			assert_eq!(ids.len(), LOOPS);

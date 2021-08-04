@@ -2,16 +2,28 @@ mod from_view;
 mod hash;
 mod partial_eq;
 
-use
-{
-	crate::{Expense, Id, Invoice, Timesheet},
-	clinvoice_finance::{Decimal, ExchangeRates, Money, Result},
-
-	chrono::{DateTime, Utc},
+use chrono::{
+	DateTime,
+	Utc,
+};
+use clinvoice_finance::{
+	Decimal,
+	ExchangeRates,
+	Money,
+	Result,
+};
+#[cfg(feature = "serde_support")]
+use serde::{
+	Deserialize,
+	Serialize,
 };
 
-#[cfg(feature="serde_support")]
-use serde::{Deserialize, Serialize};
+use crate::{
+	Expense,
+	Id,
+	Invoice,
+	Timesheet,
+};
 
 const SECONDS_PER_HOUR: i16 = 3600;
 
@@ -31,7 +43,7 @@ const SECONDS_PER_HOUR: i16 = 3600;
 /// [client](Organization) information, and [work periods](Timesheet)— this
 /// structure defines what work _may_ performed.
 #[derive(Clone, Debug, Eq, Ord, PartialOrd)]
-#[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
+#[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 pub struct Job
 {
 	/// # Summary
@@ -108,18 +120,22 @@ impl Job
 	/// # Remarks
 	///
 	/// * This is intended to be used for reporting work which was done previously.
-	pub fn attach_timesheet(&mut self, employee: Id, expenses: Vec<Expense>, time_begin: DateTime<Utc>, time_end: Option<DateTime<Utc>>, work_notes: &str)
+	pub fn attach_timesheet(
+		&mut self,
+		employee: Id,
+		expenses: Vec<Expense>,
+		time_begin: DateTime<Utc>,
+		time_end: Option<DateTime<Utc>>,
+		work_notes: &str,
+	)
 	{
-		self.timesheets.push(
-			Timesheet
-			{
-				employee_id: employee,
-				expenses,
-				time_begin,
-				time_end,
-				work_notes: work_notes.into()
-			}
-		);
+		self.timesheets.push(Timesheet {
+			employee_id: employee,
+			expenses,
+			time_begin,
+			time_end,
+			work_notes: work_notes.into(),
+		});
 	}
 
 	/// # Summary
@@ -137,7 +153,13 @@ impl Job
 	/// * `employee`, the [`Id`] of the [`Employee`] who is working on this timesheet.
 	pub fn start_timesheet(&mut self, employee: Id)
 	{
-		self.attach_timesheet(employee, Vec::new(), Utc::now(), None, "* Work which was done goes here\n* Supports markdown formatting");
+		self.attach_timesheet(
+			employee,
+			Vec::new(),
+			Utc::now(),
+			None,
+			"* Work which was done goes here\n* Supports markdown formatting",
+		);
 	}
 
 	/// # Summary
@@ -157,35 +179,49 @@ impl Job
 
 		let mut exchange_rates = None;
 
-		let mut total = self.timesheets.iter().filter(|timesheet| timesheet.time_end.is_some()).try_fold(
-			Money::new(0, 2, self.invoice.hourly_rate.currency),
-			|mut total, timesheet| -> Result<Money>
-			{
-				let duration_seconds: Decimal = timesheet.time_end.unwrap().signed_duration_since(timesheet.time_begin).num_seconds().into();
-				total.amount += (duration_seconds / seconds_per_hour) * self.invoice.hourly_rate.amount;
+		let mut total = self
+			.timesheets
+			.iter()
+			.filter(|timesheet| timesheet.time_end.is_some())
+			.try_fold(
+				Money::new(0, 2, self.invoice.hourly_rate.currency),
+				|mut total, timesheet| -> Result<Money> {
+					let duration_seconds: Decimal = timesheet
+						.time_end
+						.unwrap()
+						.signed_duration_since(timesheet.time_begin)
+						.num_seconds()
+						.into();
+					total.amount +=
+						(duration_seconds / seconds_per_hour) * self.invoice.hourly_rate.amount;
 
-				timesheet.expenses.iter().try_for_each(|expense| -> Result<()>
-				{
-					if expense.cost.currency == total.currency
-					{
-						total.amount += expense.cost.amount;
-					}
-					else
-					{
-						if exchange_rates.is_none()
-						{
-							exchange_rates = Some(ExchangeRates::new()?);
-						}
+					timesheet
+						.expenses
+						.iter()
+						.try_for_each(|expense| -> Result<()> {
+							if expense.cost.currency == total.currency
+							{
+								total.amount += expense.cost.amount;
+							}
+							else
+							{
+								if exchange_rates.is_none()
+								{
+									exchange_rates = Some(ExchangeRates::new()?);
+								}
 
-						total.amount += expense.cost.exchange(total.currency, exchange_rates.as_ref().unwrap()).amount;
-					}
+								total.amount += expense
+									.cost
+									.exchange(total.currency, exchange_rates.as_ref().unwrap())
+									.amount;
+							}
 
-					Ok(())
-				})?;
+							Ok(())
+						})?;
 
-				Ok(total)
-			},
-		)?;
+					Ok(total)
+				},
+			)?;
 
 		total.amount.rescale(2);
 		Ok(total)
@@ -195,62 +231,62 @@ impl Job
 #[cfg(test)]
 mod tests
 {
-	use
-	{
-		std::time::Instant,
+	use std::time::Instant;
 
-		super::{Expense, Id, Invoice, Job, Money, Timesheet},
-		crate::ExpenseCategory,
-		clinvoice_finance::Currency,
+	use chrono::Utc;
+	use clinvoice_finance::Currency;
 
-		chrono::Utc,
+	use super::{
+		Expense,
+		Id,
+		Invoice,
+		Job,
+		Money,
+		Timesheet,
 	};
+	use crate::ExpenseCategory;
 
 	#[test]
 	fn total()
 	{
-		let job = Job
-		{
+		let job = Job {
 			client_id: Id::default(),
 			date_close: None,
 			date_open: Utc::now(),
 			id: Id::default(),
-			invoice: Invoice
-			{
+			invoice: Invoice {
 				date: None,
 				hourly_rate: Money::new(20_00, 2, Currency::USD),
 			},
 			notes: "".into(),
 			objectives: "".into(),
 			timesheets: vec![
-				Timesheet
-				{
+				Timesheet {
 					employee_id: Id::default(),
-					expenses: Vec::new(),
-					time_begin: Utc::today().and_hms(2, 0, 0),
-					time_end: Some(Utc::today().and_hms(2, 30, 0)),
-					work_notes: "- Wrote the test.".into(),
+					expenses:    Vec::new(),
+					time_begin:  Utc::today().and_hms(2, 0, 0),
+					time_end:    Some(Utc::today().and_hms(2, 30, 0)),
+					work_notes:  "- Wrote the test.".into(),
 				},
-				Timesheet
-				{
+				Timesheet {
 					employee_id: Id::default(),
-					expenses: vec![
-						Expense
-						{
-							category: ExpenseCategory::Item,
-							cost: Money::new(20_00, 2, Currency::USD),
-							description: "Paid for someone else to clean".into(),
-						},
-					],
-					time_begin: Utc::today().and_hms(3, 0, 0),
-					time_end: Some(Utc::today().and_hms(3, 30, 0)),
-					work_notes: "- Clean the deck.".into(),
+					expenses:    vec![Expense {
+						category: ExpenseCategory::Item,
+						cost: Money::new(20_00, 2, Currency::USD),
+						description: "Paid for someone else to clean".into(),
+					}],
+					time_begin:  Utc::today().and_hms(3, 0, 0),
+					time_end:    Some(Utc::today().and_hms(3, 30, 0)),
+					work_notes:  "- Clean the deck.".into(),
 				},
 			],
 		};
 
 		let start = Instant::now();
 		assert_eq!(job.total().unwrap(), Money::new(4000, 2, Currency::USD));
-		println!("\n>>>>> Job::total {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+		println!(
+			"\n>>>>> Job::total {}us <<<<<\n",
+			Instant::now().duration_since(start).as_micros()
+		);
 	}
 }

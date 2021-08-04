@@ -17,18 +17,15 @@ mod job_adapter;
 mod location_adapter;
 mod organization_adapter;
 mod person_adapter;
-mod updatable;
 pub mod timesheet;
+mod updatable;
 
-pub use
-{
-	deletable::Deletable,
-	employee_adapter::EmployeeAdapter,
-	error::Error,
-	initializable::Initializable,
-	job_adapter::JobAdapter,
-	location_adapter::LocationAdapter,
-	organization_adapter::OrganizationAdapter,
-	person_adapter::PersonAdapter,
-	updatable::Updatable,
-};
+pub use deletable::Deletable;
+pub use employee_adapter::EmployeeAdapter;
+pub use error::Error;
+pub use initializable::Initializable;
+pub use job_adapter::JobAdapter;
+pub use location_adapter::LocationAdapter;
+pub use organization_adapter::OrganizationAdapter;
+pub use person_adapter::PersonAdapter;
+pub use updatable::Updatable;

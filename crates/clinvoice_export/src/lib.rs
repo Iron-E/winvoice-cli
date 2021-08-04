@@ -1,4 +1,4 @@
-#[cfg(feature="markdown")]
+#[cfg(feature = "markdown")]
 pub mod markdown;
 mod target;
 

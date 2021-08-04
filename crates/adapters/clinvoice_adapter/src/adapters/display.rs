@@ -1,9 +1,10 @@
-use
-{
-	core::fmt::{Display, Formatter, Result as FmtResult},
-
-	super::Adapters,
+use core::fmt::{
+	Display,
+	Formatter,
+	Result as FmtResult,
 };
+
+use super::Adapters;
 
 impl Display for Adapters
 {
@@ -20,18 +21,18 @@ impl Display for Adapters
 #[cfg(test)]
 mod tests
 {
-	use
-	{
-		std::time::Instant,
+	use std::time::Instant;
 
-		super::Adapters,
-	};
+	use super::Adapters;
 
 	#[test]
 	fn display()
 	{
 		let start = Instant::now();
 		assert_eq!(format!("{}", Adapters::Bincode), "Bincode");
-		println!("\n>>>>> Adapters::fmt {}us <<<<<\n", Instant::now().duration_since(start).as_micros());
+		println!(
+			"\n>>>>> Adapters::fmt {}us <<<<<\n",
+			Instant::now().duration_since(start).as_micros()
+		);
 	}
 }

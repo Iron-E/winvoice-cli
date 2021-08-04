@@ -1,8 +1,5 @@
-use
-{
-	super::LocationView,
-	crate::views::RestorableSerde,
-};
+use super::LocationView;
+use crate::views::RestorableSerde;
 
 impl RestorableSerde for LocationView
 {

@@ -14,4 +14,3 @@ pub enum Error
 }
 
 clinvoice_error::AliasResult!();
-

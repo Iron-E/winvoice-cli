@@ -1,30 +1,39 @@
 mod default;
 
-use
-{
-	core::
-	{
-		cmp::{Eq, Ord},
-		fmt::Debug,
-		hash::Hash,
-		iter::Iterator,
+use core::{
+	cmp::{
+		Eq,
+		Ord,
 	},
-	std::{borrow::Cow, collections::HashSet},
+	fmt::Debug,
+	hash::Hash,
+	iter::Iterator,
+};
+use std::{
+	borrow::Cow,
+	collections::HashSet,
 };
 
-#[cfg(feature="serde_support")]
-use serde::{Deserialize, Serialize};
+#[cfg(feature = "serde_support")]
+use serde::{
+	Deserialize,
+	Serialize,
+};
 
 /// # Summary
 ///
 /// A value in a retrieval operation.
 #[derive(Clone, Debug, Eq, PartialEq)]
-#[cfg_attr(feature="serde_support", derive(Deserialize, Serialize))]
-#[cfg_attr(feature="serde_support", serde(content="value", tag="condition"))]
-pub enum Match<'element, T> where
-	T : Clone + Debug + Hash + Ord
+#[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
+#[cfg_attr(feature = "serde_support", serde(content = "value", tag = "condition"))]
+pub enum Match<'element, T>
+where
+	T: Clone + Debug + Hash + Ord,
 {
-	#[cfg_attr(feature="serde_support", serde(bound(deserialize = "T : Deserialize<'de>")))]
+	#[cfg_attr(
+		feature = "serde_support",
+		serde(bound(deserialize = "T : Deserialize<'de>"))
+	)]
 
 	/// # Summary
 	///
@@ -37,6 +46,7 @@ pub enum Match<'element, T> where
 	///
 	/// ```rust
 	/// use std::borrow::Cow::Owned;
+	///
 	/// use clinvoice_query::Match::AllGreaterThan;
 	///
 	/// let greater_than = AllGreaterThan(Owned(5));
@@ -60,6 +70,7 @@ pub enum Match<'element, T> where
 	///
 	/// ```rust
 	/// use std::borrow::Cow::Owned;
+	///
 	/// use clinvoice_query::Match::AllLessThan;
 	///
 	/// let less_than = AllLessThan(Owned(5));
@@ -83,6 +94,7 @@ pub enum Match<'element, T> where
 	///
 	/// ```rust
 	/// use std::borrow::Cow::Owned;
+	///
 	/// use clinvoice_query::Match::AllInRange;
 	///
 	/// let in_range = AllInRange(Owned(3), Owned(5));
@@ -102,9 +114,18 @@ pub enum Match<'element, T> where
 	///
 	/// ```rust
 	/// use std::borrow::Cow::Owned;
-	/// use clinvoice_query::Match::{And, EqualTo, InRange, Not};
 	///
-	/// let and = And(vec![InRange(Owned(1), Owned(100)), Not(EqualTo(Owned(5)).into())]);
+	/// use clinvoice_query::Match::{
+	/// 	And,
+	/// 	EqualTo,
+	/// 	InRange,
+	/// 	Not,
+	/// };
+	///
+	/// let and = And(vec![
+	/// 	InRange(Owned(1), Owned(100)),
+	/// 	Not(EqualTo(Owned(5)).into()),
+	/// ]);
 	///
 	/// assert!(and.matches(&4));
 	/// assert!(!and.matches(&5));
@@ -128,6 +149,7 @@ pub enum Match<'element, T> where
 	///
 	/// ```rust
 	/// use std::borrow::Cow::Owned;
+	///
 	/// use clinvoice_query::Match::EqualTo;
 	///
 	/// let equal_to = EqualTo(Owned(5));
@@ -150,6 +172,7 @@ pub enum Match<'element, T> where
 	///
 	/// ```rust
 	/// use std::borrow::Cow::Owned;
+	///
 	/// use clinvoice_query::Match::GreaterThan;
 	///
 	/// let greater_than = GreaterThan(Owned(5));
@@ -172,6 +195,7 @@ pub enum Match<'element, T> where
 	///
 	/// ```rust
 	/// use std::borrow::Cow::Owned;
+	///
 	/// use clinvoice_query::Match::HasAll;
 	///
 	/// let has_all = HasAll(vec![Owned(1), Owned(5), Owned(9)].into_iter().collect());
@@ -194,9 +218,14 @@ pub enum Match<'element, T> where
 	///
 	/// ```rust
 	/// use std::borrow::Cow::Owned;
+	///
 	/// use clinvoice_query::Match::HasAny;
 	///
-	/// let has_any = HasAny(vec![Owned(1), Owned(5), Owned(7), Owned(9)].into_iter().collect());
+	/// let has_any = HasAny(
+	/// 	vec![Owned(1), Owned(5), Owned(7), Owned(9)]
+	/// 		.into_iter()
+	/// 		.collect(),
+	/// );
 	///
 	/// assert!(has_any.matches(&1));
 	/// assert!(!has_any.matches(&4));
@@ -215,6 +244,7 @@ pub enum Match<'element, T> where
 	///
 	/// ```rust
 	/// use std::borrow::Cow::Owned;
+	///
 	/// use clinvoice_query::Match::InRange;
 	///
 	/// let in_range = InRange(Owned(3), Owned(5));
@@ -236,6 +266,7 @@ pub enum Match<'element, T> where
 	///
 	/// ```rust
 	/// use std::borrow::Cow::Owned;
+	///
 	/// use clinvoice_query::Match::LessThan;
 	///
 	/// let less_than = LessThan(Owned(5));
@@ -255,7 +286,11 @@ pub enum Match<'element, T> where
 	///
 	/// ```rust
 	/// use std::borrow::Cow::Owned;
-	/// use clinvoice_query::Match::{EqualTo, Not};
+	///
+	/// use clinvoice_query::Match::{
+	/// 	EqualTo,
+	/// 	Not,
+	/// };
 	///
 	/// let not_equal_to = Not(EqualTo(Owned(5)).into());
 	///
@@ -274,9 +309,18 @@ pub enum Match<'element, T> where
 	///
 	/// ```rust
 	/// use std::borrow::Cow::Owned;
-	/// use clinvoice_query::Match::{EqualTo, InRange, Not, Or};
 	///
-	/// let or = Or(vec![InRange(Owned(1), Owned(100)), Not(EqualTo(Owned(5)).into())]);
+	/// use clinvoice_query::Match::{
+	/// 	EqualTo,
+	/// 	InRange,
+	/// 	Not,
+	/// 	Or,
+	/// };
+	///
+	/// let or = Or(vec![
+	/// 	InRange(Owned(1), Owned(100)),
+	/// 	Not(EqualTo(Owned(5)).into()),
+	/// ]);
 	///
 	/// assert!(or.matches(&110));
 	/// assert!(or.matches(&5));
@@ -288,14 +332,16 @@ pub enum Match<'element, T> where
 /// # Summary
 ///
 /// Return whether or not some [`Match::InRange`] is in range.
-fn is_in_range<T>(min: &T, max: &T, value: &T) -> bool where
-	T : Ord,
+fn is_in_range<T>(min: &T, max: &T, value: &T) -> bool
+where
+	T: Ord,
 {
 	min <= value && value < max
 }
 
-impl<'element, T> Match<'element, T> where
-	T : 'element + Clone + Debug + Hash + Ord
+impl<'element, T> Match<'element, T>
+where
+	T: 'element + Clone + Debug + Hash + Ord,
 {
 	/// # Summary
 	///
@@ -316,11 +362,23 @@ impl<'element, T> Match<'element, T> where
 			Self::And(matches) => matches.iter().all(|m| m.matches(value)),
 			Self::Any => true,
 			Self::EqualTo(equal_value) => value == equal_value.as_ref(),
-			Self::AllGreaterThan(lesser_value) | Self::GreaterThan(lesser_value) => value > lesser_value.as_ref(),
-			Self::HasAll(required_values) => required_values.len() == 1 && required_values.contains(value),
+			Self::AllGreaterThan(lesser_value) | Self::GreaterThan(lesser_value) =>
+			{
+				value > lesser_value.as_ref()
+			},
+			Self::HasAll(required_values) =>
+			{
+				required_values.len() == 1 && required_values.contains(value)
+			},
 			Self::HasAny(accepted_values) => accepted_values.contains(value),
-			Self::AllInRange(min, max) | Self::InRange(min, max) => is_in_range(min.as_ref(), max.as_ref(), value),
-			Self::AllLessThan(greater_value) | Self::LessThan(greater_value) => value < greater_value.as_ref(),
+			Self::AllInRange(min, max) | Self::InRange(min, max) =>
+			{
+				is_in_range(min.as_ref(), max.as_ref(), value)
+			},
+			Self::AllLessThan(greater_value) | Self::LessThan(greater_value) =>
+			{
+				value < greater_value.as_ref()
+			},
 			Self::Not(m) => !m.matches(value),
 			Self::Or(matches) => matches.iter().any(|m| m.matches(value)),
 		}
@@ -343,15 +401,25 @@ impl<'element, T> Match<'element, T> where
 		match self
 		{
 			Self::AllGreaterThan(lesser_value) => values.iter().all(|v| *v > lesser_value.as_ref()),
-			Self::AllInRange(min, max) => values.iter().all(|v| is_in_range(min.as_ref(), max.as_ref(), v)),
+			Self::AllInRange(min, max) => values
+				.iter()
+				.all(|v| is_in_range(min.as_ref(), max.as_ref(), v)),
 			Self::AllLessThan(greater_value) => values.iter().all(|v| *v < greater_value.as_ref()),
 			Self::And(matches) => matches.iter().all(|m| m.set_matches(values)),
 			Self::Any => true,
 			Self::EqualTo(equal_value) => values.len() == 1 && values.contains(equal_value.as_ref()),
 			Self::GreaterThan(lesser_value) => values.iter().any(|v| *v > lesser_value.as_ref()),
-			Self::HasAll(required_values) => values.is_superset(&required_values.iter().map(|v| v.as_ref()).collect()),
-			Self::HasAny(accepted_values) => !values.is_disjoint(&accepted_values.iter().map(|v| v.as_ref()).collect()),
-			Self::InRange(min, max) => values.iter().any(|v| is_in_range(min.as_ref(), max.as_ref(), v)),
+			Self::HasAll(required_values) =>
+			{
+				values.is_superset(&required_values.iter().map(|v| v.as_ref()).collect())
+			},
+			Self::HasAny(accepted_values) =>
+			{
+				!values.is_disjoint(&accepted_values.iter().map(|v| v.as_ref()).collect())
+			},
+			Self::InRange(min, max) => values
+				.iter()
+				.any(|v| is_in_range(min.as_ref(), max.as_ref(), v)),
 			Self::LessThan(greater_value) => values.iter().any(|v| *v < greater_value.as_ref()),
 			Self::Not(m) => !m.set_matches(values),
 			Self::Or(matches) => matches.iter().any(|m| m.set_matches(values)),

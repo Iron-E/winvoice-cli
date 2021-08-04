@@ -1,13 +1,14 @@
-use
-{
-	std::fs,
+use std::fs;
 
-	super::{Config, Error, Result},
+use clinvoice_adapter::data::Updatable;
 
-	clinvoice_adapter::data::Updatable,
+use super::{
+	Config,
+	Error,
+	Result,
 };
 
-impl Updatable for Config<'_, '_,>
+impl Updatable for Config<'_, '_>
 {
 	type Error = Error;
 
@@ -17,7 +18,10 @@ impl Updatable for Config<'_, '_,>
 
 		if let Some(parent) = path.parent()
 		{
-			if !parent.is_dir() { fs::create_dir_all(parent)?; }
+			if !parent.is_dir()
+			{
+				fs::create_dir_all(parent)?;
+			}
 		}
 
 		let serialized = toml::to_string_pretty(self)?;

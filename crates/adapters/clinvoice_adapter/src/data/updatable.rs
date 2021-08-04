@@ -5,7 +5,7 @@ use std::error::Error;
 /// A structure which can be updated on some remote [`Store`][store].
 pub trait Updatable
 {
-	type Error : Error;
+	type Error: Error;
 
 	/// # Summary
 	///

@@ -104,7 +104,7 @@ async fn to_vec_employee()
 
 	let start = Instant::now();
 	// Retrieve the written employees back into the `Employee` structure.
-	let reps = BincodeOrganization::to_employees::<BincodeEmployee>(&dogood, store).await;
+	let reps = BincodeOrganization::to_employees::<BincodeEmployee>(&dogood, &store).await;
 	println!(
 		"\n>>>>> BincodeOrganization::to_vec_employee {}us <<<<<\n",
 		Instant::now().duration_since(start).as_micros()

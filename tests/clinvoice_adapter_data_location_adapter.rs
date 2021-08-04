@@ -17,23 +17,26 @@ async fn to_view()
 
 	let usa = BincodeLocation {
 		location: &earth,
-		store,
+		store: &store,
 	}
 	.create_inner("USA".into())
+	.await
 	.unwrap();
 
 	let arizona = BincodeLocation {
 		location: &usa,
-		store,
+		store: &store,
 	}
 	.create_inner("Arizona".into())
+	.await
 	.unwrap();
 
 	let phoenix = BincodeLocation {
 		location: &arizona,
-		store,
+		store: &store,
 	}
 	.create_inner("Phoenix".into())
+	.await
 	.unwrap();
 
 	let phoenix_view = LocationView {
@@ -64,7 +67,7 @@ async fn to_view()
 	};
 
 	let start = Instant::now();
-	let phoenix_view_result = BincodeLocation::into_view(phoenix, store).await;
+	let phoenix_view_result = BincodeLocation::into_view(phoenix, &store).await;
 	println!(
 		"\n>>>>> BincodeLocation::to_view {}us <<<<<\n",
 		Instant::now().duration_since(start).as_micros()

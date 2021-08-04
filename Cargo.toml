@@ -15,7 +15,7 @@ repository = "https://www.github.com/Iron-E/clinvoice"
 [dependencies]
 # Async
 futures = "0.3"
-tokio = {features=["fs"], version="1"}
+tokio = {features=["fs", "macros", "rt-multi-thread"], version="1"}
 
 # Arguments
 structopt = "0.3"

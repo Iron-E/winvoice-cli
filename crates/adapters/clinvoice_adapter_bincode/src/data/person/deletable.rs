@@ -77,7 +77,7 @@ mod tests
 		clinvoice_data::{Contact, EmployeeStatus},
 	};
 
-	#[tokio::test]
+	#[tokio::test(flavor="multi_thread", worker_threads=10)]
 	async fn delete()
 	{
 		let store = util::temp_store();

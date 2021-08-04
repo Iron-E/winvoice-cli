@@ -13,7 +13,7 @@ use
 	},
 };
 
-#[tokio::test]
+#[tokio::test(flavor="multi_thread", worker_threads=10)]
 async fn to_organization()
 {
 	let store = util::temp_store();
@@ -44,7 +44,7 @@ async fn to_organization()
 	assert_eq!(dogood, testy_org.unwrap());
 }
 
-#[tokio::test]
+#[tokio::test(flavor="multi_thread", worker_threads=10)]
 async fn to_person()
 {
 	let store = util::temp_store();
@@ -75,7 +75,7 @@ async fn to_person()
 	assert_eq!(testy, testy_person.unwrap());
 }
 
-#[tokio::test]
+#[tokio::test(flavor="multi_thread", worker_threads=10)]
 async fn to_view()
 {
 	let store = util::temp_store();

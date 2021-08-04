@@ -9,7 +9,7 @@ use
 	clinvoice_data::{Contact, Id, EmployeeStatus, Location, Person},
 };
 
-#[tokio::test]
+#[tokio::test(flavor="multi_thread", worker_threads=10)]
 async fn to_location()
 {
 	let store = util::temp_store();
@@ -30,7 +30,7 @@ async fn to_location()
 	assert_eq!(arizona, dogood_location.unwrap());
 }
 
-#[tokio::test]
+#[tokio::test(flavor="multi_thread", worker_threads=10)]
 async fn to_vec_employee()
 {
 	let store = util::temp_store();

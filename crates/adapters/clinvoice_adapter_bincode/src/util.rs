@@ -158,7 +158,7 @@ mod tests
 
 	/// NOTE: this test is `async` because of the single `create_store_dir` call.
 	/// TODO: see if `Stream`ing to an `Arc<Mutex<HashSet>>` would make this faster
-	#[tokio::test]
+	#[tokio::test(flavor="multi_thread", worker_threads=10)]
 	async fn unique_id()
 	{
 		const LOOPS: usize = 1000;

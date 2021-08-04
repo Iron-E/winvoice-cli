@@ -109,7 +109,7 @@ mod tests
 		tokio::fs,
 	};
 
-	#[tokio::test]
+	#[tokio::test(flavor="multi_thread", worker_threads=10)]
 	async fn create()
 	{
 		let organization = Organization
@@ -182,7 +182,7 @@ mod tests
 		assert_eq!(job, bincode::deserialize(&read_result).unwrap());
 	}
 
-	#[tokio::test]
+	#[tokio::test(flavor="multi_thread", worker_threads=10)]
 	async fn retrieve()
 	{
 		let organization = Organization

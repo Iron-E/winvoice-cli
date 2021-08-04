@@ -93,7 +93,7 @@ mod tests
 		clinvoice_adapter::data::OrganizationAdapter,
 	};
 
-	#[tokio::test]
+	#[tokio::test(flavor="multi_thread", worker_threads=10)]
 	async fn delete()
 	{
 		let store = util::temp_store();

@@ -89,12 +89,13 @@ where
 			future::ok(if path.is_file() { Some(path) } else { None })
 		})
 		.err_into()
-		.and_then(|file_path| async move {
+		.map_ok(|file_path| async move {
 			let mut file = fs::File::open(file_path).await?;
 			let mut contents = Vec::new();
 			file.read_to_end(&mut contents).await?;
 			bincode::deserialize::<T>(&contents).map_err(DataError::from)
 		})
+		.try_buffer_unordered(10)
 		.try_filter_map(|retrieval| match query(&retrieval)
 		{
 			Ok(b) if b => future::ok(Some(retrieval)),

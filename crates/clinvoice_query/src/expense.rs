@@ -1,18 +1,8 @@
-use clinvoice_data::{
-	finance::Money,
-	ExpenseCategory,
-};
+use clinvoice_data::{finance::Money, ExpenseCategory};
 #[cfg(feature = "serde_support")]
-use serde::{
-	Deserialize,
-	Serialize,
-};
+use serde::{Deserialize, Serialize};
 
-use super::{
-	Match,
-	MatchStr,
-	Result,
-};
+use super::{Match, MatchStr, Result};
 
 /// # Summary
 ///

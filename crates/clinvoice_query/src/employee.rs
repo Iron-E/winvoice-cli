@@ -1,22 +1,8 @@
-use clinvoice_data::{
-	views::EmployeeView,
-	EmployeeStatus,
-	Id,
-};
+use clinvoice_data::{views::EmployeeView, EmployeeStatus, Id};
 #[cfg(feature = "serde_support")]
-use serde::{
-	Deserialize,
-	Serialize,
-};
+use serde::{Deserialize, Serialize};
 
-use super::{
-	Contact,
-	Match,
-	MatchStr,
-	Organization,
-	Person,
-	Result,
-};
+use super::{Contact, Match, MatchStr, Organization, Person, Result};
 
 /// # Summary
 ///

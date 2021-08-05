@@ -1,15 +1,9 @@
-use std::{
-	fs,
-	io::ErrorKind,
-};
+use std::{fs, io::ErrorKind};
 
 use clinvoice_adapter::data::Deletable;
 
 use super::BincodeJob;
-use crate::data::{
-	Error,
-	Result,
-};
+use crate::data::{Error, Result};
 
 impl Deletable for BincodeJob<'_, '_>
 {
@@ -35,28 +29,16 @@ mod tests
 {
 	use std::time::Instant;
 
-	use clinvoice_adapter::data::{
-		JobAdapter,
-		OrganizationAdapter,
-	};
+	use clinvoice_adapter::data::{JobAdapter, OrganizationAdapter};
 	use clinvoice_data::{
 		chrono::Utc,
-		finance::{
-			Currency,
-			Money,
-		},
+		finance::{Currency, Money},
 		Id,
 		Location,
 	};
 
-	use super::{
-		BincodeJob,
-		Deletable,
-	};
-	use crate::{
-		data::BincodeOrganization,
-		util,
-	};
+	use super::{BincodeJob, Deletable};
+	use crate::{data::BincodeOrganization, util};
 
 	#[test]
 	fn delete()

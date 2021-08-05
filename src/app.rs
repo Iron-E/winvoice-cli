@@ -9,11 +9,7 @@ use dialoguer::Editor;
 use retrieve::Retrieve;
 use time::Time;
 
-use crate::{
-	Config,
-	DynResult,
-	StructOpt,
-};
+use crate::{Config, DynResult, StructOpt};
 
 /// # Summary
 ///

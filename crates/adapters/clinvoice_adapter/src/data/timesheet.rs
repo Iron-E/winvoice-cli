@@ -1,15 +1,9 @@
 use std::borrow::Cow::Borrowed;
 
-use clinvoice_data::{
-	Employee,
-	Timesheet,
-};
+use clinvoice_data::{Employee, Timesheet};
 use clinvoice_query as query;
 
-use super::{
-	EmployeeAdapter,
-	Error,
-};
+use super::{EmployeeAdapter, Error};
 use crate::Store;
 
 /// # Summary

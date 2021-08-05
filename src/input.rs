@@ -2,33 +2,16 @@ mod error;
 pub mod util;
 
 use core::{
-	fmt::{
-		Debug,
-		Display,
-	},
+	fmt::{Debug, Display},
 	str::FromStr,
 };
-use std::{
-	any,
-	io,
-};
+use std::{any, io};
 
 use clinvoice_adapter::data::Error as DataError;
 use clinvoice_data::views::RestorableSerde;
-use dialoguer::{
-	Editor,
-	Input,
-	MultiSelect,
-	Select,
-};
-pub use error::{
-	Error,
-	Result,
-};
-use serde::{
-	de::DeserializeOwned,
-	Serialize,
-};
+use dialoguer::{Editor, Input, MultiSelect, Select};
+pub use error::{Error, Result};
+use serde::{de::DeserializeOwned, Serialize};
 use serde_yaml as yaml;
 
 /// # Summary

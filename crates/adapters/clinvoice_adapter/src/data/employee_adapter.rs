@@ -1,16 +1,9 @@
 #![allow(clippy::wrong_self_convention)]
 
-use std::{
-	borrow::Cow::Borrowed,
-	collections::HashMap,
-	error::Error,
-};
+use std::{borrow::Cow::Borrowed, collections::HashMap, error::Error};
 
 use clinvoice_data::{
-	views::{
-		EmployeeView,
-		PersonView,
-	},
+	views::{EmployeeView, PersonView},
 	Contact,
 	Employee,
 	EmployeeStatus,

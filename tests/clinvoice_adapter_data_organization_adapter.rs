@@ -1,27 +1,10 @@
 mod util;
 
-use std::{
-	collections::HashSet,
-	time::Instant,
-};
+use std::{collections::HashSet, time::Instant};
 
-use clinvoice_adapter::data::{
-	EmployeeAdapter,
-	LocationAdapter,
-	OrganizationAdapter,
-};
-use clinvoice_adapter_bincode::data::{
-	BincodeEmployee,
-	BincodeLocation,
-	BincodeOrganization,
-};
-use clinvoice_data::{
-	Contact,
-	EmployeeStatus,
-	Id,
-	Location,
-	Person,
-};
+use clinvoice_adapter::data::{EmployeeAdapter, LocationAdapter, OrganizationAdapter};
+use clinvoice_adapter_bincode::data::{BincodeEmployee, BincodeLocation, BincodeOrganization};
+use clinvoice_data::{Contact, EmployeeStatus, Id, Location, Person};
 
 #[test]
 fn to_location()

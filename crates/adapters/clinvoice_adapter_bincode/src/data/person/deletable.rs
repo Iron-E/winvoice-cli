@@ -1,22 +1,10 @@
-use std::{
-	borrow::Cow::Borrowed,
-	fs,
-	io::ErrorKind,
-};
+use std::{borrow::Cow::Borrowed, fs, io::ErrorKind};
 
-use clinvoice_adapter::data::{
-	Deletable,
-	EmployeeAdapter,
-	Error as DataError,
-};
+use clinvoice_adapter::data::{Deletable, EmployeeAdapter, Error as DataError};
 use clinvoice_query as query;
 
 use super::BincodePerson;
-use crate::data::{
-	BincodeEmployee,
-	Error,
-	Result,
-};
+use crate::data::{BincodeEmployee, Error, Result};
 
 impl Deletable for BincodePerson<'_, '_>
 {
@@ -68,27 +56,12 @@ mod tests
 {
 	use std::time::Instant;
 
-	use clinvoice_adapter::data::{
-		LocationAdapter,
-		OrganizationAdapter,
-		PersonAdapter,
-	};
-	use clinvoice_data::{
-		Contact,
-		EmployeeStatus,
-	};
+	use clinvoice_adapter::data::{LocationAdapter, OrganizationAdapter, PersonAdapter};
+	use clinvoice_data::{Contact, EmployeeStatus};
 
-	use super::{
-		BincodeEmployee,
-		BincodePerson,
-		Deletable,
-		EmployeeAdapter,
-	};
+	use super::{BincodeEmployee, BincodePerson, Deletable, EmployeeAdapter};
 	use crate::{
-		data::{
-			BincodeLocation,
-			BincodeOrganization,
-		},
+		data::{BincodeLocation, BincodeOrganization},
 		util,
 	};
 

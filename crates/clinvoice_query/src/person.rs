@@ -1,18 +1,8 @@
-use clinvoice_data::{
-	views::PersonView,
-	Id,
-};
+use clinvoice_data::{views::PersonView, Id};
 #[cfg(feature = "serde_support")]
-use serde::{
-	Deserialize,
-	Serialize,
-};
+use serde::{Deserialize, Serialize};
 
-use super::{
-	Match,
-	MatchStr,
-	Result,
-};
+use super::{Match, MatchStr, Result};
 
 /// # Summary
 ///

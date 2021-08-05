@@ -3,10 +3,7 @@ mod display;
 use std::cmp::Ordering;
 
 use clinvoice_adapter::{
-	data::{
-		Error as DataError,
-		Updatable,
-	},
+	data::{Error as DataError, Updatable},
 	Adapters,
 	Error as AdapterError,
 };
@@ -19,24 +16,11 @@ use clinvoice_adapter_bincode::data::{
 	BincodePerson,
 };
 use clinvoice_data::{
-	chrono::{
-		Duration,
-		DurationRound,
-		Utc,
-	},
-	views::{
-		EmployeeView,
-		JobView,
-		TimesheetView,
-	},
+	chrono::{Duration, DurationRound, Utc},
+	views::{EmployeeView, JobView, TimesheetView},
 };
 
-use crate::{
-	input,
-	Config,
-	DynResult,
-	StructOpt,
-};
+use crate::{input, Config, DynResult, StructOpt};
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, StructOpt)]
 #[structopt(about = "Time information that was recorded with CLInvoice")]

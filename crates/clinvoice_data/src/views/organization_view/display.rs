@@ -1,8 +1,4 @@
-use core::fmt::{
-	Display,
-	Formatter,
-	Result,
-};
+use core::fmt::{Display, Formatter, Result};
 
 use super::OrganizationView;
 
@@ -20,10 +16,7 @@ mod tests
 	use std::time::Instant;
 
 	use super::OrganizationView;
-	use crate::{
-		views::LocationView,
-		Id,
-	};
+	use crate::{views::LocationView, Id};
 
 	#[test]
 	fn display()

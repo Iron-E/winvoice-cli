@@ -5,16 +5,9 @@ mod partial_eq;
 use std::collections::HashMap;
 
 #[cfg(feature = "serde_support")]
-use serde::{
-	Deserialize,
-	Serialize,
-};
+use serde::{Deserialize, Serialize};
 
-use crate::{
-	Contact,
-	EmployeeStatus,
-	Id,
-};
+use crate::{Contact, EmployeeStatus, Id};
 
 /// # Summary
 ///

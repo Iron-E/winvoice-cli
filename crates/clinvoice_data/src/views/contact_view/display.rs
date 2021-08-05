@@ -1,8 +1,4 @@
-use core::fmt::{
-	Display,
-	Formatter,
-	Result,
-};
+use core::fmt::{Display, Formatter, Result};
 
 use super::ContactView;
 
@@ -28,10 +24,7 @@ mod tests
 	use std::time::Instant;
 
 	use super::ContactView;
-	use crate::{
-		views::LocationView,
-		Id,
-	};
+	use crate::{views::LocationView, Id};
 
 	/// # Summary
 	///

@@ -1,24 +1,12 @@
 mod display;
 mod restorable_serde;
 
-use chrono::{
-	DateTime,
-	Utc,
-};
+use chrono::{DateTime, Utc};
 #[cfg(feature = "serde_support")]
-use serde::{
-	Deserialize,
-	Serialize,
-};
+use serde::{Deserialize, Serialize};
 
-use super::{
-	OrganizationView,
-	TimesheetView,
-};
-use crate::{
-	Id,
-	Invoice,
-};
+use super::{OrganizationView, TimesheetView};
+use crate::{Id, Invoice};
 
 /// # Summary
 ///

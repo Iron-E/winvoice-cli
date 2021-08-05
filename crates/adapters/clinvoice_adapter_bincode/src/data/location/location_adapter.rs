@@ -1,10 +1,5 @@
 use clinvoice_adapter::{
-	data::{
-		Error as DataError,
-		Initializable,
-		LocationAdapter,
-		Updatable,
-	},
+	data::{Error as DataError, Initializable, LocationAdapter, Updatable},
 	Store,
 };
 use clinvoice_data::Location;
@@ -12,10 +7,7 @@ use clinvoice_query as query;
 
 use super::BincodeLocation;
 use crate::{
-	data::{
-		Error,
-		Result,
-	},
+	data::{Error, Result},
 	util,
 };
 
@@ -110,22 +102,11 @@ impl LocationAdapter for BincodeLocation<'_, '_>
 #[cfg(test)]
 mod tests
 {
-	use std::{
-		borrow::Cow::Borrowed,
-		fs,
-		time::Instant,
-	};
+	use std::{borrow::Cow::Borrowed, fs, time::Instant};
 
 	use clinvoice_query::Match;
 
-	use super::{
-		query,
-		util,
-		BincodeLocation,
-		Location,
-		LocationAdapter,
-		Store,
-	};
+	use super::{query, util, BincodeLocation, Location, LocationAdapter, Store};
 
 	#[test]
 	fn create()

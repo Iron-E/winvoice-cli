@@ -1,10 +1,5 @@
 use clinvoice_adapter::{
-	data::{
-		Error as DataError,
-		Initializable,
-		PersonAdapter,
-		Updatable,
-	},
+	data::{Error as DataError, Initializable, PersonAdapter, Updatable},
 	Store,
 };
 use clinvoice_data::Person;
@@ -12,10 +7,7 @@ use clinvoice_query as query;
 
 use super::BincodePerson;
 use crate::{
-	data::{
-		Error,
-		Result,
-	},
+	data::{Error, Result},
 	util,
 };
 
@@ -77,25 +69,11 @@ impl PersonAdapter for BincodePerson<'_, '_>
 #[cfg(test)]
 mod tests
 {
-	use std::{
-		borrow::Cow::Borrowed,
-		fs,
-		time::Instant,
-	};
+	use std::{borrow::Cow::Borrowed, fs, time::Instant};
 
-	use clinvoice_query::{
-		Match,
-		MatchStr,
-	};
+	use clinvoice_query::{Match, MatchStr};
 
-	use super::{
-		query,
-		util,
-		BincodePerson,
-		Person,
-		PersonAdapter,
-		Store,
-	};
+	use super::{query, util, BincodePerson, Person, PersonAdapter, Store};
 
 	#[test]
 	fn create()

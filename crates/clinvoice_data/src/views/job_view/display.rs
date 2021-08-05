@@ -1,14 +1,6 @@
-use core::fmt::{
-	Display,
-	Error,
-	Formatter,
-	Result,
-};
+use core::fmt::{Display, Error, Formatter, Result};
 
-use chrono::{
-	DateTime,
-	Local,
-};
+use chrono::{DateTime, Local};
 
 use super::JobView;
 use crate::Job;
@@ -91,16 +83,9 @@ mod tests
 	use std::time::Instant;
 
 	use chrono::Utc;
-	use clinvoice_finance::{
-		Currency,
-		Money,
-	};
+	use clinvoice_finance::{Currency, Money};
 
-	use super::{
-		DateTime,
-		JobView,
-		Local,
-	};
+	use super::{DateTime, JobView, Local};
 	use crate::{
 		views::{
 			ContactView,

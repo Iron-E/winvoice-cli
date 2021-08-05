@@ -1,13 +1,6 @@
-use core::fmt::{
-	Display,
-	Formatter,
-	Result,
-};
+use core::fmt::{Display, Formatter, Result};
 
-use chrono::{
-	DateTime,
-	Local,
-};
+use chrono::{DateTime, Local};
 
 use super::TimesheetView;
 
@@ -55,30 +48,14 @@ impl Display for TimesheetView
 #[cfg(test)]
 mod tests
 {
-	use std::{
-		collections::HashMap,
-		time::Instant,
-	};
+	use std::{collections::HashMap, time::Instant};
 
 	use chrono::Utc;
-	use clinvoice_finance::{
-		Currency,
-		Money,
-	};
+	use clinvoice_finance::{Currency, Money};
 
-	use super::{
-		DateTime,
-		Local,
-		TimesheetView,
-	};
+	use super::{DateTime, Local, TimesheetView};
 	use crate::{
-		views::{
-			ContactView,
-			EmployeeView,
-			LocationView,
-			OrganizationView,
-			PersonView,
-		},
+		views::{ContactView, EmployeeView, LocationView, OrganizationView, PersonView},
 		EmployeeStatus,
 		Expense,
 		ExpenseCategory,

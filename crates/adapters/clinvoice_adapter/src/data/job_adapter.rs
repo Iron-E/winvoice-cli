@@ -1,20 +1,11 @@
 #![allow(clippy::wrong_self_convention)]
 
-use std::{
-	borrow::Cow::Borrowed,
-	error::Error,
-};
+use std::{borrow::Cow::Borrowed, error::Error};
 
 use clinvoice_data::{
-	chrono::{
-		DateTime,
-		Utc,
-	},
+	chrono::{DateTime, Utc},
 	finance::Money,
-	views::{
-		JobView,
-		TimesheetView,
-	},
+	views::{JobView, TimesheetView},
 	Job,
 	Organization,
 };

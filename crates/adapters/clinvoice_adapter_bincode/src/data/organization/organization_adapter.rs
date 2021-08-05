@@ -1,24 +1,13 @@
 use clinvoice_adapter::{
-	data::{
-		Error as DataError,
-		Initializable,
-		OrganizationAdapter,
-		Updatable,
-	},
+	data::{Error as DataError, Initializable, OrganizationAdapter, Updatable},
 	Store,
 };
-use clinvoice_data::{
-	Location,
-	Organization,
-};
+use clinvoice_data::{Location, Organization};
 use clinvoice_query as query;
 
 use super::BincodeOrganization;
 use crate::{
-	data::{
-		Error,
-		Result,
-	},
+	data::{Error, Result},
 	util,
 };
 
@@ -81,17 +70,10 @@ impl OrganizationAdapter for BincodeOrganization<'_, '_>
 #[cfg(test)]
 mod tests
 {
-	use std::{
-		borrow::Cow::Borrowed,
-		fs,
-		time::Instant,
-	};
+	use std::{borrow::Cow::Borrowed, fs, time::Instant};
 
 	use clinvoice_data::Id;
-	use clinvoice_query::{
-		Match,
-		MatchStr,
-	};
+	use clinvoice_query::{Match, MatchStr};
 
 	use super::{
 		query,

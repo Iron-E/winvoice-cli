@@ -1,10 +1,7 @@
 use core::str::FromStr;
 
 use super::Currency;
-use crate::{
-	Error,
-	Result,
-};
+use crate::{Error, Result};
 
 impl FromStr for Currency
 {

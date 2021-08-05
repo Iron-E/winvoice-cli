@@ -1,13 +1,6 @@
-use core::fmt::{
-	Display,
-	Formatter,
-	Result,
-};
+use core::fmt::{Display, Formatter, Result};
 
-use chrono::{
-	DateTime,
-	Local,
-};
+use chrono::{DateTime, Local};
 
 use super::InvoiceDate;
 
@@ -37,11 +30,7 @@ mod tests
 
 	use chrono::Utc;
 
-	use super::{
-		DateTime,
-		InvoiceDate,
-		Local,
-	};
+	use super::{DateTime, InvoiceDate, Local};
 
 	#[test]
 	fn display()

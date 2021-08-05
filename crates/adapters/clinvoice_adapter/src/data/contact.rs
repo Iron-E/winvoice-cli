@@ -1,19 +1,9 @@
-use std::{
-	borrow::Cow::Borrowed,
-	collections::HashMap,
-	hash::Hash,
-};
+use std::{borrow::Cow::Borrowed, collections::HashMap, hash::Hash};
 
-use clinvoice_data::{
-	views::ContactView,
-	Contact,
-};
+use clinvoice_data::{views::ContactView, Contact};
 use clinvoice_query as query;
 
-use super::{
-	Error,
-	LocationAdapter,
-};
+use super::{Error, LocationAdapter};
 use crate::Store;
 
 /// # Summary

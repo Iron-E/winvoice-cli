@@ -1,29 +1,15 @@
 use std::collections::HashMap;
 
 use clinvoice_adapter::{
-	data::{
-		EmployeeAdapter,
-		Error as DataError,
-		Initializable,
-		Updatable,
-	},
+	data::{EmployeeAdapter, Error as DataError, Initializable, Updatable},
 	Store,
 };
-use clinvoice_data::{
-	Contact,
-	Employee,
-	EmployeeStatus,
-	Organization,
-	Person,
-};
+use clinvoice_data::{Contact, Employee, EmployeeStatus, Organization, Person};
 use clinvoice_query as query;
 
 use super::BincodeEmployee;
 use crate::{
-	data::{
-		Error,
-		Result,
-	},
+	data::{Error, Result},
 	util,
 };
 
@@ -97,11 +83,7 @@ impl EmployeeAdapter for BincodeEmployee<'_, '_>
 #[cfg(test)]
 mod tests
 {
-	use std::{
-		borrow::Cow::Borrowed,
-		fs,
-		time::Instant,
-	};
+	use std::{borrow::Cow::Borrowed, fs, time::Instant};
 
 	use clinvoice_data::Id;
 	use clinvoice_query::Match;

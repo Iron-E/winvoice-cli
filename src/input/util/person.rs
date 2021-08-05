@@ -1,18 +1,11 @@
 use core::fmt::Display;
 
-use clinvoice_adapter::{
-	data::PersonAdapter,
-	Store,
-};
+use clinvoice_adapter::{data::PersonAdapter, Store};
 use clinvoice_data::views::PersonView;
 use clinvoice_query as query;
 
 use super::menu;
-use crate::{
-	app::QUERY_PROMPT,
-	input,
-	DynResult,
-};
+use crate::{app::QUERY_PROMPT, input, DynResult};
 
 /// # Summary
 ///

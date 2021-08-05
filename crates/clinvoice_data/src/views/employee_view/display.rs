@@ -1,8 +1,4 @@
-use core::fmt::{
-	Display,
-	Formatter,
-	Result,
-};
+use core::fmt::{Display, Formatter, Result};
 
 use super::EmployeeView;
 
@@ -35,12 +31,7 @@ mod tests
 
 	use super::EmployeeView;
 	use crate::{
-		views::{
-			ContactView,
-			LocationView,
-			OrganizationView,
-			PersonView,
-		},
+		views::{ContactView, LocationView, OrganizationView, PersonView},
 		EmployeeStatus,
 		Id,
 	};

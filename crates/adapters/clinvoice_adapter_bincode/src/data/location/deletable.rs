@@ -1,8 +1,4 @@
-use std::{
-	borrow::Cow::Borrowed,
-	fs,
-	io::ErrorKind,
-};
+use std::{borrow::Cow::Borrowed, fs, io::ErrorKind};
 
 use clinvoice_adapter::data::{
 	Deletable,
@@ -14,11 +10,7 @@ use clinvoice_data::Location;
 use clinvoice_query as query;
 
 use super::BincodeLocation;
-use crate::data::{
-	BincodeOrganization,
-	Error,
-	Result,
-};
+use crate::data::{BincodeOrganization, Error, Result};
 
 impl Deletable for BincodeLocation<'_, '_>
 {
@@ -97,15 +89,8 @@ mod tests
 
 	use clinvoice_adapter::data::OrganizationAdapter;
 
-	use super::{
-		BincodeLocation,
-		Deletable,
-		LocationAdapter,
-	};
-	use crate::{
-		data::BincodeOrganization,
-		util,
-	};
+	use super::{BincodeLocation, Deletable, LocationAdapter};
+	use crate::{data::BincodeOrganization, util};
 
 	#[test]
 	fn delete()

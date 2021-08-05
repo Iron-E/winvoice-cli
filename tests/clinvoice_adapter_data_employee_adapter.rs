@@ -15,13 +15,7 @@ use clinvoice_adapter_bincode::data::{
 	BincodePerson,
 };
 use clinvoice_data::{
-	views::{
-		ContactView,
-		EmployeeView,
-		LocationView,
-		OrganizationView,
-		PersonView,
-	},
+	views::{ContactView, EmployeeView, LocationView, OrganizationView, PersonView},
 	Contact,
 	EmployeeStatus,
 	Id,

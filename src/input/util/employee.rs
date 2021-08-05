@@ -11,19 +11,11 @@ use clinvoice_adapter::{
 	},
 	Store,
 };
-use clinvoice_data::{
-	views::EmployeeView,
-	Id,
-};
+use clinvoice_data::{views::EmployeeView, Id};
 use clinvoice_query as query;
 
 use super::menu;
-use crate::{
-	app::QUERY_PROMPT,
-	filter_map_view,
-	input,
-	DynResult,
-};
+use crate::{app::QUERY_PROMPT, filter_map_view, input, DynResult};
 
 /// # Summary
 ///

@@ -1,8 +1,4 @@
-use core::fmt::{
-	Display,
-	Formatter,
-	Result,
-};
+use core::fmt::{Display, Formatter, Result};
 
 use super::Invoice;
 
@@ -29,15 +25,8 @@ mod tests
 {
 	use std::time::Instant;
 
-	use chrono::{
-		DateTime,
-		Local,
-		Utc,
-	};
-	use clinvoice_finance::{
-		Currency,
-		Money,
-	};
+	use chrono::{DateTime, Local, Utc};
+	use clinvoice_finance::{Currency, Money};
 
 	use super::Invoice;
 	use crate::InvoiceDate;

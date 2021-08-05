@@ -1,24 +1,15 @@
 mod default;
 
 use core::{
-	cmp::{
-		Eq,
-		Ord,
-	},
+	cmp::{Eq, Ord},
 	fmt::Debug,
 	hash::Hash,
 	iter::Iterator,
 };
-use std::{
-	borrow::Cow,
-	collections::HashSet,
-};
+use std::{borrow::Cow, collections::HashSet};
 
 #[cfg(feature = "serde_support")]
-use serde::{
-	Deserialize,
-	Serialize,
-};
+use serde::{Deserialize, Serialize};
 
 /// # Summary
 ///
@@ -115,12 +106,7 @@ where
 	/// ```rust
 	/// use std::borrow::Cow::Owned;
 	///
-	/// use clinvoice_query::Match::{
-	/// 	And,
-	/// 	EqualTo,
-	/// 	InRange,
-	/// 	Not,
-	/// };
+	/// use clinvoice_query::Match::{And, EqualTo, InRange, Not};
 	///
 	/// let and = And(vec![
 	/// 	InRange(Owned(1), Owned(100)),
@@ -287,10 +273,7 @@ where
 	/// ```rust
 	/// use std::borrow::Cow::Owned;
 	///
-	/// use clinvoice_query::Match::{
-	/// 	EqualTo,
-	/// 	Not,
-	/// };
+	/// use clinvoice_query::Match::{EqualTo, Not};
 	///
 	/// let not_equal_to = Not(EqualTo(Owned(5)).into());
 	///
@@ -310,12 +293,7 @@ where
 	/// ```rust
 	/// use std::borrow::Cow::Owned;
 	///
-	/// use clinvoice_query::Match::{
-	/// 	EqualTo,
-	/// 	InRange,
-	/// 	Not,
-	/// 	Or,
-	/// };
+	/// use clinvoice_query::Match::{EqualTo, InRange, Not, Or};
 	///
 	/// let or = Or(vec![
 	/// 	InRange(Owned(1), Owned(100)),

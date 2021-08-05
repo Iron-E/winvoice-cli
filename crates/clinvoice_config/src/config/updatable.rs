@@ -2,11 +2,7 @@ use std::fs;
 
 use clinvoice_adapter::data::Updatable;
 
-use super::{
-	Config,
-	Error,
-	Result,
-};
+use super::{Config, Error, Result};
 
 impl Updatable for Config<'_, '_>
 {

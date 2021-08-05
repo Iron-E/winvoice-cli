@@ -1,10 +1,7 @@
 mod from_view;
 
 #[cfg(feature = "serde_support")]
-use serde::{
-	Deserialize,
-	Serialize,
-};
+use serde::{Deserialize, Serialize};
 
 use crate::Id;
 

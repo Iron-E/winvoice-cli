@@ -1,9 +1,6 @@
 use core::time::Duration;
 
-use serde::{
-	Deserialize,
-	Serialize,
-};
+use serde::{Deserialize, Serialize};
 
 /// # Summary
 ///

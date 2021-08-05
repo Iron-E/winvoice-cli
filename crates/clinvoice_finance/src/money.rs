@@ -2,15 +2,9 @@ mod display;
 
 use rust_decimal::Decimal;
 #[cfg(feature = "serde_support")]
-use serde::{
-	Deserialize,
-	Serialize,
-};
+use serde::{Deserialize, Serialize};
 
-use crate::{
-	Currency,
-	ExchangeRates,
-};
+use crate::{Currency, ExchangeRates};
 
 /// # Summary
 ///
@@ -78,18 +72,9 @@ impl Money
 #[cfg(test)]
 mod tests
 {
-	use std::{
-		convert::TryFrom,
-		env,
-		fs,
-		time::Instant,
-	};
+	use std::{convert::TryFrom, env, fs, time::Instant};
 
-	use super::{
-		Currency,
-		ExchangeRates,
-		Money,
-	};
+	use super::{Currency, ExchangeRates, Money};
 
 	#[test]
 	fn exchange()

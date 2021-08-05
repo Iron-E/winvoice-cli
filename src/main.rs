@@ -4,11 +4,7 @@ mod app;
 mod dyn_result;
 mod input;
 
-use std::{
-	error::Error,
-	fs,
-	process,
-};
+use std::{error::Error, fs, process};
 
 use app::App;
 use clinvoice_config::Config;

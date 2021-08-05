@@ -1,23 +1,14 @@
 use std::{
 	fs,
 	io,
-	path::{
-		Path,
-		PathBuf,
-	},
+	path::{Path, PathBuf},
 };
 
 use clinvoice_adapter::Store;
-use clinvoice_data::{
-	Id,
-	UUID_NAMESPACE,
-};
+use clinvoice_data::{Id, UUID_NAMESPACE};
 use serde::de::DeserializeOwned;
 #[cfg(test)]
-use {
-	clinvoice_adapter::Adapters,
-	std::env,
-};
+use {clinvoice_adapter::Adapters, std::env};
 
 use crate::data::Result as DataResult;
 
@@ -165,15 +156,9 @@ pub fn unique_id(store_dir: &Path) -> io::Result<Id>
 #[cfg(test)]
 mod tests
 {
-	use std::{
-		collections::HashSet,
-		time::Instant,
-	};
+	use std::{collections::HashSet, time::Instant};
 
-	use super::{
-		fs,
-		PathBuf,
-	};
+	use super::{fs, PathBuf};
 
 	#[test]
 	fn unique_id()

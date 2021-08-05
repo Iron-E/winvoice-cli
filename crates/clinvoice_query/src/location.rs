@@ -1,21 +1,11 @@
 mod outer_location;
 
-use clinvoice_data::{
-	views::LocationView,
-	Id,
-};
+use clinvoice_data::{views::LocationView, Id};
 pub use outer_location::OuterLocation;
 #[cfg(feature = "serde_support")]
-use serde::{
-	Deserialize,
-	Serialize,
-};
+use serde::{Deserialize, Serialize};
 
-use super::{
-	Match,
-	MatchStr,
-	Result,
-};
+use super::{Match, MatchStr, Result};
 
 /// # Summary
 ///

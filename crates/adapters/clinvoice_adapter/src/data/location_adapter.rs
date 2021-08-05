@@ -1,21 +1,11 @@
 #![allow(clippy::wrong_self_convention)]
 
-use std::{
-	borrow::Cow::Borrowed,
-	error::Error,
-};
+use std::{borrow::Cow::Borrowed, error::Error};
 
-use clinvoice_data::{
-	views::LocationView,
-	Location,
-};
+use clinvoice_data::{views::LocationView, Location};
 use clinvoice_query as query;
 
-use super::{
-	Deletable,
-	Initializable,
-	Updatable,
-};
+use super::{Deletable, Initializable, Updatable};
 use crate::Store;
 
 pub trait LocationAdapter:

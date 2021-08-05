@@ -1,8 +1,4 @@
-use core::{
-	cmp::Ord,
-	fmt::Debug,
-	hash::Hash,
-};
+use core::{cmp::Ord, fmt::Debug, hash::Hash};
 
 use super::Match;
 

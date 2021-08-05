@@ -5,23 +5,13 @@ use core::fmt::Write;
 use std::collections::HashSet;
 
 use clinvoice_data::{
-	chrono::{
-		DateTime,
-		Local,
-	},
+	chrono::{DateTime, Local},
 	finance::Result as FinanceResult,
-	views::{
-		ContactView,
-		JobView,
-		TimesheetView,
-	},
+	views::{ContactView, JobView, TimesheetView},
 	Id,
 	Job,
 };
-pub use error::{
-	Error,
-	Result,
-};
+pub use error::{Error, Result};
 
 use crate::markdown;
 
@@ -344,27 +334,12 @@ impl Target
 #[cfg(all(feature = "markdown", test))]
 mod tests
 {
-	use std::{
-		collections::HashMap,
-		time::Instant,
-	};
+	use std::{collections::HashMap, time::Instant};
 
 	use clinvoice_data::{
-		chrono::{
-			DateTime,
-			Local,
-			Utc,
-		},
-		finance::{
-			Currency,
-			Money,
-		},
-		views::{
-			EmployeeView,
-			LocationView,
-			OrganizationView,
-			PersonView,
-		},
+		chrono::{DateTime, Local, Utc},
+		finance::{Currency, Money},
+		views::{EmployeeView, LocationView, OrganizationView, PersonView},
 		EmployeeStatus,
 		Expense,
 		ExpenseCategory,
@@ -372,11 +347,7 @@ mod tests
 		Invoice,
 	};
 
-	use super::{
-		JobView,
-		Target,
-		TimesheetView,
-	};
+	use super::{JobView, Target, TimesheetView};
 
 	#[test]
 	fn export_job()

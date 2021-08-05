@@ -19,10 +19,7 @@ mod exchange_rates;
 mod money;
 
 pub use currency::Currency;
-pub use error::{
-	Error,
-	Result,
-};
+pub use error::{Error, Result};
 pub use exchange_rates::ExchangeRates;
 pub use money::Money;
 pub use rust_decimal::Decimal;

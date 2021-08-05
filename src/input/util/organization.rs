@@ -1,23 +1,14 @@
 use core::fmt::Display;
 
 use clinvoice_adapter::{
-	data::{
-		Error as DataError,
-		LocationAdapter,
-		OrganizationAdapter,
-	},
+	data::{Error as DataError, LocationAdapter, OrganizationAdapter},
 	Store,
 };
 use clinvoice_data::views::OrganizationView;
 use clinvoice_query as query;
 
 use super::menu;
-use crate::{
-	app::QUERY_PROMPT,
-	filter_map_view,
-	input,
-	DynResult,
-};
+use crate::{app::QUERY_PROMPT, filter_map_view, input, DynResult};
 
 /// # Summary
 ///

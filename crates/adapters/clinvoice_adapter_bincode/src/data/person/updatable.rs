@@ -3,10 +3,7 @@ use std::fs;
 use clinvoice_adapter::data::Updatable;
 
 use super::BincodePerson;
-use crate::data::{
-	Error,
-	Result,
-};
+use crate::data::{Error, Result};
 
 impl Updatable for BincodePerson<'_, '_>
 {

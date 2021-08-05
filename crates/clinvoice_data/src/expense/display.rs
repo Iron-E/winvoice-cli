@@ -1,8 +1,4 @@
-use core::fmt::{
-	Display,
-	Formatter,
-	Result,
-};
+use core::fmt::{Display, Formatter, Result};
 
 use super::Expense;
 
@@ -20,10 +16,7 @@ mod tests
 {
 	use std::time::Instant;
 
-	use clinvoice_finance::{
-		Currency,
-		Money,
-	};
+	use clinvoice_finance::{Currency, Money};
 
 	use super::Expense;
 	use crate::ExpenseCategory;

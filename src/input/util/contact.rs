@@ -1,20 +1,11 @@
 use core::fmt::Display;
-use std::{
-	collections::HashMap,
-	io,
-};
+use std::{collections::HashMap, io};
 
-use clinvoice_adapter::{
-	data::LocationAdapter,
-	Store,
-};
+use clinvoice_adapter::{data::LocationAdapter, Store};
 use clinvoice_data::views::ContactView;
 
 use super::menu;
-use crate::{
-	input,
-	DynResult,
-};
+use crate::{input, DynResult};
 
 /// # Summary
 ///

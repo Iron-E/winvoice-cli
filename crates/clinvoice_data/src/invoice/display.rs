@@ -4,7 +4,7 @@ use core::fmt::{
 	Result,
 };
 
-use super::Invoice;
+use super::{Invoice, InvoiceDate};
 
 impl Display for Invoice
 {
@@ -18,7 +18,7 @@ impl Display for Invoice
 			self
 				.date
 				.as_ref()
-				.map(|date| date.to_string())
+				.map(InvoiceDate::to_string)
 				.unwrap_or_else(|| "Not issued".into())
 		)
 	}

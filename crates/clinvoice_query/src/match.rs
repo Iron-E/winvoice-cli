@@ -411,11 +411,11 @@ where
 			Self::GreaterThan(lesser_value) => values.iter().any(|v| *v > lesser_value.as_ref()),
 			Self::HasAll(required_values) =>
 			{
-				values.is_superset(&required_values.iter().map(|v| v.as_ref()).collect())
+				values.is_superset(&required_values.iter().map(Cow::as_ref).collect())
 			},
 			Self::HasAny(accepted_values) =>
 			{
-				!values.is_disjoint(&accepted_values.iter().map(|v| v.as_ref()).collect())
+				!values.is_disjoint(&accepted_values.iter().map(Cow::as_ref).collect())
 			},
 			Self::InRange(min, max) => values
 				.iter()

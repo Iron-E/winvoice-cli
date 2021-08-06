@@ -83,7 +83,7 @@ pub trait LocationAdapter:
 					Some(LocationView {
 						id:    outer_location.id,
 						name:  outer_location.name,
-						outer: previous.map(|l| l.into()),
+						outer: previous.map(LocationView::into),
 					})
 				})
 				.map(|l| Box::new(l))

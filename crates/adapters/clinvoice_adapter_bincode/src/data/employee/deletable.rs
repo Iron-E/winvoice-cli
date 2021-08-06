@@ -103,7 +103,7 @@ mod tests
 			store:    &store,
 		};
 
-		let mut big_old_test = BincodeOrganization::create(
+		let big_old_test = BincodeOrganization::create(
 			earth.location.clone(),
 			"Big Old Test Corporation".into(),
 			&store,
@@ -184,21 +184,6 @@ mod tests
 		.is_file());
 		assert!(earth.filepath().is_file());
 		assert!(testy.filepath().is_file());
-
-		// NOTE: I don't know if this statement is really necessary.
-		big_old_test = BincodeOrganization::retrieve(
-			&query::Organization {
-				id: query::Match::EqualTo(Borrowed(&big_old_test.id)),
-				..Default::default()
-			},
-			&store,
-		)
-		.await
-		.unwrap()
-		.iter()
-		.next()
-		.unwrap()
-		.clone();
 
 		creation = BincodeJob::retrieve(
 			&query::Job {

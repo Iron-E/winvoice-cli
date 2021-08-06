@@ -1,5 +1,5 @@
 use core::fmt::Display;
-use std::{error::Error, fs};
+use std::error::Error;
 
 use clinvoice_adapter::{
 	data::{Deletable, Error as DataError, LocationAdapter, Updatable},
@@ -16,7 +16,14 @@ use clinvoice_adapter_bincode::data::{
 };
 use clinvoice_data::{chrono::Utc, views::RestorableSerde, Location};
 use clinvoice_export::Target;
+use futures::{
+	future,
+	stream::{self, TryStreamExt},
+	Future,
+	TryFutureExt,
+};
 use serde::{de::DeserializeOwned, Serialize};
+use tokio::fs;
 
 use crate::{input, Config, DynResult, StructOpt};
 
@@ -106,19 +113,18 @@ impl Retrieve
 	/// Delete some `entities`
 	///
 	/// `delete_entity` determines how the entities are deleted.
-	fn delete<'err, E, T>(
-		entities: &[T],
-		delete_entity: impl Fn(T) -> Result<(), E>,
-	) -> DynResult<'err, ()>
+	async fn delete<'err, E, F, Fut, T>(entities: &[T], delete_entity: F) -> DynResult<'err, ()>
 	where
 		E: Error + 'err,
+		F: Fn(T) -> Fut,
+		Fut: Future<Output = Result<(), E>>,
 		T: Clone + Display,
 	{
 		let selection = input::select(entities, "Select the entities you want to delete")?;
-		selection
-			.into_iter()
-			.try_for_each(|entity| delete_entity(entity))
-			.map_err(|e| e.into())
+		stream::iter(selection.into_iter().map(Ok))
+			.try_for_each_concurrent(None, |entity| async { delete_entity(entity).await })
+			.err_into()
+			.await
 	}
 
 	/// # Summary
@@ -126,25 +132,32 @@ impl Retrieve
 	/// Edit some `entities`, and then update them.
 	///
 	/// `update_entity` determines how the entities are updated.
-	fn update<'err, E, T>(
-		entities: &[T],
-		update_entity: impl Fn(T) -> Result<(), E>,
-	) -> DynResult<'err, ()>
+	async fn update<'err, E, F, Fut, T>(entities: &[T], update_entity: F) -> DynResult<'err, ()>
 	where
 		E: Error + 'err,
+		F: Fn(T) -> Fut,
+		Fut: Future<Output = Result<(), E>>,
 		T: Clone + DeserializeOwned + Display + RestorableSerde + Serialize,
 	{
 		let selection = input::select(entities, "Select the entities you want to update")?;
-		selection.into_iter().try_for_each(|entity| {
-			let edited = match input::edit_and_restore(&entity, "Make any desired edits")
-			{
-				Ok(e) => e,
-				Err(input::Error::NotEdited) => entity,
-				Err(e) => return Err(e.into()),
-			};
 
-			update_entity(edited).map_err(|e| e.into())
-		})
+		// PERF: all of the `update_entity` operations are queued in the background while the user keeps editing. this is in case users have slow internet connection
+		let updates = selection
+			.into_iter()
+			.try_fold(Vec::new(), |mut v, entity| {
+				let edited = match input::edit_and_restore(&entity, "Make any desired edits")
+				{
+					Ok(e) => e,
+					Err(input::Error::NotEdited) => entity,
+					Err(e) => return Err(e),
+				};
+
+				v.push(update_entity(edited));
+				Ok(v)
+			})?;
+
+		future::try_join_all(updates).await?;
+		Ok(())
 	}
 
 	/// # Summary
@@ -185,28 +198,33 @@ impl Retrieve
 								"Query the `Employee` you are looking for",
 								false,
 								store,
-							)?;
+							)
+							.await?;
 
 						if self.delete
 						{
-							Self::delete(&results_view, |e| {
+							Self::delete(&results_view, |e| async {
 								$emp {
 									employee: &(e.into()),
 									store,
 								}
 								.delete(self.cascade)
-							})?;
+								.await
+							})
+							.await?;
 						}
 
 						if self.update
 						{
-							Self::update(&results_view, |e| {
+							Self::update(&results_view, |e| async {
 								$emp {
 									employee: &(e.into()),
 									store,
 								}
 								.update()
-							})?;
+								.await
+							})
+							.await?;
 						}
 
 						if set_default
@@ -233,7 +251,7 @@ impl Retrieve
 								},
 							};
 
-							new_config.update()?;
+							new_config.update().await?;
 						}
 						else if !(self.delete || self.update)
 						{
@@ -269,28 +287,33 @@ impl Retrieve
 								"Query the `Job` you are looking for",
 								false,
 								store,
-							)?;
+							)
+							.await?;
 
 						if self.delete
 						{
-							Self::delete(&results_view, |j| {
+							Self::delete(&results_view, |j| async {
 								$job {
 									job: &(j.into()),
 									store,
 								}
 								.delete(self.cascade)
-							})?;
+								.await
+							})
+							.await?;
 						}
 
 						if self.update
 						{
-							Self::update(&results_view, |j| {
+							Self::update(&results_view, |j| async {
 								$job {
 									job: &(j.into()),
 									store,
 								}
 								.update()
-							})?;
+								.await
+							})
+							.await?;
 						}
 
 						if close
@@ -301,14 +324,17 @@ impl Retrieve
 								.cloned()
 								.collect();
 							let selected = input::select(&unclosed, "Select the Jobs you want to close")?;
-							selected.into_iter().try_for_each(|mut j| {
-								j.date_close = Some(Utc::now());
-								$job {
-									job: &(j.into()),
-									store,
-								}
-								.update()
-							})?;
+							stream::iter(selected.into_iter().map(Ok))
+								.try_for_each_concurrent(None, |mut j| async {
+									j.date_close = Some(Utc::now());
+									$job {
+										job: &(j.into()),
+										store,
+									}
+									.update()
+									.await
+								})
+								.await?;
 						}
 
 						if reopen
@@ -319,33 +345,43 @@ impl Retrieve
 								.cloned()
 								.collect();
 							let selected = input::select(&closed, "Select the Jobs you want to reopen")?;
-							selected.into_iter().try_for_each(|mut j| {
-								j.date_close = None;
-								$job {
-									job: &(j.into()),
-									store,
-								}
-								.update()
-							})?;
+							stream::iter(selected.into_iter().map(Ok))
+								.try_for_each_concurrent(None, |mut j| async {
+									j.date_close = None;
+									$job {
+										job: &(j.into()),
+										store,
+									}
+									.update()
+									.await
+								})
+								.await?;
 						}
 
 						if let Some(target) = export
 						{
-							input::select(&results_view, "Select which Jobs you want to export")?
-								.into_iter()
-								.try_for_each(|job| -> DynResult<()> {
-									let exported = target.export_job(&job)?;
-									fs::write(
-										format!(
-											"{}--{}{}",
-											job.client.name.replace(' ', "-"),
-											job.id,
-											target.extension()
-										),
-										exported,
-									)?;
-									Ok(())
-								})?;
+							let to_export =
+								input::select(&results_view, "Select which Jobs you want to export")?;
+
+							// WARN: this `let` seems redundant, but the "type needs to be known at this point"
+							let export_result: DynResult<'_, _> =
+								stream::iter(to_export.into_iter().map(Ok))
+									.try_for_each_concurrent(None, |job| async move {
+										let exported = target.export_job(&job)?;
+										fs::write(
+											format!(
+												"{}--{}{}",
+												job.client.name.replace(' ', "-"),
+												job.id,
+												target.extension()
+											),
+											exported,
+										)
+										.await?;
+										Ok(())
+									})
+									.await;
+							export_result?;
 						}
 						else if !(close || self.delete || reopen || self.update)
 						{
@@ -377,29 +413,34 @@ impl Retrieve
 							"Query the `Location` you are looking for",
 							false,
 							store,
-						)?;
+						)
+						.await?;
 
 						if self.delete
 						{
 							let cascade = self.cascade;
-							Self::delete(&results_view, |l| {
+							Self::delete(&results_view, |l| async {
 								$loc {
 									location: &(l.into()),
 									store,
 								}
 								.delete(cascade)
-							})?;
+								.await
+							})
+							.await?;
 						}
 
 						if self.update
 						{
-							Self::update(&results_view, |l| {
+							Self::update(&results_view, |l| async {
 								$loc {
 									location: &(l.into()),
 									store,
 								}
 								.update()
-							})?;
+								.await
+							})
+							.await?;
 						}
 
 						if let Some(name) = create_inner.last()
@@ -408,18 +449,16 @@ impl Retrieve
 								&results_view,
 								format!("Select the outer Location of {}", name),
 							)?;
-							create_inner.into_iter().rev().try_fold(
-								location.into(),
-								|loc: Location,
-								 name: String|
-								 -> Result<Location, <$loc as LocationAdapter>::Error> {
+							stream::iter(create_inner.into_iter().map(Ok).rev())
+								.try_fold(location.into(), |loc: Location, name: String| async {
 									$loc {
 										location: &(loc.into()),
 										store,
 									}
 									.create_inner(name)
-								},
-							)?;
+									.await
+								})
+								.await?;
 						}
 						else if !(self.delete || self.update)
 						{
@@ -445,28 +484,33 @@ impl Retrieve
 							"Query the `Organization` you are looking for",
 							false,
 							store,
-						)?;
+						)
+						.await?;
 
 						if self.delete
 						{
-							Self::delete(&results_view, |o| {
+							Self::delete(&results_view, |o| async {
 								$org {
 									organization: &(o.into()),
 									store,
 								}
 								.delete(self.cascade)
-							})?;
+								.await
+							})
+							.await?;
 						}
 
 						if self.update
 						{
-							Self::update(&results_view, |o| {
+							Self::update(&results_view, |o| async {
 								$org {
 									organization: &(o.into()),
 									store,
 								}
 								.update()
-							})?;
+								.await
+							})
+							.await?;
 						}
 						else if !self.delete
 						{
@@ -492,28 +536,33 @@ impl Retrieve
 							"Query the `Person` you are looking for",
 							false,
 							store,
-						)?;
+						)
+						.await?;
 
 						if self.delete
 						{
-							Self::delete(&results_view, |p| {
+							Self::delete(&results_view, |p| async {
 								$per {
 									person: &(p.into()),
 									store,
 								}
 								.delete(self.cascade)
-							})?;
+								.await
+							})
+							.await?;
 						}
 
 						if self.update
 						{
-							Self::update(&results_view, |p| {
+							Self::update(&results_view, |p| async {
 								$per {
 									person: &(p.into()),
 									store,
 								}
 								.update()
-							})?;
+								.await
+							})
+							.await?;
 						}
 						else if !self.delete
 						{

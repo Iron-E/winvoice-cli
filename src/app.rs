@@ -58,13 +58,13 @@ impl App
 	/// # Summary
 	///
 	/// Edit the user's configuration file.
-	fn edit_config(config: &Config) -> ConfigResult<()>
+	async fn edit_config(config: &Config<'_, '_>) -> ConfigResult<()>
 	{
 		let serialized = toml::to_string_pretty(config)?;
 		if let Some(edited) = Editor::new().extension(".toml").edit(&serialized)?
 		{
 			let deserialized: Config = toml::from_str(&edited)?;
-			deserialized.update()?;
+			deserialized.update().await?;
 		}
 
 		Ok(())
@@ -73,14 +73,14 @@ impl App
 	/// # Summary
 	///
 	/// Run the application and parse its provided arguments / flags.
-	pub fn run<'config>(self, config: &'config Config) -> DynResult<'config, ()>
+	pub async fn run<'config>(self, config: &'config Config<'_, '_>) -> DynResult<'config, ()>
 	{
 		match self.command
 		{
-			AppCommand::Config => Self::edit_config(config).map_err(|e| e.into()),
-			AppCommand::Create(cmd) => cmd.run(config, self.store),
-			AppCommand::Retrieve(cmd) => cmd.run(config, self.store),
-			AppCommand::Time(cmd) => cmd.run(config, self.store),
+			AppCommand::Config => Self::edit_config(config).await.map_err(|e| e.into()),
+			AppCommand::Create(cmd) => cmd.run(config, self.store).await,
+			AppCommand::Retrieve(cmd) => cmd.run(config, self.store).await,
+			AppCommand::Time(cmd) => cmd.run(config, self.store).await,
 		}
 	}
 }

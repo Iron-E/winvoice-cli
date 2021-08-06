@@ -3,7 +3,6 @@ use core::fmt::Display;
 use clinvoice_adapter::{
 	data::{
 		EmployeeAdapter,
-		Error as DataError,
 		JobAdapter,
 		LocationAdapter,
 		OrganizationAdapter,
@@ -13,6 +12,11 @@ use clinvoice_adapter::{
 };
 use clinvoice_data::views::JobView;
 use clinvoice_query as query;
+use futures::stream::{
+	self,
+	TryStreamExt,
+};
+
 
 use super::menu;
 use crate::{
@@ -35,39 +39,45 @@ use crate::{
 ///
 /// [L_retrieve]: clinvoice_adapter::data::LocationAdapter::retrieve
 /// [location]: clinvoice_data::Location
-pub fn retrieve_views<'err, D, E, J, L, O, P>(
+pub async fn retrieve_views<'err, D, E, J, L, O, P>(
 	prompt: D,
 	retry_on_empty: bool,
 	store: &Store,
 ) -> DynResult<'err, Vec<JobView>>
 where
 	D: Display,
-	E: EmployeeAdapter,
-	J: JobAdapter,
-	L: LocationAdapter,
-	O: OrganizationAdapter,
+	E: EmployeeAdapter + Send,
+	J: JobAdapter + Send,
+	L: LocationAdapter + Send,
+	O: OrganizationAdapter + Send,
 	P: PersonAdapter,
 
+	<L as LocationAdapter>::Error: Send,
 	<E as EmployeeAdapter>::Error: From<<L as LocationAdapter>::Error>
 		+ From<<O as OrganizationAdapter>::Error>
-		+ From<<P as PersonAdapter>::Error>,
+		+ From<<P as PersonAdapter>::Error>
+		+ Send,
 	<J as JobAdapter>::Error: 'err + From<<E as EmployeeAdapter>::Error>,
 {
-	let query: query::Job = input::edit_default(format!("{}\n{}jobs", prompt, QUERY_PROMPT))?;
-
-	let results = J::retrieve(&query, &store)?;
-	let results_view: Result<Vec<_>, _> = results
-		.into_iter()
-		.map(|j| J::into_view::<E, L, O, P>(j, &store))
-		.filter_map(|result| filter_map_view!(query, result))
-		.collect();
-
-	if retry_on_empty &&
-		results_view.as_ref().map(|r| r.is_empty()).unwrap_or(false) &&
-		menu::retry_query()?
+	loop
 	{
-		return retrieve_views::<D, E, J, L, O, P>(prompt, true, store);
-	}
+		let query: query::Job = input::edit_default(format!("{}\n{}jobs", prompt, QUERY_PROMPT))?;
 
-	results_view.map_err(|e| e.into())
+		let results = J::retrieve(&query, &store).await?;
+		let results_view: Result<Vec<_>, _> = stream::iter(results.into_iter().map(Ok))
+			.map_ok(|j| async move { J::into_view::<E, L, O, P>(j, &store).await })
+			.try_buffer_unordered(10)
+			.try_filter_map(|result| filter_map_view!(query, result))
+			.try_collect()
+			.await;
+
+		if retry_on_empty &&
+			results_view.as_ref().map(Vec::is_empty).unwrap_or(false) &&
+			menu::retry_query()?
+		{
+			continue;
+		}
+
+		return results_view.map_err(|e| e.into());
+	}
 }

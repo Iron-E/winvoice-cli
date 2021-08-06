@@ -4,6 +4,7 @@ mod app;
 mod dyn_result;
 mod input;
 
+// PERF: we're using `std::fs` because the main function does not need asynchrony at this point.
 use std::{
 	error::Error,
 	fs,
@@ -32,10 +33,11 @@ fn exit_with_err(error: impl Error) -> !
 /// # Summary
 ///
 /// The main method.
-fn main()
+#[tokio::main]
+async fn main()
 {
 	// Create a default user configuration if not already present.
-	Config::init().unwrap_or_else(|e| exit_with_err(e));
+	Config::init().await.unwrap_or_else(|e| exit_with_err(e));
 
 	// Get the user configuration.
 	let config_bytes = fs::read(Config::path()).unwrap_or_else(|e| exit_with_err(e));
@@ -44,5 +46,6 @@ fn main()
 	// Run the CLInvoice application.
 	App::from_args()
 		.run(&config)
+		.await
 		.unwrap_or_else(|e| exit_with_err(e.as_ref()));
 }

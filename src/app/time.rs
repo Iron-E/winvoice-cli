@@ -153,7 +153,11 @@ impl Time
 	/// # Summary
 	///
 	/// Execute the constructed command.
-	pub(super) fn run<'err>(self, config: &Config, store_name: String) -> DynResult<'err, ()>
+	pub(super) async fn run<'err>(
+		self,
+		config: &Config<'_, '_>,
+		store_name: String,
+	) -> DynResult<'err, ()>
 	{
 		let store = config
 			.get_store(&store_name)
@@ -166,7 +170,7 @@ impl Time
 						"Query the `Job` which you are working on",
 						false,
 						store,
-					)?
+					).await?
 					.into_iter()
 					.filter(|j| j.date_close.is_none())
 					.collect();
@@ -193,7 +197,7 @@ impl Time
 								"Query the `Employee` who will be doing the work",
 								true,
 								store,
-							)?;
+							).await?;
 
 						let selected = input::select_one(
 							&results_view,
@@ -210,7 +214,7 @@ impl Time
 					job: &(selected_job.into()),
 					store,
 				}
-				.update()?;
+				.update().await?;
 			}};
 		}
 

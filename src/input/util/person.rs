@@ -27,7 +27,7 @@ use crate::{
 ///
 /// [P_retrieve]: clinvoice_adapter::data::PersonAdapter::retrieve
 /// [person]: clinvoice_data::Person
-pub fn retrieve_views<'err, D, P>(
+pub async fn retrieve_views<'err, D, P>(
 	prompt: D,
 	retry_on_empty: bool,
 	store: &Store,
@@ -38,26 +38,29 @@ where
 
 	<P as PersonAdapter>::Error: 'err,
 {
-	let query: query::Person = input::edit_default(format!("{}\n{}persons", prompt, QUERY_PROMPT))?;
-
-	let results = P::retrieve(&query, &store)?;
-	let results_view: Result<Vec<_>, _> = results
-		.into_iter()
-		.map(PersonView::from)
-		.filter_map(|view| match query.matches_view(&view)
-		{
-			Ok(b) if b => Some(Ok(view)),
-			Err(e) => Some(Err(e)),
-			_ => None,
-		})
-		.collect();
-
-	if retry_on_empty &&
-		results_view.as_ref().map(|r| r.is_empty()).unwrap_or(false) &&
-		menu::retry_query()?
+	loop
 	{
-		return retrieve_views::<D, P>(prompt, true, store);
-	}
+		let query: query::Person = input::edit_default(format!("{}\n{}persons", prompt, QUERY_PROMPT))?;
 
-	results_view.map_err(|e| e.into())
+		let results = P::retrieve(&query, &store).await?;
+		let results_view: Result<Vec<_>, _> = results
+			.into_iter()
+			.map(PersonView::from)
+			.filter_map(|view| match query.matches_view(&view)
+			{
+				Ok(b) if b => Some(Ok(view)),
+				Err(e) => Some(Err(e)),
+				_ => None,
+			})
+			.collect();
+
+		if retry_on_empty &&
+			results_view.as_ref().map(Vec::is_empty).unwrap_or(false) &&
+			menu::retry_query()?
+		{
+			continue;
+		}
+
+		return results_view.map_err(|e| e.into());
+	}
 }

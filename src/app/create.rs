@@ -243,7 +243,7 @@ impl Create
 		Ok(())
 	}
 
-	fn create_location<L>(
+	async fn create_location<L>(
 		create_inner: fn(
 			&Location,
 			String,
@@ -290,9 +290,9 @@ impl Create
 		Ok(())
 	}
 
-	pub(super) fn run<'config>(
+	pub(super) async fn run<'config>(
 		self,
-		config: &'config Config,
+		config: &'config Config<'_, '_>,
 		store_name: String,
 	) -> DynResult<'config, ()>
 	{
@@ -335,16 +335,17 @@ impl Create
 
 				Self::Location { names } =>
 				{
-					fn create_inner(
+					async fn create_inner(
 						location: &Location,
 						name: String,
 						store: &Store,
 					) -> Result<Location, BincodeError>
 					{
-						BincodeLocation { location, store }.create_inner(name)
+						BincodeLocation { location, store }.create_inner(name).await
 					}
 
 					Self::create_location::<BincodeLocation>(create_inner, names, store)
+						.await
 						.map_err(|e| e.into())
 				},
 

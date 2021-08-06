@@ -23,12 +23,12 @@ use crate::{
 /// # Errors
 ///
 /// Will error whenever [`input::select_one`] or [`input::text`] does.
-fn add_menu<'err, L>(
+async fn add_menu<'err, L>(
 	contact_info: &mut HashMap<String, ContactView>,
 	store: &Store,
 ) -> DynResult<'err, ()>
 where
-	L: LocationAdapter,
+	L: LocationAdapter + Send,
 	<L as LocationAdapter>::Error: 'err,
 {
 	const ADDRESS: &str = "Address";
@@ -78,7 +78,7 @@ where
 				"Query the `Location` which can be used to reach this `Employee`",
 				true,
 				store,
-			)?;
+			).await?;
 
 			let location = input::select_one(&locations, "Select the location to add")?;
 			insert!(Address, location);
@@ -217,9 +217,9 @@ fn edit_menu(contact_info: &mut HashMap<String, ContactView>) -> input::Result<(
 /// If a user manages to select an action (e.g. `ADD`, `CONTINUE`, `DELETE`) which is unaccounted
 /// for. This is __theoretically not possible__ but must be present to account for the case of an
 /// unrecoverable state of the program.
-pub fn menu<'err, L>(store: &Store) -> DynResult<'err, HashMap<String, ContactView>>
+pub async fn menu<'err, L>(store: &Store) -> DynResult<'err, HashMap<String, ContactView>>
 where
-	L: LocationAdapter,
+	L: LocationAdapter + Send,
 	<L as LocationAdapter>::Error: 'err,
 {
 	let mut contact_info = HashMap::<String, ContactView>::new();
@@ -232,7 +232,7 @@ where
 		)?;
 		match action
 		{
-			menu::ADD => add_menu::<L>(&mut contact_info, store)?,
+			menu::ADD => add_menu::<L>(&mut contact_info, store).await?,
 			menu::CONTINUE => break,
 			menu::DELETE => delete_menu(&mut contact_info)?,
 			menu::EDIT => edit_menu(&mut contact_info)?,

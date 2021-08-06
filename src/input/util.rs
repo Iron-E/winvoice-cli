@@ -21,16 +21,14 @@ pub mod person;
 /// * `Err(e)` => `Some(Err(_))`
 #[macro_export]
 macro_rules! filter_map_view {
-	($query:ident, $result:ident) => {
-		match $result
+	($query:ident, $val:ident) => {{
+		use futures::future;
+
+		match $query.matches_view(&$val)
 		{
-			Ok(val) => match $query.matches_view(&val)
-			{
-				Ok(matches) if matches => Some(Ok(val)),
-				Err(e) => Some(Err(DataError::from(e).into())),
-				_ => None,
-			},
-			Err(e) => Some(Err(e)),
+			Ok(b) if b => future::ok(Some($val)),
+			Err(e) => future::err(clinvoice_adapter::data::Error::from(e).into()),
+			_ => future::ok(None),
 		}
-	};
+	}};
 }

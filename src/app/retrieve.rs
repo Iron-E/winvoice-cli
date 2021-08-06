@@ -170,7 +170,11 @@ impl Retrieve
 	/// # Summary
 	///
 	/// Execute the constructed command.
-	pub(super) fn run<'err>(self, config: &Config, store_name: String) -> DynResult<'err, ()>
+	pub(super) async fn run<'err>(
+		self,
+		config: &Config<'_, '_>,
+		store_name: String,
+	) -> DynResult<'err, ()>
 	{
 		let store = config
 			.get_store(&store_name)

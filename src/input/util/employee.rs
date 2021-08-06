@@ -4,7 +4,6 @@ use std::borrow::Cow::Owned;
 use clinvoice_adapter::{
 	data::{
 		EmployeeAdapter,
-		Error as DataError,
 		LocationAdapter,
 		OrganizationAdapter,
 		PersonAdapter,
@@ -16,6 +15,10 @@ use clinvoice_data::{
 	Id,
 };
 use clinvoice_query as query;
+use futures::stream::{
+	self,
+	TryStreamExt,
+};
 
 use super::menu;
 use crate::{
@@ -38,7 +41,7 @@ use crate::{
 ///
 /// [L_retrieve]: clinvoice_adapter::data::EmployeeAdapter::retrieve
 /// [location]: clinvoice_data::Employee
-pub fn retrieve_views<'err, D, E, L, O, P>(
+pub async fn retrieve_views<'err, D, E, L, O, P>(
 	default_id: Option<Id>,
 	prompt: D,
 	retry_on_empty: bool,
@@ -46,41 +49,46 @@ pub fn retrieve_views<'err, D, E, L, O, P>(
 ) -> DynResult<'err, Vec<EmployeeView>>
 where
 	D: Display,
-	E: EmployeeAdapter,
-	L: LocationAdapter,
-	O: OrganizationAdapter,
-	P: PersonAdapter,
+	E: EmployeeAdapter + Send,
+	L: LocationAdapter + Send,
+	O: OrganizationAdapter + Send,
+	P: PersonAdapter + Send,
 
 	<E as EmployeeAdapter>::Error: 'err
 		+ From<<L as LocationAdapter>::Error>
 		+ From<<O as OrganizationAdapter>::Error>
-		+ From<<P as PersonAdapter>::Error>,
-	<L as LocationAdapter>::Error: 'err,
+		+ From<<P as PersonAdapter>::Error>
+		+ Send,
+	<L as LocationAdapter>::Error: 'err + Send,
 	<O as OrganizationAdapter>::Error: 'err,
 	<P as PersonAdapter>::Error: 'err,
 {
-	let query = match default_id
+	loop
 	{
-		Some(id) => query::Employee {
-			id: query::Match::EqualTo(Owned(id)),
-			..Default::default()
-		},
-		_ => input::edit_default(format!("{}\n{}employees", prompt, QUERY_PROMPT))?,
-	};
+		let query = match default_id
+		{
+			Some(id) => query::Employee {
+				id: query::Match::EqualTo(Owned(id)),
+				..Default::default()
+			},
+			_ => input::edit_default(format!("{}\n{}employees", prompt, QUERY_PROMPT))?,
+		};
 
-	let results = E::retrieve(&query, &store)?;
-	let results_view: Result<Vec<_>, _> = results
-		.into_iter()
-		.map(|e| E::into_view::<L, O, P>(e, &store))
-		.filter_map(|result| filter_map_view!(query, result))
-		.collect();
+		let results = E::retrieve(&query, &store).await?;
+		let results_view: Result<Vec<_>, _> = stream::iter(results.into_iter().map(Ok))
+			.map_ok(|e| async move { E::into_view::<L, O, P>(e, &store).await })
+			.try_buffer_unordered(10)
+			.try_filter_map(|val| filter_map_view!(query, val))
+			.try_collect()
+			.await;
 
-	if retry_on_empty &&
-		results_view.as_ref().map(|r| r.is_empty()).unwrap_or(false) &&
-		menu::retry_query()?
-	{
-		return retrieve_views::<D, E, L, O, P>(default_id, prompt, true, store);
+		if retry_on_empty &&
+			results_view.as_ref().map(Vec::is_empty).unwrap_or(false) &&
+			menu::retry_query()?
+		{
+			continue;
+		}
+
+		return results_view.map_err(|e| e.into());
 	}
-
-	results_view.map_err(|e| e.into())
 }

@@ -1,8 +1,4 @@
-use core::fmt::{
-	Display,
-	Formatter,
-	Result as FmtResult,
-};
+use core::fmt::{Display, Formatter, Result as FmtResult};
 
 use super::Adapters;
 

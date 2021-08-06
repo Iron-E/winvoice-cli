@@ -5,11 +5,7 @@ use std::error::Error;
 use clinvoice_data::Person;
 use clinvoice_query as query;
 
-use super::{
-	Deletable,
-	Initializable,
-	Updatable,
-};
+use super::{Deletable, Initializable, Updatable};
 use crate::Store;
 
 #[async_trait::async_trait]

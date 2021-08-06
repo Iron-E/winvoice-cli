@@ -3,10 +3,7 @@ mod display;
 use std::cmp::Ordering;
 
 use clinvoice_adapter::{
-	data::{
-		Error as DataError,
-		Updatable,
-	},
+	data::{Error as DataError, Updatable},
 	Adapters,
 	Error as AdapterError,
 };
@@ -19,24 +16,11 @@ use clinvoice_adapter_bincode::data::{
 	BincodePerson,
 };
 use clinvoice_data::{
-	chrono::{
-		Duration,
-		DurationRound,
-		Utc,
-	},
-	views::{
-		EmployeeView,
-		JobView,
-		TimesheetView,
-	},
+	chrono::{Duration, DurationRound, Utc},
+	views::{EmployeeView, JobView, TimesheetView},
 };
 
-use crate::{
-	input,
-	Config,
-	DynResult,
-	StructOpt,
-};
+use crate::{input, Config, DynResult, StructOpt};
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, StructOpt)]
 #[structopt(about = "Time information that was recorded with CLInvoice")]
@@ -170,7 +154,8 @@ impl Time
 						"Query the `Job` which you are working on",
 						false,
 						store,
-					).await?
+					)
+					.await?
 					.into_iter()
 					.filter(|j| j.date_close.is_none())
 					.collect();
@@ -197,7 +182,8 @@ impl Time
 								"Query the `Employee` who will be doing the work",
 								true,
 								store,
-							).await?;
+							)
+							.await?;
 
 						let selected = input::select_one(
 							&results_view,
@@ -214,7 +200,8 @@ impl Time
 					job: &(selected_job.into()),
 					store,
 				}
-				.update().await?;
+				.update()
+				.await?;
 			}};
 		}
 

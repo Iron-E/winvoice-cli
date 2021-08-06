@@ -2,35 +2,14 @@ mod error;
 mod updatable;
 
 use core::time::Duration;
-use std::{
-	collections::BTreeMap,
-	path::PathBuf,
-};
+use std::{collections::BTreeMap, path::PathBuf};
 
-use clinvoice_adapter::{
-	data::Updatable,
-	Adapters,
-	Store,
-};
-use clinvoice_data::{
-	finance::Currency,
-	Id,
-};
-pub use error::{
-	Error,
-	Result,
-};
-use serde::{
-	Deserialize,
-	Serialize,
-};
+use clinvoice_adapter::{data::Updatable, Adapters, Store};
+use clinvoice_data::{finance::Currency, Id};
+pub use error::{Error, Result};
+use serde::{Deserialize, Serialize};
 
-use crate::{
-	Employees,
-	Invoices,
-	StoreValue,
-	Timesheets,
-};
+use crate::{Employees, Invoices, StoreValue, Timesheets};
 
 /// # Summary
 ///
@@ -137,24 +116,12 @@ impl Config<'_, '_>
 #[cfg(test)]
 mod tests
 {
-	use std::time::{
-		Duration,
-		Instant,
-	};
+	use std::time::{Duration, Instant};
 
 	use clinvoice_adapter::Adapters;
 	use clinvoice_data::Id;
 
-	use super::{
-		BTreeMap,
-		Config,
-		Currency,
-		Employees,
-		Invoices,
-		Store,
-		StoreValue,
-		Timesheets,
-	};
+	use super::{BTreeMap, Config, Currency, Employees, Invoices, Store, StoreValue, Timesheets};
 
 	#[test]
 	fn get_store()

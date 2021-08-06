@@ -2,31 +2,15 @@ use core::fmt::Display;
 use std::borrow::Cow::Owned;
 
 use clinvoice_adapter::{
-	data::{
-		EmployeeAdapter,
-		LocationAdapter,
-		OrganizationAdapter,
-		PersonAdapter,
-	},
+	data::{EmployeeAdapter, LocationAdapter, OrganizationAdapter, PersonAdapter},
 	Store,
 };
-use clinvoice_data::{
-	views::EmployeeView,
-	Id,
-};
+use clinvoice_data::{views::EmployeeView, Id};
 use clinvoice_query as query;
-use futures::stream::{
-	self,
-	TryStreamExt,
-};
+use futures::stream::{self, TryStreamExt};
 
 use super::menu;
-use crate::{
-	app::QUERY_PROMPT,
-	filter_map_view,
-	input,
-	DynResult,
-};
+use crate::{app::QUERY_PROMPT, filter_map_view, input, DynResult};
 
 /// # Summary
 ///

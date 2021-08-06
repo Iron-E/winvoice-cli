@@ -1,12 +1,6 @@
-use clinvoice_data::{
-	chrono::NaiveDateTime,
-	finance::Money,
-};
+use clinvoice_data::{chrono::NaiveDateTime, finance::Money};
 #[cfg(feature = "serde_support")]
-use serde::{
-	Deserialize,
-	Serialize,
-};
+use serde::{Deserialize, Serialize};
 
 use super::Match;
 

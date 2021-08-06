@@ -1,7 +1,4 @@
-use std::{
-	borrow::Cow::Borrowed,
-	io::ErrorKind,
-};
+use std::{borrow::Cow::Borrowed, io::ErrorKind};
 
 use clinvoice_adapter::data::{
 	Deletable,
@@ -10,18 +7,11 @@ use clinvoice_adapter::data::{
 	OrganizationAdapter,
 };
 use clinvoice_query as query;
-use futures::stream::{
-	self,
-	TryStreamExt,
-};
+use futures::stream::{self, TryStreamExt};
 use tokio::fs;
 
 use super::BincodeLocation;
-use crate::data::{
-	BincodeOrganization,
-	Error,
-	Result,
-};
+use crate::data::{BincodeOrganization, Error, Result};
 
 #[async_trait::async_trait]
 impl Deletable for BincodeLocation<'_, '_>
@@ -103,15 +93,8 @@ mod tests
 
 	use clinvoice_adapter::data::OrganizationAdapter;
 
-	use super::{
-		BincodeLocation,
-		Deletable,
-		LocationAdapter,
-	};
-	use crate::{
-		data::BincodeOrganization,
-		util,
-	};
+	use super::{BincodeLocation, Deletable, LocationAdapter};
+	use crate::{data::BincodeOrganization, util};
 
 	#[tokio::test(flavor = "multi_thread", worker_threads = 10)]
 	async fn delete()

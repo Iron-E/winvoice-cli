@@ -1,11 +1,5 @@
 use clinvoice_adapter::{
-	data::{
-		EmployeeAdapter,
-		JobAdapter,
-		LocationAdapter,
-		OrganizationAdapter,
-		PersonAdapter,
-	},
+	data::{EmployeeAdapter, JobAdapter, LocationAdapter, OrganizationAdapter, PersonAdapter},
 	Adapters,
 	Error,
 	Store,
@@ -20,29 +14,13 @@ use clinvoice_adapter_bincode::data::{
 	Error as BincodeError,
 };
 use clinvoice_data::{
-	chrono::{
-		DateTime,
-		Datelike,
-		Local,
-		TimeZone,
-		Timelike,
-		Utc,
-	},
-	finance::{
-		Currency,
-		Decimal,
-		Money,
-	},
+	chrono::{DateTime, Datelike, Local, TimeZone, Timelike, Utc},
+	finance::{Currency, Decimal, Money},
 	EmployeeStatus,
 	Location,
 };
 
-use crate::{
-	input,
-	Config,
-	DynResult,
-	StructOpt,
-};
+use crate::{input, Config, DynResult, StructOpt};
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, StructOpt)]
 #[structopt(about = "Record information information with CLInvoice")]

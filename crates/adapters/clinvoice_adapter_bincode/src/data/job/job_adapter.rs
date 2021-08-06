@@ -1,17 +1,9 @@
 use clinvoice_adapter::{
-	data::{
-		Error as DataError,
-		Initializable,
-		JobAdapter,
-		Updatable,
-	},
+	data::{Error as DataError, Initializable, JobAdapter, Updatable},
 	Store,
 };
 use clinvoice_data::{
-	chrono::{
-		DateTime,
-		Utc,
-	},
+	chrono::{DateTime, Utc},
 	finance::Money,
 	Invoice,
 	Job,
@@ -21,10 +13,7 @@ use clinvoice_query as query;
 
 use super::BincodeJob;
 use crate::{
-	data::{
-		Error,
-		Result,
-	},
+	data::{Error, Result},
 	util,
 };
 
@@ -101,31 +90,15 @@ impl JobAdapter for BincodeJob<'_, '_>
 mod tests
 {
 	use std::{
-		borrow::Cow::{
-			Borrowed,
-			Owned,
-		},
+		borrow::Cow::{Borrowed, Owned},
 		time::Instant,
 	};
 
-	use clinvoice_data::{
-		finance::Currency,
-		Id,
-	};
+	use clinvoice_data::{finance::Currency, Id};
 	use clinvoice_query::Match;
 	use tokio::fs;
 
-	use super::{
-		query,
-		util,
-		BincodeJob,
-		Job,
-		JobAdapter,
-		Money,
-		Organization,
-		Store,
-		Utc,
-	};
+	use super::{query, util, BincodeJob, Job, JobAdapter, Money, Organization, Store, Utc};
 
 	#[tokio::test(flavor = "multi_thread", worker_threads = 10)]
 	async fn create()

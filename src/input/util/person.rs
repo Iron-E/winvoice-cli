@@ -1,18 +1,11 @@
 use core::fmt::Display;
 
-use clinvoice_adapter::{
-	data::PersonAdapter,
-	Store,
-};
+use clinvoice_adapter::{data::PersonAdapter, Store};
 use clinvoice_data::views::PersonView;
 use clinvoice_query as query;
 
 use super::menu;
-use crate::{
-	app::QUERY_PROMPT,
-	input,
-	DynResult,
-};
+use crate::{app::QUERY_PROMPT, input, DynResult};
 
 /// # Summary
 ///
@@ -40,7 +33,8 @@ where
 {
 	loop
 	{
-		let query: query::Person = input::edit_default(format!("{}\n{}persons", prompt, QUERY_PROMPT))?;
+		let query: query::Person =
+			input::edit_default(format!("{}\n{}persons", prompt, QUERY_PROMPT))?;
 
 		let results = P::retrieve(&query, &store).await?;
 		let results_view: Result<Vec<_>, _> = results

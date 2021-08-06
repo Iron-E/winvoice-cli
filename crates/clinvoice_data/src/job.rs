@@ -2,28 +2,12 @@ mod from_view;
 mod hash;
 mod partial_eq;
 
-use chrono::{
-	DateTime,
-	Utc,
-};
-use clinvoice_finance::{
-	Decimal,
-	ExchangeRates,
-	Money,
-	Result,
-};
+use chrono::{DateTime, Utc};
+use clinvoice_finance::{Decimal, ExchangeRates, Money, Result};
 #[cfg(feature = "serde_support")]
-use serde::{
-	Deserialize,
-	Serialize,
-};
+use serde::{Deserialize, Serialize};
 
-use crate::{
-	Expense,
-	Id,
-	Invoice,
-	Timesheet,
-};
+use crate::{Expense, Id, Invoice, Timesheet};
 
 const SECONDS_PER_HOUR: i16 = 3600;
 
@@ -236,14 +220,7 @@ mod tests
 	use chrono::Utc;
 	use clinvoice_finance::Currency;
 
-	use super::{
-		Expense,
-		Id,
-		Invoice,
-		Job,
-		Money,
-		Timesheet,
-	};
+	use super::{Expense, Id, Invoice, Job, Money, Timesheet};
 	use crate::ExpenseCategory;
 
 	#[test]

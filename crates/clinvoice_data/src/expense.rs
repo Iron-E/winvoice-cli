@@ -2,10 +2,7 @@ mod display;
 
 use clinvoice_finance::Money;
 #[cfg(feature = "serde_support")]
-use serde::{
-	Deserialize,
-	Serialize,
-};
+use serde::{Deserialize, Serialize};
 
 use crate::ExpenseCategory;
 

@@ -1,20 +1,8 @@
-use clinvoice_data::{
-	chrono::NaiveDateTime,
-	views::TimesheetView,
-};
+use clinvoice_data::{chrono::NaiveDateTime, views::TimesheetView};
 #[cfg(feature = "serde_support")]
-use serde::{
-	Deserialize,
-	Serialize,
-};
+use serde::{Deserialize, Serialize};
 
-use super::{
-	Employee,
-	Expense,
-	Match,
-	MatchStr,
-	Result,
-};
+use super::{Employee, Expense, Match, MatchStr, Result};
 
 /// # Summary
 ///

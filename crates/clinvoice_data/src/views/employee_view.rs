@@ -6,20 +6,10 @@ mod restorable_serde;
 use std::collections::HashMap;
 
 #[cfg(feature = "serde_support")]
-use serde::{
-	Deserialize,
-	Serialize,
-};
+use serde::{Deserialize, Serialize};
 
-use super::{
-	ContactView,
-	OrganizationView,
-	PersonView,
-};
-use crate::{
-	EmployeeStatus,
-	Id,
-};
+use super::{ContactView, OrganizationView, PersonView};
+use crate::{EmployeeStatus, Id};
 
 /// # Summary
 ///

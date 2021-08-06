@@ -2,10 +2,7 @@ mod default;
 
 use regex::Regex;
 #[cfg(feature = "serde_support")]
-use serde::{
-	Deserialize,
-	Serialize,
-};
+use serde::{Deserialize, Serialize};
 
 use super::Result;
 
@@ -28,10 +25,7 @@ where
 	/// ```rust
 	/// use std::borrow::Cow::Borrowed;
 	///
-	/// use clinvoice_query::MatchStr::{
-	/// 	And,
-	/// 	Contains,
-	/// };
+	/// use clinvoice_query::MatchStr::{And, Contains};
 	///
 	/// let and = And(vec![Contains("foo"), Contains("bar")]);
 	///
@@ -97,10 +91,7 @@ where
 	/// ```rust
 	/// use std::array::IntoIter as Iter;
 	///
-	/// use clinvoice_query::MatchStr::{
-	/// 	Contains,
-	/// 	Not,
-	/// };
+	/// use clinvoice_query::MatchStr::{Contains, Not};
 	///
 	/// let not_contains = Not(Contains("Foo").into());
 	///
@@ -122,10 +113,7 @@ where
 	/// ```rust
 	/// use std::borrow::Cow::Borrowed;
 	///
-	/// use clinvoice_query::MatchStr::{
-	/// 	Contains,
-	/// 	Or,
-	/// };
+	/// use clinvoice_query::MatchStr::{Contains, Or};
 	///
 	/// let or = Or(vec![Contains("foo"), Contains("bar")]);
 	///

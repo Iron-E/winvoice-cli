@@ -1,11 +1,8 @@
-use clinvoice_adapter::data::Updatable;
-use std::fs; // PERF: we're using `std::fs` because no more than 1 config will be written at a time
+use std::fs; /* PERF: we're using `std::fs` because no more than 1 config will be written at a time */
 
-use super::{
-	Config,
-	Error,
-	Result,
-};
+use clinvoice_adapter::data::Updatable;
+
+use super::{Config, Error, Result};
 
 #[async_trait::async_trait]
 impl Updatable for Config<'_, '_>

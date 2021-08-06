@@ -2,10 +2,7 @@ mod display;
 mod restorable_serde;
 
 #[cfg(feature = "serde_support")]
-use serde::{
-	Deserialize,
-	Serialize,
-};
+use serde::{Deserialize, Serialize};
 
 use super::LocationView;
 use crate::Id;

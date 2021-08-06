@@ -1,12 +1,6 @@
-use std::{
-	env,
-	io,
-};
+use std::{env, io};
 
-use clinvoice_adapter::{
-	Adapters,
-	Store,
-};
+use clinvoice_adapter::{Adapters, Store};
 
 /// # Summary
 ///

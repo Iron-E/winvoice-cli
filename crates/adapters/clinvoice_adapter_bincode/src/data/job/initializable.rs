@@ -1,14 +1,8 @@
-use clinvoice_adapter::{
-	data::Initializable,
-	Store,
-};
+use clinvoice_adapter::{data::Initializable, Store};
 
 use super::BincodeJob;
 use crate::{
-	data::{
-		Error,
-		Result,
-	},
+	data::{Error, Result},
 	util,
 };
 

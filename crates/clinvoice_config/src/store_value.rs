@@ -1,8 +1,5 @@
 use clinvoice_adapter::Store;
-use serde::{
-	Deserialize,
-	Serialize,
-};
+use serde::{Deserialize, Serialize};
 
 /// # Summary
 ///

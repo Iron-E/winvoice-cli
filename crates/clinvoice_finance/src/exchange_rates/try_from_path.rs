@@ -1,18 +1,9 @@
-use std::{
-	collections::HashMap,
-	convert::TryFrom,
-	fs,
-	path::Path,
-};
+use std::{collections::HashMap, convert::TryFrom, fs, path::Path};
 
 use rust_decimal::Decimal;
 
 use super::ExchangeRates;
-use crate::{
-	Currency,
-	Error,
-	Result,
-};
+use crate::{Currency, Error, Result};
 
 impl TryFrom<&Path> for ExchangeRates
 {
@@ -45,18 +36,9 @@ impl TryFrom<&Path> for ExchangeRates
 #[cfg(test)]
 mod tests
 {
-	use std::{
-		env,
-		time::Instant,
-	};
+	use std::{env, time::Instant};
 
-	use super::{
-		fs,
-		Currency,
-		Decimal,
-		ExchangeRates,
-		TryFrom,
-	};
+	use super::{fs, Currency, Decimal, ExchangeRates, TryFrom};
 
 	#[test]
 	fn try_from()

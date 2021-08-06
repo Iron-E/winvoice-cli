@@ -17,7 +17,7 @@ async fn to_view()
 
 	let usa = BincodeLocation {
 		location: &earth,
-		store: &store,
+		store:    &store,
 	}
 	.create_inner("USA".into())
 	.await
@@ -25,7 +25,7 @@ async fn to_view()
 
 	let arizona = BincodeLocation {
 		location: &usa,
-		store: &store,
+		store:    &store,
 	}
 	.create_inner("Arizona".into())
 	.await
@@ -33,7 +33,7 @@ async fn to_view()
 
 	let phoenix = BincodeLocation {
 		location: &arizona,
-		store: &store,
+		store:    &store,
 	}
 	.create_inner("Phoenix".into())
 	.await

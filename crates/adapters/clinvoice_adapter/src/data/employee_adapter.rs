@@ -1,11 +1,6 @@
 #![allow(clippy::wrong_self_convention)]
 
-use std::{
-	borrow::Cow::Borrowed,
-	collections::HashMap,
-	error::Error,
-	marker::Send,
-};
+use std::{borrow::Cow::Borrowed, collections::HashMap, error::Error, marker::Send};
 
 use clinvoice_data::{
 	views::EmployeeView,
@@ -16,10 +11,7 @@ use clinvoice_data::{
 	Person,
 };
 use clinvoice_query as query;
-use futures::{
-	FutureExt,
-	TryFutureExt,
-};
+use futures::{FutureExt, TryFutureExt};
 
 use super::{
 	contact,

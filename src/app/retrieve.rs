@@ -1,16 +1,8 @@
 use core::fmt::Display;
-use std::{
-	error::Error,
-	fs,
-};
+use std::{error::Error, fs};
 
 use clinvoice_adapter::{
-	data::{
-		Deletable,
-		Error as DataError,
-		LocationAdapter,
-		Updatable,
-	},
+	data::{Deletable, Error as DataError, LocationAdapter, Updatable},
 	Adapters,
 	Error as AdapterError,
 };
@@ -22,23 +14,11 @@ use clinvoice_adapter_bincode::data::{
 	BincodeOrganization,
 	BincodePerson,
 };
-use clinvoice_data::{
-	chrono::Utc,
-	views::RestorableSerde,
-	Location,
-};
+use clinvoice_data::{chrono::Utc, views::RestorableSerde, Location};
 use clinvoice_export::Target;
-use serde::{
-	de::DeserializeOwned,
-	Serialize,
-};
+use serde::{de::DeserializeOwned, Serialize};
 
-use crate::{
-	input,
-	Config,
-	DynResult,
-	StructOpt,
-};
+use crate::{input, Config, DynResult, StructOpt};
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, StructOpt)]
 #[structopt(about = "Retrieve information that was recorded with CLInvoice")]

@@ -11,10 +11,7 @@ mod organization;
 mod person;
 
 pub use employee::BincodeEmployee;
-pub use error::{
-	Error,
-	Result,
-};
+pub use error::{Error, Result};
 pub use job::BincodeJob;
 pub use location::BincodeLocation;
 pub use organization::BincodeOrganization;

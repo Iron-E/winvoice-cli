@@ -33,17 +33,11 @@ mod timesheet;
 
 pub use contact::Contact;
 pub use employee::Employee;
-pub use error::{
-	Error,
-	Result,
-};
+pub use error::{Error, Result};
 pub use expense::Expense;
 pub use invoice::Invoice;
 pub use job::Job;
-pub use location::{
-	Location,
-	OuterLocation,
-};
+pub use location::{Location, OuterLocation};
 pub use match_str::MatchStr;
 pub use organization::Organization;
 pub use person::Person;

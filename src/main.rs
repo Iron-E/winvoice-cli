@@ -5,11 +5,7 @@ mod dyn_result;
 mod input;
 
 // PERF: we're using `std::fs` because the main function does not need asynchrony at this point.
-use std::{
-	error::Error,
-	fs,
-	process,
-};
+use std::{error::Error, fs, process};
 
 use app::App;
 use clinvoice_config::Config;

@@ -1,37 +1,18 @@
 use std::{
 	io,
-	path::{
-		Path,
-		PathBuf,
-	},
+	path::{Path, PathBuf},
 };
 
 use clinvoice_adapter::Store;
-use clinvoice_data::{
-	Id,
-	UUID_NAMESPACE,
-};
-use futures::{
-	future,
-	stream::TryStreamExt,
-	TryFutureExt,
-};
+use clinvoice_data::{Id, UUID_NAMESPACE};
+use futures::{future, stream::TryStreamExt, TryFutureExt};
 use serde::de::DeserializeOwned;
-use tokio::{
-	fs,
-	io::AsyncReadExt,
-};
+use tokio::{fs, io::AsyncReadExt};
 use tokio_stream::wrappers::ReadDirStream;
 #[cfg(test)]
-use {
-	clinvoice_adapter::Adapters,
-	std::env,
-};
+use {clinvoice_adapter::Adapters, std::env};
 
-use crate::data::{
-	Error as DataError,
-	Result as DataResult,
-};
+use crate::data::{Error as DataError, Result as DataResult};
 
 /// # Summary
 ///
@@ -168,11 +149,7 @@ pub fn unique_id(store_dir: &Path) -> io::Result<Id>
 #[cfg(test)]
 mod tests
 {
-	use std::{
-		collections::HashSet,
-		fs,
-		time::Instant,
-	};
+	use std::{collections::HashSet, fs, time::Instant};
 
 	use super::PathBuf;
 

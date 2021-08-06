@@ -2,10 +2,7 @@ use clinvoice_adapter::data::Updatable;
 use tokio::fs;
 
 use super::BincodeOrganization;
-use crate::data::{
-	Error,
-	Result,
-};
+use crate::data::{Error, Result};
 
 #[async_trait::async_trait]
 impl Updatable for BincodeOrganization<'_, '_>

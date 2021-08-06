@@ -1,10 +1,5 @@
 use clinvoice_adapter::{
-	data::{
-		Error as DataError,
-		Initializable,
-		PersonAdapter,
-		Updatable,
-	},
+	data::{Error as DataError, Initializable, PersonAdapter, Updatable},
 	Store,
 };
 use clinvoice_data::Person;
@@ -12,10 +7,7 @@ use clinvoice_query as query;
 
 use super::BincodePerson;
 use crate::{
-	data::{
-		Error,
-		Result,
-	},
+	data::{Error, Result},
 	util,
 };
 
@@ -81,25 +73,12 @@ impl PersonAdapter for BincodePerson<'_, '_>
 #[cfg(test)]
 mod tests
 {
-	use std::{
-		borrow::Cow::Borrowed,
-		time::Instant,
-	};
+	use std::{borrow::Cow::Borrowed, time::Instant};
 
-	use clinvoice_query::{
-		Match,
-		MatchStr,
-	};
+	use clinvoice_query::{Match, MatchStr};
 	use tokio::fs;
 
-	use super::{
-		query,
-		util,
-		BincodePerson,
-		Person,
-		PersonAdapter,
-		Store,
-	};
+	use super::{query, util, BincodePerson, Person, PersonAdapter, Store};
 
 	#[tokio::test(flavor = "multi_thread", worker_threads = 10)]
 	async fn create()

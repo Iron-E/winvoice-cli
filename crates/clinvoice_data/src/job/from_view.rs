@@ -13,7 +13,11 @@ impl From<View> for Job
 			invoice: view.invoice,
 			notes: view.notes,
 			objectives: view.objectives,
-			timesheets: view.timesheets.into_iter().map(TimesheetView::into).collect(),
+			timesheets: view
+				.timesheets
+				.into_iter()
+				.map(TimesheetView::into)
+				.collect(),
 		}
 	}
 }
@@ -30,7 +34,12 @@ impl From<&View> for Job
 			invoice: view.invoice.clone(),
 			notes: view.notes.clone(),
 			objectives: view.objectives.clone(),
-			timesheets: view.timesheets.iter().cloned().map(TimesheetView::into).collect(),
+			timesheets: view
+				.timesheets
+				.iter()
+				.cloned()
+				.map(TimesheetView::into)
+				.collect(),
 		}
 	}
 }

@@ -1,19 +1,8 @@
-use clinvoice_data::{
-	views::OrganizationView,
-	Id,
-};
+use clinvoice_data::{views::OrganizationView, Id};
 #[cfg(feature = "serde_support")]
-use serde::{
-	Deserialize,
-	Serialize,
-};
+use serde::{Deserialize, Serialize};
 
-use super::{
-	Location,
-	Match,
-	MatchStr,
-	Result,
-};
+use super::{Location, Match, MatchStr, Result};
 
 /// # Summary
 ///

@@ -6,27 +6,15 @@ use std::{
 	convert::TryInto,
 	env,
 	fs,
-	io::{
-		Cursor,
-		Read,
-	},
-	path::{
-		Path,
-		PathBuf,
-	},
+	io::{Cursor, Read},
+	path::{Path, PathBuf},
 };
 
-use chrono::{
-	Datelike,
-	Local,
-};
+use chrono::{Datelike, Local};
 use rust_decimal::Decimal;
 use zip::ZipArchive;
 
-use crate::{
-	Currency,
-	Result,
-};
+use crate::{Currency, Result};
 
 pub struct ExchangeRates(HashMap<Currency, Decimal>);
 
@@ -85,16 +73,9 @@ impl ExchangeRates
 #[cfg(test)]
 mod tests
 {
-	use std::{
-		convert::TryFrom,
-		time::Instant,
-	};
+	use std::{convert::TryFrom, time::Instant};
 
-	use super::{
-		env,
-		fs,
-		ExchangeRates,
-	};
+	use super::{env, fs, ExchangeRates};
 
 	#[test]
 	fn download()

@@ -1,9 +1,6 @@
 mod util;
 
-use std::{
-	collections::HashMap,
-	time::Instant,
-};
+use std::{collections::HashMap, time::Instant};
 
 use clinvoice_adapter::data::{
 	EmployeeAdapter,
@@ -21,10 +18,7 @@ use clinvoice_adapter_bincode::data::{
 };
 use clinvoice_data::{
 	chrono::Utc,
-	finance::{
-		Currency,
-		Money,
-	},
+	finance::{Currency, Money},
 	views::{
 		ContactView,
 		EmployeeView,

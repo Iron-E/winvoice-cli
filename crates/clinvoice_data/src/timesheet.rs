@@ -1,19 +1,10 @@
 mod from_view;
 
-use chrono::{
-	DateTime,
-	Utc,
-};
+use chrono::{DateTime, Utc};
 #[cfg(feature = "serde_support")]
-use serde::{
-	Deserialize,
-	Serialize,
-};
+use serde::{Deserialize, Serialize};
 
-use crate::{
-	Expense,
-	Id,
-};
+use crate::{Expense, Id};
 
 /// # Summary
 ///

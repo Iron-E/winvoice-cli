@@ -1,28 +1,12 @@
-use std::{
-	borrow::Cow::Borrowed,
-	io::ErrorKind,
-};
+use std::{borrow::Cow::Borrowed, io::ErrorKind};
 
-use clinvoice_adapter::data::{
-	Deletable,
-	EmployeeAdapter,
-	Error as DataError,
-	JobAdapter,
-};
+use clinvoice_adapter::data::{Deletable, EmployeeAdapter, Error as DataError, JobAdapter};
 use clinvoice_query as query;
-use futures::stream::{
-	self,
-	TryStreamExt,
-};
+use futures::stream::{self, TryStreamExt};
 use tokio::fs;
 
 use super::BincodeOrganization;
-use crate::data::{
-	BincodeEmployee,
-	BincodeJob,
-	Error,
-	Result,
-};
+use crate::data::{BincodeEmployee, BincodeJob, Error, Result};
 
 #[async_trait::async_trait]
 impl Deletable for BincodeOrganization<'_, '_>
@@ -108,26 +92,14 @@ mod tests
 	};
 	use clinvoice_data::{
 		chrono::Utc,
-		finance::{
-			Currency,
-			Money,
-		},
+		finance::{Currency, Money},
 		Contact,
 		EmployeeStatus,
 	};
 
-	use super::{
-		BincodeEmployee,
-		BincodeJob,
-		BincodeOrganization,
-		Deletable,
-		JobAdapter,
-	};
+	use super::{BincodeEmployee, BincodeJob, BincodeOrganization, Deletable, JobAdapter};
 	use crate::{
-		data::{
-			BincodeLocation,
-			BincodePerson,
-		},
+		data::{BincodeLocation, BincodePerson},
 		util,
 	};
 

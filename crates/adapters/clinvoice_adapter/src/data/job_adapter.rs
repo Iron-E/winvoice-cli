@@ -1,30 +1,17 @@
 #![allow(clippy::wrong_self_convention)]
 
-use std::{
-	borrow::Cow::Borrowed,
-	error::Error,
-	marker::Send,
-};
+use std::{borrow::Cow::Borrowed, error::Error, marker::Send};
 
 use clinvoice_data::{
-	chrono::{
-		DateTime,
-		Utc,
-	},
+	chrono::{DateTime, Utc},
 	finance::Money,
-	views::{
-		JobView,
-		TimesheetView,
-	},
+	views::{JobView, TimesheetView},
 	Job,
 	Organization,
 };
 use clinvoice_query as query;
 use futures::{
-	stream::{
-		self,
-		TryStreamExt,
-	},
+	stream::{self, TryStreamExt},
 	FutureExt,
 	TryFutureExt,
 };

@@ -2,10 +2,7 @@ mod display;
 mod from_str;
 
 #[cfg(feature = "serde_support")]
-use serde::{
-	Deserialize,
-	Serialize,
-};
+use serde::{Deserialize, Serialize};
 
 /// # Summary
 ///

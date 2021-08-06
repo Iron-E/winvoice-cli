@@ -1,8 +1,4 @@
-use core::fmt::{
-	Display,
-	Formatter,
-	Result,
-};
+use core::fmt::{Display, Formatter, Result};
 
 use super::PersonView;
 

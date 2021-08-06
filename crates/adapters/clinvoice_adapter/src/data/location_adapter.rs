@@ -1,26 +1,12 @@
 #![allow(clippy::wrong_self_convention)]
 
-use std::{
-	borrow::Cow::Borrowed,
-	error::Error,
-	marker::Send,
-};
+use std::{borrow::Cow::Borrowed, error::Error, marker::Send};
 
-use clinvoice_data::{
-	views::LocationView,
-	Location,
-};
+use clinvoice_data::{views::LocationView, Location};
 use clinvoice_query as query;
-use futures::{
-	FutureExt,
-	TryFutureExt,
-};
+use futures::{FutureExt, TryFutureExt};
 
-use super::{
-	Deletable,
-	Initializable,
-	Updatable,
-};
+use super::{Deletable, Initializable, Updatable};
 use crate::Store;
 
 #[async_trait::async_trait]

@@ -70,7 +70,7 @@ where
 			future::ok(if path.is_file() { Some(path) } else { None })
 		})
 		.err_into()
-		.map_ok(|file_path| async move {
+		.map_ok(|file_path| async {
 			let mut file = fs::File::open(file_path).await?;
 			let mut contents = Vec::new();
 			file.read_to_end(&mut contents).await?;

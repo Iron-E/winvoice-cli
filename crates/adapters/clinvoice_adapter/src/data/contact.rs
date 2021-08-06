@@ -69,7 +69,7 @@ where
 {
 	stream::iter(contact_info.into_iter())
 		.then(
-			|(key, contact)| async move { to_view::<L>(contact, store).await.map(|view| (key, view)) },
+			|(key, contact)| async { to_view::<L>(contact, store).await.map(|view| (key, view)) },
 		)
 		.try_collect()
 		.await

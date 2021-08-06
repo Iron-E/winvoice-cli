@@ -33,7 +33,7 @@ impl Deletable for BincodeEmployee<'_, '_>
 		if cascade
 		{
 			stream::iter(associated_jobs.into_iter().map(Ok))
-				.try_for_each_concurrent(None, |mut result| async move {
+				.try_for_each_concurrent(None, |mut result| async {
 					result.timesheets = result
 						.timesheets
 						.into_iter()

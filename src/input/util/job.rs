@@ -50,7 +50,7 @@ where
 
 		let results = J::retrieve(&query, &store).await?;
 		let results_view: Result<Vec<_>, _> = stream::iter(results.into_iter().map(Ok))
-			.map_ok(|j| async move { J::into_view::<E, L, O, P>(j, &store).await })
+			.map_ok(|j| async { J::into_view::<E, L, O, P>(j, &store).await })
 			.try_buffer_unordered(10)
 			.try_filter_map(|result| filter_map_view!(query, result))
 			.try_collect()

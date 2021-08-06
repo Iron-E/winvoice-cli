@@ -60,7 +60,7 @@ where
 
 		let results = E::retrieve(&query, &store).await?;
 		let results_view: Result<Vec<_>, _> = stream::iter(results.into_iter().map(Ok))
-			.map_ok(|e| async move { E::into_view::<L, O, P>(e, &store).await })
+			.map_ok(|e| async { E::into_view::<L, O, P>(e, &store).await })
 			.try_buffer_unordered(10)
 			.try_filter_map(|val| filter_map_view!(query, val))
 			.try_collect()

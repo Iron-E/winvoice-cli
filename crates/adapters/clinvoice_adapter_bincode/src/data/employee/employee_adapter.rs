@@ -39,11 +39,11 @@ impl EmployeeAdapter for BincodeEmployee<'_, '_>
 		store: &Store,
 	) -> Result<Employee>
 	{
-		let init_fut = Self::init(&store);
+		let init_fut = Self::init(store);
 
 		let employee = Employee {
 			contact_info,
-			id: util::unique_id(&Self::path(&store))?,
+			id: util::unique_id(&Self::path(store))?,
 			organization_id: organization.id,
 			person_id: person.id,
 			title,
@@ -75,7 +75,7 @@ impl EmployeeAdapter for BincodeEmployee<'_, '_>
 	/// * An [`Error`], should something go wrong.
 	async fn retrieve(query: &query::Employee, store: &Store) -> Result<Vec<Employee>>
 	{
-		Self::init(&store).await?;
+		Self::init(store).await?;
 
 		util::retrieve(Self::path(store), |emp| {
 			query.matches(emp).map_err(|e| DataError::from(e).into())

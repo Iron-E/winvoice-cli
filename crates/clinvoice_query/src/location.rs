@@ -37,7 +37,7 @@ impl Location<'_>
 				OuterLocation::Some(outer) => location
 					.outer_id
 					.as_ref()
-					.map(|id| outer.id.matches(&id))
+					.map(|id| outer.id.matches(id))
 					.unwrap_or(false),
 				OuterLocation::None => location.outer_id.is_none(),
 				_ => true,
@@ -55,7 +55,7 @@ impl Location<'_>
 				OuterLocation::Some(outer) => location
 					.outer
 					.as_ref()
-					.map(|o| outer.matches_view(&o))
+					.map(|o| outer.matches_view(o))
 					.unwrap_or(Ok(false))?,
 				OuterLocation::None => location.outer.is_none(),
 				_ => true,
@@ -81,7 +81,7 @@ impl Location<'_>
 					.try_fold(false, |mut b, o| -> Result<bool> {
 						if !b
 						{
-							b = outer.matches_view(&o)?;
+							b = outer.matches_view(o)?;
 						}
 
 						Ok(b)

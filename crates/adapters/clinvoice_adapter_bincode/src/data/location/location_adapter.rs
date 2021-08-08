@@ -31,10 +31,10 @@ impl LocationAdapter for BincodeLocation<'_, '_>
 	/// ```
 	async fn create(name: String, store: &Store) -> Result<Location>
 	{
-		let init_fut = Self::init(&store);
+		let init_fut = Self::init(store);
 
 		let location = Location {
-			id: util::unique_id(&Self::path(&store))?,
+			id: util::unique_id(&Self::path(store))?,
 			name,
 			outer_id: None,
 		};
@@ -66,7 +66,7 @@ impl LocationAdapter for BincodeLocation<'_, '_>
 	async fn create_inner(&self, name: String) -> Result<Location>
 	{
 		let inner_location = Location {
-			id: util::unique_id(&Self::path(&self.store))?,
+			id: util::unique_id(&Self::path(self.store))?,
 			name,
 			outer_id: Some(self.location.id),
 		};
@@ -95,7 +95,7 @@ impl LocationAdapter for BincodeLocation<'_, '_>
 	/// * A list of matches, if there are any.
 	async fn retrieve(query: &query::Location, store: &Store) -> Result<Vec<Location>>
 	{
-		Self::init(&store).await?;
+		Self::init(store).await?;
 
 		util::retrieve(Self::path(store), |l| {
 			query.matches(l).map_err(|e| DataError::from(e).into())

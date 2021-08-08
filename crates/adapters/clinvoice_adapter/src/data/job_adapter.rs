@@ -81,7 +81,7 @@ pub trait JobAdapter:
 
 		let timesheet_fut = stream::iter(job.timesheets.iter().map(Ok))
 			.and_then(|t| {
-				timesheet::to_employee::<E>(&t, store)
+				timesheet::to_employee::<E>(t, store)
 					.and_then(|employee| E::into_view::<L, O, P>(employee, store))
 					.map_ok(move |employee_view| TimesheetView {
 						employee:   employee_view,

@@ -29,10 +29,10 @@ impl PersonAdapter for BincodePerson<'_, '_>
 	/// The newly created [`Person`].
 	async fn create(name: String, store: &Store) -> Result<Person>
 	{
-		let init_fut = Self::init(&store);
+		let init_fut = Self::init(store);
 
 		let person = Person {
-			id: util::unique_id(&Self::path(&store))?,
+			id: util::unique_id(&Self::path(store))?,
 			name,
 		};
 
@@ -61,7 +61,7 @@ impl PersonAdapter for BincodePerson<'_, '_>
 	/// * A list of matching [`Job`]s.
 	async fn retrieve(query: &query::Person, store: &Store) -> Result<Vec<Person>>
 	{
-		Self::init(&store).await?;
+		Self::init(store).await?;
 
 		util::retrieve(Self::path(store), |p| {
 			query.matches(p).map_err(|e| DataError::from(e).into())

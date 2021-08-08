@@ -89,7 +89,7 @@ fn delete_menu(expenses: &mut Vec<Expense>) -> input::Result<()>
 {
 	if !expenses.is_empty()
 	{
-		let remove = input::select_one(&expenses, "Select an expense to remove")?;
+		let remove = input::select_one(expenses, "Select an expense to remove")?;
 
 		expenses.remove(expenses.iter().enumerate().fold(0, |i, enumeration| {
 			if &remove == enumeration.1
@@ -118,7 +118,7 @@ fn edit_menu(expenses: &mut Vec<Expense>) -> input::Result<()>
 {
 	if !expenses.is_empty()
 	{
-		let edit = input::select_one(&expenses, "Select an expense to edit")?;
+		let edit = input::select_one(expenses, "Select an expense to edit")?;
 
 		let edit_index = expenses.iter().enumerate().fold(0, |i, enumeration| {
 			if &edit == enumeration.1

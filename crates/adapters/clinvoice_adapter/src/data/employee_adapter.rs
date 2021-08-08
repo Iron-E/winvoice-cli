@@ -72,7 +72,7 @@ pub trait EmployeeAdapter:
 			+ Send,
 	{
 		let organization_fut = Self::to_organization::<O>(&employee, store)
-			.map_err(|e| <Self as EmployeeAdapter>::Error::from(e))
+			.map_err(<Self as EmployeeAdapter>::Error::from)
 			.and_then(|organization| O::into_view::<L>(organization, store).err_into());
 
 		let person_fut = Self::to_person::<P>(&employee, store);

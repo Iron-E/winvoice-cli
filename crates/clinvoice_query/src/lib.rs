@@ -18,6 +18,8 @@
 //! * [`Organization`](crate::data::OrganizationAdapter)
 //! * [`Person`](crate::data::PersonAdapter)
 
+#![allow(clippy::tabs_in_doc_comments)]
+
 mod contact;
 mod employee;
 mod error;

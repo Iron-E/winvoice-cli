@@ -29,10 +29,10 @@ impl OrganizationAdapter for BincodeOrganization<'_, '_>
 	/// The newly created [`Organization`].
 	async fn create(location: Location, name: String, store: &Store) -> Result<Organization>
 	{
-		let init_fut = Self::init(&store);
+		let init_fut = Self::init(store);
 
 		let organization = Organization {
-			id: util::unique_id(&Self::path(&store))?,
+			id: util::unique_id(&Self::path(store))?,
 			location_id: location.id,
 			name,
 		};
@@ -62,7 +62,7 @@ impl OrganizationAdapter for BincodeOrganization<'_, '_>
 	/// * A list of matching [`Job`]s.
 	async fn retrieve(query: &query::Organization, store: &Store) -> Result<Vec<Organization>>
 	{
-		Self::init(&store).await?;
+		Self::init(store).await?;
 
 		util::retrieve(Self::path(store), |o| {
 			query.matches(o).map_err(|e| DataError::from(e).into())

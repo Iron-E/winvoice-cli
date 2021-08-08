@@ -37,9 +37,9 @@ where
 		let query: query::Location =
 			input::edit_default(format!("{}\n{}locations", prompt, QUERY_PROMPT))?;
 
-		let results = L::retrieve(&query, &store).await?;
+		let results = L::retrieve(&query, store).await?;
 		let results_view: Result<Vec<_>, _> = stream::iter(results.into_iter().map(Ok))
-			.map_ok(|l| async { L::into_view(l, &store).await })
+			.map_ok(|l| async { L::into_view(l, store).await })
 			.try_buffer_unordered(10)
 			.try_filter_map(|val| filter_map_view!(query, val))
 			.try_collect()

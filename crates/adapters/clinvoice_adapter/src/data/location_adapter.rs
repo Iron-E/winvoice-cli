@@ -65,14 +65,14 @@ pub trait LocationAdapter:
 			outers.reverse();
 			outers
 				.into_iter()
-				.fold(None::<LocationView>, |previous, outer_location| {
+				.fold(None, |previous, outer_location| {
 					Some(LocationView {
 						id:    outer_location.id,
 						name:  outer_location.name,
 						outer: previous.map(LocationView::into),
 					})
 				})
-				.map(|l| Box::new(l))
+				.map(Box::new)
 		});
 
 		Ok(LocationView {
@@ -100,7 +100,7 @@ pub trait LocationAdapter:
 				..Default::default()
 			};
 
-			Self::retrieve(&query, &store)
+			Self::retrieve(&query, store)
 				.map(|result| {
 					result.and_then(|retrieved| {
 						retrieved

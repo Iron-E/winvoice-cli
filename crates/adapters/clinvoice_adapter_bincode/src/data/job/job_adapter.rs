@@ -41,13 +41,13 @@ impl JobAdapter for BincodeJob<'_, '_>
 		store: &Store,
 	) -> Result<Job>
 	{
-		let init_fut = Self::init(&store);
+		let init_fut = Self::init(store);
 
 		let job = Job {
 			client_id: client.id,
 			date_close: None,
 			date_open,
-			id: util::unique_id(&Self::path(&store))?,
+			id: util::unique_id(&Self::path(store))?,
 			invoice: Invoice {
 				date: None,
 				hourly_rate,
@@ -77,7 +77,7 @@ impl JobAdapter for BincodeJob<'_, '_>
 	/// * A list of matching [`Job`]s.
 	async fn retrieve(query: &query::Job, store: &Store) -> Result<Vec<Job>>
 	{
-		Self::init(&store).await?;
+		Self::init(store).await?;
 
 		util::retrieve(Self::path(store), |j| {
 			query.matches(j).map_err(|e| DataError::from(e).into())

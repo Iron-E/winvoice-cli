@@ -36,7 +36,7 @@ where
 		let query: query::Person =
 			input::edit_default(format!("{}\n{}persons", prompt, QUERY_PROMPT))?;
 
-		let results = P::retrieve(&query, &store).await?;
+		let results = P::retrieve(&query, store).await?;
 		let results_view: Result<Vec<_>, _> = results
 			.into_iter()
 			.map(PersonView::from)

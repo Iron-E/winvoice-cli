@@ -11,13 +11,17 @@ use clinvoice_adapter_bincode::data::{
 	BincodeLocation,
 	BincodeOrganization,
 	BincodePerson,
-	Error as BincodeError,
 };
 use clinvoice_data::{
-	chrono::{DateTime, Datelike, Local, TimeZone, Timelike, Utc},
+	chrono::{Datelike, Local, TimeZone, Timelike},
 	finance::{Currency, Decimal, Money},
 	EmployeeStatus,
 	Location,
+};
+use futures::{
+	stream::{self, TryStreamExt},
+	Future,
+	TryFutureExt,
 };
 
 use crate::{input, Config, DynResult, StructOpt};
@@ -103,11 +107,11 @@ pub(super) enum Create
 
 impl Create
 {
-	fn create_employee<'err, E, L, O, P>(title: String, store: &Store) -> DynResult<'err, ()>
+	async fn create_employee<'err, E, L, O, P>(title: String, store: &Store) -> DynResult<'err, ()>
 	where
 		E: EmployeeAdapter,
-		L: LocationAdapter,
-		O: OrganizationAdapter,
+		L: LocationAdapter + Send,
+		O: OrganizationAdapter + Send,
 		P: PersonAdapter,
 
 		<E as EmployeeAdapter>::Error: 'err,
@@ -119,7 +123,8 @@ impl Create
 			"Query the `Organization` where this `Employee` works",
 			false,
 			store,
-		)?;
+		)
+		.await?;
 
 		let organization = input::select_one(
 			&organization_views,
@@ -130,10 +135,12 @@ impl Create
 			"Query the `Person` who this `Employee` is",
 			true,
 			store,
-		)?;
+		)
+		.await?;
+
 		let person = input::select_one(&person_views, "Which `Person` is this `Employee`?")?;
 
-		let contact_info = input::util::contact::menu::<L>(store)?;
+		let contact_info = input::util::contact::menu::<L>(store).await?;
 		let employee_status = input::select_one(
 			&[
 				EmployeeStatus::Employed,
@@ -153,12 +160,13 @@ impl Create
 			employee_status,
 			title,
 			store,
-		)?;
+		)
+		.await?;
 
 		Ok(())
 	}
 
-	fn create_job<'err, J, L, O>(
+	async fn create_job<'err, J, L, O>(
 		hourly_rate: Money,
 		year: Option<i32>,
 		month: Option<u32>,
@@ -169,8 +177,8 @@ impl Create
 	) -> DynResult<'err, ()>
 	where
 		J: JobAdapter,
-		L: LocationAdapter,
-		O: OrganizationAdapter,
+		L: LocationAdapter + Send,
+		O: OrganizationAdapter + Send,
 
 		<J as JobAdapter>::Error: 'err,
 		<L as LocationAdapter>::Error: 'err,
@@ -180,76 +188,77 @@ impl Create
 			"Query the client `Organization` for this `Job`",
 			false,
 			store,
-		)?;
+		)
+		.await?;
 
 		let client = input::select_one(&organization_views, "Select the client for this job")?;
 
 		let objectives = input::edit_markdown("* List your objectives\n* All markdown syntax works")?;
 
+		// [null]                               = current date and time
+		// <year> <month> <day>                 = that day, midnight
+		// <year> <month> <day> <hour> <minute> = that day and time
+		let local_date_open = {
+			let now = Local::now();
+
+			let date = Local.ymd(
+				year.unwrap_or_else(|| now.year()),
+				month.unwrap_or_else(|| now.month()),
+				day.unwrap_or_else(|| now.day()),
+			);
+
+			if year.is_some() && hour.is_none()
+			{
+				date.and_hms(0, 0, 0)
+			}
+			else
+			{
+				date.and_hms(
+					hour.unwrap_or_else(|| now.hour()),
+					minute.unwrap_or_else(|| now.minute()),
+					0,
+				)
+			}
+		};
+
 		J::create(
 			client.into(),
-			DateTime::<Utc>::from({
-				let now = Local::now();
-
-				// [null]                               = current date and time
-				// <year> <month> <day>                 = that day, midnight
-				// <year> <month> <day> <hour> <minute> = that day and time
-				let date = Local.ymd(
-					year.unwrap_or_else(|| now.year()),
-					month.unwrap_or_else(|| now.month()),
-					day.unwrap_or_else(|| now.day()),
-				);
-
-				if year.is_some() && hour.is_none()
-				{
-					date.and_hms(0, 0, 0)
-				}
-				else
-				{
-					date.and_hms(
-						hour.unwrap_or_else(|| now.hour()),
-						minute.unwrap_or_else(|| now.minute()),
-						0,
-					)
-				}
-			}),
+			local_date_open.into(),
 			hourly_rate,
 			objectives,
 			store,
-		)?;
+		)
+		.await?;
 
 		Ok(())
 	}
 
-	async fn create_location<L>(
-		create_inner: fn(
-			&Location,
-			String,
-			&Store,
-		) -> Result<Location, <L as LocationAdapter>::Error>,
+	async fn create_location<'store, F, Fut, L>(
+		create_inner: F,
 		names: Vec<String>,
-		store: &Store,
+		store: &'store Store,
 	) -> Result<(), <L as LocationAdapter>::Error>
 	where
+		F: Fn(Location, String, &'store Store) -> Fut,
+		Fut: Future<Output = Result<Location, <L as LocationAdapter>::Error>>,
 		L: LocationAdapter,
 	{
 		if let Some(name) = names.last()
 		{
-			let outer = L::create(name.clone(), store)?;
-			names.into_iter().rev().skip(1).try_fold(
-				outer,
-				|outer, name| -> Result<Location, <L as LocationAdapter>::Error> {
-					create_inner(&outer, name, store)
-				},
-			)?;
+			let outer = L::create(name.clone(), store).await?;
+			stream::iter(names.into_iter().rev().skip(1).map(Ok))
+				.try_fold(outer, |outer, name| async {
+					create_inner(outer, name, store).await
+				})
+				.await?;
 		}
 
 		Ok(())
 	}
 
-	fn create_organization<'err, L, O>(name: String, store: &Store) -> DynResult<'err, ()>
+	async fn create_organization<'err, L, O>(name: String, store: &Store) -> DynResult<'err, ()>
 	where
-		L: LocationAdapter,
+		L: LocationAdapter + Send,
 		O: OrganizationAdapter,
 
 		<L as LocationAdapter>::Error: 'err,
@@ -259,11 +268,13 @@ impl Create
 			"Query the `Location` of this `Organization`",
 			false,
 			store,
-		)?;
+		)
+		.await?;
+
 		let selected_view =
 			input::select_one(&location_views, format!("Select a location for {}", name))?;
 
-		O::create(selected_view.into(), name, store)?;
+		O::create(selected_view.into(), name, store).await?;
 
 		Ok(())
 	}
@@ -283,12 +294,16 @@ impl Create
 			#[cfg(feature = "bincode")]
 			Adapters::Bincode => match self
 			{
-				Self::Employee { title } => Self::create_employee::<
-					BincodeEmployee,
-					BincodeLocation,
-					BincodeOrganization,
-					BincodePerson,
-				>(title, store),
+				Self::Employee { title } =>
+				{
+					Self::create_employee::<
+						BincodeEmployee,
+						BincodeLocation,
+						BincodeOrganization,
+						BincodePerson,
+					>(title, store)
+					.await
+				},
 
 				Self::Job {
 					currency,
@@ -298,43 +313,50 @@ impl Create
 					day,
 					hour,
 					minute,
-				} => Self::create_job::<BincodeJob, BincodeLocation, BincodeOrganization>(
-					Money {
-						amount:   hourly_rate,
-						currency: currency.unwrap_or(config.invoices.default_currency),
-					},
-					year,
-					month,
-					day,
-					hour,
-					minute,
-					store,
-				),
+				} =>
+				{
+					Self::create_job::<BincodeJob, BincodeLocation, BincodeOrganization>(
+						Money {
+							amount:   hourly_rate,
+							currency: currency.unwrap_or(config.invoices.default_currency),
+						},
+						year,
+						month,
+						day,
+						hour,
+						minute,
+						store,
+					)
+					.await
+				},
 
 				Self::Location { names } =>
 				{
-					async fn create_inner(
-						location: &Location,
-						name: String,
-						store: &Store,
-					) -> Result<Location, BincodeError>
-					{
-						BincodeLocation { location, store }.create_inner(name).await
-					}
-
-					Self::create_location::<BincodeLocation>(create_inner, names, store)
-						.await
-						.map_err(|e| e.into())
+					Self::create_location::<_, _, BincodeLocation>(
+						|loc, name, store| async move {
+							BincodeLocation {
+								location: &loc,
+								store,
+							}
+							.create_inner(name)
+							.await
+						},
+						names,
+						store,
+					)
+					.err_into()
+					.await
 				},
 
 				Self::Organization { name } =>
 				{
-					Self::create_organization::<BincodeLocation, BincodeOrganization>(name, store)
+					Self::create_organization::<BincodeLocation, BincodeOrganization>(name, store).await
 				},
 
 				Self::Person { name } => BincodePerson::create(name, store)
-					.and(Ok(()))
-					.map_err(|e| e.into()),
+					.err_into()
+					.await
+					.and(Ok(())),
 			},
 
 			_ => return Err(Error::FeatureNotFound(store.adapter).into()),

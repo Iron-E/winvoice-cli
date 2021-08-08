@@ -18,7 +18,7 @@ tokio = {features=["fs"], version="1"}
 tokio-stream = {features=["fs"], version="0.1"}
 
 # CLInvoice
-clinvoice_adapter = {path="../clinvoice_adapter", version="0.8"}
+clinvoice_adapter = {path="../clinvoice_adapter", version="0.9"}
 clinvoice_data = {path="../../clinvoice_data", features=["serde_support"], version="0.5"}
 clinvoice_error = {path="../../clinvoice_error", version="0.2"}
 clinvoice_query = {path="../../clinvoice_query", version="0.2"}

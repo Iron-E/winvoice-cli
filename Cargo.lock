@@ -163,7 +163,7 @@ dependencies = [
 
 [[package]]
 name = "clinvoice"
-version = "0.2.0-rc1"
+version = "0.3.0"
 dependencies = [
  "clinvoice_adapter",
  "clinvoice_adapter_bincode",

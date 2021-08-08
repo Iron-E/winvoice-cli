@@ -1,7 +1,7 @@
 # See https://doc.rust-lang.org/cargo/reference/manifest.html
 [package]
 name = "clinvoice_adapter_bincode"
-version = "0.6.0"
+version = "0.7.0"
 authors = ["Iron-E <code.iron.e@gmail.com>"]
 description = "Bincode filesystem support for `clinvoice_adapter` 0.8"
 

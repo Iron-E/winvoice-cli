@@ -61,7 +61,7 @@ async fn to_organization()
 	.unwrap();
 
 	let start = Instant::now();
-	let testy_org = BincodeEmployee::to_organization::<BincodeOrganization>(&testy, store).await;
+	let testy_org = BincodeEmployee::to_organization::<BincodeOrganization>(&testy, &store).await;
 	println!(
 		"\n>>>>> BincodeEmployee::to_organization {}us <<<<<\n",
 		Instant::now().duration_since(start).as_micros()
@@ -100,7 +100,7 @@ async fn to_person()
 	.unwrap();
 
 	let start = Instant::now();
-	let testy_person = BincodeEmployee::to_person::<BincodePerson>(&testy_employed, store).await;
+	let testy_person = BincodeEmployee::to_person::<BincodePerson>(&testy_employed, &store).await;
 	println!(
 		"\n>>>>> BincodeEmployee::to_person {}us <<<<<\n",
 		Instant::now().duration_since(start).as_micros()
@@ -173,7 +173,7 @@ async fn to_view()
 	let start = Instant::now();
 	let ceo_testy_view_result =
 		BincodeEmployee::into_view::<BincodeLocation, BincodeOrganization, BincodePerson>(
-			ceo_testy, store,
+			ceo_testy, &store,
 		)
 		.await;
 	println!(

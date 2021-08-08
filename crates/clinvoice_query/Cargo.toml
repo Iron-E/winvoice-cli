@@ -1,7 +1,7 @@
 # See https://doc.rust-lang.org/cargo/reference/manifest.html
 [package]
 name = "clinvoice_query"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["Iron-E <code.iron.e@gmail.com>"]
 description = "Query language of CLInvoice."
 

@@ -97,7 +97,7 @@ impl LocationAdapter for BincodeLocation<'_, '_>
 	{
 		Self::init(store).await?;
 
-		util::retrieve(Self::path(store), |l| {
+		util::retrieve(&query.id, Self::path(store), |l| {
 			query.matches(l).map_err(|e| DataError::from(e).into())
 		})
 		.await

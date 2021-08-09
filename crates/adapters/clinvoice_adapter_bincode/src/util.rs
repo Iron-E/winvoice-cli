@@ -5,6 +5,7 @@ use std::{
 
 use clinvoice_adapter::Store;
 use clinvoice_data::{Id, UUID_NAMESPACE};
+use clinvoice_query::Match;
 use futures::{future, stream::TryStreamExt, TryFutureExt};
 use serde::de::DeserializeOwned;
 use tokio::{fs, io::AsyncReadExt};
@@ -57,19 +58,53 @@ pub fn expand_store_path(store: &Store) -> PathBuf
 /// * When [`fs::read_dir`] does.
 /// * When [`fs::File::open`] does.
 pub async fn retrieve<T>(
+	id: &Match<'_, Id>,
 	path: impl AsRef<Path>,
 	query: impl Fn(&T) -> DataResult<bool>,
 ) -> DataResult<Vec<T>>
 where
 	T: DeserializeOwned,
 {
+	let check_id = id != &Match::Any;
+
 	let node_results = fs::read_dir(path).map_err(DataError::from).await?;
 	ReadDirStream::new(node_results)
+		.err_into()
 		.try_filter_map(|node| {
 			let path = node.path();
-			future::ok(if path.is_file() { Some(path) } else { None })
+			if path.is_file()
+			{
+				return future::ok(
+					if check_id
+					{
+						// PERF: the ID is visible in the filename without reading it, so we match that first.
+						//       we assume `Err` / `None`s in file operations mean the file does not match
+						//       and are simply propogated to the end.
+						if Id::parse_str(
+							path
+								.file_name()
+								.and_then(|name| name.to_str())
+								.unwrap_or(""),
+						)
+						.map(|file_id| id.matches(&file_id))
+						.unwrap_or(false)
+						{
+							Some(path)
+						}
+						else
+						{
+							None
+						}
+					}
+					else
+					{
+						Some(path)
+					},
+				);
+			}
+
+			future::ok(None)
 		})
-		.err_into()
 		.map_ok(|file_path| async {
 			let mut file = fs::File::open(file_path).await?;
 			let mut contents = Vec::new();
@@ -154,7 +189,6 @@ mod tests
 	use super::PathBuf;
 
 	/// NOTE: this test is `async` because of the single `create_store_dir` call.
-	/// TODO: see if `Stream`ing to an `Arc<Mutex<HashSet>>` would make this faster
 	#[tokio::test(flavor = "multi_thread", worker_threads = 10)]
 	async fn unique_id()
 	{

@@ -63,7 +63,7 @@ impl PersonAdapter for BincodePerson<'_, '_>
 	{
 		Self::init(store).await?;
 
-		util::retrieve(Self::path(store), |p| {
+		util::retrieve(&query.id, Self::path(store), |p| {
 			query.matches(p).map_err(|e| DataError::from(e).into())
 		})
 		.await

@@ -64,7 +64,7 @@ impl OrganizationAdapter for BincodeOrganization<'_, '_>
 	{
 		Self::init(store).await?;
 
-		util::retrieve(Self::path(store), |o| {
+		util::retrieve(&query.id, Self::path(store), |o| {
 			query.matches(o).map_err(|e| DataError::from(e).into())
 		})
 		.await

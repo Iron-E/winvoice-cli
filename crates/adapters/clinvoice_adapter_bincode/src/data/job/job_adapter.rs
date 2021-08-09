@@ -79,7 +79,7 @@ impl JobAdapter for BincodeJob<'_, '_>
 	{
 		Self::init(store).await?;
 
-		util::retrieve(Self::path(store), |j| {
+		util::retrieve(&query.id, Self::path(store), |j| {
 			query.matches(j).map_err(|e| DataError::from(e).into())
 		})
 		.await

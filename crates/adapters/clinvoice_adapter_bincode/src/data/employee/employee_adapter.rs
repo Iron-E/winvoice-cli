@@ -77,7 +77,7 @@ impl EmployeeAdapter for BincodeEmployee<'_, '_>
 	{
 		Self::init(store).await?;
 
-		util::retrieve(Self::path(store), |emp| {
+		util::retrieve(&query.id, Self::path(store), |emp| {
 			query.matches(emp).map_err(|e| DataError::from(e).into())
 		})
 		.await

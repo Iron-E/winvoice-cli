@@ -4,7 +4,97 @@ use std::{collections::HashSet, time::Instant};
 
 use clinvoice_adapter::data::{EmployeeAdapter, LocationAdapter, OrganizationAdapter};
 use clinvoice_adapter_bincode::data::{BincodeEmployee, BincodeLocation, BincodeOrganization};
-use clinvoice_data::{Contact, EmployeeStatus, Id, Location, Person};
+use clinvoice_data::{views::OrganizationView, Contact, EmployeeStatus, Id, Location, Person};
+#[tokio::test(flavor = "multi_thread", worker_threads = 10)]
+async fn into_view()
+{
+	let store = util::temp_store();
+
+	let earth = BincodeLocation::create("Earth".into(), &store)
+		.await
+		.unwrap();
+
+	let usa = BincodeLocation {
+		location: &earth,
+		store:    &store,
+	}
+	.create_inner("USA".into())
+	.await
+	.unwrap();
+
+	let arizona = BincodeLocation {
+		location: &usa,
+		store:    &store,
+	}
+	.create_inner("Arizona".into())
+	.await
+	.unwrap();
+
+	let phoenix = BincodeLocation {
+		location: &arizona,
+		store:    &store,
+	}
+	.create_inner("Phoenix".into())
+	.await
+	.unwrap();
+
+	let (alsd, eal, aaa, focj, giguy) = futures::try_join!(
+		BincodeOrganization::create(earth.clone(), "alsdkjaldkj".into(), &store),
+		BincodeOrganization::create(usa.clone(), "alskdjalgkh  ladhkj EAL ISdh".into(), &store),
+		BincodeOrganization::create(arizona.clone(), " AAA – 44 %%".into(), &store),
+		BincodeOrganization::create(phoenix.clone(), " ^^^ ADSLKJDLASKJD FOCJCI".into(), &store),
+		BincodeOrganization::create(phoenix.clone(), "aldkj doiciuc giguy &&".into(), &store),
+	)
+	.unwrap();
+
+	let start = Instant::now();
+
+	let (alsd_view, eal_view, aaa_view, focj_view, giguy_view) = futures::try_join!(
+		BincodeOrganization::into_view::<BincodeLocation>(alsd.clone(), &store),
+		BincodeOrganization::into_view::<BincodeLocation>(eal.clone(), &store),
+		BincodeOrganization::into_view::<BincodeLocation>(aaa.clone(), &store),
+		BincodeOrganization::into_view::<BincodeLocation>(focj.clone(), &store),
+		BincodeOrganization::into_view::<BincodeLocation>(giguy.clone(), &store),
+	)
+	.unwrap();
+
+	println!(
+		"\n>>>>> BincodeOrganization::into_view {}us <<<<<\n",
+		Instant::now().duration_since(start).as_micros() / 5
+	);
+
+	let phoenix_view = BincodeLocation::into_view(phoenix, &store).await.unwrap();
+
+	assert_eq!(alsd_view, OrganizationView {
+		id: alsd.id,
+		location: BincodeLocation::into_view(earth, &store).await.unwrap(),
+		name: alsd.name,
+	});
+
+	assert_eq!(eal_view, OrganizationView {
+		id: eal.id,
+		location: BincodeLocation::into_view(usa, &store).await.unwrap(),
+		name: eal.name,
+	});
+
+	assert_eq!(aaa_view, OrganizationView {
+		id: aaa.id,
+		location: BincodeLocation::into_view(arizona, &store).await.unwrap(),
+		name: aaa.name,
+	});
+
+	assert_eq!(focj_view, OrganizationView {
+		id: focj.id,
+		location: phoenix_view.clone(),
+		name: focj.name,
+	});
+
+	assert_eq!(giguy_view, OrganizationView {
+		id: giguy.id,
+		location: phoenix_view,
+		name: giguy.name,
+	});
+}
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 10)]
 async fn to_location()

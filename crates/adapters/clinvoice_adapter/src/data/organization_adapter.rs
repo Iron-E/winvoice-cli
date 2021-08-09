@@ -37,6 +37,10 @@ pub trait OrganizationAdapter:
 	/// # Summary
 	///
 	/// Convert some `organization` into a [`OrganizationView`].
+	///
+	/// # TODO
+	///
+	/// write test
 	async fn into_view<L>(
 		organization: Organization,
 		store: &Store,

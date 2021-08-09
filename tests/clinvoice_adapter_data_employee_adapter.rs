@@ -25,6 +25,82 @@ use clinvoice_data::{
 };
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 10)]
+async fn into_view()
+{
+	let store = util::temp_store();
+
+	let earth = BincodeLocation::create("Earth".into(), &store)
+		.await
+		.unwrap();
+
+	let big_old_test =
+		BincodeOrganization::create(earth.clone(), "Big Old Test Corporation".into(), &store)
+			.await
+			.unwrap();
+
+	let testy = BincodePerson::create("Testy Mćtesterson".into(), &store)
+		.await
+		.unwrap();
+
+	let ceo_testy = BincodeEmployee::create(
+		vec![("Work".into(), Contact::Address {
+			location_id: earth.id,
+			export:      false,
+		})]
+		.into_iter()
+		.collect(),
+		big_old_test.clone(),
+		testy.clone(),
+		EmployeeStatus::Employed,
+		"CEO of Tests".into(),
+		&store,
+	)
+	.await
+	.unwrap();
+
+	let earth_view = LocationView {
+		id:    earth.id,
+		name:  earth.name,
+		outer: None,
+	};
+
+	let ceo_testy_view = EmployeeView {
+		contact_info: vec![("Work".into(), ContactView::Address {
+			location: earth_view.clone(),
+			export:   false,
+		})]
+		.into_iter()
+		.collect(),
+		id: ceo_testy.id,
+		organization: OrganizationView {
+			id: big_old_test.id,
+			location: earth_view.clone(),
+			name: big_old_test.name,
+		},
+		person: PersonView {
+			id:   testy.id,
+			name: testy.name,
+		},
+		title: ceo_testy.title.clone(),
+		status: ceo_testy.status,
+	};
+
+	let start = Instant::now();
+	let ceo_testy_view_result =
+		BincodeEmployee::into_view::<BincodeLocation, BincodeOrganization, BincodePerson>(
+			ceo_testy, &store,
+		)
+		.await;
+	println!(
+		"\n>>>>> BincodeEmployee::into_view {}us <<<<<\n",
+		Instant::now().duration_since(start).as_micros()
+	);
+
+	// Asser that the synthetic view is the same as the view which was created naturally.
+	assert_eq!(ceo_testy_view, ceo_testy_view_result.unwrap());
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 10)]
 async fn to_organization()
 {
 	let store = util::temp_store();
@@ -107,80 +183,4 @@ async fn to_person()
 	);
 
 	assert_eq!(testy, testy_person.unwrap());
-}
-
-#[tokio::test(flavor = "multi_thread", worker_threads = 10)]
-async fn to_view()
-{
-	let store = util::temp_store();
-
-	let earth = BincodeLocation::create("Earth".into(), &store)
-		.await
-		.unwrap();
-
-	let big_old_test =
-		BincodeOrganization::create(earth.clone(), "Big Old Test Corporation".into(), &store)
-			.await
-			.unwrap();
-
-	let testy = BincodePerson::create("Testy Mćtesterson".into(), &store)
-		.await
-		.unwrap();
-
-	let ceo_testy = BincodeEmployee::create(
-		vec![("Work".into(), Contact::Address {
-			location_id: earth.id,
-			export:      false,
-		})]
-		.into_iter()
-		.collect(),
-		big_old_test.clone(),
-		testy.clone(),
-		EmployeeStatus::Employed,
-		"CEO of Tests".into(),
-		&store,
-	)
-	.await
-	.unwrap();
-
-	let earth_view = LocationView {
-		id:    earth.id,
-		name:  earth.name,
-		outer: None,
-	};
-
-	let ceo_testy_view = EmployeeView {
-		contact_info: vec![("Work".into(), ContactView::Address {
-			location: earth_view.clone(),
-			export:   false,
-		})]
-		.into_iter()
-		.collect(),
-		id: ceo_testy.id,
-		organization: OrganizationView {
-			id: big_old_test.id,
-			location: earth_view.clone(),
-			name: big_old_test.name,
-		},
-		person: PersonView {
-			id:   testy.id,
-			name: testy.name,
-		},
-		title: ceo_testy.title.clone(),
-		status: ceo_testy.status,
-	};
-
-	let start = Instant::now();
-	let ceo_testy_view_result =
-		BincodeEmployee::into_view::<BincodeLocation, BincodeOrganization, BincodePerson>(
-			ceo_testy, &store,
-		)
-		.await;
-	println!(
-		"\n>>>>> BincodeEmployee::to_view {}us <<<<<\n",
-		Instant::now().duration_since(start).as_micros()
-	);
-
-	// Asser that the synthetic view is the same as the view which was created naturally.
-	assert_eq!(ceo_testy_view, ceo_testy_view_result.unwrap());
 }

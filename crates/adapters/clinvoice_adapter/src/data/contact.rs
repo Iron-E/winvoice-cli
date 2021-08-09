@@ -14,7 +14,7 @@ use crate::Store;
 /// # Summary
 ///
 /// Convert some [`Contact`] into a [`ContactView`].
-pub async fn to_view<L>(
+pub async fn into_view<L>(
 	contact: Contact,
 	store: &Store,
 ) -> Result<ContactView, <L as LocationAdapter>::Error>
@@ -59,7 +59,7 @@ where
 /// # Summary
 ///
 /// Convert some [`Contact`] into a [`ContactView`].
-pub async fn to_views<L, T>(
+pub async fn into_views<L, T>(
 	contact_info: HashMap<T, Contact>,
 	store: &Store,
 ) -> Result<HashMap<T, ContactView>, <L as LocationAdapter>::Error>
@@ -68,7 +68,7 @@ where
 	T: Eq + Hash,
 {
 	stream::iter(contact_info.into_iter())
-		.then(|(key, contact)| async { to_view::<L>(contact, store).await.map(|view| (key, view)) })
+		.then(|(key, contact)| async { into_view::<L>(contact, store).await.map(|view| (key, view)) })
 		.try_collect()
 		.await
 }

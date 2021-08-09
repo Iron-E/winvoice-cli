@@ -147,7 +147,7 @@ mod tests
 		.unwrap();
 
 		println!(
-			"\n>>>>> BincodeLocation::start {}us <<<<<\n",
+			"\n>>>>> BincodeLocation::create {}us <<<<<\n",
 			Instant::now().duration_since(start).as_micros() / 4
 		);
 

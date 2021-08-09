@@ -77,7 +77,7 @@ pub trait EmployeeAdapter:
 
 		let person_fut = Self::to_person::<P>(&employee, store);
 
-		let contact_info_fut = contact::to_views::<L, String>(employee.contact_info.clone(), store);
+		let contact_info_fut = contact::into_views::<L, String>(employee.contact_info.clone(), store);
 
 		Ok(EmployeeView {
 			contact_info: contact_info_fut.await?,

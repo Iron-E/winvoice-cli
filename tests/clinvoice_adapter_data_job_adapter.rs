@@ -35,44 +35,7 @@ use clinvoice_data::{
 };
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 10)]
-async fn to_organization()
-{
-	let store = util::temp_store();
-
-	let dogood = BincodeOrganization::create(
-		Location {
-			name: "Earth".into(),
-			id: Id::new_v4(),
-			outer_id: None,
-		},
-		"DoGood Inc".into(),
-		&store,
-	)
-	.await
-	.unwrap();
-
-	let test_job = BincodeJob::create(
-		dogood.clone(),
-		Utc::now(),
-		Money::new(2_00, 2, Currency::USD),
-		"Test the job creation function".into(),
-		&store,
-	)
-	.await
-	.unwrap();
-
-	let start = Instant::now();
-	let test_org = BincodeJob::to_organization::<BincodeOrganization>(&test_job, &store).await;
-	println!(
-		"\n>>>>> BincodeJob::to_organization {}us <<<<<\n",
-		Instant::now().duration_since(start).as_micros()
-	);
-
-	assert_eq!(dogood, test_org.unwrap());
-}
-
-#[tokio::test(flavor = "multi_thread", worker_threads = 10)]
-async fn to_view()
+async fn into_view()
 {
 	let store = util::temp_store();
 
@@ -184,9 +147,46 @@ async fn to_view()
 	>(create_job, &store)
 	.await;
 	println!(
-		"\n>>>>> BincodeJob::to_view {}us <<<<<\n",
+		"\n>>>>> BincodeJob::into_view {}us <<<<<\n",
 		Instant::now().duration_since(start).as_micros()
 	);
 
 	assert_eq!(create_job_view, create_job_view_result.unwrap());
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 10)]
+async fn to_organization()
+{
+	let store = util::temp_store();
+
+	let dogood = BincodeOrganization::create(
+		Location {
+			name: "Earth".into(),
+			id: Id::new_v4(),
+			outer_id: None,
+		},
+		"DoGood Inc".into(),
+		&store,
+	)
+	.await
+	.unwrap();
+
+	let test_job = BincodeJob::create(
+		dogood.clone(),
+		Utc::now(),
+		Money::new(2_00, 2, Currency::USD),
+		"Test the job creation function".into(),
+		&store,
+	)
+	.await
+	.unwrap();
+
+	let start = Instant::now();
+	let test_org = BincodeJob::to_organization::<BincodeOrganization>(&test_job, &store).await;
+	println!(
+		"\n>>>>> BincodeJob::to_organization {}us <<<<<\n",
+		Instant::now().duration_since(start).as_micros()
+	);
+
+	assert_eq!(dogood, test_org.unwrap());
 }

@@ -7,7 +7,7 @@ use clinvoice_adapter_bincode::data::BincodeLocation;
 use clinvoice_data::views::LocationView;
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 10)]
-async fn to_view()
+async fn into_view()
 {
 	let store = util::temp_store();
 
@@ -69,7 +69,7 @@ async fn to_view()
 	let start = Instant::now();
 	let phoenix_view_result = BincodeLocation::into_view(phoenix, &store).await;
 	println!(
-		"\n>>>>> BincodeLocation::to_view {}us <<<<<\n",
+		"\n>>>>> BincodeLocation::into_view {}us <<<<<\n",
 		Instant::now().duration_since(start).as_micros()
 	);
 

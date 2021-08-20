@@ -6,6 +6,7 @@ use clinvoice_adapter::data::Updatable;
 use clinvoice_config::Result as ConfigResult;
 use create::Create;
 use dialoguer::Editor;
+use futures::TryFutureExt;
 use retrieve::Retrieve;
 use time::Time;
 
@@ -73,7 +74,7 @@ impl App
 	{
 		match self.command
 		{
-			AppCommand::Config => Self::edit_config(config).await.map_err(|e| e.into()),
+			AppCommand::Config => Self::edit_config(config).err_into().await,
 			AppCommand::Create(cmd) => cmd.run(config, self.store).await,
 			AppCommand::Retrieve(cmd) => cmd.run(config, self.store).await,
 			AppCommand::Time(cmd) => cmd.run(config, self.store).await,

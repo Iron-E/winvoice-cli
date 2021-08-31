@@ -90,8 +90,10 @@ mod tests
 
 		let start = Instant::now();
 		// Delete both jobs
-		create_job.delete(true).await.unwrap();
-		assert_job.delete(true).await.unwrap();
+		futures::try_join!(
+			create_job.delete(true),
+			assert_job.delete(true),
+		).unwrap();
 		println!(
 			"\n>>>>> BincodeJob::delete {}us <<<<<\n",
 			Instant::now().duration_since(start).as_micros() / 2

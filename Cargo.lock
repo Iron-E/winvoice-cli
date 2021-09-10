@@ -247,13 +247,16 @@ dependencies = [
 name = "clinvoice_adapter_postgres"
 version = "0.1.0"
 dependencies = [
+ "async-trait",
  "clinvoice_adapter",
  "clinvoice_data",
  "clinvoice_error",
  "clinvoice_query",
+ "futures",
  "shellexpand",
  "sqlx",
  "thiserror",
+ "tokio",
 ]
 
 [[package]]
@@ -269,7 +272,6 @@ dependencies = [
  "humantime-serde",
  "serde",
  "thiserror",
- "tokio",
  "toml",
 ]
 
@@ -1517,9 +1519,9 @@ dependencies = [
 
 [[package]]
 name = "serde_yaml"
-version = "0.8.20"
+version = "0.8.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ad104641f3c958dab30eb3010e834c2622d1f3f4c530fef1dee20ad9485f3c09"
+checksum = "d8c608a35705a5d3cdc9fbe403147647ff34b921f8e833e49306df898f9b20af"
 dependencies = [
  "dtoa",
  "indexmap",

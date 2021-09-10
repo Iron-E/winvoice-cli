@@ -1,4 +1,4 @@
-use std::fs; /* PERF: we're using `std::fs` because no more than 1 config will be written at a time */
+use std::fs; // PERF: we're using `std::fs` because no more than 1 config will be written at a time
 
 use clinvoice_adapter::data::Updatable;
 

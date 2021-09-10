@@ -14,7 +14,6 @@ repository = "https://www.github.com/Iron-E/clinvoice"
 # Async
 async-trait = "0.1"
 futures = "0.3"
-tokio = {features=["fs"], version="1"}
 
 # CLInvoice
 clinvoice_adapter = {path="../adapters/clinvoice_adapter", features=["serde_support"], version="0.9"}

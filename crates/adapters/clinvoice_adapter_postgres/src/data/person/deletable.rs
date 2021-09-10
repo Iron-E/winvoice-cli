@@ -9,11 +9,12 @@ use
 	clinvoice_query as query,
 };
 
+#[async_trait::async_trait]
 impl Deletable for PostgresPerson<'_, '_>
 {
 	type Error = Error;
 
-	fn delete(&self, cascade: bool) -> Result<()>
+	async fn delete(&self, cascade: bool) -> Result<()>
 	{
 		todo!()
 	}
@@ -22,8 +23,8 @@ impl Deletable for PostgresPerson<'_, '_>
 #[cfg(test)]
 mod tests
 {
-	#[test]
-	fn delete()
+	#[tokio::test]
+	async fn delete()
 	{
 	}
 }

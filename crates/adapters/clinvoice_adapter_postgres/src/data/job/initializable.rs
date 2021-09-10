@@ -6,6 +6,7 @@ use
 	clinvoice_adapter::{data::Initializable, Store},
 };
 
+#[async_trait::async_trait]
 impl Initializable for PostgresJob<'_, '_>
 {
 	type Error = Error;
@@ -13,7 +14,7 @@ impl Initializable for PostgresJob<'_, '_>
 	/// # Summary
 	///
 	/// Initialize the database for a given [`Store`].
-	fn init(store: &Store) -> Result<()>
+	async fn init(store: &Store) -> Result<()>
 	{
 		todo!()
 	}

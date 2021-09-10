@@ -10,6 +10,7 @@ use
 	},
 };
 
+#[async_trait::async_trait]
 impl Initializable for PostgresPerson<'_, '_>
 {
 	type Error = Error;
@@ -17,7 +18,7 @@ impl Initializable for PostgresPerson<'_, '_>
 	/// # Summary
 	///
 	/// Initialize the database for a given [`Store`].
-	fn init(store: &Store) -> Result<()>
+	async fn init(store: &Store) -> Result<()>
 	{
 		todo!()
 	}

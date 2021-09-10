@@ -14,6 +14,7 @@ use
 	clinvoice_query as query,
 };
 
+#[async_trait::async_trait]
 impl EmployeeAdapter for PostgresEmployee<'_, '_>
 {
 	type Error = Error;
@@ -30,7 +31,7 @@ impl EmployeeAdapter for PostgresEmployee<'_, '_>
 	///
 	/// * The created [`Employee`], if there were no errors.
 	/// * An [`Error`], if something goes wrong.
-	fn create(
+	async fn create(
 		contact_info: HashMap<String, Contact>,
 		organization: Organization,
 		person: Person,
@@ -54,7 +55,7 @@ impl EmployeeAdapter for PostgresEmployee<'_, '_>
 	///
 	/// * Any matching [`Employee`]s.
 	/// * An [`Error`], should something go wrong.
-	fn retrieve(query: &query::Employee, store: &Store) -> Result<Vec<Employee>>
+	async fn retrieve(query: &query::Employee, store: &Store) -> Result<Vec<Employee>>
 	{
 		todo!()
 	}
@@ -63,13 +64,13 @@ impl EmployeeAdapter for PostgresEmployee<'_, '_>
 #[cfg(test)]
 mod tests
 {
-	#[test]
-	fn create()
+	#[tokio::test]
+	async fn create()
 	{
 	}
 
-	#[test]
-	fn retrieve()
+	#[tokio::test]
+	async fn retrieve()
 	{
 	}
 }

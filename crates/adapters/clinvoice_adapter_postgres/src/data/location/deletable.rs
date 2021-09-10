@@ -1,6 +1,6 @@
 use
 {
-	std::{borrow::Cow::Borrowed, fs, io::ErrorKind},
+	std::{borrow::Cow::Borrowed},
 
 	super::PostgresLocation,
 	crate::data::{PostgresOrganization, Error, Result},
@@ -10,11 +10,12 @@ use
 	clinvoice_query as query,
 };
 
+#[async_trait::async_trait]
 impl Deletable for PostgresLocation<'_, '_>
 {
 	type Error = Error;
 
-	fn delete(&self, cascade: bool) -> Result<()>
+	async fn delete(&self, cascade: bool) -> Result<()>
 	{
 		todo!()
 	}
@@ -23,8 +24,8 @@ impl Deletable for PostgresLocation<'_, '_>
 #[cfg(test)]
 mod tests
 {
-	#[test]
-	fn delete()
+	#[tokio::test]
+	async fn delete()
 	{
 	}
 }

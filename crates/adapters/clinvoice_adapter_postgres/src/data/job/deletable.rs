@@ -1,18 +1,17 @@
 use
 {
-	std::{fs, io::ErrorKind},
-
 	super::PostgresJob,
 	crate::data::{Error, Result},
 
 	clinvoice_adapter::data::Deletable,
 };
 
+#[async_trait::async_trait]
 impl Deletable for PostgresJob<'_, '_>
 {
 	type Error = Error;
 
-	fn delete(&self, _cascade: bool) -> Result<()>
+	async fn delete(&self, _cascade: bool) -> Result<()>
 	{
 		todo!()
 	}
@@ -21,8 +20,8 @@ impl Deletable for PostgresJob<'_, '_>
 #[cfg(test)]
 mod tests
 {
-	#[test]
-	fn delete()
+	#[tokio::test]
+	async fn delete()
 	{
 	}
 }

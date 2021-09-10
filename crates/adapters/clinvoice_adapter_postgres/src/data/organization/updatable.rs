@@ -8,11 +8,12 @@ use
 	clinvoice_adapter::data::Updatable,
 };
 
+#[async_trait::async_trait]
 impl Updatable for PostgresOrganization<'_, '_>
 {
 	type Error = Error;
 
-	fn update(&self) -> Result<()>
+	async fn update(&self) -> Result<()>
 	{
 		todo!()
 	}

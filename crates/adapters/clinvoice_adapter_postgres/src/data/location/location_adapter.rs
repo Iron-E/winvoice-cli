@@ -12,6 +12,7 @@ use
 	clinvoice_query as query,
 };
 
+#[async_trait::async_trait]
 impl LocationAdapter for PostgresLocation<'_, '_>
 {
 	type Error = Error;
@@ -29,7 +30,7 @@ impl LocationAdapter for PostgresLocation<'_, '_>
 	/// ```ignore
 	/// Location {name, id: /* generated */};
 	/// ```
-	fn create(name: String, store: &Store) -> Result<Location>
+	async fn create(name: String, store: &Store) -> Result<Location>
 	{
 		todo!()
 	}
@@ -47,7 +48,7 @@ impl LocationAdapter for PostgresLocation<'_, '_>
 	/// ```ignore
 	/// Location {name, id: /* generated */, outside_id: self.unroll().id};
 	/// ```
-	fn create_inner(&self, name: String) -> Result<Location>
+	async fn create_inner(&self, name: String) -> Result<Location>
 	{
 		todo!()
 	}
@@ -64,7 +65,7 @@ impl LocationAdapter for PostgresLocation<'_, '_>
 	///
 	/// * An [`Error`], when something goes wrong.
 	/// * A list of matches, if there are any.
-	fn retrieve(query: &query::Location, store: &Store) -> Result<Vec<Location>>
+	async fn retrieve(query: &query::Location, store: &Store) -> Result<Vec<Location>>
 	{
 		todo!()
 	}
@@ -73,13 +74,13 @@ impl LocationAdapter for PostgresLocation<'_, '_>
 #[cfg(test)]
 mod tests
 {
-	#[test]
-	fn create()
+	#[tokio::test]
+	async fn create()
 	{
 	}
 
-	#[test]
-	fn retrieve()
+	#[tokio::test]
+	async fn retrieve()
 	{
 	}
 }

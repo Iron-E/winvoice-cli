@@ -12,6 +12,7 @@ use
 	clinvoice_query as query,
 };
 
+#[async_trait::async_trait]
 impl OrganizationAdapter for PostgresOrganization<'_, '_>
 {
 	type Error = Error;
@@ -27,7 +28,7 @@ impl OrganizationAdapter for PostgresOrganization<'_, '_>
 	/// # Returns
 	///
 	/// The newly created [`Organization`].
-	fn create(location: Location, name: String, store: &Store) -> Result<Organization>
+	async fn create(location: Location, name: String, store: &Store) -> Result<Organization>
 	{
 		todo!()
 	}
@@ -44,7 +45,7 @@ impl OrganizationAdapter for PostgresOrganization<'_, '_>
 	///
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`Job`]s.
-	fn retrieve(query: &query::Organization, store: &Store) -> Result<Vec<Organization>>
+	async fn retrieve(query: &query::Organization, store: &Store) -> Result<Vec<Organization>>
 	{
 		todo!()
 	}
@@ -53,13 +54,13 @@ impl OrganizationAdapter for PostgresOrganization<'_, '_>
 #[cfg(test)]
 mod tests
 {
-	#[test]
-	fn create()
+	#[tokio::test]
+	async fn create()
 	{
 	}
 
-	#[test]
-	fn retrieve()
+	#[tokio::test]
+	async fn retrieve()
 	{
 	}
 }

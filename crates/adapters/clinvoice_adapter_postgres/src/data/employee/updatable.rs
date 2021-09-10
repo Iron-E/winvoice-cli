@@ -1,18 +1,17 @@
 use
 {
-	std::fs,
-
 	super::PostgresEmployee,
 	crate::data::{Error, Result},
 
 	clinvoice_adapter::data::Updatable,
 };
 
+#[async_trait::async_trait]
 impl Updatable for PostgresEmployee<'_, '_>
 {
 	type Error = Error;
 
-	fn update(&self) -> Result<()>
+	async fn update(&self) -> Result<()>
 	{
 		todo!()
 	}

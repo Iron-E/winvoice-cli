@@ -16,6 +16,7 @@ use
 	clinvoice_query as query,
 };
 
+#[async_trait::async_trait]
 impl JobAdapter for PostgresJob<'_, '_>
 {
 	type Error = Error;
@@ -31,7 +32,7 @@ impl JobAdapter for PostgresJob<'_, '_>
 	/// # Returns
 	///
 	/// The newly created [`Person`].
-	fn create(
+	async fn create(
 		client: Organization,
 		date_open: DateTime<Utc>,
 		hourly_rate: Money,
@@ -54,7 +55,7 @@ impl JobAdapter for PostgresJob<'_, '_>
 	///
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`Job`]s.
-	fn retrieve(query: &query::Job, store: &Store) -> Result<Vec<Job>>
+	async fn retrieve(query: &query::Job, store: &Store) -> Result<Vec<Job>>
 	{
 		todo!()
 	}
@@ -63,13 +64,13 @@ impl JobAdapter for PostgresJob<'_, '_>
 #[cfg(test)]
 mod tests
 {
-	#[test]
-	fn create()
+	#[tokio::test]
+	async fn create()
 	{
 	}
 
-	#[test]
-	fn retrieve()
+	#[tokio::test]
+	async fn retrieve()
 	{
 	}
 }

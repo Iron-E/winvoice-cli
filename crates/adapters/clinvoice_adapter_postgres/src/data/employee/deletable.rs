@@ -1,6 +1,6 @@
 use
 {
-	std::{borrow::Cow::Borrowed, fs, io::ErrorKind},
+	std::borrow::Cow::Borrowed,
 
 	super::PostgresEmployee,
 	crate::data::{PostgresJob, Error, Result},
@@ -9,11 +9,12 @@ use
 	clinvoice_query as query,
 };
 
+#[async_trait::async_trait]
 impl Deletable for PostgresEmployee<'_, '_>
 {
 	type Error = Error;
 
-	fn delete(&self, cascade: bool) -> Result<()>
+	async fn delete(&self, cascade: bool) -> Result<()>
 	{
 		todo!()
 	}
@@ -22,8 +23,8 @@ impl Deletable for PostgresEmployee<'_, '_>
 #[cfg(test)]
 mod tests
 {
-	#[test]
-	fn delete()
+	#[tokio::test]
+	async fn delete()
 	{
 	}
 }

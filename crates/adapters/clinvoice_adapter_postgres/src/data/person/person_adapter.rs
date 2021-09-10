@@ -12,6 +12,7 @@ use
 	clinvoice_query as query,
 };
 
+#[async_trait::async_trait]
 impl PersonAdapter for PostgresPerson<'_, '_>
 {
 	type Error = Error;
@@ -27,7 +28,7 @@ impl PersonAdapter for PostgresPerson<'_, '_>
 	/// # Returns
 	///
 	/// The newly created [`Person`].
-	fn create(name: String, store: &Store,) -> Result<Person>
+	async fn create(name: String, store: &Store) -> Result<Person>
 	{
 		todo!()
 	}
@@ -44,7 +45,7 @@ impl PersonAdapter for PostgresPerson<'_, '_>
 	///
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`Job`]s.
-	fn retrieve(query: &query::Person, store: &Store) -> Result<Vec<Person>>
+	async fn retrieve(query: &query::Person, store: &Store) -> Result<Vec<Person>>
 	{
 		todo!()
 	}
@@ -53,13 +54,13 @@ impl PersonAdapter for PostgresPerson<'_, '_>
 #[cfg(test)]
 mod tests
 {
-	#[test]
-	fn create()
+	#[tokio::test]
+	async fn create()
 	{
 	}
 
-	#[test]
-	fn retrieve()
+	#[tokio::test]
+	async fn retrieve()
 	{
 	}
 }

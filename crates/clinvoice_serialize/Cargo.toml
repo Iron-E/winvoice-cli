@@ -1,9 +1,9 @@
 # See https://doc.rust-lang.org/cargo/reference/manifest.html
 [package]
-name = "clinvoice_export"
-version = "0.2.0"
+name = "clinvoice_serialize"
+version = "0.3.0"
 authors = ["Iron-E <code.iron.e@gmail.com>"]
-description = "Exporting support for CLInvoice"
+description = "Serializing various CLInvoice entities"
 
 edition = "2018"
 license = "GPL3"

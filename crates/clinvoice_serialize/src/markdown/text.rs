@@ -15,7 +15,7 @@ where
 	/// # Example
 	///
 	/// ```
-	/// use clinvoice_export::markdown::Text::Bold;
+	/// use clinvoice_serialize::markdown::Text::Bold;
 	///
 	/// assert_eq!(Bold("Something").to_string(), "**Something**");
 	/// ```
@@ -28,7 +28,7 @@ where
 	/// # Example
 	///
 	/// ```
-	/// use clinvoice_export::markdown::Text::Italic;
+	/// use clinvoice_serialize::markdown::Text::Italic;
 	///
 	/// assert_eq!(Italic("Something").to_string(), "*Something*");
 	/// ```
@@ -41,7 +41,7 @@ where
 	/// # Example
 	///
 	/// ```
-	/// use clinvoice_export::markdown::Text::Math;
+	/// use clinvoice_serialize::markdown::Text::Math;
 	///
 	/// assert_eq!(Math("Something").to_string(), "$Something$");
 	/// ```

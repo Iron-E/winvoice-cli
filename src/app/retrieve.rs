@@ -7,7 +7,7 @@ use clinvoice_adapter::{
 	Error as AdapterError,
 };
 use clinvoice_data::{chrono::Utc, views::RestorableSerde, Location};
-use clinvoice_export::Target;
+use clinvoice_serialize::markdown;
 use futures::{
 	future,
 	stream::{self, TryStreamExt},
@@ -72,11 +72,11 @@ pub(super) enum RetrieveCommand
 		close: bool,
 
 		#[structopt(
-			help = "Export retrieved entities to the specified format\nSupported: markdown",
+			help = "Export retrieved entities to markdown",
 			long,
 			short
 		)]
-		export: Option<Target>,
+		export: bool,
 
 		#[structopt(help = "Select jobs to be reopened", long, short)]
 		reopen: bool,
@@ -348,7 +348,7 @@ impl Retrieve
 								.await?;
 						}
 
-						if let Some(target) = export
+						if export
 						{
 							let to_export =
 								input::select(&results_view, "Select which Jobs you want to export")?;
@@ -357,13 +357,12 @@ impl Retrieve
 							let export_result: DynResult<'_, _> =
 								stream::iter(to_export.into_iter().map(Ok))
 									.try_for_each_concurrent(None, |job| async move {
-										let exported = target.export_job(&job)?;
+										let exported = markdown::job(&job)?;
 										fs::write(
 											format!(
-												"{}--{}{}",
+												"{}--{}.md",
 												job.client.name.replace(' ', "-"),
 												job.id,
-												target.extension()
 											),
 											exported,
 										)

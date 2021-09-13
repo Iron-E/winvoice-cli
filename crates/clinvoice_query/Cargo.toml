@@ -12,7 +12,7 @@ repository = "https://www.github.com/Iron-E/clinvoice"
 
 [dependencies]
 # CLInvoice
-clinvoice_data = {path="../clinvoice_data", version="0.5"}
+clinvoice_data = {features=["serde_support"], path="../clinvoice_data", version="0.5"}
 clinvoice_error = {path="../clinvoice_error", version="0.2"}
 
 # Const Contat

@@ -87,15 +87,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "904dfeac50f3cdaba28fc6f57fdcddb75f49ed61346676a78c4ffe55877802fd"
 
 [[package]]
-name = "bincode"
-version = "1.3.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b1f45e9417d87227c7a56d22e471c6206462cba514c7590c09aff4cf6d1ddcad"
-dependencies = [
- "serde",
-]
-
-[[package]]
 name = "bitflags"
 version = "1.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -195,13 +186,12 @@ name = "clinvoice"
 version = "0.2.0-rc2"
 dependencies = [
  "clinvoice_adapter",
- "clinvoice_adapter_bincode",
  "clinvoice_adapter_postgres",
  "clinvoice_config",
  "clinvoice_data",
  "clinvoice_error",
- "clinvoice_export",
  "clinvoice_query",
+ "clinvoice_serialize",
  "dialoguer",
  "futures",
  "serde",
@@ -223,24 +213,6 @@ dependencies = [
  "futures",
  "serde",
  "thiserror",
-]
-
-[[package]]
-name = "clinvoice_adapter_bincode"
-version = "0.7.0"
-dependencies = [
- "async-trait",
- "bincode",
- "clinvoice_adapter",
- "clinvoice_data",
- "clinvoice_error",
- "clinvoice_query",
- "futures",
- "serde",
- "shellexpand",
- "thiserror",
- "tokio",
- "tokio-stream",
 ]
 
 [[package]]
@@ -290,15 +262,6 @@ name = "clinvoice_error"
 version = "0.2.0"
 
 [[package]]
-name = "clinvoice_export"
-version = "0.2.0"
-dependencies = [
- "clinvoice_data",
- "clinvoice_error",
- "thiserror",
-]
-
-[[package]]
 name = "clinvoice_finance"
 version = "0.2.0"
 dependencies = [
@@ -324,6 +287,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "clinvoice_serialize"
+version = "0.3.0"
+dependencies = [
+ "clinvoice_data",
+ "clinvoice_error",
+ "thiserror",
+]
+
+[[package]]
 name = "console"
 version = "0.14.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -340,18 +312,18 @@ dependencies = [
 
 [[package]]
 name = "const_format"
-version = "0.2.19"
+version = "0.2.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "59c7d3aa11be45d56befebb10f4a8785fcb62aabddf5f33638efef922e505ec9"
+checksum = "ae592b8ddbf42b388f8211f0fd4d0985768ed7316348277c250dca4513695492"
 dependencies = [
  "const_format_proc_macros",
 ]
 
 [[package]]
 name = "const_format_proc_macros"
-version = "0.2.14"
+version = "0.2.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "29c36c619c422113552db4eb28cddba8faa757e33f758cc3415bd2885977b591"
+checksum = "98b53b21a34874c03f4ee8fe5a5dbd977fbe09cfa43b7e2362d94f33e42d56af"
 dependencies = [
  "proc-macro2",
  "quote",

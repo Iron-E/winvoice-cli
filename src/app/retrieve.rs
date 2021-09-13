@@ -6,14 +6,6 @@ use clinvoice_adapter::{
 	Adapters,
 	Error as AdapterError,
 };
-#[cfg(feature = "bincode")]
-use clinvoice_adapter_bincode::data::{
-	BincodeEmployee,
-	BincodeJob,
-	BincodeLocation,
-	BincodeOrganization,
-	BincodePerson,
-};
 use clinvoice_data::{chrono::Utc, views::RestorableSerde, Location};
 use clinvoice_export::Target;
 use futures::{
@@ -265,14 +257,6 @@ impl Retrieve
 
 				match store.adapter
 				{
-					#[cfg(feature = "bincode")]
-					Adapters::Bincode => retrieve!(
-						BincodeEmployee,
-						BincodeLocation,
-						BincodeOrganization,
-						BincodePerson
-					),
-
 					#[cfg(feature="postgres")]
 					Adapters::Postgres => retrieve!(PostgresEmployee, PostgresLocation, PostgresOrganization, PostgresPerson),
 
@@ -398,15 +382,6 @@ impl Retrieve
 
 				match store.adapter
 				{
-					#[cfg(feature = "bincode")]
-					Adapters::Bincode => retrieve!(
-						BincodeEmployee,
-						BincodeJob,
-						BincodeLocation,
-						BincodeOrganization,
-						BincodePerson
-					),
-
 					#[cfg(feature="postgres")]
 					Adapters::Postgres => retrieve!(PostgresEmployee, PostgresJob, PostgresLocation, PostgresOrganization, PostgresPerson),
 
@@ -478,9 +453,6 @@ impl Retrieve
 
 				match store.adapter
 				{
-					#[cfg(feature = "bincode")]
-					Adapters::Bincode => retrieve!(BincodeLocation),
-
 					#[cfg(feature="postgres")]
 					Adapters::Postgres => retrieve!(PostgresLocation),
 
@@ -533,9 +505,6 @@ impl Retrieve
 
 				match store.adapter
 				{
-					#[cfg(feature = "bincode")]
-					Adapters::Bincode => retrieve!(BincodeLocation, BincodeOrganization),
-
 					#[cfg(feature="postgres")]
 					Adapters::Postgres => retrieve!(PostgresLocation, PostgresOrganization),
 
@@ -588,9 +557,6 @@ impl Retrieve
 
 				match store.adapter
 				{
-					#[cfg(feature = "bincode")]
-					Adapters::Bincode => retrieve!(BincodePerson),
-
 					#[cfg(feature="postgres")]
 					Adapters::Postgres => retrieve!(PostgresPerson),
 

@@ -4,14 +4,6 @@ use clinvoice_adapter::{
 	Error,
 	Store,
 };
-#[cfg(feature = "bincode")]
-use clinvoice_adapter_bincode::data::{
-	BincodeEmployee,
-	BincodeJob,
-	BincodeLocation,
-	BincodeOrganization,
-	BincodePerson,
-};
 use clinvoice_data::{
 	chrono::{Datelike, Local, TimeZone, Timelike},
 	finance::{Currency, Decimal, Money},
@@ -27,7 +19,7 @@ use futures::{
 use crate::{input, Config, DynResult, StructOpt};
 
 #[cfg(feature="postgres")]
-use clinvoice_adapter_postgres::data::{PostgresEmployee, PostgresJob, PostgresLocation, PostgresOrganization, PostgresPerson, Error as PostgresError};
+use clinvoice_adapter_postgres::data::{PostgresEmployee, PostgresJob, PostgresLocation, PostgresOrganization, PostgresPerson};
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, StructOpt)]
 #[structopt(about = "Record information information with CLInvoice")]
@@ -294,16 +286,16 @@ impl Create
 
 		match store.adapter
 		{
-			#[cfg(feature = "bincode")]
-			Adapters::Bincode => match self
+			#[cfg(feature="postgres")]
+			Adapters::Postgres => match self
 			{
 				Self::Employee { title } =>
 				{
 					Self::create_employee::<
-						BincodeEmployee,
-						BincodeLocation,
-						BincodeOrganization,
-						BincodePerson,
+						PostgresEmployee,
+						PostgresLocation,
+						PostgresOrganization,
+						PostgresPerson,
 					>(title, store)
 					.await
 				},
@@ -318,7 +310,7 @@ impl Create
 					minute,
 				} =>
 				{
-					Self::create_job::<BincodeJob, BincodeLocation, BincodeOrganization>(
+					Self::create_job::<PostgresJob, PostgresLocation, PostgresOrganization>(
 						Money {
 							amount:   hourly_rate,
 							currency: currency.unwrap_or(config.invoices.default_currency),
@@ -335,9 +327,9 @@ impl Create
 
 				Self::Location { names } =>
 				{
-					Self::create_location::<_, _, BincodeLocation>(
+					Self::create_location::<_, _, PostgresLocation>(
 						|loc, name, store| async move {
-							BincodeLocation {
+							PostgresLocation {
 								location: &loc,
 								store,
 							}
@@ -353,47 +345,13 @@ impl Create
 
 				Self::Organization { name } =>
 				{
-					Self::create_organization::<BincodeLocation, BincodeOrganization>(name, store).await
+					Self::create_organization::<PostgresLocation, PostgresOrganization>(name, store).await
 				},
 
-				Self::Person { name } => BincodePerson::create(name, store)
+				Self::Person { name } => PostgresPerson::create(name, store)
 					.err_into()
 					.await
 					.and(Ok(())),
-			},
-
-			#[cfg(feature="postgres")]
-			Adapters::Postgres => match self
-			{
-				Self::Employee {title} =>
-					Self::create_employee::<PostgresEmployee, PostgresLocation, PostgresOrganization, PostgresPerson>(title, store),
-
-				Self::Job {currency, hourly_rate, year, month, day, hour, minute} =>
-					Self::create_job::<PostgresJob, PostgresLocation, PostgresOrganization>(
-						Money
-						{
-							amount: hourly_rate,
-							currency: currency.unwrap_or(config.invoices.default_currency),
-						},
-						year, month, day, hour, minute,
-						store,
-					),
-
-				Self::Location {names} =>
-				{
-					fn create_inner(location: &Location, name: String, store: &Store) -> Result<Location, PostgresError>
-					{
-						PostgresLocation {location, store}.create_inner(name)
-					}
-
-					Self::create_location::<PostgresLocation>(create_inner, names, store).map_err(|e| e.into())
-				},
-
-				Self::Organization {name} =>
-					Self::create_organization::<PostgresLocation, PostgresOrganization>(name, store),
-
-				Self::Person {name} =>
-					PostgresPerson::create(name, store).and(Ok(())).map_err(|e| e.into()),
 			},
 
 			_ => return Err(Error::FeatureNotFound(store.adapter).into()),

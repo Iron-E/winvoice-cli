@@ -8,7 +8,6 @@ impl Display for Adapters
 	{
 		write!(formatter, "{}", match self
 		{
-			Adapters::Bincode => "Bincode",
 			Adapters::Postgres => "Postgres",
 		})
 	}
@@ -25,7 +24,7 @@ mod tests
 	fn display()
 	{
 		let start = Instant::now();
-		assert_eq!(format!("{}", Adapters::Bincode), "Bincode");
+		assert_eq!(format!("{}", Adapters::Postgres), "Postgres");
 		println!(
 			"\n>>>>> Adapters::fmt {}us <<<<<\n",
 			Instant::now().duration_since(start).as_micros()

@@ -60,7 +60,7 @@ impl Config<'_, '_>
 					(
 						"foo",
 						StoreValue::Storage(Store {
-							adapter:  Adapters::Bincode,
+							adapter:  Adapters::Postgres,
 							password: Some(
 								"Optional password. May or may not be accompanied by a username".into(),
 							),
@@ -133,7 +133,7 @@ mod tests
 		stores.insert(
 			"c",
 			StoreValue::Storage(Store {
-				adapter:  Adapters::Bincode,
+				adapter:  Adapters::Postgres,
 				password: None,
 				path:     "c/path".into(),
 				username: None,
@@ -142,7 +142,7 @@ mod tests
 		stores.insert(
 			"d",
 			StoreValue::Storage(Store {
-				adapter:  Adapters::Bincode,
+				adapter:  Adapters::Postgres,
 				password: Some("asldkj".into()),
 				path:     "d/path".into(),
 				username: None,

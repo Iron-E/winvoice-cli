@@ -21,7 +21,7 @@ chrono = {version="0.4", features=["serde"]}
 serde = {version="1", optional=true}
 
 # Unique Identification
-uuid = {version="0.8", features=["v4", "v5"]}
+uuid = {version="0.8", features=["serde", "v4", "v5"]}
 
 [features]
 default = []

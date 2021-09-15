@@ -134,21 +134,16 @@ impl Time
 	/// Execute the constructed command.
 	pub(super) async fn run<'err>(
 		self,
-		config: &Config<'_, '_>,
-		store_name: String,
+		store: &Store,
 	) -> DynResult<'err, ()>
 	{
-		let store = config
-			.get_store(&store_name)
-			.expect("Storage name not known");
-
 		macro_rules! retrieve {
-			($emp:ident, $job:ident, $loc:ident, $org:ident, $per:ident) => {{
+			($Emp:ident, $Job:ident, $pool:ident) => {{
 				let job_results_view: Vec<_> =
-					input::util::job::retrieve_views::<&str, $emp, $job, $loc, $org, $per>(
+					input::util::job::retrieve_view::<&str, $Job, _>(
 						"Query the `Job` which you are working on",
 						false,
-						store,
+						$pool,
 					)
 					.await?
 					.into_iter()
@@ -165,7 +160,7 @@ impl Time
 					TimeCommand::Start =>
 					{
 						let results_view =
-							input::util::employee::retrieve_views::<&str, $emp, $loc, $org, $per>(
+							input::util::employee::retrieve_view::<&str, $Emp, _>(
 								if self.default
 								{
 									Some(config.employees.default_id)
@@ -176,7 +171,7 @@ impl Time
 								},
 								"Query the `Employee` who will be doing the work",
 								true,
-								store,
+								pool,
 							)
 							.await?;
 
@@ -191,7 +186,7 @@ impl Time
 					TimeCommand::Stop => Self::stop(config, self.default, &mut selected_job)?,
 				};
 
-				$job {
+				$Job {
 					job: &(selected_job.into()),
 					store,
 				}

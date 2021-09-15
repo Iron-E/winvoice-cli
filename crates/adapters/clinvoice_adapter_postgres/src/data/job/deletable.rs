@@ -1,3 +1,5 @@
+use clinvoice_data::Job;
+
 use
 {
 	super::PostgresJob,
@@ -7,11 +9,13 @@ use
 };
 
 #[async_trait::async_trait]
-impl Deletable for PostgresJob<'_, '_>
+impl<'a> Deletable for PostgresJob<'a>
 {
+	type Entity = Job;
 	type Error = Error;
+	type Pool = &'a sqlx::PgPool;
 
-	async fn delete(&self, _cascade: bool) -> Result<()>
+	async fn delete(cascade: bool, entities: &[Self::Entity], pool: &Self::Pool) -> Result<()>
 	{
 		todo!()
 	}

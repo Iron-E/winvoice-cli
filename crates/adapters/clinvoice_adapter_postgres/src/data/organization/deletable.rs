@@ -1,21 +1,21 @@
+use clinvoice_data::Organization;
+
 use
 {
-	std::borrow::Cow::Borrowed,
-
 	super::PostgresOrganization,
-	crate::data::{PostgresEmployee, PostgresJob, Error, Result},
+	crate::data::{Error, Result},
 
-	clinvoice_adapter::data::{Deletable, EmployeeAdapter, Error as DataError, JobAdapter},
-	clinvoice_data::Employee,
-	clinvoice_query as query,
+	clinvoice_adapter::data::Deletable,
 };
 
 #[async_trait::async_trait]
-impl Deletable for PostgresOrganization<'_, '_>
+impl<'a> Deletable for PostgresOrganization<'a>
 {
+	type Entity = Organization;
 	type Error = Error;
+	type Pool = &'a sqlx::PgPool;
 
-	async fn delete(&self, cascade: bool) -> Result<()>
+	async fn delete(cascade: bool, entities: &[Self::Entity], pool: &Self::Pool) -> Result<()>
 	{
 		todo!()
 	}

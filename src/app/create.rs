@@ -1,7 +1,7 @@
 use clinvoice_adapter::{
 	data::{EmployeeAdapter, JobAdapter, LocationAdapter, OrganizationAdapter, PersonAdapter},
 	Adapters,
-	Error,
+	Error as FeatureNotFoundError,
 	Store,
 };
 use clinvoice_data::{
@@ -16,7 +16,7 @@ use futures::{
 	TryFutureExt,
 };
 
-use crate::{input, Config, DynResult, StructOpt};
+use crate::{input, DynResult, StructOpt};
 
 #[cfg(feature="postgres")]
 use clinvoice_adapter_postgres::data::{PostgresEmployee, PostgresJob, PostgresLocation, PostgresOrganization, PostgresPerson};
@@ -102,22 +102,22 @@ pub(super) enum Create
 
 impl Create
 {
-	async fn create_employee<'err, E, L, O, P>(title: String, store: &Store) -> DynResult<'err, ()>
+	async fn create_employee<'a, E, L, O, Pr, Pl>(title: String, pool: &'a Pl) -> DynResult<'a, ()>
 	where
-		E: EmployeeAdapter,
-		L: LocationAdapter + Send,
-		O: OrganizationAdapter + Send,
-		P: PersonAdapter,
+		E: EmployeeAdapter<Pool = &'a Pl>,
+		L: LocationAdapter<Pool = &'a Pl> + Send,
+		O: OrganizationAdapter<Pool = &'a Pl> + Send,
+		Pr: PersonAdapter<Pool = &'a Pl>,
 
-		<E as EmployeeAdapter>::Error: 'err,
-		<L as LocationAdapter>::Error: 'err,
-		<O as OrganizationAdapter>::Error: 'err,
-		<P as PersonAdapter>::Error: 'err,
+		<E as EmployeeAdapter>::Error: 'a,
+		<L as LocationAdapter>::Error: 'a,
+		<O as OrganizationAdapter>::Error: 'a,
+		<Pr as PersonAdapter>::Error: 'a,
 	{
-		let organization_views = input::util::organization::retrieve_views::<&str, L, O>(
+		let organization_views = input::util::organization::retrieve_view::<&str, O, _>(
 			"Query the `Organization` where this `Employee` works",
 			false,
-			store,
+			pool,
 		)
 		.await?;
 
@@ -126,16 +126,16 @@ impl Create
 			"Which organization does this employee work at?",
 		)?;
 
-		let person_views = input::util::person::retrieve_views::<&str, P>(
+		let person_views = input::util::person::retrieve_view::<&str, Pr, _>(
 			"Query the `Person` who this `Employee` is",
 			true,
-			store,
+			pool,
 		)
 		.await?;
 
 		let person = input::select_one(&person_views, "Which `Person` is this `Employee`?")?;
 
-		let contact_info = input::util::contact::menu::<L>(store).await?;
+		let contact_info = input::util::contact::menu::<L, _>(pool).await?;
 		let employee_status = input::select_one(
 			&[
 				EmployeeStatus::Employed,
@@ -154,35 +154,33 @@ impl Create
 			person.into(),
 			employee_status,
 			title,
-			store,
+			pool,
 		)
 		.await?;
 
 		Ok(())
 	}
 
-	async fn create_job<'err, J, L, O>(
+	async fn create_job<'a, J, O, P>(
 		hourly_rate: Money,
 		year: Option<i32>,
 		month: Option<u32>,
 		day: Option<u32>,
 		hour: Option<u32>,
 		minute: Option<u32>,
-		store: &Store,
-	) -> DynResult<'err, ()>
+		pool: &'a P,
+	) -> DynResult<'a, ()>
 	where
-		J: JobAdapter,
-		L: LocationAdapter + Send,
-		O: OrganizationAdapter + Send,
+		J: JobAdapter<Pool = &'a P>,
+		O: OrganizationAdapter<Pool = &'a P> + Send,
 
-		<J as JobAdapter>::Error: 'err,
-		<L as LocationAdapter>::Error: 'err,
-		<O as OrganizationAdapter>::Error: 'err,
+		<J as JobAdapter>::Error: 'a,
+		<O as OrganizationAdapter>::Error: 'a,
 	{
-		let organization_views = input::util::organization::retrieve_views::<&str, L, O>(
+		let organization_views = input::util::organization::retrieve_view::<&str, O, _>(
 			"Query the client `Organization` for this `Job`",
 			false,
-			store,
+			pool,
 		)
 		.await?;
 
@@ -221,29 +219,29 @@ impl Create
 			local_date_open.into(),
 			hourly_rate,
 			objectives,
-			store,
+			pool,
 		)
 		.await?;
 
 		Ok(())
 	}
 
-	async fn create_location<'store, F, Fut, L>(
+	async fn create_location<'a, F, Fut, L, P>(
 		create_inner: F,
 		names: Vec<String>,
-		store: &'store Store,
+		pool: &'a P,
 	) -> Result<(), <L as LocationAdapter>::Error>
 	where
-		F: Fn(Location, String, &'store Store) -> Fut,
+		F: Fn(Location, String, &'a P) -> Fut,
 		Fut: Future<Output = Result<Location, <L as LocationAdapter>::Error>>,
-		L: LocationAdapter,
+		L: LocationAdapter<Pool = &'a P>,
 	{
 		if let Some(name) = names.last()
 		{
-			let outer = L::create(name.clone(), store).await?;
+			let outer = L::create(name.clone(), pool).await?;
 			stream::iter(names.into_iter().rev().skip(1).map(Ok))
 				.try_fold(outer, |outer, name| async {
-					create_inner(outer, name, store).await
+					create_inner(outer, name, pool).await
 				})
 				.await?;
 		}
@@ -251,110 +249,112 @@ impl Create
 		Ok(())
 	}
 
-	async fn create_organization<'err, L, O>(name: String, store: &Store) -> DynResult<'err, ()>
+	async fn create_organization<'a, L, O, P>(name: String, pool: &'a P) -> DynResult<'a, ()>
 	where
-		L: LocationAdapter + Send,
-		O: OrganizationAdapter,
+		L: LocationAdapter<Pool = &'a P> + Send,
+		O: OrganizationAdapter<Pool = &'a P>,
 
-		<L as LocationAdapter>::Error: 'err,
-		<O as OrganizationAdapter>::Error: 'err,
+		<L as LocationAdapter>::Error: 'a,
+		<O as OrganizationAdapter>::Error: 'a,
 	{
-		let location_views = input::util::location::retrieve_views::<&str, L>(
+		let location_views = input::util::location::retrieve_view::<&str, L, _>(
 			"Query the `Location` of this `Organization`",
 			false,
-			store,
+			pool,
 		)
 		.await?;
 
 		let selected_view =
 			input::select_one(&location_views, format!("Select a location for {}", name))?;
 
-		O::create(selected_view.into(), name, store).await?;
+		O::create(selected_view.into(), name, pool).await?;
 
 		Ok(())
 	}
 
-	pub(super) async fn run<'config>(
+	pub(super) async fn run<'err>(
 		self,
-		config: &'config Config<'_, '_>,
-		store_name: String,
-	) -> DynResult<'config, ()>
+		default_currency: Currency,
+		store: &Store,
+	) -> DynResult<'err, ()>
 	{
-		let store = config
-			.get_store(&store_name)
-			.expect("Storage name not known");
-
 		match store.adapter
 		{
 			#[cfg(feature="postgres")]
-			Adapters::Postgres => match self
+			Adapters::Postgres =>
 			{
-				Self::Employee { title } =>
-				{
-					Self::create_employee::<
-						PostgresEmployee,
-						PostgresLocation,
-						PostgresOrganization,
-						PostgresPerson,
-					>(title, store)
-					.await
-				},
+				let pool = sqlx::PgPool::connect_lazy(&store.url)?;
 
-				Self::Job {
-					currency,
-					hourly_rate,
-					year,
-					month,
-					day,
-					hour,
-					minute,
-				} =>
+				match self
 				{
-					Self::create_job::<PostgresJob, PostgresLocation, PostgresOrganization>(
-						Money {
-							amount:   hourly_rate,
-							currency: currency.unwrap_or(config.invoices.default_currency),
-						},
+					Self::Employee { title } =>
+					{
+						Self::create_employee::<
+							PostgresEmployee,
+							PostgresLocation,
+							PostgresOrganization,
+							PostgresPerson,
+							_,
+						>(title, &pool)
+						.await
+					},
+
+					Self::Job {
+						currency,
+						hourly_rate,
 						year,
 						month,
 						day,
 						hour,
 						minute,
-						store,
-					)
-					.await
-				},
+					} =>
+					{
+						Self::create_job::<PostgresJob, PostgresOrganization, _>(
+							Money {
+								amount:   hourly_rate,
+								currency: currency.unwrap_or(default_currency),
+							},
+							year,
+							month,
+							day,
+							hour,
+							minute,
+							&pool,
+						)
+						.await
+					},
 
-				Self::Location { names } =>
-				{
-					Self::create_location::<_, _, PostgresLocation>(
-						|loc, name, store| async move {
-							PostgresLocation {
-								location: &loc,
-								store,
-							}
-							.create_inner(name)
-							.await
-						},
-						names,
-						store,
-					)
-					.err_into()
-					.await
-				},
+					Self::Location { names } =>
+					{
+						Self::create_location::<_, _, PostgresLocation, _>(
+							|loc, name, store| async move {
+								PostgresLocation {
+									location: &loc,
+									pool: &pool,
+								}
+								.create_inner(name)
+								.await
+							},
+							names,
+							&pool,
+						)
+						.err_into()
+						.await
+					},
 
-				Self::Organization { name } =>
-				{
-					Self::create_organization::<PostgresLocation, PostgresOrganization>(name, store).await
-				},
+					Self::Organization { name } =>
+					{
+						Self::create_organization::<PostgresLocation, PostgresOrganization, _>(name, &pool).await
+					},
 
-				Self::Person { name } => PostgresPerson::create(name, store)
-					.err_into()
-					.await
-					.and(Ok(())),
+					Self::Person { name } => PostgresPerson::create(name, &pool)
+						.err_into()
+						.await
+						.and(Ok(())),
+				}
 			},
 
-			_ => return Err(Error::FeatureNotFound(store.adapter).into()),
+			_ => return Err(FeatureNotFoundError(store.adapter).into()),
 		}?;
 
 		Ok(())

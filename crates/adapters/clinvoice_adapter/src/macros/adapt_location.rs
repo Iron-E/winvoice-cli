@@ -1,22 +1,28 @@
+/// # Summary
+///
+/// `AdaptLocation!` is a marcro which allows quick generation of [`Location`](clinvoice_data::Location) wrapper types necessary to implement
+/// `Crud` traits on a CLInvoice adapter.
+///
+/// # Examples
+///
+/// ```rust
+/// clinvoice_adapter::AdaptLocation!(PostgresLocation<'loc, sqlx::PgPool>);
+/// ```
 #[macro_export]
 macro_rules! AdaptLocation
 {
-	($name: ident, $loc_life: lifetime, $store_life: lifetime) =>
+	($name:ident<$life:lifetime, $Pool:ty>) =>
 	{
-		use
-		{
-			clinvoice_adapter::Store,
-			clinvoice_data::Location,
-		};
+		use clinvoice_data::Location;
 
 		/// # Summary
 		///
 		/// A wrapper around [`Location`] with a [`Store`] that points to its location.
-		#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-		pub struct $name<$loc_life, $store_life>
+		#[derive(Clone, Debug)]
+		pub struct $name<$life>
 		{
-			pub location: &$loc_life Location,
-			pub store: &$store_life Store,
+			pub location: &$life Location,
+			pub pool: &$life $Pool,
 		}
 	}
 }

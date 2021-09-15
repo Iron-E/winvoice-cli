@@ -8,7 +8,6 @@
 //! [`clinvoice` data](clinvoice_data) types may implement it with the same signature. This is in
 //! contrast to [`JobAdapter`], which may only be implemented by [`Job`](clinvoice_data::Job)s.
 
-pub mod contact;
 mod deletable;
 mod employee_adapter;
 mod error;
@@ -17,7 +16,6 @@ mod job_adapter;
 mod location_adapter;
 mod organization_adapter;
 mod person_adapter;
-pub mod timesheet;
 mod updatable;
 
 pub use deletable::Deletable;

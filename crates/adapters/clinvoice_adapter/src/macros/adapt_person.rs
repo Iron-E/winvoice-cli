@@ -1,22 +1,28 @@
+/// # Summary
+///
+/// `AdaptPerson!` is a marcro which allows quick generation of [`Person`](clinvoice_data::Person) wrapper types necessary to implement
+/// `Crud` traits on a CLInvoice adapter.
+///
+/// # Examples
+///
+/// ```rust
+/// clinvoice_adapter::AdaptPerson!(PostgresPerson<'per, sqlx::PgPool>);
+/// ```
 #[macro_export]
 macro_rules! AdaptPerson
 {
-	($name: ident, $per_life: lifetime, $store_life: lifetime) =>
+	($name:ident<$life:lifetime, $Pool:ty>) =>
 	{
-		use
-		{
-			clinvoice_adapter::Store,
-			clinvoice_data::Person,
-		};
+		use clinvoice_data::Person;
 
 		/// # Summary
 		///
 		/// A wrapper around [`Person`] with a [`Store`] that points to its location.
-		#[derive(Clone, Debug, Eq, PartialEq)]
-		pub struct $name<$per_life, $store_life>
+		#[derive(Clone, Debug)]
+		pub struct $name<$life>
 		{
-			pub person: &$per_life Person,
-			pub store: &$store_life Store,
+			pub person: &$life Person,
+			pub pool: &$life $Pool,
 		}
 	}
 }

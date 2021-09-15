@@ -60,14 +60,8 @@ impl Config<'_, '_>
 					(
 						"foo",
 						StoreValue::Storage(Store {
-							adapter:  Adapters::Postgres,
-							password: Some(
-								"Optional password. May or may not be accompanied by a username".into(),
-							),
-							username: Some(
-								"Optional username. May or may not be accompanied by a password".into(),
-							),
-							path:     "See https://github.com/Iron-E/clinvoice/wiki/Usage#adapters".into(),
+							adapter: Adapters::Postgres,
+							url:     "See https://github.com/Iron-E/clinvoice/wiki/Usage#adapters".into(),
 						}),
 					),
 				]
@@ -134,18 +128,14 @@ mod tests
 			"c",
 			StoreValue::Storage(Store {
 				adapter:  Adapters::Postgres,
-				password: None,
-				path:     "c/path".into(),
-				username: None,
+				url:     "c/path".into(),
 			}),
 		);
 		stores.insert(
 			"d",
 			StoreValue::Storage(Store {
 				adapter:  Adapters::Postgres,
-				password: Some("asldkj".into()),
-				path:     "d/path".into(),
-				username: None,
+				url:     "d/path".into(),
 			}),
 		);
 		stores.insert("e", StoreValue::Alias("d"));

@@ -1,19 +1,17 @@
+use clinvoice_data::views::PersonView;
+
 use
 {
 	super::PostgresPerson,
 	crate::data::{Error, Result},
 
-	clinvoice_adapter::
-	{
-		data::{Error as DataError, Initializable, PersonAdapter, Updatable},
-		Store,
-	},
+	clinvoice_adapter::data::PersonAdapter,
 	clinvoice_data::Person,
 	clinvoice_query as query,
 };
 
 #[async_trait::async_trait]
-impl PersonAdapter for PostgresPerson<'_, '_>
+impl PersonAdapter for PostgresPerson<'_>
 {
 	type Error = Error;
 
@@ -28,24 +26,39 @@ impl PersonAdapter for PostgresPerson<'_, '_>
 	/// # Returns
 	///
 	/// The newly created [`Person`].
-	async fn create(name: String, store: &Store) -> Result<Person>
+	async fn create(name: String, pool: Self::Pool) -> Result<Person>
 	{
 		todo!()
 	}
 
 	/// # Summary
 	///
-	/// Retrieve some [`Person`] from the active [`Store`](crate::Store).
-	///
-	/// # Parameters
-	///
-	/// See [`Person`].
+	/// Retrieve some [`PersonView`]s from the database using a [query](query::Person).
 	///
 	/// # Returns
 	///
 	/// * An `Error`, if something goes wrong.
-	/// * A list of matching [`Job`]s.
-	async fn retrieve(query: &query::Person, store: &Store) -> Result<Vec<Person>>
+	/// * A list of matching [`PersonView`]s.
+	async fn retrieve(
+		query: &query::Person,
+		pool: Self::Pool,
+	) -> Result<Vec<Person>>
+	{
+		todo!()
+	}
+
+	/// # Summary
+	///
+	/// Retrieve some [`PersonView`]s from the database using a [query](query::Person).
+	///
+	/// # Returns
+	///
+	/// * An `Error`, if something goes wrong.
+	/// * A list of matching [`PersonView`]s.
+	async fn retrieve_view(
+		query: &query::Person,
+		pool: Self::Pool,
+	) -> Result<Vec<PersonView>>
 	{
 		todo!()
 	}

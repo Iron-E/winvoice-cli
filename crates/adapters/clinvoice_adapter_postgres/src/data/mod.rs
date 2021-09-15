@@ -6,10 +6,13 @@
 
 mod employee;
 mod error;
+mod initializer;
 mod job;
 mod location;
 mod organization;
 mod person;
+
+pub(self) use initializer::Initializer;
 
 pub use
 {

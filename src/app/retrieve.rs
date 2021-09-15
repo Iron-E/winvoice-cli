@@ -1,11 +1,7 @@
 use core::fmt::Display;
 use std::error::Error;
 
-use clinvoice_adapter::{
-	data::{Deletable, Error as DataError, LocationAdapter, Updatable},
-	Adapters,
-	Error as AdapterError,
-};
+use clinvoice_adapter::{Adapters, Error as AdapterError, Store, data::{Deletable, LocationAdapter, Updatable}};
 use clinvoice_data::{chrono::Utc, views::RestorableSerde, Location};
 use clinvoice_serialize::markdown;
 use futures::{
@@ -160,14 +156,10 @@ impl Retrieve
 	/// Execute the constructed command.
 	pub(super) async fn run<'err>(
 		self,
-		config: &Config<'_, '_>,
-		store_name: String,
+		config: Config<'_, '_>,
+		store: &Store,
 	) -> DynResult<'err, ()>
 	{
-		let store = config
-			.get_store(&store_name)
-			.expect("Storage name not known");
-
 		let adapter_not_enabled =
 			|| -> DynResult<'err, ()> { Err(AdapterError::FeatureNotFound(store.adapter).into()) };
 
@@ -179,9 +171,9 @@ impl Retrieve
 			} =>
 			{
 				macro_rules! retrieve {
-					($emp:ident, $loc:ident, $org:ident, $per:ident) => {{
+					($Emp:ident, $pool:ident) => {{
 						let results_view =
-							input::util::employee::retrieve_views::<&str, $emp, $loc, $org, $per>(
+							input::util::employee::retrieve_view::<&str, $Emp, _>(
 								if default
 								{
 									Some(config.employees.default_id)
@@ -192,14 +184,14 @@ impl Retrieve
 								},
 								"Query the `Employee` you are looking for",
 								false,
-								store,
+								pool,
 							)
 							.await?;
 
 						if self.delete
 						{
 							Self::delete(&results_view, |e| async {
-								$emp {
+								$Emp {
 									employee: &(e.into()),
 									store,
 								}
@@ -212,7 +204,7 @@ impl Retrieve
 						if self.update
 						{
 							Self::update(&results_view, |e| async {
-								$emp {
+								$Emp {
 									employee: &(e.into()),
 									store,
 								}
@@ -258,7 +250,7 @@ impl Retrieve
 				match store.adapter
 				{
 					#[cfg(feature="postgres")]
-					Adapters::Postgres => retrieve!(PostgresEmployee, PostgresLocation, PostgresOrganization, PostgresPerson),
+					Adapters::Postgres => retrieve!(PostgresEmployee, pool),
 
 					_ => return adapter_not_enabled(),
 				};
@@ -271,9 +263,9 @@ impl Retrieve
 			} =>
 			{
 				macro_rules! retrieve {
-					($emp:ident, $job:ident, $loc:ident, $org:ident, $per:ident) => {{
+					($Emp:ident, $job:ident, $loc:ident, $org:ident, $per:ident) => {{
 						let results_view =
-							input::util::job::retrieve_views::<&str, $emp, $job, $loc, $org, $per>(
+							input::util::job::retrieve_view::<&str, $Emp, $job, $loc, $org, $per>(
 								"Query the `Job` you are looking for",
 								false,
 								store,
@@ -392,7 +384,7 @@ impl Retrieve
 			{
 				macro_rules! retrieve {
 					($loc:ident) => {{
-						let results_view = input::util::location::retrieve_views::<&str, $loc>(
+						let results_view = input::util::location::retrieve_view::<&str, $loc>(
 							"Query the `Location` you are looking for",
 							false,
 							store,
@@ -463,7 +455,7 @@ impl Retrieve
 			{
 				macro_rules! retrieve {
 					($loc:ident, $org:ident) => {{
-						let results_view = input::util::organization::retrieve_views::<&str, $loc, $org>(
+						let results_view = input::util::organization::retrieve_view::<&str, $loc, $org>(
 							"Query the `Organization` you are looking for",
 							false,
 							store,
@@ -515,7 +507,7 @@ impl Retrieve
 			{
 				macro_rules! retrieve {
 					($per:ident) => {{
-						let results_view = input::util::person::retrieve_views::<&str, $per>(
+						let results_view = input::util::person::retrieve_view::<&str, $per>(
 							"Query the `Person` you are looking for",
 							false,
 							store,

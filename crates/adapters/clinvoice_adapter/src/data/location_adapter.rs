@@ -1,25 +1,23 @@
 #![allow(clippy::wrong_self_convention)]
 
-use std::{borrow::Cow::Borrowed, error::Error, marker::Send};
+use std::{borrow::Cow::Owned, error::Error};
 
 use clinvoice_data::{views::LocationView, Location};
 use clinvoice_query as query;
-use futures::{FutureExt, TryFutureExt};
+use futures::FutureExt;
 
-use super::{Deletable, Initializable, Updatable};
-use crate::Store;
+use super::{Deletable, Updatable};
 
 #[async_trait::async_trait]
 pub trait LocationAdapter:
 	Deletable<Error = <Self as LocationAdapter>::Error>
-	+ Initializable<Error = <Self as LocationAdapter>::Error>
 	+ Updatable<Error = <Self as LocationAdapter>::Error>
 {
 	type Error: From<super::Error> + Error;
 
 	/// # Summary
 	///
-	/// Create a new `Location` with a generated ID.
+	/// Create a new [`Location`] on the database.
 	///
 	/// # Parameters
 	///
@@ -27,17 +25,15 @@ pub trait LocationAdapter:
 	///
 	/// # Returns
 	///
-	/// ```ignore
-	/// Location {name, id: /* generated */};
-	/// ```
+	/// The created [`Location`].
 	async fn create(
 		name: String,
-		store: &Store,
+		pool: Self::Pool,
 	) -> Result<Location, <Self as LocationAdapter>::Error>;
 
 	/// # Summary
 	///
-	/// Create a new [`Location`] which is inside of `self`.
+	/// Create a new [`Location`] on the database which is inside of `self`.
 	///
 	/// # Parameters
 	///
@@ -45,49 +41,16 @@ pub trait LocationAdapter:
 	///
 	/// # Returns
 	///
-	/// ```ignore
-	/// Location {name, id: /* generated */, outside_id: self.unroll().id};
-	/// ```
+	/// The created [`Location`].
 	async fn create_inner(&self, name: String)
 		-> Result<Location, <Self as LocationAdapter>::Error>;
-
-	/// # Summary
-	///
-	/// Convert some `location` into a [`LocationView`].
-	async fn into_view(
-		location: Location,
-		store: &Store,
-	) -> Result<LocationView, <Self as LocationAdapter>::Error>
-	where
-		Self: Send,
-	{
-		let outer_location_fut = Self::outers(&location, store).map_ok(|mut outers| {
-			outers.reverse();
-			outers
-				.into_iter()
-				.fold(None, |previous, outer_location| {
-					Some(LocationView {
-						id:    outer_location.id,
-						name:  outer_location.name,
-						outer: previous.map(LocationView::into),
-					})
-				})
-				.map(Box::new)
-		});
-
-		Ok(LocationView {
-			id:    location.id,
-			name:  location.name.clone(),
-			outer: outer_location_fut.await?,
-		})
-	}
 
 	/// # Summary
 	///
 	/// Get the [`Location`]s which contain this [`Location`].
 	async fn outers(
 		location: &Location,
-		store: &Store,
+		pool: Self::Pool,
 	) -> Result<Vec<Location>, <Self as LocationAdapter>::Error>
 	{
 		let mut outer_locations = Vec::new();
@@ -96,11 +59,11 @@ pub trait LocationAdapter:
 		while let Some(id) = outer_id
 		{
 			let query = query::Location {
-				id: query::Match::EqualTo(Borrowed(&id)),
+				id: query::Match::EqualTo(Owned(id)),
 				..Default::default()
 			};
 
-			Self::retrieve(&query, store)
+			Self::retrieve(&query, pool.clone())
 				.map(|result| {
 					result.and_then(|retrieved| {
 						retrieved
@@ -121,18 +84,27 @@ pub trait LocationAdapter:
 
 	/// # Summary
 	///
-	/// Retrieve a [`Location`] from an active [`Store`](core::Store).
-	///
-	/// # Parameters
-	///
-	/// See [`Location`].
+	/// Retrieve some [`LocationView`]s from the database using a [query](query::Location).
 	///
 	/// # Returns
 	///
-	/// * An [`Error`], when something goes wrong.
-	/// * A list of matches, if there are any.
+	/// * An `Error`, if something goes wrong.
+	/// * A list of matching [`LocationView`]s.
 	async fn retrieve(
 		query: &query::Location,
-		store: &Store,
+		pool: Self::Pool,
 	) -> Result<Vec<Location>, <Self as LocationAdapter>::Error>;
+
+	/// # Summary
+	///
+	/// Retrieve some [`LocationView`]s from the database using a [query](query::Location).
+	///
+	/// # Returns
+	///
+	/// * An `Error`, if something goes wrong.
+	/// * A list of matching [`LocationView`]s.
+	async fn retrieve_view(
+		query: &query::Location,
+		pool: Self::Pool,
+	) -> Result<Vec<LocationView>, <Self as LocationAdapter>::Error>;
 }

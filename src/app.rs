@@ -70,14 +70,18 @@ impl App
 	/// # Summary
 	///
 	/// Run the application and parse its provided arguments / flags.
-	pub async fn run<'config>(self, config: &'config Config<'_, '_>) -> DynResult<'config, ()>
+	pub async fn run<'err>(self, config: Config<'_, '_>) -> DynResult<'err, ()>
 	{
+		let store = config
+			.get_store(&self.store)
+			.expect("Storage name not known");
+
 		match self.command
 		{
-			AppCommand::Config => Self::edit_config(config).err_into().await,
-			AppCommand::Create(cmd) => cmd.run(config, self.store).await,
-			AppCommand::Retrieve(cmd) => cmd.run(config, self.store).await,
-			AppCommand::Time(cmd) => cmd.run(config, self.store).await,
+			AppCommand::Config => Self::edit_config(&config).err_into().await,
+			AppCommand::Create(cmd) => cmd.run(config.invoices.default_currency, store).await,
+			AppCommand::Retrieve(cmd) => cmd.run(config, store).await,
+			AppCommand::Time(cmd) => cmd.run(store).await,
 		}
 	}
 }

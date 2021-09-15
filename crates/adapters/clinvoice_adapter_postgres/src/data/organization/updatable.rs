@@ -1,7 +1,5 @@
 use
 {
-	std::fs,
-
 	super::PostgresOrganization,
 	crate::data::{Error, Result},
 
@@ -9,7 +7,7 @@ use
 };
 
 #[async_trait::async_trait]
-impl Updatable for PostgresOrganization<'_, '_>
+impl Updatable for PostgresOrganization<'_>
 {
 	type Error = Error;
 

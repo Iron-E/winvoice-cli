@@ -1,21 +1,20 @@
 use
 {
-	std::{borrow::Cow::Borrowed},
-
 	super::PostgresLocation,
-	crate::data::{PostgresOrganization, Error, Result},
+	crate::data::{Error, Result},
 
-	clinvoice_adapter::data::{Deletable, Error as DataError, LocationAdapter, OrganizationAdapter},
+	clinvoice_adapter::data::Deletable,
 	clinvoice_data::Location,
-	clinvoice_query as query,
 };
 
 #[async_trait::async_trait]
-impl Deletable for PostgresLocation<'_, '_>
+impl<'a> Deletable for PostgresLocation<'a>
 {
+	type Entity = Location;
 	type Error = Error;
+	type Pool = &'a sqlx::PgPool;
 
-	async fn delete(&self, cascade: bool) -> Result<()>
+	async fn delete(cascade: bool, entities: &[Self::Entity], pool: &Self::Pool) -> Result<()>
 	{
 		todo!()
 	}

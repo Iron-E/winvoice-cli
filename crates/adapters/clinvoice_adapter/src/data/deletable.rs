@@ -6,7 +6,9 @@ use std::error::Error;
 #[async_trait::async_trait]
 pub trait Deletable
 {
+	type Entity;
 	type Error: Error;
+	type Pool: Clone + Send + Sync;
 
 	/// # Summary
 	///
@@ -28,5 +30,5 @@ pub trait Deletable
 	/// * An [`Error`] when:
 	///   * `self.id` had not already been `create`d.
 	///   * Something goes wrong.
-	async fn delete(&self, cascade: bool) -> Result<(), Self::Error>;
+	async fn delete(cascade: bool, entities: &[Self::Entity], pool: &Self::Pool) -> Result<(), Self::Error>;
 }

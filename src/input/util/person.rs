@@ -1,6 +1,6 @@
 use core::fmt::Display;
 
-use clinvoice_adapter::{data::PersonAdapter, Store};
+use clinvoice_adapter::data::PersonAdapter;
 use clinvoice_data::views::PersonView;
 use clinvoice_query as query;
 
@@ -20,41 +20,30 @@ use crate::{app::QUERY_PROMPT, input, DynResult};
 ///
 /// [P_retrieve]: clinvoice_adapter::data::PersonAdapter::retrieve
 /// [person]: clinvoice_data::Person
-pub async fn retrieve_views<'err, D, P>(
+pub async fn retrieve_view<'a, D, Pr, Pl>(
 	prompt: D,
 	retry_on_empty: bool,
-	store: &Store,
-) -> DynResult<'err, Vec<PersonView>>
+	pool: &'a Pl,
+) -> DynResult<'a, Vec<PersonView>>
 where
 	D: Display,
-	P: PersonAdapter,
-
-	<P as PersonAdapter>::Error: 'err,
+	Pr: PersonAdapter<Pool = &'a Pl>,
+	<Pr as PersonAdapter>::Error: 'a,
 {
 	loop
 	{
 		let query: query::Person =
 			input::edit_default(format!("{}\n{}persons", prompt, QUERY_PROMPT))?;
 
-		let results = P::retrieve(&query, store).await?;
-		let results_view: Result<Vec<_>, _> = results
-			.into_iter()
-			.map(PersonView::from)
-			.filter_map(|view| match query.matches_view(&view)
-			{
-				Ok(b) if b => Some(Ok(view)),
-				Err(e) => Some(Err(e)),
-				_ => None,
-			})
-			.collect();
+		let results = Pr::retrieve_view(&query, pool).await?;
 
 		if retry_on_empty &&
-			results_view.as_ref().map(Vec::is_empty).unwrap_or(false) &&
+			results.is_empty() &&
 			menu::retry_query()?
 		{
 			continue;
 		}
 
-		return results_view.map_err(|e| e.into());
+		return Ok(results);
 	}
 }

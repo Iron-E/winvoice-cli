@@ -1,15 +1,12 @@
 use core::fmt::Display;
 
-use clinvoice_adapter::{
-	data::{EmployeeAdapter, JobAdapter, LocationAdapter, OrganizationAdapter, PersonAdapter},
-	Store,
-};
+use clinvoice_adapter::data::JobAdapter;
+
 use clinvoice_data::views::JobView;
 use clinvoice_query as query;
-use futures::stream::{self, TryStreamExt};
 
 use super::menu;
-use crate::{app::QUERY_PROMPT, filter_map_view, input, DynResult};
+use crate::{app::QUERY_PROMPT, input, DynResult};
 
 /// # Summary
 ///
@@ -24,45 +21,29 @@ use crate::{app::QUERY_PROMPT, filter_map_view, input, DynResult};
 ///
 /// [L_retrieve]: clinvoice_adapter::data::LocationAdapter::retrieve
 /// [location]: clinvoice_data::Location
-pub async fn retrieve_views<'err, D, E, J, L, O, P>(
+pub async fn retrieve_view<'a, D, J, P>(
 	prompt: D,
 	retry_on_empty: bool,
-	store: &Store,
-) -> DynResult<'err, Vec<JobView>>
+	pool: &'a P,
+) -> DynResult<'a, Vec<JobView>>
 where
 	D: Display,
-	E: EmployeeAdapter + Send,
-	J: JobAdapter + Send,
-	L: LocationAdapter + Send,
-	O: OrganizationAdapter + Send,
-	P: PersonAdapter,
-
-	<L as LocationAdapter>::Error: Send,
-	<E as EmployeeAdapter>::Error: From<<L as LocationAdapter>::Error>
-		+ From<<O as OrganizationAdapter>::Error>
-		+ From<<P as PersonAdapter>::Error>
-		+ Send,
-	<J as JobAdapter>::Error: 'err + From<<E as EmployeeAdapter>::Error>,
+	J: JobAdapter<Pool = &'a P> + Send,
+	<J as JobAdapter>::Error: 'a,
 {
 	loop
 	{
 		let query: query::Job = input::edit_default(format!("{}\n{}jobs", prompt, QUERY_PROMPT))?;
 
-		let results = J::retrieve(&query, store).await?;
-		let results_view: Result<Vec<_>, _> = stream::iter(results.into_iter().map(Ok))
-			.map_ok(|j| async { J::into_view::<E, L, O, P>(j, store).await })
-			.try_buffer_unordered(10)
-			.try_filter_map(|result| filter_map_view!(query, result))
-			.try_collect()
-			.await;
+		let results = J::retrieve_view(&query, pool).await?;
 
 		if retry_on_empty &&
-			results_view.as_ref().map(Vec::is_empty).unwrap_or(false) &&
+			results.is_empty() &&
 			menu::retry_query()?
 		{
 			continue;
 		}
 
-		return results_view.map_err(|e| e.into());
+		return Ok(results);
 	}
 }

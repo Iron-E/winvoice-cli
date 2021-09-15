@@ -1,22 +1,28 @@
+/// # Summary
+///
+/// `AdaptJob!` is a marcro which allows quick generation of [`Job`](clinvoice_data::Job) wrapper types necessary to implement
+/// `Crud` traits on a CLInvoice adapter.
+///
+/// # Examples
+///
+/// ```rust
+/// clinvoice_adapter::AdaptJob!(PostgresJob<'job, sqlx::PgPool>);
+/// ```
 #[macro_export]
 macro_rules! AdaptJob
 {
-	($name: ident, $job_life: lifetime, $store_life: lifetime) =>
+	($name:ident<$life:lifetime, $Pool:ty>) =>
 	{
-		use
-		{
-			clinvoice_adapter::Store,
-			clinvoice_data::Job,
-		};
+		use clinvoice_data::Job;
 
 		/// # Summary
 		///
 		/// A wrapper around [`Job`] with a [`Store`] that points to its location.
-		#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-		pub struct $name<$job_life, $store_life>
+		#[derive(Clone, Debug)]
+		pub struct $name<$life>
 		{
-			pub job: &$job_life Job,
-			pub store: &$store_life Store,
+			pub job: &$life Job,
+			pub pool: &$life $Pool,
 		}
 	};
 }

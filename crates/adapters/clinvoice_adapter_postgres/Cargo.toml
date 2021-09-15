@@ -22,7 +22,7 @@ clinvoice_error = {path="../../clinvoice_error", version="0.2"}
 clinvoice_query = {path="../../clinvoice_query", version="0.2"}
 
 # Database
-sqlx = {features=["chrono", "decimal", "macros", "postgres", "runtime-tokio-rustls", "tls", "uuid"], version="0.5"}
+sqlx = {features=["chrono", "decimal", "macros", "postgres", "runtime-tokio-rustls", "uuid"], version="0.5"}
 
 # Environment Variable Expansion
 shellexpand = "2"

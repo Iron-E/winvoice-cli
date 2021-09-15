@@ -8,7 +8,7 @@
 //! # Usage
 //!
 //! 1. Begin by creating wrapper newtypes for each top-level data item in [`clinvoice_data`].
-//!   * See the Bincode adapter for an example of this, or the [`Adapt`] macro for more information.
+//!    * See the Bincode adapter for an example of this, or the [`Adapt`] macro for more information.
 //! 2. Implement each newtype's corresponding `Adapter` trait.
 //! 3. Create a new feature flag for the adapter on `clinvoice`.
 //! 4. Write new `match` arms in `clinvoice`'s `Create` and `Retrieve` types for the adapter and
@@ -16,10 +16,10 @@
 
 mod adapters;
 pub mod data;
-mod error;
+mod feature_not_found;
 mod macros;
 mod store;
 
 pub use adapters::Adapters;
-pub use error::{Error, Result};
+pub use feature_not_found::{Error, Result};
 pub use store::Store;

@@ -41,7 +41,7 @@ async fn main()
 
 	// Run the CLInvoice application.
 	App::from_args()
-		.run(&config)
+		.run(config)
 		.await
 		.unwrap_or_else(|e| exit_with_err(e.as_ref()));
 }

@@ -7,7 +7,7 @@ use
 };
 
 #[async_trait::async_trait]
-impl Updatable for PostgresLocation<'_, '_>
+impl Updatable for PostgresLocation<'_>
 {
 	type Error = Error;
 

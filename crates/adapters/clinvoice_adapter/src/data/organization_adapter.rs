@@ -1,25 +1,22 @@
 #![allow(clippy::wrong_self_convention)]
 
-use std::{borrow::Cow::Borrowed, error::Error, marker::Send};
+use std::error::Error;
 
-use clinvoice_data::{views::OrganizationView, Employee, Location, Organization};
+use clinvoice_data::{views::OrganizationView, Location, Organization};
 use clinvoice_query as query;
-use futures::{FutureExt, TryFutureExt};
 
-use super::{Deletable, EmployeeAdapter, Initializable, LocationAdapter, Updatable};
-use crate::Store;
+use super::{Deletable, Updatable};
 
 #[async_trait::async_trait]
 pub trait OrganizationAdapter:
 	Deletable<Error = <Self as OrganizationAdapter>::Error>
-	+ Initializable<Error = <Self as OrganizationAdapter>::Error>
 	+ Updatable<Error = <Self as OrganizationAdapter>::Error>
 {
 	type Error: From<super::Error> + Error;
 
 	/// # Summary
 	///
-	/// Create a new [`Organization`] on the active [`Store`](crate::Store).
+	/// Create a new [`Organization`] on the database.
 	///
 	/// # Parameters
 	///
@@ -31,97 +28,32 @@ pub trait OrganizationAdapter:
 	async fn create(
 		location: Location,
 		name: String,
-		store: &Store,
+		pool: Self::Pool,
 	) -> Result<Organization, <Self as OrganizationAdapter>::Error>;
 
 	/// # Summary
 	///
-	/// Convert some `organization` into a [`OrganizationView`].
-	///
-	/// # TODO
-	///
-	/// write test
-	async fn into_view<L>(
-		organization: Organization,
-		store: &Store,
-	) -> Result<OrganizationView, <L as LocationAdapter>::Error>
-	where
-		L: LocationAdapter + Send,
-	{
-		let location_fut = Self::to_location::<L>(&organization, store)
-			.and_then(|result| L::into_view(result, store));
-
-		Ok(OrganizationView {
-			id: organization.id,
-			location: location_fut.await?,
-			name: organization.name,
-		})
-	}
-
-	/// # Summary
-	///
-	/// Retrieve some [`Organization`] from the active [`Store`]crate::Store).
-	///
-	/// # Parameters
-	///
-	/// See [`Organization`].
+	/// Retrieve some [`Organization`]s from the database using a [query](query::Organization).
 	///
 	/// # Returns
 	///
 	/// * An `Error`, if something goes wrong.
-	/// * A list of matching [`Job`]s.
+	/// * A list of matching [`Organization`]s.
 	async fn retrieve(
 		query: &query::Organization,
-		store: &Store,
+		pool: Self::Pool,
 	) -> Result<Vec<Organization>, <Self as OrganizationAdapter>::Error>;
 
 	/// # Summary
 	///
-	/// Get all of the [`Employee`]s which work at some `organization`.
-	async fn to_employees<E>(
-		organization: &Organization,
-		store: &Store,
-	) -> Result<Vec<Employee>, <E as EmployeeAdapter>::Error>
-	where
-		E: EmployeeAdapter,
-	{
-		E::retrieve(
-			&query::Employee {
-				organization: query::Organization {
-					id: query::Match::EqualTo(Borrowed(&organization.id)),
-					..Default::default()
-				},
-				..Default::default()
-			},
-			store,
-		)
-		.await
-	}
-
-	/// # Summary
+	/// Retrieve some [`OrganizationView`]s from the database using a [query](query::Organization).
 	///
-	/// Convert some `organization` into a [`Location`] through it's `location_id` field.
-	async fn to_location<L>(
-		organization: &Organization,
-		store: &Store,
-	) -> Result<Location, <L as LocationAdapter>::Error>
-	where
-		L: LocationAdapter,
-	{
-		let query = query::Location {
-			id: query::Match::EqualTo(Borrowed(&organization.location_id)),
-			..Default::default()
-		};
-
-		L::retrieve(&query, store)
-			.map(|result| {
-				result.and_then(|retrieved| {
-					retrieved
-						.into_iter()
-						.next()
-						.ok_or_else(|| super::Error::DataIntegrity(organization.location_id).into())
-				})
-			})
-			.await
-	}
+	/// # Returns
+	///
+	/// * An `Error`, if something goes wrong.
+	/// * A list of matching [`OrganizationView`]s.
+	async fn retrieve_view(
+		query: &query::Organization,
+		pool: Self::Pool,
+	) -> Result<Vec<OrganizationView>, <Self as OrganizationAdapter>::Error>;
 }

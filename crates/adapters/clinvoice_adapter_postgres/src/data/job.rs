@@ -1,12 +1,5 @@
 mod deletable;
-mod initializable;
 mod job_adapter;
 mod updatable;
 
-use std::path::PathBuf;
-
-clinvoice_adapter::Adapt!(Job => PostgresJob);
-
-impl PostgresJob<'_, '_>
-{
-}
+clinvoice_adapter::AdaptJob!(PostgresJob<'job, sqlx::PgPool>);

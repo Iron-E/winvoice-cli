@@ -1,16 +1,11 @@
-use core::fmt::Display;
-use std::borrow::Cow::Owned;
+use std::{borrow::Cow::Owned, fmt::Display};
 
-use clinvoice_adapter::{
-	data::{EmployeeAdapter, LocationAdapter, OrganizationAdapter, PersonAdapter},
-	Store,
-};
+use clinvoice_adapter::data::EmployeeAdapter;
 use clinvoice_data::{views::EmployeeView, Id};
 use clinvoice_query as query;
-use futures::stream::{self, TryStreamExt};
 
 use super::menu;
-use crate::{app::QUERY_PROMPT, filter_map_view, input, DynResult};
+use crate::{app::QUERY_PROMPT, input, DynResult};
 
 /// # Summary
 ///
@@ -25,27 +20,16 @@ use crate::{app::QUERY_PROMPT, filter_map_view, input, DynResult};
 ///
 /// [L_retrieve]: clinvoice_adapter::data::EmployeeAdapter::retrieve
 /// [location]: clinvoice_data::Employee
-pub async fn retrieve_views<'err, D, E, L, O, P>(
+pub async fn retrieve_view<'a, D, E, P>(
 	default_id: Option<Id>,
 	prompt: D,
 	retry_on_empty: bool,
-	store: &Store,
-) -> DynResult<'err, Vec<EmployeeView>>
+	pool: &'a P,
+) -> DynResult<'a, Vec<EmployeeView>>
 where
 	D: Display,
-	E: EmployeeAdapter + Send,
-	L: LocationAdapter + Send,
-	O: OrganizationAdapter + Send,
-	P: PersonAdapter + Send,
-
-	<E as EmployeeAdapter>::Error: 'err
-		+ From<<L as LocationAdapter>::Error>
-		+ From<<O as OrganizationAdapter>::Error>
-		+ From<<P as PersonAdapter>::Error>
-		+ Send,
-	<L as LocationAdapter>::Error: 'err + Send,
-	<O as OrganizationAdapter>::Error: 'err,
-	<P as PersonAdapter>::Error: 'err,
+	E: EmployeeAdapter<Pool = &'a P> + Send,
+	<E as EmployeeAdapter>::Error: 'a + Send,
 {
 	loop
 	{
@@ -58,21 +42,15 @@ where
 			_ => input::edit_default(format!("{}\n{}employees", prompt, QUERY_PROMPT))?,
 		};
 
-		let results = E::retrieve(&query, store).await?;
-		let results_view: Result<Vec<_>, _> = stream::iter(results.into_iter().map(Ok))
-			.map_ok(|e| async { E::into_view::<L, O, P>(e, store).await })
-			.try_buffer_unordered(10)
-			.try_filter_map(|val| filter_map_view!(query, val))
-			.try_collect()
-			.await;
+		let results = E::retrieve_view(&query, pool).await?;
 
 		if retry_on_empty &&
-			results_view.as_ref().map(Vec::is_empty).unwrap_or(false) &&
+			results.is_empty() &&
 			menu::retry_query()?
 		{
 			continue;
 		}
 
-		return results_view.map_err(|e| e.into());
+		return Ok(results);
 	}
 }

@@ -29,6 +29,9 @@ clinvoice_error = {path='crates/clinvoice_error', version="0.2"}
 clinvoice_query = {path='crates/clinvoice_query', features=["serde_support"], version="0.2"}
 clinvoice_serialize = {path='crates/clinvoice_serialize', version="0.3"}
 
+# Database
+sqlx = {features=["runtime-tokio-rustls", "tls"], version="0.5"}
+
 # Dialogues
 dialoguer = "0.8"
 
@@ -42,7 +45,7 @@ serde_yaml = "0.8"
 
 [features]
 default = ["postgres"]
-postgres = ["clinvoice_adapter_postgres"]
+postgres = ["clinvoice_adapter_postgres", "sqlx/postgres"]
 
 [workspace]
 members = [

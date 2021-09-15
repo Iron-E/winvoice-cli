@@ -1,51 +1,41 @@
+use clinvoice_data::views::OrganizationView;
+
 use
 {
 	super::PostgresOrganization,
 	crate::data::{Error, Result},
 
-	clinvoice_adapter::
-	{
-		data::{Error as DataError, Initializable, OrganizationAdapter, Updatable},
-		Store,
-	},
+	clinvoice_adapter::data::OrganizationAdapter,
 	clinvoice_data::{Location, Organization},
 	clinvoice_query as query,
 };
 
 #[async_trait::async_trait]
-impl OrganizationAdapter for PostgresOrganization<'_, '_>
+impl OrganizationAdapter for PostgresOrganization<'_>
 {
 	type Error = Error;
 
-	/// # Summary
-	///
-	/// Create a new [`Organization`] on the active [`Store`](crate::Store).
-	///
-	/// # Parameters
-	///
-	/// See [`Organization`].
-	///
-	/// # Returns
-	///
-	/// The newly created [`Organization`].
-	async fn create(location: Location, name: String, store: &Store) -> Result<Organization>
+	async fn create(
+		location: Location,
+		name: String,
+		pool: Self::Pool,
+	) -> Result<Organization>
 	{
 		todo!()
 	}
 
-	/// # Summary
-	///
-	/// Retrieve some [`Organization`] from the active [`Store`]crate::Store).
-	///
-	/// # Parameters
-	///
-	/// See [`Organization`].
-	///
-	/// # Returns
-	///
-	/// * An `Error`, if something goes wrong.
-	/// * A list of matching [`Job`]s.
-	async fn retrieve(query: &query::Organization, store: &Store) -> Result<Vec<Organization>>
+	async fn retrieve(
+		query: &query::Organization,
+		pool: Self::Pool,
+	) -> Result<Vec<Organization>>
+	{
+		todo!()
+	}
+
+	async fn retrieve_view(
+		query: &query::Organization,
+		pool: Self::Pool,
+	) -> Result<Vec<OrganizationView>>
 	{
 		todo!()
 	}

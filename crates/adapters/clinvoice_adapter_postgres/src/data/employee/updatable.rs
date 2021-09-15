@@ -7,7 +7,7 @@ use
 };
 
 #[async_trait::async_trait]
-impl Updatable for PostgresEmployee<'_, '_>
+impl Updatable for PostgresEmployee<'_>
 {
 	type Error = Error;
 

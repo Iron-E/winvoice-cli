@@ -1,61 +1,47 @@
+use std::collections::HashMap;
+
+use clinvoice_data::{Contact, EmployeeStatus, Organization, Person, views::EmployeeView};
+
 use
 {
-	std::collections::HashMap,
-
 	super::PostgresEmployee,
 	crate::data::{Error, Result},
 
-	clinvoice_adapter::
-	{
-		data::{EmployeeAdapter, Error as DataError, Initializable, Updatable},
-		Store,
-	},
-	clinvoice_data::{Contact, Employee, EmployeeStatus, Organization, Person},
+	clinvoice_adapter::data::EmployeeAdapter,
+
+	clinvoice_data::Employee,
 	clinvoice_query as query,
 };
 
 #[async_trait::async_trait]
-impl EmployeeAdapter for PostgresEmployee<'_, '_>
+impl EmployeeAdapter for PostgresEmployee<'_>
 {
 	type Error = Error;
 
-	/// # Summary
-	///
-	/// Create some [`Employee`] on an active [`Store`](crate::Store).
-	///
-	/// # Parameters
-	///
-	/// See [`Employee`].
-	///
-	/// # Returns
-	///
-	/// * The created [`Employee`], if there were no errors.
-	/// * An [`Error`], if something goes wrong.
 	async fn create(
 		contact_info: HashMap<String, Contact>,
 		organization: Organization,
 		person: Person,
 		status: EmployeeStatus,
 		title: String,
-		store: &Store,
+		pool: Self::Pool,
 	) -> Result<Employee>
 	{
 		todo!()
 	}
 
-	/// # Summary
-	///
-	/// Retrieve some [`Employee`] from an active [`Store`](crate::Store).
-	///
-	/// # Parameters
-	///
-	/// See [`Employee`].
-	///
-	/// # Returns
-	///
-	/// * Any matching [`Employee`]s.
-	/// * An [`Error`], should something go wrong.
-	async fn retrieve(query: &query::Employee, store: &Store) -> Result<Vec<Employee>>
+	async fn retrieve(
+		query: &query::Employee,
+		pool: Self::Pool,
+	) -> Result<Vec<Employee>>
+	{
+		todo!()
+	}
+
+	async fn retrieve_view(
+		query: &query::Employee,
+		pool: Self::Pool,
+	) -> Result<Vec<EmployeeView>>
 	{
 		todo!()
 	}

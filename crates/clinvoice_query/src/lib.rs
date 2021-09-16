@@ -22,7 +22,6 @@
 
 mod contact;
 mod employee;
-mod error;
 mod expense;
 mod invoice;
 mod job;
@@ -35,7 +34,6 @@ mod timesheet;
 
 pub use contact::Contact;
 pub use employee::Employee;
-pub use error::{Error, Result};
 pub use expense::Expense;
 pub use invoice::Invoice;
 pub use job::Job;

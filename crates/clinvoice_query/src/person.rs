@@ -1,8 +1,8 @@
-use clinvoice_data::{views::PersonView, Id};
+use clinvoice_data::Id;
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 
-use super::{Match, MatchStr, Result};
+use super::{Match, MatchStr};
 
 /// # Summary
 ///
@@ -16,39 +16,4 @@ pub struct Person<'m>
 
 	#[cfg_attr(feature = "serde_support", serde(default))]
 	pub name: MatchStr<String>,
-}
-
-impl Person<'_>
-{
-	/// # Summary
-	///
-	/// Return `true` if `person` is a match.
-	pub fn matches(&self, person: &clinvoice_data::Person) -> Result<bool>
-	{
-		Ok(self.id.matches(&person.id) && self.name.matches(&person.name)?)
-	}
-
-	/// # Summary
-	///
-	/// Return `true` if `person` is a match.
-	pub fn matches_view(&self, person: &PersonView) -> Result<bool>
-	{
-		Ok(self.id.matches(&person.id) && self.name.matches(&person.name)?)
-	}
-
-	/// # Summary
-	///
-	/// Return `true` if `people` [`Match::set_matches`].
-	pub fn set_matches_view<'item>(
-		&self,
-		people: &mut impl Iterator<Item = &'item PersonView>,
-	) -> Result<bool>
-	{
-		Ok(self
-			.id
-			.set_matches(&people.by_ref().map(|p| &p.id).collect()) &&
-			self
-				.name
-				.set_matches(&mut people.map(|p| p.name.as_ref()))?)
-	}
 }

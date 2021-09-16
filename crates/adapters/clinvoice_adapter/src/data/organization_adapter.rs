@@ -4,13 +4,14 @@ use std::error::Error;
 
 use clinvoice_data::{views::OrganizationView, Location, Organization};
 use clinvoice_query as query;
+use sqlx::Executor;
 
 use super::{Deletable, Updatable};
 
 #[async_trait::async_trait]
 pub trait OrganizationAdapter:
-	Deletable<Error = <Self as OrganizationAdapter>::Error>
-	+ Updatable<Error = <Self as OrganizationAdapter>::Error>
+	Deletable<Entity = Organization>
+	+ Updatable<Db = <Self as Deletable>::Db, Entity = <Self as Deletable>::Entity, Error = <Self as Deletable>::Error>
 {
 	type Error: From<super::Error> + Error;
 
@@ -25,11 +26,11 @@ pub trait OrganizationAdapter:
 	/// # Returns
 	///
 	/// The newly created [`Organization`].
-	async fn create(
+	async fn create<'conn>(
+		connection: impl Executor<'conn, Database = <Self as Deletable>::Db>,
 		location: Location,
 		name: String,
-		pool: Self::Pool,
-	) -> Result<Organization, <Self as OrganizationAdapter>::Error>;
+	) -> Result<<Self as Deletable>::Entity, <Self as Deletable>::Error>;
 
 	/// # Summary
 	///
@@ -39,10 +40,10 @@ pub trait OrganizationAdapter:
 	///
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`Organization`]s.
-	async fn retrieve(
+	async fn retrieve<'conn>(
+		connection: impl Executor<'conn, Database = <Self as Deletable>::Db>,
 		query: &query::Organization,
-		pool: Self::Pool,
-	) -> Result<Vec<Organization>, <Self as OrganizationAdapter>::Error>;
+	) -> Result<Vec<<Self as Deletable>::Entity>, <Self as Deletable>::Error>;
 
 	/// # Summary
 	///
@@ -52,8 +53,8 @@ pub trait OrganizationAdapter:
 	///
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`OrganizationView`]s.
-	async fn retrieve_view(
+	async fn retrieve_view<'conn>(
+		connection: impl Executor<'conn, Database = <Self as Deletable>::Db>,
 		query: &query::Organization,
-		pool: Self::Pool,
-	) -> Result<Vec<OrganizationView>, <Self as OrganizationAdapter>::Error>;
+	) -> Result<Vec<OrganizationView>, <Self as Deletable>::Error>;
 }

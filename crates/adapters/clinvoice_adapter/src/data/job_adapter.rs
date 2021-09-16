@@ -1,7 +1,5 @@
 #![allow(clippy::wrong_self_convention)]
 
-use std::error::Error;
-
 use clinvoice_data::{
 	chrono::{DateTime, Utc},
 	finance::Money,
@@ -10,6 +8,7 @@ use clinvoice_data::{
 	Organization,
 };
 use clinvoice_query as query;
+use sqlx::Executor;
 
 use super::{
 	Deletable,
@@ -18,11 +17,9 @@ use super::{
 
 #[async_trait::async_trait]
 pub trait JobAdapter:
-	Deletable<Error = <Self as JobAdapter>::Error>
-	+ Updatable<Error = <Self as JobAdapter>::Error>
+	Deletable<Entity = Job>
+	+ Updatable<Db = <Self as Deletable>::Db, Entity = <Self as Deletable>::Entity, Error = <Self as Deletable>::Error>
 {
-	type Error: From<super::Error> + Error;
-
 	/// # Summary
 	///
 	/// Create a new [`Job`] on the database.
@@ -34,13 +31,13 @@ pub trait JobAdapter:
 	/// # Returns
 	///
 	/// The newly created [`Job`].
-	async fn create(
+	async fn create<'conn>(
+		connection: impl Executor<'conn, Database = <Self as Deletable>::Db>,
 		client: Organization,
 		date_open: DateTime<Utc>,
 		hourly_rate: Money,
 		objectives: String,
-		pool: Self::Pool,
-	) -> Result<Job, <Self as JobAdapter>::Error>;
+	) -> Result<<Self as Deletable>::Entity, <Self as Deletable>::Error>;
 
 	/// # Summary
 	///
@@ -50,10 +47,10 @@ pub trait JobAdapter:
 	///
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`Job`]s.
-	async fn retrieve(
+	async fn retrieve<'conn>(
+		connection: impl Executor<'conn, Database = <Self as Deletable>::Db>,
 		query: &query::Job,
-		pool: Self::Pool,
-	) -> Result<Vec<Job>, <Self as JobAdapter>::Error>;
+	) -> Result<Vec<<Self as Deletable>::Entity>, <Self as Deletable>::Error>;
 
 	/// # Summary
 	///
@@ -63,8 +60,8 @@ pub trait JobAdapter:
 	///
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`JobView`]s.
-	async fn retrieve_view(
+	async fn retrieve_view<'conn>(
+		connection: impl Executor<'conn, Database = <Self as Deletable>::Db>,
 		query: &query::Job,
-		pool: Self::Pool,
-	) -> Result<Vec<JobView>, <Self as JobAdapter>::Error>;
+	) -> Result<Vec<JobView>, <Self as Deletable>::Error>;
 }

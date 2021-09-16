@@ -17,7 +17,6 @@
 mod adapters;
 pub mod data;
 mod feature_not_found;
-mod macros;
 mod store;
 
 pub use adapters::Adapters;

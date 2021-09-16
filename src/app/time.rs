@@ -3,7 +3,7 @@ mod display;
 use std::cmp::Ordering;
 
 use clinvoice_adapter::{
-	data::{Error as DataError, Updatable},
+	data::{Error as NoDataError, Updatable},
 	Adapters,
 	Error as AdapterError,
 };
@@ -76,7 +76,7 @@ impl Time
 
 			if timesheets.is_empty()
 			{
-				return Err(DataError::NoData(format!("active `{}`s", stringify!(Timesheet))).into());
+				return Err(NoDataError(format!("active `{}`s", stringify!(Timesheet))).into());
 			}
 
 			let selected = input::select_one(&timesheets, "Which `Timesheet` are you working on?")?;

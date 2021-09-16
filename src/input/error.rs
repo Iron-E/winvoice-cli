@@ -11,10 +11,10 @@ use thiserror::Error;
 pub enum Error
 {
 	#[error("{0}")]
-	Data(#[from] data::Error),
+	Io(#[from] io::Error),
 
 	#[error("{0}")]
-	Io(#[from] io::Error),
+	NoData(#[from] data::Error),
 
 	/// # Summary
 	///

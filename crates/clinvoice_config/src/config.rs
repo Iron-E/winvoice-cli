@@ -1,10 +1,9 @@
 mod error;
-mod updatable;
 
 use core::time::Duration;
-use std::{collections::BTreeMap, path::PathBuf};
+use std::{collections::BTreeMap, fs, path::PathBuf};
 
-use clinvoice_adapter::{data::Updatable, Adapters, Store};
+use clinvoice_adapter::{Adapters, Store};
 use clinvoice_data::{finance::Currency, Id};
 pub use error::{Error, Result};
 use serde::{Deserialize, Serialize};
@@ -44,10 +43,19 @@ impl Config<'_, '_>
 	/// # Summary
 	///
 	/// Create a configuration file with some defaults.
-	pub async fn init() -> Result<()>
+	pub fn init() -> Result<()>
 	{
-		if !Self::path().is_file()
+		let path = Self::path();
+		if !path.is_file()
 		{
+			if let Some(parent) = path.parent()
+			{
+				if !parent.is_dir()
+				{
+					fs::create_dir_all(parent)?;
+				}
+			}
+
 			let config = Self {
 				employees:  Employees {
 					default_id: Id::default(),
@@ -72,7 +80,7 @@ impl Config<'_, '_>
 				},
 			};
 
-			config.update().await?;
+			config.update()?;
 		}
 
 		Ok(())
@@ -104,6 +112,14 @@ impl Config<'_, '_>
 			.expect("Operating System is not supported")
 			.join("clinvoice")
 			.join("config.toml")
+	}
+
+	pub fn update(&self) -> Result<()>
+	{
+		let serialized = toml::to_string_pretty(self)?;
+		fs::write(Self::path(), serialized)?;
+
+		Ok(())
 	}
 }
 

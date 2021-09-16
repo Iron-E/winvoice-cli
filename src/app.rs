@@ -9,6 +9,7 @@ use dialoguer::Editor;
 use futures::TryFutureExt;
 use retrieve::Retrieve;
 use time::Time;
+use futures::future::{self, Future};
 
 use crate::{Config, DynResult, StructOpt};
 
@@ -55,16 +56,16 @@ impl App
 	/// # Summary
 	///
 	/// Edit the user's configuration file.
-	async fn edit_config(config: &Config<'_, '_>) -> ConfigResult<()>
+	fn edit_config(config: &Config<'_, '_>) -> impl Future<Output = ConfigResult<()>>
 	{
-		let serialized = toml::to_string_pretty(config)?;
-		if let Some(edited) = Editor::new().extension(".toml").edit(&serialized)?
+		let serialized = toml::to_string_pretty(config).map_err(future::err)?;
+		if let Some(edited) = Editor::new().extension(".toml").edit(&serialized).map_err(future::err)?
 		{
-			let deserialized: Config = toml::from_str(&edited)?;
-			deserialized.update().await?;
+			let deserialized: Config = toml::from_str(&edited).map_err(future::err)?;
+			deserialized.update().map_err(future::err)?;
 		}
 
-		Ok(())
+		future::ok(())
 	}
 
 	/// # Summary

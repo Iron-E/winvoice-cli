@@ -1,6 +1,7 @@
 #![allow(clippy::wrong_self_convention)]
 
-use std::{collections::HashMap, error::Error};
+use std::collections::HashMap;
+use sqlx::Executor;
 
 use clinvoice_data::{
 	views::EmployeeView,
@@ -19,11 +20,9 @@ use super::{
 
 #[async_trait::async_trait]
 pub trait EmployeeAdapter:
-	Deletable<Error = <Self as EmployeeAdapter>::Error>
-	+ Updatable<Error = <Self as EmployeeAdapter>::Error>
+	Deletable<Entity = Employee>
+	+ Updatable<Db = <Self as Deletable>::Db, Entity = <Self as Deletable>::Entity, Error = <Self as Deletable>::Error>
 {
-	type Error: From<super::Error> + Error;
-
 	/// # Summary
 	///
 	/// Create some [`Employee`] on the database.
@@ -36,14 +35,14 @@ pub trait EmployeeAdapter:
 	///
 	/// * The created [`Employee`], if there were no errors.
 	/// * An [`Error`], if something goes wrong.
-	async fn create(
+	async fn create<'conn>(
+		connection: impl Executor<'conn, Database = <Self as Deletable>::Db>,
 		contact_info: HashMap<String, Contact>,
 		organization: Organization,
 		person: Person,
 		status: EmployeeStatus,
 		title: String,
-		pool: Self::Pool,
-	) -> Result<Employee, <Self as EmployeeAdapter>::Error>;
+	) -> Result<<Self as Deletable>::Entity, <Self as Deletable>::Error>;
 
 	/// # Summary
 	///
@@ -57,10 +56,10 @@ pub trait EmployeeAdapter:
 	///
 	/// * Any matching [`Employee`]s.
 	/// * An [`Error`], should something go wrong.
-	async fn retrieve(
+	async fn retrieve<'conn>(
+		connection: impl Executor<'conn, Database = <Self as Deletable>::Db>,
 		query: &query::Employee,
-		pool: Self::Pool,
-	) -> Result<Vec<Employee>, <Self as EmployeeAdapter>::Error>;
+	) -> Result<Vec<<Self as Deletable>::Entity>, <Self as Deletable>::Error>;
 
 	/// # Summary
 	///
@@ -74,8 +73,8 @@ pub trait EmployeeAdapter:
 	///
 	/// * Any matching [`Employee`]s.
 	/// * An [`Error`], should something go wrong.
-	async fn retrieve_view(
+	async fn retrieve_view<'conn>(
+		connection: impl Executor<'conn, Database = <Self as Deletable>::Db>,
 		query: &query::Employee,
-		pool: Self::Pool,
-	) -> Result<Vec<EmployeeView>, <Self as EmployeeAdapter>::Error>;
+	) -> Result<Vec<EmployeeView>, <Self as Deletable>::Error>;
 }

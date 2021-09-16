@@ -4,13 +4,14 @@ use std::error::Error;
 
 use clinvoice_data::{Person, views::PersonView};
 use clinvoice_query as query;
+use sqlx::Executor;
 
 use super::{Deletable, Updatable};
 
 #[async_trait::async_trait]
 pub trait PersonAdapter:
-	Deletable<Error = <Self as PersonAdapter>::Error>
-	+ Updatable<Error = <Self as PersonAdapter>::Error>
+	Deletable<Entity = Person>
+	+ Updatable<Db = <Self as Deletable>::Db, Entity = <Self as Deletable>::Entity, Error = <Self as Deletable>::Error>
 {
 	type Error: From<super::Error> + Error;
 
@@ -25,7 +26,10 @@ pub trait PersonAdapter:
 	/// # Returns
 	///
 	/// The newly created [`Person`].
-	async fn create(name: String, pool: Self::Pool) -> Result<Person, <Self as PersonAdapter>::Error>;
+	async fn create<'conn>(
+		connection: impl Executor<'conn, Database = <Self as Deletable>::Db>,
+		name: String,
+	) -> Result<<Self as Deletable>::Entity, <Self as Deletable>::Error>;
 
 	/// # Summary
 	///
@@ -35,10 +39,10 @@ pub trait PersonAdapter:
 	///
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`PersonView`]s.
-	async fn retrieve(
+	async fn retrieve<'conn>(
+		connection: impl Executor<'conn, Database = <Self as Deletable>::Db>,
 		query: &query::Person,
-		pool: Self::Pool,
-	) -> Result<Vec<Person>, <Self as PersonAdapter>::Error>;
+	) -> Result<Vec<<Self as Deletable>::Entity>, <Self as Deletable>::Error>;
 
 	/// # Summary
 	///
@@ -48,8 +52,8 @@ pub trait PersonAdapter:
 	///
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`PersonView`]s.
-	async fn retrieve_view(
+	async fn retrieve_view<'conn>(
+		connection: impl Executor<'conn, Database = <Self as Deletable>::Db>,
 		query: &query::Person,
-		pool: Self::Pool,
-	) -> Result<Vec<PersonView>, <Self as PersonAdapter>::Error>;
+	) -> Result<Vec<PersonView>, <Self as Deletable>::Error>;
 }

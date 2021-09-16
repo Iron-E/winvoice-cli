@@ -33,7 +33,7 @@ fn exit_with_err(error: impl Error) -> !
 async fn main()
 {
 	// Create a default user configuration if not already present.
-	Config::init().await.unwrap_or_else(|e| exit_with_err(e));
+	Config::init().unwrap_or_else(|e| exit_with_err(e));
 
 	// Get the user configuration.
 	let config_bytes = fs::read(Config::path()).unwrap_or_else(|e| exit_with_err(e));

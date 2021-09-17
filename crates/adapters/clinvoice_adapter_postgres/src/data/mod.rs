@@ -6,13 +6,13 @@
 
 mod employee;
 mod error;
-mod initializer;
 mod job;
 mod location;
 mod organization;
 mod person;
+mod schema;
 
-pub(self) use initializer::Initializer;
+pub use schema::PostgresSchema;
 
 pub use
 {

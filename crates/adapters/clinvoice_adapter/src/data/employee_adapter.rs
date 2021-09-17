@@ -35,8 +35,8 @@ pub trait EmployeeAdapter:
 	///
 	/// * The created [`Employee`], if there were no errors.
 	/// * An [`Error`], if something goes wrong.
-	async fn create<'conn>(
-		connection: impl Executor<'conn, Database = <Self as Deletable>::Db>,
+	async fn create(
+		connection: impl Executor<'_, Database = <Self as Deletable>::Db>,
 		contact_info: HashMap<String, Contact>,
 		organization: Organization,
 		person: Person,
@@ -56,8 +56,8 @@ pub trait EmployeeAdapter:
 	///
 	/// * Any matching [`Employee`]s.
 	/// * An [`Error`], should something go wrong.
-	async fn retrieve<'conn>(
-		connection: impl Executor<'conn, Database = <Self as Deletable>::Db>,
+	async fn retrieve(
+		connection: impl Executor<'_, Database = <Self as Deletable>::Db>,
 		query: &query::Employee,
 	) -> Result<Vec<<Self as Deletable>::Entity>, <Self as Deletable>::Error>;
 
@@ -73,8 +73,8 @@ pub trait EmployeeAdapter:
 	///
 	/// * Any matching [`Employee`]s.
 	/// * An [`Error`], should something go wrong.
-	async fn retrieve_view<'conn>(
-		connection: impl Executor<'conn, Database = <Self as Deletable>::Db>,
+	async fn retrieve_view(
+		connection: impl Executor<'_, Database = <Self as Deletable>::Db>,
 		query: &query::Employee,
 	) -> Result<Vec<EmployeeView>, <Self as Deletable>::Error>;
 }

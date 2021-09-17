@@ -224,7 +224,7 @@ impl Retrieve
 									results_view
 										.first()
 										.ok_or_else(|| {
-											DataError::NoData(format!("`{}`", stringify!(Employee)))
+											input::Error::NoData(format!("`{}`", stringify!(Employee)))
 										})?
 										.id
 								},

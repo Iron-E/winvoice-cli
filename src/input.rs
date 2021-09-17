@@ -7,7 +7,6 @@ use core::{
 };
 use std::{any, io};
 
-use clinvoice_adapter::data::Error as NoDataError;
 use clinvoice_data::views::RestorableSerde;
 use dialoguer::{Editor, Input, MultiSelect, Select};
 pub use error::{Error, Result};
@@ -155,7 +154,7 @@ where
 {
 	if entities.is_empty()
 	{
-		return Err(NoDataError(format!("`{}`", any::type_name::<T>())).into());
+		return Err(Error::NoData(format!("`{}`", any::type_name::<T>())));
 	}
 
 	let selector = {

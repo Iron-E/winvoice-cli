@@ -1,4 +1,5 @@
 use std::error::Error;
+use sqlx::{Database, Executor, Error as SqlxError};
 
 /// # Summary
 ///
@@ -6,9 +7,9 @@ use std::error::Error;
 #[async_trait::async_trait]
 pub trait Deletable
 {
-	type Db: sqlx::Database;
+	type Db: Database;
 	type Entity;
-	type Error: Error + From<sqlx::Error>;
+	type Error: Error + From<SqlxError>;
 
 	/// # Summary
 	///
@@ -30,5 +31,5 @@ pub trait Deletable
 	/// * An [`Error`] when:
 	///   * `self.id` had not already been `create`d.
 	///   * Something goes wrong.
-	async fn delete<'conn>(cascade: bool, connection: impl sqlx::Executor<'conn, Database = Self::Db>, entities: &[Self::Entity]) -> Result<(), Self::Error>;
+	async fn delete(cascade: bool, connection: impl Executor<'_, Database = Self::Db>, entities: &[Self::Entity]) -> Result<(), Self::Error>;
 }

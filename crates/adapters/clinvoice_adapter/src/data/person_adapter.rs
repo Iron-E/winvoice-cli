@@ -26,8 +26,8 @@ pub trait PersonAdapter:
 	/// # Returns
 	///
 	/// The newly created [`Person`].
-	async fn create<'conn>(
-		connection: impl Executor<'conn, Database = <Self as Deletable>::Db>,
+	async fn create(
+		connection: impl Executor<'_, Database = <Self as Deletable>::Db>,
 		name: String,
 	) -> Result<<Self as Deletable>::Entity, <Self as Deletable>::Error>;
 
@@ -39,8 +39,8 @@ pub trait PersonAdapter:
 	///
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`PersonView`]s.
-	async fn retrieve<'conn>(
-		connection: impl Executor<'conn, Database = <Self as Deletable>::Db>,
+	async fn retrieve(
+		connection: impl Executor<'_, Database = <Self as Deletable>::Db>,
 		query: &query::Person,
 	) -> Result<Vec<<Self as Deletable>::Entity>, <Self as Deletable>::Error>;
 
@@ -52,8 +52,8 @@ pub trait PersonAdapter:
 	///
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`PersonView`]s.
-	async fn retrieve_view<'conn>(
-		connection: impl Executor<'conn, Database = <Self as Deletable>::Db>,
+	async fn retrieve_view(
+		connection: impl Executor<'_, Database = <Self as Deletable>::Db>,
 		query: &query::Person,
 	) -> Result<Vec<PersonView>, <Self as Deletable>::Error>;
 }

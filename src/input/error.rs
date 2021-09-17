@@ -13,8 +13,8 @@ pub enum Error
 	#[error("{0}")]
 	Io(#[from] io::Error),
 
-	#[error("{0}")]
-	NoData(#[from] data::Error),
+	#[error("No {0} could be selected for this operation, and at least one was required")]
+	NoData(String),
 
 	/// # Summary
 	///

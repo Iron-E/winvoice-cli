@@ -26,8 +26,8 @@ pub trait OrganizationAdapter:
 	/// # Returns
 	///
 	/// The newly created [`Organization`].
-	async fn create<'conn>(
-		connection: impl Executor<'conn, Database = <Self as Deletable>::Db>,
+	async fn create(
+		connection: impl Executor<'_, Database = <Self as Deletable>::Db>,
 		location: Location,
 		name: String,
 	) -> Result<<Self as Deletable>::Entity, <Self as Deletable>::Error>;
@@ -40,8 +40,8 @@ pub trait OrganizationAdapter:
 	///
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`Organization`]s.
-	async fn retrieve<'conn>(
-		connection: impl Executor<'conn, Database = <Self as Deletable>::Db>,
+	async fn retrieve(
+		connection: impl Executor<'_, Database = <Self as Deletable>::Db>,
 		query: &query::Organization,
 	) -> Result<Vec<<Self as Deletable>::Entity>, <Self as Deletable>::Error>;
 
@@ -53,8 +53,8 @@ pub trait OrganizationAdapter:
 	///
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`OrganizationView`]s.
-	async fn retrieve_view<'conn>(
-		connection: impl Executor<'conn, Database = <Self as Deletable>::Db>,
+	async fn retrieve_view(
+		connection: impl Executor<'_, Database = <Self as Deletable>::Db>,
 		query: &query::Organization,
 	) -> Result<Vec<OrganizationView>, <Self as Deletable>::Error>;
 }

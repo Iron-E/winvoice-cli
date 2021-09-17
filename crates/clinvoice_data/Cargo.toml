@@ -21,8 +21,10 @@ chrono = {version="0.4", features=["serde"]}
 serde = {version="1", optional=true}
 
 # Unique Identification
-uuid = {version="0.8", features=["serde", "v4", "v5"]}
+uuid = {version="0.8", features=["v4"], optional=true}
 
 [features]
 default = []
-serde_support = ["clinvoice_finance/serde_support", "serde/derive", "uuid/serde"]
+serde_support = ["clinvoice_finance/serde_support", "serde/derive"]
+serde_support_unique_id = ["clinvoice_finance/serde_support", "serde/derive", "uuid", "uuid/serde"]
+unique_id = ["uuid"]

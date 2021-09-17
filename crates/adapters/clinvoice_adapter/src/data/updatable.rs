@@ -1,4 +1,5 @@
 use std::error::Error;
+use sqlx::{Database, Executor, Error as SqlxError};
 
 /// # Summary
 ///
@@ -6,9 +7,9 @@ use std::error::Error;
 #[async_trait::async_trait]
 pub trait Updatable
 {
-	type Db: sqlx::Database;
+	type Db: Database;
 	type Entity;
-	type Error: Error + From<sqlx::Error>;
+	type Error: Error + From<SqlxError>;
 
 	/// # Summary
 	///
@@ -28,5 +29,5 @@ pub trait Updatable
 	/// * An `Error`, when something goes wrong.
 	///
 	/// [store]: crate::Store
-	async fn update<'conn>(entity: &Self::Entity, connection: impl sqlx::Executor<'conn, Database = Self::Db>) -> Result<(), Self::Error>;
+	async fn update(entity: &Self::Entity, connection: impl Executor<'_, Database = Self::Db>) -> Result<(), Self::Error>;
 }

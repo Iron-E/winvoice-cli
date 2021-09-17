@@ -1,21 +1,21 @@
 use clinvoice_data::Person;
+use sqlx::{Postgres, Executor, Error, Result};
 
 use
 {
 	super::PostgresPerson,
-	crate::data::{Error, Result},
 
 	clinvoice_adapter::data::Deletable,
 };
 
 #[async_trait::async_trait]
-impl<'a> Deletable for PostgresPerson<'a>
+impl Deletable for PostgresPerson
 {
-	type Error = Error;
+	type Db = Postgres;
 	type Entity = Person;
-	type Pool = &'a sqlx::PgPool;
+	type Error = Error;
 
-	async fn delete(cascade: bool, entities: &[Self::Entity], pool: &Self::Pool) -> Result<()>
+	async fn delete(cascade: bool, connection: impl Executor<'_, Database = Self::Db>, entities: &[Self::Entity]) -> Result<()>
 	{
 		todo!()
 	}
@@ -27,5 +27,6 @@ mod tests
 	#[tokio::test]
 	async fn delete()
 	{
+		// TODO: write test
 	}
 }

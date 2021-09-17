@@ -1,18 +1,32 @@
+use clinvoice_data::Organization;
+use sqlx::{Postgres, Executor, Error, Result};
+
 use
 {
 	super::PostgresOrganization,
-	crate::data::{Error, Result},
 
 	clinvoice_adapter::data::Updatable,
 };
 
 #[async_trait::async_trait]
-impl Updatable for PostgresOrganization<'_>
+impl Updatable for PostgresOrganization
 {
+	type Db = Postgres;
+	type Entity = Organization;
 	type Error = Error;
 
-	async fn update(&self) -> Result<()>
+	async fn update(entity: &Self::Entity, connection: impl Executor<'_, Database = Self::Db>) -> Result<()>
 	{
 		todo!()
+	}
+}
+
+#[cfg(test)]
+mod tests
+{
+	#[tokio::test]
+	async fn update()
+	{
+		// TODO: write test
 	}
 }

@@ -31,8 +31,8 @@ pub trait JobAdapter:
 	/// # Returns
 	///
 	/// The newly created [`Job`].
-	async fn create<'conn>(
-		connection: impl Executor<'conn, Database = <Self as Deletable>::Db>,
+	async fn create(
+		connection: impl Executor<'_, Database = <Self as Deletable>::Db>,
 		client: Organization,
 		date_open: DateTime<Utc>,
 		hourly_rate: Money,
@@ -47,8 +47,8 @@ pub trait JobAdapter:
 	///
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`Job`]s.
-	async fn retrieve<'conn>(
-		connection: impl Executor<'conn, Database = <Self as Deletable>::Db>,
+	async fn retrieve(
+		connection: impl Executor<'_, Database = <Self as Deletable>::Db>,
 		query: &query::Job,
 	) -> Result<Vec<<Self as Deletable>::Entity>, <Self as Deletable>::Error>;
 
@@ -60,8 +60,8 @@ pub trait JobAdapter:
 	///
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`JobView`]s.
-	async fn retrieve_view<'conn>(
-		connection: impl Executor<'conn, Database = <Self as Deletable>::Db>,
+	async fn retrieve_view(
+		connection: impl Executor<'_, Database = <Self as Deletable>::Db>,
 		query: &query::Job,
 	) -> Result<Vec<JobView>, <Self as Deletable>::Error>;
 }

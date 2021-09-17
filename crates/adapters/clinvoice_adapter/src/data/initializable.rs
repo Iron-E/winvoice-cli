@@ -1,13 +1,14 @@
 use std::error::Error;
+use sqlx::{Database, Executor, Error as SqlxError};
 
 #[async_trait::async_trait]
 pub trait Initializable
 {
-	type Db: sqlx::Database;
-	type Error: Error + From<sqlx::Error>;
+	type Db: Database;
+	type Error: Error + From<SqlxError>;
 
 	/// # Summary
 	///
 	/// Initialize the database for a given [`Store`].
-	async fn init<'conn>(connection: impl sqlx::Executor<'conn, Database = Self::Db>) -> Result<(), Self::Error>;
+	async fn init(connection: impl Executor<'_, Database = Self::Db>) -> Result<(), Self::Error>;
 }

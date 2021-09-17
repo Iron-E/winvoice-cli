@@ -1,20 +1,20 @@
+use sqlx::{Postgres, Executor, Error, Result};
 use
 {
 	super::PostgresLocation,
-	crate::data::{Error, Result},
 
 	clinvoice_adapter::data::Deletable,
 	clinvoice_data::Location,
 };
 
 #[async_trait::async_trait]
-impl<'a> Deletable for PostgresLocation<'a>
+impl Deletable for PostgresLocation
 {
+	type Db = Postgres;
 	type Entity = Location;
 	type Error = Error;
-	type Pool = &'a sqlx::PgPool;
 
-	async fn delete(cascade: bool, entities: &[Self::Entity], pool: &Self::Pool) -> Result<()>
+	async fn delete(cascade: bool, connection: impl Executor<'_, Database = Self::Db>, entities: &[Self::Entity]) -> Result<()>
 	{
 		todo!()
 	}
@@ -26,5 +26,6 @@ mod tests
 	#[tokio::test]
 	async fn delete()
 	{
+		// TODO: write test
 	}
 }

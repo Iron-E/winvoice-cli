@@ -1,9 +1,9 @@
 use clinvoice_data::views::PersonView;
+use sqlx::{Executor, Postgres, Result};
 
 use
 {
 	super::PostgresPerson,
-	crate::data::{Error, Result},
 
 	clinvoice_adapter::data::PersonAdapter,
 	clinvoice_data::Person,
@@ -26,7 +26,10 @@ impl PersonAdapter for PostgresPerson<'_>
 	/// # Returns
 	///
 	/// The newly created [`Person`].
-	async fn create(name: String, pool: Self::Pool) -> Result<Person>
+	async fn create(
+		connection: impl Executor<'_, Database = Postgres>,
+		name: String,
+	) -> Result<Person>
 	{
 		todo!()
 	}
@@ -40,8 +43,8 @@ impl PersonAdapter for PostgresPerson<'_>
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`PersonView`]s.
 	async fn retrieve(
+		connection: impl Executor<'_, Database = Postgres>,
 		query: &query::Person,
-		pool: Self::Pool,
 	) -> Result<Vec<Person>>
 	{
 		todo!()
@@ -56,8 +59,8 @@ impl PersonAdapter for PostgresPerson<'_>
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`PersonView`]s.
 	async fn retrieve_view(
+		connection: impl Executor<'_, Database = Postgres>,
 		query: &query::Person,
-		pool: Self::Pool,
 	) -> Result<Vec<PersonView>>
 	{
 		todo!()
@@ -75,5 +78,6 @@ mod tests
 	#[tokio::test]
 	async fn retrieve()
 	{
+		// TODO: write test + `retrieve_view`
 	}
 }

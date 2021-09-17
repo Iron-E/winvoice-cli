@@ -2,7 +2,7 @@
 
 use clinvoice_data::{views::LocationView, Location};
 use clinvoice_query as query;
-use sqlx::Executor;
+use sqlx::{Acquire, Executor};
 
 use super::{Deletable, Updatable};
 
@@ -22,8 +22,8 @@ pub trait LocationAdapter:
 	/// # Returns
 	///
 	/// The created [`Location`].
-	async fn create<'conn>(
-		connection: impl Executor<'conn, Database = <Self as Deletable>::Db>,
+	async fn create(
+		connection: impl Executor<'_, Database = <Self as Deletable>::Db>,
 		name: String,
 	) -> Result<<Self as Deletable>::Entity, <Self as Deletable>::Error>;
 
@@ -38,43 +38,43 @@ pub trait LocationAdapter:
 	/// # Returns
 	///
 	/// The created [`Location`].
-	async fn create_inner<'conn>(
-		connection: impl Executor<'conn, Database = <Self as Deletable>::Db>,
-		outer: <Self as Deletable>::Entity,
+	async fn create_inner(
+		connection: impl Executor<'_, Database = <Self as Deletable>::Db>,
+		outer: &<Self as Deletable>::Entity,
 		name: String,
 	) -> Result<<Self as Deletable>::Entity, <Self as Deletable>::Error>;
 
 	/// # Summary
 	///
-	/// Get the [`Location`]s which contain this [`Location`].
-	async fn outers<'conn>(
-		connection: impl Executor<'conn, Database = <Self as Deletable>::Db>,
-		location: &Location,
-	) -> Result<Vec<<Self as Deletable>::Entity>, <Self as Deletable>::Error>;
-
-	/// # Summary
-	///
 	/// Retrieve some [`LocationView`]s from the database using a [query](query::Location).
 	///
 	/// # Returns
 	///
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`LocationView`]s.
-	async fn retrieve<'conn>(
-		connection: impl Executor<'conn, Database = <Self as Deletable>::Db>,
+	async fn retrieve(
+		connection: impl Executor<'_, Database = <Self as Deletable>::Db>,
 		query: &query::Location,
 	) -> Result<Vec<<Self as Deletable>::Entity>, <Self as Deletable>::Error>;
 
 	/// # Summary
 	///
+	/// Get the [`Location`]s which contain this [`Location`].
+	async fn retrieve_outers(
+		connection: impl Executor<'_, Database = <Self as Deletable>::Db>,
+		location: &<Self as Deletable>::Entity,
+	) -> Result<Vec<<Self as Deletable>::Entity>, <Self as Deletable>::Error>;
+
+	/// # Summary
+	///
 	/// Retrieve some [`LocationView`]s from the database using a [query](query::Location).
 	///
 	/// # Returns
 	///
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`LocationView`]s.
-	async fn retrieve_view<'conn>(
-		connection: impl Executor<'conn, Database = <Self as Deletable>::Db>,
+	async fn retrieve_view(
+		connection: impl Acquire<'_, Database = <Self as Deletable>::Db>,
 		query: &query::Location,
 	) -> Result<Vec<LocationView>, <Self as Deletable>::Error>;
 }

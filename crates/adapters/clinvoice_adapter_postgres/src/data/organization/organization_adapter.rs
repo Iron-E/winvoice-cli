@@ -14,7 +14,7 @@ use
 impl OrganizationAdapter for PostgresOrganization
 {
 	async fn create(
-		connection: impl Executor<'_, Database = Postgres>,
+		connection: impl 'async_trait + Executor<'_, Database = Postgres>,
 		location: Location,
 		name: String,
 	) -> Result<Organization>
@@ -23,7 +23,7 @@ impl OrganizationAdapter for PostgresOrganization
 	}
 
 	async fn retrieve(
-		connection: impl Executor<'_, Database = Postgres>,
+		connection: impl 'async_trait + Executor<'_, Database = Postgres>,
 		query: &query::Organization,
 	) -> Result<Vec<Organization>>
 	{
@@ -31,7 +31,7 @@ impl OrganizationAdapter for PostgresOrganization
 	}
 
 	async fn retrieve_view(
-		connection: impl Executor<'_, Database = Postgres>,
+		connection: impl 'async_trait + Executor<'_, Database = Postgres>,
 		query: &query::Organization,
 	) -> Result<Vec<OrganizationView>>
 	{

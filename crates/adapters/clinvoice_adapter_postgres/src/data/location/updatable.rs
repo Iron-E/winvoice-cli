@@ -15,7 +15,7 @@ impl Updatable for PostgresLocation
 	type Entity = Location;
 	type Error = Error;
 
-	async fn update(entity: &Self::Entity, connection: impl Executor<'_, Database = Self::Db>) -> Result<()>
+	async fn update(connection: impl 'async_trait + Executor<'_, Database = Self::Db>, entity: &Self::Entity) -> Result<()>
 	{
 		todo!()
 	}

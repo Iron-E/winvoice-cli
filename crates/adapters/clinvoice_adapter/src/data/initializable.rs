@@ -10,5 +10,5 @@ pub trait Initializable
 	/// # Summary
 	///
 	/// Initialize the database for a given [`Store`].
-	async fn init(connection: impl Executor<'_, Database = Self::Db>) -> Result<(), Self::Error>;
+	async fn init(connection: impl 'async_trait + Executor<'_, Database = Self::Db>) -> Result<(), Self::Error>;
 }

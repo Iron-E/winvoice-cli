@@ -5,7 +5,6 @@
 
 
 mod employee;
-mod error;
 mod job;
 mod location;
 mod organization;
@@ -17,7 +16,6 @@ pub use schema::PostgresSchema;
 pub use
 {
 	employee::PostgresEmployee,
-	error::{Error, Result},
 	job::PostgresJob,
 	location::PostgresLocation,
 	organization::PostgresOrganization,

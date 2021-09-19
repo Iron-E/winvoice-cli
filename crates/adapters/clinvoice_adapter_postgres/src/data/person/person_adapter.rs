@@ -11,10 +11,8 @@ use
 };
 
 #[async_trait::async_trait]
-impl PersonAdapter for PostgresPerson<'_>
+impl PersonAdapter for PostgresPerson
 {
-	type Error = Error;
-
 	/// # Summary
 	///
 	/// Create a new [`Person`] on the active [`Store`](crate::Store).
@@ -27,7 +25,7 @@ impl PersonAdapter for PostgresPerson<'_>
 	///
 	/// The newly created [`Person`].
 	async fn create(
-		connection: impl Executor<'_, Database = Postgres>,
+		connection: impl 'async_trait + Executor<'_, Database = Postgres>,
 		name: String,
 	) -> Result<Person>
 	{
@@ -43,7 +41,7 @@ impl PersonAdapter for PostgresPerson<'_>
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`PersonView`]s.
 	async fn retrieve(
-		connection: impl Executor<'_, Database = Postgres>,
+		connection: impl 'async_trait + Executor<'_, Database = Postgres>,
 		query: &query::Person,
 	) -> Result<Vec<Person>>
 	{
@@ -59,7 +57,7 @@ impl PersonAdapter for PostgresPerson<'_>
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`PersonView`]s.
 	async fn retrieve_view(
-		connection: impl Executor<'_, Database = Postgres>,
+		connection: impl 'async_trait + Executor<'_, Database = Postgres>,
 		query: &query::Person,
 	) -> Result<Vec<PersonView>>
 	{

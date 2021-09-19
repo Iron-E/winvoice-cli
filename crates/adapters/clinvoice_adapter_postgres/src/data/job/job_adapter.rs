@@ -18,7 +18,7 @@ use
 impl JobAdapter for PostgresJob
 {
 	async fn create(
-		connection: impl Executor<'_, Database = Postgres>,
+		connection: impl 'async_trait + Executor<'_, Database = Postgres>,
 		client: Organization,
 		date_open: DateTime<Utc>,
 		hourly_rate: Money,
@@ -29,7 +29,7 @@ impl JobAdapter for PostgresJob
 	}
 
 	async fn retrieve(
-		connection: impl Executor<'_, Database = Postgres>,
+		connection: impl 'async_trait + Executor<'_, Database = Postgres>,
 		query: &query::Job,
 	) -> Result<Vec<Job>>
 	{
@@ -37,7 +37,7 @@ impl JobAdapter for PostgresJob
 	}
 
 	async fn retrieve_view(
-		connection: impl Executor<'_, Database = Postgres>,
+		connection: impl 'async_trait + Executor<'_, Database = Postgres>,
 		query: &query::Job,
 	) -> Result<Vec<JobView>>
 	{

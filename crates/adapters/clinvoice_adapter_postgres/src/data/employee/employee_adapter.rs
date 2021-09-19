@@ -17,7 +17,7 @@ use
 impl EmployeeAdapter for PostgresEmployee
 {
 	async fn create(
-		connection: impl Executor<'_, Database = Postgres>,
+		connection: impl 'async_trait + Executor<'_, Database = Postgres>,
 		contact_info: HashMap<String, Contact>,
 		organization: Organization,
 		person: Person,
@@ -29,7 +29,7 @@ impl EmployeeAdapter for PostgresEmployee
 	}
 
 	async fn retrieve(
-		connection: impl Executor<'_, Database = Postgres>,
+		connection: impl 'async_trait + Executor<'_, Database = Postgres>,
 		query: &query::Employee,
 	) -> Result<Vec<Employee>>
 	{
@@ -37,7 +37,7 @@ impl EmployeeAdapter for PostgresEmployee
 	}
 
 	async fn retrieve_view(
-		connection: impl Executor<'_, Database = Postgres>,
+		connection: impl 'async_trait + Executor<'_, Database = Postgres>,
 		query: &query::Employee,
 	) -> Result<Vec<EmployeeView>>
 	{

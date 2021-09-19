@@ -1,5 +1,5 @@
 use clinvoice_data::views::LocationView;
-use sqlx::{Executor, Postgres, Result};
+use sqlx::{Acquire, Executor, Postgres, Result};
 
 use
 {
@@ -14,7 +14,7 @@ use
 impl LocationAdapter for PostgresLocation
 {
 	async fn create(
-		connection: impl Executor<'_, Database = Postgres>,
+		connection: impl 'async_trait + Executor<'_, Database = Postgres>,
 		name: String,
 	) -> Result<Location>
 	{
@@ -22,7 +22,7 @@ impl LocationAdapter for PostgresLocation
 	}
 
 	async fn create_inner(
-		connection: impl Executor<'_, Database = Postgres>,
+		connection: impl 'async_trait + Executor<'_, Database = Postgres>,
 		outer: &Location,
 		name: String,
 	) -> Result<Location>
@@ -31,7 +31,7 @@ impl LocationAdapter for PostgresLocation
 	}
 
 	async fn retrieve(
-		connection: impl Executor<'_, Database = Postgres>,
+		connection: impl 'async_trait + Executor<'_, Database = Postgres>,
 		query: &query::Location,
 	) -> Result<Vec<Location>>
 	{
@@ -39,7 +39,7 @@ impl LocationAdapter for PostgresLocation
 	}
 
 	async fn retrieve_outers(
-		connection: impl Executor<'_, Database = Postgres>,
+		connection: impl 'async_trait + Executor<'_, Database = Postgres>,
 		location: &Location,
 	) -> Result<Vec<Location>>
 	{
@@ -48,7 +48,7 @@ impl LocationAdapter for PostgresLocation
 
 	// WARN: `Might need `Acquire` or `&mut Transaction` depending on how recursive views work
 	async fn retrieve_view(
-		connection: impl Executor<'_, Database = Postgres>,
+		connection: impl 'async_trait + Acquire<'_, Database = Postgres> + Send,
 		query: &query::Location,
 	) -> Result<Vec<LocationView>>
 	{

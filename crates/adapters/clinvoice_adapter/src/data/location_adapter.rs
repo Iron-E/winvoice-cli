@@ -23,7 +23,7 @@ pub trait LocationAdapter:
 	///
 	/// The created [`Location`].
 	async fn create(
-		connection: impl Executor<'_, Database = <Self as Deletable>::Db>,
+		connection: impl 'async_trait + Executor<'_, Database = <Self as Deletable>::Db>,
 		name: String,
 	) -> Result<<Self as Deletable>::Entity, <Self as Deletable>::Error>;
 
@@ -39,7 +39,7 @@ pub trait LocationAdapter:
 	///
 	/// The created [`Location`].
 	async fn create_inner(
-		connection: impl Executor<'_, Database = <Self as Deletable>::Db>,
+		connection: impl 'async_trait + Executor<'_, Database = <Self as Deletable>::Db>,
 		outer: &<Self as Deletable>::Entity,
 		name: String,
 	) -> Result<<Self as Deletable>::Entity, <Self as Deletable>::Error>;
@@ -53,7 +53,7 @@ pub trait LocationAdapter:
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`LocationView`]s.
 	async fn retrieve(
-		connection: impl Executor<'_, Database = <Self as Deletable>::Db>,
+		connection: impl 'async_trait + Executor<'_, Database = <Self as Deletable>::Db>,
 		query: &query::Location,
 	) -> Result<Vec<<Self as Deletable>::Entity>, <Self as Deletable>::Error>;
 
@@ -61,7 +61,7 @@ pub trait LocationAdapter:
 	///
 	/// Get the [`Location`]s which contain this [`Location`].
 	async fn retrieve_outers(
-		connection: impl Executor<'_, Database = <Self as Deletable>::Db>,
+		connection: impl 'async_trait + Executor<'_, Database = <Self as Deletable>::Db>,
 		location: &<Self as Deletable>::Entity,
 	) -> Result<Vec<<Self as Deletable>::Entity>, <Self as Deletable>::Error>;
 
@@ -74,7 +74,7 @@ pub trait LocationAdapter:
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`LocationView`]s.
 	async fn retrieve_view(
-		connection: impl Acquire<'_, Database = <Self as Deletable>::Db>,
+		connection: impl 'async_trait + Acquire<'_, Database = <Self as Deletable>::Db> + Send,
 		query: &query::Location,
 	) -> Result<Vec<LocationView>, <Self as Deletable>::Error>;
 }

@@ -31,5 +31,5 @@ pub trait Deletable
 	/// * An [`Error`] when:
 	///   * `self.id` had not already been `create`d.
 	///   * Something goes wrong.
-	async fn delete(cascade: bool, connection: impl Executor<'_, Database = Self::Db>, entities: &[Self::Entity]) -> Result<(), Self::Error>;
+	async fn delete(cascade: bool, connection: impl 'async_trait + Executor<'_, Database = Self::Db>, entities: &[Self::Entity]) -> Result<(), Self::Error>;
 }

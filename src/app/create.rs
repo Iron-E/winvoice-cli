@@ -1,20 +1,14 @@
-use clinvoice_adapter::{
-	data::{EmployeeAdapter, JobAdapter, LocationAdapter, OrganizationAdapter, PersonAdapter},
-	Adapters,
-	Error as FeatureNotFoundError,
-	Store,
-};
+use clinvoice_adapter::{Adapters, Error as FeatureNotFoundError, Store, data::{Deletable, EmployeeAdapter, JobAdapter, LocationAdapter, OrganizationAdapter, PersonAdapter}};
 use clinvoice_data::{
 	chrono::{Datelike, Local, TimeZone, Timelike},
 	finance::{Currency, Decimal, Money},
 	EmployeeStatus,
-	Location,
 };
 use futures::{
 	stream::{self, TryStreamExt},
-	Future,
 	TryFutureExt,
 };
+use sqlx::{Database, Pool};
 
 use crate::{input, DynResult, StructOpt};
 
@@ -102,22 +96,19 @@ pub(super) enum Create
 
 impl Create
 {
-	async fn create_employee<'a, E, L, O, Pr, Pl>(title: String, pool: &'a Pl) -> DynResult<'a, ()>
+	async fn create_employee<'err, Db, EAdapter, LAdapter, OAdapter, PAdapter>(connection: &Pool<Db>, title: String) -> DynResult<'err, ()>
 	where
-		E: EmployeeAdapter<Pool = &'a Pl>,
-		L: LocationAdapter<Pool = &'a Pl> + Send,
-		O: OrganizationAdapter<Pool = &'a Pl> + Send,
-		Pr: PersonAdapter<Pool = &'a Pl>,
-
-		<E as EmployeeAdapter>::Error: 'a,
-		<L as LocationAdapter>::Error: 'a,
-		<O as OrganizationAdapter>::Error: 'a,
-		<Pr as PersonAdapter>::Error: 'a,
+		Db: Database,
+		EAdapter: Deletable<Db = Db> + EmployeeAdapter + Send,
+		LAdapter: Deletable<Db = Db> + LocationAdapter + Send,
+		OAdapter: Deletable<Db = Db> + OrganizationAdapter + Send,
+		PAdapter: Deletable<Db = Db> + PersonAdapter + Send,
+		<EAdapter as Deletable>::Error: 'err,
 	{
-		let organization_views = input::util::organization::retrieve_view::<&str, O, _>(
+		let organization_views = input::util::organization::retrieve_view::<&str, _, OAdapter>(
+			connection,
 			"Query the `Organization` where this `Employee` works",
 			false,
-			pool,
 		)
 		.await?;
 
@@ -126,16 +117,16 @@ impl Create
 			"Which organization does this employee work at?",
 		)?;
 
-		let person_views = input::util::person::retrieve_view::<&str, Pr, _>(
+		let person_views = input::util::person::retrieve_view::<&str, _, PAdapter>(
+			connection,
 			"Query the `Person` who this `Employee` is",
 			true,
-			pool,
 		)
 		.await?;
 
 		let person = input::select_one(&person_views, "Which `Person` is this `Employee`?")?;
 
-		let contact_info = input::util::contact::menu::<L, _>(pool).await?;
+		let contact_info = input::util::contact::menu::<_, LAdapter>(connection).await?;
 		let employee_status = input::select_one(
 			&[
 				EmployeeStatus::Employed,
@@ -145,7 +136,8 @@ impl Create
 			"What is the status of the employee?",
 		)?;
 
-		E::create(
+		EAdapter::create(
+			connection,
 			contact_info
 				.into_iter()
 				.map(|(label, contact)| (label, contact.into()))
@@ -154,33 +146,30 @@ impl Create
 			person.into(),
 			employee_status,
 			title,
-			pool,
 		)
 		.await?;
 
 		Ok(())
 	}
 
-	async fn create_job<'a, J, O, P>(
+	async fn create_job<'err, Db, JAdapter, OAdapter>(
+		connection: &Pool<Db>,
 		hourly_rate: Money,
 		year: Option<i32>,
 		month: Option<u32>,
 		day: Option<u32>,
 		hour: Option<u32>,
 		minute: Option<u32>,
-		pool: &'a P,
-	) -> DynResult<'a, ()>
+	) -> DynResult<'err, ()>
 	where
-		J: JobAdapter<Pool = &'a P>,
-		O: OrganizationAdapter<Pool = &'a P> + Send,
-
-		<J as JobAdapter>::Error: 'a,
-		<O as OrganizationAdapter>::Error: 'a,
+		Db: Database,
+		JAdapter: Deletable<Db = Db> + JobAdapter,
+		OAdapter: Deletable<Db = Db> + OrganizationAdapter + Send,
 	{
-		let organization_views = input::util::organization::retrieve_view::<&str, O, _>(
+		let organization_views = input::util::organization::retrieve_view::<&str, _, OAdapter>(
+			connection,
 			"Query the client `Organization` for this `Job`",
 			false,
-			pool,
 		)
 		.await?;
 
@@ -214,34 +203,32 @@ impl Create
 			}
 		};
 
-		J::create(
+		JAdapter::create(
+			connection,
 			client.into(),
 			local_date_open.into(),
 			hourly_rate,
 			objectives,
-			pool,
 		)
 		.await?;
 
 		Ok(())
 	}
 
-	async fn create_location<'a, F, Fut, L, P>(
-		create_inner: F,
+	async fn create_location<'a, Db, LAdapter>(
+		connection: &Pool<Db>,
 		names: Vec<String>,
-		pool: &'a P,
-	) -> Result<(), <L as LocationAdapter>::Error>
+	) -> Result<(), <LAdapter as Deletable>::Error>
 	where
-		F: Fn(Location, String, &'a P) -> Fut,
-		Fut: Future<Output = Result<Location, <L as LocationAdapter>::Error>>,
-		L: LocationAdapter<Pool = &'a P>,
+		Db: Database,
+		LAdapter: Deletable<Db = Db> + LocationAdapter,
 	{
 		if let Some(name) = names.last()
 		{
-			let outer = L::create(name.clone(), pool).await?;
+			let outer = LAdapter::create(connection, name.clone()).await?;
 			stream::iter(names.into_iter().rev().skip(1).map(Ok))
 				.try_fold(outer, |outer, name| async {
-					create_inner(outer, name, pool).await
+					LAdapter::create_inner(connection, &outer, name).await
 				})
 				.await?;
 		}
@@ -249,25 +236,23 @@ impl Create
 		Ok(())
 	}
 
-	async fn create_organization<'a, L, O, P>(name: String, pool: &'a P) -> DynResult<'a, ()>
+	async fn create_organization<'a, Db, LAdapter, OAdapter>(connection: &Pool<Db>, name: String) -> DynResult<'a, ()>
 	where
-		L: LocationAdapter<Pool = &'a P> + Send,
-		O: OrganizationAdapter<Pool = &'a P>,
-
-		<L as LocationAdapter>::Error: 'a,
-		<O as OrganizationAdapter>::Error: 'a,
+		Db: Database,
+		LAdapter: Deletable<Db = Db> + LocationAdapter + Send,
+		OAdapter: Deletable<Db = Db> + OrganizationAdapter,
 	{
-		let location_views = input::util::location::retrieve_view::<&str, L, _>(
+		let location_views = input::util::location::retrieve_view::<&str, _, LAdapter>(
+			connection,
 			"Query the `Location` of this `Organization`",
 			false,
-			pool,
 		)
 		.await?;
 
 		let selected_view =
 			input::select_one(&location_views, format!("Select a location for {}", name))?;
 
-		O::create(selected_view.into(), name, pool).await?;
+		OAdapter::create(connection, selected_view.into(), name).await?;
 
 		Ok(())
 	}
@@ -290,12 +275,12 @@ impl Create
 					Self::Employee { title } =>
 					{
 						Self::create_employee::<
+							_,
 							PostgresEmployee,
 							PostgresLocation,
 							PostgresOrganization,
 							PostgresPerson,
-							_,
-						>(title, &pool)
+						>(&pool, title)
 						.await
 					},
 
@@ -309,7 +294,8 @@ impl Create
 						minute,
 					} =>
 					{
-						Self::create_job::<PostgresJob, PostgresOrganization, _>(
+						Self::create_job::<_, PostgresJob, PostgresOrganization,>(
+							&pool,
 							Money {
 								amount:   hourly_rate,
 								currency: currency.unwrap_or(default_currency),
@@ -319,35 +305,23 @@ impl Create
 							day,
 							hour,
 							minute,
-							&pool,
 						)
 						.await
 					},
 
 					Self::Location { names } =>
 					{
-						Self::create_location::<_, _, PostgresLocation, _>(
-							|loc, name, store| async move {
-								PostgresLocation {
-									location: &loc,
-									pool: &pool,
-								}
-								.create_inner(name)
-								.await
-							},
-							names,
-							&pool,
-						)
+						Self::create_location::<_, PostgresLocation>(&pool, names)
 						.err_into()
 						.await
 					},
 
 					Self::Organization { name } =>
 					{
-						Self::create_organization::<PostgresLocation, PostgresOrganization, _>(name, &pool).await
+						Self::create_organization::<_, PostgresLocation, PostgresOrganization>(&pool, name).await
 					},
 
-					Self::Person { name } => PostgresPerson::create(name, &pool)
+					Self::Person { name } => PostgresPerson::create(&pool, name)
 						.err_into()
 						.await
 						.and(Ok(())),

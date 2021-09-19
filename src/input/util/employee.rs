@@ -1,8 +1,9 @@
 use std::{borrow::Cow::Owned, fmt::Display};
 
-use clinvoice_adapter::data::EmployeeAdapter;
+use clinvoice_adapter::data::{Deletable, EmployeeAdapter};
 use clinvoice_data::{views::EmployeeView, Id};
 use clinvoice_query as query;
+use sqlx::{Database, Pool};
 
 use super::menu;
 use crate::{app::QUERY_PROMPT, input, DynResult};
@@ -20,16 +21,16 @@ use crate::{app::QUERY_PROMPT, input, DynResult};
 ///
 /// [L_retrieve]: clinvoice_adapter::data::EmployeeAdapter::retrieve
 /// [location]: clinvoice_data::Employee
-pub async fn retrieve_view<'a, D, E, P>(
+pub async fn retrieve_view<'err, D, Db, EAdapter>(
+	connection: &Pool<Db>,
 	default_id: Option<Id>,
 	prompt: D,
 	retry_on_empty: bool,
-	pool: &'a P,
-) -> DynResult<'a, Vec<EmployeeView>>
+) -> DynResult<'err, Vec<EmployeeView>>
 where
 	D: Display,
-	E: EmployeeAdapter<Pool = &'a P> + Send,
-	<E as EmployeeAdapter>::Error: 'a + Send,
+	Db: Database,
+	EAdapter: Deletable<Db = Db> + EmployeeAdapter + Send,
 {
 	loop
 	{
@@ -42,7 +43,7 @@ where
 			_ => input::edit_default(format!("{}\n{}employees", prompt, QUERY_PROMPT))?,
 		};
 
-		let results = E::retrieve_view(&query, pool).await?;
+		let results = EAdapter::retrieve_view(connection, &query).await?;
 
 		if retry_on_empty &&
 			results.is_empty() &&

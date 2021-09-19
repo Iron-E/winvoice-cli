@@ -1,8 +1,9 @@
 use core::fmt::Display;
 use std::{collections::HashMap, io};
 
-use clinvoice_adapter::data::LocationAdapter;
+use clinvoice_adapter::data::{Deletable, LocationAdapter};
 use clinvoice_data::views::ContactView;
+use sqlx::{Database, Pool};
 
 use super::menu;
 use crate::{input, DynResult};
@@ -14,13 +15,13 @@ use crate::{input, DynResult};
 /// # Errors
 ///
 /// Will error whenever [`input::select_one`] or [`input::text`] does.
-async fn add_menu<'a, L, P>(
+async fn add_menu<'err, Db, LAdapter>(
+	connection: &Pool<Db>,
 	contact_info: &mut HashMap<String, ContactView>,
-	pool: &'a P,
-) -> DynResult<'a, ()>
+) -> DynResult<'err, ()>
 where
-	L: LocationAdapter<Pool = &'a P> + Send,
-	<L as LocationAdapter>::Error: 'a,
+	Db: Database,
+	LAdapter: Deletable<Db = Db> + LocationAdapter + Send,
 {
 	const ADDRESS: &str = "Address";
 	const EMAIL: &str = "Email";
@@ -65,10 +66,10 @@ where
 	{
 		ADDRESS =>
 		{
-			let locations = input::util::location::retrieve_view::<&str, L, _>(
+			let locations = input::util::location::retrieve_view::<&str, LAdapter, _>(
 				"Query the `Location` which can be used to reach this `Employee`",
 				true,
-				pool,
+				connection,
 			).await?;
 
 			let location = input::select_one(&locations, "Select the location to add")?;
@@ -208,10 +209,10 @@ fn edit_menu(contact_info: &mut HashMap<String, ContactView>) -> input::Result<(
 /// If a user manages to select an action (e.g. `ADD`, `CONTINUE`, `DELETE`) which is unaccounted
 /// for. This is __theoretically not possible__ but must be present to account for the case of an
 /// unrecoverable state of the program.
-pub async fn menu<'a, L, P>(pool: &'a P) -> DynResult<'a, HashMap<String, ContactView>>
+pub async fn menu<'err, Db, LAdapter>(connection: &Pool<Db>) -> DynResult<'err, HashMap<String, ContactView>>
 where
-	L: LocationAdapter<Pool = &'a P> + Send,
-	<L as LocationAdapter>::Error: 'a,
+	Db: Database,
+	LAdapter: Deletable<Db = Db> + LocationAdapter + Send,
 {
 	let mut contact_info = HashMap::<String, ContactView>::new();
 
@@ -223,7 +224,7 @@ where
 		)?;
 		match action
 		{
-			menu::ADD => add_menu::<L, _>(&mut contact_info, pool).await?,
+			menu::ADD => add_menu::<_, LAdapter, _>(connection, &mut contact_info).await?,
 			menu::CONTINUE => break,
 			menu::DELETE => delete_menu(&mut contact_info)?,
 			menu::EDIT => edit_menu(&mut contact_info)?,

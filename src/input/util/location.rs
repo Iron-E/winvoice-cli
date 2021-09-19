@@ -1,8 +1,9 @@
 use core::fmt::Display;
 
-use clinvoice_adapter::data::LocationAdapter;
+use clinvoice_adapter::data::{Deletable, LocationAdapter};
 use clinvoice_data::views::LocationView;
 use clinvoice_query as query;
+use sqlx::{Database, Pool};
 
 use super::menu;
 use crate::{app::QUERY_PROMPT, input, DynResult};
@@ -20,22 +21,22 @@ use crate::{app::QUERY_PROMPT, input, DynResult};
 ///
 /// [L_retrieve]: clinvoice_adapter::data::LocationAdapter::retrieve
 /// [location]: clinvoice_data::Location
-pub async fn retrieve_view<'a, D, L, P>(
+pub async fn retrieve_view<'err, D, Db, LAdapter>(
+	connection: &Pool<Db>,
 	prompt: D,
 	retry_on_empty: bool,
-	pool: &'a P,
-) -> DynResult<'a, Vec<LocationView>>
+) -> DynResult<'err, Vec<LocationView>>
 where
 	D: Display,
-	L: LocationAdapter<Pool = &'a P> + Send,
-	<L as LocationAdapter>::Error: 'a,
+	Db: Database,
+	LAdapter: Deletable<Db = Db> + LocationAdapter + Send,
 {
 	loop
 	{
 		let query: query::Location =
 			input::edit_default(format!("{}\n{}locations", prompt, QUERY_PROMPT))?;
 
-		let results = L::retrieve_view(&query, pool).await?;
+		let results = LAdapter::retrieve_view(&query, connection).await?;
 
 		if retry_on_empty &&
 			results.is_empty() &&

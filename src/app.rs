@@ -56,6 +56,10 @@ impl App
 	/// # Summary
 	///
 	/// Edit the user's configuration file.
+	///
+	/// # TODO
+	///
+	/// * Use `try` blocks when they land to not need `.map_err()` all the time.
 	fn edit_config(config: &Config<'_, '_>) -> impl Future<Output = ConfigResult<()>>
 	{
 		let serialized = toml::to_string_pretty(config).map_err(future::err)?;
@@ -82,7 +86,12 @@ impl App
 			AppCommand::Config => Self::edit_config(&config).err_into().await,
 			AppCommand::Create(cmd) => cmd.run(config.invoices.default_currency, store).await,
 			AppCommand::Retrieve(cmd) => cmd.run(config, store).await,
-			AppCommand::Time(cmd) => cmd.run(store).await,
+			AppCommand::Time(cmd) => cmd.run(
+				config.invoices.default_currency,
+				config.employees.default_id,
+				config.timesheets.interval,
+				store,
+			).await,
 		}
 	}
 }

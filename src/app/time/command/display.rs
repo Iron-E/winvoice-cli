@@ -1,8 +1,8 @@
 use core::fmt::{Display, Formatter, Result};
 
-use super::TimeCommand;
+use super::Command;
 
-impl Display for TimeCommand
+impl Display for Command
 {
 	fn fmt(&self, formatter: &mut Formatter<'_>) -> Result
 	{

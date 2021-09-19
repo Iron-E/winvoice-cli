@@ -1,8 +1,9 @@
 use core::fmt::Display;
 
-use clinvoice_adapter::data::PersonAdapter;
+use clinvoice_adapter::data::{Deletable, PersonAdapter};
 use clinvoice_data::views::PersonView;
 use clinvoice_query as query;
+use sqlx::{Database, Pool};
 
 use super::menu;
 use crate::{app::QUERY_PROMPT, input, DynResult};
@@ -20,22 +21,22 @@ use crate::{app::QUERY_PROMPT, input, DynResult};
 ///
 /// [P_retrieve]: clinvoice_adapter::data::PersonAdapter::retrieve
 /// [person]: clinvoice_data::Person
-pub async fn retrieve_view<'a, D, Pr, Pl>(
+pub async fn retrieve_view<'a, D, Db, PAdapter>(
+	connection: &Pool<Db>,
 	prompt: D,
 	retry_on_empty: bool,
-	pool: &'a Pl,
 ) -> DynResult<'a, Vec<PersonView>>
 where
 	D: Display,
-	Pr: PersonAdapter<Pool = &'a Pl>,
-	<Pr as PersonAdapter>::Error: 'a,
+	Db: Database,
+	PAdapter: Deletable<Db = Db> + PersonAdapter + Send,
 {
 	loop
 	{
 		let query: query::Person =
 			input::edit_default(format!("{}\n{}persons", prompt, QUERY_PROMPT))?;
 
-		let results = Pr::retrieve_view(&query, pool).await?;
+		let results = PAdapter::retrieve_view(&query, connection).await?;
 
 		if retry_on_empty &&
 			results.is_empty() &&

@@ -1,8 +1,9 @@
 use core::fmt::Display;
 
-use clinvoice_adapter::data::OrganizationAdapter;
+use clinvoice_adapter::data::{Deletable, OrganizationAdapter};
 use clinvoice_data::views::OrganizationView;
 use clinvoice_query as query;
+use sqlx::{Database, Pool};
 
 use super::menu;
 use crate::{app::QUERY_PROMPT, input, DynResult};
@@ -20,22 +21,22 @@ use crate::{app::QUERY_PROMPT, input, DynResult};
 ///
 /// [P_retrieve]: clinvoice_adapter::data::OrganizationAdapter::retrieve
 /// [organization]: clinvoice_data::Organization
-pub async fn retrieve_view<'a, D, O, P>(
+pub async fn retrieve_view<'err, D, Db, OAdapter>(
+	connection: &Pool<Db>,
 	prompt: D,
 	retry_on_empty: bool,
-	pool: &'a P,
-) -> DynResult<'a, Vec<OrganizationView>>
+) -> DynResult<'err, Vec<OrganizationView>>
 where
 	D: Display,
-	O: OrganizationAdapter<Pool = &'a P> + Send,
-	<O as OrganizationAdapter>::Error: 'a,
+	Db: Database,
+	OAdapter: Deletable<Db = Db> + OrganizationAdapter + Send,
 {
 	loop
 	{
 		let query: query::Organization =
 			input::edit_default(format!("{}\n{}organizations", prompt, QUERY_PROMPT))?;
 
-		let results = O::retrieve_view(&query, pool).await?;
+		let results = OAdapter::retrieve_view(&query, connection).await?;
 
 		if retry_on_empty &&
 			results.is_empty() &&

@@ -1,9 +1,10 @@
 use core::fmt::Display;
 
-use clinvoice_adapter::data::JobAdapter;
+use clinvoice_adapter::data::{Deletable, JobAdapter};
 
 use clinvoice_data::views::JobView;
 use clinvoice_query as query;
+use sqlx::{Database, Pool};
 
 use super::menu;
 use crate::{app::QUERY_PROMPT, input, DynResult};
@@ -21,21 +22,21 @@ use crate::{app::QUERY_PROMPT, input, DynResult};
 ///
 /// [L_retrieve]: clinvoice_adapter::data::LocationAdapter::retrieve
 /// [location]: clinvoice_data::Location
-pub async fn retrieve_view<'a, D, J, P>(
+pub async fn retrieve_view<'err, D, Db, JAdapter>(
+	connection: &Pool<Db>,
 	prompt: D,
 	retry_on_empty: bool,
-	pool: &'a P,
-) -> DynResult<'a, Vec<JobView>>
+) -> DynResult<'err, Vec<JobView>>
 where
 	D: Display,
-	J: JobAdapter<Pool = &'a P> + Send,
-	<J as JobAdapter>::Error: 'a,
+	Db: Database,
+	JAdapter: Deletable<Db = Db> + JobAdapter + Send,
 {
 	loop
 	{
 		let query: query::Job = input::edit_default(format!("{}\n{}jobs", prompt, QUERY_PROMPT))?;
 
-		let results = J::retrieve_view(&query, pool).await?;
+		let results = JAdapter::retrieve_view(connection, &query).await?;
 
 		if retry_on_empty &&
 			results.is_empty() &&

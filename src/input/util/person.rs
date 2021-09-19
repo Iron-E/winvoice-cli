@@ -21,11 +21,11 @@ use crate::{app::QUERY_PROMPT, input, DynResult};
 ///
 /// [P_retrieve]: clinvoice_adapter::data::PersonAdapter::retrieve
 /// [person]: clinvoice_data::Person
-pub async fn retrieve_view<'a, D, Db, PAdapter>(
+pub async fn retrieve_view<'err, D, Db, PAdapter>(
 	connection: &Pool<Db>,
 	prompt: D,
 	retry_on_empty: bool,
-) -> DynResult<'a, Vec<PersonView>>
+) -> DynResult<'err, Vec<PersonView>>
 where
 	D: Display,
 	Db: Database,

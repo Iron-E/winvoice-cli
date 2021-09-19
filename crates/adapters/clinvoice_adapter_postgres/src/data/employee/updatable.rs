@@ -15,7 +15,7 @@ impl Updatable for PostgresEmployee
 	type Entity = Employee;
 	type Error = Error;
 
-	async fn update(connection: impl 'async_trait + Executor<'_, Database = Self::Db>, entity: &Self::Entity) -> Result<()>
+	async fn update(connection: impl 'async_trait + Executor<'_, Database = Self::Db>, entity: Self::Entity) -> Result<()>
 	{
 		todo!()
 	}

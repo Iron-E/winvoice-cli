@@ -11,7 +11,9 @@ use retrieve::Retrieve;
 use time::Time;
 use futures::future::{self, Future};
 
-use crate::{Config, DynResult, StructOpt};
+use crate::DynResult;
+use clinvoice_config::Config;
+use structopt::StructOpt;
 
 /// # Summary
 ///
@@ -62,11 +64,29 @@ impl App
 	/// * Use `try` blocks when they land to not need `.map_err()` all the time.
 	fn edit_config(config: &Config<'_, '_>) -> impl Future<Output = ConfigResult<()>>
 	{
-		let serialized = toml::to_string_pretty(config).map_err(future::err)?;
-		if let Some(edited) = Editor::new().extension(".toml").edit(&serialized).map_err(future::err)?
+		let serialized = match toml::to_string_pretty(config)
 		{
-			let deserialized: Config = toml::from_str(&edited).map_err(future::err)?;
-			deserialized.update().map_err(future::err)?;
+			Ok(ser) => ser,
+			Err(e) => return future::err(e.into()),
+		};
+
+		if let Some(edited) = match Editor::new().extension(".toml").edit(&serialized)
+		{
+			Ok(edit) => edit,
+			Err(e) => return future::err(e.into()),
+		}
+		{
+			let deserialized: Config = match toml::from_str(&edited)
+			{
+				Ok(deser) => deser,
+				Err(e) => return future::err(e.into()),
+			};
+
+			match deserialized.update()
+			{
+				Err(e) => return future::err(e.into()),
+				_ => (),
+			};
 		}
 
 		future::ok(())
@@ -85,7 +105,7 @@ impl App
 		{
 			AppCommand::Config => Self::edit_config(&config).err_into().await,
 			AppCommand::Create(cmd) => cmd.run(config.invoices.default_currency, store).await,
-			AppCommand::Retrieve(cmd) => cmd.run(config, store).await,
+			AppCommand::Retrieve(cmd) => cmd.run(&config, store).await,
 			AppCommand::Time(cmd) => cmd.run(
 				config.invoices.default_currency,
 				config.employees.default_id,

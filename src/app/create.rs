@@ -215,7 +215,7 @@ impl Create
 		Ok(())
 	}
 
-	async fn create_location<'a, Db, LAdapter>(
+	async fn create_location<Db, LAdapter>(
 		connection: &Pool<Db>,
 		names: Vec<String>,
 	) -> Result<(), <LAdapter as Deletable>::Error>
@@ -236,7 +236,7 @@ impl Create
 		Ok(())
 	}
 
-	async fn create_organization<'a, Db, LAdapter, OAdapter>(connection: &Pool<Db>, name: String) -> DynResult<'a, ()>
+	async fn create_organization<'err, Db, LAdapter, OAdapter>(connection: &Pool<Db>, name: String) -> DynResult<'err, ()>
 	where
 		Db: Database,
 		LAdapter: Deletable<Db = Db> + LocationAdapter + Send,

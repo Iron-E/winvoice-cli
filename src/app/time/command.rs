@@ -112,13 +112,13 @@ impl Command
 		Ok(())
 	}
 
-	pub(super) async fn run<'a, Db, EAdapter, JAdapter>(
+	pub(super) async fn run<'err, Db, EAdapter, JAdapter>(
 		&self,
 		connection: Pool<Db>,
 		default_currency: Currency,
 		default_employee_id: Option<Id>,
 		default_timesheet_interval: StdDuration,
-	) -> DynResult<'a, ()> where
+	) -> DynResult<'err, ()> where
 		Db: Database,
 		EAdapter : Deletable<Db = Db> + EmployeeAdapter + Send,
 		JAdapter : Deletable<Db = Db> + JobAdapter + Send,

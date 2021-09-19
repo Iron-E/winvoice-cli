@@ -29,5 +29,5 @@ pub trait Updatable
 	/// * An `Error`, when something goes wrong.
 	///
 	/// [store]: crate::Store
-	async fn update(connection: impl 'async_trait + Executor<'_, Database = Self::Db>, entity: &Self::Entity) -> Result<(), Self::Error>;
+	async fn update(connection: impl 'async_trait + Executor<'_, Database = Self::Db>, entity: Self::Entity) -> Result<(), Self::Error>;
 }

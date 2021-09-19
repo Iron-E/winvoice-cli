@@ -73,6 +73,10 @@ pub trait LocationAdapter:
 	///
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`LocationView`]s.
+	///
+	/// # TODO
+	///
+	/// * Provide default impl when `async trait` is stabilized
 	async fn retrieve_view(
 		connection: impl 'async_trait + Acquire<'_, Database = <Self as Deletable>::Db> + Send,
 		query: &query::Location,

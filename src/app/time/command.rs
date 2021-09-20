@@ -170,7 +170,7 @@ impl Command
 			)?,
 		};
 
-		JAdapter::update(&connection, &selected_job.into()).await?;
+		JAdapter::update(&connection, selected_job.into()).await?;
 
 		Ok(())
 	}

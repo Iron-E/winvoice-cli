@@ -6,7 +6,8 @@ use clinvoice_adapter::{Adapters, Error as AdapterError, Store};
 use clinvoice_data::{Id, finance::Currency};
 use core::time::Duration;
 
-use crate::{DynResult, StructOpt};
+use crate::DynResult;
+use structopt::StructOpt;
 
 #[cfg(feature="postgres")]
 use clinvoice_adapter_postgres::data::{PostgresEmployee, PostgresJob};

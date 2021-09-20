@@ -8,7 +8,7 @@ use sqlx::{Database, Pool};
 use structopt::StructOpt;
 use core::time::Duration as StdDuration;
 
-use crate::{dyn_result::DynResult, input};
+use crate::{DynResult, input};
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, StructOpt)]
 pub(super) enum Command

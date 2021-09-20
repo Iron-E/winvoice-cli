@@ -2,14 +2,12 @@ pub mod create;
 pub mod retrieve;
 pub mod time;
 
-use clinvoice_adapter::data::Updatable;
 use clinvoice_config::Result as ConfigResult;
 use create::Create;
 use dialoguer::Editor;
-use futures::TryFutureExt;
 use retrieve::Retrieve;
 use time::Time;
-use futures::future::{self, Future};
+use futures::future;
 
 use crate::DynResult;
 use clinvoice_config::Config;
@@ -62,34 +60,16 @@ impl App
 	/// # TODO
 	///
 	/// * Use `try` blocks when they land to not need `.map_err()` all the time.
-	fn edit_config(config: &Config<'_, '_>) -> impl Future<Output = ConfigResult<()>>
+	fn edit_config(config: &Config<'_, '_>) -> ConfigResult<()>
 	{
-		let serialized = match toml::to_string_pretty(config)
+		let serialized = toml::to_string_pretty(config)?;
+		if let Some(edited) = Editor::new().extension(".toml").edit(&serialized)?
 		{
-			Ok(ser) => ser,
-			Err(e) => return future::err(e.into()),
-		};
-
-		if let Some(edited) = match Editor::new().extension(".toml").edit(&serialized)
-		{
-			Ok(edit) => edit,
-			Err(e) => return future::err(e.into()),
-		}
-		{
-			let deserialized: Config = match toml::from_str(&edited)
-			{
-				Ok(deser) => deser,
-				Err(e) => return future::err(e.into()),
-			};
-
-			match deserialized.update()
-			{
-				Err(e) => return future::err(e.into()),
-				_ => (),
-			};
+			let deserialized: Config = toml::from_str(&edited)?;
+			deserialized.update()?;
 		}
 
-		future::ok(())
+		Ok(())
 	}
 
 	/// # Summary
@@ -103,7 +83,11 @@ impl App
 
 		match self.command
 		{
-			AppCommand::Config => Self::edit_config(&config).err_into().await,
+			AppCommand::Config => match Self::edit_config(&config)
+			{
+				Ok(_) => future::ok(()),
+				Err(e) => future::err(e.into()),
+			}.await,
 			AppCommand::Create(cmd) => cmd.run(config.invoices.default_currency, store).await,
 			AppCommand::Retrieve(cmd) => cmd.run(&config, store).await,
 			AppCommand::Time(cmd) => cmd.run(

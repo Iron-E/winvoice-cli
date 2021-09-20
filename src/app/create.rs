@@ -10,7 +10,8 @@ use futures::{
 };
 use sqlx::{Database, Pool};
 
-use crate::{input, DynResult, StructOpt};
+use crate::{input, DynResult};
+use structopt::StructOpt;
 
 #[cfg(feature="postgres")]
 use clinvoice_adapter_postgres::data::{PostgresEmployee, PostgresJob, PostgresLocation, PostgresOrganization, PostgresPerson};
@@ -96,6 +97,71 @@ pub(super) enum Create
 
 impl Create
 {
+	async fn create<'err, Db, EAdapter, JAdapter, LAdapter, OAdapter, PAdapter>(
+		command: Self,
+		connection: Pool<Db>,
+		default_currency: Currency,
+	) -> DynResult<'err, ()> where
+		Db: Database,
+		EAdapter : Deletable<Db = Db> + EmployeeAdapter + Send,
+		JAdapter : Deletable<Db = Db> + JobAdapter + Send,
+		LAdapter : Deletable<Db = Db> + LocationAdapter + Send,
+		OAdapter : Deletable<Db = Db> + OrganizationAdapter + Send,
+		PAdapter : Deletable<Db = Db> + PersonAdapter + Send,
+	{
+		match command
+		{
+			Self::Employee { title } =>
+			{
+				Self::create_employee::<
+					_,
+					EAdapter,
+					LAdapter,
+					OAdapter,
+					PAdapter,
+				>(&connection, title)
+				.await
+			},
+
+			Self::Job {
+				currency,
+				hourly_rate,
+				year,
+				month,
+				day,
+				hour,
+				minute,
+			} =>
+			{
+				Self::create_job::<_, JAdapter, OAdapter>(
+					&connection,
+					Money {
+						amount:   hourly_rate,
+						currency: currency.unwrap_or(default_currency),
+					},
+					year,
+					month,
+					day,
+					hour,
+					minute,
+				)
+				.await
+			},
+
+			Self::Location { names } => Self::create_location::<_, LAdapter>(&connection, names)
+				.err_into()
+				.await,
+
+			Self::Organization { name } =>
+				Self::create_organization::<_, LAdapter, OAdapter>(&connection, name).await,
+
+			Self::Person { name } => PAdapter::create(&connection, name)
+				.err_into()
+				.await
+				.and(Ok(())),
+		}
+	}
+
 	async fn create_employee<'err, Db, EAdapter, LAdapter, OAdapter, PAdapter>(connection: &Pool<Db>, title: String) -> DynResult<'err, ()>
 	where
 		Db: Database,
@@ -266,71 +332,13 @@ impl Create
 		match store.adapter
 		{
 			#[cfg(feature="postgres")]
-			Adapters::Postgres =>
-			{
-				let pool = sqlx::PgPool::connect_lazy(&store.url)?;
+			Adapters::Postgres => Self::create::<_, PostgresEmployee, PostgresJob, PostgresLocation, PostgresOrganization, PostgresPerson>(
+				self,
+				sqlx::PgPool::connect_lazy(&store.url)?,
+				default_currency,
+			).await,
 
-				match self
-				{
-					Self::Employee { title } =>
-					{
-						Self::create_employee::<
-							_,
-							PostgresEmployee,
-							PostgresLocation,
-							PostgresOrganization,
-							PostgresPerson,
-						>(&pool, title)
-						.await
-					},
-
-					Self::Job {
-						currency,
-						hourly_rate,
-						year,
-						month,
-						day,
-						hour,
-						minute,
-					} =>
-					{
-						Self::create_job::<_, PostgresJob, PostgresOrganization,>(
-							&pool,
-							Money {
-								amount:   hourly_rate,
-								currency: currency.unwrap_or(default_currency),
-							},
-							year,
-							month,
-							day,
-							hour,
-							minute,
-						)
-						.await
-					},
-
-					Self::Location { names } =>
-					{
-						Self::create_location::<_, PostgresLocation>(&pool, names)
-						.err_into()
-						.await
-					},
-
-					Self::Organization { name } =>
-					{
-						Self::create_organization::<_, PostgresLocation, PostgresOrganization>(&pool, name).await
-					},
-
-					Self::Person { name } => PostgresPerson::create(&pool, name)
-						.err_into()
-						.await
-						.and(Ok(())),
-				}
-			},
-
-			_ => return Err(FeatureNotFoundError(store.adapter).into()),
-		}?;
-
-		Ok(())
+			_ => Err(FeatureNotFoundError(store.adapter).into()),
+		}
 	}
 }

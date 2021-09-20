@@ -36,7 +36,7 @@ where
 		let query: query::Person =
 			input::edit_default(format!("{}\n{}persons", prompt, QUERY_PROMPT))?;
 
-		let results = PAdapter::retrieve_view(&query, connection).await?;
+		let results = PAdapter::retrieve_view(connection, &query).await?;
 
 		if retry_on_empty &&
 			results.is_empty() &&

@@ -30,13 +30,14 @@ where
 	D: Display,
 	Db: Database,
 	LAdapter: Deletable<Db = Db> + LocationAdapter + Send,
+	<LAdapter as Deletable>::Error: 'err,
 {
 	loop
 	{
 		let query: query::Location =
 			input::edit_default(format!("{}\n{}locations", prompt, QUERY_PROMPT))?;
 
-		let results = LAdapter::retrieve_view(&query, connection).await?;
+		let results = LAdapter::retrieve_view(connection, &query).await?;
 
 		if retry_on_empty &&
 			results.is_empty() &&

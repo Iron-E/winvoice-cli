@@ -36,7 +36,7 @@ where
 		let query: query::Organization =
 			input::edit_default(format!("{}\n{}organizations", prompt, QUERY_PROMPT))?;
 
-		let results = OAdapter::retrieve_view(&query, connection).await?;
+		let results = OAdapter::retrieve_view(connection, &query).await?;
 
 		if retry_on_empty &&
 			results.is_empty() &&

@@ -22,6 +22,7 @@ async fn add_menu<'err, Db, LAdapter>(
 where
 	Db: Database,
 	LAdapter: Deletable<Db = Db> + LocationAdapter + Send,
+	<LAdapter as Deletable>::Error: 'err,
 {
 	const ADDRESS: &str = "Address";
 	const EMAIL: &str = "Email";
@@ -66,10 +67,10 @@ where
 	{
 		ADDRESS =>
 		{
-			let locations = input::util::location::retrieve_view::<&str, LAdapter, _>(
+			let locations = input::util::location::retrieve_view::<&str, _, LAdapter>(
+				connection,
 				"Query the `Location` which can be used to reach this `Employee`",
 				true,
-				connection,
 			).await?;
 
 			let location = input::select_one(&locations, "Select the location to add")?;
@@ -213,6 +214,7 @@ pub async fn menu<'err, Db, LAdapter>(connection: &Pool<Db>) -> DynResult<'err, 
 where
 	Db: Database,
 	LAdapter: Deletable<Db = Db> + LocationAdapter + Send,
+	<LAdapter as Deletable>::Error: 'err,
 {
 	let mut contact_info = HashMap::<String, ContactView>::new();
 
@@ -224,7 +226,7 @@ where
 		)?;
 		match action
 		{
-			menu::ADD => add_menu::<_, LAdapter, _>(connection, &mut contact_info).await?,
+			menu::ADD => add_menu::<_, LAdapter>(connection, &mut contact_info).await?,
 			menu::CONTINUE => break,
 			menu::DELETE => delete_menu(&mut contact_info)?,
 			menu::EDIT => edit_menu(&mut contact_info)?,

@@ -1,11 +1,9 @@
-use std::error::Error;
-
 use core::fmt::Display;
 use clinvoice_adapter::data::{Deletable, EmployeeAdapter, JobAdapter, LocationAdapter, OrganizationAdapter, PersonAdapter, Updatable};
 use clinvoice_config::Config;
-use clinvoice_data::{Location, views::RestorableSerde};
+use clinvoice_data::{Location, chrono::Utc, views::RestorableSerde};
 use clinvoice_serialize::markdown;
-use futures::{Future, future, stream::{self, TryStreamExt}};
+use futures::{future, stream::{self, TryStreamExt}};
 use serde::{Serialize, de::DeserializeOwned};
 use sqlx::{Database, Pool};
 use structopt::StructOpt;
@@ -76,7 +74,7 @@ impl Command
 	/// Delete some `entities`
 	///
 	/// `delete_entity` determines how the entities are deleted.
-	async fn delete<'err, D, Db, E>(cascade: bool, connection: &Pool<Db>, entities: &[E]) -> DynResult<'err, ()>
+	async fn delete<'err, D, Db, E>(connection: &Pool<Db>, cascade: bool, entities: &[E]) -> DynResult<'err, ()>
 	where
 		D: Deletable<Db = Db, Entity = E>,
 		Db: Database,
@@ -159,7 +157,7 @@ impl Command
 
 				if delete
 				{
-					Self::delete(cascade_delete, &connection, &results_view).await?;
+					Self::delete(&connection, cascade_delete, &results_view).await?;
 				}
 
 				if update
@@ -191,11 +189,11 @@ impl Command
 						},
 					};
 
-					new_config.update().await?;
+					new_config.update();
 				}
 				else if !(delete || update)
 				{
-					results_view.iter().for_each(|e| println!("{}", e));
+					results_view.into_iter().for_each(|e| println!("{}", e));
 				}
 			},
 
@@ -215,7 +213,7 @@ impl Command
 
 				if delete
 				{
-					Self::delete(cascade_delete, &connection, &results_view).await?;
+					Self::delete(&connection, cascade_delete, &results_view).await?;
 				}
 
 				if update
@@ -234,12 +232,7 @@ impl Command
 					stream::iter(selected.into_iter().map(Ok))
 						.try_for_each_concurrent(None, |mut j| async {
 							j.date_close = Some(Utc::now());
-							JAdapter {
-								job: &(j.into()),
-								store,
-							}
-							.update()
-							.await
+							JAdapter::update(&connection, j.into()).await
 						})
 						.await?;
 				}
@@ -255,12 +248,7 @@ impl Command
 					stream::iter(selected.into_iter().map(Ok))
 						.try_for_each_concurrent(None, |mut j| async {
 							j.date_close = None;
-							JAdapter {
-								job: &(j.into()),
-								store,
-							}
-							.update()
-							.await
+							JAdapter::update(&connection, j.into()).await
 						})
 						.await?;
 				}
@@ -306,7 +294,7 @@ impl Command
 
 				if delete
 				{
-					Self::delete(cascade_delete, &connection, &results_view).await?;
+					Self::delete(&connection, cascade_delete, &results_view).await?;
 				}
 
 				if update
@@ -322,12 +310,7 @@ impl Command
 					)?;
 					stream::iter(create_inner.into_iter().map(Ok).rev())
 						.try_fold(location.into(), |loc: Location, name: String| async {
-							LAdapter {
-								location: &(loc.into()),
-								store,
-							}
-							.create_inner(name)
-							.await
+							LAdapter::create_inner(&connection, &loc.into(), name).await
 						})
 						.await?;
 				}
@@ -348,7 +331,7 @@ impl Command
 
 				if delete
 				{
-					Self::delete(cascade_delete, &connection, &results_view).await?;
+					Self::delete(&connection, cascade_delete, &results_view).await?;
 				}
 
 				if update
@@ -372,7 +355,7 @@ impl Command
 
 				if delete
 				{
-					Self::delete(cascade_delete, &connection, &results_view).await?;
+					Self::delete(&connection, cascade_delete, &results_view).await?;
 				}
 
 				if update
@@ -384,6 +367,8 @@ impl Command
 					results_view.iter().for_each(|p| println!("{}", p));
 				}
 			},
-		}
+		};
+
+		Ok(())
 	}
 }

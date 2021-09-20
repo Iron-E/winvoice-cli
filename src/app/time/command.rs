@@ -59,7 +59,9 @@ impl Command
 
 			if timesheets.is_empty()
 			{
-				return Err(input::Error::NoData(format!("active `{}`s", stringify!(Timesheet))));
+				return Err(input::Error::NoData(
+					format!("active `{}`s", stringify!(Timesheet))
+				).into());
 			}
 
 			let selected = input::select_one(&timesheets, "Which `Timesheet` are you working on?")?;

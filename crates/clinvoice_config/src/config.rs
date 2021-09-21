@@ -128,7 +128,8 @@ impl Config<'_, '_>
 #[cfg(test)]
 mod tests
 {
-	use std::time::{Duration, Instant};
+	use core::time::Duration;
+	use std::time::Instant;
 
 	use clinvoice_adapter::Adapters;
 	use clinvoice_data::Id;

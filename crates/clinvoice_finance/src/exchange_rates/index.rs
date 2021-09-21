@@ -1,4 +1,4 @@
-use std::ops::Index;
+use core::ops::Index;
 
 use rust_decimal::Decimal;
 

@@ -15,7 +15,7 @@ pub struct Timesheets
 	/// # Example
 	///
 	/// ```rust
-	/// use std::time::Duration;
+	/// use core::time::Duration;
 	///
 	/// use clinvoice_config::Timesheets;
 	///

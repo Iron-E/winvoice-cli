@@ -3,7 +3,7 @@ use std::{collections::HashMap, io};
 
 use clinvoice_adapter::data::{Deletable, LocationAdapter};
 use clinvoice_data::views::ContactView;
-use sqlx::{Database, Pool};
+use sqlx::{Database, Executor, Pool};
 
 use super::menu;
 use crate::{input, DynResult};
@@ -23,6 +23,7 @@ where
 	Db: Database,
 	LAdapter: Deletable<Db = Db> + LocationAdapter + Send,
 	<LAdapter as Deletable>::Error: 'err,
+	for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 {
 	const ADDRESS: &str = "Address";
 	const EMAIL: &str = "Email";
@@ -215,6 +216,7 @@ where
 	Db: Database,
 	LAdapter: Deletable<Db = Db> + LocationAdapter + Send,
 	<LAdapter as Deletable>::Error: 'err,
+	for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 {
 	let mut contact_info = HashMap::<String, ContactView>::new();
 

@@ -1,6 +1,5 @@
 use std::io;
 
-use clinvoice_adapter::data;
 use serde_yaml as yaml;
 use thiserror::Error;
 

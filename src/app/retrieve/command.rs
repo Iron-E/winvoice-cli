@@ -5,13 +5,13 @@ use clinvoice_data::{Location, chrono::Utc, views::RestorableSerde};
 use clinvoice_serialize::markdown;
 use futures::{future, stream::{self, TryStreamExt}};
 use serde::{Serialize, de::DeserializeOwned};
-use sqlx::{Database, Pool};
+use sqlx::{Database, Executor, Pool};
 use structopt::StructOpt;
 use tokio::fs;
 use crate::{DynResult, input};
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, StructOpt)]
-pub(super) enum Command
+pub enum Command
 {
 	#[structopt(about = "Retrieve existing records about employees")]
 	Employee
@@ -74,14 +74,16 @@ impl Command
 	/// Delete some `entities`
 	///
 	/// `delete_entity` determines how the entities are deleted.
-	async fn delete<'err, D, Db, E>(connection: &Pool<Db>, cascade: bool, entities: &[E]) -> DynResult<'err, ()>
+	async fn delete<'err, D, Db, Entity, EntityView>(connection: &Pool<Db>, cascade: bool, entities: &[EntityView]) -> DynResult<'err, ()>
 	where
-		D: Deletable<Db = Db, Entity = E>,
+		D: Deletable<Db = Db, Entity = Entity>,
+		D::Error: 'err,
 		Db: Database,
-		E: Clone + Display + Send,
+		EntityView: Clone + Display + Into<Entity> + Send,
+		for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 	{
 		let selection = input::select(entities, "Select the entities you want to delete")?;
-		D::delete(connection, cascade, &selection).await?;
+		D::delete(connection, cascade, selection.into_iter().map(EntityView::into)).await?;
 		Ok(())
 	}
 
@@ -90,11 +92,13 @@ impl Command
 	/// Edit some `entities`, and then update them.
 	///
 	/// `update_entity` determines how the entities are updated.
-	async fn update<'err, Db, E, U>(connection: &Pool<Db>, entities: &[E]) -> DynResult<'err, ()>
+	async fn update<'err, Db, Entity, EntityView, U>(connection: &Pool<Db>, entities: &[EntityView]) -> DynResult<'err, ()>
 	where
 		Db: Database,
-		E: Clone + DeserializeOwned + Display + RestorableSerde + Serialize + Send,
-		U: Updatable<Db = Db, Entity = E>,
+		EntityView: Clone + DeserializeOwned + Display + Into<Entity> + RestorableSerde + Serialize + Send,
+		U: Updatable<Db = Db, Entity = Entity>,
+		U::Error: 'err,
+		for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 	{
 		let selection = input::select(entities, "Select the entities you want to update")?;
 
@@ -109,7 +113,7 @@ impl Command
 					Err(e) => return Err(e),
 				};
 
-				v.push(U::update(connection, edited));
+				v.push(U::update(connection, edited.into()));
 				Ok(v)
 			})?;
 
@@ -117,7 +121,7 @@ impl Command
 		Ok(())
 	}
 
-	pub(super) async fn run<'err, Db, EAdapter, JAdapter, LAdapter, OAdapter, PAdapter>(
+	pub async fn run<'err, Db, EAdapter, JAdapter, LAdapter, OAdapter, PAdapter>(
 		self,
 		connection: Pool<Db>,
 		cascade_delete: bool,
@@ -131,6 +135,12 @@ impl Command
 		LAdapter : Deletable<Db = Db> + LocationAdapter + Send,
 		OAdapter : Deletable<Db = Db> + OrganizationAdapter + Send,
 		PAdapter : Deletable<Db = Db> + PersonAdapter + Send,
+		<EAdapter as Deletable>::Error: 'err,
+		<JAdapter as Deletable>::Error: 'err,
+		<LAdapter as Deletable>::Error: 'err,
+		<OAdapter as Deletable>::Error: 'err,
+		<PAdapter as Deletable>::Error: 'err,
+		for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 	{
 		match self
 		{
@@ -157,12 +167,12 @@ impl Command
 
 				if delete
 				{
-					Self::delete(&connection, cascade_delete, &results_view).await?;
+					Self::delete::<EAdapter, _, _, _>(&connection, cascade_delete, &results_view).await?;
 				}
 
 				if update
 				{
-					Self::update(&connection, &results_view).await?
+					Self::update::<_, _, _, EAdapter>(&connection, &results_view).await?
 				}
 
 				if set_default
@@ -189,7 +199,7 @@ impl Command
 						},
 					};
 
-					new_config.update();
+					new_config.update()?;
 				}
 				else if !(delete || update)
 				{
@@ -213,12 +223,12 @@ impl Command
 
 				if delete
 				{
-					Self::delete(&connection, cascade_delete, &results_view).await?;
+					Self::delete::<JAdapter, _, _, _>(&connection, cascade_delete, &results_view).await?;
 				}
 
 				if update
 				{
-					Self::update(&connection, &results_view).await?
+					Self::update::<_, _, _, JAdapter>(&connection, &results_view).await?
 				}
 
 				if close
@@ -294,12 +304,12 @@ impl Command
 
 				if delete
 				{
-					Self::delete(&connection, cascade_delete, &results_view).await?;
+					Self::delete::<LAdapter, _, _, _>(&connection, cascade_delete, &results_view).await?;
 				}
 
 				if update
 				{
-					Self::update(&connection, &results_view).await?
+					Self::update::<_, _, _, LAdapter>(&connection, &results_view).await?
 				}
 
 				if let Some(name) = create_inner.last()
@@ -331,12 +341,12 @@ impl Command
 
 				if delete
 				{
-					Self::delete(&connection, cascade_delete, &results_view).await?;
+					Self::delete::<OAdapter, _, _, _>(&connection, cascade_delete, &results_view).await?;
 				}
 
 				if update
 				{
-					Self::update(&connection, &results_view).await?
+					Self::update::<_, _, _, OAdapter>(&connection, &results_view).await?
 				}
 				else if !delete
 				{
@@ -355,12 +365,12 @@ impl Command
 
 				if delete
 				{
-					Self::delete(&connection, cascade_delete, &results_view).await?;
+					Self::delete::<PAdapter, _, _, _>(&connection, cascade_delete, &results_view).await?;
 				}
 
 				if update
 				{
-					Self::update(&connection, &results_view).await?
+					Self::update::<_, _, _, PAdapter>(&connection, &results_view).await?
 				}
 				else if !delete
 				{

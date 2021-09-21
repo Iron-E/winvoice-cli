@@ -14,7 +14,7 @@ use clinvoice_adapter_postgres::data::{PostgresEmployee, PostgresJob};
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, StructOpt)]
 #[structopt(about = "Time information that was recorded with CLInvoice")]
-pub(super) struct Time
+pub struct Time
 {
 	#[structopt(subcommand)]
 	pub command: Command,
@@ -32,7 +32,7 @@ impl Time
 	/// # Summary
 	///
 	/// Execute the constructed command.
-	pub(super) async fn run<'err>(
+	pub async fn run<'err>(
 		self,
 		default_currency: Currency,
 		default_employee_id: Id,

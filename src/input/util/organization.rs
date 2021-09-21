@@ -3,10 +3,10 @@ use core::fmt::Display;
 use clinvoice_adapter::data::{Deletable, OrganizationAdapter};
 use clinvoice_data::views::OrganizationView;
 use clinvoice_query as query;
-use sqlx::{Database, Pool};
+use sqlx::{Database, Executor, Pool};
 
-use super::menu;
-use crate::{app::QUERY_PROMPT, input, DynResult};
+use super::{menu, QUERY_PROMPT};
+use crate::{input, DynResult};
 
 /// # Summary
 ///
@@ -29,7 +29,9 @@ pub async fn retrieve_view<'err, D, Db, OAdapter>(
 where
 	D: Display,
 	Db: Database,
-	OAdapter: Deletable<Db = Db> + OrganizationAdapter + Send,
+	OAdapter : Deletable<Db = Db> + OrganizationAdapter + Send,
+	<OAdapter as Deletable>::Error: 'err,
+	for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 {
 	loop
 	{
@@ -40,7 +42,7 @@ where
 
 		if retry_on_empty &&
 			results.is_empty() &&
-			menu::retry_query()?
+			menu::ask_to_retry()?
 		{
 			continue;
 		}

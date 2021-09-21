@@ -8,7 +8,7 @@ use futures::{
 	stream::{self, TryStreamExt},
 	TryFutureExt,
 };
-use sqlx::{Database, Pool};
+use sqlx::{Database, Executor, Pool};
 
 use crate::{input, DynResult};
 use structopt::StructOpt;
@@ -18,7 +18,7 @@ use clinvoice_adapter_postgres::data::{PostgresEmployee, PostgresJob, PostgresLo
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, StructOpt)]
 #[structopt(about = "Record information information with CLInvoice")]
-pub(super) enum Create
+pub enum Create
 {
 	#[structopt(about = "Create a new employee record")]
 	Employee
@@ -108,6 +108,12 @@ impl Create
 		LAdapter : Deletable<Db = Db> + LocationAdapter + Send,
 		OAdapter : Deletable<Db = Db> + OrganizationAdapter + Send,
 		PAdapter : Deletable<Db = Db> + PersonAdapter + Send,
+		<EAdapter as Deletable>::Error: 'err,
+		<JAdapter as Deletable>::Error: 'err,
+		<LAdapter as Deletable>::Error: 'err,
+		<OAdapter as Deletable>::Error: 'err,
+		<PAdapter as Deletable>::Error: 'err,
+		for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 	{
 		match command
 		{
@@ -170,6 +176,10 @@ impl Create
 		OAdapter: Deletable<Db = Db> + OrganizationAdapter + Send,
 		PAdapter: Deletable<Db = Db> + PersonAdapter + Send,
 		<EAdapter as Deletable>::Error: 'err,
+		<LAdapter as Deletable>::Error: 'err,
+		<OAdapter as Deletable>::Error: 'err,
+		<PAdapter as Deletable>::Error: 'err,
+		for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 	{
 		let organization_views = input::util::organization::retrieve_view::<&str, _, OAdapter>(
 			connection,
@@ -231,6 +241,9 @@ impl Create
 		Db: Database,
 		JAdapter: Deletable<Db = Db> + JobAdapter,
 		OAdapter: Deletable<Db = Db> + OrganizationAdapter + Send,
+		<JAdapter as Deletable>::Error: 'err,
+		<OAdapter as Deletable>::Error: 'err,
+		for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 	{
 		let organization_views = input::util::organization::retrieve_view::<&str, _, OAdapter>(
 			connection,
@@ -288,12 +301,13 @@ impl Create
 	where
 		Db: Database,
 		LAdapter: Deletable<Db = Db> + LocationAdapter,
+		for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 	{
 		if let Some(name) = names.last()
 		{
 			let outer = LAdapter::create(connection, name.clone()).await?;
 			stream::iter(names.into_iter().rev().skip(1).map(Ok))
-				.try_fold(outer, |outer, name| async {
+				.try_fold(outer, |outer, name| async move {
 					LAdapter::create_inner(connection, &outer, name).await
 				})
 				.await?;
@@ -307,6 +321,9 @@ impl Create
 		Db: Database,
 		LAdapter: Deletable<Db = Db> + LocationAdapter + Send,
 		OAdapter: Deletable<Db = Db> + OrganizationAdapter,
+		<LAdapter as Deletable>::Error: 'err,
+		<OAdapter as Deletable>::Error: 'err,
+		for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 	{
 		let location_views = input::util::location::retrieve_view::<&str, _, LAdapter>(
 			connection,
@@ -323,7 +340,7 @@ impl Create
 		Ok(())
 	}
 
-	pub(super) async fn run<'err>(
+	pub async fn run<'err>(
 		self,
 		default_currency: Currency,
 		store: &Store,
@@ -338,6 +355,9 @@ impl Create
 				default_currency,
 			).await,
 
+			// NOTE: this is allowed because there may be additional adapters added later, and I want
+			//       to define this behavior now.
+			#[allow(unreachable_patterns)]
 			_ => Err(FeatureNotFoundError(store.adapter).into()),
 		}
 	}

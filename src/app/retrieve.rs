@@ -13,10 +13,10 @@ use clinvoice_adapter_postgres::data::{PostgresEmployee, PostgresJob, PostgresLo
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, StructOpt)]
 #[structopt(about = "Retrieve information that was recorded with CLInvoice")]
-pub(super) struct Retrieve
+pub struct Retrieve
 {
 	#[structopt(help = "Select retrieved entities for deletion. See -c", long, short)]
-	pub delete: bool,
+	delete: bool,
 
 	#[structopt(
 		help = "Cascade -d operations. Without this flag, entities referenced by other entities \
@@ -24,13 +24,13 @@ pub(super) struct Retrieve
 		long = "cascade",
 		short = "c",
 	)]
-	pub cascade_delete: bool,
+	cascade_delete: bool,
 
 	#[structopt(help = "Select retrieved entities for data updating", long, short)]
-	pub update: bool,
+	update: bool,
 
 	#[structopt(subcommand)]
-	pub command: Command,
+	command: Command,
 }
 
 impl Retrieve
@@ -38,7 +38,7 @@ impl Retrieve
 	/// # Summary
 	///
 	/// Execute the constructed command.
-	pub(super) async fn run<'err>(
+	pub async fn run<'err>(
 		self,
 		config: &Config<'_, '_>,
 		store: &Store,

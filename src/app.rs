@@ -1,6 +1,6 @@
-pub mod create;
-pub mod retrieve;
-pub mod time;
+mod create;
+mod retrieve;
+mod time;
 
 use clinvoice_config::Result as ConfigResult;
 use create::Create;
@@ -12,12 +12,6 @@ use futures::future;
 use crate::DynResult;
 use clinvoice_config::Config;
 use structopt::StructOpt;
-
-/// # Summary
-///
-/// The prompt for when editing a [query](clinvoice_query).
-pub const QUERY_PROMPT: &str =
-	"See the documentation of this query at https://github.com/Iron-E/clinvoice/wiki/Query-Syntax#";
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, StructOpt)]
 #[structopt(
@@ -56,10 +50,6 @@ impl App
 	/// # Summary
 	///
 	/// Edit the user's configuration file.
-	///
-	/// # TODO
-	///
-	/// * Use `try` blocks when they land to not need `.map_err()` all the time.
 	fn edit_config(config: &Config<'_, '_>) -> ConfigResult<()>
 	{
 		let serialized = toml::to_string_pretty(config)?;

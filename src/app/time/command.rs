@@ -4,14 +4,14 @@ use std::cmp::Ordering;
 
 use clinvoice_adapter::data::{Deletable, EmployeeAdapter, JobAdapter};
 use clinvoice_data::{Id, chrono::{Duration, DurationRound, Utc}, finance::Currency, views::{EmployeeView, JobView, TimesheetView}};
-use sqlx::{Database, Pool};
+use sqlx::{Database, Executor, Pool};
 use structopt::StructOpt;
 use core::time::Duration as StdDuration;
 
 use crate::{DynResult, input};
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, StructOpt)]
-pub(super) enum Command
+pub enum Command
 {
 	#[structopt(about = "Start working on a `Job`")]
 	Start,
@@ -114,7 +114,7 @@ impl Command
 		Ok(())
 	}
 
-	pub(super) async fn run<'err, Db, EAdapter, JAdapter>(
+	pub async fn run<'err, Db, EAdapter, JAdapter>(
 		&self,
 		connection: Pool<Db>,
 		default_currency: Currency,
@@ -124,6 +124,9 @@ impl Command
 		Db: Database,
 		EAdapter : Deletable<Db = Db> + EmployeeAdapter + Send,
 		JAdapter : Deletable<Db = Db> + JobAdapter + Send,
+		<EAdapter as Deletable>::Error: 'err,
+		<JAdapter as Deletable>::Error: 'err,
+		for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 	{
 		let job_results_view: Vec<_> =
 			input::util::job::retrieve_view::<&str, _, JAdapter>(

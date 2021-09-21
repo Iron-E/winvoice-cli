@@ -1,18 +1,15 @@
-use clinvoice_data::views::JobView;
+use clinvoice_adapter::data::JobAdapter;
+use clinvoice_data::{
+	chrono::{DateTime, Utc},
+	finance::Money,
+	views::JobView,
+	Job,
+	Organization,
+};
+use clinvoice_query as query;
 use sqlx::{Executor, Postgres, Result};
 
-use
-{
-	super::PostgresJob,
-
-	clinvoice_adapter::data::JobAdapter,
-	clinvoice_data::
-	{
-		chrono::{DateTime, Utc},
-		Job, finance::Money, Organization
-	},
-	clinvoice_query as query,
-};
+use super::PostgresJob;
 
 #[async_trait::async_trait]
 impl JobAdapter for PostgresJob

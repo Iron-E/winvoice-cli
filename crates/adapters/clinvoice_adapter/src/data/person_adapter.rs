@@ -1,6 +1,6 @@
 #![allow(clippy::wrong_self_convention)]
 
-use clinvoice_data::{Person, views::PersonView};
+use clinvoice_data::{views::PersonView, Person};
 use clinvoice_query as query;
 use sqlx::Executor;
 
@@ -9,7 +9,11 @@ use super::{Deletable, Updatable};
 #[async_trait::async_trait]
 pub trait PersonAdapter:
 	Deletable<Entity = Person>
-	+ Updatable<Db = <Self as Deletable>::Db, Entity = <Self as Deletable>::Entity, Error = <Self as Deletable>::Error>
+	+ Updatable<
+		Db = <Self as Deletable>::Db,
+		Entity = <Self as Deletable>::Entity,
+		Error = <Self as Deletable>::Error,
+	>
 {
 	/// # Summary
 	///

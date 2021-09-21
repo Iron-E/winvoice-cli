@@ -1,14 +1,9 @@
-use clinvoice_data::views::PersonView;
+use clinvoice_adapter::data::PersonAdapter;
+use clinvoice_data::{views::PersonView, Person};
+use clinvoice_query as query;
 use sqlx::{Executor, Postgres, Result};
 
-use
-{
-	super::PostgresPerson,
-
-	clinvoice_adapter::data::PersonAdapter,
-	clinvoice_data::Person,
-	clinvoice_query as query,
-};
+use super::PostgresPerson;
 
 #[async_trait::async_trait]
 impl PersonAdapter for PostgresPerson
@@ -69,9 +64,7 @@ impl PersonAdapter for PostgresPerson
 mod tests
 {
 	#[tokio::test]
-	async fn create()
-	{
-	}
+	async fn create() {}
 
 	#[tokio::test]
 	async fn retrieve()

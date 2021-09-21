@@ -10,15 +10,16 @@ use clinvoice_data::{
 use clinvoice_query as query;
 use sqlx::Executor;
 
-use super::{
-	Deletable,
-	Updatable,
-};
+use super::{Deletable, Updatable};
 
 #[async_trait::async_trait]
 pub trait JobAdapter:
 	Deletable<Entity = Job>
-	+ Updatable<Db = <Self as Deletable>::Db, Entity = <Self as Deletable>::Entity, Error = <Self as Deletable>::Error>
+	+ Updatable<
+		Db = <Self as Deletable>::Db,
+		Entity = <Self as Deletable>::Entity,
+		Error = <Self as Deletable>::Error,
+	>
 {
 	/// # Summary
 	///

@@ -1,4 +1,24 @@
-use clinvoice_adapter::{Adapters, Error as FeatureNotFoundError, Store, data::{Deletable, EmployeeAdapter, JobAdapter, LocationAdapter, OrganizationAdapter, PersonAdapter}};
+use clinvoice_adapter::{
+	data::{
+		Deletable,
+		EmployeeAdapter,
+		JobAdapter,
+		LocationAdapter,
+		OrganizationAdapter,
+		PersonAdapter,
+	},
+	Adapters,
+	Error as FeatureNotFoundError,
+	Store,
+};
+#[cfg(feature = "postgres")]
+use clinvoice_adapter_postgres::data::{
+	PostgresEmployee,
+	PostgresJob,
+	PostgresLocation,
+	PostgresOrganization,
+	PostgresPerson,
+};
 use clinvoice_data::{
 	chrono::{Datelike, Local, TimeZone, Timelike},
 	finance::{Currency, Decimal, Money},
@@ -9,12 +29,9 @@ use futures::{
 	TryFutureExt,
 };
 use sqlx::{Database, Executor, Pool};
-
-use crate::{input, DynResult};
 use structopt::StructOpt;
 
-#[cfg(feature="postgres")]
-use clinvoice_adapter_postgres::data::{PostgresEmployee, PostgresJob, PostgresLocation, PostgresOrganization, PostgresPerson};
+use crate::{input, DynResult};
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, StructOpt)]
 #[structopt(about = "Record information information with CLInvoice")]
@@ -101,13 +118,14 @@ impl Create
 		command: Self,
 		connection: Pool<Db>,
 		default_currency: Currency,
-	) -> DynResult<'err, ()> where
+	) -> DynResult<'err, ()>
+	where
 		Db: Database,
-		EAdapter : Deletable<Db = Db> + EmployeeAdapter + Send,
-		JAdapter : Deletable<Db = Db> + JobAdapter + Send,
-		LAdapter : Deletable<Db = Db> + LocationAdapter + Send,
-		OAdapter : Deletable<Db = Db> + OrganizationAdapter + Send,
-		PAdapter : Deletable<Db = Db> + PersonAdapter + Send,
+		EAdapter: Deletable<Db = Db> + EmployeeAdapter + Send,
+		JAdapter: Deletable<Db = Db> + JobAdapter + Send,
+		LAdapter: Deletable<Db = Db> + LocationAdapter + Send,
+		OAdapter: Deletable<Db = Db> + OrganizationAdapter + Send,
+		PAdapter: Deletable<Db = Db> + PersonAdapter + Send,
 		<EAdapter as Deletable>::Error: 'err,
 		<JAdapter as Deletable>::Error: 'err,
 		<LAdapter as Deletable>::Error: 'err,
@@ -119,14 +137,8 @@ impl Create
 		{
 			Self::Employee { title } =>
 			{
-				Self::create_employee::<
-					_,
-					EAdapter,
-					LAdapter,
-					OAdapter,
-					PAdapter,
-				>(&connection, title)
-				.await
+				Self::create_employee::<_, EAdapter, LAdapter, OAdapter, PAdapter>(&connection, title)
+					.await
 			},
 
 			Self::Job {
@@ -154,12 +166,17 @@ impl Create
 				.await
 			},
 
-			Self::Location { names } => Self::create_location::<_, LAdapter>(&connection, names)
-				.err_into()
-				.await,
+			Self::Location { names } =>
+			{
+				Self::create_location::<_, LAdapter>(&connection, names)
+					.err_into()
+					.await
+			},
 
 			Self::Organization { name } =>
-				Self::create_organization::<_, LAdapter, OAdapter>(&connection, name).await,
+			{
+				Self::create_organization::<_, LAdapter, OAdapter>(&connection, name).await
+			},
 
 			Self::Person { name } => PAdapter::create(&connection, name)
 				.err_into()
@@ -168,7 +185,10 @@ impl Create
 		}
 	}
 
-	async fn create_employee<'err, Db, EAdapter, LAdapter, OAdapter, PAdapter>(connection: &Pool<Db>, title: String) -> DynResult<'err, ()>
+	async fn create_employee<'err, Db, EAdapter, LAdapter, OAdapter, PAdapter>(
+		connection: &Pool<Db>,
+		title: String,
+	) -> DynResult<'err, ()>
 	where
 		Db: Database,
 		EAdapter: Deletable<Db = Db> + EmployeeAdapter + Send,
@@ -316,7 +336,10 @@ impl Create
 		Ok(())
 	}
 
-	async fn create_organization<'err, Db, LAdapter, OAdapter>(connection: &Pool<Db>, name: String) -> DynResult<'err, ()>
+	async fn create_organization<'err, Db, LAdapter, OAdapter>(
+		connection: &Pool<Db>,
+		name: String,
+	) -> DynResult<'err, ()>
 	where
 		Db: Database,
 		LAdapter: Deletable<Db = Db> + LocationAdapter + Send,
@@ -340,20 +363,27 @@ impl Create
 		Ok(())
 	}
 
-	pub async fn run<'err>(
-		self,
-		default_currency: Currency,
-		store: &Store,
-	) -> DynResult<'err, ()>
+	pub async fn run<'err>(self, default_currency: Currency, store: &Store) -> DynResult<'err, ()>
 	{
 		match store.adapter
 		{
-			#[cfg(feature="postgres")]
-			Adapters::Postgres => Self::create::<_, PostgresEmployee, PostgresJob, PostgresLocation, PostgresOrganization, PostgresPerson>(
-				self,
-				sqlx::PgPool::connect_lazy(&store.url)?,
-				default_currency,
-			).await,
+			#[cfg(feature = "postgres")]
+			Adapters::Postgres =>
+			{
+				Self::create::<
+					_,
+					PostgresEmployee,
+					PostgresJob,
+					PostgresLocation,
+					PostgresOrganization,
+					PostgresPerson,
+				>(
+					self,
+					sqlx::PgPool::connect_lazy(&store.url)?,
+					default_currency,
+				)
+				.await
+			},
 
 			// NOTE: this is allowed because there may be additional adapters added later, and I want
 			//       to define this behavior now.

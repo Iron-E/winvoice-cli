@@ -1,11 +1,8 @@
-use sqlx::{Postgres, Executor, Error, Result};
-use
-{
-	super::PostgresLocation,
+use clinvoice_adapter::data::Deletable;
+use clinvoice_data::Location;
+use sqlx::{Error, Executor, Postgres, Result};
 
-	clinvoice_adapter::data::Deletable,
-	clinvoice_data::Location,
-};
+use super::PostgresLocation;
 
 #[async_trait::async_trait]
 impl Deletable for PostgresLocation
@@ -18,7 +15,7 @@ impl Deletable for PostgresLocation
 		connection: impl 'async_trait + Executor<'_, Database = Self::Db>,
 		cascade: bool,
 		entities: impl 'async_trait + Iterator<Item = Self::Entity> + Send,
-	)-> Result<()>
+	) -> Result<()>
 	{
 		todo!()
 	}

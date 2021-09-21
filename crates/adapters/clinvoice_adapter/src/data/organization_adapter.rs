@@ -9,7 +9,11 @@ use super::{Deletable, Updatable};
 #[async_trait::async_trait]
 pub trait OrganizationAdapter:
 	Deletable<Entity = Organization>
-	+ Updatable<Db = <Self as Deletable>::Db, Entity = <Self as Deletable>::Entity, Error = <Self as Deletable>::Error>
+	+ Updatable<
+		Db = <Self as Deletable>::Db,
+		Entity = <Self as Deletable>::Entity,
+		Error = <Self as Deletable>::Error,
+	>
 {
 	/// # Summary
 	///

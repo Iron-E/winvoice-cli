@@ -1,9 +1,6 @@
 mod element;
 mod text;
 
-pub use element::Element;
-pub use text::Text;
-
 use core::fmt::Write;
 use std::collections::HashSet;
 
@@ -14,6 +11,8 @@ use clinvoice_data::{
 	Id,
 	Job,
 };
+pub use element::Element;
+pub use text::Text;
 
 /// # Summary
 ///
@@ -148,11 +147,7 @@ pub fn job(job: &JobView) -> FinanceResult<String>
 ///
 /// Tracks the previously `serialized_employees` so that their contact information is not
 /// reiterated every time.
-fn timesheet(
-	serialized_employees: &mut HashSet<Id>,
-	output: &mut String,
-	timesheet: &TimesheetView,
-)
+fn timesheet(serialized_employees: &mut HashSet<Id>, output: &mut String, timesheet: &TimesheetView)
 {
 	writeln!(output, "{}", Element::Heading {
 		depth: 3,
@@ -278,12 +273,7 @@ fn timesheet(
 			text:  "Work Notes",
 		})
 		.unwrap();
-		writeln!(
-			output,
-			"{}",
-			Element::BlockText(&timesheet.work_notes)
-		)
-		.unwrap();
+		writeln!(output, "{}", Element::BlockText(&timesheet.work_notes)).unwrap();
 	}
 
 	serialized_employees.insert(timesheet.employee.id);

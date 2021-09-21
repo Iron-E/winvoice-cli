@@ -1,16 +1,15 @@
 mod command;
 
-use command::Command;
-
-use clinvoice_adapter::{Adapters, Error as AdapterError, Store};
-use clinvoice_data::{Id, finance::Currency};
 use core::time::Duration;
 
-use crate::DynResult;
+use clinvoice_adapter::{Adapters, Error as AdapterError, Store};
+#[cfg(feature = "postgres")]
+use clinvoice_adapter_postgres::data::{PostgresEmployee, PostgresJob};
+use clinvoice_data::{finance::Currency, Id};
+use command::Command;
 use structopt::StructOpt;
 
-#[cfg(feature="postgres")]
-use clinvoice_adapter_postgres::data::{PostgresEmployee, PostgresJob};
+use crate::DynResult;
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, StructOpt)]
 #[structopt(about = "Time information that was recorded with CLInvoice")]
@@ -40,17 +39,28 @@ impl Time
 		store: &Store,
 	) -> DynResult<'err, ()>
 	{
-		let provided_employee_id = if self.use_default_employee_id { Some(default_employee_id) } else { None };
+		let provided_employee_id = if self.use_default_employee_id
+		{
+			Some(default_employee_id)
+		}
+		else
+		{
+			None
+		};
 		match store.adapter
 		{
-			#[cfg(feature="postgres")]
-			Adapters::Postgres => {
-				self.command.run::<_, PostgresEmployee, PostgresJob>(
-					sqlx::PgPool::connect_lazy(&store.url)?,
-					default_currency,
-					provided_employee_id,
-					default_timesheet_interval,
-				).await
+			#[cfg(feature = "postgres")]
+			Adapters::Postgres =>
+			{
+				self
+					.command
+					.run::<_, PostgresEmployee, PostgresJob>(
+						sqlx::PgPool::connect_lazy(&store.url)?,
+						default_currency,
+						provided_employee_id,
+						default_timesheet_interval,
+					)
+					.await
 			},
 
 			_ => return Err(AdapterError(store.adapter).into()),

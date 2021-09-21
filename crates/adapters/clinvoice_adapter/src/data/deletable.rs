@@ -1,5 +1,6 @@
 use std::error::Error;
-use sqlx::{Database, Executor, Error as SqlxError};
+
+use sqlx::{Database, Error as SqlxError, Executor};
 
 /// # Summary
 ///

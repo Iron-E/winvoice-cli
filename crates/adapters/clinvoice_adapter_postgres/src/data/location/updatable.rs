@@ -1,12 +1,8 @@
+use clinvoice_adapter::data::Updatable;
 use clinvoice_data::Location;
-use sqlx::{Postgres, Executor, Error, Result};
+use sqlx::{Error, Executor, Postgres, Result};
 
-use
-{
-	super::PostgresLocation,
-
-	clinvoice_adapter::data::Updatable,
-};
+use super::PostgresLocation;
 
 #[async_trait::async_trait]
 impl Updatable for PostgresLocation
@@ -15,7 +11,10 @@ impl Updatable for PostgresLocation
 	type Entity = Location;
 	type Error = Error;
 
-	async fn update(connection: impl 'async_trait + Executor<'_, Database = Self::Db>, entity: Self::Entity) -> Result<()>
+	async fn update(
+		connection: impl 'async_trait + Executor<'_, Database = Self::Db>,
+		entity: Self::Entity,
+	) -> Result<()>
 	{
 		todo!()
 	}

@@ -1,14 +1,9 @@
-use clinvoice_data::views::LocationView;
+use clinvoice_adapter::data::LocationAdapter;
+use clinvoice_data::{views::LocationView, Location};
+use clinvoice_query as query;
 use sqlx::{Acquire, Executor, Postgres, Result};
 
-use
-{
-	super::PostgresLocation,
-
-	clinvoice_adapter::data::LocationAdapter,
-	clinvoice_data::Location,
-	clinvoice_query as query,
-};
+use super::PostgresLocation;
 
 #[async_trait::async_trait]
 impl LocationAdapter for PostgresLocation

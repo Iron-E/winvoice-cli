@@ -1,14 +1,9 @@
-use clinvoice_data::views::OrganizationView;
+use clinvoice_adapter::data::OrganizationAdapter;
+use clinvoice_data::{views::OrganizationView, Location, Organization};
+use clinvoice_query as query;
 use sqlx::{Executor, Postgres, Result};
 
-use
-{
-	super::PostgresOrganization,
-
-	clinvoice_adapter::data::OrganizationAdapter,
-	clinvoice_data::{Location, Organization},
-	clinvoice_query as query,
-};
+use super::PostgresOrganization;
 
 #[async_trait::async_trait]
 impl OrganizationAdapter for PostgresOrganization

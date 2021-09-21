@@ -211,7 +211,9 @@ fn edit_menu(contact_info: &mut HashMap<String, ContactView>) -> input::Result<(
 /// If a user manages to select an action (e.g. `ADD`, `CONTINUE`, `DELETE`) which is unaccounted
 /// for. This is __theoretically not possible__ but must be present to account for the case of an
 /// unrecoverable state of the program.
-pub async fn menu<'err, Db, LAdapter>(connection: &Pool<Db>) -> DynResult<'err, HashMap<String, ContactView>>
+pub async fn menu<'err, Db, LAdapter>(
+	connection: &Pool<Db>,
+) -> DynResult<'err, HashMap<String, ContactView>>
 where
 	Db: Database,
 	LAdapter: Deletable<Db = Db> + LocationAdapter + Send,

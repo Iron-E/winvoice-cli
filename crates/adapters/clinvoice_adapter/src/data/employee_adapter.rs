@@ -1,7 +1,6 @@
 #![allow(clippy::wrong_self_convention)]
 
 use std::collections::HashMap;
-use sqlx::Executor;
 
 use clinvoice_data::{
 	views::EmployeeView,
@@ -12,16 +11,18 @@ use clinvoice_data::{
 	Person,
 };
 use clinvoice_query as query;
+use sqlx::Executor;
 
-use super::{
-	Deletable,
-	Updatable,
-};
+use super::{Deletable, Updatable};
 
 #[async_trait::async_trait]
 pub trait EmployeeAdapter:
 	Deletable<Entity = Employee>
-	+ Updatable<Db = <Self as Deletable>::Db, Entity = <Self as Deletable>::Entity, Error = <Self as Deletable>::Error>
+	+ Updatable<
+		Db = <Self as Deletable>::Db,
+		Entity = <Self as Deletable>::Entity,
+		Error = <Self as Deletable>::Error,
+	>
 {
 	/// # Summary
 	///

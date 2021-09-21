@@ -1,17 +1,18 @@
 use std::collections::HashMap;
 
-use clinvoice_data::{Contact, EmployeeStatus, Organization, Person, views::EmployeeView};
+use clinvoice_adapter::data::EmployeeAdapter;
+use clinvoice_data::{
+	views::EmployeeView,
+	Contact,
+	Employee,
+	EmployeeStatus,
+	Organization,
+	Person,
+};
+use clinvoice_query as query;
 use sqlx::{Executor, Postgres, Result};
 
-use
-{
-	super::PostgresEmployee,
-
-	clinvoice_adapter::data::EmployeeAdapter,
-
-	clinvoice_data::Employee,
-	clinvoice_query as query,
-};
+use super::PostgresEmployee;
 
 #[async_trait::async_trait]
 impl EmployeeAdapter for PostgresEmployee

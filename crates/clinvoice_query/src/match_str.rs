@@ -26,7 +26,6 @@ where
 	/// # Summary
 	///
 	/// Match if and only if this value and some other string are exactly the same.
-	///
 	EqualTo(S),
 
 	/// # Summary

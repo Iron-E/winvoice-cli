@@ -1,14 +1,27 @@
 use core::fmt::Display;
-use clinvoice_adapter::data::{Deletable, EmployeeAdapter, JobAdapter, LocationAdapter, OrganizationAdapter, PersonAdapter, Updatable};
+
+use clinvoice_adapter::data::{
+	Deletable,
+	EmployeeAdapter,
+	JobAdapter,
+	LocationAdapter,
+	OrganizationAdapter,
+	PersonAdapter,
+	Updatable,
+};
 use clinvoice_config::Config;
-use clinvoice_data::{Location, chrono::Utc, views::RestorableSerde};
+use clinvoice_data::{chrono::Utc, views::RestorableSerde, Location};
 use clinvoice_serialize::markdown;
-use futures::{future, stream::{self, TryStreamExt}};
-use serde::{Serialize, de::DeserializeOwned};
+use futures::{
+	future,
+	stream::{self, TryStreamExt},
+};
+use serde::{de::DeserializeOwned, Serialize};
 use sqlx::{Database, Executor, Pool};
 use structopt::StructOpt;
 use tokio::fs;
-use crate::{DynResult, input};
+
+use crate::{input, DynResult};
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, StructOpt)]
 pub enum Command
@@ -37,11 +50,7 @@ pub enum Command
 		#[structopt(help = "Select jobs to be closed", long, short)]
 		close: bool,
 
-		#[structopt(
-			help = "Export retrieved entities to markdown",
-			long,
-			short
-		)]
+		#[structopt(help = "Export retrieved entities to markdown", long, short)]
 		export: bool,
 
 		#[structopt(help = "Select jobs to be reopened", long, short)]
@@ -74,7 +83,11 @@ impl Command
 	/// Delete some `entities`
 	///
 	/// `delete_entity` determines how the entities are deleted.
-	async fn delete<'err, D, Db, Entity, EntityView>(connection: &Pool<Db>, cascade: bool, entities: &[EntityView]) -> DynResult<'err, ()>
+	async fn delete<'err, D, Db, Entity, EntityView>(
+		connection: &Pool<Db>,
+		cascade: bool,
+		entities: &[EntityView],
+	) -> DynResult<'err, ()>
 	where
 		D: Deletable<Db = Db, Entity = Entity>,
 		D::Error: 'err,
@@ -83,7 +96,12 @@ impl Command
 		for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 	{
 		let selection = input::select(entities, "Select the entities you want to delete")?;
-		D::delete(connection, cascade, selection.into_iter().map(EntityView::into)).await?;
+		D::delete(
+			connection,
+			cascade,
+			selection.into_iter().map(EntityView::into),
+		)
+		.await?;
 		Ok(())
 	}
 
@@ -92,10 +110,14 @@ impl Command
 	/// Edit some `entities`, and then update them.
 	///
 	/// `update_entity` determines how the entities are updated.
-	async fn update<'err, Db, Entity, EntityView, U>(connection: &Pool<Db>, entities: &[EntityView]) -> DynResult<'err, ()>
+	async fn update<'err, Db, Entity, EntityView, U>(
+		connection: &Pool<Db>,
+		entities: &[EntityView],
+	) -> DynResult<'err, ()>
 	where
 		Db: Database,
-		EntityView: Clone + DeserializeOwned + Display + Into<Entity> + RestorableSerde + Serialize + Send,
+		EntityView:
+			Clone + DeserializeOwned + Display + Into<Entity> + RestorableSerde + Serialize + Send,
 		U: Updatable<Db = Db, Entity = Entity>,
 		U::Error: 'err,
 		for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
@@ -128,13 +150,14 @@ impl Command
 		config: &Config<'_, '_>,
 		delete: bool,
 		update: bool,
-	) -> DynResult<'err, ()> where
+	) -> DynResult<'err, ()>
+	where
 		Db: Database,
-		EAdapter : Deletable<Db = Db> + EmployeeAdapter + Send,
-		JAdapter : Deletable<Db = Db> + JobAdapter + Send,
-		LAdapter : Deletable<Db = Db> + LocationAdapter + Send,
-		OAdapter : Deletable<Db = Db> + OrganizationAdapter + Send,
-		PAdapter : Deletable<Db = Db> + PersonAdapter + Send,
+		EAdapter: Deletable<Db = Db> + EmployeeAdapter + Send,
+		JAdapter: Deletable<Db = Db> + JobAdapter + Send,
+		LAdapter: Deletable<Db = Db> + LocationAdapter + Send,
+		OAdapter: Deletable<Db = Db> + OrganizationAdapter + Send,
+		PAdapter: Deletable<Db = Db> + PersonAdapter + Send,
 		<EAdapter as Deletable>::Error: 'err,
 		<JAdapter as Deletable>::Error: 'err,
 		<LAdapter as Deletable>::Error: 'err,
@@ -149,25 +172,25 @@ impl Command
 				set_default,
 			} =>
 			{
-				let results_view =
-					input::util::employee::retrieve_view::<&str, _, EAdapter>(
-						&connection,
-						if default
-						{
-							Some(config.employees.default_id)
-						}
-						else
-						{
-							None
-						},
-						"Query the `Employee` you are looking for",
-						false,
-					)
-					.await?;
+				let results_view = input::util::employee::retrieve_view::<&str, _, EAdapter>(
+					&connection,
+					if default
+					{
+						Some(config.employees.default_id)
+					}
+					else
+					{
+						None
+					},
+					"Query the `Employee` you are looking for",
+					false,
+				)
+				.await?;
 
 				if delete
 				{
-					Self::delete::<EAdapter, _, _, _>(&connection, cascade_delete, &results_view).await?;
+					Self::delete::<EAdapter, _, _, _>(&connection, cascade_delete, &results_view)
+						.await?;
 				}
 
 				if update
@@ -184,18 +207,12 @@ impl Command
 						{
 							results_view
 								.first()
-								.ok_or_else(|| {
-									input::Error::NoData(format!("`{}`", stringify!(Employee)))
-								})?
+								.ok_or_else(|| input::Error::NoData(format!("`{}`", stringify!(Employee))))?
 								.id
 						},
 						_ =>
 						{
-							input::select_one(
-								&results_view,
-								"Which `Employee` should be the default?",
-							)?
-							.id
+							input::select_one(&results_view, "Which `Employee` should be the default?")?.id
 						},
 					};
 
@@ -213,17 +230,17 @@ impl Command
 				reopen,
 			} =>
 			{
-				let results_view =
-					input::util::job::retrieve_view::<&str, _, JAdapter>(
-						&connection,
-						"Query the `Job` you are looking for",
-						false,
-					)
-					.await?;
+				let results_view = input::util::job::retrieve_view::<&str, _, JAdapter>(
+					&connection,
+					"Query the `Job` you are looking for",
+					false,
+				)
+				.await?;
 
 				if delete
 				{
-					Self::delete::<JAdapter, _, _, _>(&connection, cascade_delete, &results_view).await?;
+					Self::delete::<JAdapter, _, _, _>(&connection, cascade_delete, &results_view)
+						.await?;
 				}
 
 				if update
@@ -269,22 +286,17 @@ impl Command
 						input::select(&results_view, "Select which Jobs you want to export")?;
 
 					// WARN: this `let` seems redundant, but the "type needs to be known at this point"
-					let export_result: DynResult<'_, _> =
-						stream::iter(to_export.into_iter().map(Ok))
-							.try_for_each_concurrent(None, |job| async move {
-								let exported = markdown::job(&job)?;
-								fs::write(
-									format!(
-										"{}--{}.md",
-										job.client.name.replace(' ', "-"),
-										job.id,
-									),
-									exported,
-								)
-								.await?;
-								Ok(())
-							})
-							.await;
+					let export_result: DynResult<'_, _> = stream::iter(to_export.into_iter().map(Ok))
+						.try_for_each_concurrent(None, |job| async move {
+							let exported = markdown::job(&job)?;
+							fs::write(
+								format!("{}--{}.md", job.client.name.replace(' ', "-"), job.id,),
+								exported,
+							)
+							.await?;
+							Ok(())
+						})
+						.await;
 					export_result?;
 				}
 				else if !(close || delete || reopen || update)
@@ -304,7 +316,8 @@ impl Command
 
 				if delete
 				{
-					Self::delete::<LAdapter, _, _, _>(&connection, cascade_delete, &results_view).await?;
+					Self::delete::<LAdapter, _, _, _>(&connection, cascade_delete, &results_view)
+						.await?;
 				}
 
 				if update
@@ -341,7 +354,8 @@ impl Command
 
 				if delete
 				{
-					Self::delete::<OAdapter, _, _, _>(&connection, cascade_delete, &results_view).await?;
+					Self::delete::<OAdapter, _, _, _>(&connection, cascade_delete, &results_view)
+						.await?;
 				}
 
 				if update
@@ -365,7 +379,8 @@ impl Command
 
 				if delete
 				{
-					Self::delete::<PAdapter, _, _, _>(&connection, cascade_delete, &results_view).await?;
+					Self::delete::<PAdapter, _, _, _>(&connection, cascade_delete, &results_view)
+						.await?;
 				}
 
 				if update

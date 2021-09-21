@@ -2,16 +2,15 @@ mod create;
 mod retrieve;
 mod time;
 
-use clinvoice_config::Result as ConfigResult;
+use clinvoice_config::{Config, Result as ConfigResult};
 use create::Create;
 use dialoguer::Editor;
-use retrieve::Retrieve;
-use time::Time;
 use futures::future;
+use retrieve::Retrieve;
+use structopt::StructOpt;
+use time::Time;
 
 use crate::DynResult;
-use clinvoice_config::Config;
-use structopt::StructOpt;
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, StructOpt)]
 #[structopt(
@@ -73,19 +72,27 @@ impl App
 
 		match self.command
 		{
-			AppCommand::Config => match Self::edit_config(&config)
+			AppCommand::Config =>
 			{
-				Ok(_) => future::ok(()),
-				Err(e) => future::err(e.into()),
-			}.await,
+				match Self::edit_config(&config)
+				{
+					Ok(_) => future::ok(()),
+					Err(e) => future::err(e.into()),
+				}
+				.await
+			},
 			AppCommand::Create(cmd) => cmd.run(config.invoices.default_currency, store).await,
 			AppCommand::Retrieve(cmd) => cmd.run(&config, store).await,
-			AppCommand::Time(cmd) => cmd.run(
-				config.invoices.default_currency,
-				config.employees.default_id,
-				config.timesheets.interval,
-				store,
-			).await,
+			AppCommand::Time(cmd) =>
+			{
+				cmd.run(
+					config.invoices.default_currency,
+					config.employees.default_id,
+					config.timesheets.interval,
+					store,
+				)
+				.await
+			},
 		}
 	}
 }

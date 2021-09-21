@@ -47,9 +47,7 @@ where
 
 		let results = EAdapter::retrieve_view(connection, &query).await?;
 
-		if retry_on_empty &&
-			results.is_empty() &&
-			menu::ask_to_retry()?
+		if retry_on_empty && results.is_empty() && menu::ask_to_retry()?
 		{
 			continue;
 		}

@@ -29,7 +29,7 @@ pub async fn retrieve_view<'err, D, Db, PAdapter>(
 where
 	D: Display,
 	Db: Database,
-	PAdapter : Deletable<Db = Db> + PersonAdapter + Send,
+	PAdapter: Deletable<Db = Db> + PersonAdapter + Send,
 	<PAdapter as Deletable>::Error: 'err,
 	for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 {
@@ -40,9 +40,7 @@ where
 
 		let results = PAdapter::retrieve_view(connection, &query).await?;
 
-		if retry_on_empty &&
-			results.is_empty() &&
-			menu::ask_to_retry()?
+		if retry_on_empty && results.is_empty() && menu::ask_to_retry()?
 		{
 			continue;
 		}

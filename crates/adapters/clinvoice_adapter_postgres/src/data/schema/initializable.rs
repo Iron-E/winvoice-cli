@@ -1,6 +1,7 @@
-use sqlx::{Postgres, Executor, Error, Result};
-use super::PostgresSchema;
 use clinvoice_adapter::data::Initializable;
+use sqlx::{Error, Executor, Postgres, Result};
+
+use super::PostgresSchema;
 
 #[async_trait::async_trait]
 impl Initializable for PostgresSchema

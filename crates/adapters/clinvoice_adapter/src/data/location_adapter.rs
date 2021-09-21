@@ -9,7 +9,11 @@ use super::{Deletable, Updatable};
 #[async_trait::async_trait]
 pub trait LocationAdapter:
 	Deletable<Entity = Location>
-	+ Updatable<Db = <Self as Deletable>::Db, Entity = <Self as Deletable>::Entity, Error = <Self as Deletable>::Error>
+	+ Updatable<
+		Db = <Self as Deletable>::Db,
+		Entity = <Self as Deletable>::Entity,
+		Error = <Self as Deletable>::Error,
+	>
 {
 	/// # Summary
 	///
@@ -79,11 +83,11 @@ pub trait LocationAdapter:
 		connection: impl 'async_trait + Acquire<'_, Database = <Self as Deletable>::Db> + Send,
 		query: &query::Location,
 	) -> Result<Vec<LocationView>, <Self as Deletable>::Error>; //where
-	// 	for<'c> &'c mut <<Self as Deletable>::Db as Database>::Connection: Executor<'c, Database = <Self as Deletable>::Db>,
-	// 	for<'c> &'c mut Transaction<'c, <Self as Deletable>::Db>: Executor<'c, Database = <Self as Deletable>::Db>,
-	// {
-	// 	let mut transaction = connection.begin().await?;
-	// 	let inners = Self::retrieve(&mut transaction, query).await?;
+																				// 	for<'c> &'c mut <<Self as Deletable>::Db as Database>::Connection: Executor<'c, Database = <Self as Deletable>::Db>,
+																				// 	for<'c> &'c mut Transaction<'c, <Self as Deletable>::Db>: Executor<'c, Database = <Self as Deletable>::Db>,
+																				// {
+																				// 	let mut transaction = connection.begin().await?;
+																				// 	let inners = Self::retrieve(&mut transaction, query).await?;
 
 	// 	todo!()
 	// }

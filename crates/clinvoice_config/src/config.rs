@@ -145,14 +145,14 @@ mod tests
 		stores.insert(
 			"c",
 			StoreValue::Storage(Store {
-				adapter:  Adapters::Postgres,
+				adapter: Adapters::Postgres,
 				url:     "c/path".into(),
 			}),
 		);
 		stores.insert(
 			"d",
 			StoreValue::Storage(Store {
-				adapter:  Adapters::Postgres,
+				adapter: Adapters::Postgres,
 				url:     "d/path".into(),
 			}),
 		);

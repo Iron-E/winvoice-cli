@@ -1,14 +1,19 @@
 mod display;
 
+use core::time::Duration as StdDuration;
 use std::cmp::Ordering;
 
 use clinvoice_adapter::data::{Deletable, EmployeeAdapter, JobAdapter};
-use clinvoice_data::{Id, chrono::{Duration, DurationRound, Utc}, finance::Currency, views::{EmployeeView, JobView, TimesheetView}};
+use clinvoice_data::{
+	chrono::{Duration, DurationRound, Utc},
+	finance::Currency,
+	views::{EmployeeView, JobView, TimesheetView},
+	Id,
+};
 use sqlx::{Database, Executor, Pool};
 use structopt::StructOpt;
-use core::time::Duration as StdDuration;
 
-use crate::{DynResult, input};
+use crate::{input, DynResult};
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, StructOpt)]
 pub enum Command
@@ -37,7 +42,7 @@ impl Command
 		default_currency: Currency,
 		default_employee_id: Option<Id>,
 		default_timesheet_interval: StdDuration,
-		job: &mut JobView
+		job: &mut JobView,
 	) -> DynResult<'err, ()>
 	{
 		let index = {
@@ -59,9 +64,9 @@ impl Command
 
 			if timesheets.is_empty()
 			{
-				return Err(input::Error::NoData(
-					format!("active `{}`s", stringify!(Timesheet))
-				).into());
+				return Err(
+					input::Error::NoData(format!("active `{}`s", stringify!(Timesheet))).into(),
+				);
 			}
 
 			let selected = input::select_one(&timesheets, "Which `Timesheet` are you working on?")?;
@@ -80,10 +85,7 @@ impl Command
 
 		job.timesheets[index].work_notes = input::edit_markdown(&job.timesheets[index].work_notes)?;
 
-		input::util::expense::menu(
-			&mut job.timesheets[index].expenses,
-			default_currency,
-		)?;
+		input::util::expense::menu(&mut job.timesheets[index].expenses, default_currency)?;
 
 		// Stop time on the `Job` AFTER requiring users to enter information. Users shouldn't enter things for free ;)
 		let interval = Duration::from_std(default_timesheet_interval)?;
@@ -120,24 +122,24 @@ impl Command
 		default_currency: Currency,
 		default_employee_id: Option<Id>,
 		default_timesheet_interval: StdDuration,
-	) -> DynResult<'err, ()> where
+	) -> DynResult<'err, ()>
+	where
 		Db: Database,
-		EAdapter : Deletable<Db = Db> + EmployeeAdapter + Send,
-		JAdapter : Deletable<Db = Db> + JobAdapter + Send,
+		EAdapter: Deletable<Db = Db> + EmployeeAdapter + Send,
+		JAdapter: Deletable<Db = Db> + JobAdapter + Send,
 		<EAdapter as Deletable>::Error: 'err,
 		<JAdapter as Deletable>::Error: 'err,
 		for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 	{
-		let job_results_view: Vec<_> =
-			input::util::job::retrieve_view::<&str, _, JAdapter>(
-				&connection,
-				"Query the `Job` which you are working on",
-				false,
-			)
-			.await?
-			.into_iter()
-			.filter(|j| j.date_close.is_none())
-			.collect();
+		let job_results_view: Vec<_> = input::util::job::retrieve_view::<&str, _, JAdapter>(
+			&connection,
+			"Query the `Job` which you are working on",
+			false,
+		)
+		.await?
+		.into_iter()
+		.filter(|j| j.date_close.is_none())
+		.collect();
 
 		let mut selected_job = input::select_one(
 			&job_results_view,
@@ -148,14 +150,13 @@ impl Command
 		{
 			Self::Start =>
 			{
-				let results_view =
-					input::util::employee::retrieve_view::<&str, _, EAdapter>(
-						&connection,
-						default_employee_id,
-						"Query the `Employee` who will be doing the work",
-						true,
-					)
-					.await?;
+				let results_view = input::util::employee::retrieve_view::<&str, _, EAdapter>(
+					&connection,
+					default_employee_id,
+					"Query the `Employee` who will be doing the work",
+					true,
+				)
+				.await?;
 
 				let selected_employee = input::select_one(
 					&results_view,

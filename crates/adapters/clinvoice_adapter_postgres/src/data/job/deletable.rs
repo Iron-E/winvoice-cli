@@ -15,7 +15,11 @@ impl Deletable for PostgresJob
 	type Entity = Job;
 	type Error = Error;
 
-	async fn delete(connection: impl 'async_trait + Executor<'_, Database = Self::Db>, cascade: bool, entities: &[Self::Entity]) -> Result<()>
+	async fn delete(
+		connection: impl 'async_trait + Executor<'_, Database = Self::Db>,
+		cascade: bool,
+		entities: impl 'async_trait + Iterator<Item = Self::Entity> + Send,
+	)-> Result<()>
 	{
 		todo!()
 	}

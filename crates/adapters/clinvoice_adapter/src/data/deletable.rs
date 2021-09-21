@@ -31,5 +31,11 @@ pub trait Deletable
 	/// * An [`Error`] when:
 	///   * `self.id` had not already been `create`d.
 	///   * Something goes wrong.
-	async fn delete(connection: impl 'async_trait + Executor<'_, Database = Self::Db>, cascade: bool, entities: &[Self::Entity]) -> Result<(), Self::Error>;
+	///
+	/// TODO: replace generics with `impl` after `async fn` stabilized
+	async fn delete(
+		connection: impl 'async_trait + Executor<'_, Database = Self::Db>,
+		cascade: bool,
+		entities: impl 'async_trait + Iterator<Item = Self::Entity> + Send,
+	) -> Result<(), Self::Error>;
 }

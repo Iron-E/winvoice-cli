@@ -23,12 +23,10 @@ clinvoice_error = {path="../clinvoice_error", version="0.2"}
 # Directories
 dirs = "3"
 
-# Durations
-humantime-serde = "1"
-
 # Errors
 thiserror = "1"
 
 # Serialization
+humantime-serde = "1"
 serde = {version="1", features=["derive"]}
 toml = "0.5"

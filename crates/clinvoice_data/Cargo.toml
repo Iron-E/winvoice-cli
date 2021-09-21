@@ -18,6 +18,7 @@ clinvoice_finance = {path='../clinvoice_finance', version="0.2"}
 chrono = {version="0.4", features=["serde"]}
 
 # Serialization
+humantime-serde = "1"
 serde = {version="1", optional=true}
 
 # Unique Identification

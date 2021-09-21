@@ -154,9 +154,7 @@ impl Job
 	///
 	/// * When not all [`Money`] amounts are in the same currency.
 	///
-	/// # TODO
-	///
-	/// * Add tests.
+	/// TODO: add tests
 	pub fn total(&self) -> Result<Money>
 	{
 		let seconds_per_hour: Decimal = SECONDS_PER_HOUR.into();

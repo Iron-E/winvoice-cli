@@ -14,7 +14,7 @@ use crate::{Employees, Invoices, StoreValue, Timesheets};
 ///
 /// The `Config` contains settings that affect all areas of the application.
 ///
-/// TODO: see if the number of lifetime params can be reduced.
+/// TODO: see if the number of lifetime params can be reduced
 #[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Config<'alias, 'name>
 {

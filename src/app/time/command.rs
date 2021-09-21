@@ -90,8 +90,8 @@ impl Command
 		// Stop time on the `Job` AFTER requiring users to enter information. Users shouldn't enter things for free ;)
 		let interval = Duration::from_std(default_timesheet_interval)?;
 		job.timesheets[index].time_begin =
-			job.timesheets[index].time_begin.duration_trunc(interval)?;
-		job.timesheets[index].time_end = Some(Utc::now().duration_trunc(interval)?);
+			job.timesheets[index].time_begin.duration_round(interval)?;
+		job.timesheets[index].time_end = Some(Utc::now().duration_round(interval)?);
 
 		// Now that `job.timesheets[index]` is done being ammended, we can resort the timesheets.
 		job.timesheets.sort_by(|t1, t2| {

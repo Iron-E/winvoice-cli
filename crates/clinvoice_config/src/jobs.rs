@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 ///
 /// Configurations for [`Timesheet`](clinvoice_data::timesheet:Timesheet)s.
 #[derive(Copy, Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
-pub struct Timesheets
+pub struct Jobs
 {
 	/// # Summary
 	///

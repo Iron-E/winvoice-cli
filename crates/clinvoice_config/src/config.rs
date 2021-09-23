@@ -8,7 +8,7 @@ use clinvoice_data::{finance::Currency, Id};
 pub use error::{Error, Result};
 use serde::{Deserialize, Serialize};
 
-use crate::{Employees, Invoices, StoreValue, Timesheets};
+use crate::{Employees, Invoices, Jobs, StoreValue};
 
 /// # Summary
 ///
@@ -25,6 +25,11 @@ pub struct Config<'alias, 'name>
 
 	/// # Summary
 	///
+	/// Configurations for [`Timesheet`](clinvoice_data::timesheet:Timesheet)s.
+	pub jobs: Jobs,
+
+	/// # Summary
+	///
 	/// Configurations for [`Invoice`](clinvoice_data::invoice::Invoice)s.
 	pub invoices: Invoices,
 
@@ -33,11 +38,6 @@ pub struct Config<'alias, 'name>
 	/// Configurations for data storages.
 	#[serde(borrow)]
 	stores: BTreeMap<&'name str, StoreValue<'alias>>,
-
-	/// # Summary
-	///
-	/// Configurations for [`Timesheet`](clinvoice_data::timesheet:Timesheet)s.
-	pub timesheets: Timesheets,
 }
 
 impl Config<'_, '_>
@@ -77,7 +77,7 @@ impl Config<'_, '_>
 				]
 				.into_iter()
 				.collect(),
-				timesheets: Timesheets {
+				jobs: Jobs {
 					default_interval: Duration::from_secs(300),
 				},
 			};
@@ -134,7 +134,7 @@ mod tests
 	use clinvoice_adapter::Adapters;
 	use clinvoice_data::Id;
 
-	use super::{BTreeMap, Config, Currency, Employees, Invoices, Store, StoreValue, Timesheets};
+	use super::{BTreeMap, Config, Currency, Employees, Invoices, Store, StoreValue, Jobs};
 
 	#[test]
 	fn get_store()
@@ -167,7 +167,7 @@ mod tests
 				default_currency: Currency::USD,
 			},
 			stores,
-			timesheets: Timesheets {
+			jobs: Jobs {
 				default_interval: Duration::new(100, 0),
 			},
 		};

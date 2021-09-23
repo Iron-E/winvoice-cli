@@ -10,4 +10,4 @@ default_id = "95d053c5-4be5-45bf-90f6-5e63cb43fb9c"
 default_currency = "USD"
 
 [timesheets]
-interval = "5min"
+default_increment = "5min"

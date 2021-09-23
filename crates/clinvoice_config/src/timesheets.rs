@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 ///
 /// Configurations for [`Timesheet`](clinvoice_data::timesheet:Timesheet)s.
 #[derive(Copy, Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
-pub struct Jobs
+pub struct Timesheets
 {
 	/// # Summary
 	///
@@ -19,11 +19,11 @@ pub struct Jobs
 	///
 	/// use clinvoice_config::Timesheets;
 	///
-	/// // 5 minute interval
+	/// // 5 minute increment
 	/// Timesheets {
-	/// 	interval: Duration::new(300, 0),
+	/// 	increment: Duration::new(300, 0),
 	/// };
 	/// ```
 	#[serde(with = "humantime_serde")]
-	pub default_interval: Duration,
+	pub default_increment: Duration,
 }

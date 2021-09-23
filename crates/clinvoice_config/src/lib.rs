@@ -7,11 +7,11 @@
 mod config;
 mod employees;
 mod invoices;
-mod jobs;
+mod timesheets;
 mod store_value;
 
 pub use config::{Config, Error, Result};
 pub use employees::Employees;
 pub use invoices::Invoices;
-pub use jobs::Jobs;
+pub use timesheets::Timesheets;
 pub use store_value::StoreValue;

@@ -3,7 +3,7 @@ use core::time::Duration;
 use clinvoice_adapter::data::JobAdapter;
 use clinvoice_data::{
 	chrono::{DateTime, Utc},
-	finance::Money,
+	Money,
 	views::JobView,
 	Job,
 	Organization,

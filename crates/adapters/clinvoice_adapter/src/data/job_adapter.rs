@@ -1,5 +1,7 @@
 #![allow(clippy::wrong_self_convention)]
 
+use core::time::Duration;
+
 use clinvoice_data::{
 	chrono::{DateTime, Utc},
 	finance::Money,
@@ -37,6 +39,7 @@ pub trait JobAdapter:
 		client: Organization,
 		date_open: DateTime<Utc>,
 		hourly_rate: Money,
+		interval: Duration,
 		objectives: String,
 	) -> Result<<Self as Deletable>::Entity, <Self as Deletable>::Error>;
 

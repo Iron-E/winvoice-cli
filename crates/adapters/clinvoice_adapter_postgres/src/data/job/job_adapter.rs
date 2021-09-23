@@ -1,3 +1,5 @@
+use core::time::Duration;
+
 use clinvoice_adapter::data::JobAdapter;
 use clinvoice_data::{
 	chrono::{DateTime, Utc},
@@ -19,6 +21,7 @@ impl JobAdapter for PostgresJob
 		client: Organization,
 		date_open: DateTime<Utc>,
 		hourly_rate: Money,
+		interval: Duration,
 		objectives: String,
 	) -> Result<Job>
 	{

@@ -5,7 +5,7 @@ use std::cmp::Ordering;
 use clinvoice_adapter::data::{Deletable, EmployeeAdapter, JobAdapter};
 use clinvoice_data::{
 	chrono::{Duration, DurationRound, Utc},
-	finance::Currency,
+	Currency,
 	views::{EmployeeView, JobView, TimesheetView},
 	Id,
 };
@@ -87,10 +87,10 @@ impl Command
 		input::util::expense::menu(&mut job.timesheets[index].expenses, default_currency)?;
 
 		// Stop time on the `Job` AFTER requiring users to enter information. Users shouldn't enter things for free ;)
-		let interval = Duration::from_std(job.interval)?;
+		let increment = Duration::from_std(job.increment)?;
 		job.timesheets[index].time_begin =
-			job.timesheets[index].time_begin.duration_round(interval)?;
-		job.timesheets[index].time_end = Some(Utc::now().duration_round(interval)?);
+			job.timesheets[index].time_begin.duration_round(increment)?;
+		job.timesheets[index].time_end = Some(Utc::now().duration_round(increment)?);
 
 		// Now that `job.timesheets[index]` is done being ammended, we can resort the timesheets.
 		job.timesheets.sort_by(|t1, t2| {

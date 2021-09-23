@@ -12,7 +12,7 @@ use time::Time;
 
 use crate::DynResult;
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, StructOpt)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, StructOpt)]
 #[structopt(
 	name = "clinvoice",
 	about = "CLInvoice is a tool to help with invoicing from the command line!"

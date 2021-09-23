@@ -1,4 +1,6 @@
-use core::time::Duration;
+use core::time::Duration as StdDuration;
+
+use humantime::Duration;
 
 use clinvoice_adapter::{
 	data::{
@@ -23,7 +25,7 @@ use clinvoice_adapter_postgres::data::{
 };
 use clinvoice_data::{
 	chrono::{Datelike, Local, TimeZone, Timelike},
-	finance::{Currency, Decimal, Money},
+	Currency, Decimal, Money,
 	EmployeeStatus,
 };
 use futures::{
@@ -35,7 +37,7 @@ use structopt::StructOpt;
 
 use crate::{input, DynResult};
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, StructOpt)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, StructOpt)]
 #[structopt(about = "Record information information with CLInvoice")]
 pub enum Create
 {
@@ -56,6 +58,13 @@ pub enum Create
 			short
 		)]
 		currency: Option<Currency>,
+
+		#[structopt(
+			help = "The increment that time in `Timesheet`s is rounded to when running `clinvoice time stop`",
+			long,
+			short
+		)]
+		increment: Option<Duration>,
 
 		#[structopt(help = "The amount of money charged per hour for this job (e.g. 12.00)")]
 		hourly_rate: Decimal,
@@ -120,7 +129,7 @@ impl Create
 		self,
 		connection: Pool<Db>,
 		default_currency: Currency,
-		default_timesheet_interval: Duration,
+		default_increment: StdDuration,
 	) -> DynResult<'err, ()>
 	where
 		Db: Database,
@@ -146,6 +155,7 @@ impl Create
 
 			Self::Job {
 				currency,
+				increment,
 				hourly_rate,
 				year,
 				month,
@@ -160,7 +170,7 @@ impl Create
 						amount:   hourly_rate,
 						currency: currency.unwrap_or(default_currency),
 					},
-					None.unwrap_or(default_timesheet_interval), // TODO: replace `None` with `humantime` `--interval` option
+					increment.map(Duration::into).unwrap_or(default_increment),
 					year,
 					month,
 					day,
@@ -255,7 +265,7 @@ impl Create
 	async fn create_job<'err, Db, JAdapter, OAdapter>(
 		connection: &Pool<Db>,
 		hourly_rate: Money,
-		interval: Duration,
+		increment: StdDuration,
 		year: Option<i32>,
 		month: Option<u32>,
 		day: Option<u32>,
@@ -312,7 +322,7 @@ impl Create
 			client.into(),
 			local_date_open.into(),
 			hourly_rate,
-			interval,
+			increment,
 			objectives,
 		)
 		.await?;
@@ -369,7 +379,7 @@ impl Create
 		Ok(())
 	}
 
-	pub async fn run<'err>(self, default_currency: Currency, default_timesheet_interval: Duration, store: &Store) -> DynResult<'err, ()>
+	pub async fn run<'err>(self, default_currency: Currency, default_increment: StdDuration, store: &Store) -> DynResult<'err, ()>
 	{
 		match store.adapter
 		{
@@ -386,7 +396,7 @@ impl Create
 				>(
 					sqlx::PgPool::connect_lazy(&store.url)?,
 					default_currency,
-					default_timesheet_interval,
+					default_increment,
 				)
 				.await
 			},

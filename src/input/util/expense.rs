@@ -1,5 +1,5 @@
 use clinvoice_data::{
-	finance::{Currency, Money},
+	Currency, Money,
 	Expense,
 	ExpenseCategory,
 };

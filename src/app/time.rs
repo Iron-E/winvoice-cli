@@ -1,11 +1,9 @@
 mod command;
 
-use core::time::Duration;
-
 use clinvoice_adapter::{Adapters, Error as AdapterError, Store};
 #[cfg(feature = "postgres")]
 use clinvoice_adapter_postgres::data::{PostgresEmployee, PostgresJob};
-use clinvoice_data::{finance::Currency, Id};
+use clinvoice_data::{Currency, Id};
 use command::Command;
 use structopt::StructOpt;
 

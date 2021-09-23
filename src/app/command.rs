@@ -7,7 +7,7 @@ use structopt::StructOpt;
 use super::{Create, Retrieve, Time};
 use crate::DynResult;
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, StructOpt)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, StructOpt)]
 pub enum Command
 {
 	#[structopt(about = "Edit the configuration file in the default editor")]
@@ -58,7 +58,7 @@ impl Command
 			},
 			Self::Create(cmd) => cmd.run(
 				config.invoices.default_currency,
-				config.jobs.default_interval,
+				config.timesheets.default_increment,
 				store,
 			).await,
 			Self::Retrieve(cmd) => cmd.run(&config, store).await,

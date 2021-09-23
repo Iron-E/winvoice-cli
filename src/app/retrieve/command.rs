@@ -11,7 +11,6 @@ use clinvoice_adapter::data::{
 };
 use clinvoice_config::Config;
 use clinvoice_data::{chrono::Utc, views::RestorableSerde, Location};
-use clinvoice_serialize::markdown;
 use futures::{
 	future,
 	stream::{self, TryStreamExt},
@@ -117,7 +116,7 @@ impl Command
 	where
 		Db: Database,
 		EntityView:
-			Clone + DeserializeOwned + Display + Into<Entity> + RestorableSerde + Serialize + Send,
+		Clone + DeserializeOwned + Display + Into<Entity> + RestorableSerde + Serialize + Send,
 		U: Updatable<Db = Db, Entity = Entity>,
 		U::Error: 'err,
 		for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
@@ -288,10 +287,9 @@ impl Command
 					// WARN: this `let` seems redundant, but the "type needs to be known at this point"
 					let export_result: DynResult<'_, _> = stream::iter(to_export.into_iter().map(Ok))
 						.try_for_each_concurrent(None, |job| async move {
-							let exported = markdown::job(&job)?;
 							fs::write(
 								format!("{}--{}.md", job.client.name.replace(' ', "-"), job.id,),
-								exported,
+								job.export()?,
 							)
 							.await?;
 							Ok(())

@@ -35,7 +35,6 @@ impl Time
 		self,
 		default_currency: Currency,
 		default_employee_id: Id,
-		default_timesheet_interval: Duration,
 		store: &Store,
 	) -> DynResult<'err, ()>
 	{
@@ -58,7 +57,6 @@ impl Time
 						sqlx::PgPool::connect_lazy(&store.url)?,
 						default_currency,
 						provided_employee_id,
-						default_timesheet_interval,
 					)
 					.await
 			},

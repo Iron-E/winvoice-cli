@@ -1,3 +1,5 @@
+use core::time::Duration;
+
 use clinvoice_adapter::{
 	data::{
 		Deletable,
@@ -115,9 +117,10 @@ pub enum Create
 impl Create
 {
 	async fn create<'err, Db, EAdapter, JAdapter, LAdapter, OAdapter, PAdapter>(
-		command: Self,
+		self,
 		connection: Pool<Db>,
 		default_currency: Currency,
+		default_timesheet_interval: Duration,
 	) -> DynResult<'err, ()>
 	where
 		Db: Database,
@@ -133,7 +136,7 @@ impl Create
 		<PAdapter as Deletable>::Error: 'err,
 		for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 	{
-		match command
+		match self
 		{
 			Self::Employee { title } =>
 			{
@@ -157,6 +160,7 @@ impl Create
 						amount:   hourly_rate,
 						currency: currency.unwrap_or(default_currency),
 					},
+					None.unwrap_or(default_timesheet_interval), // TODO: replace `None` with `humantime` `--interval` option
 					year,
 					month,
 					day,
@@ -251,6 +255,7 @@ impl Create
 	async fn create_job<'err, Db, JAdapter, OAdapter>(
 		connection: &Pool<Db>,
 		hourly_rate: Money,
+		interval: Duration,
 		year: Option<i32>,
 		month: Option<u32>,
 		day: Option<u32>,
@@ -307,6 +312,7 @@ impl Create
 			client.into(),
 			local_date_open.into(),
 			hourly_rate,
+			interval,
 			objectives,
 		)
 		.await?;
@@ -363,14 +369,14 @@ impl Create
 		Ok(())
 	}
 
-	pub async fn run<'err>(self, default_currency: Currency, store: &Store) -> DynResult<'err, ()>
+	pub async fn run<'err>(self, default_currency: Currency, default_timesheet_interval: Duration, store: &Store) -> DynResult<'err, ()>
 	{
 		match store.adapter
 		{
 			#[cfg(feature = "postgres")]
 			Adapters::Postgres =>
 			{
-				Self::create::<
+				self.create::<
 					_,
 					PostgresEmployee,
 					PostgresJob,
@@ -378,9 +384,9 @@ impl Create
 					PostgresOrganization,
 					PostgresPerson,
 				>(
-					self,
 					sqlx::PgPool::connect_lazy(&store.url)?,
 					default_currency,
+					default_timesheet_interval,
 				)
 				.await
 			},

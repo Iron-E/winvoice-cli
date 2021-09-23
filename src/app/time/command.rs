@@ -1,6 +1,5 @@
 mod display;
 
-use core::time::Duration as StdDuration;
 use std::cmp::Ordering;
 
 use clinvoice_adapter::data::{Deletable, EmployeeAdapter, JobAdapter};
@@ -32,6 +31,7 @@ impl Command
 		job.timesheets.push(TimesheetView {
 			employee,
 			expenses: Vec::new(),
+			job_id: job.id,
 			time_begin: Utc::now(),
 			time_end: None,
 			work_notes: "* Work which was done goes here\n* Supports markdown formatting".into(),
@@ -41,7 +41,6 @@ impl Command
 	fn stop<'err>(
 		default_currency: Currency,
 		default_employee_id: Option<Id>,
-		default_timesheet_interval: StdDuration,
 		job: &mut JobView,
 	) -> DynResult<'err, ()>
 	{
@@ -88,7 +87,7 @@ impl Command
 		input::util::expense::menu(&mut job.timesheets[index].expenses, default_currency)?;
 
 		// Stop time on the `Job` AFTER requiring users to enter information. Users shouldn't enter things for free ;)
-		let interval = Duration::from_std(default_timesheet_interval)?;
+		let interval = Duration::from_std(job.interval)?;
 		job.timesheets[index].time_begin =
 			job.timesheets[index].time_begin.duration_round(interval)?;
 		job.timesheets[index].time_end = Some(Utc::now().duration_round(interval)?);
@@ -121,7 +120,6 @@ impl Command
 		connection: Pool<Db>,
 		default_currency: Currency,
 		default_employee_id: Option<Id>,
-		default_timesheet_interval: StdDuration,
 	) -> DynResult<'err, ()>
 	where
 		Db: Database,
@@ -169,7 +167,6 @@ impl Command
 			Self::Stop => Self::stop(
 				default_currency,
 				default_employee_id,
-				default_timesheet_interval,
 				&mut selected_job,
 			)?,
 		};

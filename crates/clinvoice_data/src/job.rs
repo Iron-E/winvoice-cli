@@ -2,14 +2,13 @@ mod from_view;
 mod hash;
 mod partial_eq;
 
+use core::time::Duration;
+
 use chrono::{DateTime, Utc};
-use clinvoice_finance::{Decimal, ExchangeRates, Money, Result};
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 
-use crate::{Expense, Id, Invoice, Timesheet};
-
-const SECONDS_PER_HOUR: i16 = 3600;
+use crate::{Id, Invoice};
 
 /// # Summary
 ///
@@ -56,6 +55,27 @@ pub struct Job
 
 	/// # Summary
 	///
+	/// The amount of time between increments to the [`time_end`] on a [`Timesheet`].
+	///
+	/// # Example
+	///
+	/// * If `interval` is 15m…
+	///   * A work begin time of 12:14 is set to 12:15.
+	///   * A work end time of 13:29 is set to 13:30.
+	/// * If `interval` is 5m…
+	///   * A work begin time of 12:07 is set to 12:05.
+	///   * A work end time of 13:31 is set to 13:30.
+	/// * If `interval` is 0m…
+	///   * A work begin time of 12:14 is not changed.
+	///   * A work end time of 13:29 is not changed.
+	///
+	/// __Note__ that the duration does not have to be in even minutes. It can be any combination of
+	/// days, hours, minutes, etc.
+	#[serde(with = "humantime_serde")]
+	pub interval: Duration,
+
+	/// # Summary
+	///
 	/// The [`Invoice`] which will be sent to the [client](Organization) after the [`Job`] is done.
 	pub invoice: Invoice,
 
@@ -88,180 +108,4 @@ pub struct Job
 	/// * Contact customer support for X hardware device.
 	/// ```
 	pub objectives: String,
-
-	/// # Summary
-	///
-	/// The periods of time during which work was performed for this [`Job`].
-	pub timesheets: Vec<Timesheet>,
-}
-
-impl Job
-{
-	/// # Summary
-	///
-	/// Create a new [`Timesheet`] and attach it to the list of [`timesheets`](Self::timesheets).
-	///
-	/// # Remarks
-	///
-	/// * This is intended to be used for reporting work which was done previously.
-	pub fn attach_timesheet(
-		&mut self,
-		employee: Id,
-		expenses: Vec<Expense>,
-		time_begin: DateTime<Utc>,
-		time_end: Option<DateTime<Utc>>,
-		work_notes: &str,
-	)
-	{
-		self.timesheets.push(Timesheet {
-			employee_id: employee,
-			expenses,
-			time_begin,
-			time_end,
-			work_notes: work_notes.into(),
-		});
-	}
-
-	/// # Summary
-	///
-	/// Create a new [`Timesheet`] with the starting time set to the current time.
-	///
-	/// # Remarks
-	///
-	/// * This is a synonym for [`attach_timesheet`](Self::attach_timesheet) but with the `time_start`
-	///   parameter defaulted to [`Utc::now`](chrono::Utc::now).
-	/// * This is intended to be used for reporting work which is about to be done.
-	///
-	/// # Parameters
-	///
-	/// * `employee`, the [`Id`] of the [`Employee`] who is working on this timesheet.
-	pub fn start_timesheet(&mut self, employee: Id)
-	{
-		self.attach_timesheet(
-			employee,
-			Vec::new(),
-			Utc::now(),
-			None,
-			"* Work which was done goes here\n* Supports markdown formatting",
-		);
-	}
-
-	/// # Summary
-	///
-	/// Get the amount of [`Money`] which is owed by the client on the [`Inovice`].
-	///
-	/// # Panics
-	///
-	/// * When not all [`Money`] amounts are in the same currency.
-	///
-	/// TODO: add tests
-	pub fn total(&self) -> Result<Money>
-	{
-		let seconds_per_hour: Decimal = SECONDS_PER_HOUR.into();
-
-		let mut exchange_rates = None;
-
-		let mut total = self
-			.timesheets
-			.iter()
-			.filter(|timesheet| timesheet.time_end.is_some())
-			.try_fold(
-				Money::new(0, 2, self.invoice.hourly_rate.currency),
-				|mut total, timesheet| -> Result<Money> {
-					let duration_seconds: Decimal = timesheet
-						.time_end
-						.unwrap()
-						.signed_duration_since(timesheet.time_begin)
-						.num_seconds()
-						.into();
-					total.amount +=
-						(duration_seconds / seconds_per_hour) * self.invoice.hourly_rate.amount;
-
-					timesheet
-						.expenses
-						.iter()
-						.try_for_each(|expense| -> Result<()> {
-							if expense.cost.currency == total.currency
-							{
-								total.amount += expense.cost.amount;
-							}
-							else
-							{
-								if exchange_rates.is_none()
-								{
-									exchange_rates = Some(ExchangeRates::new()?);
-								}
-
-								total.amount += expense
-									.cost
-									.exchange(total.currency, exchange_rates.as_ref().unwrap())
-									.amount;
-							}
-
-							Ok(())
-						})?;
-
-					Ok(total)
-				},
-			)?;
-
-		total.amount.rescale(2);
-		Ok(total)
-	}
-}
-
-#[cfg(test)]
-mod tests
-{
-	use std::time::Instant;
-
-	use chrono::Utc;
-	use clinvoice_finance::Currency;
-
-	use super::{Expense, Id, Invoice, Job, Money, Timesheet};
-	use crate::ExpenseCategory;
-
-	#[test]
-	fn total()
-	{
-		let job = Job {
-			client_id: Id::default(),
-			date_close: None,
-			date_open: Utc::now(),
-			id: Id::default(),
-			invoice: Invoice {
-				date: None,
-				hourly_rate: Money::new(20_00, 2, Currency::USD),
-			},
-			notes: "".into(),
-			objectives: "".into(),
-			timesheets: vec![
-				Timesheet {
-					employee_id: Id::default(),
-					expenses:    Vec::new(),
-					time_begin:  Utc::today().and_hms(2, 0, 0),
-					time_end:    Some(Utc::today().and_hms(2, 30, 0)),
-					work_notes:  "- Wrote the test.".into(),
-				},
-				Timesheet {
-					employee_id: Id::default(),
-					expenses:    vec![Expense {
-						category: ExpenseCategory::Item,
-						cost: Money::new(20_00, 2, Currency::USD),
-						description: "Paid for someone else to clean".into(),
-					}],
-					time_begin:  Utc::today().and_hms(3, 0, 0),
-					time_end:    Some(Utc::today().and_hms(3, 30, 0)),
-					work_notes:  "- Clean the deck.".into(),
-				},
-			],
-		};
-
-		let start = Instant::now();
-		assert_eq!(job.total().unwrap(), Money::new(4000, 2, Currency::USD));
-		println!(
-			"\n>>>>> Job::total {}us <<<<<\n",
-			Instant::now().duration_since(start).as_micros()
-		);
-	}
 }

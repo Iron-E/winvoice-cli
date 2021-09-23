@@ -32,6 +32,11 @@ pub struct Timesheet
 
 	/// # Summary
 	///
+	/// The ID of the [`Job`](crate::Job) this [`Timesheet`] is attached to.
+	pub job_id: Id,
+
+	/// # Summary
+	///
 	/// The time at which this period of work began.
 	pub time_begin: DateTime<Utc>,
 

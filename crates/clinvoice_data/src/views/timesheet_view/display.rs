@@ -140,6 +140,10 @@ mod tests
 					description: "Gas".into(),
 				},
 			],
+			#[cfg(uuid)]
+			job_id:    Id::new_v4(),
+			#[cfg(not(uuid))]
+			job_id:    0,
 			time_begin: Utc::now(),
 			time_end:   Some(Utc::today().and_hms(23, 59, 59)),
 			work_notes: "Went to non-corporate fast food restaurant for business meeting".into(),

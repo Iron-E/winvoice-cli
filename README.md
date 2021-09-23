@@ -57,19 +57,20 @@ Below is a summary of the configuration file's supported options. For a guide on
 default_id = # your employee ID. this value should not be set manually, instead use: `clinvoice retrieve employee --set-default`
 
 [invoices]
-default_currency = # an ISO-4217 currency code, e.g. 'USD'
+default_currency = # what currency should be used if none is specified during `Job` creation.
+                   # an ISO-4217 currency code, e.g. 'USD'
 
 [stores]
 default = # an alias to a different adapter; e.g. 'foo'.
 foo = {
 	adapter = # a supported storage adapter; e.g. 'Bincode'.
-	password = # OPTIONAL password. May or may not be accompanied by a username.
-	path = # Place where data can be found. Depends on the adapter— may be a path to a folder on a filesystem, or a schema on a database.
-	username = # OPTIONAL username. May or may not be accompanied by a password.
+	url = # URL to connect to the database.
+	      # See https://github.com/Iron-E/clinvoice/wiki/Usage#adapters
 }
 
 [timesheets]
-interval = # amount of time; e.g. '5min', '3h', '10d 2s', etc. See https://github.com/tailhook/humantime
+default_interval = # Used if a specific `Interval`
+                   # amount of time; e.g. '5min', '3h', '10d 2s', etc. See https://github.com/tailhook/humantime
 ```
 
 ### Example

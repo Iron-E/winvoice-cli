@@ -1,5 +1,5 @@
 use super::Job;
-use crate::views::{JobView as View, TimesheetView};
+use crate::views::JobView as View;
 
 impl From<View> for Job
 {
@@ -10,14 +10,10 @@ impl From<View> for Job
 			date_close: view.date_close,
 			date_open: view.date_open,
 			id: view.id,
+			interval: view.interval,
 			invoice: view.invoice,
 			notes: view.notes,
 			objectives: view.objectives,
-			timesheets: view
-				.timesheets
-				.into_iter()
-				.map(TimesheetView::into)
-				.collect(),
 		}
 	}
 }
@@ -31,15 +27,10 @@ impl From<&View> for Job
 			date_close: view.date_close,
 			date_open: view.date_open,
 			id: view.id,
+			interval: view.interval,
 			invoice: view.invoice.clone(),
 			notes: view.notes.clone(),
 			objectives: view.objectives.clone(),
-			timesheets: view
-				.timesheets
-				.iter()
-				.cloned()
-				.map(TimesheetView::into)
-				.collect(),
 		}
 	}
 }

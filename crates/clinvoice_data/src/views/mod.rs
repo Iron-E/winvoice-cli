@@ -7,6 +7,7 @@ mod contact_view;
 mod employee_view;
 mod job_view;
 mod location_view;
+mod markdown;
 mod organization_view;
 mod person_view;
 mod restorable_serde;

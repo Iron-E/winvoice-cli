@@ -152,7 +152,7 @@ mod tests
 			id:    Id::new_v4(),
 			#[cfg(not(uuid))]
 			id:    0,
-			interval: Duration::from_secs(900),
+			increment: Duration::from_secs(900),
 			invoice: Invoice {
 				date: None,
 				hourly_rate: Money::new(20_00, 2, Currency::USD),

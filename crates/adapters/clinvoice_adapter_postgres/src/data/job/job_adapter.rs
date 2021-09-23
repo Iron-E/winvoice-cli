@@ -21,7 +21,7 @@ impl JobAdapter for PostgresJob
 		client: Organization,
 		date_open: DateTime<Utc>,
 		hourly_rate: Money,
-		interval: Duration,
+		increment: Duration,
 		objectives: String,
 	) -> Result<Job>
 	{

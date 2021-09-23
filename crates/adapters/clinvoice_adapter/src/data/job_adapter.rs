@@ -39,7 +39,7 @@ pub trait JobAdapter:
 		client: Organization,
 		date_open: DateTime<Utc>,
 		hourly_rate: Money,
-		interval: Duration,
+		increment: Duration,
 		objectives: String,
 	) -> Result<<Self as Deletable>::Entity, <Self as Deletable>::Error>;
 

@@ -69,7 +69,7 @@ foo = {
 }
 
 [timesheets]
-default_interval = # Used if a specific `Interval`
+default_increment = # Used if a specific `increment`
                    # amount of time; e.g. '5min', '3h', '10d 2s', etc. See https://github.com/tailhook/humantime
 ```
 

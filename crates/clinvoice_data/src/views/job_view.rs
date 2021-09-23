@@ -48,20 +48,20 @@ pub struct JobView
 	///
 	/// # Example
 	///
-	/// * If `interval` is 15m…
+	/// * If `increment` is 15m…
 	///   * A work begin time of 12:14 is set to 12:15.
 	///   * A work end time of 13:29 is set to 13:30.
-	/// * If `interval` is 5m…
+	/// * If `increment` is 5m…
 	///   * A work begin time of 12:07 is set to 12:05.
 	///   * A work end time of 13:31 is set to 13:30.
-	/// * If `interval` is 0m…
+	/// * If `increment` is 0m…
 	///   * A work begin time of 12:14 is not changed.
 	///   * A work end time of 13:29 is not changed.
 	///
 	/// __Note__ that the duration does not have to be in even minutes. It can be any combination of
 	/// days, hours, minutes, etc.
 	#[serde(with = "humantime_serde")]
-	pub interval: Duration,
+	pub increment: Duration,
 
 	/// # Summary
 	///
@@ -409,7 +409,7 @@ mod tests
 			id:    Id::new_v4(),
 			#[cfg(not(uuid))]
 			id:    0,
-			interval: Duration::from_secs(900),
+			increment: Duration::from_secs(900),
 			invoice: Invoice {
 				date: None,
 				hourly_rate: Money::new(20_00, 2, Currency::USD),
@@ -584,7 +584,7 @@ Paid for someone else to clean
 			date_close: None,
 			date_open: Utc::now(),
 			id: Id::default(),
-			interval: Duration::from_secs(900),
+			increment: Duration::from_secs(900),
 			invoice: Invoice {
 				date: None,
 				hourly_rate: Money::new(20_00, 2, Currency::USD),

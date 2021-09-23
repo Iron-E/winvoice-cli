@@ -34,7 +34,7 @@ mod timesheet;
 pub mod views;
 
 pub use chrono;
-pub use clinvoice_finance as finance;
+pub use clinvoice_finance::{Currency, Decimal, Money};
 pub use contact::Contact;
 pub use employee::Employee;
 pub use employee_status::EmployeeStatus;

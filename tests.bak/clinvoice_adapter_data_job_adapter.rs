@@ -18,7 +18,8 @@ use clinvoice_adapter_bincode::data::{
 };
 use clinvoice_data::{
 	chrono::Utc,
-	finance::{Currency, Money},
+	Currency,
+	Money,
 	views::{
 		ContactView,
 		EmployeeView,

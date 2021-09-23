@@ -25,5 +25,5 @@ pub struct Timesheets
 	/// };
 	/// ```
 	#[serde(with = "humantime_serde")]
-	pub interval: Duration,
+	pub default_interval: Duration,
 }

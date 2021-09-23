@@ -78,7 +78,7 @@ impl Config<'_, '_>
 				.into_iter()
 				.collect(),
 				timesheets: Timesheets {
-					interval: Duration::from_secs(300),
+					default_interval: Duration::from_secs(300),
 				},
 			};
 
@@ -168,7 +168,7 @@ mod tests
 			},
 			stores,
 			timesheets: Timesheets {
-				interval: Duration::new(100, 0),
+				default_interval: Duration::new(100, 0),
 			},
 		};
 

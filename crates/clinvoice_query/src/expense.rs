@@ -1,4 +1,4 @@
-use clinvoice_data::{finance::Money, ExpenseCategory};
+use clinvoice_data::{ExpenseCategory, Money};
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 

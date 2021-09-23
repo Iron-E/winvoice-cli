@@ -1,4 +1,4 @@
-use clinvoice_data::{chrono::NaiveDateTime, finance::Money};
+use clinvoice_data::{chrono::NaiveDateTime, Money};
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 

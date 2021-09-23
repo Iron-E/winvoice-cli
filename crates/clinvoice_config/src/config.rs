@@ -1,10 +1,9 @@
 mod error;
 
-use core::time::Duration;
 use std::{collections::BTreeMap, fs, path::PathBuf};
 
 use clinvoice_adapter::{Adapters, Store};
-use clinvoice_data::{finance::Currency, Id};
+use clinvoice_data::Id;
 pub use error::{Error, Result};
 use serde::{Deserialize, Serialize};
 
@@ -59,12 +58,8 @@ impl Config<'_, '_>
 			}
 
 			let config = Self {
-				employees:  Employees {
-					default_id: Id::default(),
-				},
-				invoices:   Invoices {
-					default_currency: Currency::USD,
-				},
+				employees:  Default::default(),
+				invoices:   Default::default(),
 				stores:     vec![
 					("default", StoreValue::Alias("foo")),
 					(
@@ -77,9 +72,7 @@ impl Config<'_, '_>
 				]
 				.into_iter()
 				.collect(),
-				timesheets: Timesheets {
-					default_increment: Duration::from_secs(300),
-				},
+				timesheets: Default::default(),
 			};
 
 			config.update()?;
@@ -132,9 +125,9 @@ mod tests
 	use std::time::Instant;
 
 	use clinvoice_adapter::Adapters;
-	use clinvoice_data::Id;
+	use clinvoice_data::{Currency, Id};
 
-	use super::{BTreeMap, Config, Currency, Employees, Invoices, Store, StoreValue, Jobs};
+	use super::{BTreeMap, Config, Employees, Invoices, Store, StoreValue, Timesheets};
 
 	#[test]
 	fn get_store()
@@ -161,13 +154,13 @@ mod tests
 
 		let conf = Config {
 			employees: Employees {
-				default_id: Id::new_v4(),
+				default_id: Id::default(),
 			},
 			invoices: Invoices {
 				default_currency: Currency::USD,
 			},
 			stores,
-			jobs: Jobs {
+			timesheets: Timesheets {
 				default_increment: Duration::new(100, 0),
 			},
 		};

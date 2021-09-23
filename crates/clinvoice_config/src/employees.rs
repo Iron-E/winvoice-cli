@@ -1,3 +1,5 @@
+mod default;
+
 use clinvoice_data::Id;
 use serde::{Deserialize, Serialize};
 

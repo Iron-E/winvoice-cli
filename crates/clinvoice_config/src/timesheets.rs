@@ -1,3 +1,5 @@
+mod default;
+
 use core::time::Duration;
 
 use serde::{Deserialize, Serialize};

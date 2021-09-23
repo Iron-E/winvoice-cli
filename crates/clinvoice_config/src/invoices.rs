@@ -1,4 +1,6 @@
-use clinvoice_data::finance::Currency;
+mod default;
+
+use clinvoice_data::Currency;
 use serde::{Deserialize, Serialize};
 
 /// # Summary

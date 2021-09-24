@@ -3,7 +3,6 @@ mod error;
 use std::{collections::BTreeMap, fs, path::PathBuf};
 
 use clinvoice_adapter::{Adapters, Store};
-use clinvoice_data::Id;
 pub use error::{Error, Result};
 use serde::{Deserialize, Serialize};
 
@@ -20,11 +19,13 @@ pub struct Config<'alias, 'name>
 	/// # Summary
 	///
 	/// Configurations for [`Employee`](clinvoice_data::employee::Employee)s.
+	#[serde(default)]
 	pub employees: Employees,
 
 	/// # Summary
 	///
 	/// Configurations for [`Invoice`](clinvoice_data::invoice::Invoice)s.
+	#[serde(default)]
 	pub invoices: Invoices,
 
 	/// # Summary
@@ -36,6 +37,7 @@ pub struct Config<'alias, 'name>
 	/// # Summary
 	///
 	/// Configurations for [`Timesheet`](clinvoice_data::timesheet:Timesheet)s.
+	#[serde(default)]
 	pub timesheets: Timesheets,
 }
 
@@ -154,7 +156,7 @@ mod tests
 
 		let conf = Config {
 			employees: Employees {
-				default_id: Id::default(),
+				default_id: Some(Id::default()),
 			},
 			invoices: Invoices {
 				default_currency: Currency::USD,

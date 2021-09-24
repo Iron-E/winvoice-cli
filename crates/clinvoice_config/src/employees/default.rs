@@ -1,4 +1,4 @@
-use super::{Employees, Id};
+use super::Employees;
 
 impl Default for Employees
 {

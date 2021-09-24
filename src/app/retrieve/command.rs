@@ -175,7 +175,7 @@ impl Command
 					&connection,
 					if default
 					{
-						Some(config.employees.default_id)
+						config.employees.default_id
 					}
 					else
 					{
@@ -200,20 +200,19 @@ impl Command
 				if set_default
 				{
 					let mut new_config = config.clone();
-					new_config.employees.default_id = match results_view.len() > 1
-					{
-						false =>
+					new_config.employees.default_id = Some(
+						if results_view.len() > 1
+						{
+							input::select_one(&results_view, "Which `Employee` should be the default?")?.id
+						}
+						else
 						{
 							results_view
 								.first()
 								.ok_or_else(|| input::Error::NoData(format!("`{}`", stringify!(Employee))))?
 								.id
-						},
-						_ =>
-						{
-							input::select_one(&results_view, "Which `Employee` should be the default?")?.id
-						},
-					};
+						}
+					);
 
 					new_config.update()?;
 				}

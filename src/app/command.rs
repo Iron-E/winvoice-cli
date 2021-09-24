@@ -62,15 +62,11 @@ impl Command
 				store,
 			).await,
 			Self::Retrieve(cmd) => cmd.run(&config, store).await,
-			Self::Time(cmd) =>
-			{
-				cmd.run(
-					config.invoices.default_currency,
-					config.employees.default_id,
-					store,
-				)
-				.await
-			},
+			Self::Time(cmd) => cmd.run(
+				config.invoices.default_currency,
+				config.employees.default_id,
+				store,
+			).await,
 		}
 	}
 }

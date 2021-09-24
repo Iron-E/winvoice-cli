@@ -32,18 +32,10 @@ impl Time
 	pub async fn run<'err>(
 		self,
 		default_currency: Currency,
-		default_employee_id: Id,
+		default_employee_id: Option<Id>,
 		store: &Store,
 	) -> DynResult<'err, ()>
 	{
-		let provided_employee_id = if self.use_default_employee_id
-		{
-			Some(default_employee_id)
-		}
-		else
-		{
-			None
-		};
 		match store.adapter
 		{
 			#[cfg(feature = "postgres")]
@@ -54,7 +46,7 @@ impl Time
 					.run::<_, PostgresEmployee, PostgresJob>(
 						sqlx::PgPool::connect_lazy(&store.url)?,
 						default_currency,
-						provided_employee_id,
+						if self.use_default_employee_id { default_employee_id } else { None },
 					)
 					.await
 			},

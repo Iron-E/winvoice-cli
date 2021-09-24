@@ -16,23 +16,38 @@ mod tests
 	use std::time::Instant;
 
 	use super::OrganizationView;
-	use crate::{views::LocationView, Id};
+	use crate::views::LocationView;
+
+	#[cfg(uuid)]
+	use crate::Id;
 
 	#[test]
 	fn display()
 	{
 		let organization = OrganizationView {
-			id: Id::new_v4(),
+			#[cfg(uuid)]
+			id:    Id::new_v4(),
+			#[cfg(not(uuid))]
+			id:    0,
 			location: LocationView {
+				#[cfg(uuid)]
 				id:    Id::new_v4(),
+				#[cfg(not(uuid))]
+				id:    0,
 				name:  "Arizona".into(),
 				outer: Some(
 					LocationView {
+						#[cfg(uuid)]
 						id:    Id::new_v4(),
+						#[cfg(not(uuid))]
+						id:    0,
 						name:  "USA".into(),
 						outer: Some(
 							LocationView {
+								#[cfg(uuid)]
 								id:    Id::new_v4(),
+								#[cfg(not(uuid))]
+								id:    0,
 								name:  "Earth".into(),
 								outer: None,
 							}

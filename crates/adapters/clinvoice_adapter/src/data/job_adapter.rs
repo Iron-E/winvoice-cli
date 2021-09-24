@@ -4,9 +4,9 @@ use core::time::Duration;
 
 use clinvoice_data::{
 	chrono::{DateTime, Utc},
-	Money,
 	views::JobView,
 	Job,
+	Money,
 	Organization,
 };
 use clinvoice_query as query;

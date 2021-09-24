@@ -17,7 +17,6 @@ pub enum Command
 
 	// TODO: create `Init` command to prevent having to run `create table`
 	//       commands as a new user.
-
 	Retrieve(Retrieve),
 
 	Time(Time),
@@ -56,17 +55,25 @@ impl Command
 				}
 				.await
 			},
-			Self::Create(cmd) => cmd.run(
-				config.invoices.default_currency,
-				config.timesheets.default_increment,
-				store,
-			).await,
+			Self::Create(cmd) =>
+			{
+				cmd.run(
+					config.invoices.default_currency,
+					config.timesheets.default_increment,
+					store,
+				)
+				.await
+			},
 			Self::Retrieve(cmd) => cmd.run(&config, store).await,
-			Self::Time(cmd) => cmd.run(
-				config.invoices.default_currency,
-				config.employees.default_id,
-				store,
-			).await,
+			Self::Time(cmd) =>
+			{
+				cmd.run(
+					config.invoices.default_currency,
+					config.employees.default_id,
+					store,
+				)
+				.await
+			},
 		}
 	}
 }

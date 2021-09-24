@@ -1,8 +1,4 @@
-use clinvoice_data::{
-	Currency, Money,
-	Expense,
-	ExpenseCategory,
-};
+use clinvoice_data::{Currency, Expense, ExpenseCategory, Money};
 
 use super::menu::{ADD, ALL_ACTIONS, CONTINUE, DELETE, EDIT};
 use crate::input;

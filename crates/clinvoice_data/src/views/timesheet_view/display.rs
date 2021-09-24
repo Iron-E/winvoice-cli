@@ -54,6 +54,8 @@ mod tests
 	use clinvoice_finance::{Currency, Money};
 
 	use super::{DateTime, Local, TimesheetView};
+	#[cfg(uuid)]
+	use crate::Id;
 	use crate::{
 		views::{ContactView, EmployeeView, LocationView, OrganizationView, PersonView},
 		EmployeeStatus,
@@ -61,54 +63,51 @@ mod tests
 		ExpenseCategory,
 	};
 
-	#[cfg(uuid)]
-	use crate::Id;
-
 	#[test]
 	fn display()
 	{
 		let earth_view = LocationView {
 			#[cfg(uuid)]
-			id:    Id::new_v4(),
+			id: Id::new_v4(),
 			#[cfg(not(uuid))]
-			id:    0,
-			name:  "Earth".into(),
+			id: 0,
+			name: "Earth".into(),
 			outer: None,
 		};
 
 		let usa_view = LocationView {
 			#[cfg(uuid)]
-			id:    Id::new_v4(),
+			id: Id::new_v4(),
 			#[cfg(not(uuid))]
-			id:    0,
-			name:  "USA".into(),
+			id: 0,
+			name: "USA".into(),
 			outer: Some(earth_view.into()),
 		};
 
 		let arizona_view = LocationView {
 			#[cfg(uuid)]
-			id:    Id::new_v4(),
+			id: Id::new_v4(),
 			#[cfg(not(uuid))]
-			id:    0,
-			name:  "Arizona".into(),
+			id: 0,
+			name: "Arizona".into(),
 			outer: Some(usa_view.into()),
 		};
 
 		let phoenix_view = LocationView {
 			#[cfg(uuid)]
-			id:    Id::new_v4(),
+			id: Id::new_v4(),
 			#[cfg(not(uuid))]
-			id:    0,
-			name:  "Phoenix".into(),
+			id: 0,
+			name: "Phoenix".into(),
 			outer: Some(arizona_view.into()),
 		};
 
 		let street_view = LocationView {
 			#[cfg(uuid)]
-			id:    Id::new_v4(),
+			id: Id::new_v4(),
 			#[cfg(not(uuid))]
-			id:    0,
-			name:  "1337 Some Street".into(),
+			id: 0,
+			name: "1337 Some Street".into(),
 			outer: Some(phoenix_view.into()),
 		};
 
@@ -130,31 +129,31 @@ mod tests
 		.collect();
 
 		let timesheet = TimesheetView {
-			employee:   EmployeeView {
+			employee: EmployeeView {
 				contact_info: contact_info.clone(),
 				#[cfg(uuid)]
-				id:    Id::new_v4(),
+				id: Id::new_v4(),
 				#[cfg(not(uuid))]
-				id:    0,
+				id: 0,
 				organization: OrganizationView {
 					#[cfg(uuid)]
-					id:    Id::new_v4(),
+					id: Id::new_v4(),
 					#[cfg(not(uuid))]
-					id:    0,
+					id: 0,
 					location: street_view,
 					name: "Big Test Organization".into(),
 				},
 				person: PersonView {
 					#[cfg(uuid)]
-					id:    Id::new_v4(),
+					id: Id::new_v4(),
 					#[cfg(not(uuid))]
-					id:    0,
+					id: 0,
 					name: "Testy McTesterson".into(),
 				},
 				status: EmployeeStatus::Representative,
 				title: "CEO of Tests".into(),
 			},
-			expenses:   vec![
+			expenses: vec![
 				Expense {
 					category: ExpenseCategory::Food,
 					cost: Money::new(20_50, 2, Currency::USD),
@@ -167,11 +166,11 @@ mod tests
 				},
 			],
 			#[cfg(uuid)]
-			job_id:    Id::new_v4(),
+			job_id: Id::new_v4(),
 			#[cfg(not(uuid))]
-			job_id:    0,
+			job_id: 0,
 			time_begin: Utc::now(),
-			time_end:   Some(Utc::today().and_hms(23, 59, 59)),
+			time_end: Some(Utc::today().and_hms(23, 59, 59)),
 			work_notes: "Went to non-corporate fast food restaurant for business meeting".into(),
 		};
 

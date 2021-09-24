@@ -17,7 +17,6 @@ mod tests
 
 	use super::OrganizationView;
 	use crate::views::LocationView;
-
 	#[cfg(uuid)]
 	use crate::Id;
 
@@ -26,29 +25,29 @@ mod tests
 	{
 		let organization = OrganizationView {
 			#[cfg(uuid)]
-			id:    Id::new_v4(),
+			id: Id::new_v4(),
 			#[cfg(not(uuid))]
-			id:    0,
+			id: 0,
 			location: LocationView {
 				#[cfg(uuid)]
-				id:    Id::new_v4(),
+				id: Id::new_v4(),
 				#[cfg(not(uuid))]
-				id:    0,
-				name:  "Arizona".into(),
+				id: 0,
+				name: "Arizona".into(),
 				outer: Some(
 					LocationView {
 						#[cfg(uuid)]
-						id:    Id::new_v4(),
+						id: Id::new_v4(),
 						#[cfg(not(uuid))]
-						id:    0,
-						name:  "USA".into(),
+						id: 0,
+						name: "USA".into(),
 						outer: Some(
 							LocationView {
 								#[cfg(uuid)]
-								id:    Id::new_v4(),
+								id: Id::new_v4(),
 								#[cfg(not(uuid))]
-								id:    0,
-								name:  "Earth".into(),
+								id: 0,
+								name: "Earth".into(),
 								outer: None,
 							}
 							.into(),

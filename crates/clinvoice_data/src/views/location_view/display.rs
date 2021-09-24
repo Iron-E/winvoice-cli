@@ -35,47 +35,47 @@ mod tests
 	fn display()
 	{
 		let earth_view = LocationView {
-			name:  "Earth".into(),
+			name: "Earth".into(),
 			#[cfg(uuid)]
-			id:    Id::new_v4(),
+			id: Id::new_v4(),
 			#[cfg(not(uuid))]
-			id:    0,
+			id: 0,
 			outer: None,
 		};
 
 		let usa_view = LocationView {
-			name:  "USA".into(),
+			name: "USA".into(),
 			#[cfg(uuid)]
-			id:    Id::new_v4(),
+			id: Id::new_v4(),
 			#[cfg(not(uuid))]
-			id:    0,
+			id: 0,
 			outer: Some(earth_view.into()),
 		};
 
 		let arizona_view = LocationView {
-			name:  "Arizona".into(),
+			name: "Arizona".into(),
 			#[cfg(uuid)]
-			id:    Id::new_v4(),
+			id: Id::new_v4(),
 			#[cfg(not(uuid))]
-			id:    0,
+			id: 0,
 			outer: Some(usa_view.into()),
 		};
 
 		let phoenix_view = LocationView {
-			name:  "Phoenix".into(),
+			name: "Phoenix".into(),
 			#[cfg(uuid)]
-			id:    Id::new_v4(),
+			id: Id::new_v4(),
 			#[cfg(not(uuid))]
-			id:    0,
+			id: 0,
 			outer: Some(arizona_view.into()),
 		};
 
 		let street_view = LocationView {
-			name:  "1337 Some Street".into(),
+			name: "1337 Some Street".into(),
 			#[cfg(uuid)]
-			id:    Id::new_v4(),
+			id: Id::new_v4(),
 			#[cfg(not(uuid))]
-			id:    0,
+			id: 0,
 			outer: Some(phoenix_view.into()),
 		};
 

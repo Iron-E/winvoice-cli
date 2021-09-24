@@ -5,8 +5,8 @@ use std::cmp::Ordering;
 use clinvoice_adapter::data::{Deletable, EmployeeAdapter, JobAdapter};
 use clinvoice_data::{
 	chrono::{Duration, DurationRound, Utc},
-	Currency,
 	views::{EmployeeView, JobView, TimesheetView},
+	Currency,
 	Id,
 };
 use sqlx::{Database, Executor, Pool};
@@ -164,11 +164,7 @@ impl Command
 				Self::start(selected_employee, &mut selected_job)
 			},
 
-			Self::Stop => Self::stop(
-				default_currency,
-				default_employee_id,
-				&mut selected_job,
-			)?,
+			Self::Stop => Self::stop(default_currency, default_employee_id, &mut selected_job)?,
 		};
 
 		JAdapter::update(&connection, selected_job.into()).await?;

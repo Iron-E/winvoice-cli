@@ -86,6 +86,8 @@ mod tests
 	use clinvoice_finance::{Currency, Money};
 
 	use super::{DateTime, JobView, Local};
+	#[cfg(uuid)]
+	use crate::Id;
 	use crate::{
 		views::{
 			ContactView,
@@ -99,18 +101,15 @@ mod tests
 		Invoice,
 	};
 
-	#[cfg(uuid)]
-	use crate::Id;
-
 	#[test]
 	fn display()
 	{
 		let earth_view = LocationView {
 			#[cfg(uuid)]
-			id:    Id::new_v4(),
+			id: Id::new_v4(),
 			#[cfg(not(uuid))]
-			id:    0,
-			name:  "Earth".into(),
+			id: 0,
+			name: "Earth".into(),
 			outer: None,
 		};
 
@@ -122,22 +121,22 @@ mod tests
 			.into_iter()
 			.collect(),
 			#[cfg(uuid)]
-			id:    Id::new_v4(),
+			id: Id::new_v4(),
 			#[cfg(not(uuid))]
-			id:    0,
+			id: 0,
 			organization: OrganizationView {
 				#[cfg(uuid)]
-				id:    Id::new_v4(),
+				id: Id::new_v4(),
 				#[cfg(not(uuid))]
-				id:    0,
+				id: 0,
 				location: earth_view.clone(),
 				name: "Big Old Test".into(),
 			},
 			person: PersonView {
 				#[cfg(uuid)]
-				id:    Id::new_v4(),
+				id: Id::new_v4(),
 				#[cfg(not(uuid))]
-				id:    0,
+				id: 0,
 				name: "Testy McTesterson".into(),
 			},
 			status: EmployeeStatus::Representative,
@@ -149,9 +148,9 @@ mod tests
 			date_close: Some(Utc::today().and_hms(23, 59, 59)),
 			date_open: Utc::now(),
 			#[cfg(uuid)]
-			id:    Id::new_v4(),
+			id: Id::new_v4(),
 			#[cfg(not(uuid))]
-			id:    0,
+			id: 0,
 			increment: Duration::from_secs(900),
 			invoice: Invoice {
 				date: None,
@@ -165,7 +164,7 @@ mod tests
 		create_job_view.timesheets.push(TimesheetView {
 			employee:   ceo_testy_view,
 			expenses:   Vec::new(),
-			job_id: create_job_view.id,
+			job_id:     create_job_view.id,
 			time_begin: Utc::now(),
 			time_end:   Some(Utc::today().and_hms(23, 59, 59)),
 			work_notes: "Went to non-corporate fast food restaurant for business meeting".into(),

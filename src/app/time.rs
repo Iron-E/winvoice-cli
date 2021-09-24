@@ -46,7 +46,14 @@ impl Time
 					.run::<_, PostgresEmployee, PostgresJob>(
 						sqlx::PgPool::connect_lazy(&store.url)?,
 						default_currency,
-						if self.use_default_employee_id { default_employee_id } else { None },
+						if self.use_default_employee_id
+						{
+							default_employee_id
+						}
+						else
+						{
+							None
+						},
 					)
 					.await
 			},

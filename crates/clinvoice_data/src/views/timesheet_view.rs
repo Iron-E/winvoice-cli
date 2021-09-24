@@ -7,7 +7,11 @@ use chrono::{DateTime, Utc};
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 
-use super::{ContactView, EmployeeView, markdown::{Element, Text}};
+use super::{
+	markdown::{Element, Text},
+	ContactView,
+	EmployeeView,
+};
 use crate::{Expense, Id};
 
 /// # Summary

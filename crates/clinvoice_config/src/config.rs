@@ -6,7 +6,7 @@ use clinvoice_adapter::{Adapters, Store};
 pub use error::{Error, Result};
 use serde::{Deserialize, Serialize};
 
-use crate::{Employees, Invoices, Timesheets, StoreValue};
+use crate::{Employees, Invoices, StoreValue, Timesheets};
 
 /// # Summary
 ///

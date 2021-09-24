@@ -1,7 +1,5 @@
 use core::time::Duration as StdDuration;
 
-use humantime::Duration;
-
 use clinvoice_adapter::{
 	data::{
 		Deletable,
@@ -25,13 +23,16 @@ use clinvoice_adapter_postgres::data::{
 };
 use clinvoice_data::{
 	chrono::{Datelike, Local, TimeZone, Timelike},
-	Currency, Decimal, Money,
+	Currency,
+	Decimal,
 	EmployeeStatus,
+	Money,
 };
 use futures::{
 	stream::{self, TryStreamExt},
 	TryFutureExt,
 };
+use humantime::Duration;
 use sqlx::{Database, Executor, Pool};
 use structopt::StructOpt;
 
@@ -60,7 +61,8 @@ pub enum Create
 		currency: Option<Currency>,
 
 		#[structopt(
-			help = "The increment that time in `Timesheet`s is rounded to when running `clinvoice time stop`",
+			help = "The increment that time in `Timesheet`s is rounded to when running `clinvoice \
+			        time stop`",
 			long,
 			short
 		)]
@@ -379,26 +381,25 @@ impl Create
 		Ok(())
 	}
 
-	pub async fn run<'err>(self, default_currency: Currency, default_increment: StdDuration, store: &Store) -> DynResult<'err, ()>
+	pub async fn run<'err>(
+		self,
+		default_currency: Currency,
+		default_increment: StdDuration,
+		store: &Store,
+	) -> DynResult<'err, ()>
 	{
 		match store.adapter
 		{
 			#[cfg(feature = "postgres")]
 			Adapters::Postgres =>
 			{
-				self.create::<
-					_,
-					PostgresEmployee,
-					PostgresJob,
-					PostgresLocation,
-					PostgresOrganization,
-					PostgresPerson,
-				>(
-					sqlx::PgPool::connect_lazy(&store.url)?,
-					default_currency,
-					default_increment,
-				)
-				.await
+				self
+					.create::<_, PostgresEmployee, PostgresJob, PostgresLocation, PostgresOrganization, PostgresPerson>(
+						sqlx::PgPool::connect_lazy(&store.url)?,
+						default_currency,
+						default_increment,
+					)
+					.await
 			},
 
 			// NOTE: this is allowed because there may be additional adapters added later, and I want

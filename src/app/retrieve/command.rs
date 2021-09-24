@@ -116,7 +116,7 @@ impl Command
 	where
 		Db: Database,
 		EntityView:
-		Clone + DeserializeOwned + Display + Into<Entity> + RestorableSerde + Serialize + Send,
+			Clone + DeserializeOwned + Display + Into<Entity> + RestorableSerde + Serialize + Send,
 		U: Updatable<Db = Db, Entity = Entity>,
 		U::Error: 'err,
 		for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
@@ -211,7 +211,7 @@ impl Command
 								.first()
 								.ok_or_else(|| input::Error::NoData(format!("`{}`", stringify!(Employee))))?
 								.id
-						}
+						},
 					);
 
 					new_config.update()?;

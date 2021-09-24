@@ -9,7 +9,11 @@ use clinvoice_finance::{Decimal, ExchangeRates, Money, Result};
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 
-use super::{OrganizationView, TimesheetView, markdown::{Element, Text}};
+use super::{
+	markdown::{Element, Text},
+	OrganizationView,
+	TimesheetView,
+};
 use crate::{Id, Invoice};
 
 const SECONDS_PER_HOUR: i16 = 3600;
@@ -224,7 +228,8 @@ impl JobView
 			})
 			.unwrap();
 			let mut employees = HashSet::new();
-			self.timesheets
+			self
+				.timesheets
 				.iter()
 				.for_each(|t| t.export(&mut employees, &mut output));
 		}
@@ -303,64 +308,69 @@ mod tests
 	use chrono::Utc;
 	use clinvoice_finance::Currency;
 
-	use super::{DateTime, Local, Id, Invoice, JobView, Money, TimesheetView};
-	use crate::{EmployeeStatus, Expense, ExpenseCategory, views::{EmployeeView, LocationView, OrganizationView, PersonView}};
+	use super::{DateTime, Id, Invoice, JobView, Local, Money, TimesheetView};
+	use crate::{
+		views::{EmployeeView, LocationView, OrganizationView, PersonView},
+		EmployeeStatus,
+		Expense,
+		ExpenseCategory,
+	};
 
 	#[test]
 	fn export()
 	{
 		let organization = OrganizationView {
 			#[cfg(uuid)]
-			id:    Id::new_v4(),
+			id: Id::new_v4(),
 			#[cfg(not(uuid))]
-			id:    0,
+			id: 0,
 			location: LocationView {
 				#[cfg(uuid)]
-				id:    Id::new_v4(),
+				id: Id::new_v4(),
 				#[cfg(not(uuid))]
-				id:    0,
+				id: 0,
 				outer: Some(
 					LocationView {
 						#[cfg(uuid)]
-						id:    Id::new_v4(),
+						id: Id::new_v4(),
 						#[cfg(not(uuid))]
-						id:    0,
+						id: 0,
 						outer: Some(
 							LocationView {
 								#[cfg(uuid)]
-								id:    Id::new_v4(),
+								id: Id::new_v4(),
 								#[cfg(not(uuid))]
-								id:    0,
+								id: 0,
 								outer: Some(
 									LocationView {
 										#[cfg(uuid)]
-										id:    Id::new_v4(),
+										id: Id::new_v4(),
 										#[cfg(not(uuid))]
-										id:    0,
+										id: 0,
 										outer: Some(
 											LocationView {
 												#[cfg(uuid)]
-												id:    Id::new_v4(),
+												id: Id::new_v4(),
 												#[cfg(not(uuid))]
-												id:    0,
+												id: 0,
 												outer: None,
-												name:  "Earth".into(),
+												name: "Earth".into(),
 											}
 											.into(),
 										),
-										name:  "USA".into(),
+										name: "USA".into(),
 									}
 									.into(),
 								),
-								name:  "Arizona".into(),
+								name: "Arizona".into(),
 							}
 							.into(),
 						),
-						name:  "Phoenix".into(),
+						name: "Phoenix".into(),
 					}
 					.into(),
 				),
-				name:  "1337 Some Street".into(),
+				name: "1337 Some Street".into(),
 			},
 			name: "Big Old Test".into(),
 		};
@@ -368,15 +378,15 @@ mod tests
 		let testy_mctesterson = EmployeeView {
 			contact_info: vec![].into_iter().collect(),
 			#[cfg(uuid)]
-			id:    Id::new_v4(),
+			id: Id::new_v4(),
 			#[cfg(not(uuid))]
-			id:    0,
+			id: 0,
 			organization: organization.clone(),
 			person: PersonView {
 				#[cfg(uuid)]
-				id:    Id::new_v4(),
+				id: Id::new_v4(),
 				#[cfg(not(uuid))]
-				id:    0,
+				id: 0,
 				name: "Testy McTesterson".into(),
 			},
 			status: EmployeeStatus::Representative,
@@ -386,15 +396,15 @@ mod tests
 		let bob = EmployeeView {
 			contact_info: HashMap::new(),
 			#[cfg(uuid)]
-			id:    Id::new_v4(),
+			id: Id::new_v4(),
 			#[cfg(not(uuid))]
-			id:    0,
+			id: 0,
 			organization: organization.clone(),
 			person: PersonView {
 				#[cfg(uuid)]
-				id:    Id::new_v4(),
+				id: Id::new_v4(),
 				#[cfg(not(uuid))]
-				id:    0,
+				id: 0,
 				name: "Bob".into(),
 			},
 			status: EmployeeStatus::Employed,
@@ -406,9 +416,9 @@ mod tests
 			date_close: None,
 			date_open: Utc::today().and_hms(0, 0, 0),
 			#[cfg(uuid)]
-			id:    Id::new_v4(),
+			id: Id::new_v4(),
 			#[cfg(not(uuid))]
-			id:    0,
+			id: 0,
 			increment: Duration::from_secs(900),
 			invoice: Invoice {
 				date: None,
@@ -545,18 +555,18 @@ Paid for someone else to clean
 	{
 		let location = LocationView {
 			#[cfg(uuid)]
-			id:    Id::new_v4(),
+			id: Id::new_v4(),
 			#[cfg(not(uuid))]
-			id:    0,
+			id: 0,
 			name: "Earth".into(),
 			outer: None,
 		};
 
 		let organization = OrganizationView {
 			#[cfg(uuid)]
-			id:    Id::new_v4(),
+			id: Id::new_v4(),
 			#[cfg(not(uuid))]
-			id:    0,
+			id: 0,
 			location: location.clone(),
 			name: "Big Old Test Corporation".into(),
 		};
@@ -564,15 +574,15 @@ Paid for someone else to clean
 		let employee = EmployeeView {
 			contact_info: HashMap::new(),
 			#[cfg(uuid)]
-			id:    Id::new_v4(),
+			id: Id::new_v4(),
 			#[cfg(not(uuid))]
-			id:    0,
+			id: 0,
 			organization: organization.clone(),
 			person: PersonView {
 				#[cfg(uuid)]
-				id:    Id::new_v4(),
+				id: Id::new_v4(),
 				#[cfg(not(uuid))]
-				id:    0,
+				id: 0,
 				name: "Testy Mćtesterson".into(),
 			},
 			status: EmployeeStatus::Employed,
@@ -595,25 +605,25 @@ Paid for someone else to clean
 		};
 
 		job.timesheets.push(TimesheetView {
-			employee: employee.clone(),
-			expenses: Vec::new(),
-			job_id: job.id,
-			time_begin:  Utc::today().and_hms(2, 0, 0),
-			time_end:    Some(Utc::today().and_hms(2, 30, 0)),
-			work_notes:  "- Wrote the test.".into(),
+			employee:   employee.clone(),
+			expenses:   Vec::new(),
+			job_id:     job.id,
+			time_begin: Utc::today().and_hms(2, 0, 0),
+			time_end:   Some(Utc::today().and_hms(2, 30, 0)),
+			work_notes: "- Wrote the test.".into(),
 		});
 
 		job.timesheets.push(TimesheetView {
-			employee: employee.clone(),
-			expenses:    vec![Expense {
+			employee:   employee.clone(),
+			expenses:   vec![Expense {
 				category: ExpenseCategory::Item,
 				cost: Money::new(20_00, 2, Currency::USD),
 				description: "Paid for someone else to clean".into(),
 			}],
-			job_id: job.id,
-			time_begin:  Utc::today().and_hms(3, 0, 0),
-			time_end:    Some(Utc::today().and_hms(3, 30, 0)),
-			work_notes:  "- Clean the deck.".into(),
+			job_id:     job.id,
+			time_begin: Utc::today().and_hms(3, 0, 0),
+			time_end:   Some(Utc::today().and_hms(3, 30, 0)),
+			work_notes: "- Clean the deck.".into(),
 		});
 
 		let start = Instant::now();

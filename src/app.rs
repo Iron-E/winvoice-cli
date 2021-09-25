@@ -1,5 +1,6 @@
 mod command;
 mod create;
+mod init;
 mod retrieve;
 mod time;
 

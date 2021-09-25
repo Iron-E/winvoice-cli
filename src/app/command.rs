@@ -4,7 +4,7 @@ use dialoguer::Editor;
 use futures::future;
 use structopt::StructOpt;
 
-use super::{Create, Retrieve, Time};
+use super::{init, Create, Retrieve, Time};
 use crate::DynResult;
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, StructOpt)]
@@ -15,8 +15,12 @@ pub enum Command
 
 	Create(Create),
 
-	// TODO: create `Init` command to prevent having to run `create table`
-	//       commands as a new user.
+	#[structopt(
+		about = "Prepare the specified store (-s) for use with CLInvoice.\nWill not clobber \
+		         existing data. Should only be run by administrators."
+	)]
+	Init,
+
 	Retrieve(Retrieve),
 
 	Time(Time),
@@ -64,6 +68,7 @@ impl Command
 				)
 				.await
 			},
+			Self::Init => init::run(store).await,
 			Self::Retrieve(cmd) => cmd.run(&config, store).await,
 			Self::Time(cmd) =>
 			{

@@ -44,10 +44,11 @@ impl Time
 			#[cfg(feature = "postgres")]
 			Adapters::Postgres =>
 			{
+				let pool = PgPool::connect_lazy(&store.url)?;
 				self
 					.command
 					.run::<_, PostgresEmployee, PostgresJob>(
-						sqlx::PgPool::connect_lazy(&store.url)?,
+						pool,
 						default_currency,
 						if self.use_default_employee_id
 						{

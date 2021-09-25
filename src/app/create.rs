@@ -396,9 +396,10 @@ impl Create
 			#[cfg(feature = "postgres")]
 			Adapters::Postgres =>
 			{
+				let pool = PgPool::connect_lazy(&store.url)?;
 				self
 					.create::<_, PostgresEmployee, PostgresJob, PostgresLocation, PostgresOrganization, PostgresPerson>(
-						sqlx::PgPool::connect_lazy(&store.url)?,
+						pool,
 						default_currency,
 						default_increment,
 					)

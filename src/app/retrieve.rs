@@ -52,10 +52,11 @@ impl Retrieve
 			#[cfg(feature = "postgres")]
 			Adapters::Postgres =>
 			{
+				let pool = PgPool::connect_lazy(&store.url)?;
 				self
 					.command
 					.run::<_, PostgresEmployee, PostgresJob, PostgresLocation, PostgresOrganization, PostgresPerson>(
-						sqlx::PgPool::connect_lazy(&store.url)?,
+						pool,
 						self.cascade_delete,
 						config,
 						self.delete,

@@ -10,7 +10,7 @@ use crate::DynResult;
 #[derive(Clone, Debug, Eq, Hash, PartialEq, StructOpt)]
 pub enum Command
 {
-	#[structopt(about = "Edit the configuration file in the default editor")]
+	#[structopt(about = "Edit the CLInvoice configuration in your default editor")]
 	Config,
 
 	Create(Create),

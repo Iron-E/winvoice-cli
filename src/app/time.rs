@@ -1,11 +1,14 @@
 mod command;
 
 use clinvoice_adapter::{Adapters, Error as AdapterError, Store};
-#[cfg(feature = "postgres")]
-use clinvoice_adapter_postgres::data::{PostgresEmployee, PostgresJob};
 use clinvoice_data::{Currency, Id};
 use command::Command;
 use structopt::StructOpt;
+#[cfg(feature = "postgres")]
+use {
+	clinvoice_adapter_postgres::data::{PostgresEmployee, PostgresJob},
+	sqlx::PgPool,
+};
 
 use crate::DynResult;
 

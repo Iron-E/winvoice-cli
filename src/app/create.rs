@@ -13,14 +13,6 @@ use clinvoice_adapter::{
 	Error as FeatureNotFoundError,
 	Store,
 };
-#[cfg(feature = "postgres")]
-use clinvoice_adapter_postgres::data::{
-	PostgresEmployee,
-	PostgresJob,
-	PostgresLocation,
-	PostgresOrganization,
-	PostgresPerson,
-};
 use clinvoice_data::{
 	chrono::{Datelike, Local, TimeZone, Timelike},
 	Currency,
@@ -35,6 +27,17 @@ use futures::{
 use humantime::Duration;
 use sqlx::{Database, Executor, Pool};
 use structopt::StructOpt;
+#[cfg(feature = "postgres")]
+use {
+	clinvoice_adapter_postgres::data::{
+		PostgresEmployee,
+		PostgresJob,
+		PostgresLocation,
+		PostgresOrganization,
+		PostgresPerson,
+	},
+	sqlx::PgPool,
+};
 
 use crate::{input, DynResult};
 

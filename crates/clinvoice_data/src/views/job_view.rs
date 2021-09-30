@@ -320,38 +320,20 @@ mod tests
 	fn export()
 	{
 		let organization = OrganizationView {
-			#[cfg(uuid)]
-			id: Id::new_v4(),
-			#[cfg(not(uuid))]
 			id: 0,
 			location: LocationView {
-				#[cfg(uuid)]
-				id: Id::new_v4(),
-				#[cfg(not(uuid))]
 				id: 0,
 				outer: Some(
 					LocationView {
-						#[cfg(uuid)]
-						id: Id::new_v4(),
-						#[cfg(not(uuid))]
 						id: 0,
 						outer: Some(
 							LocationView {
-								#[cfg(uuid)]
-								id: Id::new_v4(),
-								#[cfg(not(uuid))]
 								id: 0,
 								outer: Some(
 									LocationView {
-										#[cfg(uuid)]
-										id: Id::new_v4(),
-										#[cfg(not(uuid))]
 										id: 0,
 										outer: Some(
 											LocationView {
-												#[cfg(uuid)]
-												id: Id::new_v4(),
-												#[cfg(not(uuid))]
 												id: 0,
 												outer: None,
 												name: "Earth".into(),
@@ -377,15 +359,9 @@ mod tests
 
 		let testy_mctesterson = EmployeeView {
 			contact_info: vec![].into_iter().collect(),
-			#[cfg(uuid)]
-			id: Id::new_v4(),
-			#[cfg(not(uuid))]
 			id: 0,
 			organization: organization.clone(),
 			person: PersonView {
-				#[cfg(uuid)]
-				id: Id::new_v4(),
-				#[cfg(not(uuid))]
 				id: 0,
 				name: "Testy McTesterson".into(),
 			},
@@ -395,15 +371,9 @@ mod tests
 
 		let bob = EmployeeView {
 			contact_info: HashMap::new(),
-			#[cfg(uuid)]
-			id: Id::new_v4(),
-			#[cfg(not(uuid))]
 			id: 0,
 			organization: organization.clone(),
 			person: PersonView {
-				#[cfg(uuid)]
-				id: Id::new_v4(),
-				#[cfg(not(uuid))]
 				id: 0,
 				name: "Bob".into(),
 			},
@@ -415,9 +385,6 @@ mod tests
 			client: organization,
 			date_close: None,
 			date_open: Utc::today().and_hms(0, 0, 0),
-			#[cfg(uuid)]
-			id: Id::new_v4(),
-			#[cfg(not(uuid))]
 			id: 0,
 			increment: Duration::from_secs(900),
 			invoice: Invoice {
@@ -554,18 +521,12 @@ Paid for someone else to clean
 	fn total()
 	{
 		let location = LocationView {
-			#[cfg(uuid)]
-			id: Id::new_v4(),
-			#[cfg(not(uuid))]
 			id: 0,
 			name: "Earth".into(),
 			outer: None,
 		};
 
 		let organization = OrganizationView {
-			#[cfg(uuid)]
-			id: Id::new_v4(),
-			#[cfg(not(uuid))]
 			id: 0,
 			location: location.clone(),
 			name: "Big Old Test Corporation".into(),
@@ -573,15 +534,9 @@ Paid for someone else to clean
 
 		let employee = EmployeeView {
 			contact_info: HashMap::new(),
-			#[cfg(uuid)]
-			id: Id::new_v4(),
-			#[cfg(not(uuid))]
 			id: 0,
 			organization: organization.clone(),
 			person: PersonView {
-				#[cfg(uuid)]
-				id: Id::new_v4(),
-				#[cfg(not(uuid))]
 				id: 0,
 				name: "Testy Mćtesterson".into(),
 			},

@@ -30,8 +30,6 @@ mod tests
 	use std::time::Instant;
 
 	use super::EmployeeView;
-	#[cfg(uuid)]
-	use crate::Id;
 	use crate::{
 		views::{ContactView, LocationView, OrganizationView, PersonView},
 		EmployeeStatus,
@@ -41,45 +39,30 @@ mod tests
 	fn display()
 	{
 		let earth_view = LocationView {
-			#[cfg(uuid)]
-			id: Id::new_v4(),
-			#[cfg(not(uuid))]
 			id: 0,
 			name: "Earth".into(),
 			outer: None,
 		};
 
 		let usa_view = LocationView {
-			#[cfg(uuid)]
-			id: Id::new_v4(),
-			#[cfg(not(uuid))]
 			id: 0,
 			name: "USA".into(),
 			outer: Some(earth_view.into()),
 		};
 
 		let arizona_view = LocationView {
-			#[cfg(uuid)]
-			id: Id::new_v4(),
-			#[cfg(not(uuid))]
 			id: 0,
 			name: "Arizona".into(),
 			outer: Some(usa_view.into()),
 		};
 
 		let phoenix_view = LocationView {
-			#[cfg(uuid)]
-			id: Id::new_v4(),
-			#[cfg(not(uuid))]
 			id: 0,
 			name: "Phoenix".into(),
 			outer: Some(arizona_view.into()),
 		};
 
 		let work_street_view = LocationView {
-			#[cfg(uuid)]
-			id: Id::new_v4(),
-			#[cfg(not(uuid))]
 			id: 0,
 			name: "1234 Work Street".into(),
 			outer: Some(phoenix_view.into()),
@@ -98,22 +81,13 @@ mod tests
 			]
 			.into_iter()
 			.collect(),
-			#[cfg(uuid)]
-			id: Id::new_v4(),
-			#[cfg(not(uuid))]
 			id: 0,
 			organization: OrganizationView {
-				#[cfg(uuid)]
-				id: Id::new_v4(),
-				#[cfg(not(uuid))]
 				id: 0,
 				location: work_street_view,
 				name: "Big Old Test".into(),
 			},
 			person: PersonView {
-				#[cfg(uuid)]
-				id: Id::new_v4(),
-				#[cfg(not(uuid))]
 				id: 0,
 				name: "Testy McTesterson".into(),
 			},

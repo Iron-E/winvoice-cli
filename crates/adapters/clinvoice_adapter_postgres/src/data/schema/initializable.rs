@@ -14,6 +14,6 @@ impl Initializable for PostgresSchema
 	/// Initialize the database for a given [`Store`].
 	async fn init(connection: impl 'async_trait + Executor<'_, Database = Self::Db>) -> Result<()>
 	{
-		todo!()
+		sqlx::query!("").await
 	}
 }

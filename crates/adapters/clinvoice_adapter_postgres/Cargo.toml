@@ -37,4 +37,3 @@ tokio = {features=["macros", "rt-multi-thread"], version="1"}
 default = []
 # sqlx-actix = ["sqlx/runtime-actix-rustls"]
 # sqlx-tokio = ["sqlx/runtime-tokio-rustls"]
-unique_id = ["clinvoice_data/unique_id", "sqlx/uuid"]

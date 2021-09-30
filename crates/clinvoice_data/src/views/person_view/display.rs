@@ -16,16 +16,11 @@ mod tests
 	use std::time::Instant;
 
 	use super::PersonView;
-	#[cfg(uuid)]
-	use crate::Id;
 
 	#[test]
 	fn display()
 	{
 		let person_view = PersonView {
-			#[cfg(uuid)]
-			id: Id::new_v4(),
-			#[cfg(not(uuid))]
 			id: 0,
 			name: "Someone".into(),
 		};

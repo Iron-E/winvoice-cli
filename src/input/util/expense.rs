@@ -5,7 +5,7 @@ use crate::input;
 
 /// # Summary
 ///
-/// Show a menu for adding [contact information](clinvoice_data::Contact).
+/// Show a menu for adding [expenses](clinvoice_data::Expense).
 ///
 /// # Errors
 ///
@@ -44,7 +44,7 @@ fn add_menu(expenses: &mut Vec<Expense>, default_currency: Currency) -> input::R
 
 /// # Summary
 ///
-/// Show a menu for creating [contact information](clinvoice_data::Contact).
+/// Show a menu for creating [expenses](clinvoice_data::Expense).
 ///
 /// # Errors
 ///
@@ -76,7 +76,7 @@ pub fn menu(expenses: &mut Vec<Expense>, default_currency: Currency) -> input::R
 
 /// # Summary
 ///
-/// Show a menu for deleting [contact information](clinvoice_data::Contact).
+/// Show a menu for deleting [expenses](clinvoice_data::Expense).
 ///
 /// # Errors
 ///
@@ -104,7 +104,7 @@ fn delete_menu(expenses: &mut Vec<Expense>) -> input::Result<()>
 
 /// # Summary
 ///
-/// Show a menu for editing [contact information](clinvoice_data::Contact).
+/// Show a menu for editing [expenses](clinvoice_data::Expense).
 ///
 /// # Errors
 ///

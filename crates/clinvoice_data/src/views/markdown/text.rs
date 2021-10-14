@@ -11,40 +11,16 @@ where
 	/// # Summary
 	///
 	/// Bold text.
-	///
-	/// # Example
-	///
-	/// ```
-	/// use clinvoice_serialize::markdown::Text::Bold;
-	///
-	/// assert_eq!(Bold("Something").to_string(), "**Something**");
-	/// ```
 	Bold(D),
 
 	/// # Summary
 	///
 	/// Italic text.
-	///
-	/// # Example
-	///
-	/// ```
-	/// use clinvoice_serialize::markdown::Text::Italic;
-	///
-	/// assert_eq!(Italic("Something").to_string(), "*Something*");
-	/// ```
 	Italic(D),
 
 	/// # Summary
 	///
 	/// LaTeX formatted text.
-	///
-	/// # Example
-	///
-	/// ```
-	/// use clinvoice_serialize::markdown::Text::Math;
-	///
-	/// assert_eq!(Math("Something").to_string(), "$Something$");
-	/// ```
 	Math(D),
 }
 

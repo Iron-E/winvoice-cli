@@ -322,37 +322,37 @@ mod tests
 		let organization = OrganizationView {
 			id: 0,
 			location: LocationView {
-				id: 0,
+				id:    0,
 				outer: Some(
 					LocationView {
-						id: 0,
+						id:    0,
 						outer: Some(
 							LocationView {
-								id: 0,
+								id:    0,
 								outer: Some(
 									LocationView {
-										id: 0,
+										id:    0,
 										outer: Some(
 											LocationView {
-												id: 0,
+												id:    0,
 												outer: None,
-												name: "Earth".into(),
+												name:  "Earth".into(),
 											}
 											.into(),
 										),
-										name: "USA".into(),
+										name:  "USA".into(),
 									}
 									.into(),
 								),
-								name: "Arizona".into(),
+								name:  "Arizona".into(),
 							}
 							.into(),
 						),
-						name: "Phoenix".into(),
+						name:  "Phoenix".into(),
 					}
 					.into(),
 				),
-				name: "1337 Some Street".into(),
+				name:  "1337 Some Street".into(),
 			},
 			name: "Big Old Test".into(),
 		};
@@ -362,7 +362,7 @@ mod tests
 			id: 0,
 			organization: organization.clone(),
 			person: PersonView {
-				id: 0,
+				id:   0,
 				name: "Testy McTesterson".into(),
 			},
 			status: EmployeeStatus::Representative,
@@ -374,7 +374,7 @@ mod tests
 			id: 0,
 			organization: organization.clone(),
 			person: PersonView {
-				id: 0,
+				id:   0,
 				name: "Bob".into(),
 			},
 			status: EmployeeStatus::Employed,
@@ -521,8 +521,8 @@ Paid for someone else to clean
 	fn total()
 	{
 		let location = LocationView {
-			id: 0,
-			name: "Earth".into(),
+			id:    0,
+			name:  "Earth".into(),
 			outer: None,
 		};
 
@@ -537,7 +537,7 @@ Paid for someone else to clean
 			id: 0,
 			organization: organization.clone(),
 			person: PersonView {
-				id: 0,
+				id:   0,
 				name: "Testy Mćtesterson".into(),
 			},
 			status: EmployeeStatus::Employed,

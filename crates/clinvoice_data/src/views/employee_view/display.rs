@@ -39,32 +39,32 @@ mod tests
 	fn display()
 	{
 		let earth_view = LocationView {
-			id: 0,
-			name: "Earth".into(),
+			id:    0,
+			name:  "Earth".into(),
 			outer: None,
 		};
 
 		let usa_view = LocationView {
-			id: 0,
-			name: "USA".into(),
+			id:    0,
+			name:  "USA".into(),
 			outer: Some(earth_view.into()),
 		};
 
 		let arizona_view = LocationView {
-			id: 0,
-			name: "Arizona".into(),
+			id:    0,
+			name:  "Arizona".into(),
 			outer: Some(usa_view.into()),
 		};
 
 		let phoenix_view = LocationView {
-			id: 0,
-			name: "Phoenix".into(),
+			id:    0,
+			name:  "Phoenix".into(),
 			outer: Some(arizona_view.into()),
 		};
 
 		let work_street_view = LocationView {
-			id: 0,
-			name: "1234 Work Street".into(),
+			id:    0,
+			name:  "1234 Work Street".into(),
 			outer: Some(phoenix_view.into()),
 		};
 
@@ -88,7 +88,7 @@ mod tests
 				name: "Big Old Test".into(),
 			},
 			person: PersonView {
-				id: 0,
+				id:   0,
 				name: "Testy McTesterson".into(),
 			},
 			status: EmployeeStatus::Representative,

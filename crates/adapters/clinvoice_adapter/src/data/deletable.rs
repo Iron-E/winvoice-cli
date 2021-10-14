@@ -1,6 +1,4 @@
-use std::error::Error;
-
-use sqlx::{Database, Error as SqlxError, Executor};
+use sqlx::{Database, Executor, Result};
 
 /// # Summary
 ///
@@ -10,7 +8,6 @@ pub trait Deletable
 {
 	type Db: Database;
 	type Entity;
-	type Error: Error + From<SqlxError>;
 
 	/// # Summary
 	///
@@ -32,11 +29,9 @@ pub trait Deletable
 	/// * An [`Error`] when:
 	///   * `self.id` had not already been `create`d.
 	///   * Something goes wrong.
-	///
-	/// TODO: replace generics with `impl` after `async fn` stabilized
 	async fn delete(
 		connection: impl 'async_trait + Executor<'_, Database = Self::Db>,
 		cascade: bool,
 		entities: impl 'async_trait + Iterator<Item = Self::Entity> + Send,
-	) -> Result<(), Self::Error>;
+	) -> Result<()>;
 }

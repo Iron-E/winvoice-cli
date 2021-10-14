@@ -1,6 +1,7 @@
 use clinvoice_adapter::data::LocationAdapter;
 use clinvoice_data::{views::LocationView, Location};
 use clinvoice_query as query;
+use futures::Stream;
 use sqlx::{Acquire, Executor, Postgres, Result};
 
 use super::PostgresLocation;
@@ -25,27 +26,33 @@ impl LocationAdapter for PostgresLocation
 		todo!()
 	}
 
-	async fn retrieve(
-		connection: impl 'async_trait + Executor<'_, Database = Postgres>,
+	fn retrieve<'a, S>(
+		connection: impl Executor<'a, Database = Postgres>,
 		query: &query::Location,
-	) -> Result<Vec<Location>>
+	) -> S
+	where
+		S: Stream<Item = Result<Location>>,
 	{
 		todo!()
 	}
 
-	async fn retrieve_outers(
-		connection: impl 'async_trait + Executor<'_, Database = Postgres>,
+	fn retrieve_outers<'a, S>(
+		connection: impl Executor<'a, Database = Postgres>,
 		location: &Location,
-	) -> Result<Vec<Location>>
+	) -> S
+	where
+		S: Stream<Item = Result<Location>>,
 	{
 		todo!()
 	}
 
 	// WARN: `Might need `Acquire` or `&mut Transaction` depending on how recursive views work
-	async fn retrieve_view(
-		connection: impl 'async_trait + Acquire<'_, Database = Postgres> + Send,
+	fn retrieve_view<'a, S>(
+		connection: impl Acquire<'a, Database = Postgres> + Send,
 		query: &query::Location,
-	) -> Result<Vec<LocationView>>
+	) -> S
+	where
+		S: Stream<Item = Result<LocationView>>,
 	{
 		todo!()
 	}

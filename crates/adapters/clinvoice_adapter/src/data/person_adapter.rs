@@ -2,18 +2,15 @@
 
 use clinvoice_data::{views::PersonView, Person};
 use clinvoice_query as query;
-use sqlx::Executor;
+use futures::stream::{MapOk, Stream, TryStreamExt};
+use sqlx::{Executor, Result};
 
 use super::{Deletable, Updatable};
 
 #[async_trait::async_trait]
 pub trait PersonAdapter:
 	Deletable<Entity = Person>
-	+ Updatable<
-		Db = <Self as Deletable>::Db,
-		Entity = <Self as Deletable>::Entity,
-		Error = <Self as Deletable>::Error,
-	>
+	+ Updatable<Db = <Self as Deletable>::Db, Entity = <Self as Deletable>::Entity>
 {
 	/// # Summary
 	///
@@ -29,7 +26,7 @@ pub trait PersonAdapter:
 	async fn create(
 		connection: impl 'async_trait + Executor<'_, Database = <Self as Deletable>::Db>,
 		name: String,
-	) -> Result<<Self as Deletable>::Entity, <Self as Deletable>::Error>;
+	) -> Result<<Self as Deletable>::Entity>;
 
 	/// # Summary
 	///
@@ -39,10 +36,10 @@ pub trait PersonAdapter:
 	///
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`PersonView`]s.
-	async fn retrieve(
-		connection: impl 'async_trait + Executor<'_, Database = <Self as Deletable>::Db>,
-		query: &query::Person,
-	) -> Result<Vec<<Self as Deletable>::Entity>, <Self as Deletable>::Error>;
+	fn retrieve<'a, E, S>(connection: E, query: &query::Person) -> S
+	where
+		E: Executor<'a, Database = <Self as Deletable>::Db>,
+		S: Stream<Item = Result<<Self as Deletable>::Entity>>;
 
 	/// # Summary
 	///
@@ -52,12 +49,14 @@ pub trait PersonAdapter:
 	///
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`PersonView`]s.
-	async fn retrieve_view(
-		connection: impl 'async_trait + Executor<'_, Database = <Self as Deletable>::Db>,
+	fn retrieve_view<'a, E, S>(
+		connection: E,
 		query: &query::Person,
-	) -> Result<Vec<PersonView>, <Self as Deletable>::Error>
+	) -> MapOk<S, fn(clinvoice_data::Person) -> PersonView>
+	where
+		E: Executor<'a, Database = <Self as Deletable>::Db>,
+		S: Stream<Item = Result<<Self as Deletable>::Entity>>,
 	{
-		let results = Self::retrieve(connection, query).await?;
-		Ok(results.into_iter().map(PersonView::from).collect())
+		Self::retrieve::<E, S>(connection, query).map_ok(PersonView::from)
 	}
 }

@@ -1,6 +1,6 @@
 use clinvoice_adapter::data::Deletable;
 use clinvoice_data::Organization;
-use sqlx::{Error, Executor, Postgres, Result};
+use sqlx::{Executor, Postgres, Result};
 
 use super::PostgresOrganization;
 
@@ -9,7 +9,6 @@ impl Deletable for PostgresOrganization
 {
 	type Db = Postgres;
 	type Entity = Organization;
-	type Error = Error;
 
 	async fn delete(
 		connection: impl 'async_trait + Executor<'_, Database = Self::Db>,

@@ -1,6 +1,6 @@
 use clinvoice_adapter::data::Updatable;
 use clinvoice_data::Job;
-use sqlx::{Error, Executor, Postgres, Result};
+use sqlx::{Executor, Postgres, Result};
 
 use super::PostgresJob;
 
@@ -9,7 +9,6 @@ impl Updatable for PostgresJob
 {
 	type Db = Postgres;
 	type Entity = Job;
-	type Error = Error;
 
 	async fn update(
 		connection: impl 'async_trait + Executor<'_, Database = Self::Db>,

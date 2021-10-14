@@ -1,6 +1,4 @@
-use std::error::Error;
-
-use sqlx::{Database, Error as SqlxError, Executor};
+use sqlx::{Database, Executor, Result};
 
 /// # Summary
 ///
@@ -10,7 +8,6 @@ pub trait Updatable
 {
 	type Db: Database;
 	type Entity;
-	type Error: Error + From<SqlxError>;
 
 	/// # Summary
 	///
@@ -33,5 +30,5 @@ pub trait Updatable
 	async fn update(
 		connection: impl 'async_trait + Executor<'_, Database = Self::Db>,
 		entity: Self::Entity,
-	) -> Result<(), Self::Error>;
+	) -> Result<()>;
 }

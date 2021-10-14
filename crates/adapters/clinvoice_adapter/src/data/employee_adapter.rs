@@ -11,18 +11,15 @@ use clinvoice_data::{
 	Person,
 };
 use clinvoice_query as query;
-use sqlx::Executor;
+use futures::Stream;
+use sqlx::{Executor, Result};
 
 use super::{Deletable, Updatable};
 
 #[async_trait::async_trait]
 pub trait EmployeeAdapter:
 	Deletable<Entity = Employee>
-	+ Updatable<
-		Db = <Self as Deletable>::Db,
-		Entity = <Self as Deletable>::Entity,
-		Error = <Self as Deletable>::Error,
-	>
+	+ Updatable<Db = <Self as Deletable>::Db, Entity = <Self as Deletable>::Entity>
 {
 	/// # Summary
 	///
@@ -43,7 +40,7 @@ pub trait EmployeeAdapter:
 		person: Person,
 		status: EmployeeStatus,
 		title: String,
-	) -> Result<<Self as Deletable>::Entity, <Self as Deletable>::Error>;
+	) -> Result<<Self as Deletable>::Entity>;
 
 	/// # Summary
 	///
@@ -57,10 +54,12 @@ pub trait EmployeeAdapter:
 	///
 	/// * Any matching [`Employee`]s.
 	/// * An [`Error`], should something go wrong.
-	async fn retrieve(
-		connection: impl 'async_trait + Executor<'_, Database = <Self as Deletable>::Db>,
+	fn retrieve<'a, S>(
+		connection: impl Executor<'a, Database = <Self as Deletable>::Db>,
 		query: &query::Employee,
-	) -> Result<Vec<<Self as Deletable>::Entity>, <Self as Deletable>::Error>;
+	) -> S
+	where
+		S: Stream<Item = Result<<Self as Deletable>::Entity>>;
 
 	/// # Summary
 	///
@@ -74,8 +73,10 @@ pub trait EmployeeAdapter:
 	///
 	/// * Any matching [`Employee`]s.
 	/// * An [`Error`], should something go wrong.
-	async fn retrieve_view(
-		connection: impl 'async_trait + Executor<'_, Database = <Self as Deletable>::Db>,
+	fn retrieve_view<'a, S>(
+		connection: impl Executor<'a, Database = <Self as Deletable>::Db>,
 		query: &query::Employee,
-	) -> Result<Vec<EmployeeView>, <Self as Deletable>::Error>;
+	) -> S
+	where
+		S: Stream<Item = Result<EmployeeView>>;
 }

@@ -1,6 +1,6 @@
 use clinvoice_adapter::data::Deletable;
 use clinvoice_data::Person;
-use sqlx::{Error, Executor, Postgres, Result};
+use sqlx::{Executor, Postgres, Result};
 
 use super::PostgresPerson;
 
@@ -9,7 +9,6 @@ impl Deletable for PostgresPerson
 {
 	type Db = Postgres;
 	type Entity = Person;
-	type Error = Error;
 
 	async fn delete(
 		connection: impl 'async_trait + Executor<'_, Database = Self::Db>,

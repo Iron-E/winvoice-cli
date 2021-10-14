@@ -2,18 +2,15 @@
 
 use clinvoice_data::{views::OrganizationView, Location, Organization};
 use clinvoice_query as query;
-use sqlx::Executor;
+use futures::Stream;
+use sqlx::{Executor, Result};
 
 use super::{Deletable, Updatable};
 
 #[async_trait::async_trait]
 pub trait OrganizationAdapter:
 	Deletable<Entity = Organization>
-	+ Updatable<
-		Db = <Self as Deletable>::Db,
-		Entity = <Self as Deletable>::Entity,
-		Error = <Self as Deletable>::Error,
-	>
+	+ Updatable<Db = <Self as Deletable>::Db, Entity = <Self as Deletable>::Entity>
 {
 	/// # Summary
 	///
@@ -30,7 +27,7 @@ pub trait OrganizationAdapter:
 		connection: impl 'async_trait + Executor<'_, Database = <Self as Deletable>::Db>,
 		location: Location,
 		name: String,
-	) -> Result<<Self as Deletable>::Entity, <Self as Deletable>::Error>;
+	) -> Result<<Self as Deletable>::Entity>;
 
 	/// # Summary
 	///
@@ -40,10 +37,12 @@ pub trait OrganizationAdapter:
 	///
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`Organization`]s.
-	async fn retrieve(
-		connection: impl 'async_trait + Executor<'_, Database = <Self as Deletable>::Db>,
+	fn retrieve<'a, S>(
+		connection: impl Executor<'a, Database = <Self as Deletable>::Db>,
 		query: &query::Organization,
-	) -> Result<Vec<<Self as Deletable>::Entity>, <Self as Deletable>::Error>;
+	) -> S
+	where
+		S: Stream<Item = Result<<Self as Deletable>::Entity>>;
 
 	/// # Summary
 	///
@@ -53,8 +52,10 @@ pub trait OrganizationAdapter:
 	///
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`OrganizationView`]s.
-	async fn retrieve_view(
-		connection: impl 'async_trait + Executor<'_, Database = <Self as Deletable>::Db>,
+	fn retrieve_view<'a, S>(
+		connection: impl Executor<'a, Database = <Self as Deletable>::Db>,
 		query: &query::Organization,
-	) -> Result<Vec<OrganizationView>, <Self as Deletable>::Error>;
+	) -> S
+	where
+		S: Stream<Item = Result<OrganizationView>>;
 }

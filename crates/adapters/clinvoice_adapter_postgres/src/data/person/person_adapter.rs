@@ -1,6 +1,7 @@
 use clinvoice_adapter::data::PersonAdapter;
-use clinvoice_data::{views::PersonView, Person};
+use clinvoice_data::Person;
 use clinvoice_query as query;
+use futures::Stream;
 use sqlx::{Executor, Postgres, Result};
 
 use super::PostgresPerson;
@@ -24,7 +25,11 @@ impl PersonAdapter for PostgresPerson
 		name: String,
 	) -> Result<Person>
 	{
-		todo!()
+		let row = sqlx::query!("INSERT INTO people (name) VALUES ($1) RETURNING id;", name)
+			.fetch_one(connection)
+			.await?;
+
+		Ok(Person { id: row.id, name })
 	}
 
 	/// # Summary
@@ -35,27 +40,12 @@ impl PersonAdapter for PostgresPerson
 	///
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`PersonView`]s.
-	async fn retrieve(
-		connection: impl 'async_trait + Executor<'_, Database = Postgres>,
-		query: &query::Person,
-	) -> Result<Vec<Person>>
+	fn retrieve<'a, E, S>(connection: E, query: &query::Person) -> S
+	where
+		E: Executor<'a, Database = Postgres>,
+		S: Stream<Item = Result<Person>>,
 	{
-		todo!()
-	}
-
-	/// # Summary
-	///
-	/// Retrieve some [`PersonView`]s from the database using a [query](query::Person).
-	///
-	/// # Returns
-	///
-	/// * An `Error`, if something goes wrong.
-	/// * A list of matching [`PersonView`]s.
-	async fn retrieve_view(
-		connection: impl 'async_trait + Executor<'_, Database = Postgres>,
-		query: &query::Person,
-	) -> Result<Vec<PersonView>>
-	{
+		// sqlx::query("").fetch(&mut connection).await
 		todo!()
 	}
 }
@@ -63,12 +53,36 @@ impl PersonAdapter for PostgresPerson
 #[cfg(test)]
 mod tests
 {
+	use clinvoice_adapter::data::Initializable;
+
+	use super::{PersonAdapter, PostgresPerson};
+	use crate::data::{util, PostgresSchema};
+
 	#[tokio::test]
-	async fn create() {}
+	async fn create()
+	{
+		let mut connection = util::connect().await;
+
+		PostgresSchema::init(&mut connection).await.unwrap();
+		assert!(sqlx::query!("SELECT * FROM people;")
+			.fetch_optional(&mut connection)
+			.await
+			.unwrap()
+			.is_none());
+		let person = PostgresPerson::create(&mut connection, "foo".into())
+			.await
+			.unwrap();
+		let row = sqlx::query!("SELECT * FROM people;")
+			.fetch_one(&mut connection)
+			.await
+			.unwrap();
+		assert_eq!(person.id, row.id);
+		assert_eq!(person.name, row.name);
+	}
 
 	#[tokio::test]
 	async fn retrieve()
 	{
-		// TODO: write test + `retrieve_view`
+		// TODO: write test; `SET SCHEMA 'pg_temp';`
 	}
 }

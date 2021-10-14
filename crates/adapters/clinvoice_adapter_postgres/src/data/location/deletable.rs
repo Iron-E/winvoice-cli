@@ -1,6 +1,6 @@
 use clinvoice_adapter::data::Deletable;
 use clinvoice_data::Location;
-use sqlx::{Error, Executor, Postgres, Result};
+use sqlx::{Executor, Postgres, Result};
 
 use super::PostgresLocation;
 
@@ -9,7 +9,6 @@ impl Deletable for PostgresLocation
 {
 	type Db = Postgres;
 	type Entity = Location;
-	type Error = Error;
 
 	async fn delete(
 		connection: impl 'async_trait + Executor<'_, Database = Self::Db>,

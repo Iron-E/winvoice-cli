@@ -9,6 +9,8 @@ mod location;
 mod organization;
 mod person;
 mod schema;
+#[cfg(test)]
+mod util;
 
 pub use employee::PostgresEmployee;
 pub use job::PostgresJob;

@@ -55,5 +55,9 @@ pub trait PersonAdapter:
 	async fn retrieve_view(
 		connection: impl 'async_trait + Executor<'_, Database = <Self as Deletable>::Db>,
 		query: &query::Person,
-	) -> Result<Vec<PersonView>, <Self as Deletable>::Error>;
+	) -> Result<Vec<PersonView>, <Self as Deletable>::Error>
+	{
+		let results = Self::retrieve(connection, query).await?;
+		Ok(results.into_iter().map(PersonView::from).collect())
+	}
 }

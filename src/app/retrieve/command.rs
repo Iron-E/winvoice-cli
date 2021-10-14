@@ -288,7 +288,7 @@ impl Command
 						.try_for_each_concurrent(None, |job| async move {
 							let export = job.export()?;
 							fs::write(
-								format!("{}--{}.md", job.client.name.replace(' ', "-"), job.id,),
+								format!("{}--{}.md", job.client.name.replace(' ', "-"), job.id),
 								export,
 							)
 							.await?;

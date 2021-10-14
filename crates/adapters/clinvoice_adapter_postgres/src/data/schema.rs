@@ -41,7 +41,7 @@ impl PostgresSchema
 			"CREATE TABLE IF NOT EXISTS people
 			(
 				id bigint GENERATED ALWAYS AS IDENTITY,
-				name text,
+				name text NOT NULL,
 
 				PRIMARY KEY(id)
 			);"
@@ -63,7 +63,7 @@ impl PostgresSchema
 			(
 				id bigint GENERATED ALWAYS AS IDENTITY,
 				location_id bigint NOT NULL,
-				name text,
+				name text NOT NULL,
 
 				PRIMARY KEY(id),
 				CONSTRAINT organizations_location_id_fk
@@ -102,8 +102,8 @@ impl PostgresSchema
 				id bigint GENERATED ALWAYS AS IDENTITY UNIQUE,
 				organization_id bigint NOT NULL,
 				person_id bigint NOT NULL,
-				status employee_status,
-				title text,
+				status employee_status NOT NULL,
+				title text NOT NULL,
 
 				PRIMARY KEY(organization_id, person_id),
 				CONSTRAINT employees_organization_id_fk FOREIGN KEY(organization_id) REFERENCES organizations(id),
@@ -235,7 +235,7 @@ impl PostgresSchema
 				client_id bigint NOT NULL,
 				date_close timestamptz,
 				date_open timestamptz NOT NULL,
-				increment interval,
+				increment interval NOT NULL,
 				invoice invoice NOT NULL,
 				notes text,
 				objectives text NOT NULL,

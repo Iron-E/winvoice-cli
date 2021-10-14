@@ -31,6 +31,7 @@ shellexpand = "2"
 thiserror = "1"
 
 [dev-dependencies]
+dotenv = "0.15.0"
 tokio = {features=["macros", "rt-multi-thread"], version="1"}
 
 [features]

@@ -12,7 +12,9 @@ impl Initializable for PostgresSchema
 	/// # Summary
 	///
 	/// Initialize the database for a given [`Store`].
-	async fn init(connection: impl 'async_trait + Acquire<'_, Database = Self::Db> + Send) -> Result<()>
+	async fn init(
+		connection: impl 'async_trait + Acquire<'_, Database = Self::Db> + Send,
+	) -> Result<()>
 	{
 		let mut transaction = connection.begin().await?;
 
@@ -20,8 +22,10 @@ impl Initializable for PostgresSchema
 		Self::init_people(&mut transaction).await?;
 		Self::init_organizations(&mut transaction).await?;
 		Self::init_employee_status(&mut transaction).await?;
-		Self::init_contact_info(&mut transaction).await?;
 		Self::init_employees(&mut transaction).await?;
+		Self::init_contact_info(&mut transaction).await?;
+		Self::init_currency(&mut transaction).await?;
+		Self::init_money(&mut transaction).await?;
 		Self::init_invoice(&mut transaction).await?;
 		Self::init_jobs(&mut transaction).await?;
 		Self::init_expense_category(&mut transaction).await?;

@@ -1,6 +1,6 @@
 mod initializable;
 
-use sqlx::{Error, Executor, Postgres, Result, Transaction};
+use sqlx::{Executor, Postgres, Result, Transaction};
 
 /// # Summary
 ///
@@ -14,7 +14,8 @@ impl PostgresSchema
 	/// # Summary
 	///
 	/// Initialize the database for a given [`Store`].
-	async fn init_locations(connection: impl Executor<'_, Database = Postgres> + Send) -> Result<()>
+	async fn init_locations(connection: impl Executor<'_, Database = Postgres> + Send)
+		-> Result<()>
 	{
 		sqlx::query!(
 			"CREATE TABLE IF NOT EXISTS locations
@@ -26,7 +27,10 @@ impl PostgresSchema
 				PRIMARY KEY(id),
 				CONSTRAINT locations_outer_id_fk FOREIGN KEY(outer_id) REFERENCES locations(id)
 			);"
-		).execute(connection).await.and(Ok(()))
+		)
+		.execute(connection)
+		.await
+		.and(Ok(()))
 	}
 
 	/// # Summary
@@ -41,13 +45,18 @@ impl PostgresSchema
 
 				PRIMARY KEY(id)
 			);"
-		).execute(connection).await.and(Ok(()))
+		)
+		.execute(connection)
+		.await
+		.and(Ok(()))
 	}
 
 	/// # Summary
 	///
 	/// Initialize the database for a given [`Store`].
-	async fn init_organizations(connection: impl Executor<'_, Database = Postgres> + Send) -> Result<()>
+	async fn init_organizations(
+		connection: impl Executor<'_, Database = Postgres> + Send,
+	) -> Result<()>
 	{
 		sqlx::query!(
 			"CREATE TABLE IF NOT EXISTS organizations
@@ -60,22 +69,57 @@ impl PostgresSchema
 				CONSTRAINT organizations_location_id_fk
 					FOREIGN KEY(location_id) REFERENCES locations(id)
 			);"
-		).execute(connection).await.and(Ok(()))
+		)
+		.execute(connection)
+		.await
+		.and(Ok(()))
 	}
 
 	/// # Summary
 	///
 	/// Initialize the database for a given [`Store`].
-	async fn init_employee_status(connection: impl Executor<'_, Database = Postgres> + Send) -> Result<()>
+	async fn init_employee_status(
+		connection: impl Executor<'_, Database = Postgres> + Send,
+	) -> Result<()>
 	{
 		sqlx::query!(
 			"CREATE TYPE employee_status AS ENUM ('employed', 'not_employed', 'representative');"
-		).execute(connection).await.and(Ok(()))
+		)
+		.execute(connection)
+		.await
+		.and(Ok(()))
+	}
+
+	/// # Summary
+	///
+	/// Initialize the database for a given [`Store`].
+	async fn init_employees(connection: impl Executor<'_, Database = Postgres> + Send)
+		-> Result<()>
+	{
+		sqlx::query!(
+			"CREATE TABLE IF NOT EXISTS employees
+			(
+				id bigint GENERATED ALWAYS AS IDENTITY UNIQUE,
+				organization_id bigint NOT NULL,
+				person_id bigint NOT NULL,
+				status employee_status,
+				title text,
+
+				PRIMARY KEY(organization_id, person_id),
+				CONSTRAINT employees_organization_id_fk FOREIGN KEY(organization_id) REFERENCES organizations(id),
+				CONSTRAINT employees_person_id_fk FOREIGN KEY(person_id) REFERENCES people(id)
+			);"
+		)
+		.execute(connection)
+		.await
+		.and(Ok(()))
 	}
 
 	/// # Summary
 	/// Initialize the database for a given [`Store`].
-	async fn init_contact_info(connection: impl Executor<'_, Database = Postgres> + Send) -> Result<()>
+	async fn init_contact_info(
+		connection: impl Executor<'_, Database = Postgres> + Send,
+	) -> Result<()>
 	{
 		sqlx::query!(
 			"CREATE TABLE IF NOT EXISTS contact_information
@@ -101,28 +145,54 @@ impl PostgresSchema
 					OR email IS NULL AND phone IS NULL -- Contact::Address
 				)
 			);"
-		).execute(connection).await.and(Ok(()))
+		)
+		.execute(connection)
+		.await
+		.and(Ok(()))
+	}
+
+	/// # Summary
+	/// Initialize the database for a given [`Store`].
+	async fn init_currency(connection: impl Executor<'_, Database = Postgres> + Send) -> Result<()>
+	{
+		sqlx::query!(
+			"CREATE TYPE currency AS ENUM
+			(
+				'AUD', 'BGN', 'BRL', 'CAD', 'CHF', 'CNY', 'CZK', 'DKK', 'EUR', 'GBP', 'HKD',
+				'HRK', 'HUF', 'IDR', 'ILS', 'INR', 'ISK', 'JPY', 'KRW', 'MXN', 'MYR', 'NOK',
+				'NZD', 'PHP', 'PLN', 'RON', 'RUB', 'SEK', 'SGD', 'THB', 'TRY', 'USD', 'ZAR'
+			);"
+		)
+		.execute(connection)
+		.await
+		.and(Ok(()))
 	}
 
 	/// # Summary
 	///
 	/// Initialize the database for a given [`Store`].
-	async fn init_employees(connection: impl Executor<'_, Database = Postgres> + Send) -> Result<()>
+	async fn init_money(connection: &mut Transaction<'_, Postgres>) -> Result<()>
 	{
 		sqlx::query!(
-			"CREATE TABLE IF NOT EXISTS employees
+			"CREATE TYPE amount_of_currency_unsafe AS
 			(
-				id bigint GENERATED ALWAYS AS IDENTITY,
-				organization_id bigint NOT NULL,
-				person_id bigint NOT NULL,
-				status employee_status,
-				title text,
-
-				PRIMARY KEY(organization_id, person_id),
-				CONSTRAINT employees_organization_id_fk FOREIGN KEY(organization_id) REFERENCES organizations(id),
-				CONSTRAINT employees_person_id_fk FOREIGN KEY(person_id) REFERENCES people(id)
+				amount money,
+				currency currency
 			);"
-		).execute(connection).await.and(Ok(()))
+		)
+		.execute(&mut *connection)
+		.await?;
+
+		sqlx::query!(
+			"CREATE DOMAIN amount_of_currency AS amount_of_currency_unsafe CHECK
+			(
+				(VALUE).amount IS NOT NULL AND
+				(VALUE).currency IS NOT NULL
+			);"
+		)
+		.execute(&mut *connection)
+		.await
+		.and(Ok(()))
 	}
 
 	/// # Summary
@@ -137,15 +207,20 @@ impl PostgresSchema
 				date_paid timestamptz,
 				hourly_rate amount_of_currency
 			);"
-		).execute(&mut *connection).await?;
+		)
+		.execute(&mut *connection)
+		.await?;
 
 		sqlx::query!(
 			"CREATE DOMAIN invoice AS invoice_unsafe CHECK
 			(
-				VALUE.hourly_rate IS NOT NULL AND
-				(VALUE.date_paid IS NULL OR VALUE.date_issued IS NOT NULL)
+				(VALUE).hourly_rate IS NOT NULL AND
+				((VALUE).date_paid IS NULL OR (VALUE).date_issued IS NOT NULL)
 			);"
-		).execute(&mut *connection).await.and(Ok(()))
+		)
+		.execute(&mut *connection)
+		.await
+		.and(Ok(()))
 	}
 
 	/// # Summary
@@ -168,17 +243,26 @@ impl PostgresSchema
 				PRIMARY KEY(id),
 				CONSTRAINT jobs_client_id_fk FOREIGN KEY(client_id) REFERENCES organizations(id)
 			);"
-		).execute(connection).await.and(Ok(()))
+		)
+		.execute(connection)
+		.await
+		.and(Ok(()))
 	}
 
 	/// # Summary
 	///
 	/// Initialize the database for a given [`Store`]. TODO
-	async fn init_expense_category(connection: impl Executor<'_, Database = Postgres> + Send) -> Result<()>
+	async fn init_expense_category(
+		connection: impl Executor<'_, Database = Postgres> + Send,
+	) -> Result<()>
 	{
 		sqlx::query!(
-			"CREATE TYPE expense_category AS ENUM ('food', 'item', 'other', 'service', 'software', 'travel');"
-		).execute(connection).await.and(Ok(()))
+			"CREATE TYPE expense_category AS ENUM ('food', 'item', 'other', 'service', 'software', \
+			 'travel');"
+		)
+		.execute(connection)
+		.await
+		.and(Ok(()))
 	}
 
 	/// # Summary
@@ -193,36 +277,46 @@ impl PostgresSchema
 				cost amount_of_currency,
 				description text
 			);"
-		).execute(&mut *connection).await?;
+		)
+		.execute(&mut *connection)
+		.await?;
 
 		sqlx::query!(
 			"CREATE DOMAIN expense AS expense_unsafe CHECK
 			(
-				VALUE.category IS NOT NULL AND
-				VALUE.cost IS NOT NULL AND
-				VALUE.description IS NOT NULL
+				(VALUE).category IS NOT NULL AND
+				(VALUE).cost IS NOT NULL AND
+				(VALUE).description IS NOT NULL
 			);"
-		).execute(&mut *connection).await.and(Ok(()))
+		)
+		.execute(&mut *connection)
+		.await
+		.and(Ok(()))
 	}
 
 	/// # Summary
 	///
-	/// Initialize the database for a given [`Store`]. TODO
-	async fn init_timesheets(connection: impl Executor<'_, Database = Postgres> + Send) -> Result<()>
+	/// Initialize the database for a given [`Store`].
+	async fn init_timesheets(connection: impl Executor<'_, Database = Postgres> + Send)
+		-> Result<()>
 	{
 		sqlx::query!(
-			"CREATE TABLE IF NOT EXISTS employees
+			"CREATE TABLE IF NOT EXISTS timesheets
 			(
-				id bigint GENERATED ALWAYS AS IDENTITY,
-				organization_id bigint NOT NULL,
-				person_id bigint NOT NULL,
-				status employee_status,
-				title text,
+				employee_id bigint NOT NULL,
+				job_id bigint NOT NULL,
+				expenses expense ARRAY,
+				time_begin timestamptz NOT NULL,
+				time_end timestamptz,
+				work_notes text,
 
-				PRIMARY KEY(organization_id, person_id),
-				CONSTRAINT employees_organization_id_fk FOREIGN KEY(organization_id) REFERENCES organizations(id),
-				CONSTRAINT employees_person_id_fk FOREIGN KEY(person_id) REFERENCES people(id)
+				PRIMARY KEY(employee_id, job_id, time_begin),
+				CONSTRAINT timesheets_employee_id_fk FOREIGN KEY(employee_id) REFERENCES employees(id),
+				CONSTRAINT timesheets_job_id_fk FOREIGN KEY(job_id) REFERENCES jobs(id)
 			);"
-		).execute(connection).await.and(Ok(()))
+		)
+		.execute(connection)
+		.await
+		.and(Ok(()))
 	}
 }

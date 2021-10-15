@@ -89,7 +89,6 @@ impl Command
 	) -> DynResult<'err, ()>
 	where
 		D: Deletable<Db = Db, Entity = Entity>,
-		D::Error: 'err,
 		Db: Database,
 		EntityView: Clone + Display + Into<Entity> + Send,
 		for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
@@ -118,7 +117,6 @@ impl Command
 		EntityView:
 			Clone + DeserializeOwned + Display + Into<Entity> + RestorableSerde + Serialize + Send,
 		U: Updatable<Db = Db, Entity = Entity>,
-		U::Error: 'err,
 		for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 	{
 		let selection = input::select(entities, "Select the entities you want to update")?;
@@ -157,11 +155,6 @@ impl Command
 		LAdapter: Deletable<Db = Db> + LocationAdapter + Send,
 		OAdapter: Deletable<Db = Db> + OrganizationAdapter + Send,
 		PAdapter: Deletable<Db = Db> + PersonAdapter + Send,
-		<EAdapter as Deletable>::Error: 'err,
-		<JAdapter as Deletable>::Error: 'err,
-		<LAdapter as Deletable>::Error: 'err,
-		<OAdapter as Deletable>::Error: 'err,
-		<PAdapter as Deletable>::Error: 'err,
 		for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 	{
 		match self

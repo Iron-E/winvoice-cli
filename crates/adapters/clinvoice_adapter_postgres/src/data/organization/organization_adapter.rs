@@ -1,7 +1,6 @@
 use clinvoice_adapter::data::OrganizationAdapter;
 use clinvoice_data::{views::OrganizationView, Location, Organization};
 use clinvoice_query as query;
-use futures::Stream;
 use sqlx::{Executor, Postgres, Result};
 
 use super::PostgresOrganization;
@@ -18,22 +17,18 @@ impl OrganizationAdapter for PostgresOrganization
 		todo!()
 	}
 
-	fn retrieve<'a, S>(
-		connection: impl Executor<'a, Database = Postgres>,
+	async fn retrieve(
+		connection: impl 'async_trait + Executor<'_, Database = Postgres>,
 		query: &query::Organization,
-	) -> S
-	where
-		S: Stream<Item = Result<Organization>>,
+	) -> Result<Vec<Organization>>
 	{
 		todo!()
 	}
 
-	fn retrieve_view<'a, S>(
-		connection: impl Executor<'a, Database = Postgres>,
+	async fn retrieve_view(
+		connection: impl 'async_trait + Executor<'_, Database = Postgres>,
 		query: &query::Organization,
-	) -> S
-	where
-		S: Stream<Item = Result<OrganizationView>>,
+	) -> Result<Vec<OrganizationView>>
 	{
 		todo!()
 	}

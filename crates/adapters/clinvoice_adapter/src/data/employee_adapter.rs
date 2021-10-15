@@ -11,7 +11,6 @@ use clinvoice_data::{
 	Person,
 };
 use clinvoice_query as query;
-use futures::Stream;
 use sqlx::{Executor, Result};
 
 use super::{Deletable, Updatable};
@@ -54,12 +53,10 @@ pub trait EmployeeAdapter:
 	///
 	/// * Any matching [`Employee`]s.
 	/// * An [`Error`], should something go wrong.
-	fn retrieve<'a, S>(
-		connection: impl Executor<'a, Database = <Self as Deletable>::Db>,
+	async fn retrieve(
+		connection: impl 'async_trait + Executor<'_, Database = <Self as Deletable>::Db>,
 		query: &query::Employee,
-	) -> S
-	where
-		S: Stream<Item = Result<<Self as Deletable>::Entity>>;
+	) -> Result<Vec<<Self as Deletable>::Entity>>;
 
 	/// # Summary
 	///
@@ -73,10 +70,8 @@ pub trait EmployeeAdapter:
 	///
 	/// * Any matching [`Employee`]s.
 	/// * An [`Error`], should something go wrong.
-	fn retrieve_view<'a, S>(
-		connection: impl Executor<'a, Database = <Self as Deletable>::Db>,
+	async fn retrieve_view(
+		connection: impl 'async_trait + Executor<'_, Database = <Self as Deletable>::Db>,
 		query: &query::Employee,
-	) -> S
-	where
-		S: Stream<Item = Result<EmployeeView>>;
+	) -> Result<Vec<EmployeeView>>;
 }

@@ -2,7 +2,6 @@
 
 use clinvoice_data::{views::PersonView, Person};
 use clinvoice_query as query;
-use futures::stream::{MapOk, Stream, TryStreamExt};
 use sqlx::{Executor, Result};
 
 use super::{Deletable, Updatable};
@@ -36,10 +35,10 @@ pub trait PersonAdapter:
 	///
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`PersonView`]s.
-	fn retrieve<'a, E, S>(connection: E, query: &query::Person) -> S
-	where
-		E: Executor<'a, Database = <Self as Deletable>::Db>,
-		S: Stream<Item = Result<<Self as Deletable>::Entity>>;
+	async fn retrieve(
+		connection: impl 'async_trait + Executor<'_, Database = <Self as Deletable>::Db>,
+		query: &query::Person,
+	) -> Result<Vec<<Self as Deletable>::Entity>>;
 
 	/// # Summary
 	///
@@ -49,14 +48,8 @@ pub trait PersonAdapter:
 	///
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`PersonView`]s.
-	fn retrieve_view<'a, E, S>(
-		connection: E,
+	async fn retrieve_view(
+		connection: impl 'async_trait + Executor<'_, Database = <Self as Deletable>::Db>,
 		query: &query::Person,
-	) -> MapOk<S, fn(clinvoice_data::Person) -> PersonView>
-	where
-		E: Executor<'a, Database = <Self as Deletable>::Db>,
-		S: Stream<Item = Result<<Self as Deletable>::Entity>>,
-	{
-		Self::retrieve::<E, S>(connection, query).map_ok(PersonView::from)
-	}
+	) -> Result<Vec<PersonView>>;
 }

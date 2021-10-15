@@ -30,7 +30,6 @@ where
 	D: Display,
 	Db: Database,
 	PAdapter: Deletable<Db = Db> + PersonAdapter + Send,
-	<PAdapter as Deletable>::Error: 'err,
 	for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 {
 	loop

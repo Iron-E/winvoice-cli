@@ -2,7 +2,6 @@
 
 use clinvoice_data::{views::OrganizationView, Location, Organization};
 use clinvoice_query as query;
-use futures::Stream;
 use sqlx::{Executor, Result};
 
 use super::{Deletable, Updatable};
@@ -37,12 +36,10 @@ pub trait OrganizationAdapter:
 	///
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`Organization`]s.
-	fn retrieve<'a, S>(
-		connection: impl Executor<'a, Database = <Self as Deletable>::Db>,
+	async fn retrieve(
+		connection: impl 'async_trait + Executor<'_, Database = <Self as Deletable>::Db>,
 		query: &query::Organization,
-	) -> S
-	where
-		S: Stream<Item = Result<<Self as Deletable>::Entity>>;
+	) -> Result<Vec<<Self as Deletable>::Entity>>;
 
 	/// # Summary
 	///
@@ -52,10 +49,8 @@ pub trait OrganizationAdapter:
 	///
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`OrganizationView`]s.
-	fn retrieve_view<'a, S>(
-		connection: impl Executor<'a, Database = <Self as Deletable>::Db>,
+	async fn retrieve_view(
+		connection: impl 'async_trait + Executor<'_, Database = <Self as Deletable>::Db>,
 		query: &query::Organization,
-	) -> S
-	where
-		S: Stream<Item = Result<OrganizationView>>;
+	) -> Result<Vec<OrganizationView>>;
 }

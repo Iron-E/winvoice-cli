@@ -22,7 +22,6 @@ async fn add_menu<'err, Db, LAdapter>(
 where
 	Db: Database,
 	LAdapter: Deletable<Db = Db> + LocationAdapter + Send,
-	<LAdapter as Deletable>::Error: 'err,
 	for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 {
 	const ADDRESS: &str = "Address";
@@ -217,7 +216,6 @@ pub async fn menu<'err, Db, LAdapter>(
 where
 	Db: Database,
 	LAdapter: Deletable<Db = Db> + LocationAdapter + Send,
-	<LAdapter as Deletable>::Error: 'err,
 	for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 {
 	let mut contact_info = HashMap::<String, ContactView>::new();

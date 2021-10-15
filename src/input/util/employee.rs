@@ -31,7 +31,6 @@ where
 	D: Display,
 	Db: Database,
 	EAdapter: Deletable<Db = Db> + EmployeeAdapter + Send,
-	<EAdapter as Deletable>::Error: 'err,
 	for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 {
 	loop

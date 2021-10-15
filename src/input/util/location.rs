@@ -30,7 +30,6 @@ where
 	D: Display,
 	Db: Database,
 	LAdapter: Deletable<Db = Db> + LocationAdapter + Send,
-	<LAdapter as Deletable>::Error: 'err,
 	for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 {
 	loop

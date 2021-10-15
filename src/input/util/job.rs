@@ -30,7 +30,6 @@ where
 	D: Display,
 	Db: Database,
 	JAdapter: Deletable<Db = Db> + JobAdapter + Send,
-	<JAdapter as Deletable>::Error: 'err,
 	for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 {
 	loop

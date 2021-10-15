@@ -30,7 +30,6 @@ where
 	D: Display,
 	Db: Database,
 	OAdapter: Deletable<Db = Db> + OrganizationAdapter + Send,
-	<OAdapter as Deletable>::Error: 'err,
 	for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 {
 	loop

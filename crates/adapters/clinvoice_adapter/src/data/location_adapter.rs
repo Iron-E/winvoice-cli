@@ -2,7 +2,6 @@
 
 use clinvoice_data::{views::LocationView, Location};
 use clinvoice_query as query;
-use futures::Stream;
 use sqlx::{Acquire, Executor, Result};
 
 use super::{Deletable, Updatable};
@@ -53,22 +52,18 @@ pub trait LocationAdapter:
 	///
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`LocationView`]s.
-	fn retrieve<'a, S>(
-		connection: impl Executor<'a, Database = <Self as Deletable>::Db>,
+	async fn retrieve(
+		connection: impl 'async_trait + Executor<'_, Database = <Self as Deletable>::Db>,
 		query: &query::Location,
-	) -> S
-	where
-		S: Stream<Item = Result<<Self as Deletable>::Entity>>;
+	) -> Result<Vec<<Self as Deletable>::Entity>>;
 
 	/// # Summary
 	///
 	/// Get the [`Location`]s which contain this [`Location`].
-	fn retrieve_outers<'a, S>(
-		connection: impl Executor<'a, Database = <Self as Deletable>::Db>,
+	async fn retrieve_outers(
+		connection: impl 'async_trait + Executor<'_, Database = <Self as Deletable>::Db>,
 		location: &<Self as Deletable>::Entity,
-	) -> S
-	where
-		S: Stream<Item = Result<<Self as Deletable>::Entity>>;
+	) -> Result<Vec<<Self as Deletable>::Entity>>;
 
 	/// # Summary
 	///
@@ -80,18 +75,16 @@ pub trait LocationAdapter:
 	/// * A list of matching [`LocationView`]s.
 	///
 	/// TODO: provide impl after https://github.com/rust-lang/rust/issues/60658
-	fn retrieve_view<'a, S>(
-		connection: impl Acquire<'a, Database = <Self as Deletable>::Db> + Send,
+	async fn retrieve_view(
+		connection: impl 'async_trait + Acquire<'_, Database = <Self as Deletable>::Db> + Send,
 		query: &query::Location,
-	) -> S
-	where
-		S: Stream<Item = Result<LocationView>>; //where
-													 // 	for<'c> &'c mut <<Self as Deletable>::Db as Database>::Connection: Executor<'c, Database = <Self as Deletable>::Db>,
-													 // 	for<'c> &'c mut Transaction<'c, <Self as Deletable>::Db>: Executor<'c, Database = <Self as Deletable>::Db>,
-													 // {
-													 // 	let mut transaction = connection.begin().await?;
-													 // 	let inners = Self::retrieve(&mut transaction, query).await?;
-
+	) -> Result<Vec<LocationView>>;
+	// where
+	// 	for<'c> &'c mut <<Self as Deletable>::Db as Database>::Connection: Executor<'c, Database = <Self as Deletable>::Db>,
+	// 	for<'c> &'c mut Transaction<'c, <Self as Deletable>::Db>: Executor<'c, Database = <Self as Deletable>::Db>,
+	// {
+	// 	let mut transaction = connection.begin().await?;
+	// 	let inners = Self::retrieve(&mut transaction, query).await?;
 	// 	todo!()
 	// }
 }

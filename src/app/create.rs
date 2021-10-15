@@ -25,7 +25,7 @@ use futures::{
 	TryFutureExt,
 };
 use humantime::Duration;
-use sqlx::{Database, Executor, Pool};
+use sqlx::{Database, Executor, Pool, Result};
 use structopt::StructOpt;
 #[cfg(feature = "postgres")]
 use {
@@ -143,11 +143,6 @@ impl Create
 		LAdapter: Deletable<Db = Db> + LocationAdapter + Send,
 		OAdapter: Deletable<Db = Db> + OrganizationAdapter + Send,
 		PAdapter: Deletable<Db = Db> + PersonAdapter + Send,
-		<EAdapter as Deletable>::Error: 'err,
-		<JAdapter as Deletable>::Error: 'err,
-		<LAdapter as Deletable>::Error: 'err,
-		<OAdapter as Deletable>::Error: 'err,
-		<PAdapter as Deletable>::Error: 'err,
 		for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 	{
 		match self
@@ -214,10 +209,6 @@ impl Create
 		LAdapter: Deletable<Db = Db> + LocationAdapter + Send,
 		OAdapter: Deletable<Db = Db> + OrganizationAdapter + Send,
 		PAdapter: Deletable<Db = Db> + PersonAdapter + Send,
-		<EAdapter as Deletable>::Error: 'err,
-		<LAdapter as Deletable>::Error: 'err,
-		<OAdapter as Deletable>::Error: 'err,
-		<PAdapter as Deletable>::Error: 'err,
 		for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 	{
 		let organization_views = input::util::organization::retrieve_view::<&str, _, OAdapter>(
@@ -281,8 +272,6 @@ impl Create
 		Db: Database,
 		JAdapter: Deletable<Db = Db> + JobAdapter,
 		OAdapter: Deletable<Db = Db> + OrganizationAdapter + Send,
-		<JAdapter as Deletable>::Error: 'err,
-		<OAdapter as Deletable>::Error: 'err,
 		for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 	{
 		let organization_views = input::util::organization::retrieve_view::<&str, _, OAdapter>(
@@ -335,10 +324,7 @@ impl Create
 		Ok(())
 	}
 
-	async fn create_location<Db, LAdapter>(
-		connection: &Pool<Db>,
-		names: Vec<String>,
-	) -> Result<(), <LAdapter as Deletable>::Error>
+	async fn create_location<Db, LAdapter>(connection: &Pool<Db>, names: Vec<String>) -> Result<()>
 	where
 		Db: Database,
 		LAdapter: Deletable<Db = Db> + LocationAdapter,
@@ -365,8 +351,6 @@ impl Create
 		Db: Database,
 		LAdapter: Deletable<Db = Db> + LocationAdapter + Send,
 		OAdapter: Deletable<Db = Db> + OrganizationAdapter,
-		<LAdapter as Deletable>::Error: 'err,
-		<OAdapter as Deletable>::Error: 'err,
 		for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 	{
 		let location_views = input::util::location::retrieve_view::<&str, _, LAdapter>(

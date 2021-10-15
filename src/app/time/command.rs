@@ -125,8 +125,6 @@ impl Command
 		Db: Database,
 		EAdapter: Deletable<Db = Db> + EmployeeAdapter + Send,
 		JAdapter: Deletable<Db = Db> + JobAdapter + Send,
-		<EAdapter as Deletable>::Error: 'err,
-		<JAdapter as Deletable>::Error: 'err,
 		for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 	{
 		let job_results_view: Vec<_> = input::util::job::retrieve_view::<&str, _, JAdapter>(

@@ -9,7 +9,6 @@ use clinvoice_data::{
 	Organization,
 };
 use clinvoice_query as query;
-use futures::Stream;
 use sqlx::{Executor, Postgres, Result};
 
 use super::PostgresJob;
@@ -29,19 +28,18 @@ impl JobAdapter for PostgresJob
 		todo!()
 	}
 
-	fn retrieve<'a, S>(connection: impl Executor<'a, Database = Postgres>, query: &query::Job) -> S
-	where
-		S: Stream<Item = Result<Job>>,
+	async fn retrieve(
+		connection: impl 'async_trait + Executor<'_, Database = Postgres>,
+		query: &query::Job,
+	) -> Result<Vec<Job>>
 	{
 		todo!()
 	}
 
-	fn retrieve_view<'a, S>(
-		connection: impl Executor<'a, Database = Postgres>,
+	async fn retrieve_view(
+		connection: impl 'async_trait + Executor<'_, Database = Postgres>,
 		query: &query::Job,
-	) -> S
-	where
-		S: Stream<Item = Result<JobView>>,
+	) -> Result<Vec<JobView>>
 	{
 		todo!()
 	}

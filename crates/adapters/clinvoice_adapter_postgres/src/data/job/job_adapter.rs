@@ -34,15 +34,38 @@ impl JobAdapter for PostgresJob
 		objectives: String,
 	) -> Result<Job>
 	{
-		todo!()
-	}
+		// TODO: use `decimal` instead of `money` for monetary type
+		let pg_increment = PgInterval::try_from(increment).map_err(|e| sqlx::Error::Decode(e))?;
+		// let pg_hourly_rate_amount = PgMoney::from_decimal(hourly_rate.amount);
+		let row = sqlx::query!(
+			"INSERT INTO jobs
+				(client_id, date_close, date_open, increment, invoice,                      objectives)
+			VALUES
+				($1,        NULL,       $2,        $3,        ROW(NULL, NULL, ROW($4, $5)), $6)
+			RETURNING id;",
+			client.id,
+			date_open,
+			pg_increment,
+			pg_hourly_rate_amount,
+			hourly_rate.currency.as_str() as _,
+			objectives,
+		)
+		.fetch_one(connection)
+		.await?;
 
-	async fn retrieve(
-		connection: impl 'async_trait + Executor<'_, Database = Postgres>,
-		query: &query::Job,
-	) -> Result<Vec<Job>>
-	{
-		todo!()
+		Ok(Job {
+			client_id: client.id,
+			date_close: None,
+			date_open,
+			id: row.id,
+			increment,
+			invoice: Invoice {
+				date: None,
+				hourly_rate,
+			},
+			notes: String::new(),
+			objectives,
+		})
 	}
 
 	async fn retrieve_view(

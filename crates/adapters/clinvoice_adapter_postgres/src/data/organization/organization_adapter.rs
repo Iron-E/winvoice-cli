@@ -14,15 +14,19 @@ impl OrganizationAdapter for PostgresOrganization
 		name: String,
 	) -> Result<Organization>
 	{
-		todo!()
-	}
+		let row = sqlx::query!(
+			"INSERT INTO organizations (location_id, name) VALUES ($1, $2) RETURNING id;",
+			location.id,
+			name
+		)
+		.fetch_one(connection)
+		.await?;
 
-	async fn retrieve(
-		connection: impl 'async_trait + Executor<'_, Database = Postgres>,
-		query: &query::Organization,
-	) -> Result<Vec<Organization>>
-	{
-		todo!()
+		Ok(Organization {
+			id: row.id,
+			location_id: location.id,
+			name,
+		})
 	}
 
 	async fn retrieve_view(

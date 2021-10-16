@@ -13,7 +13,18 @@ impl LocationAdapter for PostgresLocation
 		name: String,
 	) -> Result<Location>
 	{
-		todo!()
+		let row = sqlx::query!(
+			"INSERT INTO locations (name, outer_id) VALUES ($1, NULL) RETURNING id;",
+			name
+		)
+		.fetch_one(connection)
+		.await?;
+
+		Ok(Location {
+			id: row.id,
+			name,
+			outer_id: None,
+		})
 	}
 
 	async fn create_inner(
@@ -22,23 +33,19 @@ impl LocationAdapter for PostgresLocation
 		name: String,
 	) -> Result<Location>
 	{
-		todo!()
-	}
+		let row = sqlx::query!(
+			"INSERT INTO locations (name, outer_id) VALUES ($1, $2) RETURNING id;",
+			name,
+			outer.id
+		)
+		.fetch_one(connection)
+		.await?;
 
-	async fn retrieve(
-		connection: impl 'async_trait + Executor<'_, Database = Postgres>,
-		query: &query::Location,
-	) -> Result<Vec<Location>>
-	{
-		todo!()
-	}
-
-	async fn retrieve_outers(
-		connection: impl 'async_trait + Executor<'_, Database = Postgres>,
-		location: &Location,
-	) -> Result<Vec<Location>>
-	{
-		todo!()
+		Ok(Location {
+			id: row.id,
+			name,
+			outer_id: Some(outer.id),
+		})
 	}
 
 	// WARN: `Might need `Acquire` or `&mut Transaction` depending on how recursive views work

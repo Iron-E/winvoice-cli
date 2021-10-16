@@ -26,15 +26,30 @@ impl EmployeeAdapter for PostgresEmployee
 		title: String,
 	) -> Result<Employee>
 	{
-		todo!()
-	}
+		let row = sqlx::query!(
+			"INSERT INTO employees
+				(organization_id, person_id, status, title)
+			VALUES
+				($1, $2, $3, $4)
+			RETURNING id;",
+			organization.id,
+			person.id,
+			status.as_str() as _,
+			title,
+		)
+		.fetch_one(connection)
+		.await?;
 
-	async fn retrieve(
-		connection: impl 'async_trait + Executor<'_, Database = Postgres>,
-		query: &query::Employee,
-	) -> Result<Vec<Employee>>
-	{
-		todo!()
+		// TODO: use `Acquire` so that all the `ContactInfo`s can be generated
+
+		Ok(Employee {
+			contact_info,
+			id: row.id,
+			organization_id: organization.id,
+			person_id: person.id,
+			status,
+			title,
+		})
 	}
 
 	async fn retrieve_view(

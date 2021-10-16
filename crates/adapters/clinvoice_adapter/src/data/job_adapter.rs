@@ -41,19 +41,6 @@ pub trait JobAdapter:
 
 	/// # Summary
 	///
-	/// Retrieve some [`Job`]s from the database using a [query](query::Job).
-	///
-	/// # Returns
-	///
-	/// * An `Error`, if something goes wrong.
-	/// * A list of matching [`Job`]s.
-	async fn retrieve(
-		connection: impl 'async_trait + Executor<'_, Database = <Self as Deletable>::Db>,
-		query: &query::Job,
-	) -> Result<Vec<<Self as Deletable>::Entity>>;
-
-	/// # Summary
-	///
 	/// Retrieve some [`JobView`]s from the database using a [query](query::Job).
 	///
 	/// # Returns

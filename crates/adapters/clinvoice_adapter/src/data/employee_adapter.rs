@@ -43,23 +43,6 @@ pub trait EmployeeAdapter:
 
 	/// # Summary
 	///
-	/// Retrieve some [`Employee`]s from the database using a [query](query::Employee).
-	///
-	/// # Parameters
-	///
-	/// See [`Employee`].
-	///
-	/// # Returns
-	///
-	/// * Any matching [`Employee`]s.
-	/// * An [`Error`], should something go wrong.
-	async fn retrieve(
-		connection: impl 'async_trait + Executor<'_, Database = <Self as Deletable>::Db>,
-		query: &query::Employee,
-	) -> Result<Vec<<Self as Deletable>::Entity>>;
-
-	/// # Summary
-	///
 	/// Retrieve some [`EmployeeView`]s from the database using a [query](query::Employee).
 	///
 	/// # Parameters

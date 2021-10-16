@@ -21,27 +21,19 @@ impl PersonAdapter for PostgresPerson
 		Ok(Person { id: row.id, name })
 	}
 
-	async fn retrieve(
-		connection: impl 'async_trait + Executor<'_, Database = Postgres>,
-		query: &query::Person,
-	) -> Result<Vec<Person>>
-	{
-		sqlx::query("SELECT * FROM people;")
-			.fetch(connection)
-			.map_ok(|row| Person {
-				id:   row.get("id"),
-				name: row.get("name"),
-			})
-			.try_collect()
-			.await
-	}
-
 	async fn retrieve_view(
 		connection: impl 'async_trait + Executor<'_, Database = Postgres>,
 		query: &query::Person,
 	) -> Result<Vec<PersonView>>
 	{
-		todo!()
+		sqlx::query("SELECT * FROM people;")
+			.fetch(connection)
+			.map_ok(|row| PersonView {
+				id:   row.get("id"),
+				name: row.get("name"),
+			})
+			.try_collect()
+			.await
 	}
 }
 

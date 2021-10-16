@@ -30,19 +30,6 @@ pub trait OrganizationAdapter:
 
 	/// # Summary
 	///
-	/// Retrieve some [`Organization`]s from the database using a [query](query::Organization).
-	///
-	/// # Returns
-	///
-	/// * An `Error`, if something goes wrong.
-	/// * A list of matching [`Organization`]s.
-	async fn retrieve(
-		connection: impl 'async_trait + Executor<'_, Database = <Self as Deletable>::Db>,
-		query: &query::Organization,
-	) -> Result<Vec<<Self as Deletable>::Entity>>;
-
-	/// # Summary
-	///
 	/// Retrieve some [`OrganizationView`]s from the database using a [query](query::Organization).
 	///
 	/// # Returns

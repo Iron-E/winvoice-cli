@@ -35,19 +35,6 @@ pub trait PersonAdapter:
 	///
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`PersonView`]s.
-	async fn retrieve(
-		connection: impl 'async_trait + Executor<'_, Database = <Self as Deletable>::Db>,
-		query: &query::Person,
-	) -> Result<Vec<<Self as Deletable>::Entity>>;
-
-	/// # Summary
-	///
-	/// Retrieve some [`PersonView`]s from the database using a [query](query::Person).
-	///
-	/// # Returns
-	///
-	/// * An `Error`, if something goes wrong.
-	/// * A list of matching [`PersonView`]s.
 	async fn retrieve_view(
 		connection: impl 'async_trait + Executor<'_, Database = <Self as Deletable>::Db>,
 		query: &query::Person,

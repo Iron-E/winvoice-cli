@@ -1,15 +1,24 @@
 use core::time::Duration;
+use std::convert::TryFrom;
 
 use clinvoice_adapter::data::JobAdapter;
 use clinvoice_data::{
 	chrono::{DateTime, Utc},
 	views::JobView,
+	Invoice,
 	Job,
 	Money,
 	Organization,
 };
 use clinvoice_query as query;
-use sqlx::{Executor, Postgres, Result};
+use sqlx::{
+	postgres::{
+		types::{PgInterval, PgMoney},
+		Postgres,
+	},
+	Executor,
+	Result,
+};
 
 use super::PostgresJob;
 

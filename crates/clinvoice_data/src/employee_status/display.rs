@@ -6,12 +6,7 @@ impl Display for EmployeeStatus
 {
 	fn fmt(&self, formatter: &mut Formatter) -> Result
 	{
-		write!(formatter, "{}", match self
-		{
-			EmployeeStatus::Employed => "Employed",
-			EmployeeStatus::NotEmployed => "Not employed",
-			EmployeeStatus::Representative => "Representative",
-		})
+		write!(formatter, "{}", self.as_str())
 	}
 }
 

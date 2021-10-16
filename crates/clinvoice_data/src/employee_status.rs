@@ -28,3 +28,17 @@ pub enum EmployeeStatus
 	/// of the [`Organization`](crate::Organization).
 	Representative,
 }
+
+impl EmployeeStatus
+{
+	/// Foo
+	pub const fn as_str(&self) -> &'static str
+	{
+		match self
+		{
+			Self::Employed => "Employed",
+			Self::NotEmployed => "Not Employed",
+			Self::Representative => "Representative",
+		}
+	}
+}

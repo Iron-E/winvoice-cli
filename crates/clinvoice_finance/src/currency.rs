@@ -180,3 +180,47 @@ pub enum Currency
 	/// The South African rand.
 	ZAR,
 }
+
+impl Currency
+{
+	/// Foo
+	pub const fn as_str(&self) -> &'static str
+	{
+		match self
+		{
+			Self::AUD => "AUD",
+			Self::BGN => "BGN",
+			Self::BRL => "BRL",
+			Self::CAD => "CAD",
+			Self::CHF => "CHF",
+			Self::CNY => "CNY",
+			Self::CZK => "CZK",
+			Self::DKK => "DKK",
+			Self::EUR => "EUR",
+			Self::GBP => "GBP",
+			Self::HKD => "HKD",
+			Self::HRK => "HRK",
+			Self::HUF => "HUF",
+			Self::IDR => "IDR",
+			Self::ILS => "ILS",
+			Self::INR => "INR",
+			Self::ISK => "ISK",
+			Self::JPY => "JPY",
+			Self::KRW => "KRW",
+			Self::MXN => "MXN",
+			Self::MYR => "MYR",
+			Self::NOK => "NOK",
+			Self::NZD => "NZD",
+			Self::PHP => "PHP",
+			Self::PLN => "PLN",
+			Self::RON => "RON",
+			Self::RUB => "RUB",
+			Self::SEK => "SEK",
+			Self::SGD => "SGD",
+			Self::THB => "THB",
+			Self::TRY => "TRY",
+			Self::USD => "USD",
+			Self::ZAR => "ZAR",
+		}
+	}
+}

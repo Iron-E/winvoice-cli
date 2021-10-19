@@ -48,12 +48,6 @@ mod tests
 	}
 
 	#[tokio::test]
-	async fn retrieve()
-	{
-		// TODO: write test
-	}
-
-	#[tokio::test]
 	async fn retrieve_view()
 	{
 		// TODO: write test

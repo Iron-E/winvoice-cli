@@ -73,7 +73,7 @@ mod tests
 	}
 
 	#[tokio::test]
-	async fn retrieve()
+	async fn retrieve_view()
 	{
 		// TODO: write test; `SET SCHEMA 'pg_temp';`
 	}

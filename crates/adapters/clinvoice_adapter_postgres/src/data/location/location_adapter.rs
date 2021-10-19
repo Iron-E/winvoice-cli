@@ -68,18 +68,6 @@ mod tests
 	}
 
 	#[tokio::test]
-	async fn retrieve()
-	{
-		// TODO: write test + `retrieve_outers`
-	}
-
-	#[tokio::test]
-	async fn retrieve_outers()
-	{
-		// TODO: write test
-	}
-
-	#[tokio::test]
 	async fn retrieve_view()
 	{
 		// TODO: write test

@@ -176,7 +176,7 @@ impl PostgresSchema
 		sqlx::query!(
 			"CREATE TYPE amount_of_currency_unsafe AS
 			(
-				amount money,
+				amount text,
 				currency currency
 			);"
 		)
@@ -184,11 +184,12 @@ impl PostgresSchema
 		.await?;
 
 		sqlx::query!(
-			"CREATE DOMAIN amount_of_currency AS amount_of_currency_unsafe CHECK
+			r#"CREATE DOMAIN amount_of_currency AS amount_of_currency_unsafe CHECK
 			(
-				(VALUE).amount IS NOT NULL AND
+				-- NOTE: `IS TRUE` checks for `NULL` as well as `FALSE`
+				(VALUE).amount ~ '^\d+(\.\d+)?$' IS TRUE AND
 				(VALUE).currency IS NOT NULL
-			);"
+			);"#
 		)
 		.execute(&mut *connection)
 		.await
@@ -251,7 +252,7 @@ impl PostgresSchema
 
 	/// # Summary
 	///
-	/// Initialize the database for a given [`Store`]. TODO
+	/// Initialize the database for a given [`Store`].
 	async fn init_expense_category(
 		connection: impl Executor<'_, Database = Postgres> + Send,
 	) -> Result<()>
@@ -267,7 +268,7 @@ impl PostgresSchema
 
 	/// # Summary
 	///
-	/// Initialize the database for a given [`Store`]. TODO
+	/// Initialize the database for a given [`Store`].
 	async fn init_expenses(connection: &mut Transaction<'_, Postgres>) -> Result<()>
 	{
 		sqlx::query!(

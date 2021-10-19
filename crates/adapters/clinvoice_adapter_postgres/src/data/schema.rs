@@ -122,17 +122,17 @@ impl PostgresSchema
 	) -> Result<()>
 	{
 		sqlx::query!(
-			"CREATE TABLE IF NOT EXISTS contact_information
+			r#"CREATE TABLE IF NOT EXISTS contact_information
 			(
 				employee_id bigint NOT NULL,
 				export bool NOT NULL,
-				name text NOT NULL,
+				label text NOT NULL,
 
 				location_id bigint,
-				email text,
-				phone text,
+				email text CHECK (email ~ '^[A-Za-z0-9]+(\.[A-Za-z0-9])*@[A-Za-z0-9]+\.[A-Za-z0-9]+$'),
+				phone text CHECK (phone ~ '^[0-9\- ]+$'),
 
-				PRIMARY KEY(employee_id, name),
+				PRIMARY KEY(employee_id, label),
 				CONSTRAINT contact_information_employee_id_fk FOREIGN KEY(employee_id) REFERENCES employees(id),
 				CONSTRAINT contact_information_location_id_fk FOREIGN KEY(location_id) REFERENCES locations(id),
 				CONSTRAINT contact_information_variant_check CHECK
@@ -144,7 +144,7 @@ impl PostgresSchema
 					)
 					OR email IS NULL AND phone IS NULL -- Contact::Address
 				)
-			);"
+			);"#
 		)
 		.execute(connection)
 		.await

@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, fmt::Write};
 
 use clinvoice_adapter::data::EmployeeAdapter;
 use clinvoice_data::{
@@ -10,7 +10,7 @@ use clinvoice_data::{
 	Person,
 };
 use clinvoice_query as query;
-use sqlx::{Executor, Postgres, Result};
+use sqlx::{Acquire, Executor, Postgres, Result};
 
 use super::PostgresEmployee;
 
@@ -18,7 +18,7 @@ use super::PostgresEmployee;
 impl EmployeeAdapter for PostgresEmployee
 {
 	async fn create(
-		connection: impl 'async_trait + Executor<'_, Database = Postgres>,
+		connection: impl 'async_trait + Acquire<'_, Database = Postgres> + Send,
 		contact_info: HashMap<String, Contact>,
 		organization: Organization,
 		person: Person,
@@ -26,6 +26,8 @@ impl EmployeeAdapter for PostgresEmployee
 		title: String,
 	) -> Result<Employee>
 	{
+		let mut transaction = connection.begin().await?;
+
 		let row = sqlx::query!(
 			"INSERT INTO employees
 				(organization_id, person_id, status, title)
@@ -37,10 +39,48 @@ impl EmployeeAdapter for PostgresEmployee
 			status.as_str() as _,
 			title,
 		)
-		.fetch_one(connection)
+		.fetch_one(&mut transaction)
 		.await?;
 
-		// TODO: use `Acquire` so that all the `ContactInfo`s can be generated
+		const INSERT_VALUES_APPROX_LEN: u8 = 39;
+		let mut contact_info_values =
+			String::with_capacity((INSERT_VALUES_APPROX_LEN as usize) * contact_info.len());
+		contact_info.iter().for_each(|(label, contact)| {
+			write!(contact_info_values, "({}, {}, ", row.id, label).unwrap();
+			match contact
+			{
+				Contact::Address {
+					location_id,
+					export,
+				} => write!(
+					contact_info_values,
+					"{}, {}, NULL, NULL",
+					export, location_id
+				),
+				Contact::Email { email, export } =>
+				{
+					write!(contact_info_values, "{}, NULL, {}, NULL", export, email)
+				},
+				Contact::Phone { phone, export } =>
+				{
+					write!(contact_info_values, "{}, NULL, NULL, {}", export, phone)
+				},
+			}
+			.unwrap();
+			write!(contact_info_values, "),").unwrap();
+		});
+		contact_info_values.pop(); // get rid of the trailing `,` since SQL can't handle that :/
+
+		sqlx::query(&format!(
+			"INSERT INTO contact_information
+				(employee_id, label, export, location_id, email, phone)
+			VALUES {};",
+			contact_info_values,
+		))
+		.execute(&mut transaction)
+		.await?;
+
+		transaction.commit().await?;
 
 		Ok(Employee {
 			contact_info,

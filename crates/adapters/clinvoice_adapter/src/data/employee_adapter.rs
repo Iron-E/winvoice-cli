@@ -11,7 +11,7 @@ use clinvoice_data::{
 	Person,
 };
 use clinvoice_query as query;
-use sqlx::{Executor, Result};
+use sqlx::{Acquire, Executor, Result};
 
 use super::{Deletable, Updatable};
 
@@ -33,7 +33,7 @@ pub trait EmployeeAdapter:
 	/// * The created [`Employee`], if there were no errors.
 	/// * An [`Error`], if something goes wrong.
 	async fn create(
-		connection: impl 'async_trait + Executor<'_, Database = <Self as Deletable>::Db>,
+		connection: impl 'async_trait + Acquire<'_, Database = <Self as Deletable>::Db> + Send,
 		contact_info: HashMap<String, Contact>,
 		organization: Organization,
 		person: Person,

@@ -12,10 +12,8 @@ use clinvoice_data::{
 };
 use clinvoice_query as query;
 use sqlx::{
-	postgres::{
-		types::{PgInterval, PgMoney},
-		Postgres,
-	},
+	postgres::{types::PgInterval, Postgres},
+	Error,
 	Executor,
 	Result,
 };
@@ -34,9 +32,7 @@ impl JobAdapter for PostgresJob
 		objectives: String,
 	) -> Result<Job>
 	{
-		// TODO: use `decimal` instead of `money` for monetary type
-		let pg_increment = PgInterval::try_from(increment).map_err(|e| sqlx::Error::Decode(e))?;
-		// let pg_hourly_rate_amount = PgMoney::from_decimal(hourly_rate.amount);
+		let pg_increment = PgInterval::try_from(increment).map_err(Error::Decode)?;
 		let row = sqlx::query!(
 			"INSERT INTO jobs
 				(client_id, date_close, date_open, increment, invoice,                      objectives)
@@ -46,7 +42,7 @@ impl JobAdapter for PostgresJob
 			client.id,
 			date_open,
 			pg_increment,
-			pg_hourly_rate_amount,
+			hourly_rate.amount.to_string(),
 			hourly_rate.currency.as_str() as _,
 			objectives,
 		)

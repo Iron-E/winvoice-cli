@@ -41,10 +41,37 @@ impl OrganizationAdapter for PostgresOrganization
 #[cfg(test)]
 mod tests
 {
+	use clinvoice_adapter::data::{Initializable, LocationAdapter};
+
+	use super::{OrganizationAdapter, PostgresOrganization};
+	use crate::data::{util, PostgresLocation, PostgresSchema};
+
+	/// TODO: use fuzzing
 	#[tokio::test(flavor = "multi_thread", worker_threads = 10)]
 	async fn create()
 	{
-		// TODO: write test
+		let mut connection = util::connect().await;
+
+		PostgresSchema::init(&mut connection).await.unwrap();
+
+		let earth = PostgresLocation::create(&mut connection, "Earth".into())
+			.await
+			.unwrap();
+
+		let organization = PostgresOrganization::create(&mut connection, &earth, "Some Organization".into())
+			.await
+			.unwrap();
+
+		let row = sqlx::query!("SELECT * FROM organizations;")
+			.fetch_one(&mut connection)
+			.await
+			.unwrap();
+
+		// Assert ::create writes accurately to the DB
+		assert_eq!(organization.id, row.id);
+		assert_eq!(organization.location_id, earth.id);
+		assert_eq!(organization.location_id, row.id);
+		assert_eq!(organization.name, row.name);
 	}
 
 	#[tokio::test(flavor = "multi_thread", worker_threads = 10)]

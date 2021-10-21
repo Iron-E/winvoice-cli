@@ -22,7 +22,7 @@ impl PostgresSchema
 			(
 				id bigint GENERATED ALWAYS AS IDENTITY,
 				outer_id bigint CHECK (id <> outer_id),
-				name text,
+				name text NOT NULL,
 
 				PRIMARY KEY(id),
 				CONSTRAINT locations_outer_id_fk FOREIGN KEY(outer_id) REFERENCES locations(id)

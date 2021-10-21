@@ -20,8 +20,8 @@ impl EmployeeAdapter for PostgresEmployee
 	async fn create(
 		connection: impl 'async_trait + Acquire<'_, Database = Postgres> + Send,
 		contact_info: HashMap<String, Contact>,
-		organization: Organization,
-		person: Person,
+		organization: &Organization,
+		person: &Person,
 		status: EmployeeStatus,
 		title: String,
 	) -> Result<Employee>

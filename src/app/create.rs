@@ -248,8 +248,8 @@ impl Create
 				.into_iter()
 				.map(|(label, contact)| (label, contact.into()))
 				.collect(),
-			organization.into(),
-			person.into(),
+			&organization.into(),
+			&person.into(),
 			employee_status,
 			title,
 		)
@@ -313,7 +313,7 @@ impl Create
 
 		JAdapter::create(
 			connection,
-			client.into(),
+			&client.into(),
 			local_date_open.into(),
 			hourly_rate,
 			increment,
@@ -363,7 +363,7 @@ impl Create
 		let selected_view =
 			input::select_one(&location_views, format!("Select a location for {}", name))?;
 
-		OAdapter::create(connection, selected_view.into(), name).await?;
+		OAdapter::create(connection, &selected_view.into(), name).await?;
 
 		Ok(())
 	}

@@ -24,7 +24,7 @@ pub trait OrganizationAdapter:
 	/// The newly created [`Organization`].
 	async fn create(
 		connection: impl 'async_trait + Executor<'_, Database = <Self as Deletable>::Db>,
-		location: Location,
+		location: &Location,
 		name: String,
 	) -> Result<<Self as Deletable>::Entity>;
 

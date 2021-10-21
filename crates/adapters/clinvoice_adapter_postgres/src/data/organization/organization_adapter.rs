@@ -10,7 +10,7 @@ impl OrganizationAdapter for PostgresOrganization
 {
 	async fn create(
 		connection: impl 'async_trait + Executor<'_, Database = Postgres>,
-		location: Location,
+		location: &Location,
 		name: String,
 	) -> Result<Organization>
 	{

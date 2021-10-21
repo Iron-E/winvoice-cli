@@ -35,8 +35,8 @@ pub trait EmployeeAdapter:
 	async fn create(
 		connection: impl 'async_trait + Acquire<'_, Database = <Self as Deletable>::Db> + Send,
 		contact_info: HashMap<String, Contact>,
-		organization: Organization,
-		person: Person,
+		organization: &Organization,
+		person: &Person,
 		status: EmployeeStatus,
 		title: String,
 	) -> Result<<Self as Deletable>::Entity>;

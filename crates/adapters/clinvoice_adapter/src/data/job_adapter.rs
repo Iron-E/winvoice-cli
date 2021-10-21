@@ -32,7 +32,7 @@ pub trait JobAdapter:
 	/// The newly created [`Job`].
 	async fn create(
 		connection: impl 'async_trait + Executor<'_, Database = <Self as Deletable>::Db>,
-		client: Organization,
+		client: &Organization,
 		date_open: DateTime<Utc>,
 		hourly_rate: Money,
 		increment: Duration,

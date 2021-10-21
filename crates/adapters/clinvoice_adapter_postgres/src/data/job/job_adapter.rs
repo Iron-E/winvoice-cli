@@ -25,7 +25,7 @@ impl JobAdapter for PostgresJob
 {
 	async fn create(
 		connection: impl 'async_trait + Executor<'_, Database = Postgres>,
-		client: Organization,
+		client: &Organization,
 		date_open: DateTime<Utc>,
 		hourly_rate: Money,
 		increment: Duration,

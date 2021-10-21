@@ -66,6 +66,7 @@ mod tests
 	use super::{LocationAdapter, PostgresLocation};
 	use crate::data::{util, PostgresSchema};
 
+	/// TODO: use fuzzing
 	#[tokio::test(flavor = "multi_thread", worker_threads = 10)]
 	async fn create()
 	{
@@ -73,37 +74,37 @@ mod tests
 
 		PostgresSchema::init(&mut connection).await.unwrap();
 
-		// Testing ::create
 		let earth = PostgresLocation::create(&mut connection, "Earth".into())
 			.await
 			.unwrap();
 
-		// Testing ::create_inner when `outer_id` is `None`
-		let usa = PostgresLocation::create_inner(
-			&mut connection,
-			&earth,
-			"USA".into(),
-		)
-		.await
-		.unwrap();
+		let usa = PostgresLocation::create_inner(&mut connection, &earth, "USA".into())
+			.await
+			.unwrap();
 
-		// Testing ::create_inner when `outer_id` is `Some(…)`
-		let arizona = PostgresLocation::create_inner(
-			&mut connection,
-			&usa,
-			"Arizona".into(),
-		)
-		.await
-		.unwrap();
+		let arizona = PostgresLocation::create_inner(&mut connection, &usa, "Arizona".into())
+			.await
+			.unwrap();
+
+		// Assert ::create_inner works when `outer_id` has already been used for another `Location`
+		assert!(
+			PostgresLocation::create_inner(&mut connection, &usa, "Utah".into())
+				.await
+				.is_ok()
+		);
 
 		macro_rules! select {
 			($id:expr) => {
-				sqlx::query!("SELECT * FROM locations WHERE id = $1", $id).fetch_one(&mut connection).await.unwrap()
-			}
+				sqlx::query!("SELECT * FROM locations WHERE id = $1", $id)
+					.fetch_one(&mut connection)
+					.await
+					.unwrap()
+			};
 		}
 
 		let database_earth = select!(earth.id);
 
+		// Assert ::create writes accurately to the DB
 		assert_eq!(earth.id, database_earth.id);
 		assert_eq!(earth.name, database_earth.name);
 		assert_eq!(earth.outer_id, None);
@@ -111,6 +112,7 @@ mod tests
 
 		let database_usa = select!(usa.id);
 
+		// Assert ::create_inner writes accurately to the DB when `outer_id` is `None`
 		assert_eq!(usa.id, database_usa.id);
 		assert_eq!(usa.name, database_usa.name);
 		assert_eq!(usa.outer_id, Some(earth.id));
@@ -118,6 +120,7 @@ mod tests
 
 		let database_arizona = select!(arizona.id);
 
+		// Assert ::create_inner writes accurately to the DB when `outer_id` is `Some(…)`
 		assert_eq!(arizona.id, database_arizona.id);
 		assert_eq!(arizona.name, database_arizona.name);
 		assert_eq!(arizona.outer_id, Some(usa.id));

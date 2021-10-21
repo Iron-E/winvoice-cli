@@ -45,6 +45,7 @@ mod tests
 	use super::{PersonAdapter, PostgresPerson};
 	use crate::data::{util, PostgresSchema};
 
+	/// TODO: use fuzzing
 	#[tokio::test(flavor = "multi_thread", worker_threads = 10)]
 	async fn create()
 	{
@@ -52,7 +53,6 @@ mod tests
 
 		PostgresSchema::init(&mut connection).await.unwrap();
 
-		// TODO: use fuzzing
 		let person = PostgresPerson::create(&mut connection, "foo".into())
 			.await
 			.unwrap();
@@ -62,6 +62,7 @@ mod tests
 			.await
 			.unwrap();
 
+		// Assert ::create writes accurately to the DB
 		assert_eq!(person.id, row.id);
 		assert_eq!(person.name, row.name);
 	}

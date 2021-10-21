@@ -37,7 +37,7 @@ impl EmployeeStatus
 		match self
 		{
 			Self::Employed => "Employed",
-			Self::NotEmployed => "Not Employed",
+			Self::NotEmployed => "Not employed",
 			Self::Representative => "Representative",
 		}
 	}

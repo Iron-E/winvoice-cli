@@ -73,51 +73,55 @@ mod tests
 
 		PostgresSchema::init(&mut connection).await.unwrap();
 
+		// Testing ::create
 		let earth = PostgresLocation::create(&mut connection, "Earth".into())
 			.await
 			.unwrap();
 
+		// Testing ::create_inner when `outer_id` is `None`
 		let usa = PostgresLocation::create_inner(
 			&mut connection,
 			&earth,
-			"USA".into()
+			"USA".into(),
 		)
 		.await
 		.unwrap();
 
+		// Testing ::create_inner when `outer_id` is `Some(…)`
 		let arizona = PostgresLocation::create_inner(
 			&mut connection,
 			&usa,
-			"Arizona".into()
+			"Arizona".into(),
 		)
 		.await
 		.unwrap();
 
-		let phoenix = PostgresLocation::create_inner(
-			&mut connection,
-			&arizona,
-			"Phoenix".into()
-		)
-		.await
-		.unwrap();
+		macro_rules! select {
+			($id:expr) => {
+				sqlx::query!("SELECT * FROM locations WHERE id = $1", $id).fetch_one(&mut connection).await.unwrap()
+			}
+		}
 
-		let database_earth = sqlx::query!("SELECT * FROM locations WHERE id = $1", earth.id).await.unwrap();
+		let database_earth = select!(earth.id);
 
 		assert_eq!(earth.id, database_earth.id);
 		assert_eq!(earth.name, database_earth.name);
+		assert_eq!(earth.outer_id, None);
 		assert_eq!(earth.outer_id, database_earth.outer_id);
 
-		let database_usa = sqlx::query!("SELECT * FROM locations WHERE id = $1", usa.id).await.unwrap();
+		let database_usa = select!(usa.id);
 
+		assert_eq!(usa.id, database_usa.id);
+		assert_eq!(usa.name, database_usa.name);
 		assert_eq!(usa.outer_id, Some(earth.id));
+		assert_eq!(usa.outer_id, database_usa.outer_id);
 
-		let database_arizona = sqlx::query!("SELECT * FROM locations WHERE id = $1", arizona.id).await.unwrap();
+		let database_arizona = select!(arizona.id);
 
-		assert_eq!(usa.outer_id, Some(earth.id));
-
-		let database_phoenix = sqlx::query!("SELECT * FROM locations WHERE id = $1", phoenix.id).await.unwrap();
-
-		assert_eq!(usa.outer_id, Some(earth.id));
+		assert_eq!(arizona.id, database_arizona.id);
+		assert_eq!(arizona.name, database_arizona.name);
+		assert_eq!(arizona.outer_id, Some(usa.id));
+		assert_eq!(arizona.outer_id, database_arizona.outer_id);
 	}
 
 	#[tokio::test(flavor = "multi_thread", worker_threads = 10)]

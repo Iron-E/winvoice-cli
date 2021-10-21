@@ -76,13 +76,13 @@ impl JobAdapter for PostgresJob
 #[cfg(test)]
 mod tests
 {
-	#[tokio::test]
+	#[tokio::test(flavor = "multi_thread", worker_threads = 10)]
 	async fn create()
 	{
 		// TODO: write test
 	}
 
-	#[tokio::test]
+	#[tokio::test(flavor = "multi_thread", worker_threads = 10)]
 	async fn retrieve_view()
 	{
 		// TODO: write test

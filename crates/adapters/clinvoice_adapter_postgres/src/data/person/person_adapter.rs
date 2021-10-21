@@ -45,18 +45,12 @@ mod tests
 	use super::{PersonAdapter, PostgresPerson};
 	use crate::data::{util, PostgresSchema};
 
-	#[tokio::test]
+	#[tokio::test(flavor = "multi_thread", worker_threads = 10)]
 	async fn create()
 	{
 		let mut connection = util::connect().await;
 
 		PostgresSchema::init(&mut connection).await.unwrap();
-
-		assert!(sqlx::query!("SELECT * FROM people;")
-			.fetch_optional(&mut connection)
-			.await
-			.unwrap()
-			.is_none());
 
 		// TODO: use fuzzing
 		let person = PostgresPerson::create(&mut connection, "foo".into())
@@ -72,7 +66,7 @@ mod tests
 		assert_eq!(person.name, row.name);
 	}
 
-	#[tokio::test]
+	#[tokio::test(flavor = "multi_thread", worker_threads = 10)]
 	async fn retrieve_view()
 	{
 		// TODO: write test; `SET SCHEMA 'pg_temp';`

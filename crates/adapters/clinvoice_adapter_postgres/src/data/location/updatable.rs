@@ -22,7 +22,7 @@ impl Updatable for PostgresLocation
 #[cfg(test)]
 mod tests
 {
-	#[tokio::test]
+	#[tokio::test(flavor = "multi_thread", worker_threads = 10)]
 	async fn update()
 	{
 		// TODO: write test

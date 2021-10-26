@@ -83,7 +83,7 @@ impl PostgresSchema
 	) -> Result<()>
 	{
 		sqlx::query!(
-			"CREATE TYPE employee_status AS ENUM ('employed', 'not_employed', 'representative');"
+			"CREATE TYPE employee_status AS ENUM ('Employed', 'Not employed', 'Representative');"
 		)
 		.execute(connection)
 		.await

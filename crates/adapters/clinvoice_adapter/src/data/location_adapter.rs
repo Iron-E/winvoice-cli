@@ -52,18 +52,8 @@ pub trait LocationAdapter:
 	///
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`LocationView`]s.
-	///
-	/// TODO: provide impl after https://github.com/rust-lang/rust/issues/60658
 	async fn retrieve_view(
 		connection: impl 'async_trait + Acquire<'_, Database = <Self as Deletable>::Db> + Send,
 		query: &query::Location,
 	) -> Result<Vec<LocationView>>;
-	// where
-	// 	for<'c> &'c mut <<Self as Deletable>::Db as Database>::Connection: Executor<'c, Database = <Self as Deletable>::Db>,
-	// 	for<'c> &'c mut Transaction<'c, <Self as Deletable>::Db>: Executor<'c, Database = <Self as Deletable>::Db>,
-	// {
-	// 	let mut transaction = connection.begin().await?;
-	// 	let inners = Self::retrieve(&mut transaction, query).await?;
-	// 	todo!()
-	// }
 }

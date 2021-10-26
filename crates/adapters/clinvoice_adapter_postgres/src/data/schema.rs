@@ -199,34 +199,6 @@ impl PostgresSchema
 	/// # Summary
 	///
 	/// Initialize the database for a given [`Store`].
-	async fn init_invoice(connection: &mut Transaction<'_, Postgres>) -> Result<()>
-	{
-		sqlx::query!(
-			"CREATE TYPE invoice_unsafe AS
-			(
-				date_issued timestamptz,
-				date_paid timestamptz,
-				hourly_rate amount_of_currency
-			);"
-		)
-		.execute(&mut *connection)
-		.await?;
-
-		sqlx::query!(
-			"CREATE DOMAIN invoice AS invoice_unsafe CHECK
-			(
-				(VALUE).hourly_rate IS NOT NULL AND
-				((VALUE).date_paid IS NULL OR (VALUE).date_issued IS NOT NULL)
-			);"
-		)
-		.execute(&mut *connection)
-		.await
-		.and(Ok(()))
-	}
-
-	/// # Summary
-	///
-	/// Initialize the database for a given [`Store`].
 	async fn init_jobs(connection: impl Executor<'_, Database = Postgres> + Send) -> Result<()>
 	{
 		sqlx::query!(
@@ -237,7 +209,9 @@ impl PostgresSchema
 				date_close timestamptz,
 				date_open timestamptz NOT NULL,
 				increment interval NOT NULL,
-				invoice invoice NOT NULL,
+				invoice_date_issued timestamptz,
+				invoice_date_paid timestamptz CHECK (invoice_date_paid IS NULL OR invoice_date_issued IS NOT NULL),
+				invoice_hourly_rate amount_of_currency,
 				notes text,
 				objectives text NOT NULL,
 

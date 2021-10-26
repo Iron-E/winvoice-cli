@@ -145,6 +145,19 @@ mod tests
 			.unwrap();
 
 		let mut contact_info = HashMap::new();
+		contact_info.insert("Office".into(), Contact::Address {
+			location_id: earth.id,
+			export:      false,
+		});
+		contact_info.insert("Work Email".into(), Contact::Email {
+			email:  "foo@bar.io".into(),
+			export: true,
+		});
+		contact_info.insert("Office Phone".into(), Contact::Phone {
+			phone:  "555 223 5039".into(),
+			export: true,
+		});
+
 		let employee = PostgresEmployee::create(
 			&mut connection,
 			contact_info,
@@ -156,10 +169,12 @@ mod tests
 		.await
 		.unwrap();
 
-		let row = sqlx::query!("SELECT * FROM employees;")
-			.fetch_one(&mut connection)
-			.await
-			.unwrap();
+		let row = sqlx::query!(
+			r#"SELECT id, organization_id, person_id, status as "status: String", title FROM employees;"#
+		)
+		.fetch_one(&mut connection)
+		.await
+		.unwrap();
 
 		let contact_info_row = sqlx::query!(
 			"SELECT * FROM contact_information WHERE employee_id = $1;",
@@ -194,10 +209,13 @@ mod tests
 
 		// Assert ::create writes accurately to the DB
 		assert_eq!(employee.id, row.id);
-		assert_eq!(employee.contact_info, row.id);
-		assert_eq!(employee.id, row.id);
-		assert_eq!(employee.id, row.id);
-		assert_eq!(employee.id, row.id);
+		assert_eq!(employee.contact_info, contact_info_row);
+		assert_eq!(employee.organization_id, row.organization_id);
+		assert_eq!(organization.id, row.organization_id);
+		assert_eq!(employee.person_id, row.person_id);
+		assert_eq!(person.id, row.person_id);
+		assert_eq!(employee.status, row.status.parse().unwrap());
+		assert_eq!(employee.title, row.title);
 	}
 
 	#[tokio::test(flavor = "multi_thread", worker_threads = 10)]

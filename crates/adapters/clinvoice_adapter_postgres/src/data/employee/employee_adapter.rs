@@ -104,10 +104,100 @@ impl EmployeeAdapter for PostgresEmployee
 #[cfg(test)]
 mod tests
 {
+	use std::collections::HashMap;
+
+	use clinvoice_adapter::data::{
+		Initializable,
+		LocationAdapter,
+		OrganizationAdapter,
+		PersonAdapter,
+	};
+	use clinvoice_data::{Contact, EmployeeStatus};
+
+	use super::{EmployeeAdapter, PostgresEmployee};
+	use crate::data::{
+		util,
+		PostgresLocation,
+		PostgresOrganization,
+		PostgresPerson,
+		PostgresSchema,
+	};
+
+	/// TODO: use fuzzing
 	#[tokio::test(flavor = "multi_thread", worker_threads = 10)]
 	async fn create()
 	{
-		// TODO: write test
+		let mut connection = util::connect().await;
+
+		PostgresSchema::init(&mut connection).await.unwrap();
+
+		let earth = PostgresLocation::create(&mut connection, "Earth".into())
+			.await
+			.unwrap();
+
+		let organization =
+			PostgresOrganization::create(&mut connection, &earth, "Some Organization".into())
+				.await
+				.unwrap();
+
+		let person = PostgresPerson::create(&mut connection, "My Name".into())
+			.await
+			.unwrap();
+
+		let mut contact_info = HashMap::new();
+		let employee = PostgresEmployee::create(
+			&mut connection,
+			contact_info,
+			&organization,
+			&person,
+			EmployeeStatus::Employed,
+			"Janitor".into(),
+		)
+		.await
+		.unwrap();
+
+		let row = sqlx::query!("SELECT * FROM employees;")
+			.fetch_one(&mut connection)
+			.await
+			.unwrap();
+
+		let contact_info_row = sqlx::query!(
+			"SELECT * FROM contact_information WHERE employee_id = $1;",
+			employee.id
+		)
+		.fetch_all(&mut connection)
+		.await
+		.unwrap()
+		.into_iter()
+		.fold(HashMap::new(), |mut contact, row| {
+			contact.insert(
+				row.label,
+				row.address_id
+					.map(|id| Contact::Address {
+						location_id: id,
+						export:      row.export,
+					})
+					.unwrap_or_else(|| {
+						row.email
+							.map(|e| Contact::Email {
+								email:  e,
+								export: row.export,
+							})
+							.unwrap_or_else(|| Contact::Phone {
+								phone:  row.phone.unwrap(),
+								export: row.export,
+							})
+					}),
+			);
+			contact
+		});
+
+		// Assert ::create writes accurately to the DB
+		assert_eq!(employee.id, row.id);
+		assert_eq!(employee.contact_info, row.id);
+		assert_eq!(employee.id, row.id);
+		assert_eq!(employee.id, row.id);
+		assert_eq!(employee.id, row.id);
 	}
 
 	#[tokio::test(flavor = "multi_thread", worker_threads = 10)]

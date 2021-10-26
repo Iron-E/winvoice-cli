@@ -35,9 +35,9 @@ impl JobAdapter for PostgresJob
 		let pg_increment = PgInterval::try_from(increment).map_err(Error::Decode)?;
 		let row = sqlx::query!(
 			"INSERT INTO jobs
-				(client_id, date_close, date_open, increment, invoice,                      objectives)
+				(client_id, date_close, date_open, increment, invoice_date_issued, invoice_date_paid, invoice_hourly_rate, objectives)
 			VALUES
-				($1,        NULL,       $2,        $3,        ROW(NULL, NULL, ROW($4, $5)), $6)
+				($1,        NULL,       $2,        $3,        NULL,                NULL,              ROW($4, $5),         $6)
 			RETURNING id;",
 			client.id,
 			date_open,

@@ -58,9 +58,10 @@ mod tests
 			.await
 			.unwrap();
 
-		let organization = PostgresOrganization::create(&mut connection, &earth, "Some Organization".into())
-			.await
-			.unwrap();
+		let organization =
+			PostgresOrganization::create(&mut connection, &earth, "Some Organization".into())
+				.await
+				.unwrap();
 
 		let row = sqlx::query!("SELECT * FROM organizations;")
 			.fetch_one(&mut connection)

@@ -128,16 +128,16 @@ impl PostgresSchema
 				export bool NOT NULL,
 				label text NOT NULL,
 
-				location_id bigint,
+				address_id bigint,
 				email text CHECK (email ~ '^[A-Za-z0-9]+(\.[A-Za-z0-9])*@[A-Za-z0-9]+\.[A-Za-z0-9]+$'),
 				phone text CHECK (phone ~ '^[0-9\- ]+$'),
 
 				PRIMARY KEY(employee_id, label),
 				CONSTRAINT contact_information_employee_id_fk FOREIGN KEY(employee_id) REFERENCES employees(id),
-				CONSTRAINT contact_information_location_id_fk FOREIGN KEY(location_id) REFERENCES locations(id),
+				CONSTRAINT contact_information_address_id_fk FOREIGN KEY(address_id) REFERENCES locations(id),
 				CONSTRAINT contact_information_variant_check CHECK
 				(
-					location_id IS NULL AND
+					address_id IS NULL AND
 					(
 						(email IS NOT NULL AND phone IS NULL) OR -- Contact::Email
 						(email IS NULL AND phone IS NOT NULL) -- Contact::Phone

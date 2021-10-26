@@ -37,7 +37,7 @@ pub use chrono;
 pub use clinvoice_finance::{Currency, Decimal, Money};
 pub use contact::Contact;
 pub use employee::Employee;
-pub use employee_status::EmployeeStatus;
+pub use employee_status::{EmployeeStatus, FromStrError, FromStrResult};
 pub use expense::Expense;
 pub use expense_category::ExpenseCategory;
 pub use id::Id;

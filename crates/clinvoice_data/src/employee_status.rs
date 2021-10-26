@@ -1,5 +1,7 @@
 mod display;
+mod from_str;
 
+pub use from_str::{FromStrError, FromStrResult};
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 
@@ -31,7 +33,10 @@ pub enum EmployeeStatus
 
 impl EmployeeStatus
 {
-	/// Foo
+	/// # Summary
+	///
+	/// Convert this [`EmployeeStatus`] into a `&'static str` for purposes of either [`Display`] or
+	/// comparison without allocation.
 	pub const fn as_str(&self) -> &'static str
 	{
 		match self

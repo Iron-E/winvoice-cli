@@ -211,8 +211,8 @@ impl PostgresSchema
 				increment interval NOT NULL,
 				invoice_date_issued timestamptz,
 				invoice_date_paid timestamptz CHECK (invoice_date_paid IS NULL OR invoice_date_issued IS NOT NULL),
-				invoice_hourly_rate amount_of_currency,
-				notes text,
+				invoice_hourly_rate amount_of_currency CHECK((invoice_hourly_rate).amount IS NOT NULL AND (invoice_hourly_rate).currency IS NOT NULL),
+				notes text NOT NULL,
 				objectives text NOT NULL,
 
 				PRIMARY KEY(id),

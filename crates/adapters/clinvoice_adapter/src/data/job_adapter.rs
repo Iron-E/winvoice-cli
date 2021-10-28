@@ -1,5 +1,3 @@
-#![allow(clippy::wrong_self_convention)]
-
 use core::time::Duration;
 
 use clinvoice_data::{

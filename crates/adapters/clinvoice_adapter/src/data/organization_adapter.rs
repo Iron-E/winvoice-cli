@@ -1,5 +1,3 @@
-#![allow(clippy::wrong_self_convention)]
-
 use clinvoice_data::{views::OrganizationView, Location, Organization};
 use clinvoice_query as query;
 use sqlx::{Executor, Result};

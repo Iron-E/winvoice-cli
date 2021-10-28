@@ -223,8 +223,8 @@ impl PostgresSchema
 	) -> Result<()>
 	{
 		sqlx::query!(
-			"CREATE DOMAIN expense_category AS text CHECK ((VALUE) IN ('food', 'item', 'other', 'service', 'software', \
-			 'travel'));"
+			"CREATE DOMAIN expense_category AS text CHECK ((VALUE) IN ('food', 'item', 'other', \
+			 'service', 'software', 'travel'));"
 		)
 		.execute(connection)
 		.await

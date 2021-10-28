@@ -3,7 +3,7 @@ use std::convert::TryFrom;
 
 use clinvoice_adapter::data::JobAdapter;
 use clinvoice_data::{
-	chrono::{DateTime, Utc},
+	chrono::{DateTime, SubsecRound, Utc},
 	views::JobView,
 	Invoice,
 	Job,
@@ -52,7 +52,7 @@ impl JobAdapter for PostgresJob
 		Ok(Job {
 			client_id: client.id,
 			date_close: None,
-			date_open,
+			date_open: date_open.trunc_subsecs(6),
 			id: row.id,
 			increment,
 			invoice: Invoice {

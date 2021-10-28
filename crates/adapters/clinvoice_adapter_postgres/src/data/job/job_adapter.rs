@@ -76,10 +76,122 @@ impl JobAdapter for PostgresJob
 #[cfg(test)]
 mod tests
 {
+	use core::time::Duration;
+	use std::collections::HashMap;
+
+	use clinvoice_adapter::data::{
+		EmployeeAdapter,
+		Initializable,
+		LocationAdapter,
+		OrganizationAdapter,
+		PersonAdapter,
+	};
+	use clinvoice_data::{chrono::Utc, Contact, Currency, Decimal, EmployeeStatus, Money};
+
+	use super::{JobAdapter, PostgresJob};
+	use crate::data::{
+		util,
+		PostgresEmployee,
+		PostgresLocation,
+		PostgresOrganization,
+		PostgresPerson,
+		PostgresSchema,
+	};
+
 	#[tokio::test(flavor = "multi_thread", worker_threads = 10)]
 	async fn create()
 	{
-		// TODO: write test
+		let mut connection = util::connect().await;
+
+		PostgresSchema::init(&mut connection).await.unwrap();
+
+		let earth = PostgresLocation::create(&mut connection, "Earth".into())
+			.await
+			.unwrap();
+
+		let organization =
+			PostgresOrganization::create(&mut connection, &earth, "Some Organization".into())
+				.await
+				.unwrap();
+
+		let person = PostgresPerson::create(&mut connection, "My Name".into())
+			.await
+			.unwrap();
+
+		let mut contact_info = HashMap::new();
+		contact_info.insert("Office".into(), Contact::Address {
+			location_id: earth.id,
+			export:      false,
+		});
+		contact_info.insert("Work Email".into(), Contact::Email {
+			email:  "foo@bar.io".into(),
+			export: true,
+		});
+		contact_info.insert("Office Phone".into(), Contact::Phone {
+			phone:  "555 223 5039".into(),
+			export: true,
+		});
+
+		let employee = PostgresEmployee::create(
+			&mut connection,
+			contact_info,
+			&organization,
+			&person,
+			EmployeeStatus::Employed,
+			"Janitor".into(),
+		)
+		.await
+		.unwrap();
+
+		let job = PostgresJob::create(
+			&mut connection,
+			&organization,
+			Utc::now(),
+			Money::new(13_27, 2, Currency::USD),
+			Duration::new(100, 0),
+			"Write the test".into(),
+		)
+		.await
+		.unwrap();
+
+		let row = sqlx::query!(
+			r#"SELECT
+					id,
+					client_id,
+					date_close,
+					date_open,
+					increment,
+					invoice_date_issued,
+					invoice_date_paid,
+					(invoice_hourly_rate).amount as invoice_hourly_rate_amount,
+					(invoice_hourly_rate).currency as "invoice_hourly_rate_currency: String",
+					notes,
+					objectives
+				FROM jobs;"#
+		)
+		.fetch_one(&mut connection)
+		.await
+		.unwrap();
+
+		// Assert ::create writes accurately to the DB
+		assert_eq!(job.id, row.id);
+		assert_eq!(job.client_id, row.client_id);
+		assert_eq!(organization.id, row.client_id);
+		assert_eq!(job.date_close, row.date_close);
+		assert_eq!(job.date_open, row.date_open);
+		assert_eq!(job.increment, util::duration_from(row.increment).unwrap());
+		assert_eq!(None, row.invoice_date_issued);
+		assert_eq!(None, row.invoice_date_paid);
+		assert_eq!(
+			job.invoice.hourly_rate.amount,
+			row.invoice_hourly_rate_amount.unwrap().parse().unwrap()
+		);
+		assert_eq!(
+			job.invoice.hourly_rate.currency,
+			row.invoice_hourly_rate_currency.unwrap().parse().unwrap()
+		);
+		assert_eq!(job.notes, row.notes);
+		assert_eq!(job.objectives, row.objectives);
 	}
 
 	#[tokio::test(flavor = "multi_thread", worker_threads = 10)]

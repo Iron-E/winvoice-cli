@@ -171,9 +171,9 @@ mod tests
 		.unwrap();
 
 		let row = sqlx::query!("SELECT * FROM employees;")
-		.fetch_one(&mut connection)
-		.await
-		.unwrap();
+			.fetch_one(&mut connection)
+			.await
+			.unwrap();
 
 		let contact_info_row = sqlx::query!(
 			"SELECT * FROM contact_information WHERE employee_id = $1;",

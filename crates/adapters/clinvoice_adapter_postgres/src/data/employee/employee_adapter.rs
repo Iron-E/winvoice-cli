@@ -36,7 +36,7 @@ impl EmployeeAdapter for PostgresEmployee
 			RETURNING id;",
 			organization.id,
 			person.id,
-			status.as_str() as _,
+			status.as_str(),
 			title,
 		)
 		.fetch_one(&mut transaction)
@@ -46,7 +46,8 @@ impl EmployeeAdapter for PostgresEmployee
 		let mut contact_info_values =
 			String::with_capacity((INSERT_VALUES_APPROX_LEN as usize) * contact_info.len());
 		contact_info.iter().for_each(|(label, contact)| {
-			write!(contact_info_values, "({}, {}, ", row.id, label).unwrap();
+			// FIXME: labels with apostrophe (e.g. "Tony's House" will break this
+			write!(contact_info_values, "({}, '{}', ", row.id, label).unwrap();
 			match contact
 			{
 				Contact::Address {
@@ -59,11 +60,11 @@ impl EmployeeAdapter for PostgresEmployee
 				),
 				Contact::Email { email, export } =>
 				{
-					write!(contact_info_values, "{}, NULL, {}, NULL", export, email)
+					write!(contact_info_values, "{}, NULL, '{}', NULL", export, email)
 				},
 				Contact::Phone { phone, export } =>
 				{
-					write!(contact_info_values, "{}, NULL, NULL, {}", export, phone)
+					write!(contact_info_values, "{}, NULL, NULL, '{}'", export, phone)
 				},
 			}
 			.unwrap();
@@ -73,7 +74,7 @@ impl EmployeeAdapter for PostgresEmployee
 
 		sqlx::query(&format!(
 			"INSERT INTO contact_information
-				(employee_id, label, export, location_id, email, phone)
+				(employee_id, label, export, address_id, email, phone)
 			VALUES {};",
 			contact_info_values,
 		))
@@ -169,9 +170,7 @@ mod tests
 		.await
 		.unwrap();
 
-		let row = sqlx::query!(
-			r#"SELECT id, organization_id, person_id, status as "status: String", title FROM employees;"#
-		)
+		let row = sqlx::query!("SELECT * FROM employees;")
 		.fetch_one(&mut connection)
 		.await
 		.unwrap();

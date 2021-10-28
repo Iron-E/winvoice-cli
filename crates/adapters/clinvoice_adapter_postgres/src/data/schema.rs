@@ -21,11 +21,12 @@ impl PostgresSchema
 			"CREATE TABLE IF NOT EXISTS locations
 			(
 				id bigint GENERATED ALWAYS AS IDENTITY,
-				outer_id bigint CHECK (id <> outer_id),
+				outer_id bigint,
 				name text NOT NULL,
 
 				PRIMARY KEY(id),
-				CONSTRAINT locations_outer_id_fk FOREIGN KEY(outer_id) REFERENCES locations(id)
+				CONSTRAINT locations__not_outside_self CHECK (id <> outer_id),
+				CONSTRAINT locations__outer_id_fk FOREIGN KEY(outer_id) REFERENCES locations(id)
 			);"
 		)
 		.execute(connection)
@@ -66,24 +67,9 @@ impl PostgresSchema
 				name text NOT NULL,
 
 				PRIMARY KEY(id),
-				CONSTRAINT organizations_location_id_fk
+				CONSTRAINT organizations__location_id_fk
 					FOREIGN KEY(location_id) REFERENCES locations(id)
 			);"
-		)
-		.execute(connection)
-		.await
-		.and(Ok(()))
-	}
-
-	/// # Summary
-	///
-	/// Initialize the database for a given [`Store`].
-	async fn init_employee_status(
-		connection: impl Executor<'_, Database = Postgres> + Send,
-	) -> Result<()>
-	{
-		sqlx::query!(
-			"CREATE TYPE employee_status AS ENUM ('Employed', 'Not employed', 'Representative');"
 		)
 		.execute(connection)
 		.await
@@ -102,12 +88,12 @@ impl PostgresSchema
 				id bigint GENERATED ALWAYS AS IDENTITY UNIQUE,
 				organization_id bigint NOT NULL,
 				person_id bigint NOT NULL,
-				status employee_status NOT NULL,
+				status text NOT NULL CHECK (status IN ('Employed', 'Not employed', 'Representative')),
 				title text NOT NULL,
 
 				PRIMARY KEY(organization_id, person_id),
-				CONSTRAINT employees_organization_id_fk FOREIGN KEY(organization_id) REFERENCES organizations(id),
-				CONSTRAINT employees_person_id_fk FOREIGN KEY(person_id) REFERENCES people(id)
+				CONSTRAINT employees__organization_id_fk FOREIGN KEY(organization_id) REFERENCES organizations(id),
+				CONSTRAINT employees__person_id_fk FOREIGN KEY(person_id) REFERENCES people(id)
 			);"
 		)
 		.execute(connection)
@@ -133,9 +119,9 @@ impl PostgresSchema
 				phone text CHECK (phone ~ '^[0-9\- ]+$'),
 
 				PRIMARY KEY(employee_id, label),
-				CONSTRAINT contact_information_employee_id_fk FOREIGN KEY(employee_id) REFERENCES employees(id),
-				CONSTRAINT contact_information_address_id_fk FOREIGN KEY(address_id) REFERENCES locations(id),
-				CONSTRAINT contact_information_variant_check CHECK
+				CONSTRAINT contact_information__employee_id_fk FOREIGN KEY(employee_id) REFERENCES employees(id),
+				CONSTRAINT contact_information__address_id_fk FOREIGN KEY(address_id) REFERENCES locations(id),
+				CONSTRAINT contact_information__is_variant CHECK
 				(
 					address_id IS NULL AND
 					(
@@ -156,12 +142,12 @@ impl PostgresSchema
 	async fn init_currency(connection: impl Executor<'_, Database = Postgres> + Send) -> Result<()>
 	{
 		sqlx::query!(
-			"CREATE TYPE currency AS ENUM
+			"CREATE DOMAIN currency AS text CHECK ((VALUE) IN
 			(
 				'AUD', 'BGN', 'BRL', 'CAD', 'CHF', 'CNY', 'CZK', 'DKK', 'EUR', 'GBP', 'HKD',
 				'HRK', 'HUF', 'IDR', 'ILS', 'INR', 'ISK', 'JPY', 'KRW', 'MXN', 'MYR', 'NOK',
 				'NZD', 'PHP', 'PLN', 'RON', 'RUB', 'SEK', 'SGD', 'THB', 'TRY', 'USD', 'ZAR'
-			);"
+			));"
 		)
 		.execute(connection)
 		.await
@@ -210,13 +196,18 @@ impl PostgresSchema
 				date_open timestamptz NOT NULL,
 				increment interval NOT NULL,
 				invoice_date_issued timestamptz,
-				invoice_date_paid timestamptz CHECK (invoice_date_paid IS NULL OR invoice_date_issued IS NOT NULL),
-				invoice_hourly_rate amount_of_currency CHECK((invoice_hourly_rate).amount IS NOT NULL AND (invoice_hourly_rate).currency IS NOT NULL),
+				invoice_date_paid timestamptz,
+				invoice_hourly_rate amount_of_currency CHECK
+				(
+					(invoice_hourly_rate).amount IS NOT NULL AND
+					(invoice_hourly_rate).currency IS NOT NULL
+				),
 				notes text NOT NULL,
 				objectives text NOT NULL,
 
 				PRIMARY KEY(id),
-				CONSTRAINT jobs_client_id_fk FOREIGN KEY(client_id) REFERENCES organizations(id)
+				CONSTRAINT jobs__client_id_fk FOREIGN KEY(client_id) REFERENCES organizations(id),
+				CONSTRAINT jobs__invoice_date CHECK (invoice_date_paid IS NULL OR invoice_date_issued IS NOT NULL)
 			);"
 		)
 		.execute(connection)
@@ -232,8 +223,8 @@ impl PostgresSchema
 	) -> Result<()>
 	{
 		sqlx::query!(
-			"CREATE TYPE expense_category AS ENUM ('food', 'item', 'other', 'service', 'software', \
-			 'travel');"
+			"CREATE DOMAIN expense_category AS text CHECK ((VALUE) IN ('food', 'item', 'other', 'service', 'software', \
+			 'travel'));"
 		)
 		.execute(connection)
 		.await
@@ -286,8 +277,8 @@ impl PostgresSchema
 				work_notes text,
 
 				PRIMARY KEY(employee_id, job_id, time_begin),
-				CONSTRAINT timesheets_employee_id_fk FOREIGN KEY(employee_id) REFERENCES employees(id),
-				CONSTRAINT timesheets_job_id_fk FOREIGN KEY(job_id) REFERENCES jobs(id)
+				CONSTRAINT timesheets__employee_id_fk FOREIGN KEY(employee_id) REFERENCES employees(id),
+				CONSTRAINT timesheets__job_id_fk FOREIGN KEY(job_id) REFERENCES jobs(id)
 			);"
 		)
 		.execute(connection)

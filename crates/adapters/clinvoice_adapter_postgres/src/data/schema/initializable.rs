@@ -21,7 +21,6 @@ impl Initializable for PostgresSchema
 		Self::init_locations(&mut transaction).await?;
 		Self::init_people(&mut transaction).await?;
 		Self::init_organizations(&mut transaction).await?;
-		Self::init_employee_status(&mut transaction).await?;
 		Self::init_employees(&mut transaction).await?;
 		Self::init_contact_info(&mut transaction).await?;
 		Self::init_currency(&mut transaction).await?;

@@ -9,7 +9,7 @@ use clinvoice_data::{
 	Id,
 	Job,
 };
-use clinvoice_query::{self as query, Match};
+use clinvoice_query as query;
 use sqlx::{Database, Executor, Pool, Result};
 use structopt::StructOpt;
 
@@ -57,15 +57,15 @@ impl Command
 				employee: query::Employee {
 					id: if let Some(default) = default_employee_id
 					{
-						Match::EqualTo(Owned(default))
+						query::Match::EqualTo(Owned(default))
 					}
 					else
 					{
-						Match::Any
+						query::Match::Any
 					},
 					..Default::default()
 				},
-				time_end: Match::EqualTo(Owned(None)),
+				time_end: query::Match::EqualTo(Owned(None)),
 				..Default::default()
 			}).await?;
 

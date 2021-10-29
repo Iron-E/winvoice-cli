@@ -144,7 +144,7 @@ mod tests
 	#[test]
 	fn total()
 	{
-		let timesheets = Vec::new();
+		let mut timesheets = Vec::new();
 
 		timesheets.push(Timesheet {
 			employee_id: 0,

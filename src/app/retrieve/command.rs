@@ -3,7 +3,7 @@ use std::borrow::Cow::Owned;
 
 use clinvoice_adapter::data::{Deletable, EmployeeAdapter, JobAdapter, LocationAdapter, OrganizationAdapter, PersonAdapter, TimesheetAdapter, Updatable};
 use clinvoice_config::Config;
-use clinvoice_query::{self as query, Match};
+use clinvoice_query as query;
 use clinvoice_data::{chrono::Utc, views::RestorableSerde, Location};
 use futures::{
 	future,
@@ -276,7 +276,7 @@ impl Command
 						.try_for_each_concurrent(None, |job| async move {
 							let timesheets = TAdapter::retrieve_view(&connection, &query::Timesheet {
 								job: query::Job {
-									id: Match::EqualTo(Owned(job.id)),
+									id: query::Match::EqualTo(Owned(job.id)),
 									..Default::default()
 								},
 								..Default::default()

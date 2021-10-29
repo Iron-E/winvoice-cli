@@ -271,10 +271,10 @@ impl PostgresSchema
 			(
 				employee_id bigint NOT NULL,
 				job_id bigint NOT NULL,
-				expenses expense ARRAY,
+				expenses expense ARRAY NOT NULL,
 				time_begin timestamptz NOT NULL,
 				time_end timestamptz,
-				work_notes text,
+				work_notes text NOT NULL,
 
 				PRIMARY KEY(employee_id, job_id, time_begin),
 				CONSTRAINT timesheets__employee_id_fk FOREIGN KEY(employee_id) REFERENCES employees(id),

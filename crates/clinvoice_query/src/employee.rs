@@ -24,8 +24,8 @@ pub struct Employee<'m>
 	pub person: Person<'m>,
 
 	#[cfg_attr(feature = "serde_support", serde(default))]
-	pub title: MatchStr<String>,
+	pub status: Match<'m, EmployeeStatus>,
 
 	#[cfg_attr(feature = "serde_support", serde(default))]
-	pub status: Match<'m, EmployeeStatus>,
+	pub title: MatchStr<String>,
 }

@@ -16,6 +16,7 @@ mod job_adapter;
 mod location_adapter;
 mod organization_adapter;
 mod person_adapter;
+mod timesheet_adapter;
 mod updatable;
 
 pub use deletable::Deletable;
@@ -26,4 +27,5 @@ pub use job_adapter::JobAdapter;
 pub use location_adapter::LocationAdapter;
 pub use organization_adapter::OrganizationAdapter;
 pub use person_adapter::PersonAdapter;
+pub use timesheet_adapter::TimesheetAdapter;
 pub use updatable::Updatable;

@@ -30,7 +30,9 @@ impl Display for JobView
 		/// Two indents in, with a newline.
 		const DEPTH_2: &str = "\n\t\t";
 
-		writeln!(
+		// NOTE: we use `write` from here on out because it isn't certain which call will be the last
+
+		write!(
 			formatter,
 			"\tInvoice:{}{}",
 			DEPTH_2,
@@ -39,9 +41,9 @@ impl Display for JobView
 
 		if !self.objectives.is_empty()
 		{
-			writeln!(
+			write!(
 				formatter,
-				"\tObjectives:{}{}",
+				"\n\tObjectives:{}{}",
 				DEPTH_2,
 				self.objectives.replace('\n', DEPTH_2)
 			)?;
@@ -49,9 +51,9 @@ impl Display for JobView
 
 		if !self.notes.is_empty()
 		{
-			writeln!(
+			write!(
 				formatter,
-				"\tNotes:{}{}",
+				"\n\tNotes:{}{}",
 				DEPTH_2,
 				self.notes.replace('\n', DEPTH_2)
 			)?;
@@ -72,13 +74,7 @@ mod tests
 
 	use super::{DateTime, JobView, Local};
 	use crate::{
-		views::{
-			ContactView,
-			EmployeeView,
-			LocationView,
-			OrganizationView,
-			PersonView,
-		},
+		views::{ContactView, EmployeeView, LocationView, OrganizationView, PersonView},
 		EmployeeStatus,
 		Invoice,
 	};

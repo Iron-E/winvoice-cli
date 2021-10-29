@@ -77,12 +77,26 @@ impl JobAdapter for PostgresJob
 mod tests
 {
 	use core::time::Duration;
+	use std::collections::HashMap;
 
-	use clinvoice_adapter::data::{Initializable, LocationAdapter, OrganizationAdapter};
-	use clinvoice_data::{chrono::Utc, Currency, Money};
+	use clinvoice_adapter::data::{
+		EmployeeAdapter,
+		Initializable,
+		LocationAdapter,
+		OrganizationAdapter,
+		PersonAdapter,
+	};
+	use clinvoice_data::{chrono::Utc, Contact, Currency, Decimal, EmployeeStatus, Money};
 
 	use super::{JobAdapter, PostgresJob};
-	use crate::data::{util, PostgresLocation, PostgresOrganization, PostgresSchema};
+	use crate::data::{
+		util,
+		PostgresEmployee,
+		PostgresLocation,
+		PostgresOrganization,
+		PostgresPerson,
+		PostgresSchema,
+	};
 
 	#[tokio::test(flavor = "multi_thread", worker_threads = 10)]
 	async fn create()
@@ -99,6 +113,35 @@ mod tests
 			PostgresOrganization::create(&mut connection, &earth, "Some Organization".into())
 				.await
 				.unwrap();
+
+		let person = PostgresPerson::create(&mut connection, "My Name".into())
+			.await
+			.unwrap();
+
+		let mut contact_info = HashMap::new();
+		contact_info.insert("Office".into(), Contact::Address {
+			location_id: earth.id,
+			export:      false,
+		});
+		contact_info.insert("Work Email".into(), Contact::Email {
+			email:  "foo@bar.io".into(),
+			export: true,
+		});
+		contact_info.insert("Office Phone".into(), Contact::Phone {
+			phone:  "555 223 5039".into(),
+			export: true,
+		});
+
+		let employee = PostgresEmployee::create(
+			&mut connection,
+			contact_info,
+			&organization,
+			&person,
+			EmployeeStatus::Employed,
+			"Janitor".into(),
+		)
+		.await
+		.unwrap();
 
 		let job = PostgresJob::create(
 			&mut connection,

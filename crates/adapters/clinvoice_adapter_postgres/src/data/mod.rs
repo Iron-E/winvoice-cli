@@ -9,6 +9,7 @@ mod location;
 mod organization;
 mod person;
 mod schema;
+mod timesheet;
 #[cfg(test)]
 mod util;
 
@@ -18,3 +19,4 @@ pub use location::PostgresLocation;
 pub use organization::PostgresOrganization;
 pub use person::PostgresPerson;
 pub use schema::PostgresSchema;
+pub use timesheet::PostgresTimesheet;

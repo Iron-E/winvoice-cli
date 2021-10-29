@@ -1,6 +1,7 @@
 mod display;
 
 use std::borrow::Cow::Owned;
+
 use clinvoice_adapter::data::{Deletable, EmployeeAdapter, JobAdapter, TimesheetAdapter};
 use clinvoice_data::{
 	chrono::{Duration, DurationRound, Utc},
@@ -67,7 +68,8 @@ impl Command
 				},
 				time_end: query::Match::EqualTo(Owned(None)),
 				..Default::default()
-			}).await?;
+			})
+			.await?;
 
 			let selected = input::select_one(&timesheets, "Which `Timesheet` are you working on?")?;
 			selected.to_owned()

@@ -249,10 +249,10 @@ mod tests
 	use super::{DateTime, JobView, Local, TimesheetView};
 	use crate::{
 		views::{EmployeeView, LocationView, OrganizationView, PersonView},
-		Invoice,
 		EmployeeStatus,
 		Expense,
 		ExpenseCategory,
+		Invoice,
 	};
 
 	#[test]

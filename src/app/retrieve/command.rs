@@ -1,10 +1,19 @@
 use core::fmt::Display;
 use std::borrow::Cow::Owned;
 
-use clinvoice_adapter::data::{Deletable, EmployeeAdapter, JobAdapter, LocationAdapter, OrganizationAdapter, PersonAdapter, TimesheetAdapter, Updatable};
+use clinvoice_adapter::data::{
+	Deletable,
+	EmployeeAdapter,
+	JobAdapter,
+	LocationAdapter,
+	OrganizationAdapter,
+	PersonAdapter,
+	TimesheetAdapter,
+	Updatable,
+};
 use clinvoice_config::Config;
-use clinvoice_query as query;
 use clinvoice_data::{chrono::Utc, views::RestorableSerde, Location};
+use clinvoice_query as query;
 use futures::{
 	future,
 	stream::{self, TryStreamExt},
@@ -271,16 +280,19 @@ impl Command
 					let to_export =
 						input::select(&results_view, "Select which Jobs you want to export")?;
 
+					let conn_borrow = &connection;
+
 					// WARN: this `let` seems redundant, but the "type needs to be known at this point"
 					let export_result: DynResult<'_, _> = stream::iter(to_export.into_iter().map(Ok))
 						.try_for_each_concurrent(None, |job| async move {
-							let timesheets = TAdapter::retrieve_view(&connection, &query::Timesheet {
+							let timesheets = TAdapter::retrieve_view(conn_borrow, &query::Timesheet {
 								job: query::Job {
 									id: query::Match::EqualTo(Owned(job.id)),
 									..Default::default()
 								},
 								..Default::default()
-							}).await?;
+							})
+							.await?;
 							let export = job.export(&timesheets)?;
 							fs::write(
 								format!("{}--{}.md", job.client.name.replace(' ', "-"), job.id),

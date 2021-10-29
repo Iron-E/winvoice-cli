@@ -70,14 +70,7 @@ impl Command
 			},
 			Self::Init => init::run(store).await,
 			Self::Retrieve(cmd) => cmd.run(&config, store).await,
-			Self::Time(cmd) =>
-			{
-				cmd.run(
-					config.employees.default_id,
-					store,
-				)
-				.await
-			},
+			Self::Time(cmd) => cmd.run(config.employees.default_id, store).await,
 		}
 	}
 }

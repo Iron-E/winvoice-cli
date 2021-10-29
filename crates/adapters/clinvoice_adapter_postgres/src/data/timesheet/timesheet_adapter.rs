@@ -22,11 +22,11 @@ impl TimesheetAdapter for PostgresTimesheet
 	{
 		let time_begin = Utc::now();
 		sqlx::query!(
-			"INSERT INTO timesheets
+			r#"INSERT INTO timesheets
 				(employee_id, job_id, expenses,           time_begin, work_notes)
 			VALUES
-				($1,          $2,     ARRAY[]::expense[], $3,         '')
-			;",
+				($1,          $2,     ARRAY[]::expense[], $3,         '* Work which was done goes here\n* Supports markdown formatting')
+			;"#,
 			employee.id,
 			job.id,
 			time_begin,
@@ -167,7 +167,7 @@ mod tests
 					},
 					description
 				})
-				.collect()
+				.collect::<Vec<_>>()
 		);
 		assert_eq!(timesheet.job_id, row.job_id);
 		assert_eq!(timesheet.time_begin, row.time_begin);

@@ -202,7 +202,7 @@ impl Command
 						{
 							results_view
 								.first()
-								.ok_or_else(|| input::Error::NoData(format!("`{}`", stringify!(Employee))))?
+								.ok_or_else(|| input::Error::NoData("`Employee`".into()))?
 								.id
 						},
 					);

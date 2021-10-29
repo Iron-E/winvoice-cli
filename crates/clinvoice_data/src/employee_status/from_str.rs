@@ -1,17 +1,7 @@
 use std::str::FromStr;
 
-use thiserror::Error;
-
 use super::EmployeeStatus;
-
-/// # Summary
-///
-/// [`Error`](std::error::Error)s referencing [`Store`](crate::Store)s and [`Adapters`].
-#[derive(Clone, Debug, Eq, Error, Hash, Ord, PartialEq, PartialOrd)]
-#[error("Using this adapter requires the {0} feature")]
-pub struct FromStrError(pub String);
-
-pub type FromStrResult<T> = std::result::Result<T, FromStrError>;
+use crate::{FromStrError, FromStrResult};
 
 impl FromStr for EmployeeStatus
 {
@@ -19,21 +9,12 @@ impl FromStr for EmployeeStatus
 
 	fn from_str(s: &str) -> FromStrResult<Self>
 	{
-		if s == Self::Employed.as_str()
+		Ok(match s
 		{
-			Ok(Self::Employed)
-		}
-		else if s == Self::NotEmployed.as_str()
-		{
-			Ok(Self::NotEmployed)
-		}
-		else if s == Self::Representative.as_str()
-		{
-			Ok(Self::Representative)
-		}
-		else
-		{
-			Err(FromStrError(s.into()))
-		}
+			"Employed" => Self::Employed,
+			"Not employed" => Self::NotEmployed,
+			"Representative" => Self::Representative,
+			_ => return Err(FromStrError("EmployeeStatus", s.into())),
+		})
 	}
 }

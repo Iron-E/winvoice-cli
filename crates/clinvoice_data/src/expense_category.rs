@@ -1,4 +1,5 @@
 mod display;
+mod from_str;
 
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
@@ -39,4 +40,20 @@ pub enum ExpenseCategory
 	///
 	/// Cost of travel, such as gas or car maintenance.
 	Travel,
+}
+
+impl ExpenseCategory
+{
+	pub const fn as_str(&self) -> &'static str
+	{
+		match self
+		{
+			ExpenseCategory::Food => "Food",
+			ExpenseCategory::Item => "Item",
+			ExpenseCategory::Other => "Other",
+			ExpenseCategory::Service => "Service",
+			ExpenseCategory::Software => "Software",
+			ExpenseCategory::Travel => "Travel",
+		}
+	}
 }

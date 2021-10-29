@@ -1,7 +1,6 @@
 mod display;
 mod from_str;
 
-pub use from_str::{FromStrError, FromStrResult};
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 

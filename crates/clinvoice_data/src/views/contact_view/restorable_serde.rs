@@ -19,11 +19,7 @@ impl RestorableSerde for ContactView
 				return;
 			}
 
-			panic!(
-				"`original` {} was not an {}!",
-				stringify!(ContactView),
-				stringify!(Address)
-			)
+			panic!("`original` ContactView was not an Address!")
 		}
 	}
 }

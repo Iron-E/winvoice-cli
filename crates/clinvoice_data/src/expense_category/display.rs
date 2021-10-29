@@ -6,15 +6,7 @@ impl Display for ExpenseCategory
 {
 	fn fmt(&self, formatter: &mut Formatter) -> Result
 	{
-		write!(formatter, "{}", match self
-		{
-			ExpenseCategory::Food => "Food",
-			ExpenseCategory::Item => "Item",
-			ExpenseCategory::Other => "Other",
-			ExpenseCategory::Service => "Service",
-			ExpenseCategory::Software => "Software",
-			ExpenseCategory::Travel => "Travel",
-		})
+		write!(formatter, "{}", self.as_str())
 	}
 }
 

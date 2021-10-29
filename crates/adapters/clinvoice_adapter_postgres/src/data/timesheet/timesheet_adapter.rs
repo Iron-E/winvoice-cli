@@ -21,26 +21,30 @@ impl TimesheetAdapter for PostgresTimesheet
 	) -> Result<Timesheet>
 	{
 		let time_begin = Utc::now();
+		let work_notes =
+			String::from("* Work which was done goes here\n* Supports markdown formatting");
+
 		sqlx::query!(
-			r#"INSERT INTO timesheets
+			"INSERT INTO timesheets
 				(employee_id, job_id, expenses,           time_begin, work_notes)
 			VALUES
-				($1,          $2,     ARRAY[]::expense[], $3,         '* Work which was done goes here\n* Supports markdown formatting')
-			;"#,
+				($1,          $2,     ARRAY[]::expense[], $3,         $4)
+			;",
 			employee.id,
 			job.id,
 			time_begin,
+			work_notes,
 		)
 		.execute(connection)
 		.await?;
 
 		Ok(Timesheet {
 			employee_id: employee.id,
-			expenses:    Vec::new(),
-			job_id:      job.id,
-			time_begin:  time_begin.trunc_subsecs(6),
-			time_end:    None,
-			work_notes:  String::new(),
+			expenses: Vec::new(),
+			job_id: job.id,
+			time_begin: time_begin.trunc_subsecs(6),
+			time_end: None,
+			work_notes,
 		})
 	}
 
@@ -67,7 +71,7 @@ mod tests
 		OrganizationAdapter,
 		PersonAdapter,
 	};
-	use clinvoice_data::{chrono::Utc, Contact, Currency, Decimal, EmployeeStatus, Expense, Money};
+	use clinvoice_data::{chrono::Utc, Contact, Currency, EmployeeStatus, Expense, Money};
 
 	use super::{PostgresTimesheet, TimesheetAdapter};
 	use crate::data::{

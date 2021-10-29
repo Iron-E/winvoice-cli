@@ -2,7 +2,7 @@ use clinvoice_data::{chrono::NaiveDateTime, Id};
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 
-use super::{Invoice, Match, MatchStr, Organization, Timesheet};
+use super::{Invoice, Match, MatchStr, Organization};
 
 /// # Summary
 ///
@@ -31,7 +31,4 @@ pub struct Job<'m>
 
 	#[cfg_attr(feature = "serde_support", serde(default))]
 	pub objectives: MatchStr<String>,
-
-	#[cfg_attr(feature = "serde_support", serde(default))]
-	pub timesheets: Timesheet<'m>,
 }

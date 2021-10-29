@@ -1,15 +1,9 @@
 use core::fmt::Display;
+use std::borrow::Cow::Owned;
 
-use clinvoice_adapter::data::{
-	Deletable,
-	EmployeeAdapter,
-	JobAdapter,
-	LocationAdapter,
-	OrganizationAdapter,
-	PersonAdapter,
-	Updatable,
-};
+use clinvoice_adapter::data::{Deletable, EmployeeAdapter, JobAdapter, LocationAdapter, OrganizationAdapter, PersonAdapter, TimesheetAdapter, Updatable};
 use clinvoice_config::Config;
+use clinvoice_query::{self as query, Match};
 use clinvoice_data::{chrono::Utc, views::RestorableSerde, Location};
 use futures::{
 	future,
@@ -140,7 +134,7 @@ impl Command
 		Ok(())
 	}
 
-	pub async fn run<'err, Db, EAdapter, JAdapter, LAdapter, OAdapter, PAdapter>(
+	pub async fn run<'err, Db, EAdapter, JAdapter, LAdapter, OAdapter, PAdapter, TAdapter>(
 		self,
 		connection: Pool<Db>,
 		cascade_delete: bool,
@@ -155,6 +149,7 @@ impl Command
 		LAdapter: Deletable<Db = Db> + LocationAdapter + Send,
 		OAdapter: Deletable<Db = Db> + OrganizationAdapter + Send,
 		PAdapter: Deletable<Db = Db> + PersonAdapter + Send,
+		TAdapter: Deletable<Db = Db> + TimesheetAdapter + Send,
 		for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 	{
 		match self
@@ -279,7 +274,14 @@ impl Command
 					// WARN: this `let` seems redundant, but the "type needs to be known at this point"
 					let export_result: DynResult<'_, _> = stream::iter(to_export.into_iter().map(Ok))
 						.try_for_each_concurrent(None, |job| async move {
-							let export = job.export()?;
+							let timesheets = TAdapter::retrieve_view(&connection, &query::Timesheet {
+								job: query::Job {
+									id: Match::EqualTo(Owned(job.id)),
+									..Default::default()
+								},
+								..Default::default()
+							}).await?;
+							let export = job.export(&timesheets)?;
 							fs::write(
 								format!("{}--{}.md", job.client.name.replace(' ', "-"), job.id),
 								export,

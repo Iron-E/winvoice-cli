@@ -1,6 +1,7 @@
 mod command;
 
 use clinvoice_adapter::{Adapters, Error as AdapterError, Store};
+use clinvoice_adapter_postgres::data::PostgresTimesheet;
 use clinvoice_config::Config;
 use command::Command;
 use structopt::StructOpt;
@@ -55,7 +56,7 @@ impl Retrieve
 				let pool = PgPool::connect_lazy(&store.url)?;
 				self
 					.command
-					.run::<_, PostgresEmployee, PostgresJob, PostgresLocation, PostgresOrganization, PostgresPerson>(
+					.run::<_, PostgresEmployee, PostgresJob, PostgresLocation, PostgresOrganization, PostgresPerson, PostgresTimesheet>(
 						pool,
 						self.cascade_delete,
 						config,

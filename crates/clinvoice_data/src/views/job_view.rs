@@ -5,7 +5,7 @@ use core::{fmt::Write, time::Duration};
 use std::collections::HashSet;
 
 use chrono::{DateTime, Local, Utc};
-use clinvoice_finance::{Decimal, ExchangeRates, Money, Result};
+use clinvoice_finance::Result;
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 
@@ -14,9 +14,7 @@ use super::{
 	OrganizationView,
 	TimesheetView,
 };
-use crate::{Id, Invoice};
-
-const SECONDS_PER_HOUR: i16 = 3600;
+use crate::{Id, Invoice, Timesheet};
 
 /// # Summary
 ///
@@ -101,11 +99,6 @@ pub struct JobView
 	/// * Contact customer support for X hardware device.
 	/// ```
 	pub objectives: String,
-
-	/// # Summary
-	///
-	/// The periods of time during which work was performed for this [`Job`].
-	pub timesheets: Vec<TimesheetView>,
 }
 
 impl JobView
@@ -113,7 +106,7 @@ impl JobView
 	/// # Summary
 	///
 	/// Export some `job` to the [`Target`] specified.
-	pub fn export(&self) -> Result<String>
+	pub fn export(&self, timesheets: &[TimesheetView]) -> Result<String>
 	{
 		let mut output = String::new();
 
@@ -198,7 +191,14 @@ impl JobView
 				depth: 0,
 				text:  Text::Bold("Total Amount Owed"),
 			},
-			self.total()?,
+			Timesheet::total(
+				self.invoice.hourly_rate,
+				timesheets
+					.iter()
+					.map(|t| t.into())
+					.collect::<Vec<_>>()
+					.as_slice()
+			)?,
 		)
 		.unwrap();
 		writeln!(output, "{}", Element::<&str>::Break).unwrap();
@@ -220,7 +220,7 @@ impl JobView
 			writeln!(output, "{}", Element::BlockText(&self.notes)).unwrap();
 		}
 
-		if !self.timesheets.is_empty()
+		if !timesheets.is_empty()
 		{
 			writeln!(output, "{}", Element::Heading {
 				depth: 2,
@@ -228,74 +228,12 @@ impl JobView
 			})
 			.unwrap();
 			let mut employees = HashSet::new();
-			self
-				.timesheets
+			timesheets
 				.iter()
 				.for_each(|t| t.export(&mut employees, &mut output));
 		}
 
 		Ok(output)
-	}
-
-	/// # Summary
-	///
-	/// Get the amount of [`Money`] which is owed by the client on the [`Inovice`].
-	///
-	/// # Panics
-	///
-	/// * When not all [`Money`] amounts are in the same currency.
-	pub fn total(&self) -> Result<Money>
-	{
-		let seconds_per_hour: Decimal = SECONDS_PER_HOUR.into();
-
-		let mut exchange_rates = None;
-
-		let mut total = self
-			.timesheets
-			.iter()
-			.filter(|timesheet| timesheet.time_end.is_some())
-			.try_fold(
-				Money::new(0, 2, self.invoice.hourly_rate.currency),
-				|mut total, timesheet| -> Result<Money> {
-					let duration_seconds: Decimal = timesheet
-						.time_end
-						.unwrap()
-						.signed_duration_since(timesheet.time_begin)
-						.num_seconds()
-						.into();
-					total.amount +=
-						(duration_seconds / seconds_per_hour) * self.invoice.hourly_rate.amount;
-
-					timesheet
-						.expenses
-						.iter()
-						.try_for_each(|expense| -> Result<()> {
-							if expense.cost.currency == total.currency
-							{
-								total.amount += expense.cost.amount;
-							}
-							else
-							{
-								if exchange_rates.is_none()
-								{
-									exchange_rates = Some(ExchangeRates::new()?);
-								}
-
-								total.amount += expense
-									.cost
-									.exchange(total.currency, exchange_rates.as_ref().unwrap())
-									.amount;
-							}
-
-							Ok(())
-						})?;
-
-					Ok(total)
-				},
-			)?;
-
-		total.amount.rescale(2);
-		Ok(total)
 	}
 }
 
@@ -306,11 +244,12 @@ mod tests
 	use std::{collections::HashMap, time::Instant};
 
 	use chrono::Utc;
-	use clinvoice_finance::Currency;
+	use clinvoice_finance::{Currency, Money};
 
-	use super::{DateTime, Id, Invoice, JobView, Local, Money, TimesheetView};
+	use super::{DateTime, JobView, Local, TimesheetView};
 	use crate::{
 		views::{EmployeeView, LocationView, OrganizationView, PersonView},
+		Invoice,
 		EmployeeStatus,
 		Expense,
 		ExpenseCategory,
@@ -393,12 +332,11 @@ mod tests
 			},
 			notes: "- I tested the function.".into(),
 			objectives: "- I want to test this function.".into(),
-			timesheets: vec![],
 		};
 
 		let start = Instant::now();
 		assert_eq!(
-			job.export().unwrap(),
+			job.export(&[]).unwrap(),
 			format!(
 				"# Job #{}
 
@@ -425,7 +363,7 @@ mod tests
 
 		job.date_close = Some(Utc::today().and_hms(4, 30, 0));
 
-		job.timesheets = vec![
+		let timesheets = vec![
 			TimesheetView {
 				employee:   testy_mctesterson,
 				expenses:   Vec::new(),
@@ -450,7 +388,7 @@ mod tests
 
 		let second_start = Instant::now();
 		assert_eq!(
-			job.export().unwrap(),
+			job.export(&timesheets).unwrap(),
 			format!(
 				"# Job #{}
 
@@ -505,87 +443,15 @@ Paid for someone else to clean
 				job.id,
 				DateTime::<Local>::from(job.date_open),
 				DateTime::<Local>::from(job.date_close.unwrap()).naive_local(),
-				job.timesheets[0].time_begin,
-				job.timesheets[0].time_end.unwrap().naive_local(),
-				job.timesheets[1].time_begin,
-				job.timesheets[1].time_end.unwrap().naive_local(),
+				timesheets[0].time_begin,
+				timesheets[0].time_end.unwrap().naive_local(),
+				timesheets[1].time_begin,
+				timesheets[1].time_end.unwrap().naive_local(),
 			),
 		);
 		println!(
 			"\n>>>>> Target::Markdown.job {}us <<<<<\n",
 			(Instant::now().duration_since(second_start) + middle).as_micros()
-		);
-	}
-
-	#[test]
-	fn total()
-	{
-		let location = LocationView {
-			id:    0,
-			name:  "Earth".into(),
-			outer: None,
-		};
-
-		let organization = OrganizationView {
-			id: 0,
-			location: location.clone(),
-			name: "Big Old Test Corporation".into(),
-		};
-
-		let employee = EmployeeView {
-			contact_info: HashMap::new(),
-			id: 0,
-			organization: organization.clone(),
-			person: PersonView {
-				id:   0,
-				name: "Testy Mćtesterson".into(),
-			},
-			status: EmployeeStatus::Employed,
-			title: "".into(),
-		};
-
-		let mut job = JobView {
-			client: organization,
-			date_close: None,
-			date_open: Utc::now(),
-			id: Id::default(),
-			increment: Duration::from_secs(900),
-			invoice: Invoice {
-				date: None,
-				hourly_rate: Money::new(20_00, 2, Currency::USD),
-			},
-			notes: "".into(),
-			objectives: "".into(),
-			timesheets: Vec::new(),
-		};
-
-		job.timesheets.push(TimesheetView {
-			employee:   employee.clone(),
-			expenses:   Vec::new(),
-			job_id:     job.id,
-			time_begin: Utc::today().and_hms(2, 0, 0),
-			time_end:   Some(Utc::today().and_hms(2, 30, 0)),
-			work_notes: "- Wrote the test.".into(),
-		});
-
-		job.timesheets.push(TimesheetView {
-			employee:   employee.clone(),
-			expenses:   vec![Expense {
-				category: ExpenseCategory::Item,
-				cost: Money::new(20_00, 2, Currency::USD),
-				description: "Paid for someone else to clean".into(),
-			}],
-			job_id:     job.id,
-			time_begin: Utc::today().and_hms(3, 0, 0),
-			time_end:   Some(Utc::today().and_hms(3, 30, 0)),
-			work_notes: "- Clean the deck.".into(),
-		});
-
-		let start = Instant::now();
-		assert_eq!(job.total().unwrap(), Money::new(4000, 2, Currency::USD));
-		println!(
-			"\n>>>>> Job::total {}us <<<<<\n",
-			Instant::now().duration_since(start).as_micros()
 		);
 	}
 }

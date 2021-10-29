@@ -1,10 +1,13 @@
 mod from_view;
 
 use chrono::{DateTime, Utc};
+use clinvoice_finance::{Decimal, ExchangeRates, Money, Result};
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 
 use crate::{Expense, Id};
+
+const SECONDS_PER_HOUR: i16 = 3600;
 
 /// # Summary
 ///
@@ -63,4 +66,116 @@ pub struct Timesheet
 	/// * Created tests for chosen solution.
 	/// ```
 	pub work_notes: String,
+}
+
+impl Timesheet
+{
+	/// # Summary
+	///
+	/// Get the amount of [`Money`] which is owed by the client on the [`Inovice`].
+	///
+	/// # Panics
+	///
+	/// * When not all [`Money`] amounts are in the same currency.
+	pub fn total(hourly_rate: Money, timesheets: &[Timesheet]) -> Result<Money>
+	{
+		let seconds_per_hour: Decimal = SECONDS_PER_HOUR.into();
+
+		let mut exchange_rates = None;
+
+		let mut total = timesheets
+			.iter()
+			.filter(|timesheet| timesheet.time_end.is_some())
+			.try_fold(
+				Money::new(0, 2, hourly_rate.currency),
+				|mut total, timesheet| -> Result<Money> {
+					let duration_seconds: Decimal = timesheet
+						.time_end
+						.unwrap()
+						.signed_duration_since(timesheet.time_begin)
+						.num_seconds()
+						.into();
+					total.amount += (duration_seconds / seconds_per_hour) * hourly_rate.amount;
+
+					timesheet
+						.expenses
+						.iter()
+						.try_for_each(|expense| -> Result<()> {
+							if expense.cost.currency == total.currency
+							{
+								total.amount += expense.cost.amount;
+							}
+							else
+							{
+								if exchange_rates.is_none()
+								{
+									exchange_rates = Some(ExchangeRates::new()?);
+								}
+
+								total.amount += expense
+									.cost
+									.exchange(total.currency, exchange_rates.as_ref().unwrap())
+									.amount;
+							}
+
+							Ok(())
+						})?;
+
+					Ok(total)
+				},
+			)?;
+
+		total.amount.rescale(2);
+		Ok(total)
+	}
+}
+
+#[cfg(test)]
+mod tests
+{
+	use std::time::Instant;
+
+	use chrono::Utc;
+	use clinvoice_finance::Currency;
+
+	use super::{Expense, Money, Timesheet};
+	use crate::ExpenseCategory;
+
+	#[test]
+	fn total()
+	{
+		let timesheets = Vec::new();
+
+		timesheets.push(Timesheet {
+			employee_id: 0,
+			expenses:    Vec::new(),
+			job_id:      0,
+			time_begin:  Utc::today().and_hms(2, 0, 0),
+			time_end:    Some(Utc::today().and_hms(2, 30, 0)),
+			work_notes:  "- Wrote the test.".into(),
+		});
+
+		timesheets.push(Timesheet {
+			employee_id: 0,
+			expenses:    vec![Expense {
+				category: ExpenseCategory::Item,
+				cost: Money::new(20_00, 2, Currency::USD),
+				description: "Paid for someone else to clean".into(),
+			}],
+			job_id:      0,
+			time_begin:  Utc::today().and_hms(3, 0, 0),
+			time_end:    Some(Utc::today().and_hms(3, 30, 0)),
+			work_notes:  "- Clean the deck.".into(),
+		});
+
+		let start = Instant::now();
+		assert_eq!(
+			Timesheet::total(Money::new(20_00, 2, Currency::USD), &timesheets).unwrap(),
+			Money::new(4000, 2, Currency::USD),
+		);
+		println!(
+			"\n>>>>> Job::total {}us <<<<<\n",
+			Instant::now().duration_since(start).as_micros()
+		);
+	}
 }

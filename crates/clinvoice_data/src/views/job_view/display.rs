@@ -1,4 +1,4 @@
-use core::fmt::{Display, Error, Formatter, Result};
+use core::fmt::{Display, Formatter, Result};
 
 use chrono::{DateTime, Local};
 
@@ -36,8 +36,6 @@ impl Display for JobView
 			DEPTH_2,
 			self.invoice.to_string().replace('\n', DEPTH_2)
 		)?;
-		let total = self.total().map_err(|_| Error)?;
-		writeln!(formatter, "\t\tTotal Amount Owed: {}", total)?;
 
 		if !self.objectives.is_empty()
 		{
@@ -57,19 +55,6 @@ impl Display for JobView
 				DEPTH_2,
 				self.notes.replace('\n', DEPTH_2)
 			)?;
-		}
-
-		if !self.timesheets.is_empty()
-		{
-			write!(formatter, "\tTimesheets:")?;
-			self.timesheets.iter().try_for_each(|t| {
-				write!(
-					formatter,
-					"{}{}",
-					DEPTH_2,
-					t.to_string().replace('\n', DEPTH_2)
-				)
-			})?;
 		}
 
 		Ok(())
@@ -93,7 +78,6 @@ mod tests
 			LocationView,
 			OrganizationView,
 			PersonView,
-			TimesheetView,
 		},
 		EmployeeStatus,
 		Invoice,
@@ -129,7 +113,7 @@ mod tests
 			title: "CEO of Tests".into(),
 		};
 
-		let mut create_job_view = JobView {
+		let create_job_view = JobView {
 			client: ceo_testy_view.organization.clone(),
 			date_close: Some(Utc::today().and_hms(23, 59, 59)),
 			date_open: Utc::now(),
@@ -141,17 +125,7 @@ mod tests
 			},
 			notes: "Remember not to work with these guys again!".into(),
 			objectives: "Get into the mainframe, or something like that".into(),
-			timesheets: Vec::new(),
 		};
-
-		create_job_view.timesheets.push(TimesheetView {
-			employee:   ceo_testy_view,
-			expenses:   Vec::new(),
-			job_id:     create_job_view.id,
-			time_begin: Utc::now(),
-			time_end:   Some(Utc::today().and_hms(23, 59, 59)),
-			work_notes: "Went to non-corporate fast food restaurant for business meeting".into(),
-		});
 
 		let start = Instant::now();
 		assert_eq!(
@@ -161,30 +135,13 @@ mod tests
 	Invoice:
 		Hourly Rate: 20.00 USD
 		Status: Not issued
-		Total Amount Owed: {}
 	Objectives:
 		Get into the mainframe, or something like that
 	Notes:
-		Remember not to work with these guys again!
-	Timesheets:
-		{} – {}: CEO of Tests Testy McTesterson from Big Old Test @ Earth
-			Work Notes:
-				Went to non-corporate fast food restaurant for business meeting",
+		Remember not to work with these guys again!",
 				create_job_view.id,
 				DateTime::<Local>::from(create_job_view.date_open).naive_local(),
 				DateTime::<Local>::from(create_job_view.date_close.unwrap()).naive_local(),
-				&create_job_view.total().unwrap(),
-				DateTime::<Local>::from(create_job_view.timesheets.first().unwrap().time_begin)
-					.naive_local(),
-				DateTime::<Local>::from(
-					create_job_view
-						.timesheets
-						.first()
-						.unwrap()
-						.time_end
-						.unwrap()
-				)
-				.naive_local(),
 			),
 		);
 		println!(

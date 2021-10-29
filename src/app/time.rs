@@ -1,7 +1,8 @@
 mod command;
 
 use clinvoice_adapter::{Adapters, Error as AdapterError, Store};
-use clinvoice_data::{Currency, Id};
+use clinvoice_adapter_postgres::data::PostgresTimesheet;
+use clinvoice_data::Id;
 use command::Command;
 use structopt::StructOpt;
 #[cfg(feature = "postgres")]
@@ -34,7 +35,6 @@ impl Time
 	/// Execute the constructed command.
 	pub async fn run<'err>(
 		self,
-		default_currency: Currency,
 		default_employee_id: Option<Id>,
 		store: &Store,
 	) -> DynResult<'err, ()>
@@ -47,9 +47,8 @@ impl Time
 				let pool = PgPool::connect_lazy(&store.url)?;
 				self
 					.command
-					.run::<_, PostgresEmployee, PostgresJob>(
+					.run::<_, PostgresEmployee, PostgresJob, PostgresTimesheet>(
 						pool,
-						default_currency,
 						if self.use_default_employee_id
 						{
 							default_employee_id

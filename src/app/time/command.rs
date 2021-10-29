@@ -1,15 +1,16 @@
 mod display;
 
-use std::cmp::Ordering;
-
-use clinvoice_adapter::data::{Deletable, EmployeeAdapter, JobAdapter};
+use std::borrow::Cow::Owned;
+use clinvoice_adapter::data::{Deletable, EmployeeAdapter, JobAdapter, TimesheetAdapter};
 use clinvoice_data::{
 	chrono::{Duration, DurationRound, Utc},
-	views::{EmployeeView, JobView, TimesheetView},
-	Currency,
+	views::JobView,
+	Employee,
 	Id,
+	Job,
 };
-use sqlx::{Database, Executor, Pool};
+use clinvoice_query::{self as query, Match};
+use sqlx::{Database, Executor, Pool, Result};
 use structopt::StructOpt;
 
 use crate::{input, DynResult};
@@ -26,103 +27,76 @@ pub enum Command
 
 impl Command
 {
-	fn start(employee: EmployeeView, job: &mut JobView)
+	async fn start<'err, Db, TAdapter>(
+		connection: &Pool<Db>,
+		employee: &Employee,
+		job: &Job,
+	) -> Result<()>
+	where
+		Db: Database,
+		TAdapter: Deletable<Db = Db> + TimesheetAdapter + Send,
+		for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 	{
-		job.timesheets.push(TimesheetView {
-			employee,
-			expenses: Vec::new(),
-			job_id: job.id,
-			time_begin: Utc::now(),
-			time_end: None,
-			work_notes: "* Work which was done goes here\n* Supports markdown formatting".into(),
-		})
+		TAdapter::create(connection, employee, job)
+			.await
+			.and(Ok(()))
 	}
 
-	fn stop<'err>(
-		default_currency: Currency,
+	async fn stop<'err, Db, TAdapter>(
+		connection: &Pool<Db>,
 		default_employee_id: Option<Id>,
-		job: &mut JobView,
+		job: &JobView,
 	) -> DynResult<'err, ()>
+	where
+		Db: Database,
+		TAdapter: Deletable<Db = Db> + TimesheetAdapter + Send,
+		for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 	{
-		let index = {
-			let timesheets: Vec<_> = job
-				.timesheets
-				.iter()
-				.filter(|t| {
-					let is_active = t.time_end.is_none();
-					if let Some(default) = default_employee_id
+		let mut timesheet = {
+			let timesheets = TAdapter::retrieve_view(connection, &query::Timesheet {
+				employee: query::Employee {
+					id: if let Some(default) = default_employee_id
 					{
-						is_active && t.employee.id == default
+						Match::EqualTo(Owned(default))
 					}
 					else
 					{
-						is_active
-					}
-				})
-				.collect();
-
-			if timesheets.is_empty()
-			{
-				return Err(input::Error::NoData("active `Timesheet`s".into()).into());
-			}
+						Match::Any
+					},
+					..Default::default()
+				},
+				time_end: Match::EqualTo(Owned(None)),
+				..Default::default()
+			}).await?;
 
 			let selected = input::select_one(&timesheets, "Which `Timesheet` are you working on?")?;
-
-			job.timesheets.iter().enumerate().fold(0, |i, enumeration| {
-				if selected == enumeration.1
-				{
-					enumeration.0
-				}
-				else
-				{
-					i
-				}
-			})
+			selected.to_owned()
 		};
 
-		job.timesheets[index].work_notes = input::edit_markdown(&job.timesheets[index].work_notes)?;
+		timesheet.work_notes = input::edit_markdown(&timesheet.work_notes)?;
 
-		input::util::expense::menu(&mut job.timesheets[index].expenses, default_currency)?;
+		input::util::expense::menu(&mut timesheet.expenses, job.invoice.hourly_rate.currency)?;
 
 		// Stop time on the `Job` AFTER requiring users to enter information. Users shouldn't enter things for free ;)
 		let increment = Duration::from_std(job.increment)?;
-		job.timesheets[index].time_begin =
-			job.timesheets[index].time_begin.duration_round(increment)?;
-		job.timesheets[index].time_end = Some(Utc::now().duration_round(increment)?);
+		timesheet.time_begin = timesheet.time_begin.duration_round(increment)?;
+		timesheet.time_end = Some(Utc::now().duration_round(increment)?);
 
-		// Now that `job.timesheets[index]` is done being ammended, we can resort the timesheets.
-		job.timesheets.sort_by(|t1, t2| {
-			if t1.time_begin != t2.time_begin
-			{
-				t1.time_begin.cmp(&t2.time_begin)
-			}
-			else
-			{
-				t1.time_end
-					.map(|time|
-					// If they both have a time, compare it. Otherwise, `t1` has ended and `t2` has not, so
-					// `t1` is less than `t2`.
-					t2.time_end.map(|other_time| time.cmp(&other_time)).unwrap_or(Ordering::Less))
-					.unwrap_or_else(||
-					// If `t1` has not ended, but `t2` has, then `t1` is greater. Otherwise, if neither has
-					// ended, then they are equal.
-					t2.time_end.and(Some(Ordering::Greater)).unwrap_or(Ordering::Equal))
-			}
-		});
+		TAdapter::update(connection, timesheet.into()).await?;
 
 		Ok(())
 	}
 
-	pub async fn run<'err, Db, EAdapter, JAdapter>(
+	pub async fn run<'err, Db, EAdapter, JAdapter, TAdapter>(
 		&self,
 		connection: Pool<Db>,
-		default_currency: Currency,
 		default_employee_id: Option<Id>,
 	) -> DynResult<'err, ()>
 	where
 		Db: Database,
 		EAdapter: Deletable<Db = Db> + EmployeeAdapter + Send,
 		JAdapter: Deletable<Db = Db> + JobAdapter + Send,
+		TAdapter: Deletable<Db = Db> + TimesheetAdapter + Send,
 		for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 	{
 		let job_results_view: Vec<_> = input::util::job::retrieve_view::<&str, _, JAdapter>(
@@ -135,7 +109,7 @@ impl Command
 		.filter(|j| j.date_close.is_none())
 		.collect();
 
-		let mut selected_job = input::select_one(
+		let selected_job = input::select_one(
 			&job_results_view,
 			format!("Select the job to {} working on", self),
 		)?;
@@ -157,13 +131,19 @@ impl Command
 					format!("Select the `Employee` who is doing the work"),
 				)?;
 
-				Self::start(selected_employee, &mut selected_job)
+				Self::start::<_, TAdapter>(
+					&connection,
+					&selected_employee.into(),
+					&selected_job.into(),
+				)
+				.await?;
 			},
 
-			Self::Stop => Self::stop(default_currency, default_employee_id, &mut selected_job)?,
+			Self::Stop =>
+			{
+				Self::stop::<_, TAdapter>(&connection, default_employee_id, &selected_job).await?
+			},
 		};
-
-		JAdapter::update(&connection, selected_job.into()).await?;
 
 		Ok(())
 	}

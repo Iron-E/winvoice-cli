@@ -73,7 +73,6 @@ impl Command
 			Self::Time(cmd) =>
 			{
 				cmd.run(
-					config.invoices.default_currency,
 					config.employees.default_id,
 					store,
 				)

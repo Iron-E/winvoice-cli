@@ -15,7 +15,6 @@ use serde::{Deserialize, Serialize};
 /// A value in a retrieval operation.
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
-#[cfg_attr(feature = "serde_support", serde(content = "value", tag = "condition"))]
 pub enum Match<'element, T>
 where
 	T: Clone + Debug + Hash + Ord,

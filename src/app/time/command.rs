@@ -130,7 +130,7 @@ impl Command
 
 				let selected_employee = input::select_one(
 					&results_view,
-					format!("Select the `Employee` who is doing the work"),
+					"Select the `Employee` who is doing the work".to_string(),
 				)?;
 
 				Self::start::<_, TAdapter>(

@@ -72,7 +72,7 @@ impl Money
 #[cfg(test)]
 mod tests
 {
-	use std::{convert::TryFrom, env, fs, time::Instant};
+	use std::{convert::TryFrom, env, fs};
 
 	use super::{Currency, ExchangeRates, Money};
 
@@ -114,16 +114,11 @@ mod tests
 
 		let usd = Money::new(20_00, 2, Currency::USD);
 
-		let start = Instant::now();
 		let usd_to_jpy = usd.exchange(Currency::JPY, &exchange_rates);
 		assert_eq!(usd_to_jpy, Money::new(2195_95, 2, Currency::JPY));
 
 		// Assert round-trip works
 		let usd_to_jpy_to_usd = usd_to_jpy.exchange(Currency::USD, &exchange_rates);
 		assert_eq!(usd, usd_to_jpy_to_usd);
-		println!(
-			"\n>>>>> Money::exchange {}us <<<<<\n",
-			Instant::now().duration_since(start).as_micros() / 2
-		);
 	}
 }

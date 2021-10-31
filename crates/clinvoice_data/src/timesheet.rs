@@ -133,8 +133,6 @@ impl Timesheet
 #[cfg(test)]
 mod tests
 {
-	use std::time::Instant;
-
 	use chrono::Utc;
 	use clinvoice_finance::Currency;
 
@@ -168,14 +166,9 @@ mod tests
 			work_notes:  "- Clean the deck.".into(),
 		});
 
-		let start = Instant::now();
 		assert_eq!(
 			Timesheet::total(Money::new(20_00, 2, Currency::USD), &timesheets).unwrap(),
 			Money::new(4000, 2, Currency::USD),
-		);
-		println!(
-			"\n>>>>> Job::total {}us <<<<<\n",
-			Instant::now().duration_since(start).as_micros()
 		);
 	}
 }

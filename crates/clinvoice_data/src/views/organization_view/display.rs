@@ -13,8 +13,6 @@ impl Display for OrganizationView
 #[cfg(test)]
 mod tests
 {
-	use std::time::Instant;
-
 	use super::OrganizationView;
 	use crate::views::LocationView;
 
@@ -45,14 +43,9 @@ mod tests
 			name: "Big Old Test".into(),
 		};
 
-		let start = Instant::now();
 		assert_eq!(
 			format!("{}", organization),
 			"Big Old Test @ Arizona, USA, Earth"
-		);
-		println!(
-			"\n>>>>> OrganizationView::fmt {}us <<<<<\n",
-			Instant::now().duration_since(start).as_micros()
 		);
 	}
 }

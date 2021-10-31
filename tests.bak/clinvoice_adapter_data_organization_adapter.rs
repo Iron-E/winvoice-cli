@@ -1,6 +1,6 @@
 mod util;
 
-use std::{collections::HashSet, time::Instant};
+use std::collections::HashSet;
 
 use clinvoice_adapter::data::{EmployeeAdapter, LocationAdapter, OrganizationAdapter};
 use clinvoice_adapter_bincode::data::{BincodeEmployee, BincodeLocation, BincodeOrganization};
@@ -47,8 +47,6 @@ async fn into_view()
 	)
 	.unwrap();
 
-	let start = Instant::now();
-
 	let (alsd_view, eal_view, aaa_view, focj_view, giguy_view) = futures::try_join!(
 		BincodeOrganization::into_view::<BincodeLocation>(alsd.clone(), &store),
 		BincodeOrganization::into_view::<BincodeLocation>(eal.clone(), &store),
@@ -57,11 +55,6 @@ async fn into_view()
 		BincodeOrganization::into_view::<BincodeLocation>(giguy.clone(), &store),
 	)
 	.unwrap();
-
-	println!(
-		"\n>>>>> BincodeOrganization::into_view {}us <<<<<\n",
-		Instant::now().duration_since(start).as_micros() / 5
-	);
 
 	let phoenix_view = BincodeLocation::into_view(phoenix, &store).await.unwrap();
 
@@ -108,13 +101,8 @@ async fn to_location()
 		.await
 		.unwrap();
 
-	let start = Instant::now();
 	// Retrieve the written employees back into the `Employee` structure.
 	let dogood_location = BincodeOrganization::to_location::<BincodeLocation>(&dogood, &store).await;
-	println!(
-		"\n>>>>> BincodeOrganization::to_location {}us <<<<<\n",
-		Instant::now().duration_since(start).as_micros()
-	);
 
 	// Assert that the location retrieved is the location expected
 	assert_eq!(arizona, dogood_location.unwrap());
@@ -175,13 +163,8 @@ async fn to_vec_employee()
 	.await
 	.unwrap();
 
-	let start = Instant::now();
 	// Retrieve the written employees back into the `Employee` structure.
 	let reps = BincodeOrganization::to_employees::<BincodeEmployee>(&dogood, &store).await;
-	println!(
-		"\n>>>>> BincodeOrganization::to_vec_employee {}us <<<<<\n",
-		Instant::now().duration_since(start).as_micros()
-	);
 
 	assert_eq!(
 		reps.unwrap().into_iter().collect::<HashSet<_>>(),

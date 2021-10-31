@@ -1,6 +1,6 @@
 mod util;
 
-use std::{collections::HashMap, time::Instant};
+use std::collections::HashMap;
 
 use clinvoice_adapter::data::{
 	EmployeeAdapter,
@@ -139,7 +139,6 @@ async fn into_view()
 		}],
 	};
 
-	let start = Instant::now();
 	let create_job_view_result = BincodeJob::into_view::<
 		BincodeEmployee,
 		BincodeLocation,
@@ -147,10 +146,6 @@ async fn into_view()
 		BincodePerson,
 	>(create_job, &store)
 	.await;
-	println!(
-		"\n>>>>> BincodeJob::into_view {}us <<<<<\n",
-		Instant::now().duration_since(start).as_micros()
-	);
 
 	assert_eq!(create_job_view, create_job_view_result.unwrap());
 }
@@ -182,12 +177,7 @@ async fn to_organization()
 	.await
 	.unwrap();
 
-	let start = Instant::now();
 	let test_org = BincodeJob::to_organization::<BincodeOrganization>(&test_job, &store).await;
-	println!(
-		"\n>>>>> BincodeJob::to_organization {}us <<<<<\n",
-		Instant::now().duration_since(start).as_micros()
-	);
 
 	assert_eq!(dogood, test_org.unwrap());
 }

@@ -21,8 +21,6 @@ impl Display for ContactView
 #[cfg(test)]
 mod tests
 {
-	use std::time::Instant;
-
 	use super::ContactView;
 	use crate::views::LocationView;
 
@@ -62,7 +60,6 @@ mod tests
 			outer: Some(phoenix_view.into()),
 		};
 
-		let start = Instant::now();
 		assert_eq!(
 			format!("{}", ContactView::Address {
 				location: street_view,
@@ -83,10 +80,6 @@ mod tests
 				export: false,
 			}),
 			"1-603-555-5555"
-		);
-		println!(
-			"\n>>>>> ContactView::test_display {}us <<<<<\n",
-			Instant::now().duration_since(start).as_micros() / 3
 		);
 	}
 }

@@ -27,8 +27,6 @@ impl Display for EmployeeView
 #[cfg(test)]
 mod tests
 {
-	use std::time::Instant;
-
 	use super::EmployeeView;
 	use crate::{
 		views::{ContactView, LocationView, OrganizationView, PersonView},
@@ -95,7 +93,6 @@ mod tests
 			title: "CEO of Tests".into(),
 		};
 
-		let start = Instant::now();
 		assert_eq!(
 			format!("{}", employee),
 			"CEO of Tests Testy McTesterson
@@ -104,10 +101,6 @@ mod tests
 		- Place of Work: 1234 Work Street, Phoenix, Arizona, USA, Earth
 		- Work Email: foo@bar.io
 	Status: Representative",
-		);
-		println!(
-			"\n>>>>> EmployeeView::fmt {}us <<<<<\n",
-			Instant::now().duration_since(start).as_micros()
 		);
 	}
 }

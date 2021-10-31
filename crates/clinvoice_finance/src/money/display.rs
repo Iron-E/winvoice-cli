@@ -13,15 +13,12 @@ impl Display for Money
 #[cfg(test)]
 mod tests
 {
-	use std::time::Instant;
-
 	use super::Money;
 	use crate::Currency;
 
 	#[test]
 	fn display()
 	{
-		let start = Instant::now();
 		assert_eq!(
 			format!("{}", Money::new(50_00, 2, Currency::USD)),
 			"50.00 USD"
@@ -33,10 +30,6 @@ mod tests
 		assert_eq!(
 			format!("{}", Money::new(20000, 0, Currency::JPY)),
 			"20000 JPY"
-		);
-		println!(
-			"\n>>>>> Money::fmt {}us <<<<<\n",
-			Instant::now().duration_since(start).as_micros() / 3
 		);
 	}
 }

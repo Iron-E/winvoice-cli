@@ -13,8 +13,6 @@ impl Display for PersonView
 #[cfg(test)]
 mod tests
 {
-	use std::time::Instant;
-
 	use super::PersonView;
 
 	#[test]
@@ -25,14 +23,9 @@ mod tests
 			name: "Someone".into(),
 		};
 
-		let start = Instant::now();
 		assert_eq!(
 			format!("{}", person_view),
 			format!("#{}: Someone", person_view.id)
-		);
-		println!(
-			"\n>>>>> PersonView::fmt {}us <<<<<\n",
-			Instant::now().duration_since(start).as_micros()
 		);
 	}
 }

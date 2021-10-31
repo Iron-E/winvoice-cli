@@ -16,18 +16,11 @@ impl Display for Adapters
 #[cfg(test)]
 mod tests
 {
-	use std::time::Instant;
-
 	use super::Adapters;
 
 	#[test]
 	fn display()
 	{
-		let start = Instant::now();
 		assert_eq!(format!("{}", Adapters::Postgres), "Postgres");
-		println!(
-			"\n>>>>> Adapters::fmt {}us <<<<<\n",
-			Instant::now().duration_since(start).as_micros()
-		);
 	}
 }

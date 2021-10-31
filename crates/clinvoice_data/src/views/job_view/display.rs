@@ -67,7 +67,6 @@ impl Display for JobView
 mod tests
 {
 	use core::time::Duration;
-	use std::time::Instant;
 
 	use chrono::Utc;
 	use clinvoice_finance::{Currency, Money};
@@ -123,7 +122,6 @@ mod tests
 			objectives: "Get into the mainframe, or something like that".into(),
 		};
 
-		let start = Instant::now();
 		assert_eq!(
 			format!("{}", create_job_view),
 			format!(
@@ -139,10 +137,6 @@ mod tests
 				DateTime::<Local>::from(create_job_view.date_open).naive_local(),
 				DateTime::<Local>::from(create_job_view.date_close.unwrap()).naive_local(),
 			),
-		);
-		println!(
-			"\n>>>>> JobView::fmt {}us <<<<<\n",
-			Instant::now().duration_since(start).as_micros()
 		);
 	}
 }

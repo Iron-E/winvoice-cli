@@ -36,7 +36,7 @@ impl TryFrom<&Path> for ExchangeRates
 #[cfg(test)]
 mod tests
 {
-	use std::{env, time::Instant};
+	use std::env;
 
 	use super::{fs, Currency, Decimal, ExchangeRates, TryFrom};
 
@@ -74,12 +74,7 @@ mod tests
 
 		assert!(filepath.is_file());
 
-		let start = Instant::now();
 		let exchange_rates = ExchangeRates::try_from(filepath.as_path()).unwrap();
-		println!(
-			"\n>>>>> ExchangeRates::try_from {}us <<<<<\n",
-			Instant::now().duration_since(start).as_micros()
-		);
 
 		assert_eq!(exchange_rates[Currency::AUD], Decimal::new(1_5792, 4));
 		assert_eq!(exchange_rates[Currency::BGN], Decimal::new(1_9558, 4));

@@ -14,8 +14,6 @@ impl Display for Expense
 #[cfg(test)]
 mod tests
 {
-	use std::time::Instant;
-
 	use clinvoice_finance::{Currency, Money};
 
 	use super::Expense;
@@ -30,15 +28,10 @@ mod tests
 			description: "Take-out for 2".into(),
 		};
 
-		let start = Instant::now();
 		assert_eq!(
 			format!("{}", expense),
 			"Food – 20.00 USD
 	Take-out for 2",
-		);
-		println!(
-			"\n>>>>> Expense::fmt {}us <<<<<\n",
-			Instant::now().duration_since(start).as_micros()
 		);
 	}
 }

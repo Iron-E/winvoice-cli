@@ -124,7 +124,6 @@ impl Config<'_, '_>
 mod tests
 {
 	use core::time::Duration;
-	use std::time::Instant;
 
 	use clinvoice_adapter::Adapters;
 	use clinvoice_data::{Currency, Id};
@@ -167,7 +166,6 @@ mod tests
 			},
 		};
 
-		let start = Instant::now();
 		// Reflexivity
 		assert_eq!(
 			conf.get_store("a").as_deref(),
@@ -196,9 +194,5 @@ mod tests
 			conf.get_store("e").as_deref()
 		);
 
-		println!(
-			"\n>>>>> Config::get_store {}us <<<<<\n",
-			Instant::now().duration_since(start).as_micros() / 12
-		);
 	}
 }

@@ -26,8 +26,6 @@ impl Display for InvoiceDate
 #[cfg(test)]
 mod tests
 {
-	use std::time::Instant;
-
 	use chrono::Utc;
 
 	use super::{DateTime, InvoiceDate, Local};
@@ -45,7 +43,6 @@ mod tests
 			paid:   Some(Utc::now()),
 		};
 
-		let start = Instant::now();
 		assert_eq!(
 			format!("{}", date),
 			format!(
@@ -60,10 +57,6 @@ mod tests
 				DateTime::<Local>::from(other_date.issued),
 				DateTime::<Local>::from(other_date.paid.unwrap()),
 			)
-		);
-		println!(
-			"\n>>>>> InvoiceDate::fmt {}us <<<<<\n",
-			Instant::now().duration_since(start).as_micros() / 2
 		);
 	}
 }

@@ -48,7 +48,7 @@ impl Display for TimesheetView
 #[cfg(test)]
 mod tests
 {
-	use std::{collections::HashMap, time::Instant};
+	use std::collections::HashMap;
 
 	use chrono::Utc;
 	use clinvoice_finance::{Currency, Money};
@@ -145,7 +145,6 @@ mod tests
 			work_notes: "Went to non-corporate fast food restaurant for business meeting".into(),
 		};
 
-		let start = Instant::now();
 		assert_eq!(
 			format!("{}", timesheet),
 			format!(
@@ -161,10 +160,6 @@ mod tests
 				DateTime::<Local>::from(timesheet.time_begin).naive_local(),
 				DateTime::<Local>::from(timesheet.time_end.unwrap()).naive_local(),
 			),
-		);
-		println!(
-			"\n>>>>> TimesheetView::fmt {}us <<<<<\n",
-			Instant::now().duration_since(start).as_micros()
 		);
 	}
 }

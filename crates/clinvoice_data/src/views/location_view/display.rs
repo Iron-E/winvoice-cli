@@ -22,8 +22,6 @@ impl Display for LocationView
 #[cfg(test)]
 mod tests
 {
-	use std::time::Instant;
-
 	use super::LocationView;
 
 	/// # Summary
@@ -62,14 +60,9 @@ mod tests
 			outer: Some(phoenix_view.into()),
 		};
 
-		let start = Instant::now();
 		assert_eq!(
 			format!("{}", street_view),
 			"1337 Some Street, Phoenix, Arizona, USA, Earth"
-		);
-		println!(
-			"\n>>>>> LocationView::fmt {}us <<<<<\n",
-			Instant::now().duration_since(start).as_micros()
 		);
 	}
 }

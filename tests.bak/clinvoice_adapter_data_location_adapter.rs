@@ -1,7 +1,5 @@
 mod util;
 
-use std::time::Instant;
-
 use clinvoice_adapter::data::LocationAdapter;
 use clinvoice_adapter_bincode::data::BincodeLocation;
 use clinvoice_data::views::LocationView;
@@ -66,12 +64,7 @@ async fn into_view()
 		),
 	};
 
-	let start = Instant::now();
 	let phoenix_view_result = BincodeLocation::into_view(phoenix, &store).await;
-	println!(
-		"\n>>>>> BincodeLocation::into_view {}us <<<<<\n",
-		Instant::now().duration_since(start).as_micros()
-	);
 
 	assert_eq!(phoenix_view, phoenix_view_result.unwrap());
 }

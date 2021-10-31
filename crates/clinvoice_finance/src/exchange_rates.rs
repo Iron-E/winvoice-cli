@@ -73,7 +73,7 @@ impl ExchangeRates
 #[cfg(test)]
 mod tests
 {
-	use std::{convert::TryFrom, time::Instant};
+	use std::convert::TryFrom;
 
 	use super::{env, fs, ExchangeRates};
 
@@ -96,12 +96,7 @@ mod tests
 			fs::create_dir_all(parent).unwrap();
 		}
 
-		let start = Instant::now();
 		ExchangeRates::download(&filepath).unwrap();
-		println!(
-			"\n>>>>> ExchangeRates::download {}s <<<<<\n",
-			Instant::now().duration_since(start).as_secs_f64()
-		);
 
 		assert!(filepath.is_file());
 		assert!(ExchangeRates::try_from(filepath.as_path()).is_ok());
@@ -116,15 +111,10 @@ mod tests
 			fs::remove_file(&filepath).unwrap();
 		}
 
-		let start = Instant::now();
 		// First ::new downloads the file
 		ExchangeRates::new().unwrap();
 		// Second ::new reads it
 		ExchangeRates::new().unwrap();
-		println!(
-			"\n>>>>> ExchangeRates::new {}s <<<<<\n",
-			Instant::now().duration_since(start).as_secs_f64() / 2.0
-		);
 
 		assert!(filepath.is_file());
 	}

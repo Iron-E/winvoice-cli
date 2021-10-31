@@ -241,7 +241,7 @@ impl JobView
 mod tests
 {
 	use core::time::Duration;
-	use std::{collections::HashMap, time::Instant};
+	use std::collections::HashMap;
 
 	use chrono::Utc;
 	use clinvoice_finance::{Currency, Money};
@@ -334,7 +334,6 @@ mod tests
 			objectives: "- I want to test this function.".into(),
 		};
 
-		let start = Instant::now();
 		assert_eq!(
 			job.export(&[]).unwrap(),
 			format!(
@@ -359,7 +358,6 @@ mod tests
 				DateTime::<Local>::from(job.date_open),
 			),
 		);
-		let middle = Instant::now().duration_since(start);
 
 		job.date_close = Some(Utc::today().and_hms(4, 30, 0));
 
@@ -386,7 +384,6 @@ mod tests
 			},
 		];
 
-		let second_start = Instant::now();
 		assert_eq!(
 			job.export(&timesheets).unwrap(),
 			format!(
@@ -448,10 +445,6 @@ Paid for someone else to clean
 				timesheets[1].time_begin,
 				timesheets[1].time_end.unwrap().naive_local(),
 			),
-		);
-		println!(
-			"\n>>>>> Target::Markdown.job {}us <<<<<\n",
-			(Instant::now().duration_since(second_start) + middle).as_micros()
 		);
 	}
 }

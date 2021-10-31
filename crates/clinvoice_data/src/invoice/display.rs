@@ -23,8 +23,6 @@ impl Display for Invoice
 #[cfg(test)]
 mod tests
 {
-	use std::time::Instant;
-
 	use chrono::{DateTime, Local, Utc};
 	use clinvoice_finance::{Currency, Money};
 
@@ -42,7 +40,6 @@ mod tests
 			hourly_rate: Money::new(10_00, 2, Currency::USD),
 		};
 
-		let start = Instant::now();
 		assert_eq!(
 			format!("{}", invoice),
 			format!(
@@ -50,10 +47,6 @@ mod tests
 Status: Issued on {}; Outstanding",
 				DateTime::<Local>::from(invoice.date.unwrap().issued),
 			),
-		);
-		println!(
-			"\n>>>>> Invoice::fmt {}us <<<<<\n",
-			Instant::now().duration_since(start).as_micros()
 		);
 	}
 }

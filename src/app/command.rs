@@ -52,7 +52,7 @@ impl Command
 		{
 			Self::Config =>
 			{
-				match Self::edit_config(&config)
+				match Self::edit_config(config)
 				{
 					Ok(_) => future::ok(()),
 					Err(e) => future::err(e.into()),
@@ -69,7 +69,7 @@ impl Command
 				.await
 			},
 			Self::Init => init::run(store).await,
-			Self::Retrieve(cmd) => cmd.run(&config, store).await,
+			Self::Retrieve(cmd) => cmd.run(config, store).await,
 			Self::Time(cmd) => cmd.run(config.employees.default_id, store).await,
 		}
 	}

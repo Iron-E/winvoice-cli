@@ -69,7 +69,7 @@ impl Retrieve
 			// NOTE: this is allowed because there may be additional adapters added later, and I want
 			//       to define this behavior now.
 			#[allow(unreachable_patterns)]
-			_ => return Err(AdapterError(store.adapter).into()),
+			_ => Err(AdapterError(store.adapter).into()),
 		}
 	}
 }

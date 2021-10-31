@@ -336,9 +336,12 @@ impl Command
 						&results_view,
 						format!("Select the outer Location of {}", name),
 					)?;
+
+					let conn_borrow = &connection;
+
 					stream::iter(create_inner.into_iter().map(Ok).rev())
-						.try_fold(location.into(), |loc: Location, name: String| async {
-							LAdapter::create_inner(&connection, &loc.into(), name).await
+						.try_fold(location.into(), |loc: Location, name: String| async move {
+							LAdapter::create_inner(conn_borrow, &loc, name).await
 						})
 						.await?;
 				}

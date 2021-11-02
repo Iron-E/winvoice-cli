@@ -29,3 +29,4 @@ pub use feature_not_found::{Error, Result};
 pub use initializable::Initializable;
 pub use store::Store;
 pub use updatable::Updatable;
+pub use write_sql::WriteSql;

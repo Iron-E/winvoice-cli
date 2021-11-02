@@ -1,4 +1,4 @@
-use clinvoice_data::Id;
+use clinvoice_schema::Id;
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 
@@ -6,7 +6,7 @@ use super::{Match, MatchStr};
 
 /// # Summary
 ///
-/// An [`Location`](clinvoice_data::Location) with [matchable](Match) fields.
+/// An [`Location`](clinvoice_schema::Location) with [matchable](Match) fields.
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 pub struct Person<'m>

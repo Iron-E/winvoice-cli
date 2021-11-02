@@ -1,13 +1,13 @@
 //! # Summary
 //!
 //! This crate provides a definition for how functionality should be abstracted away from the
-//! [`clinvoice` data](clinvoice_data). Every top-level type in [`clinvoice_data`] has a
+//! [`clinvoice` data](clinvoice_schema). Every top-level type in [`clinvoice_schema`] has a
 //! corresponding Adapter type which must be implemented by aspiring permanent storages in order
 //! for `clinvoice` to work with that storage scheme.
 //!
 //! # Usage
 //!
-//! 1. Begin by creating wrapper newtypes for each top-level data item in [`clinvoice_data`].
+//! 1. Begin by creating wrapper newtypes for each top-level data item in [`clinvoice_schema`].
 //!    * See the Bincode adapter for an example of this, or the [`Adapt`] macro for more information.
 //! 2. Implement each newtype's corresponding `Adapter` trait.
 //! 3. Create a new feature flag for the adapter on `clinvoice`.
@@ -15,10 +15,17 @@
 //!    conditionally compile them based on the feature flag.
 
 mod adapters;
-pub mod data;
+mod deletable;
 mod feature_not_found;
+mod initializable;
+pub mod schema;
 mod store;
+mod updatable;
+mod write_sql;
 
 pub use adapters::Adapters;
+pub use deletable::Deletable;
 pub use feature_not_found::{Error, Result};
+pub use initializable::Initializable;
 pub use store::Store;
+pub use updatable::Updatable;

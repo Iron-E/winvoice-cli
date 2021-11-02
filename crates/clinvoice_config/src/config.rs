@@ -18,13 +18,13 @@ pub struct Config<'alias, 'name>
 {
 	/// # Summary
 	///
-	/// Configurations for [`Employee`](clinvoice_data::employee::Employee)s.
+	/// Configurations for [`Employee`](clinvoice_schema::employee::Employee)s.
 	#[serde(default)]
 	pub employees: Employees,
 
 	/// # Summary
 	///
-	/// Configurations for [`Invoice`](clinvoice_data::invoice::Invoice)s.
+	/// Configurations for [`Invoice`](clinvoice_schema::invoice::Invoice)s.
 	#[serde(default)]
 	pub invoices: Invoices,
 
@@ -36,7 +36,7 @@ pub struct Config<'alias, 'name>
 
 	/// # Summary
 	///
-	/// Configurations for [`Timesheet`](clinvoice_data::timesheet:Timesheet)s.
+	/// Configurations for [`Timesheet`](clinvoice_schema::timesheet:Timesheet)s.
 	#[serde(default)]
 	pub timesheets: Timesheets,
 }
@@ -126,7 +126,7 @@ mod tests
 	use core::time::Duration;
 
 	use clinvoice_adapter::Adapters;
-	use clinvoice_data::{Currency, Id};
+	use clinvoice_schema::{Currency, Id};
 
 	use super::{BTreeMap, Config, Employees, Invoices, Store, StoreValue, Timesheets};
 
@@ -193,6 +193,5 @@ mod tests
 			conf.get_store("a").as_deref(),
 			conf.get_store("e").as_deref()
 		);
-
 	}
 }

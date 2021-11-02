@@ -1,8 +1,8 @@
 use std::{borrow::Cow::Owned, fmt::Display};
 
-use clinvoice_adapter::data::{Deletable, EmployeeAdapter};
-use clinvoice_data::{views::EmployeeView, Id};
+use clinvoice_adapter::{schema::EmployeeAdapter, Deletable};
 use clinvoice_query as query;
+use clinvoice_schema::{views::EmployeeView, Id};
 use sqlx::{Database, Executor, Pool};
 
 use super::{menu, QUERY_PROMPT};
@@ -19,8 +19,8 @@ use crate::{input, DynResult};
 /// * If no [`Employee`][location]s are [retrieved][L_retrieve], an [`Error::NoData`] is returned.
 /// * If the [selection](input::select) operation fails, its error is forwarded.
 ///
-/// [L_retrieve]: clinvoice_adapter::data::EmployeeAdapter::retrieve
-/// [location]: clinvoice_data::Employee
+/// [L_retrieve]: clinvoice_adapter::schema::EmployeeAdapter::retrieve
+/// [location]: clinvoice_schema::Employee
 pub async fn retrieve_view<'err, D, Db, EAdapter>(
 	connection: &Pool<Db>,
 	default_id: Option<Id>,

@@ -7,7 +7,7 @@ use core::{
 };
 use std::{any, io};
 
-use clinvoice_data::views::RestorableSerde;
+use clinvoice_schema::views::RestorableSerde;
 use dialoguer::{Editor, Input, MultiSelect, Select};
 pub use error::{Error, Result};
 use serde::{de::DeserializeOwned, Serialize};

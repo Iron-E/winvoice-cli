@@ -1,4 +1,4 @@
-use clinvoice_data::chrono::NaiveDateTime;
+use clinvoice_schema::chrono::NaiveDateTime;
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 
@@ -6,7 +6,7 @@ use super::{Employee, Expense, Job, Match, MatchStr};
 
 /// # Summary
 ///
-/// An [`Timesheet`](clinvoice_data::Timesheet) with [matchable](Match) fields.
+/// An [`Timesheet`](clinvoice_schema::Timesheet) with [matchable](Match) fields.
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 pub struct Timesheet<'m>

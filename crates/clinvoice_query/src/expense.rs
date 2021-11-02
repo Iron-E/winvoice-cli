@@ -1,4 +1,4 @@
-use clinvoice_data::{ExpenseCategory, Money};
+use clinvoice_schema::{ExpenseCategory, Money};
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 
@@ -6,7 +6,7 @@ use super::{Match, MatchStr};
 
 /// # Summary
 ///
-/// An [`Invoice`](clinvoice_data::Invoice) with [matchable](Match) fields.
+/// An [`Invoice`](clinvoice_schema::Invoice) with [matchable](Match) fields.
 #[derive(Clone, Default, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 pub struct Expense<'m>

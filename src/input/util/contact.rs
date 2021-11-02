@@ -1,8 +1,8 @@
 use core::fmt::Display;
 use std::{collections::HashMap, io};
 
-use clinvoice_adapter::data::{Deletable, LocationAdapter};
-use clinvoice_data::views::ContactView;
+use clinvoice_adapter::{schema::LocationAdapter, Deletable};
+use clinvoice_schema::views::ContactView;
 use sqlx::{Database, Executor, Pool};
 
 use super::menu;
@@ -10,7 +10,7 @@ use crate::{input, DynResult};
 
 /// # Summary
 ///
-/// Show a menu for adding [contact information](clinvoice_data::Contact).
+/// Show a menu for adding [contact information](clinvoice_schema::Contact).
 ///
 /// # Errors
 ///
@@ -96,7 +96,7 @@ where
 }
 /// # Summary
 ///
-/// Show a menu for deleting [contact information](clinvoice_data::Contact).
+/// Show a menu for deleting [contact information](clinvoice_schema::Contact).
 ///
 /// # Errors
 ///
@@ -116,7 +116,7 @@ fn delete_menu(contact_info: &mut HashMap<String, ContactView>) -> input::Result
 
 /// # Summary
 ///
-/// Show a menu for editing [contact information](clinvoice_data::Contact).
+/// Show a menu for editing [contact information](clinvoice_schema::Contact).
 ///
 /// # Errors
 ///
@@ -199,7 +199,7 @@ fn edit_menu(contact_info: &mut HashMap<String, ContactView>) -> input::Result<(
 
 /// # Summary
 ///
-/// Show a menu for creating [contact information](clinvoice_data::Contact).
+/// Show a menu for creating [contact information](clinvoice_schema::Contact).
 ///
 /// # Errors
 ///

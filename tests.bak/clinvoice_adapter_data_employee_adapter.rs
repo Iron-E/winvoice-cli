@@ -1,18 +1,18 @@
 mod util;
 
-use clinvoice_adapter::data::{
+use clinvoice_adapter::schema::{
 	EmployeeAdapter,
 	LocationAdapter,
 	OrganizationAdapter,
 	PersonAdapter,
 };
-use clinvoice_adapter_bincode::data::{
+use clinvoice_adapter_bincode::schema::{
 	BincodeEmployee,
 	BincodeLocation,
 	BincodeOrganization,
 	BincodePerson,
 };
-use clinvoice_data::{
+use clinvoice_schema::{
 	views::{ContactView, EmployeeView, LocationView, OrganizationView, PersonView},
 	Contact,
 	EmployeeStatus,

@@ -1,19 +1,21 @@
 use core::fmt::Display;
 use std::borrow::Cow::Owned;
 
-use clinvoice_adapter::data::{
+use clinvoice_adapter::{
+	schema::{
+		EmployeeAdapter,
+		JobAdapter,
+		LocationAdapter,
+		OrganizationAdapter,
+		PersonAdapter,
+		TimesheetAdapter,
+	},
 	Deletable,
-	EmployeeAdapter,
-	JobAdapter,
-	LocationAdapter,
-	OrganizationAdapter,
-	PersonAdapter,
-	TimesheetAdapter,
 	Updatable,
 };
 use clinvoice_config::Config;
-use clinvoice_data::{chrono::Utc, views::RestorableSerde, Location};
 use clinvoice_query as query;
+use clinvoice_schema::{chrono::Utc, views::RestorableSerde, Location};
 use futures::{
 	future,
 	stream::{self, TryStreamExt},

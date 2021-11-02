@@ -2,21 +2,21 @@ mod util;
 
 use std::collections::HashMap;
 
-use clinvoice_adapter::data::{
+use clinvoice_adapter::schema::{
 	EmployeeAdapter,
 	JobAdapter,
 	LocationAdapter,
 	OrganizationAdapter,
 	PersonAdapter,
 };
-use clinvoice_adapter_bincode::data::{
+use clinvoice_adapter_bincode::schema::{
 	BincodeEmployee,
 	BincodeJob,
 	BincodeLocation,
 	BincodeOrganization,
 	BincodePerson,
 };
-use clinvoice_data::{
+use clinvoice_schema::{
 	chrono::Utc,
 	Currency,
 	Money,

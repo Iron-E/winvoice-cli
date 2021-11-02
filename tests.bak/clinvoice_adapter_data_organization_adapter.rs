@@ -2,9 +2,9 @@ mod util;
 
 use std::collections::HashSet;
 
-use clinvoice_adapter::data::{EmployeeAdapter, LocationAdapter, OrganizationAdapter};
-use clinvoice_adapter_bincode::data::{BincodeEmployee, BincodeLocation, BincodeOrganization};
-use clinvoice_data::{views::OrganizationView, Contact, EmployeeStatus, Id, Location, Person};
+use clinvoice_adapter::schema::{EmployeeAdapter, LocationAdapter, OrganizationAdapter};
+use clinvoice_adapter_bincode::schema::{BincodeEmployee, BincodeLocation, BincodeOrganization};
+use clinvoice_schema::{views::OrganizationView, Contact, EmployeeStatus, Id, Location, Person};
 #[tokio::test(flavor = "multi_thread", worker_threads = 10)]
 async fn into_view()
 {

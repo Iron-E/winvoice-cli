@@ -85,12 +85,12 @@ For more information, run `clinvoice help` from the command line.
 
 Below is a list of objectives which have been identified as necessary before this application's 1.0 release. Any item which is crossed out has been completed.
 
-1. ~~Define the data model as `clinvoice_data`.~~
+1. ~~Define the data model as `clinvoice_schema`.~~
 2. ~~Create adapter traits as `clinovice_adapter`.~~
 3. ~~Implement `clinvoice_adapter` traits for bincode filesystem as `clinvoice_adapter_bincode`.~~
 4. Write `clinvoice` application logic as `clinvoice_bin`.
 5. ~~Generate more boilerplate with `Adapt!` macro.~~
 	* Refactored `clinvoice_adapter` to not require so much boilerplate.
-6. Write PostgreSQL statements for `clinvoice_data` entities.
+6. Write PostgreSQL statements for `clinvoice_schema` entities.
 7. Implement `clinovice_adapter` traits for PostgreSQL as `clinvoice_adapter_postgres`.
 8. GUI as `guinvoice`?

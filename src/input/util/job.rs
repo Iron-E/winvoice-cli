@@ -1,8 +1,8 @@
 use core::fmt::Display;
 
-use clinvoice_adapter::data::{Deletable, JobAdapter};
-use clinvoice_data::views::JobView;
+use clinvoice_adapter::{schema::JobAdapter, Deletable};
 use clinvoice_query as query;
+use clinvoice_schema::views::JobView;
 use sqlx::{Database, Executor, Pool};
 
 use super::{menu, QUERY_PROMPT};
@@ -19,8 +19,8 @@ use crate::{input, DynResult};
 /// * If no [`Location`][location]s are [retrieved][L_retrieve], an [`Error::NoData`] is returned.
 /// * If the [selection](input::select) operation fails, its error is forwarded.
 ///
-/// [L_retrieve]: clinvoice_adapter::data::LocationAdapter::retrieve
-/// [location]: clinvoice_data::Location
+/// [L_retrieve]: clinvoice_adapter::schema::LocationAdapter::retrieve
+/// [location]: clinvoice_schema::Location
 pub async fn retrieve_view<'err, D, Db, JAdapter>(
 	connection: &Pool<Db>,
 	prompt: D,

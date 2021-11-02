@@ -1,6 +1,6 @@
-use clinvoice_adapter::{data::Initializable, Adapters, Error as AdapterError, Store};
+use clinvoice_adapter::{Adapters, Error as AdapterError, Initializable, Store};
 #[cfg(feature = "postgres")]
-use {clinvoice_adapter_postgres::data::PostgresSchema, sqlx::PgPool};
+use {clinvoice_adapter_postgres::PostgresSchema, sqlx::PgPool};
 
 use crate::DynResult;
 

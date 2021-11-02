@@ -1,8 +1,8 @@
 mod util;
 
-use clinvoice_adapter::data::LocationAdapter;
-use clinvoice_adapter_bincode::data::BincodeLocation;
-use clinvoice_data::views::LocationView;
+use clinvoice_adapter::schema::LocationAdapter;
+use clinvoice_adapter_bincode::schema::BincodeLocation;
+use clinvoice_schema::views::LocationView;
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 10)]
 async fn into_view()

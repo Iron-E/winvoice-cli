@@ -17,7 +17,7 @@ futures = "0.3"
 
 # CLInvoice
 clinvoice_adapter = {path="../clinvoice_adapter", version="0.9"}
-clinvoice_data = {path="../../clinvoice_data", version="0.6"}
+clinvoice_schema = {path="../../clinvoice_schema", version="0.6"}
 clinvoice_error = {path="../../clinvoice_error", version="0.2"}
 clinvoice_query = {path="../../clinvoice_query", version="0.2"}
 

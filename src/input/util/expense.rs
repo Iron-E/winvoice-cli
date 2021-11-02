@@ -1,11 +1,11 @@
-use clinvoice_data::{Currency, Expense, ExpenseCategory, Money};
+use clinvoice_schema::{Currency, Expense, ExpenseCategory, Money};
 
 use super::menu::{ADD, ALL_ACTIONS, CONTINUE, DELETE, EDIT};
 use crate::input;
 
 /// # Summary
 ///
-/// Show a menu for adding [expenses](clinvoice_data::Expense).
+/// Show a menu for adding [expenses](clinvoice_schema::Expense).
 ///
 /// # Errors
 ///
@@ -44,7 +44,7 @@ fn add_menu(expenses: &mut Vec<Expense>, default_currency: Currency) -> input::R
 
 /// # Summary
 ///
-/// Show a menu for creating [expenses](clinvoice_data::Expense).
+/// Show a menu for creating [expenses](clinvoice_schema::Expense).
 ///
 /// # Errors
 ///
@@ -76,7 +76,7 @@ pub fn menu(expenses: &mut Vec<Expense>, default_currency: Currency) -> input::R
 
 /// # Summary
 ///
-/// Show a menu for deleting [expenses](clinvoice_data::Expense).
+/// Show a menu for deleting [expenses](clinvoice_schema::Expense).
 ///
 /// # Errors
 ///
@@ -104,7 +104,7 @@ fn delete_menu(expenses: &mut Vec<Expense>) -> input::Result<()>
 
 /// # Summary
 ///
-/// Show a menu for editing [expenses](clinvoice_data::Expense).
+/// Show a menu for editing [expenses](clinvoice_schema::Expense).
 ///
 /// # Errors
 ///

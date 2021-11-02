@@ -1,22 +1,22 @@
 //! # Summary
 //!
-//! This module contains [view](clinvoice_data::views)-like structures which are queries that
-//! correspond to the [data item](clinvoice_data) of the same name.
+//! This module contains [view](clinvoice_schema::views)-like structures which are queries that
+//! correspond to the [data item](clinvoice_schema) of the same name.
 //!
 //! # Remarks
 //!
-//! Each field of each structure contains an identically-named, but [matchable](crate::data::Match)
+//! Each field of each structure contains an identically-named, but [matchable](crate::schema::Match)
 //! field which should be used to specify the desired contents of the structure.
 //!
 //! # Example
 //!
 //! For examples, see the `retrieve` tests for each adapter below:
 //!
-//! * [`Employee`](crate::data::EmployeeAdapter)
-//! * [`Job`](crate::data::JobAdapter)
-//! * [`Location`](crate::data::LocationAdapter)
-//! * [`Organization`](crate::data::OrganizationAdapter)
-//! * [`Person`](crate::data::PersonAdapter)
+//! * [`Employee`](crate::schema::EmployeeAdapter)
+//! * [`Job`](crate::schema::JobAdapter)
+//! * [`Location`](crate::schema::LocationAdapter)
+//! * [`Organization`](crate::schema::OrganizationAdapter)
+//! * [`Person`](crate::schema::PersonAdapter)
 
 #![allow(clippy::tabs_in_doc_comments)]
 

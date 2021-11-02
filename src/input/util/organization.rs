@@ -1,8 +1,8 @@
 use core::fmt::Display;
 
-use clinvoice_adapter::data::{Deletable, OrganizationAdapter};
-use clinvoice_data::views::OrganizationView;
+use clinvoice_adapter::{schema::OrganizationAdapter, Deletable};
 use clinvoice_query as query;
+use clinvoice_schema::views::OrganizationView;
 use sqlx::{Database, Executor, Pool};
 
 use super::{menu, QUERY_PROMPT};
@@ -19,8 +19,8 @@ use crate::{input, DynResult};
 /// * If no [`Organization`][organization]s are [retrieved][P_retrieve], an [`Error::NoData`] is returned.
 /// * If the [selection](input::select) operation fails, its error is forwarded.
 ///
-/// [P_retrieve]: clinvoice_adapter::data::OrganizationAdapter::retrieve
-/// [organization]: clinvoice_data::Organization
+/// [P_retrieve]: clinvoice_adapter::schema::OrganizationAdapter::retrieve
+/// [organization]: clinvoice_schema::Organization
 pub async fn retrieve_view<'err, D, Db, OAdapter>(
 	connection: &Pool<Db>,
 	prompt: D,

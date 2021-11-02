@@ -1,19 +1,13 @@
 use core::time::Duration as StdDuration;
 
 use clinvoice_adapter::{
-	data::{
-		Deletable,
-		EmployeeAdapter,
-		JobAdapter,
-		LocationAdapter,
-		OrganizationAdapter,
-		PersonAdapter,
-	},
+	schema::{EmployeeAdapter, JobAdapter, LocationAdapter, OrganizationAdapter, PersonAdapter},
 	Adapters,
+	Deletable,
 	Error as FeatureNotFoundError,
 	Store,
 };
-use clinvoice_data::{
+use clinvoice_schema::{
 	chrono::{Datelike, Local, TimeZone, Timelike},
 	Currency,
 	Decimal,
@@ -29,7 +23,7 @@ use sqlx::{Database, Executor, Pool, Result};
 use structopt::StructOpt;
 #[cfg(feature = "postgres")]
 use {
-	clinvoice_adapter_postgres::data::{
+	clinvoice_adapter_postgres::schema::{
 		PostgresEmployee,
 		PostgresJob,
 		PostgresLocation,

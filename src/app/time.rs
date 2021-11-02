@@ -1,13 +1,13 @@
 mod command;
 
 use clinvoice_adapter::{Adapters, Error as AdapterError, Store};
-use clinvoice_adapter_postgres::data::PostgresTimesheet;
-use clinvoice_data::Id;
+use clinvoice_adapter_postgres::schema::PostgresTimesheet;
+use clinvoice_schema::Id;
 use command::Command;
 use structopt::StructOpt;
 #[cfg(feature = "postgres")]
 use {
-	clinvoice_adapter_postgres::data::{PostgresEmployee, PostgresJob},
+	clinvoice_adapter_postgres::schema::{PostgresEmployee, PostgresJob},
 	sqlx::PgPool,
 };
 

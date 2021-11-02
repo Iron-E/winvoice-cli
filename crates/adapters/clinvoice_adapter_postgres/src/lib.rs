@@ -4,4 +4,5 @@
 
 #![allow(clippy::from_over_into)]
 
-pub mod data;
+pub mod schema;
+pub use schema::PostgresSchema;

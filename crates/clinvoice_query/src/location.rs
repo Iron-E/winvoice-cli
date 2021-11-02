@@ -1,6 +1,6 @@
 mod outer_location;
 
-use clinvoice_data::Id;
+use clinvoice_schema::Id;
 pub use outer_location::OuterLocation;
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
@@ -9,7 +9,7 @@ use super::{Match, MatchStr};
 
 /// # Summary
 ///
-/// An [`Location`](clinvoice_data::Location) with [matchable](Match) fields.
+/// An [`Location`](clinvoice_schema::Location) with [matchable](Match) fields.
 #[derive(Clone, Default, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 pub struct Location<'m>

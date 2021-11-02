@@ -2,15 +2,18 @@ mod display;
 
 use std::borrow::Cow::Owned;
 
-use clinvoice_adapter::data::{Deletable, EmployeeAdapter, JobAdapter, TimesheetAdapter};
-use clinvoice_data::{
+use clinvoice_adapter::{
+	schema::{EmployeeAdapter, JobAdapter, TimesheetAdapter},
+	Deletable,
+};
+use clinvoice_query as query;
+use clinvoice_schema::{
 	chrono::{Duration, DurationRound, Utc},
 	views::JobView,
 	Employee,
 	Id,
 	Job,
 };
-use clinvoice_query as query;
 use sqlx::{Database, Executor, Pool, Result};
 use structopt::StructOpt;
 

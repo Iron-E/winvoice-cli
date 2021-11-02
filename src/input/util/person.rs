@@ -1,8 +1,8 @@
 use core::fmt::Display;
 
-use clinvoice_adapter::data::{Deletable, PersonAdapter};
-use clinvoice_data::views::PersonView;
+use clinvoice_adapter::{schema::PersonAdapter, Deletable};
 use clinvoice_query as query;
+use clinvoice_schema::views::PersonView;
 use sqlx::{Database, Executor, Pool};
 
 use super::{menu, QUERY_PROMPT};
@@ -19,8 +19,8 @@ use crate::{input, DynResult};
 /// * If no [`Person`][person]s are [retrieved][P_retrieve], an [`Error::NoData`] is returned.
 /// * If the [selection](input::select) operation fails, its error is forwarded.
 ///
-/// [P_retrieve]: clinvoice_adapter::data::PersonAdapter::retrieve
-/// [person]: clinvoice_data::Person
+/// [P_retrieve]: clinvoice_adapter::schema::PersonAdapter::retrieve
+/// [person]: clinvoice_schema::Person
 pub async fn retrieve_view<'err, D, Db, PAdapter>(
 	connection: &Pool<Db>,
 	prompt: D,

@@ -4,8 +4,16 @@ pub trait WriteSql<Q>
 	///
 	/// Generate an `sql` `WHERE` clause for the `column` specified.
 	///
-	/// PERF: `prefix` is used to reduce the number of `write!`s, by combining combining multiple
-	///       formatting arguments into the same `String::push` rather than `push`ing more
-	///       frequently.
-	fn write_where(column: &'static str, prefix: Option<&'static str>, query: &Q, sql: &mut String);
+	/// PERF: `prefix` is used to reduce the number of [`write!`] by packing more formatting
+	///       arguments into the same [`write!`].
+	///
+	/// # Returns
+	///
+	/// `true` if anything was written (i.e. `query !=` [`clinvoice_query::Match::Any`]), `false` otherwise.
+	fn write_where(
+		column: &'static str,
+		prefix: Option<&'static str>,
+		query: &Q,
+		sql: &mut String,
+	) -> bool;
 }

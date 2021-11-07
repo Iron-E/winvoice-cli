@@ -11,8 +11,8 @@ pub trait WriteSql<Q>
 	///
 	/// `true` if anything was written (i.e. `query !=` [`clinvoice_query::Match::Any`]), `false` otherwise.
 	fn write_where(
-		column: &'static str,
 		prefix: Option<&'static str>,
+		column: &'static str,
 		query: &Q,
 		sql: &mut String,
 	) -> bool;

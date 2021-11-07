@@ -23,8 +23,8 @@ use super::PostgresSchema;
 ///
 /// The rest of the args are the same as [`WriteSql::write_where`].
 fn write_boolean_group<Q>(
-	column: &'static str,
 	prefix: Option<&'static str>,
+	column: &'static str,
 	queries: &[Q],
 	sql: &mut String,
 	union: bool,
@@ -34,10 +34,10 @@ fn write_boolean_group<Q>(
 	prefix.map(|p| write!(sql, " {}", p).unwrap());
 	queries
 		.first()
-		.map(|q| PostgresSchema::write_where(column, Some("("), q, sql));
+		.map(|q| PostgresSchema::write_where(Some("("), column, q, sql));
 	let separator = Some(if union { "AND" } else { "OR" });
 	queries.iter().skip(1).for_each(|q| {
-		PostgresSchema::write_where(column, separator, q, sql);
+		PostgresSchema::write_where(separator, column, q, sql);
 	});
 	write!(sql, ")").unwrap();
 }
@@ -56,24 +56,23 @@ fn write_boolean_group<Q>(
 ///
 /// The rest of the args are the same as [`WriteSql::write_where`].
 fn write_negated<Q>(
-	column: &'static str,
 	prefix: Option<&'static str>,
+	column: &'static str,
 	query: &Box<Q>,
 	sql: &mut String,
 ) where
 	PostgresSchema: WriteSql<Q>,
 {
 	prefix.map(|p| write!(sql, " {}", p).unwrap());
-	PostgresSchema::write_where(column, Some("NOT ("), query.deref(), sql);
+	PostgresSchema::write_where(Some("NOT ("), column, query.deref(), sql);
 	write!(sql, ") ").unwrap();
 }
-
 
 impl WriteSql<Match<'_, i64>> for PostgresSchema
 {
 	fn write_where(
-		column: &'static str,
 		prefix: Option<&'static str>,
+		column: &'static str,
 		query: &Match<'_, i64>,
 		sql: &mut String,
 	) -> bool
@@ -97,14 +96,14 @@ impl WriteSql<Match<'_, i64>> for PostgresSchema
 				column = column,
 			)
 			.unwrap(),
-			Match::And(queries) => write_boolean_group(column, prefix, queries, sql, false),
+			Match::And(queries) => write_boolean_group(prefix, column, queries, sql, false),
 			Match::Any => return false,
-			Match::EqualTo(id) => write!(sql, " {} id = {}", prefix.unwrap_or_default(), id).unwrap(),
+			Match::EqualTo(id) => write!(sql, " {} {} = {}", prefix.unwrap_or_default(), column, id).unwrap(),
 			Match::HasAll(ids) =>
 			{
 				let mut iter = ids.iter();
 				iter.next().map(|id| {
-					write!(sql, " {} id = ALL(ARRAY[{}", prefix.unwrap_or_default(), id).unwrap()
+					write!(sql, " {} {} = ALL(ARRAY[{}", prefix.unwrap_or_default(), column, id).unwrap()
 				});
 				iter.for_each(|id| write!(sql, ", {}", id).unwrap());
 				write!(sql, "])").unwrap();
@@ -114,12 +113,12 @@ impl WriteSql<Match<'_, i64>> for PostgresSchema
 				let mut iter = ids.iter();
 				iter
 					.next()
-					.map(|id| write!(sql, " {} id IN ({}", prefix.unwrap_or_default(), id).unwrap());
+					.map(|id| write!(sql, " {} {} IN ({}", prefix.unwrap_or_default(), column, id).unwrap());
 				iter.for_each(|id| write!(sql, ", {}", id).unwrap());
 				write!(sql, ")").unwrap();
 			},
-			Match::Not(query) => write_negated(column, prefix, query, sql),
-			Match::Or(queries) => write_boolean_group(column, prefix, queries, sql, false),
+			Match::Not(query) => write_negated(prefix, column, query, sql),
+			Match::Or(queries) => write_boolean_group(prefix, column, queries, sql, false),
 		};
 		true
 	}
@@ -130,13 +129,14 @@ impl WriteSql<MatchStr<String>> for PostgresSchema
 	fn write_where(
 		column: &'static str,
 		prefix: Option<&'static str>,
+		column: &'static str,
 		query: &MatchStr<String>,
 		sql: &mut String,
 	) -> bool
 	{
 		match query
 		{
-			MatchStr::And(queries) => write_boolean_group(column, prefix, queries, sql, false),
+			MatchStr::And(queries) => write_boolean_group(prefix, column, queries, sql, false),
 			MatchStr::Any => return false,
 			MatchStr::Contains(string) => write!(
 				sql,
@@ -152,8 +152,8 @@ impl WriteSql<MatchStr<String>> for PostgresSchema
 				column,
 				string,
 			).unwrap(),
-			MatchStr::Not(query) => write_negated(column, prefix, query, sql),
-			MatchStr::Or(queries) => write_boolean_group(column, prefix, queries, sql, false),
+			MatchStr::Not(query) => write_negated(prefix, column, query, sql),
+			MatchStr::Or(queries) => write_boolean_group(prefix, column, queries, sql, false),
 			MatchStr::Regex(regex) => write!(
 				sql,
 				" {} {} ~ {}",

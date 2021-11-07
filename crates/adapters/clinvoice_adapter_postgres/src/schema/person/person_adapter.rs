@@ -35,8 +35,7 @@ impl PersonAdapter for PostgresPerson
 		const PREFIX_WHERE_CLAUSE: Option<&str> = Some("WHERE");
 
 		PostgresSchema::write_where(
-			"name",
-			if PostgresSchema::write_where("id", PREFIX_WHERE_CLAUSE, &query.id, &mut sql)
+			if PostgresSchema::write_where(PREFIX_WHERE_CLAUSE, "id", &query.id, &mut sql)
 			{
 				None
 			}
@@ -44,6 +43,7 @@ impl PersonAdapter for PostgresPerson
 			{
 				PREFIX_WHERE_CLAUSE
 			},
+			"name",
 			&query.name,
 			&mut sql,
 		);

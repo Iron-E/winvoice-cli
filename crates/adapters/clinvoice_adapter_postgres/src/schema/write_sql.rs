@@ -6,6 +6,7 @@ use std::{
 
 use clinvoice_adapter::WriteSql;
 use clinvoice_query::{Match, MatchStr};
+use clinvoice_schema::EmployeeStatus;
 
 use super::PostgresSchema;
 
@@ -124,10 +125,65 @@ impl WriteSql<Match<'_, i64>> for PostgresSchema
 	}
 }
 
+impl WriteSql<Match<'_, EmployeeStatus>> for PostgresSchema
+{
+	fn write_where(
+		prefix: Option<&'static str>,
+		column: &'static str,
+		query: &Match<'_, EmployeeStatus>,
+		sql: &mut String,
+	) -> bool
+	{
+		match query
+		{
+			Match::AllGreaterThan(status) | Match::GreaterThan(status) =>
+			{
+				write!(sql, " {} {} > '{}'", prefix.unwrap_or_default(), column, status).unwrap()
+			},
+			Match::AllLessThan(status) | Match::LessThan(status) =>
+			{
+				write!(sql, " {} {} < '{}'", prefix.unwrap_or_default(), column, status).unwrap()
+			},
+			Match::AllInRange(low, high) | Match::InRange(low, high) => write!(
+				sql,
+				" {} {} <= '{column}' AND '{column}' < {}",
+				prefix.unwrap_or_default(),
+				low,
+				high,
+				column = column,
+			)
+			.unwrap(),
+			Match::And(queries) => write_boolean_group(prefix, column, queries, sql, false),
+			Match::Any => return false,
+			Match::EqualTo(status) => write!(sql, " {} {} = '{}'", prefix.unwrap_or_default(), column, status).unwrap(),
+			Match::HasAll(ids) =>
+			{
+				let mut iter = ids.iter();
+				iter.next().map(|status| {
+					write!(sql, " {} {} = ALL(ARRAY['{}'", prefix.unwrap_or_default(), column, status).unwrap()
+				});
+				iter.for_each(|status| write!(sql, ", '{}'", status).unwrap());
+				write!(sql, "])").unwrap();
+			},
+			Match::HasAny(ids) =>
+			{
+				let mut iter = ids.iter();
+				iter
+					.next()
+					.map(|status| write!(sql, " {} {} IN ('{}'", prefix.unwrap_or_default(), column, status).unwrap());
+				iter.for_each(|status| write!(sql, ", '{}'", status).unwrap());
+				write!(sql, ")").unwrap();
+			},
+			Match::Not(query) => write_negated(prefix, column, query, sql),
+			Match::Or(queries) => write_boolean_group(prefix, column, queries, sql, false),
+		};
+		true
+	}
+}
+
 impl WriteSql<MatchStr<String>> for PostgresSchema
 {
 	fn write_where(
-		column: &'static str,
 		prefix: Option<&'static str>,
 		column: &'static str,
 		query: &MatchStr<String>,

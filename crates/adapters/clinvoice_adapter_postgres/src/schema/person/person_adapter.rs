@@ -1,6 +1,9 @@
-use std::fmt::Write;
-
-use clinvoice_adapter::{schema::PersonAdapter, WriteSql};
+use clinvoice_adapter::{
+	schema::PersonAdapter,
+	WriteSqlFromClause,
+	WriteSqlSelectClause,
+	WriteSqlWhereClause,
+};
 use clinvoice_query as query;
 use clinvoice_schema::{views::PersonView, Person};
 use futures::stream::TryStreamExt;
@@ -29,13 +32,13 @@ impl PersonAdapter for PostgresPerson
 		query: &query::Person,
 	) -> Result<Vec<PersonView>>
 	{
-		let mut sql = String::with_capacity(21);
-		write!(sql, "SELECT * FROM people").unwrap();
+		let mut sql = PostgresSchema::write_sql_select_clause(["*"]);
+		PostgresSchema::write_sql_from_clause(&mut sql, "people", None);
 
 		const PREFIX_WHERE_CLAUSE: Option<&str> = Some("WHERE");
 
-		PostgresSchema::write_where(
-			if PostgresSchema::write_where(PREFIX_WHERE_CLAUSE, "id", &query.id, &mut sql)
+		PostgresSchema::write_sql_where_clause(
+			if PostgresSchema::write_sql_where_clause(PREFIX_WHERE_CLAUSE, "id", &query.id, &mut sql)
 			{
 				None
 			}

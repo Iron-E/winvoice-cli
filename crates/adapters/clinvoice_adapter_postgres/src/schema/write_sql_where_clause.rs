@@ -3,18 +3,18 @@ use std::{
 	ops::Deref,
 };
 
-use clinvoice_adapter::WriteSql;
+use clinvoice_adapter::WriteSqlWhereClause;
 use clinvoice_query::{Match, MatchStr};
 
 use super::PostgresSchema;
 
 /// # Summary
 ///
-/// Write multiple `AND`/`OR` `queries`.
+/// Write multiple `AND`/`OR` `match_conditions`.
 ///
-/// * If `union` is `true`, the `queries` are separated by `AND`:
+/// * If `union` is `true`, the `match_conditions` are separated by `AND`:
 ///   `[Match::EqualTo(3), Match::LessThan(4)]` is interpreted as `(foo = 3 AND foo < 4)`.
-/// * If `union` is `false`, the `queries` are separated by `OR`:
+/// * If `union` is `false`, the `match_conditions` are separated by `OR`:
 ///   `[Match::EqualTo(3), Match::LessThan(4)]` is interpreted as `(foo = 3 OR foo < 4)`.
 ///
 /// NOTE: the above is not proper [`Match`] syntax, since they need to wrap their inner value in a
@@ -24,19 +24,19 @@ use super::PostgresSchema;
 fn write_boolean_group<Q>(
 	prefix: Option<&'static str>,
 	column: &'static str,
-	queries: &[Q],
+	match_conditions: &[Q],
 	union: bool,
 	sql: &mut String,
 ) where
-	PostgresSchema: WriteSql<Q>,
+	PostgresSchema: WriteSqlWhereClause<Q>,
 {
 	prefix.map(|p| write!(sql, " {}", p).unwrap());
-	queries
+	match_conditions
 		.first()
-		.map(|q| PostgresSchema::write_where(Some("("), column, q, sql));
+		.map(|q| PostgresSchema::write_sql_where_clause(Some("("), column, q, sql));
 	let separator = Some(if union { "AND" } else { "OR" });
-	queries.iter().skip(1).for_each(|q| {
-		PostgresSchema::write_where(separator, column, q, sql);
+	match_conditions.iter().skip(1).for_each(|q| {
+		PostgresSchema::write_sql_where_clause(separator, column, q, sql);
 	});
 	write!(sql, ")").unwrap();
 }
@@ -111,32 +111,32 @@ fn write_has<'t, T>(
 
 /// # Summary
 ///
-/// Wrap some `query` in `NOT (…)`.
+/// Wrap some `match_condition` in `NOT (…)`.
 ///
 /// The args are the same as [`WriteSql::write_where`].
 fn write_negated<Q>(
 	prefix: Option<&'static str>,
 	column: &'static str,
-	query: &Box<Q>,
+	match_condition: &Box<Q>,
 	sql: &mut String,
 ) where
-	PostgresSchema: WriteSql<Q>,
+	PostgresSchema: WriteSqlWhereClause<Q>,
 {
 	prefix.map(|p| write!(sql, " {}", p).unwrap());
-	PostgresSchema::write_where(Some("NOT ("), column, query.deref(), sql);
+	PostgresSchema::write_sql_where_clause(Some("NOT ("), column, match_condition.deref(), sql);
 	write!(sql, ") ").unwrap();
 }
 
-impl WriteSql<Match<'_, i64>> for PostgresSchema
+impl WriteSqlWhereClause<Match<'_, i64>> for PostgresSchema
 {
-	fn write_where(
+	fn write_sql_where_clause(
 		prefix: Option<&'static str>,
 		column: &'static str,
-		query: &Match<'_, i64>,
+		match_condition: &Match<'_, i64>,
 		sql: &mut String,
 	) -> bool
 	{
-		match query
+		match match_condition
 		{
 			Match::AllGreaterThan(id) | Match::GreaterThan(id) =>
 			{
@@ -151,30 +151,39 @@ impl WriteSql<Match<'_, i64>> for PostgresSchema
 				write_comparison(prefix, column, ">=", low, sql);
 				write_comparison(Some("AND"), column, "<", high, sql);
 			},
-			Match::And(queries) => write_boolean_group(prefix, column, queries, true, sql),
+			Match::And(match_conditions) =>
+			{
+				write_boolean_group(prefix, column, match_conditions, true, sql)
+			},
 			Match::Any => return false,
 			Match::EqualTo(id) => write_comparison(prefix, column, "=", id, sql),
 			Match::HasAll(ids) => write_has(prefix, column, ids, true, sql),
 			Match::HasAny(ids) => write_has(prefix, column, ids, false, sql),
-			Match::Not(query) => write_negated(prefix, column, query, sql),
-			Match::Or(queries) => write_boolean_group(prefix, column, queries, false, sql),
+			Match::Not(match_condition) => write_negated(prefix, column, match_condition, sql),
+			Match::Or(match_conditions) =>
+			{
+				write_boolean_group(prefix, column, match_conditions, false, sql)
+			},
 		};
 		true
 	}
 }
 
-impl WriteSql<MatchStr<String>> for PostgresSchema
+impl WriteSqlWhereClause<MatchStr<String>> for PostgresSchema
 {
-	fn write_where(
+	fn write_sql_where_clause(
 		prefix: Option<&'static str>,
 		column: &'static str,
-		query: &MatchStr<String>,
+		match_condition: &MatchStr<String>,
 		sql: &mut String,
 	) -> bool
 	{
-		match query
+		match match_condition
 		{
-			MatchStr::And(queries) => write_boolean_group(prefix, column, queries, true, sql),
+			MatchStr::And(match_conditions) =>
+			{
+				write_boolean_group(prefix, column, match_conditions, true, sql)
+			},
 			MatchStr::Any => return false,
 			MatchStr::Contains(string) => write!(
 				sql,
@@ -185,8 +194,11 @@ impl WriteSql<MatchStr<String>> for PostgresSchema
 			)
 			.unwrap(),
 			MatchStr::EqualTo(string) => write_comparison(prefix, column, "=", string, sql),
-			MatchStr::Not(query) => write_negated(prefix, column, query, sql),
-			MatchStr::Or(queries) => write_boolean_group(prefix, column, queries, false, sql),
+			MatchStr::Not(match_condition) => write_negated(prefix, column, match_condition, sql),
+			MatchStr::Or(match_conditions) =>
+			{
+				write_boolean_group(prefix, column, match_conditions, false, sql)
+			},
 			MatchStr::Regex(regex) => write_comparison(prefix, column, "~", regex, sql),
 		};
 		true

@@ -12,7 +12,10 @@ mod person;
 mod timesheet;
 #[cfg(test)]
 mod util;
-mod write_sql;
+mod write_sql_from_clause;
+mod write_sql_join_clause;
+mod write_sql_select_clause;
+mod write_sql_where_clause;
 
 pub use employee::PostgresEmployee;
 pub use job::PostgresJob;

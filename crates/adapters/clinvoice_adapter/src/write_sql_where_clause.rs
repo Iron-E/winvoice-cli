@@ -1,4 +1,10 @@
-pub trait WriteSql<Q>
+/// # Summary
+///
+/// A trait to generate SQL `WHERE` clauses.
+///
+/// Helpful so that multiple implementations of the [`write_sql_where_clause`] method can be
+/// created for a builder.
+pub trait WriteSqlWhereClause<M>
 {
 	/// # Summary
 	///
@@ -10,10 +16,10 @@ pub trait WriteSql<Q>
 	/// # Returns
 	///
 	/// `true` if anything was written (i.e. `query !=` [`clinvoice_query::Match::Any`]), `false` otherwise.
-	fn write_where(
+	fn write_sql_where_clause(
 		prefix: Option<&'static str>,
 		column: &'static str,
-		query: &Q,
+		match_condition: &M,
 		sql: &mut String,
 	) -> bool;
 }

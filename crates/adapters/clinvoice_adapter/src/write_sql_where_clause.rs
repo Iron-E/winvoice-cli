@@ -1,5 +1,11 @@
 /// # Summary
 ///
+/// A constant to pass to [`write_sql_where_clause`](WriteSqlWhereClause::write_sql_where_clause) which will put `"WHERE"` in front of the
+/// clause.
+pub const PREFIX_WHERE: Option<&str> = Some("WHERE");
+
+/// # Summary
+///
 /// A trait to generate SQL `WHERE` clauses.
 ///
 /// Helpful so that multiple implementations of the [`write_sql_where_clause`] method can be

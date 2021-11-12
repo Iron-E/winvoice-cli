@@ -95,7 +95,7 @@ impl EmployeeAdapter for PostgresEmployee
 
 	async fn retrieve_view(
 		connection: impl 'async_trait + Executor<'_, Database = Postgres>,
-		query: &query::Employee,
+		match_condition: &query::Employee,
 	) -> Result<Vec<EmployeeView>>
 	{
 		todo!()

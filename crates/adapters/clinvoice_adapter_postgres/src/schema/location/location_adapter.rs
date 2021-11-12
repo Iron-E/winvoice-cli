@@ -51,7 +51,7 @@ impl LocationAdapter for PostgresLocation
 	// WARN: `Might need `Acquire` or `&mut Transaction` depending on how recursive views work
 	async fn retrieve_view(
 		connection: impl 'async_trait + Acquire<'_, Database = Postgres> + Send,
-		query: &query::Location,
+		match_condition: &query::Location,
 	) -> Result<Vec<LocationView>>
 	{
 		todo!()

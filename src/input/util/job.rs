@@ -34,9 +34,9 @@ where
 {
 	loop
 	{
-		let query: query::Job = input::edit_default(format!("{}\n{}jobs", prompt, QUERY_PROMPT))?;
+		let match_condition: query::Job = input::edit_default(format!("{}\n{}jobs", prompt, QUERY_PROMPT))?;
 
-		let results = JAdapter::retrieve_view(connection, &query).await?;
+		let results = JAdapter::retrieve_view(connection, &match_condition).await?;
 
 		if retry_on_empty && results.is_empty() && menu::ask_to_retry()?
 		{

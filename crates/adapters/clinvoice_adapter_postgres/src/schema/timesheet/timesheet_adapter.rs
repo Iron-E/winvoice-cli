@@ -50,7 +50,7 @@ impl TimesheetAdapter for PostgresTimesheet
 
 	async fn retrieve_view(
 		connection: impl 'async_trait + Executor<'_, Database = Postgres>,
-		query: &query::Timesheet,
+		match_condition: &query::Timesheet,
 	) -> Result<Vec<TimesheetView>>
 	{
 		todo!()

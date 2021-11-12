@@ -47,6 +47,6 @@ pub trait JobAdapter:
 	/// * A list of matching [`JobView`]s.
 	async fn retrieve_view(
 		connection: impl 'async_trait + Executor<'_, Database = <Self as Deletable>::Db>,
-		query: &query::Job,
+		match_condition: &query::Job,
 	) -> Result<Vec<JobView>>;
 }

@@ -30,14 +30,14 @@ impl PersonAdapter for PostgresPerson
 
 	async fn retrieve_view(
 		connection: impl 'async_trait + Executor<'_, Database = Postgres>,
-		query: &query::Person,
+		match_condition: &query::Person,
 	) -> Result<Vec<PersonView>>
 	{
 		let mut sql = PostgresSchema::write_sql_select_clause([]);
 		PostgresSchema::write_sql_from_clause(&mut sql, "people", "");
 
 		PostgresSchema::write_sql_where_clause(
-			if PostgresSchema::write_sql_where_clause(PREFIX_WHERE, "id", &query.id, &mut sql)
+			if PostgresSchema::write_sql_where_clause(PREFIX_WHERE, "id", &match_condition.id, &mut sql)
 			{
 				None
 			}
@@ -46,7 +46,7 @@ impl PersonAdapter for PostgresPerson
 				PREFIX_WHERE
 			},
 			"name",
-			&query.name,
+			&match_condition.name,
 			&mut sql,
 		);
 

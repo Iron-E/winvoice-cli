@@ -34,10 +34,10 @@ where
 {
 	loop
 	{
-		let query: query::Location =
+		let match_condition: query::Location =
 			input::edit_default(format!("{}\n{}locations", prompt, QUERY_PROMPT))?;
 
-		let results = LAdapter::retrieve_view(connection, &query).await?;
+		let results = LAdapter::retrieve_view(connection, &match_condition).await?;
 
 		if retry_on_empty && results.is_empty() && menu::ask_to_retry()?
 		{

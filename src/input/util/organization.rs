@@ -34,10 +34,10 @@ where
 {
 	loop
 	{
-		let query: query::Organization =
+		let match_condition: query::Organization =
 			input::edit_default(format!("{}\n{}organizations", prompt, QUERY_PROMPT))?;
 
-		let results = OAdapter::retrieve_view(connection, &query).await?;
+		let results = OAdapter::retrieve_view(connection, &match_condition).await?;
 
 		if retry_on_empty && results.is_empty() && menu::ask_to_retry()?
 		{

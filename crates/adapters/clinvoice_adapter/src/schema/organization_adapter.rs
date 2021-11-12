@@ -36,6 +36,6 @@ pub trait OrganizationAdapter:
 	/// * A list of matching [`OrganizationView`]s.
 	async fn retrieve_view(
 		connection: impl 'async_trait + Executor<'_, Database = <Self as Deletable>::Db>,
-		query: &query::Organization,
+		match_condition: &query::Organization,
 	) -> Result<Vec<OrganizationView>>;
 }

@@ -34,10 +34,10 @@ where
 {
 	loop
 	{
-		let query: query::Person =
+		let match_condition: query::Person =
 			input::edit_default(format!("{}\n{}persons", prompt, QUERY_PROMPT))?;
 
-		let results = PAdapter::retrieve_view(connection, &query).await?;
+		let results = PAdapter::retrieve_view(connection, &match_condition).await?;
 
 		if retry_on_empty && results.is_empty() && menu::ask_to_retry()?
 		{

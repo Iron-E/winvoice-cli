@@ -31,7 +31,7 @@ impl OrganizationAdapter for PostgresOrganization
 
 	async fn retrieve_view(
 		connection: impl 'async_trait + Executor<'_, Database = Postgres>,
-		query: &query::Organization,
+		match_condition: &query::Organization,
 	) -> Result<Vec<OrganizationView>>
 	{
 		todo!()

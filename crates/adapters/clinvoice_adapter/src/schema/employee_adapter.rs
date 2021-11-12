@@ -53,6 +53,6 @@ pub trait EmployeeAdapter:
 	/// * An [`Error`], should something go wrong.
 	async fn retrieve_view(
 		connection: impl 'async_trait + Executor<'_, Database = <Self as Deletable>::Db>,
-		query: &query::Employee,
+		match_condition: &query::Employee,
 	) -> Result<Vec<EmployeeView>>;
 }

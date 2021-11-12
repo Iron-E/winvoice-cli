@@ -66,7 +66,7 @@ impl JobAdapter for PostgresJob
 
 	async fn retrieve_view(
 		connection: impl 'async_trait + Executor<'_, Database = Postgres>,
-		query: &query::Job,
+		match_condition: &query::Job,
 	) -> Result<Vec<JobView>>
 	{
 		todo!()

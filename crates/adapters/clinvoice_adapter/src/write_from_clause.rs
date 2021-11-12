@@ -4,9 +4,9 @@ use std::fmt::Write;
 ///
 /// A trait to generate SQL `from` clauses.
 ///
-/// Helpful so that multiple implementations of the [`write_sql_from_clause`] method can be
+/// Helpful so that multiple implementations of the [`write_from_clause`] method can be
 /// created for a builder.
-pub trait WriteSqlFromClause
+pub trait WriteFromClause
 {
 	/// # Summary
 	///
@@ -25,7 +25,7 @@ pub trait WriteSqlFromClause
 	/// ```ignore
 	/// FROM foo F
 	/// ```
-	fn write_sql_from_clause(query: &mut String, table: &'static str, alias: &'static str)
+	fn write_from_clause(query: &mut String, table: &'static str, alias: &'static str)
 	{
 		write!(query, " FROM {} {}", table, alias).unwrap()
 	}
@@ -34,20 +34,20 @@ pub trait WriteSqlFromClause
 #[cfg(test)]
 mod tests
 {
-	use super::WriteSqlFromClause;
+	use super::WriteFromClause;
 
 	#[test]
-	fn write_sql_from_clause()
+	fn write_from_clause()
 	{
 		struct Foo;
-		impl WriteSqlFromClause for Foo {}
+		impl WriteFromClause for Foo {}
 
 		let mut test = String::new();
-		Foo::write_sql_from_clause(&mut test, "foo", "F");
+		Foo::write_from_clause(&mut test, "foo", "F");
 		assert_eq!(test, String::from(" FROM foo F"),);
 
 		test.clear();
-		Foo::write_sql_from_clause(&mut test, "foo", "");
+		Foo::write_from_clause(&mut test, "foo", "");
 		assert_eq!(test, String::from(" FROM foo "),);
 	}
 }

@@ -4,9 +4,9 @@ use std::fmt::{Error, Result, Write};
 ///
 /// A trait to generate SQL `JOIN` clauses.
 ///
-/// Helpful so that multiple implementations of the [`write_sql_join_clause`] method can be
+/// Helpful so that multiple implementations of the [`write_join_clause`] method can be
 /// specified.
-pub trait WriteSqlJoinClause
+pub trait WriteJoinClause
 {
 	/// # Summary
 	///
@@ -31,7 +31,7 @@ pub trait WriteSqlJoinClause
 	/// ```ignore
 	/// JOIN bar B ON (B.foo_id = F.id)
 	/// ```
-	fn write_sql_join_clause(
+	fn write_join_clause(
 		query: &mut String,
 		join_table: &'static str,
 		join_alias: &'static str,
@@ -58,19 +58,19 @@ pub trait WriteSqlJoinClause
 #[cfg(test)]
 mod tests
 {
-	use super::{Error, WriteSqlJoinClause};
+	use super::{Error, WriteJoinClause};
 
 	#[test]
-	fn write_sql_join_clause()
+	fn write_join_clause()
 	{
 		struct Foo;
-		impl WriteSqlJoinClause for Foo {}
+		impl WriteJoinClause for Foo {}
 
 		let mut test = String::new();
-		Foo::write_sql_join_clause(&mut test, "bar", "B", "foo_id", "F.id").unwrap();
+		Foo::write_join_clause(&mut test, "bar", "B", "foo_id", "F.id").unwrap();
 		assert_eq!(test, String::from(" JOIN bar B ON (B.foo_id = F.id)"));
 		assert_eq!(
-			Foo::write_sql_join_clause(&mut test, "bar", "", "foo_id", "F.id"),
+			Foo::write_join_clause(&mut test, "bar", "", "foo_id", "F.id"),
 			Err(Error)
 		);
 	}

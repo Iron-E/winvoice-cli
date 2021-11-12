@@ -3,7 +3,7 @@ use std::{
 	ops::Deref,
 };
 
-use clinvoice_adapter::WriteSqlWhereClause;
+use clinvoice_adapter::WriteWhereClause;
 use clinvoice_query::{Match, MatchStr};
 
 use super::PostgresSchema;
@@ -28,7 +28,7 @@ fn write_boolean_group<Q>(
 	union: bool,
 	query: &mut String,
 ) where
-	PostgresSchema: WriteSqlWhereClause<Q>,
+	PostgresSchema: WriteWhereClause<Q>,
 {
 	if let Some(p) = prefix
 	{
@@ -37,12 +37,12 @@ fn write_boolean_group<Q>(
 
 	if let Some(m) = match_conditions.first()
 	{
-		PostgresSchema::write_sql_where_clause(Some("("), column, m, query);
+		PostgresSchema::write_where_clause(Some("("), column, m, query);
 	}
 
 	let separator = Some(if union { "AND" } else { "OR" });
 	match_conditions.iter().skip(1).for_each(|q| {
-		PostgresSchema::write_sql_where_clause(separator, column, q, query);
+		PostgresSchema::write_where_clause(separator, column, q, query);
 	});
 
 	query.push(')');
@@ -130,21 +130,21 @@ fn write_negated<Q>(
 	match_condition: &Q,
 	query: &mut String,
 ) where
-	PostgresSchema: WriteSqlWhereClause<Q>,
+	PostgresSchema: WriteWhereClause<Q>,
 {
 	if let Some(p) = prefix
 	{
 		write!(query, " {}", p).unwrap()
 	}
 
-	PostgresSchema::write_sql_where_clause(Some("NOT ("), column, match_condition.deref(), query);
+	PostgresSchema::write_where_clause(Some("NOT ("), column, match_condition.deref(), query);
 
 	query.push(')');
 }
 
-impl WriteSqlWhereClause<Match<'_, i64>> for PostgresSchema
+impl WriteWhereClause<Match<'_, i64>> for PostgresSchema
 {
-	fn write_sql_where_clause(
+	fn write_where_clause(
 		prefix: Option<&'static str>,
 		column: &'static str,
 		match_condition: &Match<'_, i64>,
@@ -187,9 +187,9 @@ impl WriteSqlWhereClause<Match<'_, i64>> for PostgresSchema
 	}
 }
 
-impl WriteSqlWhereClause<MatchStr<String>> for PostgresSchema
+impl WriteWhereClause<MatchStr<String>> for PostgresSchema
 {
-	fn write_sql_where_clause(
+	fn write_where_clause(
 		prefix: Option<&'static str>,
 		column: &'static str,
 		match_condition: &MatchStr<String>,

@@ -1,8 +1,8 @@
 use clinvoice_adapter::{
 	schema::PersonAdapter,
-	WriteSqlFromClause,
-	WriteSqlSelectClause,
-	WriteSqlWhereClause,
+	WriteFromClause,
+	WriteSelectClause,
+	WriteWhereClause,
 	PREFIX_WHERE,
 };
 use clinvoice_query as query;
@@ -33,16 +33,11 @@ impl PersonAdapter for PostgresPerson
 		match_condition: &query::Person,
 	) -> Result<Vec<PersonView>>
 	{
-		let mut query = PostgresSchema::write_sql_select_clause([]);
-		PostgresSchema::write_sql_from_clause(&mut query, "people", "");
+		let mut query = PostgresSchema::write_select_clause([]);
+		PostgresSchema::write_from_clause(&mut query, "people", "");
 
-		PostgresSchema::write_sql_where_clause(
-			if PostgresSchema::write_sql_where_clause(
-				PREFIX_WHERE,
-				"id",
-				&match_condition.id,
-				&mut query,
-			)
+		PostgresSchema::write_where_clause(
+			if PostgresSchema::write_where_clause(PREFIX_WHERE, "id", &match_condition.id, &mut query)
 			{
 				None
 			}

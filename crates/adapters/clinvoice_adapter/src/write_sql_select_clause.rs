@@ -9,18 +9,14 @@ pub trait WriteSqlSelectClause
 	/// # Summary
 	///
 	/// Return an SQL `SELECT` clause for the `columns` specified.
+	///
+	/// If no `columns` are specified, then it will return all columns (`SELECT *`).
 	fn write_sql_select_clause<const LEN: usize>(columns: [&'static str; LEN]) -> String
 	{
-		if !columns.is_empty()
-		{
-			let mut output = columns.join(",");
-			output.insert_str(0, "SELECT ");
-			output
-		}
-		else
-		{
-			Self::write_sql_select_clause(["*"])
-		}
+		let mut output = columns.join(",");
+		if output.is_empty() { output.push('*') }
+		output.insert_str(0, "SELECT ");
+		output
 	}
 }
 

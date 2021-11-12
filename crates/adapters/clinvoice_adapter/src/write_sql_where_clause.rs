@@ -14,7 +14,8 @@ pub trait WriteSqlWhereClause<M>
 {
 	/// # Summary
 	///
-	/// Generate an `sql` `WHERE` clause for the `column` specified.
+	/// Generate an SQL `WHERE` clause for the `column` specified, and append it to the existing
+	/// `query`.
 	///
 	/// PERF: `prefix` is used to reduce the number of [`write!`] by packing more formatting
 	///       arguments into the same [`write!`].
@@ -26,6 +27,6 @@ pub trait WriteSqlWhereClause<M>
 		prefix: Option<&'static str>,
 		column: &'static str,
 		match_condition: &M,
-		sql: &mut String,
+		query: &mut String,
 	) -> bool;
 }

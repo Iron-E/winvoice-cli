@@ -10,7 +10,7 @@ pub trait WriteSqlFromClause
 {
 	/// # Summary
 	///
-	/// Generate an SQL `FROM` clause to pull data from a `table`, and [`write!`] it to the existing `sql`.
+	/// Generate an SQL `FROM` clause to pull data from a `table`, and [`write!`] it to the existing `query`.
 	///
 	/// You may `alias` a `table` in order to use it in a `JOIN` clause. Otherwise, let `alias` be
 	/// an empty `&str`.
@@ -25,9 +25,9 @@ pub trait WriteSqlFromClause
 	/// ```ignore
 	/// FROM foo F
 	/// ```
-	fn write_sql_from_clause(sql: &mut String, table: &'static str, alias: &'static str)
+	fn write_sql_from_clause(query: &mut String, table: &'static str, alias: &'static str)
 	{
-		write!(sql, " FROM {} {}", table, alias).unwrap()
+		write!(query, " FROM {} {}", table, alias).unwrap()
 	}
 }
 

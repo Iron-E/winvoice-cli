@@ -10,7 +10,7 @@ pub trait WriteSqlJoinClause
 {
 	/// # Summary
 	///
-	/// Generate an SQL `JOIN` clause to join two tables, and [`write!`] it to the existing `sql`.
+	/// Generate an SQL `JOIN` clause to join two tables, and [`write!`] it to the existing `query`.
 	///
 	/// The `join_table` must be given a `join_alias` so that it can be referenced on the
 	/// `join_column`. The `base_column` is assumed to have its alias included.
@@ -32,7 +32,7 @@ pub trait WriteSqlJoinClause
 	/// JOIN bar B ON (B.foo_id = F.id)
 	/// ```
 	fn write_sql_join_clause(
-		sql: &mut String,
+		query: &mut String,
 		join_table: &'static str,
 		join_alias: &'static str,
 		join_column: &'static str,
@@ -45,7 +45,7 @@ pub trait WriteSqlJoinClause
 		}
 
 		write!(
-			sql,
+			query,
 			" JOIN {} {alias} ON ({alias}.{} = {})",
 			join_table,
 			join_column,

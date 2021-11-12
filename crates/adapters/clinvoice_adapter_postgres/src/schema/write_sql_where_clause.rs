@@ -26,26 +26,26 @@ fn write_boolean_group<Q>(
 	column: &'static str,
 	match_conditions: &[Q],
 	union: bool,
-	sql: &mut String,
+	query: &mut String,
 ) where
 	PostgresSchema: WriteSqlWhereClause<Q>,
 {
 	if let Some(p) = prefix
 	{
-		write!(sql, " {}", p).unwrap()
+		write!(query, " {}", p).unwrap()
 	}
 
 	if let Some(m) = match_conditions.first()
 	{
-		PostgresSchema::write_sql_where_clause(Some("("), column, m, sql);
+		PostgresSchema::write_sql_where_clause(Some("("), column, m, query);
 	}
 
 	let separator = Some(if union { "AND" } else { "OR" });
 	match_conditions.iter().skip(1).for_each(|q| {
-		PostgresSchema::write_sql_where_clause(separator, column, q, sql);
+		PostgresSchema::write_sql_where_clause(separator, column, q, query);
 	});
 
-	sql.push(')');
+	query.push(')');
 }
 
 /// # Summary
@@ -58,11 +58,11 @@ fn write_comparison(
 	column: &'static str,
 	comperator: &'static str,
 	comparand: impl Display,
-	sql: &mut String,
+	query: &mut String,
 )
 {
 	write!(
-		sql,
+		query,
 		" {} {} {} {}",
 		prefix.unwrap_or_default(),
 		column,
@@ -88,7 +88,7 @@ fn write_has<'t, T>(
 	column: &'static str,
 	values: impl IntoIterator<Item = &'t T>,
 	union: bool,
-	sql: &mut String,
+	query: &mut String,
 ) where
 	T: 't + Display,
 {
@@ -97,7 +97,7 @@ fn write_has<'t, T>(
 	if let Some(id) = iter.next()
 	{
 		write!(
-			sql,
+			query,
 			" {} {} = {}{}",
 			if union { "ALL(ARRAY[" } else { "IN (" },
 			prefix.unwrap_or_default(),
@@ -107,15 +107,15 @@ fn write_has<'t, T>(
 		.unwrap()
 	}
 
-	iter.for_each(|id| write!(sql, ", {}", id).unwrap());
+	iter.for_each(|id| write!(query, ", {}", id).unwrap());
 
 	if union
 	{
-		sql.push_str("])")
+		query.push_str("])")
 	}
 	else
 	{
-		sql.push(')')
+		query.push(')')
 	}
 }
 
@@ -128,18 +128,18 @@ fn write_negated<Q>(
 	prefix: Option<&'static str>,
 	column: &'static str,
 	match_condition: &Q,
-	sql: &mut String,
+	query: &mut String,
 ) where
 	PostgresSchema: WriteSqlWhereClause<Q>,
 {
 	if let Some(p) = prefix
 	{
-		write!(sql, " {}", p).unwrap()
+		write!(query, " {}", p).unwrap()
 	}
 
-	PostgresSchema::write_sql_where_clause(Some("NOT ("), column, match_condition.deref(), sql);
+	PostgresSchema::write_sql_where_clause(Some("NOT ("), column, match_condition.deref(), query);
 
-	sql.push(')');
+	query.push(')');
 }
 
 impl WriteSqlWhereClause<Match<'_, i64>> for PostgresSchema
@@ -148,36 +148,39 @@ impl WriteSqlWhereClause<Match<'_, i64>> for PostgresSchema
 		prefix: Option<&'static str>,
 		column: &'static str,
 		match_condition: &Match<'_, i64>,
-		sql: &mut String,
+		query: &mut String,
 	) -> bool
 	{
 		match match_condition
 		{
 			Match::AllGreaterThan(id) | Match::GreaterThan(id) =>
 			{
-				write_comparison(prefix, column, ">", id, sql)
+				write_comparison(prefix, column, ">", id, query)
 			},
 			Match::AllLessThan(id) | Match::LessThan(id) =>
 			{
-				write_comparison(prefix, column, "<", id, sql)
+				write_comparison(prefix, column, "<", id, query)
 			},
 			Match::AllInRange(low, high) | Match::InRange(low, high) =>
 			{
-				write_comparison(prefix, column, ">=", low, sql);
-				write_comparison(Some("AND"), column, "<", high, sql);
+				write_comparison(prefix, column, ">=", low, query);
+				write_comparison(Some("AND"), column, "<", high, query);
 			},
 			Match::And(match_conditions) =>
 			{
-				write_boolean_group(prefix, column, match_conditions, true, sql)
+				write_boolean_group(prefix, column, match_conditions, true, query)
 			},
 			Match::Any => return false,
-			Match::EqualTo(id) => write_comparison(prefix, column, "=", id, sql),
-			Match::HasAll(ids) => write_has(prefix, column, ids, true, sql),
-			Match::HasAny(ids) => write_has(prefix, column, ids, false, sql),
-			Match::Not(match_condition) => write_negated(prefix, column, match_condition.deref(), sql),
+			Match::EqualTo(id) => write_comparison(prefix, column, "=", id, query),
+			Match::HasAll(ids) => write_has(prefix, column, ids, true, query),
+			Match::HasAny(ids) => write_has(prefix, column, ids, false, query),
+			Match::Not(match_condition) =>
+			{
+				write_negated(prefix, column, match_condition.deref(), query)
+			},
 			Match::Or(match_conditions) =>
 			{
-				write_boolean_group(prefix, column, match_conditions, false, sql)
+				write_boolean_group(prefix, column, match_conditions, false, query)
 			},
 		};
 		true
@@ -190,34 +193,34 @@ impl WriteSqlWhereClause<MatchStr<String>> for PostgresSchema
 		prefix: Option<&'static str>,
 		column: &'static str,
 		match_condition: &MatchStr<String>,
-		sql: &mut String,
+		query: &mut String,
 	) -> bool
 	{
 		match match_condition
 		{
 			MatchStr::And(match_conditions) =>
 			{
-				write_boolean_group(prefix, column, match_conditions, true, sql)
+				write_boolean_group(prefix, column, match_conditions, true, query)
 			},
 			MatchStr::Any => return false,
 			MatchStr::Contains(string) => write!(
-				sql,
+				query,
 				" {} {} LIKE '%{}%'",
 				prefix.unwrap_or_default(),
 				column,
 				string,
 			)
 			.unwrap(),
-			MatchStr::EqualTo(string) => write_comparison(prefix, column, "=", string, sql),
+			MatchStr::EqualTo(string) => write_comparison(prefix, column, "=", string, query),
 			MatchStr::Not(match_condition) =>
 			{
-				write_negated(prefix, column, match_condition.deref(), sql)
+				write_negated(prefix, column, match_condition.deref(), query)
 			},
 			MatchStr::Or(match_conditions) =>
 			{
-				write_boolean_group(prefix, column, match_conditions, false, sql)
+				write_boolean_group(prefix, column, match_conditions, false, query)
 			},
-			MatchStr::Regex(regex) => write_comparison(prefix, column, "~", regex, sql),
+			MatchStr::Regex(regex) => write_comparison(prefix, column, "~", regex, query),
 		};
 		true
 	}

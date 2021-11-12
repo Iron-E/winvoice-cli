@@ -14,7 +14,10 @@ pub trait WriteSqlSelectClause
 	fn write_sql_select_clause<const LEN: usize>(columns: [&'static str; LEN]) -> String
 	{
 		let mut output = columns.join(",");
-		if output.is_empty() { output.push('*') }
+		if output.is_empty()
+		{
+			output.push('*')
+		}
 		output.insert_str(0, "SELECT ");
 		output
 	}

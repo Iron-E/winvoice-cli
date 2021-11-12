@@ -33,7 +33,7 @@ impl PersonAdapter for PostgresPerson
 	) -> Result<Vec<PersonView>>
 	{
 		let mut sql = PostgresSchema::write_sql_select_clause(["*"]);
-		PostgresSchema::write_sql_from_clause(&mut sql, "people", None);
+		PostgresSchema::write_sql_from_clause(&mut sql, "people", "");
 
 		const PREFIX_WHERE_CLAUSE: Option<&str> = Some("WHERE");
 

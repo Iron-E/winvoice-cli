@@ -9,5 +9,40 @@ pub trait WriteSqlSelectClause
 	/// # Summary
 	///
 	/// Return an SQL `SELECT` clause for the `columns` specified.
-	fn write_sql_select_clause<const N: usize>(columns: [&'static str; N]) -> String;
+	fn write_sql_select_clause<const LEN: usize>(columns: [&'static str; LEN]) -> String
+	{
+		if !columns.is_empty()
+		{
+			let mut output = columns.join(",");
+			output.insert_str(0, "SELECT ");
+			output
+		}
+		else
+		{
+			Self::write_sql_select_clause(["*"])
+		}
+	}
+}
+
+#[cfg(test)]
+mod tests
+{
+	use super::WriteSqlSelectClause;
+
+	#[test]
+	fn write_sql_select_clause()
+	{
+		struct Foo;
+		impl WriteSqlSelectClause for Foo {}
+
+		assert_eq!(
+			Foo::write_sql_select_clause(["id", "foo"]),
+			String::from("SELECT id,foo"),
+		);
+
+		assert_eq!(
+			Foo::write_sql_select_clause(["*"]),
+			Foo::write_sql_select_clause([]),
+		);
+	}
 }

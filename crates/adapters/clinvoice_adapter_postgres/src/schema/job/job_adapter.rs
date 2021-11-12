@@ -83,7 +83,7 @@ mod tests
 		schema::{EmployeeAdapter, LocationAdapter, OrganizationAdapter, PersonAdapter},
 		Initializable,
 	};
-	use clinvoice_schema::{chrono::Utc, Contact, Currency, Decimal, EmployeeStatus, Money};
+	use clinvoice_schema::{chrono::Utc, Contact, Currency, EmployeeStatus, Money};
 
 	use super::{JobAdapter, PostgresJob};
 	use crate::{

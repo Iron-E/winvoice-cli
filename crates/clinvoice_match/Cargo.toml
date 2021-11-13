@@ -1,9 +1,9 @@
 # See https://doc.rust-lang.org/cargo/reference/manifest.html
 [package]
-name = "clinvoice_query"
+name = "clinvoice_match"
 version = "0.2.1"
 authors = ["Iron-E <code.iron.e@gmail.com>"]
-description = "Query language of CLInvoice."
+description = "Strongly-typed match conditions for CLInvoice"
 
 edition = "2021"
 license = "GPL3"

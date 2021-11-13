@@ -20,26 +20,26 @@
 
 #![allow(clippy::tabs_in_doc_comments)]
 
-mod contact;
-mod employee;
-mod expense;
-mod invoice;
-mod job;
-mod location;
 mod r#match;
+mod match_contact;
+mod match_employee;
+mod match_expense;
+mod match_invoice;
+mod match_job;
+mod match_location;
+mod match_organization;
+mod match_person;
 mod match_str;
-mod organization;
-mod person;
-mod timesheet;
+mod match_timesheet;
 
-pub use contact::Contact;
-pub use employee::Employee;
-pub use expense::Expense;
-pub use invoice::Invoice;
-pub use job::Job;
-pub use location::{Location, OuterLocation};
-pub use match_str::MatchStr;
-pub use organization::Organization;
-pub use person::Person;
 pub use r#match::Match;
-pub use timesheet::Timesheet;
+pub use match_contact::MatchContact;
+pub use match_employee::MatchEmployee;
+pub use match_expense::MatchExpense;
+pub use match_invoice::MatchInvoice;
+pub use match_job::MatchJob;
+pub use match_location::{MatchLocation, MatchOuterLocation};
+pub use match_str::MatchStr;
+pub use match_organization::MatchOrganization;
+pub use match_person::MatchPerson;
+pub use match_timesheet::MatchTimesheet;

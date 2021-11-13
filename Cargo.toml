@@ -23,7 +23,7 @@ clinvoice_adapter_postgres = {path='crates/adapters/clinvoice_adapter_postgres',
 clinvoice_config = {path='crates/clinvoice_config', version="0.3"}
 clinvoice_schema = {path='crates/clinvoice_schema', version="0.6"}
 clinvoice_error = {path='crates/clinvoice_error', version="0.2"}
-clinvoice_query = {path='crates/clinvoice_query', features=["serde_support"], version="0.2"}
+clinvoice_match = {path='crates/clinvoice_match', features=["serde_support"], version="0.2"}
 
 # Database
 sqlx = {features=["runtime-tokio-rustls", "tls"], version="0.5"}
@@ -55,5 +55,5 @@ members = [
 	"crates/clinvoice_schema",
 	"crates/clinvoice_error",
 	"crates/clinvoice_finance",
-	"crates/clinvoice_query",
+	"crates/clinvoice_match",
 ]

@@ -1,22 +1,21 @@
-use clinvoice_schema::{ExpenseCategory, Money};
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 
-use super::{Match, MatchStr};
+use super::{MatchLocation, MatchStr};
 
 /// # Summary
 ///
-/// An [`Invoice`](clinvoice_schema::Invoice) with [matchable](Match) fields.
+/// A method through which something can be communicated with.
 #[derive(Clone, Default, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
-pub struct Expense<'m>
+pub struct MatchContact<'m>
 {
 	#[cfg_attr(feature = "serde_support", serde(default))]
-	pub category: Match<'m, ExpenseCategory>,
+	pub address: MatchLocation<'m>,
 
 	#[cfg_attr(feature = "serde_support", serde(default))]
-	pub cost: Match<'m, Money>,
+	pub email: MatchStr<String>,
 
 	#[cfg_attr(feature = "serde_support", serde(default))]
-	pub description: MatchStr<String>,
+	pub phone: MatchStr<String>,
 }

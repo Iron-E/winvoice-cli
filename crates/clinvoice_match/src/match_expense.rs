@@ -1,22 +1,22 @@
-use clinvoice_schema::{chrono::NaiveDateTime, Money};
+use clinvoice_schema::{ExpenseCategory, Money};
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 
-use super::Match;
+use super::{Match, MatchStr};
 
 /// # Summary
 ///
 /// An [`Invoice`](clinvoice_schema::Invoice) with [matchable](Match) fields.
 #[derive(Clone, Default, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
-pub struct Invoice<'m>
+pub struct MatchExpense<'m>
 {
 	#[cfg_attr(feature = "serde_support", serde(default))]
-	pub issued: Match<'m, Option<NaiveDateTime>>,
+	pub category: Match<'m, ExpenseCategory>,
 
 	#[cfg_attr(feature = "serde_support", serde(default))]
-	pub paid: Match<'m, Option<NaiveDateTime>>,
+	pub cost: Match<'m, Money>,
 
 	#[cfg_attr(feature = "serde_support", serde(default))]
-	pub hourly_rate: Match<'m, Money>,
+	pub description: MatchStr<String>,
 }

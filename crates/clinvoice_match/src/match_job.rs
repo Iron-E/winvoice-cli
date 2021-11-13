@@ -2,17 +2,17 @@ use clinvoice_schema::{chrono::NaiveDateTime, Id};
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 
-use super::{Invoice, Match, MatchStr, Organization};
+use super::{MatchInvoice, Match, MatchStr, MatchOrganization};
 
 /// # Summary
 ///
 /// An [`Job`](clinvoice_schema::Job) with [matchable](Match) fields.
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
-pub struct Job<'m>
+pub struct MatchJob<'m>
 {
 	#[cfg_attr(feature = "serde_support", serde(default))]
-	pub client: Organization<'m>,
+	pub client: MatchOrganization<'m>,
 
 	#[cfg_attr(feature = "serde_support", serde(default))]
 	pub date_close: Match<'m, Option<NaiveDateTime>>,
@@ -24,7 +24,7 @@ pub struct Job<'m>
 	pub id: Match<'m, Id>,
 
 	#[cfg_attr(feature = "serde_support", serde(default))]
-	pub invoice: Invoice<'m>,
+	pub invoice: MatchInvoice<'m>,
 
 	#[cfg_attr(feature = "serde_support", serde(default))]
 	pub notes: MatchStr<String>,

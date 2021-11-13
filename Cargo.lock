@@ -180,7 +180,7 @@ dependencies = [
  "clinvoice_adapter_postgres",
  "clinvoice_config",
  "clinvoice_error",
- "clinvoice_query",
+ "clinvoice_match",
  "clinvoice_schema",
  "dialoguer",
  "futures",
@@ -200,7 +200,7 @@ version = "0.9.0"
 dependencies = [
  "async-trait",
  "clinvoice_error",
- "clinvoice_query",
+ "clinvoice_match",
  "clinvoice_schema",
  "futures",
  "serde",
@@ -215,7 +215,7 @@ dependencies = [
  "async-trait",
  "clinvoice_adapter",
  "clinvoice_error",
- "clinvoice_query",
+ "clinvoice_match",
  "clinvoice_schema",
  "dotenv",
  "futures",
@@ -259,7 +259,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "clinvoice_query"
+name = "clinvoice_match"
 version = "0.2.1"
 dependencies = [
  "clinvoice_error",

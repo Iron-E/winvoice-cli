@@ -2,7 +2,7 @@
 ///
 /// A constant to pass to [`write_where_clause`](WriteWhereClause::write_where_clause) which will put `"WHERE"` in front of the
 /// clause.
-pub const PREFIX_WHERE: Option<&str> = Some("WHERE");
+pub const PREFIX_WHERE: &str = "WHERE";
 
 /// # Summary
 ///
@@ -17,14 +17,13 @@ pub trait WriteWhereClause<M>
 	/// Generate an SQL `WHERE` clause for the `column` specified, and append it to the existing
 	/// `query`.
 	///
-	/// PERF: `prefix` is used to reduce the number of [`write!`] by packing more formatting
-	///       arguments into the same [`write!`].
+	/// Will skip writing the keyword `WHERE` if `keyword_written`.
 	///
 	/// # Returns
 	///
-	/// `true` if anything was written (i.e. `query !=` [`clinvoice_query::Match::Any`]), `false` otherwise.
+	/// `true` if anything was written, `false` otherwise.
 	fn write_where_clause(
-		prefix: Option<&'static str>,
+		keyword_written: bool,
 		column: &'static str,
 		match_condition: &M,
 		query: &mut String,

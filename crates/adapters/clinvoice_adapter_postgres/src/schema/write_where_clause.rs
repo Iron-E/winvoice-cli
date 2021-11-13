@@ -3,10 +3,14 @@ use std::{
 	ops::Deref,
 };
 
-use clinvoice_adapter::{WriteWhereClause, PREFIX_WHERE};
-use clinvoice_query::{Match, MatchStr};
+use clinvoice_adapter::{WriteJoinClause, WriteWhereClause, PREFIX_WHERE};
+use clinvoice_query::{self as query, Match, MatchStr};
 
 use super::PostgresSchema;
+
+const COLUMN_ID: &str = "id";
+const COLUMN_NAME: &str = "name";
+const COLUMN_OUTER_ID: &str = "outer_id";
 
 /// # Summary
 ///
@@ -186,24 +190,135 @@ impl WriteWhereClause<MatchStr<String>> for PostgresSchema
 		{
 			MatchStr::And(match_conditions) =>
 			{
-				write_boolean_group::<_, true>(prefix, column, match_conditions, query)
+				write_boolean_group::<_, true>(query, prefix, column, match_conditions)
 			},
 			MatchStr::Any => return false,
 			MatchStr::Contains(string) =>
 			{
 				write!(query, " {} {} LIKE '%{}%'", prefix, column, string,).unwrap()
 			},
-			MatchStr::EqualTo(string) => write_comparison(prefix, column, "=", string, query),
-			MatchStr::Not(match_condition) =>
+			MatchStr::EqualTo(string) => write_comparison(query, prefix, column, "=", string),
+			MatchStr::Not(match_condition) => match match_condition.deref()
 			{
-				write_negated(prefix, column, match_condition.deref(), query)
+				MatchStr::Any => write!(query, " {} {} IS NULL", prefix, column).unwrap(),
+				m @ _ => write_negated(query, prefix, column, m),
 			},
 			MatchStr::Or(match_conditions) =>
 			{
-				write_boolean_group::<_, false>(prefix, column, match_conditions, query)
+				write_boolean_group::<_, false>(query, prefix, column, match_conditions)
 			},
-			MatchStr::Regex(regex) => write_comparison(prefix, column, "~", regex, query),
+			MatchStr::Regex(regex) => write_comparison(query, prefix, column, "~", regex),
 		};
 		true
+	}
+}
+
+macro_rules! write_where_clause
+{
+	($query:ident, $keyword_written:expr, $column:ident, $alias:ident, $match_column:expr) =>
+	{
+		if $alias.is_empty()
+		{
+			PostgresSchema::write_where_clause(
+				$keyword_written,
+				$column,
+				&$match_column,
+				query,
+			)
+		}
+		else
+		{
+			PostgresSchema::write_where_clause(
+				$keyword_written,
+				&format!("{}.{}", $alias, $column),
+				&$match_column,
+				query,
+			)
+		}
+	}
+}
+
+impl PostgresSchema
+{
+	/// # Summary
+	///
+	/// Write a `WHERE` clause for a [`Person`](clinvoice_schema::Person) based on a
+	/// `match_condition`. An `alias` can be set to assist in a previous join. The result will be
+	/// appended to a `query`.
+	pub fn write_person_where_clause(
+		query: &mut String,
+		alias: &str,
+		keyword_written: bool,
+		match_condition: &query::Person,
+	)
+	{
+		write_where_clause!(
+			query,
+			write_where_clause!(query, keyword_written, COLUMN_ID, alias, match_condition.id),
+			COLUMN_NAME,
+			alias,
+			match_condition.id
+		);
+	}
+
+	/// # Summary
+	///
+	/// Write a `WHERE` clause for a [`Location`](clinvoice_schema::Location) based on a
+	/// `match_condition`. An `alias` can be set to assist in a previous join. The result will be
+	/// appended to a `query`.
+	pub fn write_location_join_where_clause(
+		query: &mut String,
+		keyword_written: bool,
+		match_condition: &query::Location,
+	)
+	{
+		fn recurse(
+			query: &mut String,
+			alias: &str,
+			mut keyword_written: bool,
+			match_condition: &query::Location,
+		) -> bool
+		{
+			let base_column_id = format!("{}.{}", alias, COLUMN_ID);
+			keyword_written |= match match_condition.outer
+			{
+				query::OuterLocation::Any => false,
+				query::OuterLocation::None =>
+				{
+					PostgresSchema::write_where_clause(
+						keyword_written,
+						&format!("{}.{}", alias, COLUMN_OUTER_ID),
+						&Match::Not(Match::Any.into()),
+						query,
+					)
+				},
+				query::OuterLocation::Some(ref outer) =>
+				{
+					let new_alias = format!("L{}", alias);
+					PostgresSchema::write_join_clause(query, "", "locations", &new_alias, "outer_id", &base_column_id);
+					recurse(query, &new_alias, keyword_written, outer.deref())
+				},
+			};
+
+			PostgresSchema::write_where_clause(
+				PostgresSchema::write_where_clause(
+					keyword_written,
+					&base_column_id,
+					&match_condition.id,
+					query,
+				),
+				&format!("{}.{}", alias, COLUMN_NAME),
+				&match_condition.name,
+				query,
+			)
+
+			// SELECT L.id, L.name, L.outer_id
+			// FROM locations L
+			// JOIN locations O ON (O.id = L.outer_id)
+			// JOIN locations OO ON (OO.id = O.outer_id)
+			// ;
+		}
+
+		recurse(query, "L", keyword_written, match_condition);
 	}
 }

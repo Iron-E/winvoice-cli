@@ -18,13 +18,9 @@ pub trait WriteWhereClause<M>
 	/// `query`.
 	///
 	/// Will skip writing the keyword `WHERE` if `keyword_written`.
-	///
-	/// # Returns
-	///
-	/// `true` if anything was written, `false` otherwise.
 	fn write_where_clause(
 		keyword_written: bool,
-		column: &'static str,
+		column: &str,
 		match_condition: &M,
 		query: &mut String,
 	) -> bool;

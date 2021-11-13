@@ -25,7 +25,7 @@ pub trait WriteFromClause
 	/// ```ignore
 	/// FROM foo F
 	/// ```
-	fn write_from_clause(query: &mut String, table: &'static str, alias: &'static str)
+	fn write_from_clause(query: &mut String, table: &str, alias: &str)
 	{
 		write!(query, " FROM {} {}", table, alias).unwrap()
 	}

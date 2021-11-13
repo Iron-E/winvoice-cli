@@ -34,11 +34,11 @@ pub trait WriteJoinClause
 	/// ```
 	fn write_join_clause(
 		query: &mut String,
-		join: &'static str,
-		join_table: &'static str,
-		join_alias: &'static str,
-		join_column: &'static str,
-		base_column: &'static str,
+		join: &str,
+		join_table: &str,
+		join_alias: &str,
+		join_column: &str,
+		base_column: &str,
 	) -> Result
 	{
 		if join_alias.is_empty()

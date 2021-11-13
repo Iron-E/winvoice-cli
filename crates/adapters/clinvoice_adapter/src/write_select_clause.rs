@@ -11,7 +11,7 @@ pub trait WriteSelectClause
 	/// Return an SQL `SELECT` clause for the `columns` specified.
 	///
 	/// If no `columns` are specified, then it will return all columns (`SELECT *`).
-	fn write_select_clause<const LEN: usize>(columns: [&'static str; LEN]) -> String
+	fn write_select_clause<const LEN: usize>(columns: [&str; LEN]) -> String
 	{
 		let mut output = columns.join(",");
 		if output.is_empty()

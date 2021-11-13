@@ -1,9 +1,16 @@
-use clinvoice_adapter::schema::LocationAdapter;
+use clinvoice_adapter::{
+	schema::LocationAdapter,
+	WriteFromClause,
+	WriteSelectClause,
+	WriteWhereClause,
+	PREFIX_WHERE,
+};
 use clinvoice_query as query;
 use clinvoice_schema::{views::LocationView, Location};
 use sqlx::{Acquire, Executor, Postgres, Result};
 
 use super::PostgresLocation;
+use crate::PostgresSchema;
 
 #[async_trait::async_trait]
 impl LocationAdapter for PostgresLocation
@@ -54,7 +61,24 @@ impl LocationAdapter for PostgresLocation
 		match_condition: &query::Location,
 	) -> Result<Vec<LocationView>>
 	{
+		let mut transaction = connection.begin().await?;
+
+		let mut query = PostgresSchema::write_select_clause([]);
+		PostgresSchema::write_from_clause(&mut query, "locations", "L");
+		PostgresSchema::write_location_join_where_clause(&mut query, false, match_condition);
+		query.push(';');
+
+		let output = sqlx::query(&query).fetch(&mut transaction);
+
+		// "WITH RECURSIVE location_view AS
+		// (
+		// 	 SELECT id, name, outer_id FROM locations WHERE id = 4
+		// 	 UNION
+		// 	 SELECT L.id, L.name, L.outer_id FROM locations L JOIN location_view V ON (L.id = V.outer_id)
+		// ) SELECT * FROM location_view;"
+
 		todo!()
+		// transaction.rollback().await;
 	}
 }
 

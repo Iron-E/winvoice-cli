@@ -1,10 +1,4 @@
-use clinvoice_adapter::{
-	schema::PersonAdapter,
-	WriteFromClause,
-	WriteSelectClause,
-	WriteWhereClause,
-	PREFIX_WHERE,
-};
+use clinvoice_adapter::{schema::PersonAdapter, WriteFromClause, WriteSelectClause};
 use clinvoice_query as query;
 use clinvoice_schema::{views::PersonView, Person};
 use futures::stream::TryStreamExt;
@@ -35,15 +29,9 @@ impl PersonAdapter for PostgresPerson
 	{
 		let mut query = PostgresSchema::write_select_clause([]);
 		PostgresSchema::write_from_clause(&mut query, "people", "");
-
-		PostgresSchema::write_where_clause(
-			PostgresSchema::write_where_clause(false, "id", &match_condition.id, &mut query),
-			"name",
-			&match_condition.name,
-			&mut query,
-		);
-
+		PostgresSchema::write_person_where_clause(&mut query, "", false, match_condition);
 		query.push(';');
+
 		sqlx::query(&query)
 			.fetch(connection)
 			.map_ok(|row| PersonView {

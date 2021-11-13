@@ -23,6 +23,7 @@ pub trait WriteJoinClause
 	///
 	/// In the following snippet:
 	///
+	/// * `join` is `""`
 	/// * `join_table` is `"bar"`
 	/// * `join_table` is `'B'`
 	/// * `join_column` is `"foo_id"`
@@ -33,6 +34,7 @@ pub trait WriteJoinClause
 	/// ```
 	fn write_join_clause(
 		query: &mut String,
+		join: &'static str,
 		join_table: &'static str,
 		join_alias: &'static str,
 		join_column: &'static str,
@@ -46,7 +48,8 @@ pub trait WriteJoinClause
 
 		write!(
 			query,
-			" JOIN {} {alias} ON ({alias}.{} = {})",
+			" {} JOIN {} {alias} ON ({alias}.{} = {})",
+			join,
 			join_table,
 			join_column,
 			base_column,
@@ -67,10 +70,18 @@ mod tests
 		impl WriteJoinClause for Foo {}
 
 		let mut test = String::new();
-		Foo::write_join_clause(&mut test, "bar", "B", "foo_id", "F.id").unwrap();
+		Foo::write_join_clause(&mut test, "", "bar", "B", "foo_id", "F.id").unwrap();
 		assert_eq!(test, String::from(" JOIN bar B ON (B.foo_id = F.id)"));
+
+		test.clear();
+		Foo::write_join_clause(&mut test, "LEFT", "clumpf", "C", "bar_id", "B.id").unwrap();
 		assert_eq!(
-			Foo::write_join_clause(&mut test, "bar", "", "foo_id", "F.id"),
+			test,
+			String::from(" LEFT JOIN clumpf C ON (C.bar_id = B.id)")
+		);
+
+		assert_eq!(
+			Foo::write_join_clause(&mut test, "", "bar", "", "foo_id", "F.id"),
 			Err(Error)
 		);
 	}

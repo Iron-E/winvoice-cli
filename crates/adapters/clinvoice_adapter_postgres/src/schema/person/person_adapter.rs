@@ -37,14 +37,7 @@ impl PersonAdapter for PostgresPerson
 		PostgresSchema::write_from_clause(&mut query, "people", "");
 
 		PostgresSchema::write_where_clause(
-			if PostgresSchema::write_where_clause(PREFIX_WHERE, "id", &match_condition.id, &mut query)
-			{
-				None
-			}
-			else
-			{
-				PREFIX_WHERE
-			},
+			PostgresSchema::write_where_clause(false, "id", &match_condition.id, &mut query),
 			"name",
 			&match_condition.name,
 			&mut query,

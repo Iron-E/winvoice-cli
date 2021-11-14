@@ -209,24 +209,6 @@ impl WriteWhereClause<MatchStr<String>> for PostgresSchema
 	}
 }
 
-macro_rules! write_where_clause {
-	($query:ident, $keyword_written:expr, $column:ident, $alias:ident, $match_column:expr) => {
-		if $alias.is_empty()
-		{
-			PostgresSchema::write_where_clause($keyword_written, $column, &$match_column, $query)
-		}
-		else
-		{
-			PostgresSchema::write_where_clause(
-				$keyword_written,
-				&format!("{}.{}", $alias, $column),
-				&$match_column,
-				$query,
-			)
-		}
-	};
-}
-
 impl PostgresSchema
 {
 	/// # Summary
@@ -241,12 +223,33 @@ impl PostgresSchema
 		match_condition: &MatchPerson,
 	)
 	{
+		macro_rules! write_where_clause {
+			($keyword_written:expr, $column:ident, $match_field:ident) => {
+				if alias.is_empty()
+				{
+					PostgresSchema::write_where_clause(
+						$keyword_written,
+						$column,
+						&match_condition.$match_field,
+						query,
+					)
+				}
+				else
+				{
+					PostgresSchema::write_where_clause(
+						$keyword_written,
+						&format!("{}.{}", alias, $column),
+						&match_condition.$match_field,
+						query,
+					)
+				}
+			};
+		}
+
 		write_where_clause!(
-			query,
-			write_where_clause!(query, keyword_written, COLUMN_ID, alias, match_condition.id),
+			write_where_clause!(keyword_written, COLUMN_ID, id),
 			COLUMN_NAME,
-			alias,
-			match_condition.id
+			name
 		);
 	}
 

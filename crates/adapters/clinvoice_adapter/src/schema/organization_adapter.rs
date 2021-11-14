@@ -1,4 +1,4 @@
-use clinvoice_query as query;
+use clinvoice_match::MatchOrganization;
 use clinvoice_schema::{views::OrganizationView, Location, Organization};
 use sqlx::{Executor, Result};
 
@@ -28,7 +28,7 @@ pub trait OrganizationAdapter:
 
 	/// # Summary
 	///
-	/// Retrieve some [`OrganizationView`]s from the database using a [query](query::Organization).
+	/// Retrieve some [`OrganizationView`]s from the database using a [query](MatchOrganization).
 	///
 	/// # Returns
 	///
@@ -36,6 +36,6 @@ pub trait OrganizationAdapter:
 	/// * A list of matching [`OrganizationView`]s.
 	async fn retrieve_view(
 		connection: impl 'async_trait + Executor<'_, Database = <Self as Deletable>::Db>,
-		match_condition: &query::Organization,
+		match_condition: &MatchOrganization,
 	) -> Result<Vec<OrganizationView>>;
 }

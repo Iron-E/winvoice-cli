@@ -6,7 +6,7 @@ use clinvoice_adapter::{
 	schema::{EmployeeAdapter, JobAdapter, TimesheetAdapter},
 	Deletable,
 };
-use clinvoice_query as query;
+use clinvoice_match::{Match, MatchEmployee, MatchTimesheet};
 use clinvoice_schema::{
 	chrono::{Duration, DurationRound, Utc},
 	views::JobView,
@@ -57,19 +57,19 @@ impl Command
 		for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 	{
 		let mut timesheet = {
-			let timesheets = TAdapter::retrieve_view(connection, &query::Timesheet {
-				employee: query::Employee {
+			let timesheets = TAdapter::retrieve_view(connection, &MatchTimesheet {
+				employee: MatchEmployee {
 					id: if let Some(default) = default_employee_id
 					{
-						query::Match::EqualTo(Owned(default))
+						Match::EqualTo(Owned(default))
 					}
 					else
 					{
-						query::Match::Any
+						Match::Any
 					},
 					..Default::default()
 				},
-				time_end: query::Match::EqualTo(Owned(None)),
+				time_end: Match::EqualTo(Owned(None)),
 				..Default::default()
 			})
 			.await?;

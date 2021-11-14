@@ -4,7 +4,7 @@ use std::{
 };
 
 use clinvoice_adapter::{WriteJoinClause, WriteWhereClause, PREFIX_WHERE};
-use clinvoice_query::{self as query, Match, MatchStr};
+use clinvoice_match::{Match, MatchLocation, MatchOuterLocation, MatchPerson, MatchStr};
 
 use super::PostgresSchema;
 
@@ -116,12 +116,8 @@ fn write_has<'t, T>(
 /// Wrap some `match_condition` in `NOT (…)`.
 ///
 /// The args are the same as [`WriteSql::write_where`].
-fn write_negated<Q>(
-	query: &mut String,
-	prefix: &str,
-	column: &str,
-	match_condition: &Q,
-) where
+fn write_negated<Q>(query: &mut String, prefix: &str, column: &str, match_condition: &Q)
+where
 	PostgresSchema: WriteWhereClause<Q>,
 {
 	write!(query, " {} NOT (", prefix).unwrap();
@@ -213,18 +209,11 @@ impl WriteWhereClause<MatchStr<String>> for PostgresSchema
 	}
 }
 
-macro_rules! write_where_clause
-{
-	($query:ident, $keyword_written:expr, $column:ident, $alias:ident, $match_column:expr) =>
-	{
+macro_rules! write_where_clause {
+	($query:ident, $keyword_written:expr, $column:ident, $alias:ident, $match_column:expr) => {
 		if $alias.is_empty()
 		{
-			PostgresSchema::write_where_clause(
-				$keyword_written,
-				$column,
-				&$match_column,
-				query,
-			)
+			PostgresSchema::write_where_clause($keyword_written, $column, &$match_column, $query)
 		}
 		else
 		{
@@ -232,10 +221,10 @@ macro_rules! write_where_clause
 				$keyword_written,
 				&format!("{}.{}", $alias, $column),
 				&$match_column,
-				query,
+				$query,
 			)
 		}
-	}
+	};
 }
 
 impl PostgresSchema
@@ -249,7 +238,7 @@ impl PostgresSchema
 		query: &mut String,
 		alias: &str,
 		keyword_written: bool,
-		match_condition: &query::Person,
+		match_condition: &MatchPerson,
 	)
 	{
 		write_where_clause!(
@@ -269,33 +258,38 @@ impl PostgresSchema
 	pub fn write_location_join_where_clause(
 		query: &mut String,
 		keyword_written: bool,
-		match_condition: &query::Location,
+		match_condition: &MatchLocation,
 	)
 	{
 		fn recurse(
 			query: &mut String,
 			alias: &str,
 			mut keyword_written: bool,
-			match_condition: &query::Location,
+			match_condition: &MatchLocation,
 		) -> bool
 		{
 			let base_column_id = format!("{}.{}", alias, COLUMN_ID);
 			keyword_written |= match match_condition.outer
 			{
-				query::OuterLocation::Any => false,
-				query::OuterLocation::None =>
-				{
-					PostgresSchema::write_where_clause(
-						keyword_written,
-						&format!("{}.{}", alias, COLUMN_OUTER_ID),
-						&Match::Not(Match::Any.into()),
-						query,
-					)
-				},
-				query::OuterLocation::Some(ref outer) =>
+				MatchOuterLocation::Any => false,
+				MatchOuterLocation::None => PostgresSchema::write_where_clause(
+					keyword_written,
+					&format!("{}.{}", alias, COLUMN_OUTER_ID),
+					&Match::Not(Match::Any.into()),
+					query,
+				),
+				MatchOuterLocation::Some(ref outer) =>
 				{
 					let new_alias = format!("L{}", alias);
-					PostgresSchema::write_join_clause(query, "", "locations", &new_alias, "outer_id", &base_column_id);
+					PostgresSchema::write_join_clause(
+						query,
+						"",
+						"locations",
+						&new_alias,
+						"outer_id",
+						&base_column_id,
+					)
+					.unwrap();
 					recurse(query, &new_alias, keyword_written, outer.deref())
 				},
 			};

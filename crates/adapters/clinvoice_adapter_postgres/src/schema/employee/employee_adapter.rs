@@ -1,7 +1,7 @@
 use std::{collections::HashMap, fmt::Write};
 
 use clinvoice_adapter::schema::EmployeeAdapter;
-use clinvoice_query as query;
+use clinvoice_match::MatchEmployee;
 use clinvoice_schema::{
 	views::EmployeeView,
 	Contact,
@@ -95,7 +95,7 @@ impl EmployeeAdapter for PostgresEmployee
 
 	async fn retrieve_view(
 		connection: impl 'async_trait + Executor<'_, Database = Postgres>,
-		match_condition: &query::Employee,
+		match_condition: &MatchEmployee,
 	) -> Result<Vec<EmployeeView>>
 	{
 		todo!()

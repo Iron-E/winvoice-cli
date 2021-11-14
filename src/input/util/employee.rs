@@ -1,11 +1,11 @@
 use std::{borrow::Cow::Owned, fmt::Display};
 
 use clinvoice_adapter::{schema::EmployeeAdapter, Deletable};
-use clinvoice_query as query;
+use clinvoice_match::{Match, MatchEmployee};
 use clinvoice_schema::{views::EmployeeView, Id};
 use sqlx::{Database, Executor, Pool};
 
-use super::{menu, QUERY_PROMPT};
+use super::{menu, MATCH_PROMPT};
 use crate::{input, DynResult};
 
 /// # Summary
@@ -37,11 +37,11 @@ where
 	{
 		let query = match default_id
 		{
-			Some(id) => query::Employee {
-				id: query::Match::EqualTo(Owned(id)),
+			Some(id) => MatchEmployee {
+				id: Match::EqualTo(Owned(id)),
 				..Default::default()
 			},
-			_ => input::edit_default(format!("{}\n{}employees", prompt, QUERY_PROMPT))?,
+			_ => input::edit_default(format!("{}\n{}employees", prompt, MATCH_PROMPT))?,
 		};
 
 		let results = EAdapter::retrieve_view(connection, &query).await?;

@@ -2,7 +2,7 @@ use clinvoice_schema::Id;
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 
-use super::{MatchLocation, Match, MatchStr};
+use super::{Match, MatchLocation, MatchStr};
 
 /// # Summary
 ///

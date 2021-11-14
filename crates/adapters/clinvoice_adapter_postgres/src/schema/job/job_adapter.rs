@@ -2,7 +2,7 @@ use core::time::Duration;
 use std::convert::TryFrom;
 
 use clinvoice_adapter::schema::JobAdapter;
-use clinvoice_query as query;
+use clinvoice_match::MatchJob;
 use clinvoice_schema::{
 	chrono::{DateTime, SubsecRound, Utc},
 	views::JobView,
@@ -66,7 +66,7 @@ impl JobAdapter for PostgresJob
 
 	async fn retrieve_view(
 		connection: impl 'async_trait + Executor<'_, Database = Postgres>,
-		match_condition: &query::Job,
+		match_condition: &MatchJob,
 	) -> Result<Vec<JobView>>
 	{
 		todo!()

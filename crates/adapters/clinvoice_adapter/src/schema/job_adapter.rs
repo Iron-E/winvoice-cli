@@ -1,6 +1,6 @@
 use core::time::Duration;
 
-use clinvoice_query as query;
+use clinvoice_match::MatchJob;
 use clinvoice_schema::{
 	chrono::{DateTime, Utc},
 	views::JobView,
@@ -39,7 +39,7 @@ pub trait JobAdapter:
 
 	/// # Summary
 	///
-	/// Retrieve some [`JobView`]s from the database using a [query](query::Job).
+	/// Retrieve some [`JobView`]s from the database using a [query](MatchJob).
 	///
 	/// # Returns
 	///
@@ -47,6 +47,6 @@ pub trait JobAdapter:
 	/// * A list of matching [`JobView`]s.
 	async fn retrieve_view(
 		connection: impl 'async_trait + Executor<'_, Database = <Self as Deletable>::Db>,
-		match_condition: &query::Job,
+		match_condition: &MatchJob,
 	) -> Result<Vec<JobView>>;
 }

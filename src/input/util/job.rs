@@ -1,11 +1,11 @@
 use core::fmt::Display;
 
 use clinvoice_adapter::{schema::JobAdapter, Deletable};
-use clinvoice_query as query;
+use clinvoice_match::MatchJob;
 use clinvoice_schema::views::JobView;
 use sqlx::{Database, Executor, Pool};
 
-use super::{menu, QUERY_PROMPT};
+use super::{menu, MATCH_PROMPT};
 use crate::{input, DynResult};
 
 /// # Summary
@@ -34,8 +34,8 @@ where
 {
 	loop
 	{
-		let match_condition: query::Job =
-			input::edit_default(format!("{}\n{}jobs", prompt, QUERY_PROMPT))?;
+		let match_condition: MatchJob =
+			input::edit_default(format!("{}\n{}jobs", prompt, MATCH_PROMPT))?;
 
 		let results = JAdapter::retrieve_view(connection, &match_condition).await?;
 

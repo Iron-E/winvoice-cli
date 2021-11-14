@@ -2,7 +2,7 @@ use clinvoice_schema::{EmployeeStatus, Id};
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 
-use super::{MatchContact, Match, MatchStr, MatchOrganization, MatchPerson};
+use super::{Match, MatchContact, MatchOrganization, MatchPerson, MatchStr};
 
 /// # Summary
 ///

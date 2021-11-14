@@ -1,4 +1,4 @@
-use clinvoice_query as query;
+use clinvoice_match::MatchLocation;
 use clinvoice_schema::{views::LocationView, Location};
 use sqlx::{Acquire, Executor, Result};
 
@@ -44,7 +44,7 @@ pub trait LocationAdapter:
 
 	/// # Summary
 	///
-	/// Retrieve some [`LocationView`]s from the database using a [query](query::Location).
+	/// Retrieve some [`LocationView`]s from the database using a [query](MatchLocation).
 	///
 	/// # Returns
 	///
@@ -52,6 +52,6 @@ pub trait LocationAdapter:
 	/// * A list of matching [`LocationView`]s.
 	async fn retrieve_view(
 		connection: impl 'async_trait + Acquire<'_, Database = <Self as Deletable>::Db> + Send,
-		match_condition: &query::Location,
+		match_condition: &MatchLocation,
 	) -> Result<Vec<LocationView>>;
 }

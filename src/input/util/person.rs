@@ -1,11 +1,11 @@
 use core::fmt::Display;
 
 use clinvoice_adapter::{schema::PersonAdapter, Deletable};
-use clinvoice_query as query;
+use clinvoice_match::MatchPerson;
 use clinvoice_schema::views::PersonView;
 use sqlx::{Database, Executor, Pool};
 
-use super::{menu, QUERY_PROMPT};
+use super::{menu, MATCH_PROMPT};
 use crate::{input, DynResult};
 
 /// # Summary
@@ -34,8 +34,8 @@ where
 {
 	loop
 	{
-		let match_condition: query::Person =
-			input::edit_default(format!("{}\n{}persons", prompt, QUERY_PROMPT))?;
+		let match_condition: MatchPerson =
+			input::edit_default(format!("{}\n{}persons", prompt, MATCH_PROMPT))?;
 
 		let results = PAdapter::retrieve_view(connection, &match_condition).await?;
 

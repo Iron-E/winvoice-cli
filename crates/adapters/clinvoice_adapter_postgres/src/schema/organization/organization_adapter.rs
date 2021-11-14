@@ -1,5 +1,5 @@
 use clinvoice_adapter::schema::OrganizationAdapter;
-use clinvoice_query as query;
+use clinvoice_match::MatchOrganization;
 use clinvoice_schema::{views::OrganizationView, Location, Organization};
 use sqlx::{Executor, Postgres, Result};
 
@@ -31,7 +31,7 @@ impl OrganizationAdapter for PostgresOrganization
 
 	async fn retrieve_view(
 		connection: impl 'async_trait + Executor<'_, Database = Postgres>,
-		match_condition: &query::Organization,
+		match_condition: &MatchOrganization,
 	) -> Result<Vec<OrganizationView>>
 	{
 		todo!()

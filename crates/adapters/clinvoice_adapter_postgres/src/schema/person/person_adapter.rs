@@ -1,5 +1,5 @@
 use clinvoice_adapter::{schema::PersonAdapter, WriteFromClause, WriteSelectClause};
-use clinvoice_query as query;
+use clinvoice_match::MatchPerson;
 use clinvoice_schema::{views::PersonView, Person};
 use futures::stream::TryStreamExt;
 use sqlx::{postgres::Postgres, Executor, Result, Row};
@@ -24,7 +24,7 @@ impl PersonAdapter for PostgresPerson
 
 	async fn retrieve_view(
 		connection: impl 'async_trait + Executor<'_, Database = Postgres>,
-		match_condition: &query::Person,
+		match_condition: &MatchPerson,
 	) -> Result<Vec<PersonView>>
 	{
 		let mut query = PostgresSchema::write_select_clause([]);

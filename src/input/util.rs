@@ -9,6 +9,6 @@ pub mod person;
 
 /// # Summary
 ///
-/// The prompt for when editing a [query](clinvoice_query).
-const QUERY_PROMPT: &str =
+/// The prompt for when [matching](clinvoice_match).
+const MATCH_PROMPT: &str =
 	"See the documentation of this query at https://github.com/Iron-E/clinvoice/wiki/Query-Syntax#";

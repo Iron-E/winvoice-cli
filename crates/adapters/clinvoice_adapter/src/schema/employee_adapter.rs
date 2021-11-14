@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use clinvoice_query as query;
+use clinvoice_match::MatchEmployee;
 use clinvoice_schema::{
 	views::EmployeeView,
 	Contact,
@@ -41,7 +41,7 @@ pub trait EmployeeAdapter:
 
 	/// # Summary
 	///
-	/// Retrieve some [`EmployeeView`]s from the database using a [query](query::Employee).
+	/// Retrieve some [`EmployeeView`]s from the database using a [query](MatchEmployee).
 	///
 	/// # Parameters
 	///
@@ -53,6 +53,6 @@ pub trait EmployeeAdapter:
 	/// * An [`Error`], should something go wrong.
 	async fn retrieve_view(
 		connection: impl 'async_trait + Executor<'_, Database = <Self as Deletable>::Db>,
-		match_condition: &query::Employee,
+		match_condition: &MatchEmployee,
 	) -> Result<Vec<EmployeeView>>;
 }

@@ -2,7 +2,7 @@ use clinvoice_schema::chrono::NaiveDateTime;
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 
-use super::{MatchEmployee, MatchExpense, MatchJob, Match, MatchStr};
+use super::{Match, MatchEmployee, MatchExpense, MatchJob, MatchStr};
 
 /// # Summary
 ///

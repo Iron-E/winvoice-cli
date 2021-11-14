@@ -1,5 +1,5 @@
 use clinvoice_adapter::schema::TimesheetAdapter;
-use clinvoice_query as query;
+use clinvoice_match::MatchTimesheet;
 use clinvoice_schema::{
 	chrono::{SubsecRound, Utc},
 	views::TimesheetView,
@@ -50,7 +50,7 @@ impl TimesheetAdapter for PostgresTimesheet
 
 	async fn retrieve_view(
 		connection: impl 'async_trait + Executor<'_, Database = Postgres>,
-		match_condition: &query::Timesheet,
+		match_condition: &MatchTimesheet,
 	) -> Result<Vec<TimesheetView>>
 	{
 		todo!()

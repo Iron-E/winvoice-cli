@@ -1,4 +1,4 @@
-use clinvoice_query as query;
+use clinvoice_match::MatchTimesheet;
 use clinvoice_schema::{views::TimesheetView, Employee, Job, Timesheet};
 use sqlx::{Executor, Result};
 
@@ -28,7 +28,7 @@ pub trait TimesheetAdapter:
 
 	/// # Summary
 	///
-	/// Retrieve some [`TimesheetView`]s from the database using a [query](query::Timesheet).
+	/// Retrieve some [`TimesheetView`]s from the database using a [query](MatchTimesheet).
 	///
 	/// # Returns
 	///
@@ -36,6 +36,6 @@ pub trait TimesheetAdapter:
 	/// * A list of matching [`TimesheetView`]s.
 	async fn retrieve_view(
 		connection: impl 'async_trait + Executor<'_, Database = <Self as Deletable>::Db>,
-		match_condition: &query::Timesheet,
+		match_condition: &MatchTimesheet,
 	) -> Result<Vec<TimesheetView>>;
 }

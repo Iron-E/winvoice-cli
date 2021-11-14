@@ -2,7 +2,7 @@ use clinvoice_schema::{chrono::NaiveDateTime, Id};
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 
-use super::{MatchInvoice, Match, MatchStr, MatchOrganization};
+use super::{Match, MatchInvoice, MatchOrganization, MatchStr};
 
 /// # Summary
 ///

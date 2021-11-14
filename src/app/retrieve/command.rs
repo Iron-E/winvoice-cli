@@ -14,7 +14,7 @@ use clinvoice_adapter::{
 	Updatable,
 };
 use clinvoice_config::Config;
-use clinvoice_query as query;
+use clinvoice_match::{Match, MatchJob, MatchTimesheet};
 use clinvoice_schema::{chrono::Utc, views::RestorableSerde, Location};
 use futures::{
 	future,
@@ -287,9 +287,9 @@ impl Command
 					// WARN: this `let` seems redundant, but the "type needs to be known at this point"
 					let export_result: DynResult<'_, _> = stream::iter(to_export.into_iter().map(Ok))
 						.try_for_each_concurrent(None, |job| async move {
-							let timesheets = TAdapter::retrieve_view(conn_borrow, &query::Timesheet {
-								job: query::Job {
-									id: query::Match::EqualTo(Owned(job.id)),
+							let timesheets = TAdapter::retrieve_view(conn_borrow, &MatchTimesheet {
+								job: MatchJob {
+									id: Match::EqualTo(Owned(job.id)),
 									..Default::default()
 								},
 								..Default::default()

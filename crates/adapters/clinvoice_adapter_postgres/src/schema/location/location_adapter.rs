@@ -1,11 +1,5 @@
-use clinvoice_adapter::{
-	schema::LocationAdapter,
-	WriteFromClause,
-	WriteSelectClause,
-	WriteWhereClause,
-	PREFIX_WHERE,
-};
-use clinvoice_query as query;
+use clinvoice_adapter::{schema::LocationAdapter, WriteFromClause, WriteSelectClause};
+use clinvoice_match::MatchLocation;
 use clinvoice_schema::{views::LocationView, Location};
 use sqlx::{Acquire, Executor, Postgres, Result};
 
@@ -58,7 +52,7 @@ impl LocationAdapter for PostgresLocation
 	// WARN: `Might need `Acquire` or `&mut Transaction` depending on how recursive views work
 	async fn retrieve_view(
 		connection: impl 'async_trait + Acquire<'_, Database = Postgres> + Send,
-		match_condition: &query::Location,
+		match_condition: &MatchLocation,
 	) -> Result<Vec<LocationView>>
 	{
 		let mut transaction = connection.begin().await?;

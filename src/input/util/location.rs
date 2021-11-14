@@ -1,11 +1,11 @@
 use core::fmt::Display;
 
 use clinvoice_adapter::{schema::LocationAdapter, Deletable};
-use clinvoice_query as query;
+use clinvoice_match::MatchLocation;
 use clinvoice_schema::views::LocationView;
 use sqlx::{Database, Executor, Pool};
 
-use super::{menu, QUERY_PROMPT};
+use super::{menu, MATCH_PROMPT};
 use crate::{input, DynResult};
 
 /// # Summary
@@ -34,8 +34,8 @@ where
 {
 	loop
 	{
-		let match_condition: query::Location =
-			input::edit_default(format!("{}\n{}locations", prompt, QUERY_PROMPT))?;
+		let match_condition: MatchLocation =
+			input::edit_default(format!("{}\n{}locations", prompt, MATCH_PROMPT))?;
 
 		let results = LAdapter::retrieve_view(connection, &match_condition).await?;
 

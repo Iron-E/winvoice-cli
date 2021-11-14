@@ -1,4 +1,4 @@
-use clinvoice_query as query;
+use clinvoice_match::MatchPerson;
 use clinvoice_schema::{views::PersonView, Person};
 use sqlx::{Executor, Result};
 
@@ -27,7 +27,7 @@ pub trait PersonAdapter:
 
 	/// # Summary
 	///
-	/// Retrieve some [`PersonView`]s from the database using a [query](query::Person).
+	/// Retrieve some [`PersonView`]s from the database using a [query](MatchPerson).
 	///
 	/// # Returns
 	///
@@ -35,6 +35,6 @@ pub trait PersonAdapter:
 	/// * A list of matching [`PersonView`]s.
 	async fn retrieve_view(
 		connection: impl 'async_trait + Executor<'_, Database = <Self as Deletable>::Db>,
-		match_condition: &query::Person,
+		match_condition: &MatchPerson,
 	) -> Result<Vec<PersonView>>;
 }

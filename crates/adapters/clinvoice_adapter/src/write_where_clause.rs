@@ -1,8 +1,6 @@
-/// # Summary
-///
-/// A constant to pass to [`write_where_clause`](WriteWhereClause::write_where_clause) which will put `"WHERE"` in front of the
-/// clause.
-pub const PREFIX_WHERE: &str = "WHERE";
+mod write_context;
+
+pub use write_context::WriteContext;
 
 /// # Summary
 ///
@@ -19,7 +17,7 @@ pub trait WriteWhereClause<M>
 	///
 	/// Will skip writing the keyword `WHERE` if `keyword_written`.
 	fn write_where_clause(
-		keyword_written: bool,
+		context: WriteContext,
 		column: &str,
 		match_condition: M,
 		query: &mut String,

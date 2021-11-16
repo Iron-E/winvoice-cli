@@ -35,4 +35,4 @@ pub use updatable::Updatable;
 pub use write_from_clause::WriteFromClause;
 pub use write_join_clause::WriteJoinClause;
 pub use write_select_clause::WriteSelectClause;
-pub use write_where_clause::{WriteWhereClause, PREFIX_WHERE};
+pub use write_where_clause::{WriteContext, WriteWhereClause};

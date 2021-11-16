@@ -4,7 +4,7 @@ use std::{
 	ops::Deref,
 };
 
-use clinvoice_adapter::{WriteJoinClause, WriteWhereClause, PREFIX_WHERE};
+use clinvoice_adapter::{WriteContext, WriteJoinClause, WriteWhereClause};
 use clinvoice_match::{Match, MatchLocation, MatchOuterLocation, MatchPerson, MatchStr};
 
 use super::PostgresSchema;
@@ -28,23 +28,23 @@ const COLUMN_OUTER_ID: &str = "outer_id";
 /// The rest of the args are the same as [`WriteSql::write_where`].
 fn write_boolean_group<I, Q, const UNION: bool>(
 	query: &mut String,
-	prefix: &str,
+	context: WriteContext,
 	column: &str,
 	match_conditions: &mut I,
 ) where
 	I: Iterator<Item = Q>,
 	PostgresSchema: WriteWhereClause<Q>,
 {
-	write!(query, " {} (", prefix).unwrap();
+	write!(query, "{} (", context.get_prefix()).unwrap();
 	if let Some(m) = match_conditions.next()
 	{
-		PostgresSchema::write_where_clause(true, column, m, query);
+		PostgresSchema::write_where_clause(WriteContext::InsideClause, column, m, query);
 	}
 
 	let separator: &str = if UNION { " AND" } else { " OR" };
 	match_conditions.for_each(|q| {
 		query.push_str(separator);
-		PostgresSchema::write_where_clause(true, column, q, query);
+		PostgresSchema::write_where_clause(WriteContext::InsideClause, column, q, query);
 	});
 
 	query.push(')');
@@ -57,13 +57,21 @@ fn write_boolean_group<I, Q, const UNION: bool>(
 /// The rest of the args are the same as [`WriteSql::write_where`].
 fn write_comparison(
 	query: &mut String,
-	prefix: &str,
+	context: WriteContext,
 	column: &str,
 	comperator: &str,
 	comparand: impl Display,
 )
 {
-	write!(query, " {} {} {} {}", prefix, column, comperator, comparand).unwrap()
+	write!(
+		query,
+		"{} {} {} {}",
+		context.get_prefix(),
+		column,
+		comperator,
+		comparand
+	)
+	.unwrap()
 }
 
 /// # Summary
@@ -79,7 +87,7 @@ fn write_comparison(
 /// The rest of the args are the same as [`WriteSql::write_where`].
 fn write_has<'t, T>(
 	query: &mut String,
-	prefix: &str,
+	context: WriteContext,
 	column: &str,
 	values: impl IntoIterator<Item = &'t T>,
 	union: bool,
@@ -92,8 +100,8 @@ fn write_has<'t, T>(
 	{
 		write!(
 			query,
-			" {} {} {}{}",
-			prefix,
+			"{} {} {}{}",
+			context.get_prefix(),
 			column,
 			if union { "= ALL(ARRAY[" } else { "IN (" },
 			id
@@ -122,54 +130,53 @@ fn write_negated<Q>(query: &mut String, prefix: &str, column: &str, match_condit
 where
 	PostgresSchema: WriteWhereClause<Q>,
 {
-	write!(query, " {} NOT (", prefix).unwrap();
-	PostgresSchema::write_where_clause(true, column, match_condition, query);
+	write!(query, "{} NOT (", prefix).unwrap();
+	PostgresSchema::write_where_clause(WriteContext::InsideClause, column, match_condition, query);
 	query.push(')');
 }
 
 impl WriteWhereClause<&Match<'_, i64>> for PostgresSchema
 {
 	fn write_where_clause(
-		keyword_written: bool,
+		context: WriteContext,
 		column: &str,
 		match_condition: &Match<'_, i64>,
 		query: &mut String,
 	) -> bool
 	{
-		let prefix = if keyword_written { "" } else { PREFIX_WHERE };
 		match match_condition
 		{
 			Match::AllGreaterThan(id) | Match::GreaterThan(id) =>
 			{
-				write_comparison(query, prefix, column, ">", id)
+				write_comparison(query, context, column, ">", id)
 			},
 			Match::AllLessThan(id) | Match::LessThan(id) =>
 			{
-				write_comparison(query, prefix, column, "<", id)
+				write_comparison(query, context, column, "<", id)
 			},
 			Match::AllInRange(low, high) | Match::InRange(low, high) =>
 			{
-				write_comparison(query, prefix, column, ">=", low);
-				write_comparison(query, " AND", column, "<", high);
+				write_comparison(query, context, column, ">=", low);
+				write_comparison(query, WriteContext::AfterClause, column, "<", high);
 			},
 			Match::And(match_conditions) => write_boolean_group::<_, _, true>(
 				query,
-				prefix,
+				context,
 				column,
 				&mut match_conditions.iter().filter(|m| *m != &Match::Any),
 			),
 			Match::Any => return false,
-			Match::EqualTo(id) => write_comparison(query, prefix, column, "=", id),
-			Match::HasAll(ids) => write_has(query, prefix, column, ids, true),
-			Match::HasAny(ids) => write_has(query, prefix, column, ids, false),
+			Match::EqualTo(id) => write_comparison(query, context, column, "=", id),
+			Match::HasAll(ids) => write_has(query, context, column, ids, true),
+			Match::HasAny(ids) => write_has(query, context, column, ids, false),
 			Match::Not(match_condition) => match match_condition.deref()
 			{
-				Match::Any => write!(query, " {} {} IS NULL", prefix, column).unwrap(),
-				m @ _ => write_negated(query, prefix, column, m),
+				Match::Any => write!(query, "{} {} IS NULL", context.get_prefix(), column).unwrap(),
+				m @ _ => write_negated(query, context.get_prefix(), column, m),
 			},
 			Match::Or(match_conditions) => write_boolean_group::<_, _, false>(
 				query,
-				prefix,
+				context,
 				column,
 				&mut match_conditions.iter().filter(|m| *m != &Match::Any),
 			),
@@ -181,39 +188,45 @@ impl WriteWhereClause<&Match<'_, i64>> for PostgresSchema
 impl WriteWhereClause<&MatchStr<Cow<'_, str>>> for PostgresSchema
 {
 	fn write_where_clause(
-		keyword_written: bool,
+		context: WriteContext,
 		column: &str,
 		match_condition: &MatchStr<Cow<'_, str>>,
 		query: &mut String,
 	) -> bool
 	{
-		let prefix = if keyword_written { "" } else { PREFIX_WHERE };
 		match match_condition
 		{
 			MatchStr::And(match_conditions) => write_boolean_group::<_, _, true>(
 				query,
-				prefix,
+				context,
 				column,
 				&mut match_conditions.iter().filter(|m| *m != &MatchStr::Any),
 			),
 			MatchStr::Any => return false,
-			MatchStr::Contains(string) =>
+			MatchStr::Contains(string) => write!(
+				query,
+				"{} {} LIKE '%{}%'",
+				context.get_prefix(),
+				column,
+				string
+			)
+			.unwrap(),
+			MatchStr::EqualTo(string) =>
 			{
-				write!(query, " {} {} LIKE '%{}%'", prefix, column, string).unwrap()
+				write!(query, "{} {} = '{}'", context.get_prefix(), column, string).unwrap()
 			},
-			MatchStr::EqualTo(string) => write_comparison(query, prefix, column, "=", string),
 			MatchStr::Not(match_condition) => match match_condition.deref()
 			{
-				MatchStr::Any => write!(query, " {} {} IS NULL", prefix, column).unwrap(),
-				m @ _ => write_negated(query, prefix, column, m),
+				MatchStr::Any => write!(query, "{} {} IS NULL", context.get_prefix(), column).unwrap(),
+				m @ _ => write_negated(query, context.get_prefix(), column, m),
 			},
 			MatchStr::Or(match_conditions) => write_boolean_group::<_, _, false>(
 				query,
-				prefix,
+				context,
 				column,
 				&mut match_conditions.iter().filter(|m| *m != &MatchStr::Any),
 			),
-			MatchStr::Regex(regex) => write_comparison(query, prefix, column, "~", regex),
+			MatchStr::Regex(regex) => write_comparison(query, context, column, "~", regex),
 		};
 		true
 	}
@@ -226,6 +239,9 @@ impl PostgresSchema
 	/// Write a `WHERE` clause for a [`Person`](clinvoice_schema::Person) based on a
 	/// `match_condition`. An `alias` can be set to assist in a previous join. The result will be
 	/// appended to a `query`.
+	///
+	/// If the `WHERE` clause has already been started, then pass `keyword_written` as `true`.
+	/// Otherwise, if this is the first term in the `WHERE` clause, pass it as `false`.
 	pub fn write_person_where_clause(
 		query: &mut String,
 		keyword_written: bool,
@@ -235,14 +251,10 @@ impl PostgresSchema
 	{
 		macro_rules! write_where_clause {
 			($keyword_written:expr, $column:ident, $match_field:ident) => {{
-				if $keyword_written {
-					query.push_str(" AND");
-				}
-
 				if alias.is_empty()
 				{
 					PostgresSchema::write_where_clause(
-						$keyword_written,
+						$keyword_written.into(),
 						$column,
 						&match_condition.$match_field,
 						query,
@@ -251,7 +263,7 @@ impl PostgresSchema
 				else
 				{
 					PostgresSchema::write_where_clause(
-						$keyword_written,
+						$keyword_written.into(),
 						&format!("{}.{}", alias, $column),
 						&match_condition.$match_field,
 						query,
@@ -272,6 +284,9 @@ impl PostgresSchema
 	/// Write a `WHERE` clause for a [`Location`](clinvoice_schema::Location) based on a
 	/// `match_condition`. An `alias` can be set to assist in a previous join. The result will be
 	/// appended to a `query`.
+	///
+	/// If the `WHERE` clause has already been started, then pass `keyword_written` as `true`.
+	/// Otherwise, if this is the first term in the `WHERE` clause, pass it as `false`.
 	pub fn write_location_join_where_clause(
 		query: &mut String,
 		keyword_written: bool,
@@ -290,7 +305,7 @@ impl PostgresSchema
 			{
 				MatchOuterLocation::Any => false,
 				MatchOuterLocation::None => PostgresSchema::write_where_clause(
-					keyword_written,
+					keyword_written.into(),
 					&format!("{}.{}", alias, COLUMN_OUTER_ID),
 					&Match::Not(Match::Any.into()),
 					query,
@@ -313,11 +328,12 @@ impl PostgresSchema
 
 			PostgresSchema::write_where_clause(
 				PostgresSchema::write_where_clause(
-					keyword_written,
+					keyword_written.into(),
 					&base_column_id,
 					&match_condition.id,
 					query,
-				),
+				)
+				.into(),
 				&format!("{}.{}", alias, COLUMN_NAME),
 				&match_condition.name,
 				query,

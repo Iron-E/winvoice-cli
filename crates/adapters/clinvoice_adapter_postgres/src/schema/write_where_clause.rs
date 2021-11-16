@@ -26,22 +26,23 @@ const COLUMN_OUTER_ID: &str = "outer_id";
 ///       [`std::borrow::Cow`]. View the linked documentation for proper examples.
 ///
 /// The rest of the args are the same as [`WriteSql::write_where`].
-fn write_boolean_group<Q, const UNION: bool>(
+fn write_boolean_group<I, Q, const UNION: bool>(
 	query: &mut String,
 	prefix: &str,
 	column: &str,
-	match_conditions: &[Q],
+	match_conditions: &mut I,
 ) where
+	I: Iterator<Item = Q>,
 	PostgresSchema: WriteWhereClause<Q>,
 {
 	write!(query, " {} (", prefix).unwrap();
-	if let Some(m) = match_conditions.first()
+	if let Some(m) = match_conditions.next()
 	{
 		PostgresSchema::write_where_clause(true, column, m, query);
 	}
 
 	let separator: &str = if UNION { " AND" } else { " OR" };
-	match_conditions.iter().skip(1).for_each(|q| {
+	match_conditions.for_each(|q| {
 		query.push_str(separator);
 		PostgresSchema::write_where_clause(true, column, q, query);
 	});
@@ -117,7 +118,7 @@ fn write_has<'t, T>(
 /// Wrap some `match_condition` in `NOT (…)`.
 ///
 /// The args are the same as [`WriteSql::write_where`].
-fn write_negated<Q>(query: &mut String, prefix: &str, column: &str, match_condition: &Q)
+fn write_negated<Q>(query: &mut String, prefix: &str, column: &str, match_condition: Q)
 where
 	PostgresSchema: WriteWhereClause<Q>,
 {
@@ -126,7 +127,7 @@ where
 	query.push(')');
 }
 
-impl WriteWhereClause<Match<'_, i64>> for PostgresSchema
+impl WriteWhereClause<&Match<'_, i64>> for PostgresSchema
 {
 	fn write_where_clause(
 		keyword_written: bool,
@@ -151,10 +152,12 @@ impl WriteWhereClause<Match<'_, i64>> for PostgresSchema
 				write_comparison(query, prefix, column, ">=", low);
 				write_comparison(query, " AND", column, "<", high);
 			},
-			Match::And(match_conditions) =>
-			{
-				write_boolean_group::<_, true>(query, prefix, column, match_conditions)
-			},
+			Match::And(match_conditions) => write_boolean_group::<_, _, true>(
+				query,
+				prefix,
+				column,
+				&mut match_conditions.iter().filter(|m| *m != &Match::Any),
+			),
 			Match::Any => return false,
 			Match::EqualTo(id) => write_comparison(query, prefix, column, "=", id),
 			Match::HasAll(ids) => write_has(query, prefix, column, ids, true),
@@ -164,16 +167,18 @@ impl WriteWhereClause<Match<'_, i64>> for PostgresSchema
 				Match::Any => write!(query, " {} {} IS NULL", prefix, column).unwrap(),
 				m @ _ => write_negated(query, prefix, column, m),
 			},
-			Match::Or(match_conditions) =>
-			{
-				write_boolean_group::<_, false>(query, prefix, column, match_conditions)
-			},
+			Match::Or(match_conditions) => write_boolean_group::<_, _, false>(
+				query,
+				prefix,
+				column,
+				&mut match_conditions.iter().filter(|m| *m != &Match::Any),
+			),
 		};
 		true
 	}
 }
 
-impl WriteWhereClause<MatchStr<Cow<'_, str>>> for PostgresSchema
+impl WriteWhereClause<&MatchStr<Cow<'_, str>>> for PostgresSchema
 {
 	fn write_where_clause(
 		keyword_written: bool,
@@ -185,14 +190,16 @@ impl WriteWhereClause<MatchStr<Cow<'_, str>>> for PostgresSchema
 		let prefix = if keyword_written { "" } else { PREFIX_WHERE };
 		match match_condition
 		{
-			MatchStr::And(match_conditions) =>
-			{
-				write_boolean_group::<_, true>(query, prefix, column, match_conditions)
-			},
+			MatchStr::And(match_conditions) => write_boolean_group::<_, _, true>(
+				query,
+				prefix,
+				column,
+				&mut match_conditions.iter().filter(|m| *m != &MatchStr::Any),
+			),
 			MatchStr::Any => return false,
 			MatchStr::Contains(string) =>
 			{
-				write!(query, " {} {} LIKE '%{}%'", prefix, column, string,).unwrap()
+				write!(query, " {} {} LIKE '%{}%'", prefix, column, string).unwrap()
 			},
 			MatchStr::EqualTo(string) => write_comparison(query, prefix, column, "=", string),
 			MatchStr::Not(match_condition) => match match_condition.deref()
@@ -200,10 +207,12 @@ impl WriteWhereClause<MatchStr<Cow<'_, str>>> for PostgresSchema
 				MatchStr::Any => write!(query, " {} {} IS NULL", prefix, column).unwrap(),
 				m @ _ => write_negated(query, prefix, column, m),
 			},
-			MatchStr::Or(match_conditions) =>
-			{
-				write_boolean_group::<_, false>(query, prefix, column, match_conditions)
-			},
+			MatchStr::Or(match_conditions) => write_boolean_group::<_, _, false>(
+				query,
+				prefix,
+				column,
+				&mut match_conditions.iter().filter(|m| *m != &MatchStr::Any),
+			),
 			MatchStr::Regex(regex) => write_comparison(query, prefix, column, "~", regex),
 		};
 		true

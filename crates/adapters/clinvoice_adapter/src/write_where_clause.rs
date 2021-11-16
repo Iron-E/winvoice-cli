@@ -21,7 +21,7 @@ pub trait WriteWhereClause<M>
 	fn write_where_clause(
 		keyword_written: bool,
 		column: &str,
-		match_condition: &M,
+		match_condition: M,
 		query: &mut String,
 	) -> bool;
 }

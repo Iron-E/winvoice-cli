@@ -29,7 +29,7 @@ impl PersonAdapter for PostgresPerson
 	{
 		let mut query = PostgresSchema::write_select_clause([]);
 		PostgresSchema::write_from_clause(&mut query, "people", "");
-		PostgresSchema::write_person_where_clause(&mut query, "", false, match_condition);
+		PostgresSchema::write_person_where_clause(&mut query, false, "", match_condition);
 		query.push(';');
 
 		sqlx::query(&query)

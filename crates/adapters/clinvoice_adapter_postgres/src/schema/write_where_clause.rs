@@ -228,8 +228,8 @@ impl PostgresSchema
 	/// appended to a `query`.
 	pub fn write_person_where_clause(
 		query: &mut String,
-		alias: &str,
 		keyword_written: bool,
+		alias: &str,
 		match_condition: &MatchPerson,
 	)
 	{

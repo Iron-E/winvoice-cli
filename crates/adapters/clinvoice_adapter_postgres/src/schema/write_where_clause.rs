@@ -472,7 +472,19 @@ mod tests
 	}
 
 	#[test]
-	fn write_person_where_clause() {}
+	fn write_person_where_clause()
+	{
+		let mut query = String::new();
+		Schema::write_person_where_clause(&mut query, false, "", &Default::default());
+		assert!(query.is_empty());
+
+		query.clear();
+		Schema::write_person_where_clause(&mut query, false, "", &MatchPerson {
+			id: Match::EqualTo(Owned(7)),
+			..Default::default()
+		});
+		assert_eq!(query, String::from(" WHERE id = 7"),);
+	}
 
 	#[test]
 	fn write_location_join_where_clause() {}

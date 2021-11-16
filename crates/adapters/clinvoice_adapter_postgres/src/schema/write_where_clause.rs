@@ -234,7 +234,11 @@ impl PostgresSchema
 	)
 	{
 		macro_rules! write_where_clause {
-			($keyword_written:expr, $column:ident, $match_field:ident) => {
+			($keyword_written:expr, $column:ident, $match_field:ident) => {{
+				if $keyword_written {
+					query.push_str(" AND");
+				}
+
 				if alias.is_empty()
 				{
 					PostgresSchema::write_where_clause(
@@ -253,7 +257,7 @@ impl PostgresSchema
 						query,
 					)
 				}
-			};
+			}};
 		}
 
 		write_where_clause!(

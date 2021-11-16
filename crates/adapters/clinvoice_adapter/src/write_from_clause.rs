@@ -42,12 +42,12 @@ mod tests
 		struct Foo;
 		impl WriteFromClause for Foo {}
 
-		let mut test = String::new();
-		Foo::write_from_clause(&mut test, "foo", "F");
-		assert_eq!(test, String::from(" FROM foo F"),);
+		let mut query = String::new();
+		Foo::write_from_clause(&mut query, "foo", "F");
+		assert_eq!(query, String::from(" FROM foo F"),);
 
-		test.clear();
-		Foo::write_from_clause(&mut test, "foo", "");
-		assert_eq!(test, String::from(" FROM foo "),);
+		query.clear();
+		Foo::write_from_clause(&mut query, "foo", "");
+		assert_eq!(query, String::from(" FROM foo "),);
 	}
 }

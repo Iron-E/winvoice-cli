@@ -69,19 +69,19 @@ mod tests
 		struct Foo;
 		impl WriteJoinClause for Foo {}
 
-		let mut test = String::new();
-		Foo::write_join_clause(&mut test, "", "bar", "B", "foo_id", "F.id").unwrap();
-		assert_eq!(test, String::from(" JOIN bar B ON (B.foo_id = F.id)"));
+		let mut query = String::new();
+		Foo::write_join_clause(&mut query, "", "bar", "B", "foo_id", "F.id").unwrap();
+		assert_eq!(query, String::from("  JOIN bar B ON (B.foo_id = F.id)"));
 
-		test.clear();
-		Foo::write_join_clause(&mut test, "LEFT", "clumpf", "C", "bar_id", "B.id").unwrap();
+		query.clear();
+		Foo::write_join_clause(&mut query, "LEFT", "clumpf", "C", "bar_id", "B.id").unwrap();
 		assert_eq!(
-			test,
+			query,
 			String::from(" LEFT JOIN clumpf C ON (C.bar_id = B.id)")
 		);
 
 		assert_eq!(
-			Foo::write_join_clause(&mut test, "", "bar", "", "foo_id", "F.id"),
+			Foo::write_join_clause(&mut query, "", "bar", "", "foo_id", "F.id"),
 			Err(Error)
 		);
 	}

@@ -319,3 +319,65 @@ impl PostgresSchema
 		recurse(query, "L", keyword_written, match_condition);
 	}
 }
+
+#[cfg(test)]
+mod tests
+{
+	use std::borrow::Cow::{Borrowed, Owned};
+
+	use super::{
+		Match,
+		MatchLocation,
+		MatchOuterLocation,
+		MatchPerson,
+		MatchStr,
+		PostgresSchema as Schema,
+		WriteJoinClause,
+		WriteWhereClause,
+	};
+
+	#[test]
+	fn write_where_clause()
+	{
+		let mut query = String::new();
+		assert!(Schema::write_where_clause(
+			false,
+			"foo",
+			&Match::EqualTo(Owned(18)),
+			&mut query
+		));
+		assert_eq!(query, String::from(" WHERE foo = 18"));
+
+		query.clear();
+		assert!(Schema::write_where_clause(
+			true,
+			"bar",
+			&Match::And(vec![
+				Match::Not(Box::new(Match::InRange(Owned(0), Owned(10)))),
+				Match::HasAny(
+					vec![Owned(0), Owned(9), Owned(7), Owned(4)]
+						.into_iter()
+						.collect()
+				),
+				Match::Or(vec![
+					Match::Not(Box::new(Match::Any)),
+					Match::GreaterThan(Owned(-1)),
+				]),
+			]),
+			&mut query,
+		));
+		assert_eq!(
+			query,
+			format!(
+				"  (  NOT (  bar >= 0  AND bar < 10) AND  bar IN ({}) AND  (  bar IS NULL OR  bar > -1))",
+				&query[49..59]
+			)
+		);
+	}
+
+	#[test]
+	fn write_person_where_clause() {}
+
+	#[test]
+	fn write_location_join_where_clause() {}
+}

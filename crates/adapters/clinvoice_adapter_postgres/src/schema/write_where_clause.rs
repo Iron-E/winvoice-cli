@@ -39,7 +39,7 @@ fn write_boolean_group<Q, const UNION: bool>(
 		PostgresSchema::write_where_clause(true, column, m, query);
 	}
 
-	let separator: &str = if UNION { "AND" } else { "OR" };
+	let separator: &str = if UNION { " AND" } else { " OR" };
 	match_conditions.iter().skip(1).for_each(|q| {
 		query.push_str(separator);
 		PostgresSchema::write_where_clause(true, column, q, query);
@@ -90,10 +90,10 @@ fn write_has<'t, T>(
 	{
 		write!(
 			query,
-			" {} {} = {}{}",
-			if union { "ALL(ARRAY[" } else { "IN (" },
+			" {} {} {}{}",
 			prefix,
 			column,
+			if union { "= ALL(ARRAY[" } else { "IN (" },
 			id
 		)
 		.unwrap()
@@ -148,7 +148,7 @@ impl WriteWhereClause<Match<'_, i64>> for PostgresSchema
 			Match::AllInRange(low, high) | Match::InRange(low, high) =>
 			{
 				write_comparison(query, prefix, column, ">=", low);
-				write_comparison(query, "AND", column, "<", high);
+				write_comparison(query, " AND", column, "<", high);
 			},
 			Match::And(match_conditions) =>
 			{

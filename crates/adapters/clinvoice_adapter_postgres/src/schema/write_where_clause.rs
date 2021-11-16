@@ -272,7 +272,7 @@ impl PostgresSchema
 		) -> bool
 		{
 			let base_column_id = format!("{}.{}", alias, COLUMN_ID);
-			keyword_written |= match match_condition.outer
+			keyword_written = match match_condition.outer
 			{
 				MatchOuterLocation::Any => false,
 				MatchOuterLocation::None => PostgresSchema::write_where_clause(

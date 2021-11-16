@@ -373,15 +373,101 @@ mod tests
 					Match::Not(Box::new(Match::Any)),
 					Match::GreaterThan(Owned(-1)),
 				]),
+				Match::Any,
 			]),
 			&mut query,
 		));
 		assert_eq!(
 			query,
 			format!(
-				"  (  NOT (  bar >= 0  AND bar < 10) AND  bar IN ({}) AND  (  bar IS NULL OR  bar > -1))",
+				"  (  NOT (  bar >= 0  AND bar < 10) AND  bar IN ({}) AND  (  bar IS NULL OR  bar > \
+				 -1))",
 				&query[49..59]
 			)
+		);
+
+		{
+			query.clear();
+			let mut query2 = String::new();
+
+			assert!(Schema::write_where_clause(
+				true,
+				"another_row",
+				&Match::AllInRange(Owned(0), Owned(2)),
+				&mut query
+			));
+			assert!(Schema::write_where_clause(
+				true,
+				"another_row",
+				&Match::InRange(Owned(0), Owned(2)),
+				&mut query2
+			));
+			assert_eq!(query, query2);
+
+			query.clear();
+			query2.clear();
+			assert!(Schema::write_where_clause(
+				true,
+				"another_row",
+				&Match::AllLessThan(Owned(0)),
+				&mut query
+			));
+			assert!(Schema::write_where_clause(
+				true,
+				"another_row",
+				&Match::LessThan(Owned(0)),
+				&mut query2
+			));
+			assert_eq!(query, query2);
+
+			query.clear();
+			query2.clear();
+			assert!(Schema::write_where_clause(
+				true,
+				"another_row",
+				&Match::AllGreaterThan(Owned(0)),
+				&mut query
+			));
+			assert!(Schema::write_where_clause(
+				true,
+				"another_row",
+				&Match::GreaterThan(Owned(0)),
+				&mut query2
+			));
+			assert_eq!(query, query2);
+		}
+
+		query.clear();
+		assert!(!Schema::write_where_clause(
+			false,
+			"bar",
+			&MatchStr::Any,
+			&mut query
+		));
+		assert_eq!(query, String::from(""));
+
+		query.clear();
+		assert!(Schema::write_where_clause(
+			false,
+			"bar",
+			&MatchStr::Contains(Borrowed("punky brüster")),
+			&mut query
+		));
+		assert_eq!(query, String::from(" WHERE bar LIKE '%punky brüster%'"));
+
+		query.clear();
+		assert!(Schema::write_where_clause(
+			true,
+			"some_row",
+			&MatchStr::Or(vec![
+				MatchStr::Regex(Borrowed(r#"^f.rk.*\bit\b.*over$"#)),
+				MatchStr::Not(Box::new(MatchStr::EqualTo(Borrowed("not equal")))),
+			]),
+			&mut query
+		));
+		assert_eq!(
+			query,
+			String::from(r#"  (  some_row ~ ^f.rk.*\bit\b.*over$ OR  NOT (  some_row = not equal))"#)
 		);
 	}
 

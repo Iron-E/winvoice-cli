@@ -354,7 +354,7 @@ mod tests
 			false,
 			"foo",
 			&Match::EqualTo(Owned(18)),
-			&mut query
+			&mut query,
 		));
 		assert_eq!(query, String::from(" WHERE foo = 18"));
 
@@ -382,7 +382,7 @@ mod tests
 			format!(
 				"  (  NOT (  bar >= 0  AND bar < 10) AND  bar IN ({}) AND  (  bar IS NULL OR  bar > \
 				 -1))",
-				&query[49..59]
+				&query[49..59],
 			)
 		);
 
@@ -394,13 +394,13 @@ mod tests
 				true,
 				"another_row",
 				&Match::AllInRange(Owned(0), Owned(2)),
-				&mut query
+				&mut query,
 			));
 			assert!(Schema::write_where_clause(
 				true,
 				"another_row",
 				&Match::InRange(Owned(0), Owned(2)),
-				&mut query2
+				&mut query2,
 			));
 			assert_eq!(query, query2);
 
@@ -410,13 +410,13 @@ mod tests
 				true,
 				"another_row",
 				&Match::AllLessThan(Owned(0)),
-				&mut query
+				&mut query,
 			));
 			assert!(Schema::write_where_clause(
 				true,
 				"another_row",
 				&Match::LessThan(Owned(0)),
-				&mut query2
+				&mut query2,
 			));
 			assert_eq!(query, query2);
 
@@ -426,13 +426,13 @@ mod tests
 				true,
 				"another_row",
 				&Match::AllGreaterThan(Owned(0)),
-				&mut query
+				&mut query,
 			));
 			assert!(Schema::write_where_clause(
 				true,
 				"another_row",
 				&Match::GreaterThan(Owned(0)),
-				&mut query2
+				&mut query2,
 			));
 			assert_eq!(query, query2);
 		}
@@ -442,7 +442,7 @@ mod tests
 			false,
 			"bar",
 			&MatchStr::Any,
-			&mut query
+			&mut query,
 		));
 		assert_eq!(query, String::from(""));
 
@@ -451,7 +451,7 @@ mod tests
 			false,
 			"bar",
 			&MatchStr::Contains(Borrowed("punky brüster")),
-			&mut query
+			&mut query,
 		));
 		assert_eq!(query, String::from(" WHERE bar LIKE '%punky brüster%'"));
 
@@ -463,11 +463,11 @@ mod tests
 				MatchStr::Regex(Borrowed(r#"^f.rk.*\bit\b.*over$"#)),
 				MatchStr::Not(Box::new(MatchStr::EqualTo(Borrowed("not equal")))),
 			]),
-			&mut query
+			&mut query,
 		));
 		assert_eq!(
 			query,
-			String::from(r#"  (  some_row ~ ^f.rk.*\bit\b.*over$ OR  NOT (  some_row = not equal))"#)
+			String::from(r#"  (  some_row ~ ^f.rk.*\bit\b.*over$ OR  NOT (  some_row = not equal))"#),
 		);
 	}
 

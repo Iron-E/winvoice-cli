@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use clinvoice_schema::{EmployeeStatus, Id};
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
@@ -27,5 +29,5 @@ pub struct MatchEmployee<'m>
 	pub status: Match<'m, EmployeeStatus>,
 
 	#[cfg_attr(feature = "serde_support", serde(default))]
-	pub title: MatchStr<String>,
+	pub title: MatchStr<Cow<'m, str>>,
 }

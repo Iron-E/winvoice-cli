@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use clinvoice_schema::chrono::NaiveDateTime;
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
@@ -27,5 +29,5 @@ pub struct MatchTimesheet<'m>
 	pub time_end: Match<'m, Option<NaiveDateTime>>,
 
 	#[cfg_attr(feature = "serde_support", serde(default))]
-	pub work_notes: MatchStr<String>,
+	pub work_notes: MatchStr<Cow<'m, str>>,
 }

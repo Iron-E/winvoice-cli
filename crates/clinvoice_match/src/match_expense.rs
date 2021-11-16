@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use clinvoice_schema::{ExpenseCategory, Money};
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
@@ -18,5 +20,5 @@ pub struct MatchExpense<'m>
 	pub cost: Match<'m, Money>,
 
 	#[cfg_attr(feature = "serde_support", serde(default))]
-	pub description: MatchStr<String>,
+	pub description: MatchStr<Cow<'m, str>>,
 }

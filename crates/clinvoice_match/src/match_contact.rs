@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 
@@ -14,8 +16,8 @@ pub struct MatchContact<'m>
 	pub address: MatchLocation<'m>,
 
 	#[cfg_attr(feature = "serde_support", serde(default))]
-	pub email: MatchStr<String>,
+	pub email: MatchStr<Cow<'m, str>>,
 
 	#[cfg_attr(feature = "serde_support", serde(default))]
-	pub phone: MatchStr<String>,
+	pub phone: MatchStr<Cow<'m, str>>,
 }

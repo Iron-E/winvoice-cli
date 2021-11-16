@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use clinvoice_schema::{chrono::NaiveDateTime, Id};
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
@@ -27,8 +29,8 @@ pub struct MatchJob<'m>
 	pub invoice: MatchInvoice<'m>,
 
 	#[cfg_attr(feature = "serde_support", serde(default))]
-	pub notes: MatchStr<String>,
+	pub notes: MatchStr<Cow<'m, str>>,
 
 	#[cfg_attr(feature = "serde_support", serde(default))]
-	pub objectives: MatchStr<String>,
+	pub objectives: MatchStr<Cow<'m, str>>,
 }

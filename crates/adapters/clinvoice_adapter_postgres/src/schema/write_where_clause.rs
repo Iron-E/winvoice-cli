@@ -1,4 +1,5 @@
 use std::{
+	borrow::Cow,
 	fmt::{Display, Write},
 	ops::Deref,
 };
@@ -172,12 +173,12 @@ impl WriteWhereClause<Match<'_, i64>> for PostgresSchema
 	}
 }
 
-impl WriteWhereClause<MatchStr<String>> for PostgresSchema
+impl WriteWhereClause<MatchStr<Cow<'_, str>>> for PostgresSchema
 {
 	fn write_where_clause(
 		keyword_written: bool,
 		column: &str,
-		match_condition: &MatchStr<String>,
+		match_condition: &MatchStr<Cow<'_, str>>,
 		query: &mut String,
 	) -> bool
 	{

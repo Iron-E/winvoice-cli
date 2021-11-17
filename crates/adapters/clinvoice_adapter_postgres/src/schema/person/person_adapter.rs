@@ -35,7 +35,7 @@ impl PersonAdapter for PostgresPerson
 	{
 		let mut query = Schema::write_select_clause([]);
 		Schema::write_from_clause(&mut query, "people", "");
-		Schema::write_where_clause(WriteContext::BeforeClause, "", match_condition, &mut query);
+		Schema::write_where_clause(WriteContext::BeforeWhereClause, "", match_condition, &mut query);
 		query.push(';');
 
 		sqlx::query(&query)

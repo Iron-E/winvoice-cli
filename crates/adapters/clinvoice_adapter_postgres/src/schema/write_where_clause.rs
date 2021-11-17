@@ -38,13 +38,13 @@ fn write_boolean_group<I, Q, const UNION: bool>(
 	write!(query, "{} (", context.get_prefix()).unwrap();
 	if let Some(m) = match_conditions.next()
 	{
-		PostgresSchema::write_where_clause(WriteContext::InsideClause, alias, m, query);
+		PostgresSchema::write_where_clause(WriteContext::InWhereCondition, alias, m, query);
 	}
 
 	let separator: &str = if UNION { " AND" } else { " OR" };
 	match_conditions.for_each(|q| {
 		query.push_str(separator);
-		PostgresSchema::write_where_clause(WriteContext::InsideClause, alias, q, query);
+		PostgresSchema::write_where_clause(WriteContext::InWhereCondition, alias, q, query);
 	});
 
 	query.push(')');
@@ -141,7 +141,7 @@ where
 	PostgresSchema: WriteWhereClause<Q>,
 {
 	write!(query, "{} NOT (", context.get_prefix()).unwrap();
-	PostgresSchema::write_where_clause(WriteContext::InsideClause, alias, match_condition, query);
+	PostgresSchema::write_where_clause(WriteContext::InWhereCondition, alias, match_condition, query);
 	query.push(')');
 }
 
@@ -167,7 +167,7 @@ impl WriteWhereClause<&Match<'_, i64>> for PostgresSchema
 			Match::AllInRange(low, high) | Match::InRange(low, high) =>
 			{
 				write_comparison(query, context, alias, ">=", low);
-				write_comparison(query, WriteContext::AfterClause, alias, "<", high);
+				write_comparison(query, WriteContext::AfterWhereCondition, alias, "<", high);
 			},
 			Match::And(match_conditions) => write_boolean_group::<_, _, true>(
 				query,
@@ -191,7 +191,7 @@ impl WriteWhereClause<&Match<'_, i64>> for PostgresSchema
 				&mut match_conditions.iter().filter(|m| *m != &Match::Any),
 			),
 		};
-		WriteContext::AfterClause
+		WriteContext::AfterWhereCondition
 	}
 }
 
@@ -238,7 +238,7 @@ impl WriteWhereClause<&MatchStr<Cow<'_, str>>> for PostgresSchema
 			),
 			MatchStr::Regex(regex) => write_comparison(query, context, alias, "~", regex),
 		};
-		WriteContext::AfterClause
+		WriteContext::AfterWhereCondition
 	}
 }
 
@@ -288,7 +288,7 @@ impl WriteWhereClause<&MatchLocation<'_>> for PostgresSchema
 	///
 	/// If any the following:
 	///
-	/// * `context` is not `BeforeClause`
+	/// * `context` is not `BeforeWhereClause`
 	/// * `alias` is an empty string.
 	///
 	/// # See
@@ -314,9 +314,9 @@ impl WriteWhereClause<&MatchLocation<'_>> for PostgresSchema
 				MatchOuterLocation::None =>
 				{
 					write_is_null(query, context, &format!("{}.{}", alias, COLUMN_OUTER_ID));
-					WriteContext::AfterClause
+					WriteContext::AfterWhereCondition
 				},
-				MatchOuterLocation::Some(ref outer) if context == WriteContext::BeforeClause =>
+				MatchOuterLocation::Some(ref outer) if context == WriteContext::BeforeWhereClause =>
 				{
 					let new_alias = format!("{}O", alias);
 					PostgresSchema::write_join_clause(
@@ -370,7 +370,7 @@ mod tests
 		MatchPerson,
 		MatchStr,
 		PostgresSchema as Schema,
-		WriteContext::{AfterClause, BeforeClause, InsideClause},
+		WriteContext::{AfterWhereCondition, BeforeWhereClause, InWhereCondition},
 		WriteWhereClause,
 	};
 
@@ -379,15 +379,15 @@ mod tests
 	{
 		let mut query = String::new();
 		assert_eq!(
-			Schema::write_where_clause(BeforeClause, "foo", &Match::EqualTo(Owned(18)), &mut query,),
-			AfterClause,
+			Schema::write_where_clause(BeforeWhereClause, "foo", &Match::EqualTo(Owned(18)), &mut query,),
+			AfterWhereCondition,
 		);
 		assert_eq!(query, String::from(" WHERE foo = 18"));
 
 		query.clear();
 		assert_eq!(
 			Schema::write_where_clause(
-				InsideClause,
+				InWhereCondition,
 				"bar",
 				&Match::And(vec![
 					Match::Not(Box::new(Match::InRange(Owned(0), Owned(10)))),
@@ -404,7 +404,7 @@ mod tests
 				]),
 				&mut query,
 			),
-			AfterClause,
+			AfterWhereCondition,
 		);
 		assert_eq!(
 			query,
@@ -420,21 +420,21 @@ mod tests
 
 			assert_eq!(
 				Schema::write_where_clause(
-					InsideClause,
+					InWhereCondition,
 					"another_row",
 					&Match::AllInRange(Owned(0), Owned(2)),
 					&mut query,
 				),
-				AfterClause,
+				AfterWhereCondition,
 			);
 			assert_eq!(
 				Schema::write_where_clause(
-					InsideClause,
+					InWhereCondition,
 					"another_row",
 					&Match::InRange(Owned(0), Owned(2)),
 					&mut query2,
 				),
-				AfterClause,
+				AfterWhereCondition,
 			);
 			assert_eq!(query, query2);
 
@@ -442,21 +442,21 @@ mod tests
 			query2.clear();
 			assert_eq!(
 				Schema::write_where_clause(
-					InsideClause,
+					InWhereCondition,
 					"another_row",
 					&Match::AllLessThan(Owned(0)),
 					&mut query,
 				),
-				AfterClause,
+				AfterWhereCondition,
 			);
 			assert_eq!(
 				Schema::write_where_clause(
-					InsideClause,
+					InWhereCondition,
 					"another_row",
 					&Match::LessThan(Owned(0)),
 					&mut query2,
 				),
-				AfterClause,
+				AfterWhereCondition,
 			);
 			assert_eq!(query, query2);
 
@@ -464,21 +464,21 @@ mod tests
 			query2.clear();
 			assert_eq!(
 				Schema::write_where_clause(
-					InsideClause,
+					InWhereCondition,
 					"another_row",
 					&Match::AllGreaterThan(Owned(0)),
 					&mut query,
 				),
-				AfterClause,
+				AfterWhereCondition,
 			);
 			assert_eq!(
 				Schema::write_where_clause(
-					InsideClause,
+					InWhereCondition,
 					"another_row",
 					&Match::GreaterThan(Owned(0)),
 					&mut query2,
 				),
-				AfterClause,
+				AfterWhereCondition,
 			);
 			assert_eq!(query, query2);
 		}
@@ -489,27 +489,27 @@ mod tests
 	{
 		let mut query = String::new();
 		assert_eq!(
-			Schema::write_where_clause(InsideClause, "bar", &MatchStr::Any, &mut query,),
-			InsideClause
+			Schema::write_where_clause(InWhereCondition, "bar", &MatchStr::Any, &mut query,),
+			InWhereCondition
 		);
 		assert_eq!(query, String::from(""));
 
 		query.clear();
 		assert_eq!(
 			Schema::write_where_clause(
-				AfterClause,
+				AfterWhereCondition,
 				"bar",
 				&MatchStr::Contains(Borrowed("punky brüster")),
 				&mut query,
 			),
-			AfterClause,
+			AfterWhereCondition,
 		);
 		assert_eq!(query, String::from(" AND bar LIKE '%punky brüster%'"));
 
 		query.clear();
 		assert_eq!(
 			Schema::write_where_clause(
-				BeforeClause,
+				BeforeWhereClause,
 				"some_row",
 				&MatchStr::Or(vec![
 					MatchStr::Regex(Borrowed(r#"^f.rk.*\bit\b.*over$"#)),
@@ -517,7 +517,7 @@ mod tests
 				]),
 				&mut query,
 			),
-			AfterClause,
+			AfterWhereCondition,
 		);
 		assert_eq!(
 			query,
@@ -532,15 +532,15 @@ mod tests
 	{
 		let mut query = String::new();
 		assert_eq!(
-			Schema::write_where_clause(BeforeClause, "", &MatchPerson::default(), &mut query),
-			BeforeClause
+			Schema::write_where_clause(BeforeWhereClause, "", &MatchPerson::default(), &mut query),
+			BeforeWhereClause
 		);
 		assert!(query.is_empty());
 
 		query.clear();
 		assert_eq!(
 			Schema::write_where_clause(
-				BeforeClause,
+				BeforeWhereClause,
 				"",
 				&MatchPerson {
 					id: Match::EqualTo(Owned(7)),
@@ -548,14 +548,14 @@ mod tests
 				},
 				&mut query,
 			),
-			AfterClause
+			AfterWhereCondition
 		);
 		assert_eq!(query, String::from(" WHERE id = 7"));
 
 		query.clear();
 		assert_eq!(
 			Schema::write_where_clause(
-				AfterClause,
+				AfterWhereCondition,
 				"",
 				&MatchPerson {
 					id:   Match::EqualTo(Owned(7)),
@@ -563,7 +563,7 @@ mod tests
 				},
 				&mut query,
 			),
-			AfterClause
+			AfterWhereCondition
 		);
 		assert_eq!(query, String::from(" AND id = 7 AND name = 'stuff'"),);
 	}
@@ -573,15 +573,15 @@ mod tests
 	{
 		let mut query = String::new();
 		assert_eq!(
-			Schema::write_where_clause(BeforeClause, "L", &MatchLocation::default(), &mut query),
-			BeforeClause
+			Schema::write_where_clause(BeforeWhereClause, "L", &MatchLocation::default(), &mut query),
+			BeforeWhereClause
 		);
 		assert!(query.is_empty());
 
 		query.clear();
 		assert_eq!(
 			Schema::write_where_clause(
-				BeforeClause,
+				BeforeWhereClause,
 				"L",
 				&MatchLocation {
 					id: Match::EqualTo(Owned(7)),
@@ -589,14 +589,14 @@ mod tests
 				},
 				&mut query,
 			),
-			AfterClause
+			AfterWhereCondition
 		);
 		assert_eq!(query, String::from(" WHERE L.id = 7"),);
 
 		query.clear();
 		assert_eq!(
 			Schema::write_where_clause(
-				BeforeClause,
+				BeforeWhereClause,
 				"L",
 				&MatchLocation {
 					id: Match::EqualTo(Owned(7)),
@@ -612,7 +612,7 @@ mod tests
 				},
 				&mut query,
 			),
-			AfterClause
+			AfterWhereCondition
 		);
 		assert_eq!(
 			query,

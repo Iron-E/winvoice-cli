@@ -17,7 +17,7 @@ pub enum WriteContext
 	/// ```ignore
 	/// SELECT * FROM foo
 	/// ```
-	BeforeClause,
+	BeforeWhereClause,
 
 	/// # Summary
 	///
@@ -28,7 +28,7 @@ pub enum WriteContext
 	/// ```ignore
 	/// SELECT * FROM foo WHERE bar <= 7 AND
 	/// ```
-	InsideClause,
+	InWhereCondition,
 
 	/// # Summary
 	///
@@ -39,7 +39,7 @@ pub enum WriteContext
 	/// ```ignore
 	/// SELECT * FROM foo WHERE bar = 7
 	/// ```
-	AfterClause,
+	AfterWhereCondition,
 }
 
 impl WriteContext
@@ -48,9 +48,9 @@ impl WriteContext
 	{
 		match self
 		{
-			WriteContext::AfterClause => " AND",
-			WriteContext::BeforeClause => " WHERE",
-			WriteContext::InsideClause => "",
+			WriteContext::AfterWhereCondition => " AND",
+			WriteContext::BeforeWhereClause => " WHERE",
+			WriteContext::InWhereCondition => "",
 		}
 	}
 }

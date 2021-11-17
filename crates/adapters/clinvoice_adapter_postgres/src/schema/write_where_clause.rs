@@ -400,7 +400,7 @@ mod tests
 	};
 
 	#[test]
-	fn write_where_clause()
+	fn write_match_where_clause()
 	{
 		let mut query = String::new();
 		assert!(Schema::write_where_clause(
@@ -488,8 +488,12 @@ mod tests
 			));
 			assert_eq!(query, query2);
 		}
+	}
 
-		query.clear();
+	#[test]
+	fn write_match_str_where_clause()
+	{
+		let mut query = String::new();
 		assert!(!Schema::write_where_clause(
 			InsideClause,
 			"bar",

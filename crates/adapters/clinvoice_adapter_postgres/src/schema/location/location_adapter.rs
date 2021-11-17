@@ -1,10 +1,10 @@
-use clinvoice_adapter::{schema::LocationAdapter, WriteFromClause, WriteSelectClause};
+use clinvoice_adapter::{WriteFromClause, WriteSelectClause, WriteWhereClause, schema::LocationAdapter};
 use clinvoice_match::MatchLocation;
 use clinvoice_schema::{views::LocationView, Location};
 use sqlx::{Acquire, Executor, Postgres, Result};
 
 use super::PostgresLocation;
-use crate::PostgresSchema;
+use crate::PostgresSchema as Schema;
 
 #[async_trait::async_trait]
 impl LocationAdapter for PostgresLocation
@@ -57,9 +57,9 @@ impl LocationAdapter for PostgresLocation
 	{
 		let mut transaction = connection.begin().await?;
 
-		let mut query = PostgresSchema::write_select_clause([]);
-		PostgresSchema::write_from_clause(&mut query, "locations", "L");
-		PostgresSchema::write_location_join_where_clause(&mut query, false, match_condition);
+		let mut query = Schema::write_select_clause([]);
+		Schema::write_from_clause(&mut query, "locations", "L");
+		Schema::write_where_clause(false, "L", match_condition, &mut query);
 		query.push(';');
 
 		let output = sqlx::query(&query).fetch(&mut transaction);

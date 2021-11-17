@@ -604,6 +604,7 @@ mod tests
 						id: Match::EqualTo(Owned(8)),
 						outer: MatchOuterLocation::Some(Box::new(MatchLocation {
 							id: Match::EqualTo(Owned(9)),
+							outer: MatchOuterLocation::None,
 							..Default::default()
 						})),
 						..Default::default()
@@ -618,7 +619,7 @@ mod tests
 			query,
 			String::from(
 				"  JOIN locations LO ON (LO.id = L.outer_id)  JOIN locations LOO ON (LOO.id = \
-				 LO.outer_id) WHERE LOO.id = 9 AND LO.id = 8 AND L.id = 7"
+				 LO.outer_id) WHERE LOO.outer_id IS NULL AND LOO.id = 9 AND LO.id = 8 AND L.id = 7"
 			),
 		);
 	}

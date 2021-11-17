@@ -1,4 +1,9 @@
-use clinvoice_adapter::{WriteFromClause, WriteSelectClause, WriteWhereClause, schema::PersonAdapter};
+use clinvoice_adapter::{
+	schema::PersonAdapter,
+	WriteFromClause,
+	WriteSelectClause,
+	WriteWhereClause,
+};
 use clinvoice_match::MatchPerson;
 use clinvoice_schema::{views::PersonView, Person};
 use futures::stream::TryStreamExt;

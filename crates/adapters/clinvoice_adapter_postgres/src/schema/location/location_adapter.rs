@@ -1,4 +1,9 @@
-use clinvoice_adapter::{WriteFromClause, WriteSelectClause, WriteWhereClause, schema::LocationAdapter};
+use clinvoice_adapter::{
+	schema::LocationAdapter,
+	WriteFromClause,
+	WriteSelectClause,
+	WriteWhereClause,
+};
 use clinvoice_match::MatchLocation;
 use clinvoice_schema::{views::LocationView, Location};
 use sqlx::{Acquire, Executor, Postgres, Result};

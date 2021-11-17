@@ -1,5 +1,3 @@
-mod from_bool;
-
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 

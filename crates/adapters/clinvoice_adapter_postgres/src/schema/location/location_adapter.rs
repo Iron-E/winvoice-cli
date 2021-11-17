@@ -1,5 +1,6 @@
 use clinvoice_adapter::{
 	schema::LocationAdapter,
+	WriteContext,
 	WriteFromClause,
 	WriteSelectClause,
 	WriteWhereClause,
@@ -64,7 +65,7 @@ impl LocationAdapter for PostgresLocation
 
 		let mut query = Schema::write_select_clause([]);
 		Schema::write_from_clause(&mut query, "locations", "L");
-		Schema::write_where_clause(false, "L", match_condition, &mut query);
+		Schema::write_where_clause(WriteContext::BeforeClause, "L", match_condition, &mut query);
 		query.push(';');
 
 		let output = sqlx::query(&query).fetch(&mut transaction);

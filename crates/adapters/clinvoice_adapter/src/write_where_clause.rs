@@ -19,15 +19,12 @@ pub trait WriteWhereClause<M>
 	///
 	/// # Return
 	///
-	/// `true` if anything was written, `false` otherwise. Because `WriteContext` implements
-	/// `From<bool>`, you can pass this method into itself to accurately compose a complicated `WHERE`
-	/// clause.
-	fn write_where_clause<C>(
-		context: C,
+	/// The [`WriteContext`] that the `query` will be in after this operation. Can be passed into
+	/// the `context` argument of another call to this same method.
+	fn write_where_clause(
+		context: WriteContext,
 		alias: &str,
 		match_condition: M,
 		query: &mut String,
-	) -> bool
-	where
-		C: Into<WriteContext>;
+	) -> WriteContext;
 }

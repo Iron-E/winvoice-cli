@@ -26,17 +26,16 @@ const COLUMN_OUTER_ID: &str = "outer_id";
 ///       [`std::borrow::Cow`]. View the linked documentation for proper examples.
 ///
 /// The rest of the args are the same as [`WriteSql::write_where`].
-fn write_boolean_group<C, I, Q, const UNION: bool>(
+fn write_boolean_group<I, Q, const UNION: bool>(
 	query: &mut String,
-	context: C,
+	context: WriteContext,
 	alias: &str,
 	match_conditions: &mut I,
 ) where
-	C: Into<WriteContext>,
 	I: Iterator<Item = Q>,
 	PostgresSchema: WriteWhereClause<Q>,
 {
-	write!(query, "{} (", context.into().get_prefix()).unwrap();
+	write!(query, "{} (", context.get_prefix()).unwrap();
 	if let Some(m) = match_conditions.next()
 	{
 		PostgresSchema::write_where_clause(WriteContext::InsideClause, alias, m, query);
@@ -56,19 +55,18 @@ fn write_boolean_group<C, I, Q, const UNION: bool>(
 /// Write a comparison of `alias` and `comparand` using `comparator`.
 ///
 /// The rest of the args are the same as [`WriteSql::write_where`].
-fn write_comparison<C>(
+fn write_comparison(
 	query: &mut String,
-	context: C,
+	context: WriteContext,
 	alias: &str,
 	comperator: &str,
 	comparand: impl Display,
-) where
-	C: Into<WriteContext>,
+)
 {
 	write!(
 		query,
 		"{} {} {} {}",
-		context.into().get_prefix(),
+		context.get_prefix(),
 		alias,
 		comperator,
 		comparand
@@ -87,14 +85,13 @@ fn write_comparison<C>(
 ///       [`std::borrow::Cow`]. View the linked documentation for proper examples.
 ///
 /// The rest of the args are the same as [`WriteSql::write_where`].
-fn write_has<'t, C, T>(
+fn write_has<'t, T>(
 	query: &mut String,
-	context: C,
+	context: WriteContext,
 	alias: &str,
 	values: impl IntoIterator<Item = &'t T>,
 	union: bool,
 ) where
-	C: Into<WriteContext>,
 	T: 't + Display,
 {
 	let mut iter = values.into_iter();
@@ -104,7 +101,7 @@ fn write_has<'t, C, T>(
 		write!(
 			query,
 			"{} {} {}{}",
-			context.into().get_prefix(),
+			context.get_prefix(),
 			alias,
 			if union { "= ALL(ARRAY[" } else { "IN (" },
 			id
@@ -129,11 +126,9 @@ fn write_has<'t, C, T>(
 /// Write a comparison of `alias` and `comparand` using `comparator`.
 ///
 /// The rest of the args are the same as [`WriteSql::write_where`].
-fn write_is_null<C>(query: &mut String, context: C, alias: &str)
-where
-	C: Into<WriteContext>,
+fn write_is_null(query: &mut String, context: WriteContext, alias: &str)
 {
-	write!(query, "{} {} IS NULL", context.into().get_prefix(), alias).unwrap()
+	write!(query, "{} {} IS NULL", context.get_prefix(), alias).unwrap()
 }
 
 /// # Summary
@@ -141,26 +136,23 @@ where
 /// Wrap some `match_condition` in `NOT (…)`.
 ///
 /// The args are the same as [`WriteSql::write_where`].
-fn write_negated<C, Q>(query: &mut String, context: C, alias: &str, match_condition: Q)
+fn write_negated<Q>(query: &mut String, context: WriteContext, alias: &str, match_condition: Q)
 where
-	C: Into<WriteContext>,
 	PostgresSchema: WriteWhereClause<Q>,
 {
-	write!(query, "{} NOT (", context.into().get_prefix()).unwrap();
+	write!(query, "{} NOT (", context.get_prefix()).unwrap();
 	PostgresSchema::write_where_clause(WriteContext::InsideClause, alias, match_condition, query);
 	query.push(')');
 }
 
 impl WriteWhereClause<&Match<'_, i64>> for PostgresSchema
 {
-	fn write_where_clause<C>(
-		context: C,
+	fn write_where_clause(
+		context: WriteContext,
 		alias: &str,
 		match_condition: &Match<'_, i64>,
 		query: &mut String,
-	) -> bool
-	where
-		C: Into<WriteContext>,
+	) -> WriteContext
 	{
 		match match_condition
 		{
@@ -177,13 +169,13 @@ impl WriteWhereClause<&Match<'_, i64>> for PostgresSchema
 				write_comparison(query, context, alias, ">=", low);
 				write_comparison(query, WriteContext::AfterClause, alias, "<", high);
 			},
-			Match::And(match_conditions) => write_boolean_group::<_, _, _, true>(
+			Match::And(match_conditions) => write_boolean_group::<_, _, true>(
 				query,
 				context,
 				alias,
 				&mut match_conditions.iter().filter(|m| *m != &Match::Any),
 			),
-			Match::Any => return false,
+			Match::Any => return context,
 			Match::EqualTo(id) => write_comparison(query, context, alias, "=", id),
 			Match::HasAll(ids) => write_has(query, context, alias, ids, true),
 			Match::HasAny(ids) => write_has(query, context, alias, ids, false),
@@ -192,59 +184,53 @@ impl WriteWhereClause<&Match<'_, i64>> for PostgresSchema
 				Match::Any => write_is_null(query, context, alias),
 				m @ _ => write_negated(query, context, alias, m),
 			},
-			Match::Or(match_conditions) => write_boolean_group::<_, _, _, false>(
+			Match::Or(match_conditions) => write_boolean_group::<_, _, false>(
 				query,
 				context,
 				alias,
 				&mut match_conditions.iter().filter(|m| *m != &Match::Any),
 			),
 		};
-		true
+		WriteContext::AfterClause
 	}
 }
 
 impl WriteWhereClause<&MatchStr<Cow<'_, str>>> for PostgresSchema
 {
-	fn write_where_clause<C>(
-		context: C,
+	fn write_where_clause(
+		context: WriteContext,
 		alias: &str,
 		match_condition: &MatchStr<Cow<'_, str>>,
 		query: &mut String,
-	) -> bool
-	where
-		C: Into<WriteContext>,
+	) -> WriteContext
 	{
 		match match_condition
 		{
-			MatchStr::And(match_conditions) => write_boolean_group::<_, _, _, true>(
+			MatchStr::And(match_conditions) => write_boolean_group::<_, _, true>(
 				query,
 				context,
 				alias,
 				&mut match_conditions.iter().filter(|m| *m != &MatchStr::Any),
 			),
-			MatchStr::Any => return false,
+			MatchStr::Any => return context,
 			MatchStr::Contains(string) => write!(
 				query,
 				"{} {} LIKE '%{}%'",
-				context.into().get_prefix(),
+				context.get_prefix(),
 				alias,
 				string
 			)
 			.unwrap(),
-			MatchStr::EqualTo(string) => write!(
-				query,
-				"{} {} = '{}'",
-				context.into().get_prefix(),
-				alias,
-				string
-			)
-			.unwrap(),
+			MatchStr::EqualTo(string) =>
+			{
+				write!(query, "{} {} = '{}'", context.get_prefix(), alias, string).unwrap()
+			},
 			MatchStr::Not(match_condition) => match match_condition.deref()
 			{
 				MatchStr::Any => write_is_null(query, context, alias),
 				m @ _ => write_negated(query, context, alias, m),
 			},
-			MatchStr::Or(match_conditions) => write_boolean_group::<_, _, _, false>(
+			MatchStr::Or(match_conditions) => write_boolean_group::<_, _, false>(
 				query,
 				context,
 				alias,
@@ -252,28 +238,18 @@ impl WriteWhereClause<&MatchStr<Cow<'_, str>>> for PostgresSchema
 			),
 			MatchStr::Regex(regex) => write_comparison(query, context, alias, "~", regex),
 		};
-		true
+		WriteContext::AfterClause
 	}
 }
 
 impl WriteWhereClause<&MatchPerson<'_>> for PostgresSchema
 {
-	/// # Summary
-	///
-	/// Write a `WHERE` clause for a [`Person`](clinvoice_schema::Person) based on a
-	/// `match_condition`. An `alias` can be set to assist in a previous join. The result will be
-	/// appended to a `query`.
-	///
-	/// If the `WHERE` clause has already been started, then pass `keyword_written` as `true`.
-	/// Otherwise, if this is the first term in the `WHERE` clause, pass it as `false`.
-	fn write_where_clause<C>(
-		context: C,
+	fn write_where_clause(
+		context: WriteContext,
 		alias: &str,
 		match_condition: &MatchPerson,
 		query: &mut String,
-	) -> bool
-	where
-		C: Into<WriteContext>,
+	) -> WriteContext
 	{
 		macro_rules! write_where_clause {
 			($context:expr, $column:ident, $match_field:ident) => {
@@ -308,48 +284,39 @@ impl WriteWhereClause<&MatchPerson<'_>> for PostgresSchema
 
 impl WriteWhereClause<&MatchLocation<'_>> for PostgresSchema
 {
-	/// # Summary
+	/// # Panics
 	///
-	/// Write a `WHERE` clause for a [`Location`](clinvoice_schema::Location) based on a
-	/// `match_condition`. An `alias` can be set to assist in a previous join. The result will be
-	/// appended to a `query`.
+	/// If any the following:
 	///
-	/// If the `WHERE` clause has already been started, then pass `keyword_written` as `true`.
-	/// Otherwise, if this is the first term in the `WHERE` clause, pass it as `false`.
-	fn write_where_clause<C>(
-		context: C,
+	/// * `context` is not `BeforeClause`
+	/// * `alias` is an empty string.
+	///
+	/// # See
+	///
+	/// * [`WriteWhereClause::write_where_clause`]
+	fn write_where_clause(
+		context: WriteContext,
 		alias: &str,
 		match_condition: &MatchLocation,
 		query: &mut String,
-	) -> bool
-	where
-		C: Into<WriteContext>,
+	) -> WriteContext
 	{
-		// fn recurse(
-		// 	query: &mut String,
-		// 	alias: &str,
-		// 	mut keyword_written: bool,
-		// 	match_condition: &MatchLocation,
-		// ) -> bool
-		fn recurse<C>(
+		fn recurse(
 			query: &mut String,
-			context: C,
+			context: WriteContext,
 			alias: &str,
 			match_condition: &MatchLocation,
-		) -> bool
-		where
-			C: Into<WriteContext>,
+		) -> WriteContext
 		{
-			let base_column_id = format!("{}.{}", alias, COLUMN_ID);
 			let ctx = match match_condition.outer
 			{
-				MatchOuterLocation::Any => false,
+				MatchOuterLocation::Any => context,
 				MatchOuterLocation::None =>
 				{
 					write_is_null(query, context, &format!("{}.{}", alias, COLUMN_OUTER_ID));
-					true
+					WriteContext::AfterClause
 				},
-				MatchOuterLocation::Some(ref outer) =>
+				MatchOuterLocation::Some(ref outer) if context == WriteContext::BeforeClause =>
 				{
 					let new_alias = format!("{}O", alias);
 					PostgresSchema::write_join_clause(
@@ -357,29 +324,37 @@ impl WriteWhereClause<&MatchLocation<'_>> for PostgresSchema
 						"",
 						"locations",
 						&new_alias,
-						"outer_id",
-						&base_column_id,
+						"id",
+						&format!("{}.{}", alias, COLUMN_OUTER_ID),
 					)
 					.unwrap();
 					recurse(query, context, &new_alias, outer.deref())
 				},
+				_ => panic!(
+					"Must generate SQL for `MatchLocation` _before_ the `WHERE` condition, as it \
+					 necessitates a JOIN."
+				),
 			};
 
 			PostgresSchema::write_where_clause(
-				PostgresSchema::write_where_clause(ctx, &base_column_id, &match_condition.id, query),
+				PostgresSchema::write_where_clause(
+					ctx,
+					&format!("{}.{}", alias, COLUMN_ID),
+					&match_condition.id,
+					query,
+				),
 				&format!("{}.{}", alias, COLUMN_NAME),
 				&match_condition.name,
 				query,
 			)
-
-			// SELECT L.id, L.name, L.outer_id
-			// FROM locations L
-			// JOIN locations O ON (O.id = L.outer_id)
-			// JOIN locations OO ON (OO.id = O.outer_id)
-			// ;
 		}
 
-		recurse(query, context, "L", match_condition)
+		if alias.is_empty()
+		{
+			panic!("Must provide alias for `Location`");
+		}
+
+		recurse(query, context, alias, match_condition)
 	}
 }
 

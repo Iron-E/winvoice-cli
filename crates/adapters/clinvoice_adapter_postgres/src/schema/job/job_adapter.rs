@@ -114,14 +114,14 @@ mod tests
 		let mut contact_info = HashMap::new();
 		contact_info.insert("Office".into(), Contact::Address {
 			location_id: earth.id,
-			export:      false,
+			export: false,
 		});
 		contact_info.insert("Work Email".into(), Contact::Email {
-			email:  "foo@bar.io".into(),
+			email: "foo@bar.io".into(),
 			export: true,
 		});
 		contact_info.insert("Office Phone".into(), Contact::Phone {
-			phone:  "555 223 5039".into(),
+			phone: "555 223 5039".into(),
 			export: true,
 		});
 

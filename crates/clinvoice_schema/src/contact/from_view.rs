@@ -25,14 +25,14 @@ impl From<&View> for Contact
 		{
 			View::Address { location, export } => Self::Address {
 				location_id: location.id,
-				export:      *export,
+				export: *export,
 			},
 			View::Email { email, export } => Self::Email {
-				email:  email.clone(),
+				email: email.clone(),
 				export: *export,
 			},
 			View::Phone { phone, export } => Self::Phone {
-				phone:  phone.clone(),
+				phone: phone.clone(),
 				export: *export,
 			},
 		}

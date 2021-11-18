@@ -568,7 +568,7 @@ mod tests
 				AfterWhereCondition,
 				"",
 				&MatchPerson {
-					id:   Match::EqualTo(Owned(7)),
+					id: Match::EqualTo(Owned(7)),
 					name: MatchStr::EqualTo(Borrowed("stuff")),
 				},
 				&mut query,

@@ -110,12 +110,12 @@ mod tests
 
 		assert!(writeln!(expected, "{}", Element::Heading {
 			depth: 1,
-			text:  "This is a test heading!",
+			text: "This is a test heading!",
 		})
 		.is_ok());
 		assert!(writeln!(expected, "{}", Element::Heading {
 			depth: 2,
-			text:  "Paragraphs",
+			text: "Paragraphs",
 		})
 		.is_ok());
 		assert!(writeln!(
@@ -126,33 +126,33 @@ mod tests
 		.is_ok());
 		assert!(writeln!(expected, "{}", Element::Heading {
 			depth: 2,
-			text:  "Lists",
+			text: "Lists",
 		})
 		.is_ok());
 		assert!(writeln!(expected, "{}", Element::OrderedList {
 			depth: 0,
-			text:  "Ordered lists are not a problem.",
+			text: "Ordered lists are not a problem.",
 		})
 		.is_ok());
 		assert!(writeln!(expected, "{}", Element::OrderedList {
 			depth: 0,
-			text:  "Continuing is just fine.",
+			text: "Continuing is just fine.",
 		})
 		.is_ok());
 		assert!(writeln!(expected, "{}", Element::<String>::Break).is_ok());
 		assert!(writeln!(expected, "{}", Element::UnorderedList {
 			depth: 0,
-			text:  "I can break at any point.",
+			text: "I can break at any point.",
 		})
 		.is_ok());
 		assert!(writeln!(expected, "{}", Element::UnorderedList {
 			depth: 1,
-			text:  "Indenting? Eazy breezy.",
+			text: "Indenting? Eazy breezy.",
 		})
 		.is_ok());
 		assert!(write!(expected, "{}", Element::UnorderedList {
 			depth: 0,
-			text:  "De-indenting? Easier!",
+			text: "De-indenting? Easier!",
 		})
 		.is_ok());
 

@@ -161,7 +161,7 @@ impl Create
 				Self::create_job::<_, JAdapter, OAdapter>(
 					&connection,
 					Money {
-						amount:   hourly_rate,
+						amount: hourly_rate,
 						currency: currency.unwrap_or(default_currency),
 					},
 					increment.map(Duration::into).unwrap_or(default_increment),

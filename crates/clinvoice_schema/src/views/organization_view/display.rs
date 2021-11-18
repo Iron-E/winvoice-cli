@@ -22,16 +22,16 @@ mod tests
 		let organization = OrganizationView {
 			id: 0,
 			location: LocationView {
-				id:    0,
-				name:  "Arizona".into(),
+				id: 0,
+				name: "Arizona".into(),
 				outer: Some(
 					LocationView {
-						id:    0,
-						name:  "USA".into(),
+						id: 0,
+						name: "USA".into(),
 						outer: Some(
 							LocationView {
-								id:    0,
-								name:  "Earth".into(),
+								id: 0,
+								name: "Earth".into(),
 								outer: None,
 							}
 							.into(),

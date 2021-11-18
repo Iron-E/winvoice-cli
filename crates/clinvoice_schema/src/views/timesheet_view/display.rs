@@ -65,46 +65,46 @@ mod tests
 	fn display()
 	{
 		let earth_view = LocationView {
-			id:    0,
-			name:  "Earth".into(),
+			id: 0,
+			name: "Earth".into(),
 			outer: None,
 		};
 
 		let usa_view = LocationView {
-			id:    0,
-			name:  "USA".into(),
+			id: 0,
+			name: "USA".into(),
 			outer: Some(earth_view.into()),
 		};
 
 		let arizona_view = LocationView {
-			id:    0,
-			name:  "Arizona".into(),
+			id: 0,
+			name: "Arizona".into(),
 			outer: Some(usa_view.into()),
 		};
 
 		let phoenix_view = LocationView {
-			id:    0,
-			name:  "Phoenix".into(),
+			id: 0,
+			name: "Phoenix".into(),
 			outer: Some(arizona_view.into()),
 		};
 
 		let street_view = LocationView {
-			id:    0,
-			name:  "1337 Some Street".into(),
+			id: 0,
+			name: "1337 Some Street".into(),
 			outer: Some(phoenix_view.into()),
 		};
 
 		let contact_info: HashMap<String, ContactView> = vec![
 			("Street Address".into(), ContactView::Address {
 				location: street_view.clone(),
-				export:   false,
+				export: false,
 			}),
 			("Email".into(), ContactView::Email {
-				email:  "foo@bar.io".into(),
+				email: "foo@bar.io".into(),
 				export: false,
 			}),
 			("Phone".into(), ContactView::Phone {
-				phone:  "1-800-555-5555".into(),
+				phone: "1-800-555-5555".into(),
 				export: false,
 			}),
 		]
@@ -112,7 +112,7 @@ mod tests
 		.collect();
 
 		let timesheet = TimesheetView {
-			employee:   EmployeeView {
+			employee: EmployeeView {
 				contact_info: contact_info.clone(),
 				id: 0,
 				organization: OrganizationView {
@@ -121,13 +121,13 @@ mod tests
 					name: "Big Test Organization".into(),
 				},
 				person: PersonView {
-					id:   0,
+					id: 0,
 					name: "Testy McTesterson".into(),
 				},
 				status: EmployeeStatus::Representative,
 				title: "CEO of Tests".into(),
 			},
-			expenses:   vec![
+			expenses: vec![
 				Expense {
 					category: ExpenseCategory::Food,
 					cost: Money::new(20_50, 2, Currency::USD),
@@ -139,9 +139,9 @@ mod tests
 					description: "Gas".into(),
 				},
 			],
-			job_id:     0,
+			job_id: 0,
 			time_begin: Utc::now(),
-			time_end:   Some(Utc::today().and_hms(23, 59, 59)),
+			time_end: Some(Utc::today().and_hms(23, 59, 59)),
 			work_notes: "Went to non-corporate fast food restaurant for business meeting".into(),
 		};
 

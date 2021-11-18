@@ -6,7 +6,7 @@ impl From<View> for Person
 	fn from(view: View) -> Self
 	{
 		Self {
-			id:   view.id,
+			id: view.id,
 			name: view.name,
 		}
 	}
@@ -17,7 +17,7 @@ impl From<&View> for Person
 	fn from(view: &View) -> Self
 	{
 		Self {
-			id:   view.id,
+			id: view.id,
 			name: view.name.clone(),
 		}
 	}

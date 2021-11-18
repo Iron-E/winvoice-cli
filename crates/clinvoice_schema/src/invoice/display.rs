@@ -35,7 +35,7 @@ mod tests
 		let invoice = Invoice {
 			date: Some(InvoiceDate {
 				issued: Utc::now(),
-				paid:   None,
+				paid: None,
 			}),
 			hourly_rate: Money::new(10_00, 2, Currency::USD),
 		};

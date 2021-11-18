@@ -82,15 +82,15 @@ mod tests
 	fn display()
 	{
 		let earth_view = LocationView {
-			id:    0,
-			name:  "Earth".into(),
+			id: 0,
+			name: "Earth".into(),
 			outer: None,
 		};
 
 		let ceo_testy_view = EmployeeView {
 			contact_info: vec![("Office".into(), ContactView::Address {
 				location: earth_view.clone(),
-				export:   false,
+				export: false,
 			})]
 			.into_iter()
 			.collect(),
@@ -101,7 +101,7 @@ mod tests
 				name: "Big Old Test".into(),
 			},
 			person: PersonView {
-				id:   0,
+				id: 0,
 				name: "Testy McTesterson".into(),
 			},
 			status: EmployeeStatus::Representative,

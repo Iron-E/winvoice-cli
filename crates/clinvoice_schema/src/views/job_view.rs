@@ -112,7 +112,7 @@ impl JobView
 
 		writeln!(output, "{}", Element::Heading {
 			depth: 1,
-			text:  format!("Job #{}", self.id),
+			text: format!("Job #{}", self.id),
 		})
 		.unwrap();
 
@@ -121,7 +121,7 @@ impl JobView
 			"{}: {}",
 			Element::UnorderedList {
 				depth: 0,
-				text:  Text::Bold("Client"),
+				text: Text::Bold("Client"),
 			},
 			self.client,
 		)
@@ -132,7 +132,7 @@ impl JobView
 			"{}: {}",
 			Element::UnorderedList {
 				depth: 0,
-				text:  Text::Bold("Date Opened"),
+				text: Text::Bold("Date Opened"),
 			},
 			DateTime::<Local>::from(self.date_open),
 		)
@@ -145,7 +145,7 @@ impl JobView
 				"{}: {}",
 				Element::UnorderedList {
 					depth: 0,
-					text:  Text::Bold("Date Closed"),
+					text: Text::Bold("Date Closed"),
 				},
 				DateTime::<Local>::from(date).naive_local(),
 			)
@@ -156,7 +156,7 @@ impl JobView
 
 		writeln!(output, "{}", Element::Heading {
 			depth: 2,
-			text:  "Invoice",
+			text: "Invoice",
 		})
 		.unwrap();
 		writeln!(
@@ -164,7 +164,7 @@ impl JobView
 			"{} {}",
 			Element::UnorderedList {
 				depth: 0,
-				text:  Text::Bold("Hourly Rate"),
+				text: Text::Bold("Hourly Rate"),
 			},
 			self.invoice.hourly_rate,
 		)
@@ -177,7 +177,7 @@ impl JobView
 				"{}: {}",
 				Element::UnorderedList {
 					depth: 0,
-					text:  Text::Bold("Status"),
+					text: Text::Bold("Status"),
 				},
 				date,
 			)
@@ -189,7 +189,7 @@ impl JobView
 			"{}: {}",
 			Element::UnorderedList {
 				depth: 0,
-				text:  Text::Bold("Total Amount Owed"),
+				text: Text::Bold("Total Amount Owed"),
 			},
 			Timesheet::total(
 				self.invoice.hourly_rate,
@@ -205,7 +205,7 @@ impl JobView
 
 		writeln!(output, "{}", Element::Heading {
 			depth: 2,
-			text:  "Objectives",
+			text: "Objectives",
 		})
 		.unwrap();
 		writeln!(output, "{}", Element::BlockText(&self.objectives)).unwrap();
@@ -214,7 +214,7 @@ impl JobView
 		{
 			writeln!(output, "{}", Element::Heading {
 				depth: 2,
-				text:  "Notes",
+				text: "Notes",
 			})
 			.unwrap();
 			writeln!(output, "{}", Element::BlockText(&self.notes)).unwrap();
@@ -224,7 +224,7 @@ impl JobView
 		{
 			writeln!(output, "{}", Element::Heading {
 				depth: 2,
-				text:  "Timesheets",
+				text: "Timesheets",
 			})
 			.unwrap();
 			let mut employees = HashSet::new();
@@ -261,37 +261,37 @@ mod tests
 		let organization = OrganizationView {
 			id: 0,
 			location: LocationView {
-				id:    0,
+				id: 0,
 				outer: Some(
 					LocationView {
-						id:    0,
+						id: 0,
 						outer: Some(
 							LocationView {
-								id:    0,
+								id: 0,
 								outer: Some(
 									LocationView {
-										id:    0,
+										id: 0,
 										outer: Some(
 											LocationView {
-												id:    0,
+												id: 0,
 												outer: None,
-												name:  "Earth".into(),
+												name: "Earth".into(),
 											}
 											.into(),
 										),
-										name:  "USA".into(),
+										name: "USA".into(),
 									}
 									.into(),
 								),
-								name:  "Arizona".into(),
+								name: "Arizona".into(),
 							}
 							.into(),
 						),
-						name:  "Phoenix".into(),
+						name: "Phoenix".into(),
 					}
 					.into(),
 				),
-				name:  "1337 Some Street".into(),
+				name: "1337 Some Street".into(),
 			},
 			name: "Big Old Test".into(),
 		};
@@ -301,7 +301,7 @@ mod tests
 			id: 0,
 			organization: organization.clone(),
 			person: PersonView {
-				id:   0,
+				id: 0,
 				name: "Testy McTesterson".into(),
 			},
 			status: EmployeeStatus::Representative,
@@ -313,7 +313,7 @@ mod tests
 			id: 0,
 			organization: organization.clone(),
 			person: PersonView {
-				id:   0,
+				id: 0,
 				name: "Bob".into(),
 			},
 			status: EmployeeStatus::Employed,
@@ -363,23 +363,23 @@ mod tests
 
 		let timesheets = vec![
 			TimesheetView {
-				employee:   testy_mctesterson,
-				expenses:   Vec::new(),
-				job_id:     job.id,
+				employee: testy_mctesterson,
+				expenses: Vec::new(),
+				job_id: job.id,
 				time_begin: Utc::today().and_hms(2, 0, 0),
-				time_end:   Some(Utc::today().and_hms(2, 30, 0)),
+				time_end: Some(Utc::today().and_hms(2, 30, 0)),
 				work_notes: "- Wrote the test.".into(),
 			},
 			TimesheetView {
-				employee:   bob,
-				expenses:   vec![Expense {
+				employee: bob,
+				expenses: vec![Expense {
 					category: ExpenseCategory::Service,
 					cost: Money::new(20_00, 2, Currency::USD),
 					description: "Paid for someone else to clean".into(),
 				}],
-				job_id:     job.id,
+				job_id: job.id,
 				time_begin: Utc::today().and_hms(3, 0, 0),
-				time_end:   Some(Utc::today().and_hms(3, 30, 0)),
+				time_end: Some(Utc::today().and_hms(3, 30, 0)),
 				work_notes: "- Clean the deck.".into(),
 			},
 		];

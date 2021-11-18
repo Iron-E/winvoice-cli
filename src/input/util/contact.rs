@@ -159,10 +159,10 @@ fn edit_menu(contact_info: &mut HashMap<String, ContactView>) -> input::Result<(
 	if matches!(
 		contact_info[&selected_key],
 		ContactView::Email {
-			email:  _,
+			email: _,
 			export: _,
 		} | ContactView::Phone {
-			phone:  _,
+			phone: _,
 			export: _,
 		}
 	)

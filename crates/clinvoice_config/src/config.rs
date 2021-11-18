@@ -60,15 +60,15 @@ impl Config<'_, '_>
 			}
 
 			let config = Self {
-				employees:  Default::default(),
-				invoices:   Default::default(),
-				stores:     vec![
+				employees: Default::default(),
+				invoices: Default::default(),
+				stores: vec![
 					("default", StoreValue::Alias("foo")),
 					(
 						"foo",
 						StoreValue::Storage(Store {
 							adapter: Adapters::Postgres,
-							url:     "See https://github.com/Iron-E/clinvoice/wiki/Usage#adapters".into(),
+							url: "See https://github.com/Iron-E/clinvoice/wiki/Usage#adapters".into(),
 						}),
 					),
 				]
@@ -141,14 +141,14 @@ mod tests
 			"c",
 			StoreValue::Storage(Store {
 				adapter: Adapters::Postgres,
-				url:     "c/path".into(),
+				url: "c/path".into(),
 			}),
 		);
 		stores.insert(
 			"d",
 			StoreValue::Storage(Store {
 				adapter: Adapters::Postgres,
-				url:     "d/path".into(),
+				url: "d/path".into(),
 			}),
 		);
 		stores.insert("e", StoreValue::Alias("d"));

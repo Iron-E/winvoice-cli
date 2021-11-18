@@ -35,12 +35,12 @@ mod tests
 	{
 		let date = InvoiceDate {
 			issued: Utc::now(),
-			paid:   None,
+			paid: None,
 		};
 
 		let other_date = InvoiceDate {
 			issued: Utc::now(),
-			paid:   Some(Utc::now()),
+			paid: Some(Utc::now()),
 		};
 
 		assert_eq!(

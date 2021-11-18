@@ -87,7 +87,7 @@ impl TimesheetView
 	{
 		writeln!(output, "{}", Element::Heading {
 			depth: 3,
-			text:  self
+			text: self
 				.time_end
 				.map(|time_end| format!("{} – {}", self.time_begin, time_end.naive_local()))
 				.unwrap_or_else(|| format!("{} – Current", self.time_begin)),
@@ -96,7 +96,7 @@ impl TimesheetView
 
 		writeln!(output, "{}", Element::Heading {
 			depth: 4,
-			text:  "Employee Information",
+			text: "Employee Information",
 		})
 		.unwrap();
 		writeln!(
@@ -104,7 +104,7 @@ impl TimesheetView
 			"{}: {}",
 			Element::UnorderedList {
 				depth: 0,
-				text:  Text::Bold("Name"),
+				text: Text::Bold("Name"),
 			},
 			self.employee.person.name,
 		)
@@ -114,7 +114,7 @@ impl TimesheetView
 			"{}: {}",
 			Element::UnorderedList {
 				depth: 0,
-				text:  Text::Bold("Employer"),
+				text: Text::Bold("Employer"),
 			},
 			self.employee.organization,
 		)
@@ -124,7 +124,7 @@ impl TimesheetView
 			"{}: {}",
 			Element::UnorderedList {
 				depth: 0,
-				text:  Text::Bold("Title"),
+				text: Text::Bold("Title"),
 			},
 			self.employee.title,
 		)
@@ -151,7 +151,7 @@ impl TimesheetView
 			{
 				writeln!(output, "{}:", Element::UnorderedList {
 					depth: 0,
-					text:  Text::Bold("Contact Information"),
+					text: Text::Bold("Contact Information"),
 				})
 				.unwrap();
 
@@ -166,7 +166,7 @@ impl TimesheetView
 							"{}: {}",
 							Element::UnorderedList {
 								depth: 1,
-								text:  Text::Bold(label),
+								text: Text::Bold(label),
 							},
 							contact,
 						)
@@ -181,7 +181,7 @@ impl TimesheetView
 		{
 			writeln!(output, "{}", Element::Heading {
 				depth: 4,
-				text:  "Expenses",
+				text: "Expenses",
 			})
 			.unwrap();
 
@@ -194,7 +194,7 @@ impl TimesheetView
 						"{}\n{}",
 						Element::Heading {
 							depth: 5,
-							text:  format!("{} – {}", e.category, e.cost),
+							text: format!("{} – {}", e.category, e.cost),
 						},
 						Element::BlockText(&e.description),
 					)
@@ -206,7 +206,7 @@ impl TimesheetView
 		{
 			writeln!(output, "{}", Element::Heading {
 				depth: 4,
-				text:  "Work Notes",
+				text: "Work Notes",
 			})
 			.unwrap();
 			writeln!(output, "{}", Element::BlockText(&self.work_notes)).unwrap();

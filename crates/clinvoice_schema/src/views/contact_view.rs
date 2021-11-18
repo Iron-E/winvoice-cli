@@ -20,7 +20,7 @@ pub enum ContactView
 	Address
 	{
 		location: LocationView,
-		export:   bool,
+		export: bool,
 	},
 
 	/// # Summary

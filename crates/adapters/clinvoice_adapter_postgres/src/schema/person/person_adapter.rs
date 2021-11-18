@@ -46,7 +46,7 @@ impl PersonAdapter for PostgresPerson
 		sqlx::query(&query)
 			.fetch(connection)
 			.map_ok(|row| PersonView {
-				id:   row.get("id"),
+				id: row.get("id"),
 				name: row.get("name"),
 			})
 			.try_collect()

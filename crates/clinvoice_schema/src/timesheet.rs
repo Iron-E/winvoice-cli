@@ -154,24 +154,24 @@ mod tests
 
 		timesheets.push(Timesheet {
 			employee_id: 0,
-			expenses:    Vec::new(),
-			job_id:      0,
-			time_begin:  Utc::today().and_hms(2, 0, 0),
-			time_end:    Some(Utc::today().and_hms(2, 30, 0)),
-			work_notes:  "- Wrote the test.".into(),
+			expenses: Vec::new(),
+			job_id: 0,
+			time_begin: Utc::today().and_hms(2, 0, 0),
+			time_end: Some(Utc::today().and_hms(2, 30, 0)),
+			work_notes: "- Wrote the test.".into(),
 		});
 
 		timesheets.push(Timesheet {
 			employee_id: 0,
-			expenses:    vec![Expense {
+			expenses: vec![Expense {
 				category: ExpenseCategory::Item,
 				cost: Money::new(20_00, 2, Currency::USD),
 				description: "Paid for someone else to clean".into(),
 			}],
-			job_id:      0,
-			time_begin:  Utc::today().and_hms(3, 0, 0),
-			time_end:    Some(Utc::today().and_hms(3, 30, 0)),
-			work_notes:  "- Clean the deck.".into(),
+			job_id: 0,
+			time_begin: Utc::today().and_hms(3, 0, 0),
+			time_end: Some(Utc::today().and_hms(3, 30, 0)),
+			work_notes: "- Clean the deck.".into(),
 		});
 
 		assert_eq!(

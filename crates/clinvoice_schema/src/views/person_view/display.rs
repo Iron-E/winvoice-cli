@@ -19,7 +19,7 @@ mod tests
 	fn display()
 	{
 		let person_view = PersonView {
-			id:   0,
+			id: 0,
 			name: "Someone".into(),
 		};
 

@@ -379,7 +379,7 @@ mod tests
 	{
 		let mut query = String::new();
 		assert_eq!(
-			Schema::write_where_clause(BeforeWhereClause, "foo", &Match::EqualTo(Owned(18)), &mut query,),
+			Schema::write_where_clause(BeforeWhereClause, "foo", &Match::EqualTo(Owned(18)), &mut query),
 			AfterWhereCondition,
 		);
 		assert_eq!(query, String::from(" WHERE foo = 18"));
@@ -489,7 +489,7 @@ mod tests
 	{
 		let mut query = String::new();
 		assert_eq!(
-			Schema::write_where_clause(InWhereCondition, "bar", &MatchStr::Any, &mut query,),
+			Schema::write_where_clause(InWhereCondition, "bar", &MatchStr::Any, &mut query),
 			InWhereCondition
 		);
 		assert_eq!(query, String::from(""));
@@ -565,7 +565,7 @@ mod tests
 			),
 			AfterWhereCondition
 		);
-		assert_eq!(query, String::from(" AND id = 7 AND name = 'stuff'"),);
+		assert_eq!(query, String::from(" AND id = 7 AND name = 'stuff'"));
 	}
 
 	#[test]
@@ -591,7 +591,7 @@ mod tests
 			),
 			AfterWhereCondition
 		);
-		assert_eq!(query, String::from(" WHERE L.id = 7"),);
+		assert_eq!(query, String::from(" WHERE L.id = 7"));
 
 		query.clear();
 		assert_eq!(

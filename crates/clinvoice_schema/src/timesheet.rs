@@ -91,7 +91,10 @@ impl Timesheet
 				|mut total, timesheet| -> Result<Money> {
 					let duration_seconds: Decimal = timesheet
 						.time_end
-						.unwrap()
+						.expect(
+							"Previous iterator filter should have assured end time of Timesheet had a \
+							 value",
+						)
 						.signed_duration_since(timesheet.time_begin)
 						.num_seconds()
 						.into();
@@ -114,7 +117,12 @@ impl Timesheet
 
 								total.amount += expense
 									.cost
-									.exchange(total.currency, exchange_rates.as_ref().unwrap())
+									.exchange(
+										total.currency,
+										exchange_rates.as_ref().expect(
+											"The exchange rates should have been downloaded just before this",
+										),
+									)
 									.amount;
 							}
 

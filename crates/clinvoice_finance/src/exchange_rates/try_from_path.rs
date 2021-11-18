@@ -14,7 +14,12 @@ impl TryFrom<&Path> for ExchangeRates
 		let contents = fs::read_to_string(path)?;
 		let (currencies, rates) = {
 			let mut csv = contents.split('\n').map(|line| line.split(", "));
-			(csv.next().unwrap(), csv.next().unwrap())
+			(
+				csv.next()
+					.expect("There should be a column of currencies in this CSV"),
+				csv.next()
+					.expect("There should be a column of exchange rates in this CSV"),
+			)
 		};
 
 		let mut exchange_rates = ExchangeRates(HashMap::new());

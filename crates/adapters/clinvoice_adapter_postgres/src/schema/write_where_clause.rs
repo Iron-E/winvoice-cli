@@ -141,7 +141,12 @@ where
 	PostgresSchema: WriteWhereClause<Q>,
 {
 	write!(query, "{} NOT (", context.get_prefix()).unwrap();
-	PostgresSchema::write_where_clause(WriteContext::InWhereCondition, alias, match_condition, query);
+	PostgresSchema::write_where_clause(
+		WriteContext::InWhereCondition,
+		alias,
+		match_condition,
+		query,
+	);
 	query.push(')');
 }
 
@@ -330,7 +335,7 @@ impl WriteWhereClause<&MatchLocation<'_>> for PostgresSchema
 					.unwrap();
 					recurse(query, context, &new_alias, outer.deref())
 				},
-				_ => panic!(
+				MatchOuterLocation::Some(_) => panic!(
 					"Must generate SQL for `MatchLocation` _before_ the `WHERE` condition, as it \
 					 necessitates a JOIN."
 				),
@@ -379,7 +384,12 @@ mod tests
 	{
 		let mut query = String::new();
 		assert_eq!(
-			Schema::write_where_clause(BeforeWhereClause, "foo", &Match::EqualTo(Owned(18)), &mut query),
+			Schema::write_where_clause(
+				BeforeWhereClause,
+				"foo",
+				&Match::EqualTo(Owned(18)),
+				&mut query
+			),
 			AfterWhereCondition,
 		);
 		assert_eq!(query, String::from(" WHERE foo = 18"));
@@ -573,7 +583,12 @@ mod tests
 	{
 		let mut query = String::new();
 		assert_eq!(
-			Schema::write_where_clause(BeforeWhereClause, "L", &MatchLocation::default(), &mut query),
+			Schema::write_where_clause(
+				BeforeWhereClause,
+				"L",
+				&MatchLocation::default(),
+				&mut query
+			),
 			BeforeWhereClause
 		);
 		assert!(query.is_empty());

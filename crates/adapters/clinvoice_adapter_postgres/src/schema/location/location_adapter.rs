@@ -6,8 +6,9 @@ use clinvoice_adapter::{
 	WriteWhereClause,
 };
 use clinvoice_match::MatchLocation;
-use clinvoice_schema::{views::LocationView, Location};
-use sqlx::{Acquire, Executor, Postgres, Result};
+use clinvoice_schema::{views::LocationView, Id, Location};
+use futures::{future, TryFutureExt, TryStreamExt};
+use sqlx::{Executor, PgPool, Postgres, Result, Row};
 
 use super::PostgresLocation;
 use crate::PostgresSchema as Schema;
@@ -57,28 +58,46 @@ impl LocationAdapter for PostgresLocation
 
 	// WARN: `Might need `Acquire` or `&mut Transaction` depending on how recursive views work
 	async fn retrieve_view(
-		connection: impl 'async_trait + Acquire<'_, Database = Postgres> + Send,
+		connection: &PgPool,
 		match_condition: &MatchLocation,
 	) -> Result<Vec<LocationView>>
 	{
-		let mut transaction = connection.begin().await?;
-
 		let mut query = Schema::write_select_clause([]);
 		Schema::write_from_clause(&mut query, "locations", "L");
-		Schema::write_where_clause(WriteContext::BeforeWhereClause, "L", match_condition, &mut query);
+		Schema::write_where_clause(
+			WriteContext::BeforeWhereClause,
+			"L",
+			match_condition,
+			&mut query,
+		);
 		query.push(';');
 
-		let output = sqlx::query(&query).fetch(&mut transaction);
-
-		// "WITH RECURSIVE location_view AS
-		// (
-		// 	 SELECT id, name, outer_id FROM locations WHERE id = 4
-		// 	 UNION
-		// 	 SELECT L.id, L.name, L.outer_id FROM locations L JOIN location_view V ON (L.id = V.outer_id)
-		// ) SELECT * FROM location_view;"
-
-		todo!()
-		// transaction.rollback().await;
+		sqlx::query(&query)
+			.fetch(connection)
+			.and_then(|row| {
+				sqlx::query!(
+					"WITH RECURSIVE location_view AS
+					(
+						SELECT id, name, outer_id FROM locations WHERE id = $1
+						UNION
+						SELECT L.id, L.name, L.outer_id FROM locations L JOIN location_view V ON (L.id = V.outer_id)
+					) SELECT * FROM location_view ORDER BY id;",
+					row.get::<Id, _>("id")
+				)
+				.fetch(connection)
+				.try_fold(None, |previous: Option<LocationView>, view_row| {
+					future::ok(Some(LocationView {
+						id: view_row.id.expect("`locations` table should have non-null ID"),
+						name: view_row
+							.name
+							.expect("`locations` table should have non-null name"),
+						outer: previous.map(Box::new),
+					}))
+				})
+				.map_ok(|l| l.expect("A database object failed to be returned by recursive query"))
+			})
+			.try_collect()
+			.await
 	}
 }
 
@@ -155,5 +174,6 @@ mod tests
 	async fn retrieve_view()
 	{
 		// TODO: write test
+		// TODO: profile this
 	}
 }

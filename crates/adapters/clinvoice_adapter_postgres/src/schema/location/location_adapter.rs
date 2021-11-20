@@ -7,8 +7,8 @@ use clinvoice_adapter::{
 };
 use clinvoice_match::MatchLocation;
 use clinvoice_schema::{views::LocationView, Id, Location};
-use futures::{future, TryFutureExt, TryStreamExt};
-use sqlx::{Executor, PgPool, Postgres, Result, Row};
+use futures::{future, TryStreamExt};
+use sqlx::{Acquire, Executor, Postgres, Result, Row};
 
 use super::PostgresLocation;
 use crate::PostgresSchema as Schema;
@@ -58,10 +58,11 @@ impl LocationAdapter for PostgresLocation
 
 	// WARN: `Might need `Acquire` or `&mut Transaction` depending on how recursive views work
 	async fn retrieve_view(
-		connection: &PgPool,
+		connection: impl 'async_trait + Acquire<'_, Database = Postgres> + Send,
 		match_condition: &MatchLocation,
 	) -> Result<Vec<LocationView>>
 	{
+		let mut transaction = connection.begin().await?;
 		let mut query = Schema::write_select_clause([]);
 		Schema::write_from_clause(&mut query, "locations", "L");
 		Schema::write_where_clause(
@@ -72,9 +73,14 @@ impl LocationAdapter for PostgresLocation
 		);
 		query.push(';');
 
-		sqlx::query(&query)
-			.fetch(connection)
-			.and_then(|row| {
+		let selected = sqlx::query(&query).fetch_all(&mut transaction).await?;
+		let mut output = Vec::with_capacity(selected.len());
+
+		// NOTE: because of the mutable borrow here, we need to use a `for` rather than a fancy
+		//       closure :(
+		for row in selected
+		{
+			output.push(
 				sqlx::query!(
 					"WITH RECURSIVE location_view AS
 					(
@@ -84,20 +90,25 @@ impl LocationAdapter for PostgresLocation
 					) SELECT * FROM location_view ORDER BY id;",
 					row.get::<Id, _>("id")
 				)
-				.fetch(connection)
+				.fetch(&mut transaction)
 				.try_fold(None, |previous: Option<LocationView>, view_row| {
 					future::ok(Some(LocationView {
-						id: view_row.id.expect("`locations` table should have non-null ID"),
+						id: view_row
+							.id
+							.expect("`locations` table should have non-null ID"),
 						name: view_row
 							.name
 							.expect("`locations` table should have non-null name"),
 						outer: previous.map(Box::new),
 					}))
 				})
-				.map_ok(|l| l.expect("A database object failed to be returned by recursive query"))
-			})
-			.try_collect()
-			.await
+				.await?
+				.expect("A database object failed to be returned by recursive query"),
+			);
+		}
+
+		transaction.rollback().await?;
+		Ok(output)
 	}
 }
 

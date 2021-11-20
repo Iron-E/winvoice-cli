@@ -1,6 +1,9 @@
 use clinvoice_adapter::{Adapters, Error as AdapterError, Initializable, Store};
 #[cfg(feature = "postgres")]
-use {clinvoice_adapter_postgres::PostgresSchema, sqlx::{Connection, PgConnection}};
+use {
+	clinvoice_adapter_postgres::PostgresSchema,
+	sqlx::{Connection, PgConnection},
+};
 
 use crate::DynResult;
 

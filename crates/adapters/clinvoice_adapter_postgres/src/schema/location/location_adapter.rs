@@ -115,7 +115,11 @@ impl LocationAdapter for PostgresLocation
 #[cfg(test)]
 mod tests
 {
+	use std::borrow::Cow::Owned;
+
 	use clinvoice_adapter::Initializable;
+	use clinvoice_match::{Match, MatchLocation};
+	use clinvoice_schema::views::LocationView;
 
 	use super::{LocationAdapter, PostgresLocation};
 	use crate::{schema::util, PostgresSchema};
@@ -184,7 +188,93 @@ mod tests
 	#[tokio::test(flavor = "multi_thread", worker_threads = 10)]
 	async fn retrieve_view()
 	{
-		// TODO: write test
-		// TODO: profile this
+		let mut connection = util::connect().await;
+
+		PostgresSchema::init(&mut connection).await.unwrap();
+
+		let earth = PostgresLocation::create(&mut connection, "Earth".into())
+			.await
+			.unwrap();
+
+		let usa = PostgresLocation::create_inner(&mut connection, &earth, "USA".into())
+			.await
+			.unwrap();
+
+		let arizona = PostgresLocation::create_inner(&mut connection, &usa, "Arizona".into())
+			.await
+			.unwrap();
+
+		let utah = PostgresLocation::create_inner(&mut connection, &usa, "Utah".into())
+			.await
+			.unwrap();
+
+		let earth_view = LocationView {
+			id: earth.id,
+			name: earth.name.clone(),
+			outer: None,
+		};
+
+		let usa_view = LocationView {
+			id: usa.id,
+			name: usa.name.clone(),
+			outer: Some(earth_view.clone().into()),
+		};
+
+		let arizona_view = LocationView {
+			id: arizona.id,
+			name: arizona.name.clone(),
+			outer: Some(usa_view.clone().into()),
+		};
+
+		let utah_view = LocationView {
+			id: utah.id,
+			name: utah.name.clone(),
+			outer: Some(usa_view.clone().into()),
+		};
+
+		// Assert ::retrieve_view retrieves accurately from the DB
+		assert_eq!(
+			&[earth_view],
+			PostgresLocation::retrieve_view(&mut connection, &MatchLocation {
+				id: Match::EqualTo(Owned(earth.id)),
+				..Default::default()
+			})
+			.await
+			.unwrap()
+			.as_slice()
+		);
+
+		assert_eq!(
+			&[usa_view],
+			PostgresLocation::retrieve_view(&mut connection, &MatchLocation {
+				id: Match::EqualTo(Owned(usa.id)),
+				..Default::default()
+			})
+			.await
+			.unwrap()
+			.as_slice()
+		);
+
+		assert_eq!(
+			&[arizona_view],
+			PostgresLocation::retrieve_view(&mut connection, &MatchLocation {
+				id: Match::EqualTo(Owned(arizona.id)),
+				..Default::default()
+			})
+			.await
+			.unwrap()
+			.as_slice()
+		);
+
+		assert_eq!(
+			&[utah_view],
+			PostgresLocation::retrieve_view(&mut connection, &MatchLocation {
+				id: Match::EqualTo(Owned(utah.id)),
+				..Default::default()
+			})
+			.await
+			.unwrap()
+			.as_slice()
+		);
 	}
 }

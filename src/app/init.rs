@@ -1,6 +1,6 @@
 use clinvoice_adapter::{Adapters, Error as AdapterError, Initializable, Store};
 #[cfg(feature = "postgres")]
-use {clinvoice_adapter_postgres::PostgresSchema, sqlx::PgPool};
+use {clinvoice_adapter_postgres::PostgresSchema, sqlx::{Connection, PgConnection}};
 
 use crate::DynResult;
 
@@ -14,8 +14,8 @@ pub async fn run<'err>(store: &Store) -> DynResult<'err, ()>
 		#[cfg(feature = "postgres")]
 		Adapters::Postgres =>
 		{
-			let pool = PgPool::connect_lazy(&store.url)?;
-			PostgresSchema::init(&pool).await?;
+			let mut connection = PgConnection::connect(&store.url).await?;
+			PostgresSchema::init(&mut connection).await?;
 		},
 
 		// NOTE: this is allowed because there may be additional adapters added later, and I want

@@ -7,7 +7,6 @@ use clinvoice_adapter::{
 };
 use clinvoice_match::MatchLocation;
 use clinvoice_schema::{views::LocationView, Id, Location};
-use futures::{future, TryStreamExt};
 use sqlx::{Acquire, Executor, Postgres, Result, Row};
 
 use super::PostgresLocation;
@@ -81,29 +80,10 @@ impl LocationAdapter for PostgresLocation
 		for row in selected
 		{
 			output.push(
-				sqlx::query!(
-					"WITH RECURSIVE location_view AS
-					(
-						SELECT id, name, outer_id FROM locations WHERE id = $1
-						UNION
-						SELECT L.id, L.name, L.outer_id FROM locations L JOIN location_view V ON (L.id = V.outer_id)
-					) SELECT * FROM location_view ORDER BY id;",
+				PostgresLocation::retrieve_view_by_id(
+					&mut transaction,
 					row.get::<Id, _>("id")
-				)
-				.fetch(&mut transaction)
-				.try_fold(None, |previous: Option<LocationView>, view_row| {
-					future::ok(Some(LocationView {
-						id: view_row
-							.id
-							.expect("`locations` table should have non-null ID"),
-						name: view_row
-							.name
-							.expect("`locations` table should have non-null name"),
-						outer: previous.map(Box::new),
-					}))
-				})
-				.await?
-				.expect("A database object failed to be returned by recursive query"),
+				).await?
 			);
 		}
 

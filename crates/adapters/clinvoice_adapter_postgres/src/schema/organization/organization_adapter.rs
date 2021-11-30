@@ -1,9 +1,10 @@
-use clinvoice_adapter::schema::OrganizationAdapter;
+use clinvoice_adapter::{WriteContext, WriteFromClause, WriteJoinClause, WriteSelectClause, WriteWhereClause, schema::OrganizationAdapter};
 use clinvoice_match::MatchOrganization;
 use clinvoice_schema::{views::OrganizationView, Location, Organization};
-use sqlx::{Executor, Postgres, Result};
+use sqlx::{Acquire, Executor, Postgres, Result, Row};
 
 use super::PostgresOrganization;
+use crate::{PostgresSchema as Schema, schema::PostgresLocation};
 
 #[async_trait::async_trait]
 impl OrganizationAdapter for PostgresOrganization
@@ -30,11 +31,38 @@ impl OrganizationAdapter for PostgresOrganization
 	}
 
 	async fn retrieve_view(
-		connection: impl 'async_trait + Executor<'_, Database = Postgres>,
+		connection: impl 'async_trait + Acquire<'_, Database = Postgres> + Send,
 		match_condition: &MatchOrganization,
 	) -> Result<Vec<OrganizationView>>
 	{
-		todo!()
+		let mut transaction = connection.begin().await?;
+		let mut query = Schema::write_select_clause([]);
+		Schema::write_from_clause(&mut query, "organizations", "O");
+		Schema::write_join_clause(&mut query, "", "locations", "L", "id", "O.location_id").unwrap();
+		Schema::write_where_clause(
+			Schema::write_where_clause(WriteContext::BeforeWhereClause, "L", &match_condition.location, &mut query),
+			"O",
+			match_condition,
+			&mut query,
+		);
+		query.push(';');
+
+		let selected = sqlx::query(&query).fetch_all(&mut transaction).await?;
+		let mut output = Vec::with_capacity(selected.len());
+
+		// NOTE: because of the mutable borrow here, we need to use a `for` rather than a fancy
+		//       closure :(
+		for row in selected
+		{
+			output.push(OrganizationView {
+				id: row.get("id"),
+				name: row.get("name"),
+				location: PostgresLocation::retrieve_view_by_id(&mut transaction, row.get("id")).await?,
+			});
+		}
+
+		transaction.rollback().await?;
+		Ok(output)
 	}
 }
 

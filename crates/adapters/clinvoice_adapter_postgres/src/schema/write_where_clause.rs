@@ -5,7 +5,7 @@ use std::{
 };
 
 use clinvoice_adapter::{WriteContext, WriteJoinClause, WriteWhereClause};
-use clinvoice_match::{Match, MatchLocation, MatchOuterLocation, MatchPerson, MatchStr};
+use clinvoice_match::{Match, MatchLocation, MatchOrganization, MatchOuterLocation, MatchPerson, MatchStr};
 
 use super::PostgresSchema;
 
@@ -360,6 +360,34 @@ impl WriteWhereClause<&MatchLocation<'_>> for PostgresSchema
 		}
 
 		recurse(query, context, alias, match_condition)
+	}
+}
+
+impl WriteWhereClause<&MatchOrganization<'_>> for PostgresSchema
+{
+	/// # Panics
+	///
+	/// If any the following:
+	///
+	/// * `context` is not `BeforeWhereClause`
+	/// * `alias` is an empty string.
+	///
+	/// # See
+	///
+	/// * [`WriteWhereClause::write_where_clause`]
+	fn write_where_clause(
+		context: WriteContext,
+		alias: &str,
+		match_condition: &MatchOrganization,
+		query: &mut String,
+	) -> WriteContext
+	{
+		PostgresSchema::write_where_clause(
+			PostgresSchema::write_where_clause(context, alias, &match_condition.id, query),
+			alias,
+			&match_condition.name,
+			query,
+		)
 	}
 }
 

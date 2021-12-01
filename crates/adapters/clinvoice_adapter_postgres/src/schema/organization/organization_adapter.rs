@@ -1,10 +1,17 @@
-use clinvoice_adapter::{WriteContext, WriteFromClause, WriteJoinClause, WriteSelectClause, WriteWhereClause, schema::OrganizationAdapter};
+use clinvoice_adapter::{
+	schema::OrganizationAdapter,
+	WriteContext,
+	WriteFromClause,
+	WriteJoinClause,
+	WriteSelectClause,
+	WriteWhereClause,
+};
 use clinvoice_match::MatchOrganization;
 use clinvoice_schema::{views::OrganizationView, Location, Organization};
 use sqlx::{Acquire, Executor, Postgres, Result, Row};
 
 use super::PostgresOrganization;
-use crate::{PostgresSchema as Schema, schema::PostgresLocation};
+use crate::{schema::PostgresLocation, PostgresSchema as Schema};
 
 #[async_trait::async_trait]
 impl OrganizationAdapter for PostgresOrganization
@@ -40,7 +47,12 @@ impl OrganizationAdapter for PostgresOrganization
 		Schema::write_from_clause(&mut query, "organizations", "O");
 		Schema::write_join_clause(&mut query, "", "locations", "L", "id", "O.location_id").unwrap();
 		Schema::write_where_clause(
-			Schema::write_where_clause(WriteContext::BeforeWhereClause, "L", &match_condition.location, &mut query),
+			Schema::write_where_clause(
+				WriteContext::BeforeWhereClause,
+				"L",
+				&match_condition.location,
+				&mut query,
+			),
 			"O",
 			match_condition,
 			&mut query,
@@ -57,7 +69,8 @@ impl OrganizationAdapter for PostgresOrganization
 			output.push(OrganizationView {
 				id: row.get("id"),
 				name: row.get("name"),
-				location: PostgresLocation::retrieve_view_by_id(&mut transaction, row.get("id")).await?,
+				location: PostgresLocation::retrieve_view_by_id(&mut transaction, row.get("id"))
+					.await?,
 			});
 		}
 

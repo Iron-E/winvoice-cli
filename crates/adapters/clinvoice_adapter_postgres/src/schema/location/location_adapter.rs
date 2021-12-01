@@ -80,10 +80,7 @@ impl LocationAdapter for PostgresLocation
 		for row in selected
 		{
 			output.push(
-				PostgresLocation::retrieve_view_by_id(
-					&mut transaction,
-					row.get::<Id, _>("id")
-				).await?
+				PostgresLocation::retrieve_view_by_id(&mut transaction, row.get::<Id, _>("id")).await?,
 			);
 		}
 

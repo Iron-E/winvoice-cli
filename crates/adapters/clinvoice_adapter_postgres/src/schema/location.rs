@@ -1,5 +1,5 @@
-use clinvoice_schema::{Id, views::LocationView};
-use futures::{TryFutureExt, TryStreamExt, future};
+use clinvoice_schema::{views::LocationView, Id};
+use futures::{future, TryFutureExt, TryStreamExt};
 use sqlx::{Executor, Postgres, Result};
 
 mod deletable;
@@ -8,7 +8,8 @@ mod updatable;
 
 pub struct PostgresLocation;
 
-impl PostgresLocation {
+impl PostgresLocation
+{
 	pub(super) async fn retrieve_view_by_id(
 		connection: impl Executor<'_, Database = Postgres>,
 		id: Id,
@@ -27,10 +28,13 @@ impl PostgresLocation {
 		.try_fold(None, |previous: Option<LocationView>, view| {
 			future::ok(Some(LocationView {
 				id: view.id.expect("`locations` table should have non-null ID"),
-				name: view.name.expect("`locations` table should have non-null name"),
+				name: view
+					.name
+					.expect("`locations` table should have non-null name"),
 				outer: previous.map(Box::new),
 			}))
 		})
-		.map_ok(|v| v.expect("A database object failed to be returned by recursive query")).await
+		.map_ok(|v| v.expect("A database object failed to be returned by recursive query"))
+		.await
 	}
 }

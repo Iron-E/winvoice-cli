@@ -5,7 +5,14 @@ use std::{
 };
 
 use clinvoice_adapter::{WriteContext, WriteJoinClause, WriteWhereClause};
-use clinvoice_match::{Match, MatchLocation, MatchOrganization, MatchOuterLocation, MatchPerson, MatchStr};
+use clinvoice_match::{
+	Match,
+	MatchLocation,
+	MatchOrganization,
+	MatchOuterLocation,
+	MatchPerson,
+	MatchStr,
+};
 
 use super::PostgresSchema;
 

@@ -47,12 +47,7 @@ impl OrganizationAdapter for PostgresOrganization
 		Schema::write_from_clause(&mut query, "organizations", "O");
 		Schema::write_join_clause(&mut query, "", "locations", "L", "id", "O.location_id").unwrap();
 		Schema::write_where_clause(
-			Schema::write_where_clause(
-				WriteContext::BeforeWhereClause,
-				"L",
-				&match_condition.location,
-				&mut query,
-			),
+			WriteContext::BeforeWhereClause,
 			"O",
 			match_condition,
 			&mut query,
@@ -82,7 +77,10 @@ impl OrganizationAdapter for PostgresOrganization
 #[cfg(test)]
 mod tests
 {
+	use std::borrow::Cow::{Borrowed, Owned};
 	use clinvoice_adapter::{schema::LocationAdapter, Initializable};
+	use clinvoice_match::{MatchOrganization, Match, MatchLocation};
+	use clinvoice_schema::views::{LocationView, OrganizationView};
 
 	use super::{OrganizationAdapter, PostgresOrganization};
 	use crate::{
@@ -122,6 +120,67 @@ mod tests
 	#[tokio::test(flavor = "multi_thread", worker_threads = 10)]
 	async fn retrieve_view()
 	{
-		// TODO: write test
+		let mut connection = util::connect().await;
+
+		PostgresSchema::init(&mut connection).await.unwrap();
+
+		let earth = PostgresLocation::create(&mut connection, "Earth".into())
+			.await
+			.unwrap();
+
+		let usa = PostgresLocation::create_inner(&mut connection, &earth, "USA".into())
+			.await
+			.unwrap();
+
+		let arizona = PostgresLocation::create_inner(&mut connection, &usa, "Arizona".into())
+			.await
+			.unwrap();
+
+		let utah = PostgresLocation::create_inner(&mut connection, &usa, "Utah".into())
+			.await
+			.unwrap();
+
+		let earth_view = LocationView {
+			id: earth.id,
+			name: earth.name.clone(),
+			outer: None,
+		};
+
+		let usa_view = LocationView {
+			id: usa.id,
+			name: usa.name.clone(),
+			outer: Some(earth_view.clone().into()),
+		};
+
+		let arizona_view = LocationView {
+			id: arizona.id,
+			name: arizona.name.clone(),
+			outer: Some(usa_view.clone().into()),
+		};
+
+		let utah_view = LocationView {
+			id: utah.id,
+			name: utah.name.clone(),
+			outer: Some(usa_view.clone().into()),
+		};
+
+		let some_organization = PostgresOrganization::create(&mut connection, &arizona.into(), "Some Organization".into()).await.unwrap();
+		let some_organization_view = OrganizationView {
+			id: some_organization.id,
+			name: some_organization.name.clone(),
+			location: arizona_view,
+		};
+
+		// Assert ::create writes accurately to the DB
+		assert_eq!(
+			&[some_organization_view],
+			PostgresOrganization::retrieve_view(&mut connection, &MatchOrganization {
+				id: Match::EqualTo(Owned(some_organization.id)),
+				..Default::default()
+			})
+			.await
+			.unwrap()
+			.as_slice()
+		);
 	}
 }

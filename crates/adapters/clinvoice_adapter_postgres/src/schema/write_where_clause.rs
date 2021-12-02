@@ -14,7 +14,7 @@ use clinvoice_match::{
 	MatchStr,
 };
 
-use super::PostgresSchema;
+use super::PostgresSchema as Schema;
 
 const COLUMN_ID: &str = "id";
 const COLUMN_NAME: &str = "name";
@@ -40,18 +40,18 @@ fn write_boolean_group<I, Q, const UNION: bool>(
 	match_conditions: &mut I,
 ) where
 	I: Iterator<Item = Q>,
-	PostgresSchema: WriteWhereClause<Q>,
+	Schema: WriteWhereClause<Q>,
 {
 	write!(query, "{} (", context.get_prefix()).unwrap();
 	if let Some(m) = match_conditions.next()
 	{
-		PostgresSchema::write_where_clause(WriteContext::InWhereCondition, alias, m, query);
+		Schema::write_where_clause(WriteContext::InWhereCondition, alias, m, query);
 	}
 
 	let separator: &str = if UNION { " AND" } else { " OR" };
 	match_conditions.for_each(|q| {
 		query.push_str(separator);
-		PostgresSchema::write_where_clause(WriteContext::InWhereCondition, alias, q, query);
+		Schema::write_where_clause(WriteContext::InWhereCondition, alias, q, query);
 	});
 
 	query.push(')');
@@ -145,10 +145,10 @@ fn write_is_null(query: &mut String, context: WriteContext, alias: &str)
 /// The args are the same as [`WriteSql::write_where`].
 fn write_negated<Q>(query: &mut String, context: WriteContext, alias: &str, match_condition: Q)
 where
-	PostgresSchema: WriteWhereClause<Q>,
+	Schema: WriteWhereClause<Q>,
 {
 	write!(query, "{} NOT (", context.get_prefix()).unwrap();
-	PostgresSchema::write_where_clause(
+	Schema::write_where_clause(
 		WriteContext::InWhereCondition,
 		alias,
 		match_condition,
@@ -157,7 +157,7 @@ where
 	query.push(')');
 }
 
-impl WriteWhereClause<&Match<'_, i64>> for PostgresSchema
+impl WriteWhereClause<&Match<'_, i64>> for Schema
 {
 	fn write_where_clause(
 		context: WriteContext,
@@ -207,7 +207,7 @@ impl WriteWhereClause<&Match<'_, i64>> for PostgresSchema
 	}
 }
 
-impl WriteWhereClause<&MatchStr<Cow<'_, str>>> for PostgresSchema
+impl WriteWhereClause<&MatchStr<Cow<'_, str>>> for Schema
 {
 	fn write_where_clause(
 		context: WriteContext,
@@ -254,7 +254,7 @@ impl WriteWhereClause<&MatchStr<Cow<'_, str>>> for PostgresSchema
 	}
 }
 
-impl WriteWhereClause<&MatchPerson<'_>> for PostgresSchema
+impl WriteWhereClause<&MatchPerson<'_>> for Schema
 {
 	fn write_where_clause(
 		context: WriteContext,
@@ -267,16 +267,11 @@ impl WriteWhereClause<&MatchPerson<'_>> for PostgresSchema
 			($context:expr, $column:ident, $match_field:ident) => {
 				if alias.is_empty()
 				{
-					PostgresSchema::write_where_clause(
-						$context,
-						$column,
-						&match_condition.$match_field,
-						query,
-					)
+					Schema::write_where_clause($context, $column, &match_condition.$match_field, query)
 				}
 				else
 				{
-					PostgresSchema::write_where_clause(
+					Schema::write_where_clause(
 						$context,
 						&format!("{}.{}", alias, $column),
 						&match_condition.$match_field,
@@ -294,7 +289,7 @@ impl WriteWhereClause<&MatchPerson<'_>> for PostgresSchema
 	}
 }
 
-impl WriteWhereClause<&MatchLocation<'_>> for PostgresSchema
+impl WriteWhereClause<&MatchLocation<'_>> for Schema
 {
 	/// # Panics
 	///
@@ -331,7 +326,7 @@ impl WriteWhereClause<&MatchLocation<'_>> for PostgresSchema
 				MatchOuterLocation::Some(ref outer) if context == WriteContext::BeforeWhereClause =>
 				{
 					let new_alias = format!("{}O", alias);
-					PostgresSchema::write_join_clause(
+					Schema::write_join_clause(
 						query,
 						"",
 						"locations",
@@ -348,8 +343,8 @@ impl WriteWhereClause<&MatchLocation<'_>> for PostgresSchema
 				),
 			};
 
-			PostgresSchema::write_where_clause(
-				PostgresSchema::write_where_clause(
+			Schema::write_where_clause(
+				Schema::write_where_clause(
 					ctx,
 					&format!("{}.{}", alias, COLUMN_ID),
 					&match_condition.id,
@@ -370,7 +365,7 @@ impl WriteWhereClause<&MatchLocation<'_>> for PostgresSchema
 	}
 }
 
-impl WriteWhereClause<&MatchOrganization<'_>> for PostgresSchema
+impl WriteWhereClause<&MatchOrganization<'_>> for Schema
 {
 	/// # Panics
 	///
@@ -389,9 +384,14 @@ impl WriteWhereClause<&MatchOrganization<'_>> for PostgresSchema
 		query: &mut String,
 	) -> WriteContext
 	{
-		PostgresSchema::write_where_clause(
-			PostgresSchema::write_where_clause(context, alias, &match_condition.id, query),
-			alias,
+		Schema::write_where_clause(
+			Schema::write_where_clause(
+				Schema::write_where_clause(context, "L", &match_condition.location, query),
+				&format!("{}.{}", alias, COLUMN_ID),
+				&match_condition.id,
+				query,
+			),
+			&format!("{}.{}", alias, COLUMN_NAME),
 			&match_condition.name,
 			query,
 		)
@@ -403,13 +403,15 @@ mod tests
 {
 	use std::borrow::Cow::{Borrowed, Owned};
 
+	use clinvoice_match::MatchOrganization;
+
 	use super::{
 		Match,
 		MatchLocation,
 		MatchOuterLocation,
 		MatchPerson,
 		MatchStr,
-		PostgresSchema as Schema,
+		Schema,
 		WriteContext::{AfterWhereCondition, BeforeWhereClause, InWhereCondition},
 		WriteWhereClause,
 	};
@@ -671,6 +673,56 @@ mod tests
 				"  JOIN locations LO ON (LO.id = L.outer_id)  JOIN locations LOO ON (LOO.id = \
 				 LO.outer_id) WHERE LOO.outer_id IS NULL AND LOO.id = 9 AND LO.id = 8 AND L.id = 7"
 			),
+		);
+	}
+
+	#[test]
+	fn write_organization_where_clause()
+	{
+		let mut query = String::new();
+		assert_eq!(
+			Schema::write_where_clause(
+				BeforeWhereClause,
+				"O",
+				&MatchOrganization::default(),
+				&mut query
+			),
+			BeforeWhereClause
+		);
+		assert!(query.is_empty());
+
+		query.clear();
+		assert_eq!(
+			Schema::write_where_clause(
+				BeforeWhereClause,
+				"O",
+				&MatchOrganization {
+					id: Match::EqualTo(Owned(7)),
+					name: MatchStr::Contains(Borrowed("Gögle")),
+					location: MatchLocation {
+						id: Match::EqualTo(Owned(11)),
+						outer: MatchOuterLocation::Some(Box::new(MatchLocation {
+							id: Match::EqualTo(Owned(14)),
+							outer: MatchOuterLocation::Some(Box::new(MatchLocation {
+								name: MatchStr::EqualTo(Borrowed("Japan")),
+								..Default::default()
+							})),
+							..Default::default()
+						})),
+						..Default::default()
+					},
+				},
+				&mut query,
+			),
+			AfterWhereCondition
+		);
+		assert_eq!(
+			query,
+			String::from(
+				"  JOIN locations LO ON (LO.id = L.outer_id)  JOIN locations LOO ON (LOO.id = \
+				 LO.outer_id) WHERE LOO.name = 'Japan' AND LO.id = 14 AND L.id = 11 AND O.id = 7 AND \
+				 O.name LIKE '%Gögle%'"
+			)
 		);
 	}
 }

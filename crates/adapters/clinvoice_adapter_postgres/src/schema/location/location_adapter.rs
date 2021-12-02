@@ -6,7 +6,7 @@ use clinvoice_adapter::{
 	WriteWhereClause,
 };
 use clinvoice_match::MatchLocation;
-use clinvoice_schema::{views::LocationView, Id, Location};
+use clinvoice_schema::{views::LocationView, Location};
 use sqlx::{Acquire, Executor, Postgres, Result, Row};
 
 use super::PostgresLocation;
@@ -79,9 +79,7 @@ impl LocationAdapter for PostgresLocation
 		//       closure :(
 		for row in selected
 		{
-			output.push(
-				PostgresLocation::retrieve_view_by_id(&mut transaction, row.get::<Id, _>("id")).await?,
-			);
+			output.push(PostgresLocation::retrieve_view_by_id(&mut transaction, row.get("id")).await?);
 		}
 
 		transaction.rollback().await?;

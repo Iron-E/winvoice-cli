@@ -8,7 +8,7 @@ use clinvoice_schema::{
 	Money,
 	Organization,
 };
-use sqlx::{Executor, Result};
+use sqlx::{Pool, Result};
 
 use crate::{Deletable, Updatable};
 
@@ -29,7 +29,7 @@ pub trait JobAdapter:
 	///
 	/// The newly created [`Job`].
 	async fn create(
-		connection: impl 'async_trait + Executor<'_, Database = <Self as Deletable>::Db>,
+		connection: &Pool<<Self as Deletable>::Db>,
 		client: &Organization,
 		date_open: DateTime<Utc>,
 		hourly_rate: Money,
@@ -46,7 +46,7 @@ pub trait JobAdapter:
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`JobView`]s.
 	async fn retrieve_view(
-		connection: impl 'async_trait + Executor<'_, Database = <Self as Deletable>::Db>,
+		connection: &Pool<<Self as Deletable>::Db>,
 		match_condition: &MatchJob,
 	) -> Result<Vec<JobView>>;
 }

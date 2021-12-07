@@ -1,6 +1,6 @@
 use clinvoice_match::MatchOrganization;
 use clinvoice_schema::{views::OrganizationView, Location, Organization};
-use sqlx::{Acquire, Executor, Result};
+use sqlx::{Pool, Result};
 
 use crate::{Deletable, Updatable};
 
@@ -21,7 +21,7 @@ pub trait OrganizationAdapter:
 	///
 	/// The newly created [`Organization`].
 	async fn create(
-		connection: impl 'async_trait + Executor<'_, Database = <Self as Deletable>::Db>,
+		connection: &Pool<<Self as Deletable>::Db>,
 		location: &Location,
 		name: String,
 	) -> Result<<Self as Deletable>::Entity>;
@@ -35,7 +35,7 @@ pub trait OrganizationAdapter:
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`OrganizationView`]s.
 	async fn retrieve_view(
-		connection: impl 'async_trait + Acquire<'_, Database = <Self as Deletable>::Db> + Send,
+		connection: &Pool<<Self as Deletable>::Db>,
 		match_condition: &MatchOrganization,
 	) -> Result<Vec<OrganizationView>>;
 }

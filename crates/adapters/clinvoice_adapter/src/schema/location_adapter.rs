@@ -1,6 +1,6 @@
 use clinvoice_match::MatchLocation;
 use clinvoice_schema::{views::LocationView, Location};
-use sqlx::{Acquire, Executor, Result};
+use sqlx::{Pool, Result};
 
 use crate::{Deletable, Updatable};
 
@@ -21,7 +21,7 @@ pub trait LocationAdapter:
 	///
 	/// The created [`Location`].
 	async fn create(
-		connection: impl 'async_trait + Executor<'_, Database = <Self as Deletable>::Db>,
+		connection: &Pool<<Self as Deletable>::Db>,
 		name: String,
 	) -> Result<<Self as Deletable>::Entity>;
 
@@ -37,7 +37,7 @@ pub trait LocationAdapter:
 	///
 	/// The created [`Location`].
 	async fn create_inner(
-		connection: impl 'async_trait + Executor<'_, Database = <Self as Deletable>::Db>,
+		connection: &Pool<<Self as Deletable>::Db>,
 		outer: &<Self as Deletable>::Entity,
 		name: String,
 	) -> Result<<Self as Deletable>::Entity>;
@@ -51,7 +51,7 @@ pub trait LocationAdapter:
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`LocationView`]s.
 	async fn retrieve_view(
-		connection: impl 'async_trait + Acquire<'_, Database = <Self as Deletable>::Db> + Send,
+		connection: &Pool<<Self as Deletable>::Db>,
 		match_condition: &MatchLocation,
 	) -> Result<Vec<LocationView>>;
 }

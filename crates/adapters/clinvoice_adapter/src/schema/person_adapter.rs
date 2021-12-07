@@ -1,6 +1,6 @@
 use clinvoice_match::MatchPerson;
 use clinvoice_schema::{views::PersonView, Person};
-use sqlx::{Executor, Result};
+use sqlx::{Pool, Result};
 
 use crate::{Deletable, Updatable};
 
@@ -21,7 +21,7 @@ pub trait PersonAdapter:
 	///
 	/// The newly created [`Person`].
 	async fn create(
-		connection: impl 'async_trait + Executor<'_, Database = <Self as Deletable>::Db>,
+		connection: &Pool<<Self as Deletable>::Db>,
 		name: String,
 	) -> Result<<Self as Deletable>::Entity>;
 
@@ -34,7 +34,7 @@ pub trait PersonAdapter:
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`PersonView`]s.
 	async fn retrieve_view(
-		connection: impl 'async_trait + Executor<'_, Database = <Self as Deletable>::Db>,
+		connection: &Pool<<Self as Deletable>::Db>,
 		match_condition: &MatchPerson,
 	) -> Result<Vec<PersonView>>;
 }

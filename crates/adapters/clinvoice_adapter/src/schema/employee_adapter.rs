@@ -9,7 +9,7 @@ use clinvoice_schema::{
 	Organization,
 	Person,
 };
-use sqlx::{Acquire, Executor, Result};
+use sqlx::{Pool, Result};
 
 use crate::{Deletable, Updatable};
 
@@ -31,7 +31,7 @@ pub trait EmployeeAdapter:
 	/// * The created [`Employee`], if there were no errors.
 	/// * An [`Error`], if something goes wrong.
 	async fn create(
-		connection: impl 'async_trait + Acquire<'_, Database = <Self as Deletable>::Db> + Send,
+		connection: &Pool<<Self as Deletable>::Db>,
 		contact_info: HashMap<String, Contact>,
 		organization: &Organization,
 		person: &Person,
@@ -52,7 +52,7 @@ pub trait EmployeeAdapter:
 	/// * Any matching [`Employee`]s.
 	/// * An [`Error`], should something go wrong.
 	async fn retrieve_view(
-		connection: impl 'async_trait + Executor<'_, Database = <Self as Deletable>::Db>,
+		connection: &Pool<<Self as Deletable>::Db>,
 		match_condition: &MatchEmployee,
 	) -> Result<Vec<EmployeeView>>;
 }

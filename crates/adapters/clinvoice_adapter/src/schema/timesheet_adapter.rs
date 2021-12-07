@@ -1,6 +1,6 @@
 use clinvoice_match::MatchTimesheet;
 use clinvoice_schema::{views::TimesheetView, Employee, Job, Timesheet};
-use sqlx::{Executor, Result};
+use sqlx::{Pool, Result};
 
 use crate::{Deletable, Updatable};
 
@@ -21,7 +21,7 @@ pub trait TimesheetAdapter:
 	///
 	/// The newly created [`Timesheet`].
 	async fn create(
-		connection: impl 'async_trait + Executor<'_, Database = <Self as Deletable>::Db>,
+		connection: &Pool<<Self as Deletable>::Db>,
 		employee: &Employee,
 		job: &Job,
 	) -> Result<<Self as Deletable>::Entity>;
@@ -35,7 +35,7 @@ pub trait TimesheetAdapter:
 	/// * An `Error`, if something goes wrong.
 	/// * A list of matching [`TimesheetView`]s.
 	async fn retrieve_view(
-		connection: impl 'async_trait + Executor<'_, Database = <Self as Deletable>::Db>,
+		connection: &Pool<<Self as Deletable>::Db>,
 		match_condition: &MatchTimesheet,
 	) -> Result<Vec<TimesheetView>>;
 }

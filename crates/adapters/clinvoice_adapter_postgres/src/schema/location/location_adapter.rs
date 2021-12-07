@@ -7,7 +7,8 @@ use clinvoice_adapter::{
 };
 use clinvoice_match::MatchLocation;
 use clinvoice_schema::{views::LocationView, Location};
-use sqlx::{Acquire, Executor, Postgres, Result, Row};
+use futures::TryStreamExt;
+use sqlx::{PgPool, Result, Row};
 
 use super::PostgresLocation;
 use crate::PostgresSchema as Schema;
@@ -15,10 +16,7 @@ use crate::PostgresSchema as Schema;
 #[async_trait::async_trait]
 impl LocationAdapter for PostgresLocation
 {
-	async fn create(
-		connection: impl 'async_trait + Executor<'_, Database = Postgres>,
-		name: String,
-	) -> Result<Location>
+	async fn create(connection: &PgPool, name: String) -> Result<Location>
 	{
 		let row = sqlx::query!(
 			"INSERT INTO locations (name) VALUES ($1) RETURNING id;",
@@ -34,11 +32,7 @@ impl LocationAdapter for PostgresLocation
 		})
 	}
 
-	async fn create_inner(
-		connection: impl 'async_trait + Executor<'_, Database = Postgres>,
-		outer: &Location,
-		name: String,
-	) -> Result<Location>
+	async fn create_inner(connection: &PgPool, outer: &Location, name: String) -> Result<Location>
 	{
 		let row = sqlx::query!(
 			"INSERT INTO locations (name, outer_id) VALUES ($1, $2) RETURNING id;",
@@ -57,11 +51,10 @@ impl LocationAdapter for PostgresLocation
 
 	// WARN: `Might need `Acquire` or `&mut Transaction` depending on how recursive views work
 	async fn retrieve_view(
-		connection: impl 'async_trait + Acquire<'_, Database = Postgres> + Send,
+		connection: &PgPool,
 		match_condition: &MatchLocation,
 	) -> Result<Vec<LocationView>>
 	{
-		let mut transaction = connection.begin().await?;
 		let mut query = Schema::write_select_clause([]);
 		Schema::write_from_clause(&mut query, "locations", "L");
 		Schema::write_where_clause(
@@ -72,18 +65,11 @@ impl LocationAdapter for PostgresLocation
 		);
 		query.push(';');
 
-		let selected = sqlx::query(&query).fetch_all(&mut transaction).await?;
-		let mut output = Vec::with_capacity(selected.len());
-
-		// NOTE: because of the mutable borrow here, we need to use a `for` rather than a fancy
-		//       closure :(
-		for row in selected
-		{
-			output.push(PostgresLocation::retrieve_view_by_id(&mut transaction, row.get("id")).await?);
-		}
-
-		transaction.rollback().await?;
-		Ok(output)
+		sqlx::query(&query)
+			.fetch(connection)
+			.and_then(|row| PostgresLocation::retrieve_view_by_id(connection, row.get("id")))
+			.try_collect()
+			.await
 	}
 }
 
@@ -92,36 +78,33 @@ mod tests
 {
 	use std::borrow::Cow::Owned;
 
-	use clinvoice_adapter::Initializable;
 	use clinvoice_match::{Match, MatchLocation};
 	use clinvoice_schema::views::LocationView;
 
 	use super::{LocationAdapter, PostgresLocation};
-	use crate::{schema::util, PostgresSchema};
+	use crate::schema::util;
 
 	/// TODO: use fuzzing
 	#[tokio::test(flavor = "multi_thread", worker_threads = 10)]
 	async fn create()
 	{
-		let mut connection = util::connect().await;
+		let connection = util::connect().await;
 
-		PostgresSchema::init(&mut connection).await.unwrap();
-
-		let earth = PostgresLocation::create(&mut connection, "Earth".into())
+		let earth = PostgresLocation::create(&connection, "Earth".into())
 			.await
 			.unwrap();
 
-		let usa = PostgresLocation::create_inner(&mut connection, &earth, "USA".into())
+		let usa = PostgresLocation::create_inner(&connection, &earth, "USA".into())
 			.await
 			.unwrap();
 
-		let arizona = PostgresLocation::create_inner(&mut connection, &usa, "Arizona".into())
+		let arizona = PostgresLocation::create_inner(&connection, &usa, "Arizona".into())
 			.await
 			.unwrap();
 
 		// Assert ::create_inner works when `outer_id` has already been used for another `Location`
 		assert!(
-			PostgresLocation::create_inner(&mut connection, &usa, "Utah".into())
+			PostgresLocation::create_inner(&connection, &usa, "Utah".into())
 				.await
 				.is_ok()
 		);
@@ -129,7 +112,7 @@ mod tests
 		macro_rules! select {
 			($id:expr) => {
 				sqlx::query!("SELECT * FROM locations WHERE id = $1", $id)
-					.fetch_one(&mut connection)
+					.fetch_one(&connection)
 					.await
 					.unwrap()
 			};
@@ -163,23 +146,21 @@ mod tests
 	#[tokio::test(flavor = "multi_thread", worker_threads = 10)]
 	async fn retrieve_view()
 	{
-		let mut connection = util::connect().await;
+		let connection = util::connect().await;
 
-		PostgresSchema::init(&mut connection).await.unwrap();
-
-		let earth = PostgresLocation::create(&mut connection, "Earth".into())
+		let earth = PostgresLocation::create(&connection, "Earth".into())
 			.await
 			.unwrap();
 
-		let usa = PostgresLocation::create_inner(&mut connection, &earth, "USA".into())
+		let usa = PostgresLocation::create_inner(&connection, &earth, "USA".into())
 			.await
 			.unwrap();
 
-		let arizona = PostgresLocation::create_inner(&mut connection, &usa, "Arizona".into())
+		let arizona = PostgresLocation::create_inner(&connection, &usa, "Arizona".into())
 			.await
 			.unwrap();
 
-		let utah = PostgresLocation::create_inner(&mut connection, &usa, "Utah".into())
+		let utah = PostgresLocation::create_inner(&connection, &usa, "Utah".into())
 			.await
 			.unwrap();
 
@@ -210,7 +191,7 @@ mod tests
 		// Assert ::retrieve_view retrieves accurately from the DB
 		assert_eq!(
 			&[earth_view],
-			PostgresLocation::retrieve_view(&mut connection, &MatchLocation {
+			PostgresLocation::retrieve_view(&connection, &MatchLocation {
 				id: Match::EqualTo(Owned(earth.id)),
 				..Default::default()
 			})
@@ -221,7 +202,7 @@ mod tests
 
 		assert_eq!(
 			&[usa_view],
-			PostgresLocation::retrieve_view(&mut connection, &MatchLocation {
+			PostgresLocation::retrieve_view(&connection, &MatchLocation {
 				id: Match::EqualTo(Owned(usa.id)),
 				..Default::default()
 			})
@@ -232,7 +213,7 @@ mod tests
 
 		assert_eq!(
 			&[arizona_view],
-			PostgresLocation::retrieve_view(&mut connection, &MatchLocation {
+			PostgresLocation::retrieve_view(&connection, &MatchLocation {
 				id: Match::EqualTo(Owned(arizona.id)),
 				..Default::default()
 			})
@@ -243,7 +224,7 @@ mod tests
 
 		assert_eq!(
 			&[utah_view],
-			PostgresLocation::retrieve_view(&mut connection, &MatchLocation {
+			PostgresLocation::retrieve_view(&connection, &MatchLocation {
 				id: Match::EqualTo(Owned(utah.id)),
 				..Default::default()
 			})

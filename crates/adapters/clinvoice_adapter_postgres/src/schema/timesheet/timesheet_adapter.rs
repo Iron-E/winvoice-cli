@@ -7,18 +7,14 @@ use clinvoice_schema::{
 	Job,
 	Timesheet,
 };
-use sqlx::{postgres::Postgres, Executor, Result};
+use sqlx::{PgPool, Result};
 
 use super::PostgresTimesheet;
 
 #[async_trait::async_trait]
 impl TimesheetAdapter for PostgresTimesheet
 {
-	async fn create(
-		connection: impl 'async_trait + Executor<'_, Database = Postgres>,
-		employee: &Employee,
-		job: &Job,
-	) -> Result<Timesheet>
+	async fn create(connection: &PgPool, employee: &Employee, job: &Job) -> Result<Timesheet>
 	{
 		let time_begin = Utc::now();
 		let work_notes =
@@ -49,7 +45,7 @@ impl TimesheetAdapter for PostgresTimesheet
 	}
 
 	async fn retrieve_view(
-		connection: impl 'async_trait + Executor<'_, Database = Postgres>,
+		connection: &PgPool,
 		match_condition: &MatchTimesheet,
 	) -> Result<Vec<TimesheetView>>
 	{
@@ -63,43 +59,41 @@ mod tests
 	use core::time::Duration;
 	use std::collections::HashMap;
 
-	use clinvoice_adapter::{
-		schema::{EmployeeAdapter, JobAdapter, LocationAdapter, OrganizationAdapter, PersonAdapter},
-		Initializable,
+	use clinvoice_adapter::schema::{
+		EmployeeAdapter,
+		JobAdapter,
+		LocationAdapter,
+		OrganizationAdapter,
+		PersonAdapter,
 	};
 	use clinvoice_schema::{chrono::Utc, Contact, Currency, EmployeeStatus, Expense, Money};
 
 	use super::{PostgresTimesheet, TimesheetAdapter};
-	use crate::{
-		schema::{
-			util,
-			PostgresEmployee,
-			PostgresJob,
-			PostgresLocation,
-			PostgresOrganization,
-			PostgresPerson,
-		},
-		PostgresSchema,
+	use crate::schema::{
+		util,
+		PostgresEmployee,
+		PostgresJob,
+		PostgresLocation,
+		PostgresOrganization,
+		PostgresPerson,
 	};
 
 	#[tokio::test(flavor = "multi_thread", worker_threads = 10)]
 	async fn create()
 	{
-		let mut connection = util::connect().await;
+		let connection = util::connect().await;
 
-		PostgresSchema::init(&mut connection).await.unwrap();
-
-		let earth = PostgresLocation::create(&mut connection, "Earth".into())
+		let earth = PostgresLocation::create(&connection, "Earth".into())
 			.await
 			.unwrap();
 
 		let organization =
-			PostgresOrganization::create(&mut connection, &earth, "Some Organization".into())
+			PostgresOrganization::create(&connection, &earth, "Some Organization".into())
 				.await
 				.unwrap();
 
 		let job = PostgresJob::create(
-			&mut connection,
+			&connection,
 			&organization,
 			Utc::now(),
 			Money::new(13_27, 2, Currency::USD),
@@ -109,7 +103,7 @@ mod tests
 		.await
 		.unwrap();
 
-		let person = PostgresPerson::create(&mut connection, "My Name".into())
+		let person = PostgresPerson::create(&connection, "My Name".into())
 			.await
 			.unwrap();
 
@@ -128,7 +122,7 @@ mod tests
 		});
 
 		let employee = PostgresEmployee::create(
-			&mut connection,
+			&connection,
 			contact_info,
 			&organization,
 			&person,
@@ -138,7 +132,7 @@ mod tests
 		.await
 		.unwrap();
 
-		let timesheet = PostgresTimesheet::create(&mut connection, &employee, &job)
+		let timesheet = PostgresTimesheet::create(&connection, &employee, &job)
 			.await
 			.unwrap();
 
@@ -150,9 +144,11 @@ mod tests
 					time_begin,
 					time_end,
 					work_notes
-				FROM timesheets;"#
+				FROM timesheets
+				WHERE time_begin = $1;"#,
+			timesheet.time_begin,
 		)
-		.fetch_one(&mut connection)
+		.fetch_one(&connection)
 		.await
 		.unwrap();
 

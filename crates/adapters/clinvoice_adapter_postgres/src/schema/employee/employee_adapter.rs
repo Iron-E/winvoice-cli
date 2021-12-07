@@ -10,7 +10,7 @@ use clinvoice_schema::{
 	Organization,
 	Person,
 };
-use sqlx::{Acquire, Executor, Postgres, Result};
+use sqlx::{PgPool, Result};
 
 use super::PostgresEmployee;
 
@@ -18,7 +18,7 @@ use super::PostgresEmployee;
 impl EmployeeAdapter for PostgresEmployee
 {
 	async fn create(
-		connection: impl 'async_trait + Acquire<'_, Database = Postgres> + Send,
+		connection: &PgPool,
 		contact_info: HashMap<String, Contact>,
 		organization: &Organization,
 		person: &Person,
@@ -94,7 +94,7 @@ impl EmployeeAdapter for PostgresEmployee
 	}
 
 	async fn retrieve_view(
-		connection: impl 'async_trait + Executor<'_, Database = Postgres>,
+		connection: &PgPool,
 		match_condition: &MatchEmployee,
 	) -> Result<Vec<EmployeeView>>
 	{
@@ -107,36 +107,28 @@ mod tests
 {
 	use std::collections::HashMap;
 
-	use clinvoice_adapter::{
-		schema::{LocationAdapter, OrganizationAdapter, PersonAdapter},
-		Initializable,
-	};
+	use clinvoice_adapter::schema::{LocationAdapter, OrganizationAdapter, PersonAdapter};
 	use clinvoice_schema::{Contact, EmployeeStatus};
 
 	use super::{EmployeeAdapter, PostgresEmployee};
-	use crate::{
-		schema::{util, PostgresLocation, PostgresOrganization, PostgresPerson},
-		PostgresSchema,
-	};
+	use crate::schema::{util, PostgresLocation, PostgresOrganization, PostgresPerson};
 
 	/// TODO: use fuzzing
 	#[tokio::test(flavor = "multi_thread", worker_threads = 10)]
 	async fn create()
 	{
-		let mut connection = util::connect().await;
+		let connection = util::connect().await;
 
-		PostgresSchema::init(&mut connection).await.unwrap();
-
-		let earth = PostgresLocation::create(&mut connection, "Earth".into())
+		let earth = PostgresLocation::create(&connection, "Earth".into())
 			.await
 			.unwrap();
 
 		let organization =
-			PostgresOrganization::create(&mut connection, &earth, "Some Organization".into())
+			PostgresOrganization::create(&connection, &earth, "Some Organization".into())
 				.await
 				.unwrap();
 
-		let person = PostgresPerson::create(&mut connection, "My Name".into())
+		let person = PostgresPerson::create(&connection, "My Name".into())
 			.await
 			.unwrap();
 
@@ -155,7 +147,7 @@ mod tests
 		});
 
 		let employee = PostgresEmployee::create(
-			&mut connection,
+			&connection,
 			contact_info,
 			&organization,
 			&person,
@@ -165,8 +157,8 @@ mod tests
 		.await
 		.unwrap();
 
-		let row = sqlx::query!("SELECT * FROM employees;")
-			.fetch_one(&mut connection)
+		let row = sqlx::query!("SELECT * FROM employees WHERE id = $1;", employee.id)
+			.fetch_one(&connection)
 			.await
 			.unwrap();
 
@@ -174,7 +166,7 @@ mod tests
 			"SELECT * FROM contact_information WHERE employee_id = $1;",
 			employee.id
 		)
-		.fetch_all(&mut connection)
+		.fetch_all(&connection)
 		.await
 		.unwrap()
 		.into_iter()

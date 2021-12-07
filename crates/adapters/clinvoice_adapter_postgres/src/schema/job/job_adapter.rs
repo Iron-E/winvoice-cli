@@ -11,12 +11,7 @@ use clinvoice_schema::{
 	Money,
 	Organization,
 };
-use sqlx::{
-	postgres::{types::PgInterval, Postgres},
-	Error,
-	Executor,
-	Result,
-};
+use sqlx::{postgres::types::PgInterval, Error, PgPool, Result};
 
 use super::PostgresJob;
 
@@ -24,7 +19,7 @@ use super::PostgresJob;
 impl JobAdapter for PostgresJob
 {
 	async fn create(
-		connection: impl 'async_trait + Executor<'_, Database = Postgres>,
+		connection: &PgPool,
 		client: &Organization,
 		date_open: DateTime<Utc>,
 		hourly_rate: Money,
@@ -64,10 +59,7 @@ impl JobAdapter for PostgresJob
 		})
 	}
 
-	async fn retrieve_view(
-		connection: impl 'async_trait + Executor<'_, Database = Postgres>,
-		match_condition: &MatchJob,
-	) -> Result<Vec<JobView>>
+	async fn retrieve_view(connection: &PgPool, match_condition: &MatchJob) -> Result<Vec<JobView>>
 	{
 		todo!()
 	}
@@ -79,35 +71,38 @@ mod tests
 	use core::time::Duration;
 	use std::collections::HashMap;
 
-	use clinvoice_adapter::{
-		schema::{EmployeeAdapter, LocationAdapter, OrganizationAdapter, PersonAdapter},
-		Initializable,
+	use clinvoice_adapter::schema::{
+		EmployeeAdapter,
+		LocationAdapter,
+		OrganizationAdapter,
+		PersonAdapter,
 	};
 	use clinvoice_schema::{chrono::Utc, Contact, Currency, EmployeeStatus, Money};
 
 	use super::{JobAdapter, PostgresJob};
-	use crate::{
-		schema::{util, PostgresEmployee, PostgresLocation, PostgresOrganization, PostgresPerson},
-		PostgresSchema,
+	use crate::schema::{
+		util,
+		PostgresEmployee,
+		PostgresLocation,
+		PostgresOrganization,
+		PostgresPerson,
 	};
 
 	#[tokio::test(flavor = "multi_thread", worker_threads = 10)]
 	async fn create()
 	{
-		let mut connection = util::connect().await;
+		let connection = util::connect().await;
 
-		PostgresSchema::init(&mut connection).await.unwrap();
-
-		let earth = PostgresLocation::create(&mut connection, "Earth".into())
+		let earth = PostgresLocation::create(&connection, "Earth".into())
 			.await
 			.unwrap();
 
 		let organization =
-			PostgresOrganization::create(&mut connection, &earth, "Some Organization".into())
+			PostgresOrganization::create(&connection, &earth, "Some Organization".into())
 				.await
 				.unwrap();
 
-		let person = PostgresPerson::create(&mut connection, "My Name".into())
+		let person = PostgresPerson::create(&connection, "My Name".into())
 			.await
 			.unwrap();
 
@@ -126,7 +121,7 @@ mod tests
 		});
 
 		let employee = PostgresEmployee::create(
-			&mut connection,
+			&connection,
 			contact_info,
 			&organization,
 			&person,
@@ -137,7 +132,7 @@ mod tests
 		.unwrap();
 
 		let job = PostgresJob::create(
-			&mut connection,
+			&connection,
 			&organization,
 			Utc::now(),
 			Money::new(13_27, 2, Currency::USD),
@@ -160,9 +155,11 @@ mod tests
 					(invoice_hourly_rate).currency as "invoice_hourly_rate_currency: String",
 					notes,
 					objectives
-				FROM jobs;"#
+				FROM jobs
+				WHERE id = $1;"#,
+			job.id,
 		)
-		.fetch_one(&mut connection)
+		.fetch_one(&connection)
 		.await
 		.unwrap();
 

@@ -1,23 +1,21 @@
 use core::time::Duration;
 
+#[cfg(test)]
+use lazy_static::lazy_static;
 use sqlx::{
-	postgres::{types::PgInterval, PgConnection},
-	Connection,
+	postgres::{types::PgInterval, PgPool},
 	Error,
 	Result,
 };
 
 #[cfg(test)]
-pub(super) async fn connect() -> PgConnection
+pub(super) async fn connect() -> PgPool
 {
-	let database_url = dotenv::var("DATABASE_URL").unwrap();
+	lazy_static! {
+		static ref URL: String = dotenv::var("DATABASE_URL").unwrap();
+	}
 
-	let mut conn = PgConnection::connect(&database_url).await.unwrap();
-	sqlx::query!("SET SCHEMA 'pg_temp';")
-		.execute(&mut conn)
-		.await
-		.unwrap();
-	conn
+	PgPool::connect_lazy(&URL).unwrap()
 }
 
 pub(super) fn duration_from(interval: PgInterval) -> Result<Duration>

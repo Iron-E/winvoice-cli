@@ -1,6 +1,6 @@
 use clinvoice_adapter::Deletable;
 use clinvoice_schema::Employee;
-use sqlx::{Executor, Postgres, Result};
+use sqlx::{Acquire, Postgres, Result};
 
 use super::PostgresEmployee;
 
@@ -11,7 +11,7 @@ impl Deletable for PostgresEmployee
 	type Entity = Employee;
 
 	async fn delete(
-		connection: impl 'async_trait + Executor<'_, Database = Self::Db>,
+		connection: impl 'async_trait + Acquire<'_, Database = Self::Db> + Send,
 		cascade: bool,
 		entities: impl 'async_trait + Iterator<Item = Self::Entity> + Send,
 	) -> Result<()>

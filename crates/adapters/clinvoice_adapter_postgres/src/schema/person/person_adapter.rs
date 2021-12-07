@@ -8,7 +8,7 @@ use clinvoice_adapter::{
 use clinvoice_match::MatchPerson;
 use clinvoice_schema::{views::PersonView, Person};
 use futures::stream::TryStreamExt;
-use sqlx::{postgres::Postgres, Executor, Result, Row};
+use sqlx::{PgPool, Result, Row};
 
 use super::PostgresPerson;
 use crate::PostgresSchema as Schema;
@@ -16,10 +16,7 @@ use crate::PostgresSchema as Schema;
 #[async_trait::async_trait]
 impl PersonAdapter for PostgresPerson
 {
-	async fn create(
-		connection: impl 'async_trait + Executor<'_, Database = Postgres>,
-		name: String,
-	) -> Result<Person>
+	async fn create(connection: &PgPool, name: String) -> Result<Person>
 	{
 		let row = sqlx::query!("INSERT INTO people (name) VALUES ($1) RETURNING id;", name)
 			.fetch_one(connection)
@@ -29,7 +26,7 @@ impl PersonAdapter for PostgresPerson
 	}
 
 	async fn retrieve_view(
-		connection: impl 'async_trait + Executor<'_, Database = Postgres>,
+		connection: &PgPool,
 		match_condition: &MatchPerson,
 	) -> Result<Vec<PersonView>>
 	{
@@ -57,25 +54,21 @@ impl PersonAdapter for PostgresPerson
 #[cfg(test)]
 mod tests
 {
-	use clinvoice_adapter::Initializable;
-
 	use super::{PersonAdapter, PostgresPerson};
-	use crate::schema::{util, PostgresSchema};
+	use crate::schema::util;
 
 	/// TODO: use fuzzing
 	#[tokio::test(flavor = "multi_thread", worker_threads = 10)]
 	async fn create()
 	{
-		let mut connection = util::connect().await;
+		let connection = util::connect().await;
 
-		PostgresSchema::init(&mut connection).await.unwrap();
-
-		let person = PostgresPerson::create(&mut connection, "foo".into())
+		let person = PostgresPerson::create(&connection, "foo".into())
 			.await
 			.unwrap();
 
-		let row = sqlx::query!("SELECT * FROM people;")
-			.fetch_one(&mut connection)
+		let row = sqlx::query!("SELECT * FROM people WHERE id = $1;", person.id)
+			.fetch_one(&connection)
 			.await
 			.unwrap();
 

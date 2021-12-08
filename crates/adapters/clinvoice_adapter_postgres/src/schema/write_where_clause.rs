@@ -7,11 +7,12 @@ use std::{
 use clinvoice_adapter::{WriteContext, WriteJoinClause, WriteWhereClause};
 use clinvoice_match::{
 	Match,
+	MatchEmployee,
 	MatchLocation,
 	MatchOrganization,
 	MatchOuterLocation,
 	MatchPerson,
-	MatchStr, MatchEmployee,
+	MatchStr,
 };
 
 use super::PostgresSchema as Schema;

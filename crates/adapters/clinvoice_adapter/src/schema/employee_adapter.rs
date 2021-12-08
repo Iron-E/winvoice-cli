@@ -1,13 +1,7 @@
 use std::collections::HashMap;
 
 use clinvoice_match::MatchEmployee;
-use clinvoice_schema::{
-	views::EmployeeView,
-	Contact,
-	Employee,
-	Organization,
-	Person,
-};
+use clinvoice_schema::{views::EmployeeView, Contact, Employee, Organization, Person};
 use sqlx::{Pool, Result};
 
 use crate::{Deletable, Updatable};

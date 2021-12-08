@@ -10,7 +10,7 @@ use clinvoice_adapter::{
 };
 use clinvoice_match::MatchEmployee;
 use clinvoice_schema::{
-	views::{EmployeeView, OrganizationView, PersonView, ContactView},
+	views::{ContactView, EmployeeView, OrganizationView, PersonView},
 	Contact,
 	Employee,
 	Id,
@@ -186,16 +186,15 @@ impl EmployeeAdapter for PostgresEmployee
 					contact_info: {
 						let vec: Vec<(_, _, _, _, _)> = row.get("contact_info");
 						let mut map = HashMap::with_capacity(vec.len());
-						for contact in vec {
+						for contact in vec
+						{
 							map.insert(
 								contact.1,
 								if let Some(id) = contact.2
 								{
 									ContactView::Address {
-										location: PostgresLocation::retrieve_view_by_id(
-											connection,
-											id,
-										).await?,
+										location: PostgresLocation::retrieve_view_by_id(connection, id)
+											.await?,
 										export: contact.0,
 									}
 								}

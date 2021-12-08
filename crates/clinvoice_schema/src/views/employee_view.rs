@@ -9,7 +9,7 @@ use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 
 use super::{ContactView, OrganizationView, PersonView};
-use crate::{Id};
+use crate::Id;
 
 /// # Summary
 ///

@@ -155,7 +155,7 @@ async fn to_person()
 			name: "DoGood Inc".into(),
 		},
 		testy.clone(),
-		"NotEmployed".into(),
+		"Not employed".into(),
 		"CEO of Tests".into(),
 		&store,
 	)

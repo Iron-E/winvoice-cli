@@ -160,7 +160,7 @@ mod tests
 			email: "foo@bar.io".into(),
 			export: true,
 		});
-		contact_info.insert("Office Phone".into(), Contact::Phone {
+		contact_info.insert("Office's Email".into(), Contact::Phone {
 			phone: "555 223 5039".into(),
 			export: true,
 		});

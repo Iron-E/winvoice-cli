@@ -10,7 +10,7 @@ use clinvoice_adapter::{
 };
 use clinvoice_match::MatchEmployee;
 use clinvoice_schema::{
-	views::{EmployeeView, OrganizationView, PersonView},
+	views::{EmployeeView, OrganizationView, PersonView, ContactView},
 	Contact,
 	Employee,
 	Id,
@@ -184,29 +184,32 @@ impl EmployeeAdapter for PostgresEmployee
 						name: row.get("name"),
 					},
 					contact_info: {
-						let vec = row.get("contact_info");
+						let vec: Vec<(_, _, _, _, _)> = row.get("contact_info");
 						let mut map = HashMap::with_capacity(vec.len());
-						vec.into_iter().for_each(|contact| {
+						for contact in vec {
 							map.insert(
-								contact.label,
-								if let Some(id) = contact.location_id
+								contact.1,
+								if let Some(id) = contact.2
 								{
-									Contact::Address {
-										location_id: id,
-										export: contact.export,
+									ContactView::Address {
+										location: PostgresLocation::retrieve_view_by_id(
+											connection,
+											id,
+										).await?,
+										export: contact.0,
 									}
 								}
-								else if let Some(email) = contact.email
+								else if let Some(email) = contact.3
 								{
-									Contact::Email {
+									ContactView::Email {
 										email,
-										export: contact.export,
+										export: contact.0,
 									}
 								}
-								else if let Some(phone) = contact.phone
+								else if let Some(phone) = contact.4
 								{
-									Contact::Phone {
-										export: contact.export,
+									ContactView::Phone {
+										export: contact.0,
 										phone,
 									}
 								}
@@ -214,8 +217,8 @@ impl EmployeeAdapter for PostgresEmployee
 								{
 									unreachable!("There are only three variants of `Contact`")
 								},
-							)
-						});
+							);
+						}
 						map
 					},
 					status: row.get("status"),

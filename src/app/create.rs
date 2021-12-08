@@ -226,14 +226,7 @@ impl Create
 		let person = input::select_one(&person_views, "Which `Person` is this `Employee`?")?;
 
 		let contact_info = input::util::contact::menu::<_, LAdapter>(connection).await?;
-		let employee_status = input::select_one(
-			&[
-				"Employed".into(),
-				"NotEmployed".into(),
-				"Representative".into(),
-			],
-			"What is the status of the employee?",
-		)?;
+		let employee_status = input::text(None, "What is the status of the employee?")?;
 
 		EAdapter::create(
 			connection,

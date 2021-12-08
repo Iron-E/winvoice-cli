@@ -9,7 +9,7 @@ use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 
 use super::{ContactView, OrganizationView, PersonView};
-use crate::{EmployeeStatus, Id};
+use crate::{Id};
 
 /// # Summary
 ///
@@ -52,8 +52,8 @@ pub struct EmployeeView
 	///
 	/// # Remarks
 	///
-	/// Flagging this field as [`NotEmployed`](EmployeeStatus::NOT_EMPLOYED) is a viable alternative to deletion.
-	pub status: EmployeeStatus,
+	/// Setting this field to "Not employed", or "ex-employee" is a viable alternative to deletion.
+	pub status: String,
 
 	/// # Summary
 	///

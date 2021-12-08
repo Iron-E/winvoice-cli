@@ -20,9 +20,7 @@
 
 mod contact;
 mod employee;
-mod employee_status;
 mod expense;
-mod expense_category;
 mod from_str_error;
 mod id;
 mod invoice;
@@ -38,9 +36,7 @@ pub use chrono;
 pub use clinvoice_finance::{Currency, Decimal, Money};
 pub use contact::Contact;
 pub use employee::Employee;
-pub use employee_status::EmployeeStatus;
 pub use expense::Expense;
-pub use expense_category::ExpenseCategory;
 pub use from_str_error::{FromStrError, FromStrResult};
 pub use id::Id;
 pub use invoice::Invoice;

@@ -4,8 +4,6 @@ use clinvoice_finance::Money;
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 
-use crate::ExpenseCategory;
-
 /// # Summary
 ///
 /// A representation of some item or service which a [client](crate::Organization)'s money was
@@ -17,7 +15,7 @@ pub struct Expense
 	/// # Summary
 	///
 	/// What kind of [`Expense`] this is.
-	pub category: ExpenseCategory,
+	pub category: String,
 
 	/// # Summary
 	///

@@ -28,10 +28,7 @@ impl Display for EmployeeView
 mod tests
 {
 	use super::EmployeeView;
-	use crate::{
-		views::{ContactView, LocationView, OrganizationView, PersonView},
-		EmployeeStatus,
-	};
+	use crate::views::{ContactView, LocationView, OrganizationView, PersonView};
 
 	#[test]
 	fn display()
@@ -89,7 +86,7 @@ mod tests
 				id: 0,
 				name: "Testy McTesterson".into(),
 			},
-			status: EmployeeStatus::Representative,
+			status: "Representative".into(),
 			title: "CEO of Tests".into(),
 		};
 

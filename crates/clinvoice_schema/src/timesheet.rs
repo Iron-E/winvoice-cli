@@ -145,7 +145,6 @@ mod tests
 	use clinvoice_finance::Currency;
 
 	use super::{Expense, Money, Timesheet};
-	use crate::ExpenseCategory;
 
 	#[test]
 	fn total()
@@ -164,7 +163,7 @@ mod tests
 		timesheets.push(Timesheet {
 			employee_id: 0,
 			expenses: vec![Expense {
-				category: ExpenseCategory::Item,
+				category: "Item".into(),
 				cost: Money::new(20_00, 2, Currency::USD),
 				description: "Paid for someone else to clean".into(),
 			}],

@@ -249,9 +249,7 @@ mod tests
 	use super::{DateTime, JobView, Local, TimesheetView};
 	use crate::{
 		views::{EmployeeView, LocationView, OrganizationView, PersonView},
-		EmployeeStatus,
 		Expense,
-		ExpenseCategory,
 		Invoice,
 	};
 
@@ -304,7 +302,7 @@ mod tests
 				id: 0,
 				name: "Testy McTesterson".into(),
 			},
-			status: EmployeeStatus::Representative,
+			status: "Representative".into(),
 			title: "CEO of Tests".into(),
 		};
 
@@ -316,7 +314,7 @@ mod tests
 				id: 0,
 				name: "Bob".into(),
 			},
-			status: EmployeeStatus::Employed,
+			status: "Employed".into(),
 			title: "Janitor".into(),
 		};
 
@@ -373,7 +371,7 @@ mod tests
 			TimesheetView {
 				employee: bob,
 				expenses: vec![Expense {
-					category: ExpenseCategory::Service,
+					category: "Service".into(),
 					cost: Money::new(20_00, 2, Currency::USD),
 					description: "Paid for someone else to clean".into(),
 				}],

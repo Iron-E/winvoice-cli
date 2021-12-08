@@ -17,13 +17,12 @@ mod tests
 	use clinvoice_finance::{Currency, Money};
 
 	use super::Expense;
-	use crate::ExpenseCategory;
 
 	#[test]
 	fn display()
 	{
 		let expense = Expense {
-			category: ExpenseCategory::Food,
+			category: "Food".into(),
 			cost: Money::new(20_00, 2, Currency::USD),
 			description: "Take-out for 2".into(),
 		};

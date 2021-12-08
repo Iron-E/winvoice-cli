@@ -74,7 +74,6 @@ mod tests
 	use super::{DateTime, JobView, Local};
 	use crate::{
 		views::{ContactView, EmployeeView, LocationView, OrganizationView, PersonView},
-		EmployeeStatus,
 		Invoice,
 	};
 
@@ -104,7 +103,7 @@ mod tests
 				id: 0,
 				name: "Testy McTesterson".into(),
 			},
-			status: EmployeeStatus::Representative,
+			status: "Representative".into(),
 			title: "CEO of Tests".into(),
 		};
 

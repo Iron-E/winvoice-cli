@@ -34,7 +34,7 @@ impl From<&View> for Employee
 			id: view.id,
 			organization_id: view.organization.id,
 			person_id: view.person.id,
-			status: view.status,
+			status: view.status.clone(),
 			title: view.title.clone(),
 		}
 	}

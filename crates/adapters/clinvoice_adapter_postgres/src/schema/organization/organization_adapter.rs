@@ -56,7 +56,8 @@ impl OrganizationAdapter for PostgresOrganization
 				Ok(OrganizationView {
 					id: row.get("id"),
 					name: row.get("name"),
-					location: PostgresLocation::retrieve_view_by_id(connection, row.get("location_id")).await?,
+					location: PostgresLocation::retrieve_view_by_id(connection, row.get("location_id"))
+						.await?,
 				})
 			})
 			.try_collect()

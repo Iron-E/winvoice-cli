@@ -7,6 +7,7 @@ use clinvoice_schema::{
 	Contact,
 	Employee,
 	EmployeeStatus,
+	Id,
 	Organization,
 	Person,
 };
@@ -45,41 +46,59 @@ impl EmployeeAdapter for PostgresEmployee
 		const INSERT_VALUES_APPROX_LEN: u8 = 39;
 		let mut contact_info_values =
 			String::with_capacity((INSERT_VALUES_APPROX_LEN as usize) * contact_info.len());
-		contact_info.iter().for_each(|(label, contact)| {
-			// FIXME: labels with apostrophe (e.g. "Tony's House" will break this
-			write!(contact_info_values, "({}, '{}', ", row.id, label).unwrap();
-			match contact
-			{
-				Contact::Address {
-					location_id,
-					export,
-				} => write!(
-					contact_info_values,
-					"{}, {}, NULL, NULL",
-					export, location_id
-				),
-				Contact::Email { email, export } =>
-				{
-					write!(contact_info_values, "{}, NULL, '{}', NULL", export, email)
-				},
-				Contact::Phone { phone, export } =>
-				{
-					write!(contact_info_values, "{}, NULL, NULL, '{}'", export, phone)
-				},
-			}
-			.unwrap();
-			write!(contact_info_values, "),").unwrap();
+
+		(0..contact_info.len()).map(|i| i * 6).for_each(|i| {
+			write!(
+				contact_info_values,
+				"(${}, ${}, ${}, ${}, ${}, ${}),",
+				i + 1,
+				i + 2,
+				i + 3,
+				i + 4,
+				i + 5,
+				i + 6,
+			)
+			.unwrap()
 		});
 		contact_info_values.pop(); // get rid of the trailing `,` since SQL can't handle that :/
 
-		sqlx::query(&format!(
-			"INSERT INTO contact_information
-				(employee_id, label, export, address_id, email, phone)
-			VALUES {};",
-			contact_info_values,
-		))
-		.execute(&mut transaction)
-		.await?;
+		contact_info
+			.iter()
+			.fold(
+				sqlx::query(&format!(
+					"INSERT INTO contact_information
+					(employee_id, label, export, address_id, email, phone)
+				VALUES {};",
+					contact_info_values,
+				)),
+				|mut query, (label, contact)| {
+					query = query.bind(row.id).bind(label);
+
+					match contact
+					{
+						Contact::Address {
+							location_id,
+							export,
+						} => query
+							.bind(export)
+							.bind(location_id)
+							.bind(None::<String>)
+							.bind(None::<String>),
+						Contact::Email { email, export } => query
+							.bind(export)
+							.bind(None::<Id>)
+							.bind(email)
+							.bind(None::<String>),
+						Contact::Phone { phone, export } => query
+							.bind(export)
+							.bind(None::<Id>)
+							.bind(None::<String>)
+							.bind(phone),
+					}
+				},
+			)
+			.execute(&mut transaction)
+			.await?;
 
 		transaction.commit().await?;
 

@@ -11,7 +11,6 @@ use clinvoice_schema::{
 	chrono::{Datelike, Local, TimeZone, Timelike},
 	Currency,
 	Decimal,
-	EmployeeStatus,
 	Money,
 };
 use futures::{
@@ -229,9 +228,9 @@ impl Create
 		let contact_info = input::util::contact::menu::<_, LAdapter>(connection).await?;
 		let employee_status = input::select_one(
 			&[
-				EmployeeStatus::Employed,
-				EmployeeStatus::NotEmployed,
-				EmployeeStatus::Representative,
+				"Employed".into(),
+				"NotEmployed".into(),
+				"Representative".into(),
 			],
 			"What is the status of the employee?",
 		)?;

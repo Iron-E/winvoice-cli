@@ -4,7 +4,7 @@ use std::collections::HashSet;
 
 use clinvoice_adapter::schema::{EmployeeAdapter, LocationAdapter, OrganizationAdapter};
 use clinvoice_adapter_bincode::schema::{BincodeEmployee, BincodeLocation, BincodeOrganization};
-use clinvoice_schema::{views::OrganizationView, Contact, EmployeeStatus, Id, Location, Person};
+use clinvoice_schema::{views::OrganizationView, Contact, Id, Location, Person};
 #[tokio::test(flavor = "multi_thread", worker_threads = 10)]
 async fn into_view()
 {
@@ -137,7 +137,7 @@ async fn to_vec_employee()
 			id:   Id::new_v4(),
 			name: "Testy Mćtesterson".into(),
 		},
-		EmployeeStatus::Representative,
+		"Representative".into(),
 		"CEO of Tests".into(),
 		&store,
 	)
@@ -156,7 +156,7 @@ async fn to_vec_employee()
 			id:   Id::new_v4(),
 			name: "Mr. Flu".into(),
 		},
-		EmployeeStatus::Employed,
+		"Employed".into(),
 		"Janitor".into(),
 		&store,
 	)

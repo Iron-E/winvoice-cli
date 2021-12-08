@@ -13,7 +13,6 @@ use clinvoice_schema::{
 	views::{EmployeeView, OrganizationView, PersonView},
 	Contact,
 	Employee,
-	EmployeeStatus,
 	Id,
 	Organization,
 	Person,
@@ -32,7 +31,7 @@ impl EmployeeAdapter for PostgresEmployee
 		contact_info: HashMap<String, Contact>,
 		organization: &Organization,
 		person: &Person,
-		status: EmployeeStatus,
+		status: String,
 		title: String,
 	) -> Result<Employee>
 	{
@@ -219,7 +218,7 @@ impl EmployeeAdapter for PostgresEmployee
 						});
 						map
 					},
-					status: row.get("status").parse(),
+					status: row.get("status"),
 					title: row.get("title"),
 				})
 			})
@@ -234,7 +233,7 @@ mod tests
 	use std::collections::HashMap;
 
 	use clinvoice_adapter::schema::{LocationAdapter, OrganizationAdapter, PersonAdapter};
-	use clinvoice_schema::{Contact, EmployeeStatus};
+	use clinvoice_schema::Contact;
 
 	use super::{EmployeeAdapter, PostgresEmployee};
 	use crate::schema::{util, PostgresLocation, PostgresOrganization, PostgresPerson};
@@ -277,7 +276,7 @@ mod tests
 			contact_info,
 			&organization,
 			&person,
-			EmployeeStatus::Employed,
+			"Employed".into(),
 			"Janitor".into(),
 		)
 		.await
@@ -326,7 +325,7 @@ mod tests
 		assert_eq!(organization.id, row.organization_id);
 		assert_eq!(employee.person_id, row.person_id);
 		assert_eq!(person.id, row.person_id);
-		assert_eq!(employee.status, row.status.parse().unwrap());
+		assert_eq!(employee.status, row.status);
 		assert_eq!(employee.title, row.title);
 	}
 

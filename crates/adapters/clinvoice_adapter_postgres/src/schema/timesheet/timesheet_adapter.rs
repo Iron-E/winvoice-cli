@@ -66,7 +66,7 @@ mod tests
 		OrganizationAdapter,
 		PersonAdapter,
 	};
-	use clinvoice_schema::{chrono::Utc, Contact, Currency, EmployeeStatus, Expense, Money};
+	use clinvoice_schema::{chrono::Utc, Contact, Currency, Expense, Money};
 
 	use super::{PostgresTimesheet, TimesheetAdapter};
 	use crate::schema::{
@@ -126,7 +126,7 @@ mod tests
 			contact_info,
 			&organization,
 			&person,
-			EmployeeStatus::Employed,
+			"Employed".into(),
 			"Janitor".into(),
 		)
 		.await

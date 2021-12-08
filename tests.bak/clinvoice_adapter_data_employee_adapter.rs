@@ -15,7 +15,6 @@ use clinvoice_adapter_bincode::schema::{
 use clinvoice_schema::{
 	views::{ContactView, EmployeeView, LocationView, OrganizationView, PersonView},
 	Contact,
-	EmployeeStatus,
 	Id,
 	Location,
 	Organization,
@@ -49,7 +48,7 @@ async fn into_view()
 		.collect(),
 		big_old_test.clone(),
 		testy.clone(),
-		EmployeeStatus::Employed,
+		"Employed".into(),
 		"CEO of Tests".into(),
 		&store,
 	)
@@ -122,7 +121,7 @@ async fn to_organization()
 			id:   Id::new_v4(),
 			name: "Testy Mćtesterson".into(),
 		},
-		EmployeeStatus::Employed,
+		"Employed".into(),
 		"CEO of Tests".into(),
 		&store,
 	)
@@ -156,7 +155,7 @@ async fn to_person()
 			name: "DoGood Inc".into(),
 		},
 		testy.clone(),
-		EmployeeStatus::NotEmployed,
+		"NotEmployed".into(),
 		"CEO of Tests".into(),
 		&store,
 	)

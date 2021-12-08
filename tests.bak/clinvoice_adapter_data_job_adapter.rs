@@ -30,7 +30,6 @@ use clinvoice_schema::{
 		TimesheetView,
 	},
 	Contact,
-	EmployeeStatus,
 	Id,
 	Location,
 };
@@ -74,7 +73,7 @@ async fn into_view()
 		contact_info.clone(),
 		big_test.clone(),
 		testy.clone(),
-		EmployeeStatus::Employed,
+		"Employed".into(),
 		"CEO of Tests".into(),
 		&store,
 	)

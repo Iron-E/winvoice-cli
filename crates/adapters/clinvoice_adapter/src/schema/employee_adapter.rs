@@ -5,7 +5,6 @@ use clinvoice_schema::{
 	views::EmployeeView,
 	Contact,
 	Employee,
-	EmployeeStatus,
 	Organization,
 	Person,
 };
@@ -35,7 +34,7 @@ pub trait EmployeeAdapter:
 		contact_info: HashMap<String, Contact>,
 		organization: &Organization,
 		person: &Person,
-		status: EmployeeStatus,
+		status: String,
 		title: String,
 	) -> Result<<Self as Deletable>::Entity>;
 

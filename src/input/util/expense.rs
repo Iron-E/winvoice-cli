@@ -1,4 +1,4 @@
-use clinvoice_schema::{Currency, Expense, ExpenseCategory, Money};
+use clinvoice_schema::{Currency, Expense, Money};
 
 use super::menu::{ADD, ALL_ACTIONS, CONTINUE, DELETE, EDIT};
 use crate::input;
@@ -12,19 +12,7 @@ use crate::input;
 /// Will error whenever [`input::select_one`] or [`input::text`] does.
 fn add_menu(expenses: &mut Vec<Expense>, default_currency: Currency) -> input::Result<()>
 {
-	const ALL_EXPENSE_CATEGORIES: [ExpenseCategory; 6] = [
-		ExpenseCategory::Food,
-		ExpenseCategory::Item,
-		ExpenseCategory::Other,
-		ExpenseCategory::Service,
-		ExpenseCategory::Software,
-		ExpenseCategory::Travel,
-	];
-
-	let category = input::select_one(
-		&ALL_EXPENSE_CATEGORIES,
-		"Select which type of `Expense` to add",
-	)?;
+	let category = input::text(None, "What type of `Expense` is this?")?;
 	let cost = input::edit(
 		&Money::new(20_00, 2, default_currency),
 		format!("What is the cost of the {}?", category),

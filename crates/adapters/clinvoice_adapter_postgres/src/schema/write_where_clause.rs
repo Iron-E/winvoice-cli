@@ -209,6 +209,7 @@ impl WriteWhereClause<&Match<'_, i64>> for Schema
 
 impl WriteWhereClause<&MatchStr<Cow<'_, str>>> for Schema
 {
+	/// FIXME: `MatchStr::EqualTo("Foo's Place")` would break this, because of the apostraphe.
 	fn write_where_clause(
 		context: WriteContext,
 		alias: &str,

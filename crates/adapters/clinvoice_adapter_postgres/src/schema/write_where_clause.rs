@@ -11,14 +11,17 @@ use clinvoice_match::{
 	MatchOrganization,
 	MatchOuterLocation,
 	MatchPerson,
-	MatchStr,
+	MatchStr, MatchEmployee,
 };
+use clinvoice_schema::EmployeeStatus;
 
 use super::PostgresSchema as Schema;
 
 const COLUMN_ID: &str = "id";
 const COLUMN_NAME: &str = "name";
 const COLUMN_OUTER_ID: &str = "outer_id";
+const COLUMN_STATUS: &str = "status";
+const COLUMN_TITLE: &str = "title";
 
 /// # Summary
 ///
@@ -163,6 +166,56 @@ impl WriteWhereClause<&Match<'_, i64>> for Schema
 		context: WriteContext,
 		alias: &str,
 		match_condition: &Match<'_, i64>,
+		query: &mut String,
+	) -> WriteContext
+	{
+		match match_condition
+		{
+			Match::AllGreaterThan(id) | Match::GreaterThan(id) =>
+			{
+				write_comparison(query, context, alias, ">", id)
+			},
+			Match::AllLessThan(id) | Match::LessThan(id) =>
+			{
+				write_comparison(query, context, alias, "<", id)
+			},
+			Match::AllInRange(low, high) | Match::InRange(low, high) =>
+			{
+				write_comparison(query, context, alias, ">=", low);
+				write_comparison(query, WriteContext::AfterWhereCondition, alias, "<", high);
+			},
+			Match::And(match_conditions) => write_boolean_group::<_, _, true>(
+				query,
+				context,
+				alias,
+				&mut match_conditions.iter().filter(|m| *m != &Match::Any),
+			),
+			Match::Any => return context,
+			Match::EqualTo(id) => write_comparison(query, context, alias, "=", id),
+			Match::HasAll(ids) => write_has(query, context, alias, ids, true),
+			Match::HasAny(ids) => write_has(query, context, alias, ids, false),
+			Match::Not(match_condition) => match match_condition.deref()
+			{
+				Match::Any => write_is_null(query, context, alias),
+				m @ _ => write_negated(query, context, alias, m),
+			},
+			Match::Or(match_conditions) => write_boolean_group::<_, _, false>(
+				query,
+				context,
+				alias,
+				&mut match_conditions.iter().filter(|m| *m != &Match::Any),
+			),
+		};
+		WriteContext::AfterWhereCondition
+	}
+}
+
+impl WriteWhereClause<&Match<'_, EmployeeStatus>> for Schema
+{
+	fn write_where_clause(
+		context: WriteContext,
+		alias: &str,
+		match_condition: &Match<'_, EmployeeStatus>,
 		query: &mut String,
 	) -> WriteContext
 	{
@@ -394,6 +447,49 @@ impl WriteWhereClause<&MatchOrganization<'_>> for Schema
 			),
 			&format!("{}.{}", alias, COLUMN_NAME),
 			&match_condition.name,
+			query,
+		)
+	}
+}
+
+impl WriteWhereClause<&MatchEmployee<'_>> for Schema
+{
+	/// # Panics
+	///
+	/// If any the following:
+	///
+	/// * `context` is not `BeforeWhereClause`
+	/// * `alias` is an empty string.
+	///
+	/// # See
+	///
+	/// * [`WriteWhereClause::write_where_clause`]
+	fn write_where_clause(
+		context: WriteContext,
+		alias: &str,
+		match_condition: &MatchEmployee,
+		query: &mut String,
+	) -> WriteContext
+	{
+		Schema::write_where_clause(
+			Schema::write_where_clause(
+				Schema::write_where_clause(
+					Schema::write_where_clause(
+						Schema::write_where_clause(context, "O", &match_condition.organization, query),
+						"P",
+						&match_condition.person,
+						query,
+					),
+					&format!("{}.{}", alias, COLUMN_ID),
+					&match_condition.id,
+					query,
+				),
+				&format!("{}.{}", alias, COLUMN_STATUS),
+				&match_condition.status,
+				query,
+			),
+			&format!("{}.{}", alias, COLUMN_TITLE),
+			&match_condition.title,
 			query,
 		)
 	}

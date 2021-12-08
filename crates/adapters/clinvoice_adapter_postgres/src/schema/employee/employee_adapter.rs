@@ -1,9 +1,16 @@
 use std::{collections::HashMap, fmt::Write};
 
-use clinvoice_adapter::schema::EmployeeAdapter;
+use clinvoice_adapter::{
+	schema::EmployeeAdapter,
+	WriteContext,
+	WriteFromClause,
+	WriteJoinClause,
+	WriteSelectClause,
+	WriteWhereClause,
+};
 use clinvoice_match::MatchEmployee;
 use clinvoice_schema::{
-	views::EmployeeView,
+	views::{EmployeeView, OrganizationView, PersonView},
 	Contact,
 	Employee,
 	EmployeeStatus,
@@ -11,9 +18,11 @@ use clinvoice_schema::{
 	Organization,
 	Person,
 };
-use sqlx::{PgPool, Result};
+use futures::TryStreamExt;
+use sqlx::{PgPool, Result, Row};
 
 use super::PostgresEmployee;
+use crate::{schema::PostgresLocation, PostgresSchema as Schema};
 
 #[async_trait::async_trait]
 impl EmployeeAdapter for PostgresEmployee
@@ -117,7 +126,105 @@ impl EmployeeAdapter for PostgresEmployee
 		match_condition: &MatchEmployee,
 	) -> Result<Vec<EmployeeView>>
 	{
-		todo!()
+		let mut query = Schema::write_select_clause([
+			"array_agg((C.employee_id, C.export, C.label, C.address_id, C.email, C.phone)) AS \
+			 contacts",
+			"E.id",
+			"E.organization_id",
+			"E.person_id",
+			"E.status",
+			"E.title",
+			"O.name AS organization_name",
+			"O.location_id",
+			"P.name",
+		]);
+		Schema::write_from_clause(&mut query, "employees", "E");
+		Schema::write_join_clause(
+			&mut query,
+			"",
+			"contact_information",
+			"C",
+			"employee_id",
+			"E.id",
+		)
+		.unwrap();
+		Schema::write_join_clause(
+			&mut query,
+			"",
+			"organizations",
+			"O",
+			"id",
+			"E.organization_id",
+		)
+		.unwrap();
+		Schema::write_join_clause(&mut query, "", "people", "P", "id", "E.person_id").unwrap();
+		Schema::write_where_clause(
+			WriteContext::BeforeWhereClause,
+			"E",
+			match_condition,
+			&mut query,
+		);
+		query.push(';');
+
+		sqlx::query(&query)
+			.fetch(connection)
+			.and_then(|row| async move {
+				Ok(EmployeeView {
+					id: row.get("id"),
+					organization: OrganizationView {
+						id: row.get("organization_id"),
+						name: row.get("organization_name"),
+						location: PostgresLocation::retrieve_view_by_id(
+							connection,
+							row.get("location_id"),
+						)
+						.await?,
+					},
+					person: PersonView {
+						id: row.get("person_id"),
+						name: row.get("name"),
+					},
+					contact_info: {
+						let vec = row.get("contact_info");
+						let mut map = HashMap::with_capacity(vec.len());
+						vec.into_iter().for_each(|contact| {
+							map.insert(
+								contact.label,
+								if let Some(id) = contact.location_id
+								{
+									Contact::Address {
+										location_id: id,
+										export: contact.export,
+									}
+								}
+								else if let Some(email) = contact.email
+								{
+									Contact::Email {
+										email,
+										export: contact.export,
+									}
+								}
+								else if let Some(phone) = contact.phone
+								{
+									Contact::Phone {
+										export: contact.export,
+										phone,
+									}
+								}
+								else
+								{
+									unreachable!("There are only three variants of `Contact`")
+								},
+							)
+						});
+						map
+					},
+					status: row.get("status").parse(),
+					title: row.get("title"),
+				})
+			})
+			.try_collect()
+			.await
 	}
 }
 

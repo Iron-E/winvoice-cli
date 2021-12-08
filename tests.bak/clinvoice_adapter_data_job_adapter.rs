@@ -34,7 +34,7 @@ use clinvoice_schema::{
 	Location,
 };
 
-#[tokio::test(flavor = "multi_thread", worker_threads = 10)]
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn into_view()
 {
 	let store = util::temp_store();
@@ -149,7 +149,7 @@ async fn into_view()
 	assert_eq!(create_job_view, create_job_view_result.unwrap());
 }
 
-#[tokio::test(flavor = "multi_thread", worker_threads = 10)]
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn to_organization()
 {
 	let store = util::temp_store();

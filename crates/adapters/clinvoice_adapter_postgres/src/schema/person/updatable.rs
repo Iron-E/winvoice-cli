@@ -22,7 +22,7 @@ impl Updatable for PostgresPerson
 #[cfg(test)]
 mod tests
 {
-	#[tokio::test(flavor = "multi_thread", worker_threads = 10)]
+	#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 	async fn update()
 	{
 		// TODO: write test

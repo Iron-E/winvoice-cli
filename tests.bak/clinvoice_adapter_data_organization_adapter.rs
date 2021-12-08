@@ -5,7 +5,7 @@ use std::collections::HashSet;
 use clinvoice_adapter::schema::{EmployeeAdapter, LocationAdapter, OrganizationAdapter};
 use clinvoice_adapter_bincode::schema::{BincodeEmployee, BincodeLocation, BincodeOrganization};
 use clinvoice_schema::{views::OrganizationView, Contact, Id, Location, Person};
-#[tokio::test(flavor = "multi_thread", worker_threads = 10)]
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn into_view()
 {
 	let store = util::temp_store();
@@ -89,7 +89,7 @@ async fn into_view()
 	});
 }
 
-#[tokio::test(flavor = "multi_thread", worker_threads = 10)]
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn to_location()
 {
 	let store = util::temp_store();
@@ -108,7 +108,7 @@ async fn to_location()
 	assert_eq!(arizona, dogood_location.unwrap());
 }
 
-#[tokio::test(flavor = "multi_thread", worker_threads = 10)]
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn to_vec_employee()
 {
 	let store = util::temp_store();

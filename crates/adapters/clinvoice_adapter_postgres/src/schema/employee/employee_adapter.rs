@@ -241,7 +241,7 @@ mod tests
 	use crate::schema::{util, PostgresLocation, PostgresOrganization, PostgresPerson};
 
 	/// TODO: use fuzzing
-	#[tokio::test(flavor = "multi_thread", worker_threads = 10)]
+	#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 	async fn create()
 	{
 		let connection = util::connect().await;
@@ -331,7 +331,7 @@ mod tests
 		assert_eq!(employee.title, row.title);
 	}
 
-	#[tokio::test(flavor = "multi_thread", worker_threads = 10)]
+	#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 	async fn retrieve_view()
 	{
 		// TODO: write test

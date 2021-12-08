@@ -4,7 +4,7 @@ use clinvoice_adapter::schema::LocationAdapter;
 use clinvoice_adapter_bincode::schema::BincodeLocation;
 use clinvoice_schema::views::LocationView;
 
-#[tokio::test(flavor = "multi_thread", worker_threads = 10)]
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn into_view()
 {
 	let store = util::temp_store();

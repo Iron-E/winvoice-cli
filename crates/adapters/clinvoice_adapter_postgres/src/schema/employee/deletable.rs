@@ -23,7 +23,7 @@ impl Deletable for PostgresEmployee
 #[cfg(test)]
 mod tests
 {
-	#[tokio::test(flavor = "multi_thread", worker_threads = 10)]
+	#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 	async fn delete()
 	{
 		// TODO: write test

@@ -55,7 +55,7 @@ impl LocationAdapter for PostgresLocation
 		match_condition: &MatchLocation,
 	) -> Result<Vec<LocationView>>
 	{
-		let mut query = Schema::write_select_clause([]);
+		let mut query = Schema::write_select_clause(["L.name", "L.outer_id", "L.id"]);
 		Schema::write_from_clause(&mut query, "locations", "L");
 		Schema::write_where_clause(
 			WriteContext::BeforeWhereClause,

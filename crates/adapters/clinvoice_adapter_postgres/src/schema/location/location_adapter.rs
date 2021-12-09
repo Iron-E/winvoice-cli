@@ -76,9 +76,9 @@ impl LocationAdapter for PostgresLocation
 #[cfg(test)]
 mod tests
 {
-	use std::borrow::Cow::Owned;
+	use std::{borrow::Cow::Owned, collections::HashSet};
 
-	use clinvoice_match::{Match, MatchLocation};
+	use clinvoice_match::{Match, MatchLocation, MatchStr, MatchOuterLocation};
 	use clinvoice_schema::views::LocationView;
 
 	use super::{LocationAdapter, PostgresLocation};
@@ -201,36 +201,18 @@ mod tests
 		);
 
 		assert_eq!(
-			&[usa_view],
+			[utah_view, arizona_view].into_iter().collect::<HashSet<_>>(),
 			PostgresLocation::retrieve_view(&connection, &MatchLocation {
-				id: Match::EqualTo(Owned(usa.id)),
+				outer: MatchOuterLocation::Some(Box::new(MatchLocation {
+					id: usa_view.id.into(),
+					..Default::default()
+				})),
 				..Default::default()
 			})
 			.await
 			.unwrap()
-			.as_slice()
-		);
-
-		assert_eq!(
-			&[arizona_view],
-			PostgresLocation::retrieve_view(&connection, &MatchLocation {
-				id: Match::EqualTo(Owned(arizona.id)),
-				..Default::default()
-			})
-			.await
-			.unwrap()
-			.as_slice()
-		);
-
-		assert_eq!(
-			&[utah_view],
-			PostgresLocation::retrieve_view(&connection, &MatchLocation {
-				id: Match::EqualTo(Owned(utah.id)),
-				..Default::default()
-			})
-			.await
-			.unwrap()
-			.as_slice()
+			.into_iter()
+			.collect::<HashSet<_>>()
 		);
 	}
 }

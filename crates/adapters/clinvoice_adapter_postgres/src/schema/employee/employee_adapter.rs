@@ -18,7 +18,7 @@ use clinvoice_schema::{
 	Person,
 };
 use futures::TryStreamExt;
-use sqlx::{PgPool, Result, Row};
+use sqlx::{PgPool, Result, Row, Error};
 
 use super::PostgresEmployee;
 use crate::{schema::PostgresLocation, PostgresSchema as Schema};
@@ -214,7 +214,7 @@ impl EmployeeAdapter for PostgresEmployee
 								}
 								else
 								{
-									unreachable!("There are only three variants of `Contact`")
+									return Err(Error::Decode("Row of `contact_info` did not match any `Contact` equivalent".into()));
 								},
 							);
 						}

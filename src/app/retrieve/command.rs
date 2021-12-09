@@ -289,7 +289,7 @@ impl Command
 						.try_for_each_concurrent(None, |job| async move {
 							let timesheets = TAdapter::retrieve_view(conn_borrow, &MatchTimesheet {
 								job: MatchJob {
-									id: Match::EqualTo(Owned(job.id)),
+									id: job.id.into(),
 									..Default::default()
 								},
 								..Default::default()

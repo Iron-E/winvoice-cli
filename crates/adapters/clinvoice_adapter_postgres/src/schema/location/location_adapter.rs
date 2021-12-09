@@ -192,7 +192,7 @@ mod tests
 		assert_eq!(
 			&[earth_view],
 			PostgresLocation::retrieve_view(&connection, &MatchLocation {
-				id: Match::EqualTo(Owned(earth.id)),
+				id: earth.id.into(),
 				..Default::default()
 			})
 			.await

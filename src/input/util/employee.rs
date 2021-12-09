@@ -38,7 +38,7 @@ where
 		let query = match default_id
 		{
 			Some(id) => MatchEmployee {
-				id: Match::EqualTo(Owned(id)),
+				id: id.into(),
 				..Default::default()
 			},
 			_ => input::edit_default(format!("{}\n{}employees", prompt, MATCH_PROMPT))?,

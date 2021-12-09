@@ -61,7 +61,7 @@ impl Command
 				employee: MatchEmployee {
 					id: if let Some(default) = default_employee_id
 					{
-						Match::EqualTo(Owned(default))
+						default.into()
 					}
 					else
 					{
@@ -69,7 +69,7 @@ impl Command
 					},
 					..Default::default()
 				},
-				time_end: Match::EqualTo(Owned(None)),
+				time_end: None.into(),
 				..Default::default()
 			})
 			.await?;

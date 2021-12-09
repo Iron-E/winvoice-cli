@@ -1,4 +1,5 @@
 mod default;
+mod from;
 
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
@@ -9,8 +10,6 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 pub enum MatchStr<S>
-where
-	S: AsRef<str>,
 {
 	/// # Summary
 	///

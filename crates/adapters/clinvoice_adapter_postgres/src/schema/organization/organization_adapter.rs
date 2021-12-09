@@ -166,7 +166,7 @@ mod tests
 		assert_eq!(
 			&[some_organization_view],
 			PostgresOrganization::retrieve_view(&connection, &MatchOrganization {
-				id: Match::EqualTo(Owned(some_organization.id)),
+				id: some_organization.id.into(),
 				..Default::default()
 			})
 			.await

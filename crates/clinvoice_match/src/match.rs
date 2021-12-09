@@ -1,4 +1,5 @@
 mod default;
+mod from;
 
 use core::{
 	cmp::{Eq, Ord},

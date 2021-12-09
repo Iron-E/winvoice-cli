@@ -471,7 +471,7 @@ mod tests
 			Schema::write_where_clause(
 				BeforeWhereClause,
 				"foo",
-				&Match::EqualTo(Owned(18)),
+				&Match::from(18),
 				&mut query
 			),
 			AfterWhereCondition,
@@ -607,7 +607,7 @@ mod tests
 				"some_row",
 				&MatchStr::Or(vec![
 					MatchStr::Regex(Borrowed(r#"^f.rk.*\bit\b.*over$"#)),
-					MatchStr::Not(Box::new(MatchStr::EqualTo(Borrowed("not equal")))),
+					MatchStr::Not(Box::new("not equal".into())),
 				]),
 				&mut query,
 			),
@@ -637,7 +637,7 @@ mod tests
 				BeforeWhereClause,
 				"",
 				&MatchPerson {
-					id: Match::EqualTo(Owned(7)),
+					id: 7.into(),
 					..Default::default()
 				},
 				&mut query,
@@ -652,8 +652,8 @@ mod tests
 				AfterWhereCondition,
 				"",
 				&MatchPerson {
-					id: Match::EqualTo(Owned(7)),
-					name: MatchStr::EqualTo(Borrowed("stuff")),
+					id: 7.into(),
+					name: "stuff".into(),
 				},
 				&mut query,
 			),
@@ -683,7 +683,7 @@ mod tests
 				BeforeWhereClause,
 				"L",
 				&MatchLocation {
-					id: Match::EqualTo(Owned(7)),
+					id: 7.into(),
 					..Default::default()
 				},
 				&mut query,
@@ -698,11 +698,11 @@ mod tests
 				BeforeWhereClause,
 				"L",
 				&MatchLocation {
-					id: Match::EqualTo(Owned(7)),
+					id: 7.into(),
 					outer: MatchOuterLocation::Some(Box::new(MatchLocation {
-						id: Match::EqualTo(Owned(8)),
+						id: 8.into(),
 						outer: MatchOuterLocation::Some(Box::new(MatchLocation {
-							id: Match::EqualTo(Owned(9)),
+							id: 9.into(),
 							outer: MatchOuterLocation::None,
 							..Default::default()
 						})),
@@ -744,14 +744,14 @@ mod tests
 				BeforeWhereClause,
 				"O",
 				&MatchOrganization {
-					id: Match::EqualTo(Owned(7)),
+					id: 7.into(),
 					name: MatchStr::Contains(Borrowed("Gögle")),
 					location: MatchLocation {
-						id: Match::EqualTo(Owned(11)),
+						id: 11.into(),
 						outer: MatchOuterLocation::Some(Box::new(MatchLocation {
-							id: Match::EqualTo(Owned(14)),
+							id: 14.into(),
 							outer: MatchOuterLocation::Some(Box::new(MatchLocation {
-								name: MatchStr::EqualTo(Borrowed("Japan")),
+								name: "Japan".into(),
 								..Default::default()
 							})),
 							..Default::default()

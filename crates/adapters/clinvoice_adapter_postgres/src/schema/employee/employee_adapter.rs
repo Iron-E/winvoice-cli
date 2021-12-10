@@ -1,6 +1,6 @@
 use std::{collections::HashMap, fmt::Write};
 
-use clinvoice_adapter::{schema::EmployeeAdapter, WriteContext, WriteWhereClause};
+use clinvoice_adapter::{schema::EmployeeAdapter, WriteWhereClause};
 use clinvoice_match::MatchEmployee;
 use clinvoice_schema::{
 	views::{ContactView, EmployeeView, OrganizationView, PersonView},
@@ -130,7 +130,7 @@ impl EmployeeAdapter for PostgresEmployee
 			JOIN people P ON (P.id = E.person_id)",
 		);
 		Schema::write_where_clause(
-			WriteContext::BeforeWhereClause,
+			Default::default(),
 			"E",
 			match_condition,
 			&mut query,

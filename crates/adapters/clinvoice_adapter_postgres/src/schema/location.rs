@@ -1,6 +1,6 @@
 use std::{borrow::Cow::Owned, fmt::Write};
 
-use clinvoice_adapter::{WriteContext::BeforeWhereClause, WriteWhereClause};
+use clinvoice_adapter::WriteWhereClause;
 use clinvoice_match::{Match, MatchLocation, MatchOuterLocation};
 use clinvoice_schema::{views::LocationView, Id};
 use futures::{future, TryFutureExt, TryStreamExt};
@@ -46,7 +46,7 @@ impl PostgresLocation
 					if match_condition.outer == MatchOuterLocation::None
 					{
 						Schema::write_where_clause(
-							BeforeWhereClause,
+							Default::default(),
 							"LO.outer_id",
 							&Match::Not(Match::Any.into()),
 							query,
@@ -54,7 +54,7 @@ impl PostgresLocation
 					}
 					else
 					{
-						BeforeWhereClause
+						Default::default()
 					},
 					"LO.id",
 					&match_condition.id,

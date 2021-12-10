@@ -1,6 +1,5 @@
 use clinvoice_adapter::{
 	schema::LocationAdapter,
-	WriteContext::BeforeWhereClause,
 	WriteWhereClause,
 };
 use clinvoice_match::MatchLocation;
@@ -55,7 +54,7 @@ impl LocationAdapter for PostgresLocation
 	{
 		let id_match = Self::retrieve_matching_ids(connection, match_condition);
 		let mut query = String::from("SELECT name, outer_id, id FROM locations");
-		Schema::write_where_clause(BeforeWhereClause, "id", &id_match.await?, &mut query);
+		Schema::write_where_clause(Default::default(), "id", &id_match.await?, &mut query);
 		query.push(';');
 
 		sqlx::query(&query)

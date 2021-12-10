@@ -1,6 +1,5 @@
 use clinvoice_adapter::{
 	schema::OrganizationAdapter,
-	WriteContext::BeforeWhereClause,
 	WriteWhereClause,
 };
 use clinvoice_match::MatchOrganization;
@@ -43,9 +42,9 @@ impl OrganizationAdapter for PostgresOrganization
 			JOIN locations L ON (L.id = O.location_id)",
 		);
 		Schema::write_where_clause(
-			Schema::write_where_clause(BeforeWhereClause, "L.id", &id_match.await?, &mut query),
-			"O",
-			match_condition,
+			Schema::write_where_clause(Default::default(), "O", match_condition, &mut query),
+			"L.id",
+			&id_match.await?,
 			&mut query,
 		);
 		query.push(';');

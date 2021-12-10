@@ -1,10 +1,7 @@
 mod default;
 mod from;
 
-use core::{
-	cmp::Eq,
-	fmt::Debug,
-};
+use core::{cmp::Eq, fmt::Debug};
 use std::borrow::Cow;
 
 #[cfg(feature = "serde_support")]

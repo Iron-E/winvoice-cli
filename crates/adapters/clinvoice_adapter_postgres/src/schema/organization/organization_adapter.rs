@@ -1,7 +1,4 @@
-use clinvoice_adapter::{
-	schema::OrganizationAdapter,
-	WriteWhereClause,
-};
+use clinvoice_adapter::{schema::OrganizationAdapter, WriteWhereClause};
 use clinvoice_match::MatchOrganization;
 use clinvoice_schema::{views::OrganizationView, Location, Organization};
 use futures::TryStreamExt;

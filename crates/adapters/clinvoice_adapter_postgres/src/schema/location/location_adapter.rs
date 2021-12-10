@@ -1,7 +1,4 @@
-use clinvoice_adapter::{
-	schema::LocationAdapter,
-	WriteWhereClause,
-};
+use clinvoice_adapter::{schema::LocationAdapter, WriteWhereClause};
 use clinvoice_match::MatchLocation;
 use clinvoice_schema::{views::LocationView, Location};
 use futures::TryStreamExt;

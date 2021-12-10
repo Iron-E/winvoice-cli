@@ -25,12 +25,7 @@ impl PersonAdapter for PostgresPerson
 	) -> Result<Vec<PersonView>>
 	{
 		let mut query = String::from("SELECT * FROM people");
-		Schema::write_where_clause(
-			Default::default(),
-			"",
-			match_condition,
-			&mut query,
-		);
+		Schema::write_where_clause(Default::default(), "", match_condition, &mut query);
 		query.push(';');
 
 		sqlx::query(&query)

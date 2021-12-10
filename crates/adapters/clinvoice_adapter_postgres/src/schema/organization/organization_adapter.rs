@@ -64,8 +64,9 @@ impl OrganizationAdapter for PostgresOrganization
 #[cfg(test)]
 mod tests
 {
+	use std::borrow::Cow::Owned;
 	use clinvoice_adapter::schema::LocationAdapter;
-	use clinvoice_match::MatchOrganization;
+	use clinvoice_match::{MatchLocation, MatchOrganization, MatchOuterLocation, Match};
 	use clinvoice_schema::views::{LocationView, OrganizationView};
 
 	use super::{OrganizationAdapter, PostgresOrganization};
@@ -150,24 +151,53 @@ mod tests
 			PostgresOrganization::create(&connection, &arizona.into(), "Some Organization".into())
 				.await
 				.unwrap();
+		let some_other_organization =
+			PostgresOrganization::create(&connection, &utah.into(), "Some Other Organizatión".into())
+				.await
+				.unwrap();
+
 		let some_organization_view = OrganizationView {
 			id: some_organization.id,
 			name: some_organization.name.clone(),
 			location: arizona_view,
 		};
+		let some_other_organization_view = OrganizationView {
+			id: some_other_organization.id,
+			name: some_other_organization.name.clone(),
+			location: utah_view,
+		};
 
 		// Assert ::retrieve_view gets the right data from the DB
 		assert_eq!(
-			&[some_organization_view],
 			PostgresOrganization::retrieve_view(&connection, &MatchOrganization {
-				id: some_organization.id.into(),
+				id: some_organization_view.id.into(),
 				..Default::default()
 			})
 			.await
 			.unwrap()
-			.as_slice()
+			.as_slice(),
+			&[some_organization_view.clone()],
 		);
 
-		// TODO: make more organizations
+		assert_eq!(
+			PostgresOrganization::retrieve_view(&connection, &MatchOrganization {
+				location: MatchLocation {
+					outer: MatchOuterLocation::Some(
+						MatchLocation {
+							id: Match::InRange(Owned(usa.id - 1), Owned(usa.id + 1)),
+							name: usa.name.into(),
+							..Default::default()
+						}
+						.into()
+					),
+					..Default::default()
+				},
+				..Default::default()
+			})
+			.await
+			.unwrap()
+			.as_slice(),
+			&[some_organization_view, some_other_organization_view],
+		);
 	}
 }

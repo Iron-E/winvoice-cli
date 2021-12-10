@@ -1,4 +1,5 @@
-use std::borrow::Cow::{Borrowed, Owned, self};
+use std::borrow::Cow::{self, Borrowed, Owned};
+
 use super::MatchStr;
 
 impl<'m> From<&'m str> for MatchStr<Cow<'m, str>>

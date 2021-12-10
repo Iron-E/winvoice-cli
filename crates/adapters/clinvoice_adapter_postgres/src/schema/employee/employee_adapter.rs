@@ -1,13 +1,6 @@
 use std::{collections::HashMap, fmt::Write};
 
-use clinvoice_adapter::{
-	schema::EmployeeAdapter,
-	WriteContext,
-	WriteFromClause,
-	WriteJoinClause,
-	WriteSelectClause,
-	WriteWhereClause,
-};
+use clinvoice_adapter::{schema::EmployeeAdapter, WriteContext, WriteWhereClause};
 use clinvoice_match::MatchEmployee;
 use clinvoice_schema::{
 	views::{ContactView, EmployeeView, OrganizationView, PersonView},
@@ -18,7 +11,7 @@ use clinvoice_schema::{
 	Person,
 };
 use futures::TryStreamExt;
-use sqlx::{PgPool, Result, Row, Error};
+use sqlx::{Error, PgPool, Result, Row};
 
 use super::PostgresEmployee;
 use crate::{schema::PostgresLocation, PostgresSchema as Schema};
@@ -125,38 +118,17 @@ impl EmployeeAdapter for PostgresEmployee
 		match_condition: &MatchEmployee,
 	) -> Result<Vec<EmployeeView>>
 	{
-		let mut query = Schema::write_select_clause([
-			"array_agg((C.employee_id, C.export, C.label, C.address_id, C.email, C.phone)) AS \
-			 contacts",
-			"E.id",
-			"E.organization_id",
-			"E.person_id",
-			"E.status",
-			"E.title",
-			"O.name AS organization_name",
-			"O.location_id",
-			"P.name",
-		]);
-		Schema::write_from_clause(&mut query, "employees", "E");
-		Schema::write_join_clause(
-			&mut query,
-			"",
-			"contact_information",
-			"C",
-			"employee_id",
-			"E.id",
-		)
-		.unwrap();
-		Schema::write_join_clause(
-			&mut query,
-			"",
-			"organizations",
-			"O",
-			"id",
-			"E.organization_id",
-		)
-		.unwrap();
-		Schema::write_join_clause(&mut query, "", "people", "P", "id", "E.person_id").unwrap();
+		let mut query = String::from(
+			"SELECT
+				array_agg((C.employee_id, C.export, C.label, C.address_id, C.email, C.phone)) AS contacts,
+				E.id, E.organization_id, E.person_id, E.status, E.title,
+				O.name AS organization_name, O.location_id,
+				P.name,
+			FROM employees E
+			JOIN contact_information C ON (C.employee_id = E.id)
+			JOIN organizations O ON (O.id = E.organization_id)
+			JOIN people P ON (P.id = E.person_id)",
+		);
 		Schema::write_where_clause(
 			WriteContext::BeforeWhereClause,
 			"E",
@@ -214,7 +186,9 @@ impl EmployeeAdapter for PostgresEmployee
 								}
 								else
 								{
-									return Err(Error::Decode("Row of `contact_info` did not match any `Contact` equivalent".into()));
+									return Err(Error::Decode(
+										"Row of `contact_info` did not match any `Contact` equivalent".into(),
+									));
 								},
 							);
 						}

@@ -1,9 +1,6 @@
 use clinvoice_adapter::{
 	schema::OrganizationAdapter,
-	WriteContext,
-	WriteFromClause,
-	WriteJoinClause,
-	WriteSelectClause,
+	WriteContext::BeforeWhereClause,
 	WriteWhereClause,
 };
 use clinvoice_match::MatchOrganization;
@@ -39,11 +36,14 @@ impl OrganizationAdapter for PostgresOrganization
 		match_condition: &MatchOrganization,
 	) -> Result<Vec<OrganizationView>>
 	{
-		let mut query = Schema::write_select_clause(["O.id", "O.location_id", "O.name"]);
-		Schema::write_from_clause(&mut query, "organizations", "O");
-		Schema::write_join_clause(&mut query, "", "locations", "L", "id", "O.location_id").unwrap();
+		let id_match = PostgresLocation::retrieve_matching_ids(connection, &match_condition.location);
+		let mut query = String::from(
+			"SELECT O.id, O.location_id, O.name
+			FROM organizations O
+			JOIN locations L ON (L.id = O.location_id)",
+		);
 		Schema::write_where_clause(
-			WriteContext::BeforeWhereClause,
+			Schema::write_where_clause(BeforeWhereClause, "L.id", &id_match.await?, &mut query),
 			"O",
 			match_condition,
 			&mut query,
@@ -68,10 +68,8 @@ impl OrganizationAdapter for PostgresOrganization
 #[cfg(test)]
 mod tests
 {
-	use std::borrow::Cow::{Borrowed, Owned};
-
 	use clinvoice_adapter::schema::LocationAdapter;
-	use clinvoice_match::{Match, MatchLocation, MatchOrganization};
+	use clinvoice_match::MatchOrganization;
 	use clinvoice_schema::views::{LocationView, OrganizationView};
 
 	use super::{OrganizationAdapter, PostgresOrganization};
@@ -173,5 +171,7 @@ mod tests
 			.unwrap()
 			.as_slice()
 		);
+
+		// TODO: make more organizations
 	}
 }

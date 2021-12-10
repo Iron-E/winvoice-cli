@@ -1,8 +1,6 @@
 use clinvoice_adapter::{
 	schema::LocationAdapter,
-	WriteContext,
-	WriteFromClause,
-	WriteSelectClause,
+	WriteContext::BeforeWhereClause,
 	WriteWhereClause,
 };
 use clinvoice_match::MatchLocation;
@@ -55,14 +53,9 @@ impl LocationAdapter for PostgresLocation
 		match_condition: &MatchLocation,
 	) -> Result<Vec<LocationView>>
 	{
-		let mut query = Schema::write_select_clause(["L.name", "L.outer_id", "L.id"]);
-		Schema::write_from_clause(&mut query, "locations", "L");
-		Schema::write_where_clause(
-			WriteContext::BeforeWhereClause,
-			"L",
-			match_condition,
-			&mut query,
-		);
+		let id_match = Self::retrieve_matching_ids(connection, match_condition);
+		let mut query = String::from("SELECT name, outer_id, id FROM locations");
+		Schema::write_where_clause(BeforeWhereClause, "id", &id_match.await?, &mut query);
 		query.push(';');
 
 		sqlx::query(&query)
@@ -76,9 +69,9 @@ impl LocationAdapter for PostgresLocation
 #[cfg(test)]
 mod tests
 {
-	use std::{borrow::Cow::Owned, collections::HashSet};
+	use std::collections::HashSet;
 
-	use clinvoice_match::{Match, MatchLocation, MatchStr, MatchOuterLocation};
+	use clinvoice_match::{MatchLocation, MatchOuterLocation};
 	use clinvoice_schema::views::LocationView;
 
 	use super::{LocationAdapter, PostgresLocation};
@@ -201,7 +194,9 @@ mod tests
 		);
 
 		assert_eq!(
-			[utah_view, arizona_view].into_iter().collect::<HashSet<_>>(),
+			[utah_view, arizona_view]
+				.into_iter()
+				.collect::<HashSet<_>>(),
 			PostgresLocation::retrieve_view(&connection, &MatchLocation {
 				outer: MatchOuterLocation::Some(Box::new(MatchLocation {
 					id: usa_view.id.into(),

@@ -9,7 +9,19 @@ use super::MatchLocation;
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 pub enum MatchOuterLocation<'m>
 {
+	/// # Summary
+	///
+	/// Always match.
 	Any,
+
+	/// # Summary
+	///
+	/// Match only when there is no [`outer_id`](clinvoice_schema::Location).
 	None,
+
+	/// # Summary
+	///
+	/// Match only when a specific [`outer_id`](clinvoice_schema::Location) resolves to a
+	/// matching [`Location`].
 	Some(Box<MatchLocation<'m>>),
 }

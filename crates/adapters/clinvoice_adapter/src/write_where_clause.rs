@@ -15,7 +15,7 @@ pub trait WriteWhereClause<M>
 	/// Generate an SQL `WHERE` clause for the `alias` specified, and append it to the existing
 	/// `query` after writing the `context`'s [prefix](WriteContext::get_prefix).
 	///
-	/// * Depending on implementation, `alias` must either be the `alias` of [`WriteFromClause::write_from_clause`]/[`WriteJoinClause::write_join_clause`] (e.g. "P", ""), or some column of a table that should be queried (e.g. "P.id", "id").
+	/// * Depending on implementation, `alias` must either be the `alias` of a `FROM`/`JOIN` (e.g. "P", "") or some column of a table that should be queried (e.g. "P.id", "id").
 	///
 	/// # Return
 	///

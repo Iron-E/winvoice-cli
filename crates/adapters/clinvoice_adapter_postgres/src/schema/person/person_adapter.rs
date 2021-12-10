@@ -1,10 +1,4 @@
-use clinvoice_adapter::{
-	schema::PersonAdapter,
-	WriteContext,
-	WriteFromClause,
-	WriteSelectClause,
-	WriteWhereClause,
-};
+use clinvoice_adapter::{schema::PersonAdapter, WriteContext, WriteWhereClause};
 use clinvoice_match::MatchPerson;
 use clinvoice_schema::{views::PersonView, Person};
 use futures::stream::TryStreamExt;
@@ -30,8 +24,7 @@ impl PersonAdapter for PostgresPerson
 		match_condition: &MatchPerson,
 	) -> Result<Vec<PersonView>>
 	{
-		let mut query = Schema::write_select_clause([]);
-		Schema::write_from_clause(&mut query, "people", "");
+		let mut query = String::from("SELECT * FROM people");
 		Schema::write_where_clause(
 			WriteContext::BeforeWhereClause,
 			"",

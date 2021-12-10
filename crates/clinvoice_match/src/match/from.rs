@@ -1,5 +1,6 @@
-use core::{fmt::Debug, hash::Hash, cmp::Ord};
+use core::{cmp::Ord, fmt::Debug, hash::Hash};
 use std::borrow::Cow::{Borrowed, Owned};
+
 use super::Match;
 
 impl<'m, T> From<&'m T> for Match<'m, T>

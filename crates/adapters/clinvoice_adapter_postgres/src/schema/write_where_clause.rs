@@ -4,24 +4,10 @@ use std::{
 	ops::Deref,
 };
 
-use clinvoice_adapter::{WriteContext, WriteJoinClause, WriteWhereClause};
-use clinvoice_match::{
-	Match,
-	MatchEmployee,
-	MatchLocation,
-	MatchOrganization,
-	MatchOuterLocation,
-	MatchPerson,
-	MatchStr,
-};
+use clinvoice_adapter::{WriteContext, WriteWhereClause};
+use clinvoice_match::{Match, MatchEmployee, MatchOrganization, MatchPerson, MatchStr};
 
 use super::PostgresSchema as Schema;
-
-const COLUMN_ID: &str = "id";
-const COLUMN_NAME: &str = "name";
-const COLUMN_OUTER_ID: &str = "outer_id";
-const COLUMN_STATUS: &str = "status";
-const COLUMN_TITLE: &str = "title";
 
 /// # Summary
 ///
@@ -268,7 +254,7 @@ impl WriteWhereClause<&MatchPerson<'_>> for Schema
 	) -> WriteContext
 	{
 		macro_rules! write_where_clause {
-			($context:expr, $column:ident, $match_field:ident) => {
+			($context:expr, $column:expr, $match_field:ident) => {
 				if alias.is_empty()
 				{
 					Schema::write_where_clause($context, $column, &match_condition.$match_field, query)
@@ -285,87 +271,7 @@ impl WriteWhereClause<&MatchPerson<'_>> for Schema
 			};
 		}
 
-		write_where_clause!(
-			write_where_clause!(context, COLUMN_ID, id),
-			COLUMN_NAME,
-			name
-		)
-	}
-}
-
-impl WriteWhereClause<&MatchLocation<'_>> for Schema
-{
-	/// # Panics
-	///
-	/// If any the following:
-	///
-	/// * `context` is not `BeforeWhereClause`
-	/// * `alias` is an empty string.
-	///
-	/// # See
-	///
-	/// * [`WriteWhereClause::write_where_clause`]
-	fn write_where_clause(
-		context: WriteContext,
-		alias: &str,
-		match_condition: &MatchLocation,
-		query: &mut String,
-	) -> WriteContext
-	{
-		fn recurse(
-			query: &mut String,
-			context: WriteContext,
-			alias: &str,
-			match_condition: &MatchLocation,
-		) -> WriteContext
-		{
-			let ctx = match match_condition.outer
-			{
-				MatchOuterLocation::Any => context,
-				MatchOuterLocation::None =>
-				{
-					write_is_null(query, context, &format!("{}.{}", alias, COLUMN_OUTER_ID));
-					WriteContext::AfterWhereCondition
-				},
-				MatchOuterLocation::Some(ref outer) if context == WriteContext::BeforeWhereClause =>
-				{
-					let new_alias = format!("{}O", alias);
-					Schema::write_join_clause(
-						query,
-						"",
-						"locations",
-						&new_alias,
-						"id",
-						&format!("{}.{}", alias, COLUMN_OUTER_ID),
-					)
-					.unwrap();
-					recurse(query, context, &new_alias, outer.deref())
-				},
-				MatchOuterLocation::Some(_) => panic!(
-					"Must generate SQL for `MatchLocation` _before_ the `WHERE` condition, as it \
-					 necessitates a JOIN."
-				),
-			};
-
-			Schema::write_where_clause(
-				Schema::write_where_clause(
-					ctx,
-					&format!("{}.{}", alias, COLUMN_ID),
-					&match_condition.id,
-					query,
-				),
-				&format!("{}.{}", alias, COLUMN_NAME),
-				&match_condition.name,
-				query,
-			)
-		}
-
-		if alias.is_empty()
-		{
-			panic!("Must provide alias for `Location`");
-		}
-
-		recurse(query, context, alias, match_condition)
+		write_where_clause!(write_where_clause!(context, "id", id), "name", name)
 	}
 }
 
@@ -390,12 +296,12 @@ impl WriteWhereClause<&MatchOrganization<'_>> for Schema
 	{
 		Schema::write_where_clause(
 			Schema::write_where_clause(
-				Schema::write_where_clause(context, "L", &match_condition.location, query),
-				&format!("{}.{}", alias, COLUMN_ID),
+				context,
+				&format!("{}.id", alias),
 				&match_condition.id,
 				query,
 			),
-			&format!("{}.{}", alias, COLUMN_NAME),
+			&format!("{}.name", alias),
 			&match_condition.name,
 			query,
 		)
@@ -430,15 +336,15 @@ impl WriteWhereClause<&MatchEmployee<'_>> for Schema
 						&match_condition.person,
 						query,
 					),
-					&format!("{}.{}", alias, COLUMN_ID),
+					&format!("{}.id", alias),
 					&match_condition.id,
 					query,
 				),
-				&format!("{}.{}", alias, COLUMN_STATUS),
+				&format!("{}.status", alias),
 				&match_condition.status,
 				query,
 			),
-			&format!("{}.{}", alias, COLUMN_TITLE),
+			&format!("{}.title", alias),
 			&match_condition.title,
 			query,
 		)
@@ -450,12 +356,11 @@ mod tests
 {
 	use std::borrow::Cow::{Borrowed, Owned};
 
-	use clinvoice_match::MatchOrganization;
+	use clinvoice_match::{MatchLocation, MatchOuterLocation};
 
 	use super::{
 		Match,
-		MatchLocation,
-		MatchOuterLocation,
+		MatchOrganization,
 		MatchPerson,
 		MatchStr,
 		Schema,
@@ -468,12 +373,7 @@ mod tests
 	{
 		let mut query = String::new();
 		assert_eq!(
-			Schema::write_where_clause(
-				BeforeWhereClause,
-				"foo",
-				&Match::from(18),
-				&mut query
-			),
+			Schema::write_where_clause(BeforeWhereClause, "foo", &Match::from(18), &mut query),
 			AfterWhereCondition,
 		);
 		assert_eq!(query, String::from(" WHERE foo = 18"));
@@ -663,67 +563,6 @@ mod tests
 	}
 
 	#[test]
-	fn write_location_join_where_clause()
-	{
-		let mut query = String::new();
-		assert_eq!(
-			Schema::write_where_clause(
-				BeforeWhereClause,
-				"L",
-				&MatchLocation::default(),
-				&mut query
-			),
-			BeforeWhereClause
-		);
-		assert!(query.is_empty());
-
-		query.clear();
-		assert_eq!(
-			Schema::write_where_clause(
-				BeforeWhereClause,
-				"L",
-				&MatchLocation {
-					id: 7.into(),
-					..Default::default()
-				},
-				&mut query,
-			),
-			AfterWhereCondition
-		);
-		assert_eq!(query, String::from(" WHERE L.id = 7"));
-
-		query.clear();
-		assert_eq!(
-			Schema::write_where_clause(
-				BeforeWhereClause,
-				"L",
-				&MatchLocation {
-					id: 7.into(),
-					outer: MatchOuterLocation::Some(Box::new(MatchLocation {
-						id: 8.into(),
-						outer: MatchOuterLocation::Some(Box::new(MatchLocation {
-							id: 9.into(),
-							outer: MatchOuterLocation::None,
-							..Default::default()
-						})),
-						..Default::default()
-					})),
-					..Default::default()
-				},
-				&mut query,
-			),
-			AfterWhereCondition
-		);
-		assert_eq!(
-			query,
-			String::from(
-				"  JOIN locations LO ON (LO.id = L.outer_id)  JOIN locations LOO ON (LOO.id = \
-				 LO.outer_id) WHERE LOO.outer_id IS NULL AND LOO.id = 9 AND LO.id = 8 AND L.id = 7"
-			),
-		);
-	}
-
-	#[test]
 	fn write_organization_where_clause()
 	{
 		let mut query = String::new();
@@ -765,11 +604,7 @@ mod tests
 		);
 		assert_eq!(
 			query,
-			String::from(
-				"  JOIN locations LO ON (LO.id = L.outer_id)  JOIN locations LOO ON (LOO.id = \
-				 LO.outer_id) WHERE LOO.name = 'Japan' AND LO.id = 14 AND L.id = 11 AND O.id = 7 AND \
-				 O.name LIKE '%Gögle%'"
-			)
+			String::from(" WHERE O.id = 7 AND O.name LIKE '%Gögle%'")
 		);
 	}
 }

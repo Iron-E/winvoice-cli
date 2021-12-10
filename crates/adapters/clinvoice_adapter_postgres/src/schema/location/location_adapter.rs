@@ -46,7 +46,6 @@ impl LocationAdapter for PostgresLocation
 		})
 	}
 
-	// WARN: `Might need `Acquire` or `&mut Transaction` depending on how recursive views work
 	async fn retrieve_view(
 		connection: &PgPool,
 		match_condition: &MatchLocation,

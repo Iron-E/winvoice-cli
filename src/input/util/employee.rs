@@ -1,7 +1,7 @@
-use std::{borrow::Cow::Owned, fmt::Display};
+use std::fmt::Display;
 
 use clinvoice_adapter::{schema::EmployeeAdapter, Deletable};
-use clinvoice_match::{Match, MatchEmployee};
+use clinvoice_match::MatchEmployee;
 use clinvoice_schema::{views::EmployeeView, Id};
 use sqlx::{Database, Executor, Pool};
 

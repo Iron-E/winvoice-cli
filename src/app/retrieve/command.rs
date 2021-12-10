@@ -1,5 +1,4 @@
 use core::fmt::Display;
-use std::borrow::Cow::Owned;
 
 use clinvoice_adapter::{
 	schema::{
@@ -14,7 +13,7 @@ use clinvoice_adapter::{
 	Updatable,
 };
 use clinvoice_config::Config;
-use clinvoice_match::{Match, MatchJob, MatchTimesheet};
+use clinvoice_match::{MatchJob, MatchTimesheet};
 use clinvoice_schema::{chrono::Utc, views::RestorableSerde, Location};
 use futures::{
 	future,

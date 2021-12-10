@@ -1,4 +1,4 @@
-use core::{cmp::Ord, fmt::Debug, hash::Hash};
+use core::fmt::Debug;
 use std::borrow::Cow::{Borrowed, Owned};
 
 use super::Match;

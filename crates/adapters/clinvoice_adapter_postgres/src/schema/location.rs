@@ -32,10 +32,10 @@ impl PostgresLocation
 		/// Generate multiple Common Table Expressions for a recursive query.
 		fn generate_cte(first: bool, query: &mut String, cte: Cte, match_condition: &MatchLocation)
 		{
-			write!(
+			writeln!(
 				query,
 				" {} as ( SELECT LO.id, LO.name, LO.outer_id FROM locations LO {}JOIN {} L ON (LO.id \
-				 = L.outer_id)\n",
+				 = L.outer_id)",
 				cte.current,
 				if cte.previous.is_empty() { "-- " } else { "" },
 				cte.previous,

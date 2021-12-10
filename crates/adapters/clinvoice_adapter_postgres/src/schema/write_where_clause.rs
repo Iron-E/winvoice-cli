@@ -183,7 +183,7 @@ impl WriteWhereClause<&Match<'_, i64>> for Schema
 			Match::Not(match_condition) => match match_condition.deref()
 			{
 				Match::Any => write_is_null(query, context, alias),
-				m @ _ => write_negated(query, context, alias, m),
+				m => write_negated(query, context, alias, m),
 			},
 			Match::Or(match_conditions) => write_boolean_group::<_, _, false>(
 				query,
@@ -230,7 +230,7 @@ impl WriteWhereClause<&MatchStr<Cow<'_, str>>> for Schema
 			MatchStr::Not(match_condition) => match match_condition.deref()
 			{
 				MatchStr::Any => write_is_null(query, context, alias),
-				m @ _ => write_negated(query, context, alias, m),
+				m => write_negated(query, context, alias, m),
 			},
 			MatchStr::Or(match_conditions) => write_boolean_group::<_, _, false>(
 				query,

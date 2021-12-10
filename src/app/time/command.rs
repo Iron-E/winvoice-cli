@@ -1,7 +1,5 @@
 mod display;
 
-use std::borrow::Cow::Owned;
-
 use clinvoice_adapter::{
 	schema::{EmployeeAdapter, JobAdapter, TimesheetAdapter},
 	Deletable,

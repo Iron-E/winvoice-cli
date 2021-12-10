@@ -2,9 +2,8 @@ mod default;
 mod from;
 
 use core::{
-	cmp::{Eq, Ord},
+	cmp::Eq,
 	fmt::Debug,
-	hash::Hash,
 };
 use std::borrow::Cow;
 

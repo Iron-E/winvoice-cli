@@ -118,6 +118,10 @@ impl EmployeeAdapter for PostgresEmployee
 		match_condition: &MatchEmployee,
 	) -> Result<Vec<EmployeeView>>
 	{
+		let id_match = PostgresLocation::retrieve_matching_ids(
+			connection,
+			&match_condition.organization.location,
+		);
 		let mut query = String::from(
 			"SELECT
 				array_agg((C.employee_id, C.export, C.label, C.address_id, C.email, C.phone)) AS contacts,
@@ -130,9 +134,9 @@ impl EmployeeAdapter for PostgresEmployee
 			JOIN people P ON (P.id = E.person_id)",
 		);
 		Schema::write_where_clause(
-			Default::default(),
-			"E",
-			match_condition,
+			Schema::write_where_clause(Default::default(), "E", match_condition, &mut query),
+			"O.location_id",
+			&id_match.await?,
 			&mut query,
 		);
 		query.push(';');

@@ -1,3 +1,5 @@
+mod default;
+
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 

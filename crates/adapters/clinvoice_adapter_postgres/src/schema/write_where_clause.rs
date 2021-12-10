@@ -167,8 +167,8 @@ impl WriteWhereClause<&Match<'_, i64>> for Schema
 			},
 			Match::AllInRange(low, high) | Match::InRange(low, high) =>
 			{
-				write_comparison(query, context, alias, ">=", low);
-				write_comparison(query, WriteContext::AfterWhereCondition, alias, "<", high);
+				write_comparison(query, context, alias, "BETWEEN", low);
+				write_comparison(query, WriteContext::InWhereCondition, "", "AND", high);
 			},
 			Match::And(match_conditions) => write_boolean_group::<_, _, true>(
 				query,
@@ -399,7 +399,7 @@ mod tests
 		assert_eq!(
 			query,
 			format!(
-				" ( NOT ( bar >= 0 AND bar < 10) AND bar IN ({}) AND ( bar IS NULL OR bar > -1))",
+				" ( NOT ( bar BETWEEN 0  AND 10) AND bar IN ({}) AND ( bar IS NULL OR bar > -1))",
 				&query[44..54],
 			)
 		);

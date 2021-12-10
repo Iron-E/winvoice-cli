@@ -6,7 +6,7 @@ use core::{
 	fmt::Debug,
 	hash::Hash,
 };
-use std::{borrow::Cow, collections::HashSet};
+use std::borrow::Cow;
 
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
@@ -18,7 +18,7 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 pub enum Match<'element, T>
 where
-	T: Clone + Debug + Hash + Ord,
+	T: Clone + Debug,
 {
 	#[cfg_attr(
 		feature = "serde_support",
@@ -81,7 +81,7 @@ where
 	///
 	/// * A set of `v` is made up of elements which are contained in this set.
 	/// * This set has one element, and `v` is equivalent.
-	HasAll(HashSet<Cow<'element, T>>),
+	HasAll(Cow<'element, [T]>),
 
 	/// # Summary
 	///
@@ -89,7 +89,7 @@ where
 	///
 	/// * A set of `v`'s type has any value contained in this set.
 	/// * `v` is contained within this set.
-	HasAny(HashSet<Cow<'element, T>>),
+	HasAny(Cow<'element, [T]>),
 
 	/// # Summary
 	///

@@ -178,8 +178,8 @@ impl WriteWhereClause<&Match<'_, i64>> for Schema
 			),
 			Match::Any => return context,
 			Match::EqualTo(id) => write_comparison(query, context, alias, "=", id),
-			Match::HasAll(ids) => write_has(query, context, alias, ids, true),
-			Match::HasAny(ids) => write_has(query, context, alias, ids, false),
+			Match::HasAll(ids) => write_has(query, context, alias, ids.deref(), true),
+			Match::HasAny(ids) => write_has(query, context, alias, ids.deref(), false),
 			Match::Not(match_condition) => match match_condition.deref()
 			{
 				Match::Any => write_is_null(query, context, alias),
@@ -385,11 +385,7 @@ mod tests
 				"bar",
 				&Match::And(vec![
 					Match::Not(Box::new(Match::InRange(Owned(0), Owned(10)))),
-					Match::HasAny(
-						vec![Owned(0), Owned(9), Owned(7), Owned(4)]
-							.into_iter()
-							.collect()
-					),
+					Match::HasAny(Borrowed(&[0, 9, 7, 4])),
 					Match::Or(vec![
 						Match::Not(Box::new(Match::Any)),
 						Match::GreaterThan(Owned(-1)),

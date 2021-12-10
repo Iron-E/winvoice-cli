@@ -121,14 +121,13 @@ impl PostgresLocation
 			},
 			match_condition,
 		);
-
-		Ok(Match::HasAny(
+		Ok(Match::HasAny(Owned(
 			sqlx::query(&query)
 				.fetch(connection)
-				.map_ok(|row| Owned(row.get("id")))
+				.map_ok(|row| row.get::<Id, _>("id"))
 				.try_collect()
 				.await?,
-		))
+		)))
 	}
 
 	pub(super) async fn retrieve_view_by_id(

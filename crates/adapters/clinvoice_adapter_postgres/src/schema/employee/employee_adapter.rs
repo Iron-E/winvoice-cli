@@ -237,23 +237,24 @@ mod tests
 			.await
 			.unwrap();
 
-		let mut contact_info = HashMap::new();
-		contact_info.insert("Office".into(), Contact::Address {
-			location_id: earth.id,
-			export: false,
-		});
-		contact_info.insert("Work Email".into(), Contact::Email {
-			email: "foo@bar.io".into(),
-			export: true,
-		});
-		contact_info.insert("Office's Email".into(), Contact::Phone {
-			phone: "555 223 5039".into(),
-			export: true,
-		});
-
 		let employee = PostgresEmployee::create(
 			&connection,
-			contact_info,
+			[
+				("Office".into(), Contact::Address {
+					location_id: earth.id,
+					export: false,
+				}),
+				("Work Email".into(), Contact::Email {
+					email: "foo@bar.io".into(),
+					export: true,
+				}),
+				("Office's Email".into(), Contact::Phone {
+					phone: "555 223 5039".into(),
+					export: true,
+				}),
+			]
+			.into_iter()
+			.collect(),
 			&organization,
 			&person,
 			"Employed".into(),

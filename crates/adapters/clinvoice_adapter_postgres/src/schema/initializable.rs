@@ -26,7 +26,6 @@ impl Initializable for PostgresSchema
 		Self::init_currency(&mut transaction).await?;
 		Self::init_money(&mut transaction).await?;
 		Self::init_jobs(&mut transaction).await?;
-		Self::init_expense_category(&mut transaction).await?;
 		Self::init_expenses(&mut transaction).await?;
 		Self::init_timesheets(&mut transaction).await?;
 

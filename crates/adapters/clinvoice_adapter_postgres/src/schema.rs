@@ -108,7 +108,7 @@ impl PostgresSchema
 				id bigint GENERATED ALWAYS AS IDENTITY UNIQUE,
 				organization_id bigint NOT NULL,
 				person_id bigint NOT NULL,
-				status text NOT NULL CHECK (status IN ('Employed', 'Not employed', 'Representative')),
+				status text NOT NULL,
 				title text NOT NULL,
 
 				PRIMARY KEY(organization_id, person_id),
@@ -135,7 +135,7 @@ impl PostgresSchema
 				label text NOT NULL,
 
 				address_id bigint,
-				email text CHECK (email ~ '^[A-Za-z0-9]+(\.[A-Za-z0-9])*@[A-Za-z0-9]+\.[A-Za-z0-9]+$'),
+				email text,
 				phone text CHECK (phone ~ '^[0-9\- ]+$'),
 
 				PRIMARY KEY(employee_id, label),
@@ -238,28 +238,12 @@ impl PostgresSchema
 	/// # Summary
 	///
 	/// Initialize the database for a given [`Store`].
-	async fn init_expense_category(
-		connection: impl Executor<'_, Database = Postgres> + Send,
-	) -> Result<()>
-	{
-		sqlx::query!(
-			"CREATE DOMAIN expense_category AS text CHECK ((VALUE) IN ('food', 'item', 'other', \
-			 'service', 'software', 'travel'));"
-		)
-		.execute(connection)
-		.await
-		.and(Ok(()))
-	}
-
-	/// # Summary
-	///
-	/// Initialize the database for a given [`Store`].
 	async fn init_expenses(connection: &mut Transaction<'_, Postgres>) -> Result<()>
 	{
 		sqlx::query!(
 			"CREATE TYPE expense_unsafe AS
 			(
-				category expense_category,
+				category text,
 				cost amount_of_currency,
 				description text
 			);"

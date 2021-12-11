@@ -65,8 +65,9 @@ impl OrganizationAdapter for PostgresOrganization
 mod tests
 {
 	use std::borrow::Cow::Owned;
+
 	use clinvoice_adapter::schema::LocationAdapter;
-	use clinvoice_match::{MatchLocation, MatchOrganization, MatchOuterLocation, Match};
+	use clinvoice_match::{Match, MatchLocation, MatchOrganization, MatchOuterLocation};
 	use clinvoice_schema::views::{LocationView, OrganizationView};
 
 	use super::{OrganizationAdapter, PostgresOrganization};

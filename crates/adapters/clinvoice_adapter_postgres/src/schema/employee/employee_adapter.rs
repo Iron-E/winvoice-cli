@@ -213,7 +213,10 @@ mod tests
 	use std::collections::HashMap;
 
 	use clinvoice_adapter::schema::{LocationAdapter, OrganizationAdapter, PersonAdapter};
-	use clinvoice_schema::Contact;
+	use clinvoice_schema::{
+		views::{ContactView, EmployeeView, LocationView, OrganizationView, PersonView},
+		Contact,
+	};
 
 	use super::{EmployeeAdapter, PostgresEmployee};
 	use crate::schema::{util, PostgresLocation, PostgresOrganization, PostgresPerson};
@@ -313,6 +316,177 @@ mod tests
 	#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 	async fn retrieve_view()
 	{
-		// TODO: write test
+		let connection = util::connect().await;
+
+		let earth = PostgresLocation::create(&connection, "Earth".into())
+			.await
+			.unwrap();
+
+		let usa = PostgresLocation::create_inner(&connection, &earth, "USA".into())
+			.await
+			.unwrap();
+
+		let arizona = PostgresLocation::create_inner(&connection, &usa, "Arizona".into())
+			.await
+			.unwrap();
+
+		let utah = PostgresLocation::create_inner(&connection, &usa, "Utah".into())
+			.await
+			.unwrap();
+
+		let earth_view = LocationView {
+			id: earth.id,
+			name: earth.name.clone(),
+			outer: None,
+		};
+		let usa_view = LocationView {
+			id: usa.id,
+			name: usa.name.clone(),
+			outer: Some(earth_view.clone().into()),
+		};
+		let arizona_view = LocationView {
+			id: arizona.id,
+			name: arizona.name.clone(),
+			outer: Some(usa_view.clone().into()),
+		};
+		let utah_view = LocationView {
+			id: utah.id,
+			name: utah.name.clone(),
+			outer: Some(usa_view.clone().into()),
+		};
+
+		let organization =
+			PostgresOrganization::create(&connection, &arizona, "Some Organization".into())
+				.await
+				.unwrap();
+		let organization2 =
+			PostgresOrganization::create(&connection, &utah, "Some Other Organizatión".into())
+				.await
+				.unwrap();
+
+		let organization_view = OrganizationView {
+			id: organization.id,
+			name: organization.name.clone(),
+			location: arizona_view.clone(),
+		};
+		let organization2_view = OrganizationView {
+			id: organization2.id,
+			name: organization2.name.clone(),
+			location: utah_view.clone(),
+		};
+
+		let person = PostgresPerson::create(&connection, "My Name".into())
+			.await
+			.unwrap();
+		let person2 = PostgresPerson::create(&connection, "Another Gúy".into())
+			.await
+			.unwrap();
+
+		let person_view = PersonView {
+			id: person.id,
+			name: person.name.clone(),
+		};
+		let person2_view = PersonView {
+			id: person2.id,
+			name: person2.name.clone(),
+		};
+
+		let employee = PostgresEmployee::create(
+			&connection,
+			[
+				("Remote Office".into(), Contact::Address {
+					location_id: utah.id,
+					export: false,
+				}),
+				("Work Email".into(), Contact::Email {
+					email: "foo@bar.io".into(),
+					export: true,
+				}),
+				("Office's Phone".into(), Contact::Phone {
+					phone: "555 223 5039".into(),
+					export: true,
+				}),
+			]
+			.into_iter()
+			.collect(),
+			&organization,
+			&person,
+			"Employed".into(),
+			"Janitor".into(),
+		)
+		.await
+		.unwrap();
+		let employee2 = PostgresEmployee::create(
+			&connection,
+			[
+				("Favorite Pizza Place".into(), Contact::Address {
+					location_id: arizona.id,
+					export: false,
+				}),
+				("Work Email".into(), Contact::Email {
+					email: "some_kind_of_email@f.com".into(),
+					export: true,
+				}),
+				("Office's Phone".into(), Contact::Phone {
+					phone: "555-555-8008".into(),
+					export: true,
+				}),
+			]
+			.into_iter()
+			.collect(),
+			&organization2,
+			&person2,
+			"Management".into(),
+			"Assistant to Regional Manager".into(),
+		)
+		.await
+		.unwrap();
+
+		let employee_view = EmployeeView {
+			id: employee.id,
+			contact_info: [
+				("Remote Office".into(), ContactView::Address {
+					location: utah_view,
+					export: false,
+				}),
+				("Work Email".into(), ContactView::Email {
+					email: "foo@bar.io".into(),
+					export: true,
+				}),
+				("Office's Phone".into(), ContactView::Phone {
+					phone: "555 223 5039".into(),
+					export: true,
+				}),
+			]
+			.into_iter()
+			.collect(),
+			organization: organization_view,
+			person: person_view,
+			status: "Employed".into(),
+			title: "Janitor".into(),
+		};
+		let employee2_view = EmployeeView {
+			id: employee2.id,
+			contact_info: [
+				("Favorite Pizza Place".into(), ContactView::Address {
+					location: arizona_view,
+					export: false,
+				}),
+				("Work Email".into(), ContactView::Email {
+					email: "some_kind_of_email@f.com".into(),
+					export: true,
+				}),
+				("Office's Phone".into(), ContactView::Phone {
+					phone: "555-555-8008".into(),
+					export: true,
+				}),
+			]
+			.into_iter()
+			.collect(),
+			organization: organization2_view,
+			person: person2_view,
+			status: "Management".into(),
+			title: "Assistant to Regional Manager".into(),
+		};
 	}
 }

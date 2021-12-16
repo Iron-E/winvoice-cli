@@ -216,6 +216,7 @@ mod tests
 	use std::collections::HashMap;
 
 	use clinvoice_adapter::schema::{LocationAdapter, OrganizationAdapter, PersonAdapter};
+	use clinvoice_match::{MatchEmployee, MatchLocation, MatchOrganization, MatchPerson, MatchStr};
 	use clinvoice_schema::{
 		views::{ContactView, EmployeeView, LocationView, OrganizationView, PersonView},
 		Contact,
@@ -491,5 +492,30 @@ mod tests
 			status: "Management".into(),
 			title: "Assistant to Regional Manager".into(),
 		};
+
+		assert_eq!(
+			PostgresEmployee::retrieve_view(&connection, &MatchEmployee {
+				organization: MatchOrganization {
+					name: employee_view.organization.name.clone().into(),
+					location: MatchLocation {
+						name: MatchStr::Or(vec![
+							employee_view.organization.location.name.clone().into(),
+							MatchStr::Contains(employee2_view.organization.location.name.into())
+						]),
+						..Default::default()
+					},
+					..Default::default()
+				},
+				person: MatchPerson {
+					id: person.id.into(),
+					..Default::default()
+				},
+				..Default::default()
+			})
+			.await
+			.unwrap()
+			.as_slice(),
+			&[employee_view],
+		);
 	}
 }

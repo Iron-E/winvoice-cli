@@ -124,10 +124,10 @@ impl EmployeeAdapter for PostgresEmployee
 		);
 		let mut query = String::from(
 			"SELECT
-				array_agg((C.employee_id, C.export, C.label, C.address_id, C.email, C.phone)) AS contacts,
+				array_agg((C.export, C.label, C.address_id, C.email, C.phone)) AS contact_info,
 				E.id, E.organization_id, E.person_id, E.status, E.title,
 				O.name AS organization_name, O.location_id,
-				P.name,
+				P.name
 			FROM employees E
 			JOIN contact_information C ON (C.employee_id = E.id)
 			JOIN organizations O ON (O.id = E.organization_id)
@@ -139,7 +139,10 @@ impl EmployeeAdapter for PostgresEmployee
 			&id_match.await?,
 			&mut query,
 		);
-		query.push(';');
+		query.push_str(
+			" GROUP BY C.employee_id, E.id, E.organization_id, E.person_id, E.status, E.title, O.name, \
+			 O.location_id, P.name;",
+		);
 
 		sqlx::query(&query)
 			.fetch(connection)

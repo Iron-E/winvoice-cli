@@ -12,10 +12,10 @@ use super::Match;
 pub struct MatchInvoice<'m>
 {
 	#[cfg_attr(feature = "serde_support", serde(default))]
-	pub issued: Match<'m, Option<NaiveDateTime>>,
+	pub date_issued: Match<'m, Option<NaiveDateTime>>,
 
 	#[cfg_attr(feature = "serde_support", serde(default))]
-	pub paid: Match<'m, Option<NaiveDateTime>>,
+	pub date_paid: Match<'m, Option<NaiveDateTime>>,
 
 	#[cfg_attr(feature = "serde_support", serde(default))]
 	pub hourly_rate: Match<'m, Money>,

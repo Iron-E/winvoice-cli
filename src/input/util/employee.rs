@@ -1,4 +1,4 @@
-use std::fmt::Display;
+use core::fmt::Display;
 
 use clinvoice_adapter::{schema::EmployeeAdapter, Deletable};
 use clinvoice_match::MatchEmployee;

@@ -5,9 +5,10 @@ use std::{
 };
 
 use clinvoice_adapter::{WriteContext, WriteWhereClause};
-use clinvoice_match::{Match, MatchEmployee, MatchOrganization, MatchPerson, MatchStr};
+use clinvoice_match::{Match, MatchEmployee, MatchJob, MatchOrganization, MatchPerson, MatchStr};
+use clinvoice_schema::chrono::NaiveDateTime;
 
-use super::PostgresSchema as Schema;
+use super::{PostgresDateTime, PostgresOption, PostgresSchema as Schema, PostgresStr};
 
 /// # Summary
 ///
@@ -81,14 +82,14 @@ fn write_comparison(
 ///       [`std::borrow::Cow`]. View the linked documentation for proper examples.
 ///
 /// The rest of the args are the same as [`WriteSql::write_where`].
-fn write_has<'t, T>(
+fn write_has<T>(
 	query: &mut String,
 	context: WriteContext,
 	alias: &str,
-	values: impl IntoIterator<Item = &'t T>,
+	values: impl IntoIterator<Item = T>,
 	union: bool,
 ) where
-	T: 't + Display,
+	T: Display,
 {
 	let mut iter = values.into_iter();
 
@@ -196,9 +197,171 @@ impl WriteWhereClause<&Match<'_, i64>> for Schema
 	}
 }
 
+impl WriteWhereClause<&Match<'_, NaiveDateTime>> for Schema
+{
+	fn write_where_clause(
+		context: WriteContext,
+		alias: &str,
+		match_condition: &Match<'_, NaiveDateTime>,
+		query: &mut String,
+	) -> WriteContext
+	{
+		match match_condition
+		{
+			Match::AllGreaterThan(date) | Match::GreaterThan(date) =>
+			{
+				write_comparison(query, context, alias, ">", PostgresDateTime(**date))
+			},
+			Match::AllLessThan(date) | Match::LessThan(date) =>
+			{
+				write_comparison(query, context, alias, "<", PostgresDateTime(**date))
+			},
+			Match::AllInRange(low, high) | Match::InRange(low, high) =>
+			{
+				write_comparison(query, context, alias, "BETWEEN", PostgresDateTime(**low));
+				write_comparison(
+					query,
+					WriteContext::InWhereCondition,
+					"",
+					"AND",
+					PostgresDateTime(**high),
+				);
+			},
+			Match::And(match_conditions) => write_boolean_group::<_, _, true>(
+				query,
+				context,
+				alias,
+				&mut match_conditions.iter().filter(|m| *m != &Match::Any),
+			),
+			Match::Any => return context,
+			Match::EqualTo(date) =>
+			{
+				write_comparison(query, context, alias, "=", PostgresDateTime(**date))
+			},
+			Match::HasAll(dates) => write_has(
+				query,
+				context,
+				alias,
+				dates.iter().copied().map(PostgresDateTime),
+				true,
+			),
+			Match::HasAny(dates) => write_has(
+				query,
+				context,
+				alias,
+				dates.iter().copied().map(PostgresDateTime),
+				false,
+			),
+			Match::Not(match_condition) => match match_condition.deref()
+			{
+				Match::Any => write_is_null(query, context, alias),
+				m => write_negated(query, context, alias, m),
+			},
+			Match::Or(match_conditions) => write_boolean_group::<_, _, false>(
+				query,
+				context,
+				alias,
+				&mut match_conditions.iter().filter(|m| *m != &Match::Any),
+			),
+		};
+		WriteContext::AfterWhereCondition
+	}
+}
+
+impl WriteWhereClause<&Match<'_, Option<NaiveDateTime>>> for Schema
+{
+	fn write_where_clause(
+		context: WriteContext,
+		alias: &str,
+		match_condition: &Match<'_, Option<NaiveDateTime>>,
+		query: &mut String,
+	) -> WriteContext
+	{
+		match match_condition
+		{
+			Match::AllGreaterThan(date) | Match::GreaterThan(date) => write_comparison(
+				query,
+				context,
+				alias,
+				">",
+				PostgresOption(date.map(PostgresDateTime)),
+			),
+			Match::AllLessThan(date) | Match::LessThan(date) => write_comparison(
+				query,
+				context,
+				alias,
+				"<",
+				PostgresOption(date.map(PostgresDateTime)),
+			),
+			Match::AllInRange(low, high) | Match::InRange(low, high) =>
+			{
+				write_comparison(
+					query,
+					context,
+					alias,
+					"BETWEEN",
+					PostgresOption(low.map(PostgresDateTime)),
+				);
+				write_comparison(
+					query,
+					WriteContext::InWhereCondition,
+					"",
+					"AND",
+					PostgresOption(high.map(PostgresDateTime)),
+				);
+			},
+			Match::And(match_conditions) => write_boolean_group::<_, _, true>(
+				query,
+				context,
+				alias,
+				&mut match_conditions.iter().filter(|m| *m != &Match::Any),
+			),
+			Match::Any => return context,
+			Match::EqualTo(date) => write_comparison(
+				query,
+				context,
+				alias,
+				"=",
+				PostgresOption(date.map(PostgresDateTime)),
+			),
+			Match::HasAll(dates) => write_has(
+				query,
+				context,
+				alias,
+				dates
+					.iter()
+					.map(|o| PostgresOption(o.map(PostgresDateTime))),
+				true,
+			),
+			Match::HasAny(dates) => write_has(
+				query,
+				context,
+				alias,
+				dates
+					.iter()
+					.map(|o| PostgresOption(o.map(PostgresDateTime))),
+				false,
+			),
+			Match::Not(match_condition) => match match_condition.deref()
+			{
+				Match::Any => write_is_null(query, context, alias),
+				m => write_negated(query, context, alias, m),
+			},
+			Match::Or(match_conditions) => write_boolean_group::<_, _, false>(
+				query,
+				context,
+				alias,
+				&mut match_conditions.iter().filter(|m| *m != &Match::Any),
+			),
+		};
+		WriteContext::AfterWhereCondition
+	}
+}
+
 impl WriteWhereClause<&MatchStr<Cow<'_, str>>> for Schema
 {
 	/// FIXME: `MatchStr::EqualTo("Foo's Place")` would break this, because of the apostraphe.
+	///        Might be able to fix by replacing `'` with `''` before entering.
 	fn write_where_clause(
 		context: WriteContext,
 		alias: &str,
@@ -225,7 +388,7 @@ impl WriteWhereClause<&MatchStr<Cow<'_, str>>> for Schema
 			.unwrap(),
 			MatchStr::EqualTo(string) =>
 			{
-				write!(query, "{} {} = '{}'", context.get_prefix(), alias, string).unwrap()
+				write_comparison(query, context, alias, "=", PostgresStr(string))
 			},
 			MatchStr::Not(match_condition) => match match_condition.deref()
 			{
@@ -238,7 +401,7 @@ impl WriteWhereClause<&MatchStr<Cow<'_, str>>> for Schema
 				alias,
 				&mut match_conditions.iter().filter(|m| *m != &MatchStr::Any),
 			),
-			MatchStr::Regex(regex) => write_comparison(query, context, alias, "~", regex),
+			MatchStr::Regex(regex) => write_comparison(query, context, alias, "~", PostgresStr(regex)),
 		};
 		WriteContext::AfterWhereCondition
 	}
@@ -346,6 +509,74 @@ impl WriteWhereClause<&MatchEmployee<'_>> for Schema
 			),
 			&format!("{}.title", alias),
 			&match_condition.title,
+			query,
+		)
+	}
+}
+
+impl WriteWhereClause<&MatchJob<'_>> for Schema
+{
+	/// # Panics
+	///
+	/// If any the following:
+	///
+	/// * `context` is not `BeforeWhereClause`
+	/// * `alias` is an empty string.
+	///
+	/// # See
+	///
+	/// * [`WriteWhereClause::write_where_clause`]
+	fn write_where_clause(
+		context: WriteContext,
+		alias: &str,
+		match_condition: &MatchJob,
+		query: &mut String,
+	) -> WriteContext
+	{
+		Schema::write_where_clause(
+			Schema::write_where_clause(
+				Schema::write_where_clause(
+					Schema::write_where_clause(
+						Schema::write_where_clause(
+							Schema::write_where_clause(
+								Schema::write_where_clause(
+									Schema::write_where_clause(
+										Schema::write_where_clause(
+											context,
+											&format!("{}.id", alias),
+											&match_condition.id,
+											query,
+										),
+										&format!("{}.date_close", alias),
+										&match_condition.date_close,
+										query,
+									),
+									&format!("{}.date_open", alias),
+									&match_condition.date_open,
+									query,
+								),
+								&format!("{}.increment", alias),
+								&match_condition.increment,
+								query,
+							),
+							&format!("{}.invoice_date_issued", alias),
+							&match_condition.invoice.date_issued,
+							query,
+						),
+						&format!("{}.invoice_date_paid", alias),
+						&match_condition.invoice.date_paid,
+						query,
+					),
+					&format!("{}.invoice_hourly_rate", alias),
+					&match_condition.invoice.hourly_rate,
+					query,
+				),
+				&format!("{}.notes", alias),
+				&match_condition.notes,
+				query,
+			),
+			&format!("{}.objectives", alias),
+			&match_condition.objectives,
 			query,
 		)
 	}

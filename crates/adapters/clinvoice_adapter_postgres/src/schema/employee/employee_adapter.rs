@@ -140,8 +140,8 @@ impl EmployeeAdapter for PostgresEmployee
 			&mut query,
 		);
 		query.push_str(
-			" GROUP BY C.employee_id, E.id, E.organization_id, E.person_id, E.status, E.title, O.name, \
-			 O.location_id, P.name;",
+			" GROUP BY C.employee_id, E.id, E.organization_id, E.person_id, E.status, E.title, \
+			 O.name, O.location_id, P.name;",
 		);
 
 		sqlx::query(&query)

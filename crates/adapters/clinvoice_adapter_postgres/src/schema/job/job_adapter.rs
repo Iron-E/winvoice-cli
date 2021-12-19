@@ -1,19 +1,25 @@
 use core::time::Duration;
 use std::convert::TryFrom;
 
-use clinvoice_adapter::schema::JobAdapter;
+use clinvoice_adapter::{schema::JobAdapter, WriteWhereClause};
 use clinvoice_match::MatchJob;
 use clinvoice_schema::{
 	chrono::{DateTime, SubsecRound, Utc},
-	views::JobView,
+	views::{JobView, OrganizationView},
 	Invoice,
+	InvoiceDate,
 	Job,
 	Money,
 	Organization,
 };
-use sqlx::{postgres::types::PgInterval, Error, PgPool, Result};
+use futures::TryStreamExt;
+use sqlx::{postgres::types::PgInterval, Error, PgPool, Result, Row};
 
 use super::PostgresJob;
+use crate::{
+	schema::{util, PostgresLocation},
+	PostgresSchema as Schema,
+};
 
 #[async_trait::async_trait]
 impl JobAdapter for PostgresJob
@@ -61,7 +67,80 @@ impl JobAdapter for PostgresJob
 
 	async fn retrieve_view(connection: &PgPool, match_condition: &MatchJob) -> Result<Vec<JobView>>
 	{
-		todo!()
+		let id_match =
+			PostgresLocation::retrieve_matching_ids(connection, &match_condition.client.location);
+		let mut query = String::from(
+			"SELECT
+				J.id, J.client_id, J.date_close, J.date_open, J.increment, J.invoice_date_issued, \
+			 J.invoice_date_paid, J.invoice_hourly_rate, J.notes, J.objectives,
+				O.name, O.location_id,
+				P.name
+			FROM jobs J
+			JOIN organizations O ON (O.id = J.client_id)",
+		);
+		Schema::write_where_clause(
+			Schema::write_where_clause(
+				Schema::write_where_clause(Default::default(), "J", match_condition, &mut query),
+				"O",
+				&match_condition.client,
+				&mut query,
+			),
+			"L.id",
+			&id_match.await?,
+			&mut query,
+		);
+		query.push(';');
+
+		sqlx::query(&query)
+			.fetch(connection)
+			.and_then(|row| async move {
+				Ok(JobView {
+					id: row.get("id"),
+					client: OrganizationView {
+						id: row.get("client_id"),
+						name: row.get("name"),
+						location: PostgresLocation::retrieve_view_by_id(
+							connection,
+							row.get("location_id"),
+						)
+						.await?,
+					},
+					date_close: row.get("date_close"),
+					date_open: row.get("date_open"),
+					increment: util::duration_from(row.get("increment"))?,
+					invoice: Invoice {
+						date: row
+							.get::<Option<_>, _>("invoice_date_issued")
+							.map(|d| InvoiceDate {
+								issued: d,
+								paid: row.get("invoice_date_paid"),
+							}),
+						hourly_rate: {
+							fn map_err(e: impl std::error::Error) -> Error
+							{
+								Error::Decode(
+									format!(
+										"`invoice_hourly_rate` is not validly formatted: {}\n
+										The constraints on table `jobs` have failed",
+										e
+									)
+									.into(),
+								)
+							}
+
+							let (amount, currency) = row.get::<(String, String), _>("invoice_hourly_rate");
+							Money {
+								amount: amount.parse().map_err(map_err)?,
+								currency: currency.parse().map_err(map_err)?,
+							}
+						},
+					},
+					notes: row.get("notes"),
+					objectives: row.get("objectives"),
+				})
+			})
+			.try_collect()
+			.await
 	}
 }
 

@@ -1,3 +1,4 @@
+use core::time::Duration;
 use std::borrow::Cow;
 
 use clinvoice_schema::{chrono::NaiveDateTime, Id};
@@ -24,6 +25,9 @@ pub struct MatchJob<'m>
 
 	#[cfg_attr(feature = "serde_support", serde(default))]
 	pub id: Match<'m, Id>,
+
+	#[cfg_attr(feature = "serde_support", serde(default))]
+	pub increment: Match<'m, Duration>,
 
 	#[cfg_attr(feature = "serde_support", serde(default))]
 	pub invoice: MatchInvoice<'m>,

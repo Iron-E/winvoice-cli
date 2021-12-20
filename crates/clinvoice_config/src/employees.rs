@@ -1,12 +1,10 @@
-mod default;
-
 use clinvoice_schema::Id;
 use serde::{Deserialize, Serialize};
 
 /// # Summary
 ///
 /// Configurations for [`Employee`](clinvoice_schema::employee::Employee)s.
-#[derive(Copy, Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(Copy, Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Employees
 {
 	/// # Summary

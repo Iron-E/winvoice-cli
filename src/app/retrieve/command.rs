@@ -53,8 +53,12 @@ pub enum Command
 		#[structopt(help = "Select jobs to be closed", long, short)]
 		close: bool,
 
-		#[structopt(help = "Export retrieved entities to markdown", long, short)]
-		export: bool,
+		#[structopt(
+			help = "Export retrieved entities to markdown using the specified currency",
+			long,
+			short
+		)]
+		export: Option<Currency>,
 
 		#[structopt(help = "Select jobs to be reopened", long, short)]
 		reopen: bool,
@@ -278,15 +282,28 @@ impl Command
 
 				if export
 				{
+					let exchange_rates = if export == Default::default()
+					{
+						None
+					}
+					else
+					{
+						Some(ExchangeRates::new())
+					};
+
 					let to_export =
 						input::select(&results_view, "Select which Jobs you want to export")?;
 
-					let conn_borrow = &connection;
+					let exchange_rates = match exchange_rates
+					{
+						Some(fut) => Some(fut.await?),
+						_ => None,
+					};
 
 					// WARN: this `let` seems redundant, but the "type needs to be known at this point"
 					let export_result: DynResult<'_, _> = stream::iter(to_export.into_iter().map(Ok))
 						.try_for_each_concurrent(None, |job| async move {
-							let timesheets = TAdapter::retrieve_view(conn_borrow, &MatchTimesheet {
+							let timesheets = TAdapter::retrieve_view(&connection, &MatchTimesheet {
 								job: MatchJob {
 									id: job.id.into(),
 									..Default::default()
@@ -294,7 +311,13 @@ impl Command
 								..Default::default()
 							})
 							.await?;
-							let export = job.export(&timesheets)?;
+
+							let export = match exchange_rates
+							{
+								Some(_) => JobView {}.export(exchange_rates.as_ref(), &timesheets),
+								_ => job.export(None, &timesheets),
+							}?;
+
 							fs::write(
 								format!("{}--{}.md", job.client.name.replace(' ', "-"), job.id),
 								export,
@@ -338,11 +361,9 @@ impl Command
 						format!("Select the outer Location of {}", name),
 					)?;
 
-					let conn_borrow = &connection;
-
 					stream::iter(create_inner.into_iter().map(Ok).rev())
 						.try_fold(location.into(), |loc: Location, name: String| async move {
-							LAdapter::create_inner(conn_borrow, &loc, name).await
+							LAdapter::create_inner(&connection, &loc, name).await
 						})
 						.await?;
 				}

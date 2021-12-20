@@ -11,6 +11,9 @@ readme = "../README.md"
 repository = "https://www.github.com/Iron-E/clinvoice"
 
 [dependencies]
+# Async
+futures = "0.3"
+
 # CLInvoice
 clinvoice_finance = {path='../clinvoice_finance', version="0.2"}
 
@@ -19,6 +22,9 @@ chrono = {version="0.4", features=["serde"]}
 
 # Errors
 thiserror = "1"
+
+# Perf
+lazy_static = "1"
 
 # Serialization
 humantime-serde = "1"

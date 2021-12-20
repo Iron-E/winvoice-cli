@@ -1,13 +1,12 @@
 mod from_view;
 
 use chrono::{DateTime, Utc};
-use clinvoice_finance::{Decimal, ExchangeRates, Money, Result};
+use clinvoice_finance::{Decimal, ExchangeRates, Money};
+use lazy_static::lazy_static;
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 
 use crate::{Expense, Id};
-
-const SECONDS_PER_HOUR: i16 = 3600;
 
 /// # Summary
 ///
@@ -72,69 +71,64 @@ impl Timesheet
 {
 	/// # Summary
 	///
-	/// Get the amount of [`Money`] which is owed by the client on the [`Inovice`].
+	/// Get the amount of [`Money`] which is owed by the client on the [`Inovice`](crate::Invoice).
 	///
 	/// # Panics
 	///
-	/// * When not all [`Money`] amounts are in the same currency.
-	pub fn total(hourly_rate: Money, timesheets: &[Timesheet]) -> Result<Money>
+	/// When currencies must be exchanged, but the `exchange_rates` are not provided.
+	///
+	/// * This usually happens when `hourly_rate` is not the [`ExchangeRates::default`], as that is
+	///   the currency which is used for storage.
+	pub fn total(
+		exchange_rates: Option<&ExchangeRates>,
+		hourly_rate: Money,
+		timesheets: &[Timesheet],
+	) -> Money
 	{
-		let seconds_per_hour: Decimal = SECONDS_PER_HOUR.into();
+		lazy_static! {
+			static ref SECONDS_PER_HOUR: Decimal = 3600.into();
+		}
 
-		let mut exchange_rates = None;
-
-		let mut total = timesheets
+		let mut total = Money::new(0, 2, hourly_rate.currency);
+		timesheets
 			.iter()
 			.filter(|timesheet| timesheet.time_end.is_some())
-			.try_fold(
-				Money::new(0, 2, hourly_rate.currency),
-				|mut total, timesheet| -> Result<Money> {
-					let duration_seconds: Decimal = timesheet
-						.time_end
-						.expect(
-							"Previous iterator filter should have assured end time of Timesheet had a \
-							 value",
-						)
-						.signed_duration_since(timesheet.time_begin)
-						.num_seconds()
-						.into();
-					total.amount += (duration_seconds / seconds_per_hour) * hourly_rate.amount;
-
+			.for_each(|timesheet| {
+				total.amount += (Decimal::from(
 					timesheet
-						.expenses
-						.iter()
-						.try_for_each(|expense| -> Result<()> {
-							if expense.cost.currency == total.currency
-							{
-								total.amount += expense.cost.amount;
-							}
-							else
-							{
-								if exchange_rates.is_none()
-								{
-									exchange_rates = Some(ExchangeRates::new()?);
-								}
+						.time_end
+						.expect("Filters should assure that `Timesheet`s have an end time")
+						.signed_duration_since(timesheet.time_begin)
+						.num_seconds(),
+				) / *SECONDS_PER_HOUR) *
+					hourly_rate.amount;
 
-								total.amount += expense
-									.cost
-									.exchange(
-										total.currency,
-										exchange_rates.as_ref().expect(
-											"The exchange rates should have been downloaded just before this",
-										),
+				timesheet.expenses.iter().for_each(|expense| {
+					total.amount += if expense.cost.currency == total.currency
+					{
+						expense.cost.amount
+					}
+					else
+					{
+						expense
+							.cost
+							.exchange(
+								total.currency,
+								exchange_rates.unwrap_or_else(|| {
+									panic!(
+										"Must do currency conversion from {} to {}, but the exchange rates \
+										 were not provided.",
+										expense.cost.currency, total.currency
 									)
-									.amount;
-							}
-
-							Ok(())
-						})?;
-
-					Ok(total)
-				},
-			)?;
+								}),
+							)
+							.amount
+					}
+				});
+			});
 
 		total.amount.rescale(2);
-		Ok(total)
+		total
 	}
 }
 
@@ -174,7 +168,7 @@ mod tests
 		});
 
 		assert_eq!(
-			Timesheet::total(Money::new(20_00, 2, Currency::USD), &timesheets).unwrap(),
+			Timesheet::total(None, Money::new(20_00, 2, Currency::USD), &timesheets),
 			Money::new(4000, 2, Currency::USD),
 		);
 	}

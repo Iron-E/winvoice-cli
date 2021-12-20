@@ -5,7 +5,7 @@ use core::{fmt::Write, time::Duration};
 use std::collections::HashSet;
 
 use chrono::{DateTime, Local, Utc};
-use clinvoice_finance::Result;
+use clinvoice_finance::{ExchangeRates, Result};
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 
@@ -106,7 +106,11 @@ impl JobView
 	/// # Summary
 	///
 	/// Export some `job` to the [`Target`] specified.
-	pub fn export(&self, timesheets: &[TimesheetView]) -> Result<String>
+	pub fn export(
+		&self,
+		exchange_rates: Option<&ExchangeRates>,
+		timesheets: &[TimesheetView],
+	) -> Result<String>
 	{
 		let mut output = String::new();
 
@@ -192,13 +196,14 @@ impl JobView
 				text: Text::Bold("Total Amount Owed"),
 			},
 			Timesheet::total(
+				exchange_rates,
 				self.invoice.hourly_rate,
 				timesheets
 					.iter()
 					.map(|t| t.into())
 					.collect::<Vec<_>>()
 					.as_slice()
-			)?,
+			),
 		)
 		.unwrap();
 		writeln!(output, "{}", Element::<&str>::Break).unwrap();
@@ -333,7 +338,7 @@ mod tests
 		};
 
 		assert_eq!(
-			job.export(&[]).unwrap(),
+			job.export(None, &[]).unwrap(),
 			format!(
 				"# Job #{}
 
@@ -383,7 +388,7 @@ mod tests
 		];
 
 		assert_eq!(
-			job.export(&timesheets).unwrap(),
+			job.export(None, &timesheets).unwrap(),
 			format!(
 				"# Job #{}
 

@@ -6,7 +6,7 @@ use std::{
 
 use clinvoice_adapter::{WriteContext, WriteWhereClause};
 use clinvoice_match::{Match, MatchEmployee, MatchJob, MatchOrganization, MatchPerson, MatchStr};
-use clinvoice_schema::chrono::NaiveDateTime;
+use clinvoice_schema::{chrono::NaiveDateTime, Money};
 
 use super::{PostgresDateTime, PostgresOption, PostgresSchema as Schema, PostgresStr};
 
@@ -643,7 +643,7 @@ mod tests
 				Schema::write_where_clause(
 					InWhereCondition,
 					"another_row",
-					&Match::AllInRange(Owned(0), Owned(2)),
+					&Match::<i64>::AllInRange(Owned(0), Owned(2)),
 					&mut query,
 				),
 				AfterWhereCondition,
@@ -652,7 +652,7 @@ mod tests
 				Schema::write_where_clause(
 					InWhereCondition,
 					"another_row",
-					&Match::InRange(Owned(0), Owned(2)),
+					&Match::<i64>::InRange(Owned(0), Owned(2)),
 					&mut query2,
 				),
 				AfterWhereCondition,
@@ -665,7 +665,7 @@ mod tests
 				Schema::write_where_clause(
 					InWhereCondition,
 					"another_row",
-					&Match::AllLessThan(Owned(0)),
+					&Match::<i64>::AllLessThan(Owned(0)),
 					&mut query,
 				),
 				AfterWhereCondition,
@@ -674,7 +674,7 @@ mod tests
 				Schema::write_where_clause(
 					InWhereCondition,
 					"another_row",
-					&Match::LessThan(Owned(0)),
+					&Match::<i64>::LessThan(Owned(0)),
 					&mut query2,
 				),
 				AfterWhereCondition,
@@ -687,7 +687,7 @@ mod tests
 				Schema::write_where_clause(
 					InWhereCondition,
 					"another_row",
-					&Match::AllGreaterThan(Owned(0)),
+					&Match::<i64>::AllGreaterThan(Owned(0)),
 					&mut query,
 				),
 				AfterWhereCondition,
@@ -696,7 +696,7 @@ mod tests
 				Schema::write_where_clause(
 					InWhereCondition,
 					"another_row",
-					&Match::GreaterThan(Owned(0)),
+					&Match::<i64>::GreaterThan(Owned(0)),
 					&mut query2,
 				),
 				AfterWhereCondition,

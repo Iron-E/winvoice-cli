@@ -1,3 +1,4 @@
+mod default;
 mod display;
 mod from_str;
 
@@ -222,5 +223,16 @@ impl Currency
 			Self::USD => "USD",
 			Self::ZAR => "ZAR",
 		}
+	}
+
+	/// # Summary
+	///
+	/// The number of currencies supported by the program.
+	///
+	/// Good for use when creating [`Vec`]s or [`HashMap`](std:collections::HashMap)s.
+	pub const fn count() -> usize
+	{
+		// WARN: must be updated whenever the enum is changed.
+		33
 	}
 }

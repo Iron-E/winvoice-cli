@@ -12,8 +12,7 @@ impl Index<Currency> for ExchangeRates
 	fn index(&self, index: Currency) -> &Self::Output
 	{
 		self
-			.0
-			.get(&index)
+			.get(index)
 			.unwrap_or_else(|| panic!("{} was not found in this set of exchange rates", index))
 	}
 }

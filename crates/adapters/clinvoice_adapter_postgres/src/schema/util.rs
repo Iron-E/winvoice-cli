@@ -1,12 +1,8 @@
 use core::time::Duration;
 
+use sqlx::{postgres::types::PgInterval, Error, Result};
 #[cfg(test)]
-use lazy_static::lazy_static;
-use sqlx::{
-	postgres::{types::PgInterval, PgPool},
-	Error,
-	Result,
-};
+use {lazy_static::lazy_static, sqlx::PgPool};
 
 #[cfg(test)]
 pub(super) async fn connect() -> PgPool

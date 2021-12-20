@@ -2,6 +2,7 @@ use core::time::Duration;
 use std::convert::TryFrom;
 
 use clinvoice_adapter::{schema::JobAdapter, WriteWhereClause};
+use clinvoice_finance::{Error as FinanceError, ExchangeRates};
 use clinvoice_match::MatchJob;
 use clinvoice_schema::{
 	chrono::{DateTime, SubsecRound, Utc},
@@ -12,7 +13,7 @@ use clinvoice_schema::{
 	Money,
 	Organization,
 };
-use futures::TryStreamExt;
+use futures::{TryFutureExt, TryStreamExt};
 use sqlx::{postgres::types::PgInterval, Error, PgPool, Result, Row};
 
 use super::PostgresJob;
@@ -33,7 +34,18 @@ impl JobAdapter for PostgresJob
 		objectives: String,
 	) -> Result<Job>
 	{
+		let standardized_rate_fut = ExchangeRates::new()
+			.map_ok(|r| hourly_rate.exchange(Default::default(), &r))
+			.map_err(|e| match e
+			{
+				FinanceError::Decimal(e2) => Error::Decode(e2.into()),
+				FinanceError::Io(e2) => Error::Io(e2),
+				FinanceError::Reqwest(e2) => Error::Protocol(e2.to_string()),
+				FinanceError::UnsupportedCurrency(_) => Error::Decode(e.into()),
+			});
 		let pg_increment = PgInterval::try_from(increment).map_err(Error::Decode)?;
+		let standardized_rate = standardized_rate_fut.await?;
+
 		let row = sqlx::query!(
 			"INSERT INTO jobs
 				(client_id, date_close, date_open, increment, invoice_date_issued, invoice_date_paid, invoice_hourly_rate, notes, objectives)
@@ -43,8 +55,8 @@ impl JobAdapter for PostgresJob
 			client.id,
 			date_open,
 			pg_increment,
-			hourly_rate.amount.to_string(),
-			hourly_rate.currency.as_str() as _,
+			standardized_rate.amount.to_string(),
+			standardized_rate.currency.as_str() as _,
 			objectives,
 		)
 		.fetch_one(connection)

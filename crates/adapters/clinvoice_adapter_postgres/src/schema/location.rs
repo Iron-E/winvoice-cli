@@ -48,7 +48,7 @@ impl PostgresLocation
 						Schema::write_where_clause(
 							Default::default(),
 							"LO.outer_id",
-							&Match::Not(Match::Any.into()),
+							&Match::Not(Match::<i64>::Any.into()),
 							query,
 						)
 					}

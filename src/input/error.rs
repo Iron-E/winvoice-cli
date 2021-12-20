@@ -9,7 +9,7 @@ use thiserror::Error;
 #[derive(Debug, Error)]
 pub enum Error
 {
-	#[error("{0}")]
+	#[error(transparent)]
 	Io(#[from] io::Error),
 
 	#[error("No {0} could be selected for this operation, and at least one was required")]
@@ -21,7 +21,7 @@ pub enum Error
 	#[error("The text was not edited")]
 	NotEdited,
 
-	#[error("{0}")]
+	#[error(transparent)]
 	Yaml(#[from] yaml::Error),
 }
 

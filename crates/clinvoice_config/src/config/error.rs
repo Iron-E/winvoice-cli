@@ -5,13 +5,13 @@ use thiserror::Error;
 #[derive(Debug, Error)]
 pub enum Error
 {
-	#[error("{0}")]
+	#[error(transparent)]
 	Io(#[from] io::Error),
 
-	#[error("{0}")]
+	#[error(transparent)]
 	TomlDe(#[from] toml::de::Error),
 
-	#[error("{0}")]
+	#[error(transparent)]
 	TomlSer(#[from] toml::ser::Error),
 }
 

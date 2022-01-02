@@ -23,7 +23,6 @@ impl Initializable for PostgresSchema
 		Self::init_organizations(&mut transaction).await?;
 		Self::init_employees(&mut transaction).await?;
 		Self::init_contact_info(&mut transaction).await?;
-		Self::init_currency(&mut transaction).await?;
 		Self::init_money(&mut transaction).await?;
 		Self::init_jobs(&mut transaction).await?;
 		Self::init_expenses(&mut transaction).await?;

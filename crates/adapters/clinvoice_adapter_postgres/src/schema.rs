@@ -164,48 +164,14 @@ impl PostgresSchema
 	}
 
 	/// # Summary
-	/// Initialize the database for a given [`Store`].
-	async fn init_currency(connection: impl Executor<'_, Database = Postgres> + Send) -> Result<()>
-	{
-		sqlx::query!(
-			"CREATE DOMAIN currency AS text CHECK ((VALUE) IN
-			(
-				'AUD', 'BGN', 'BRL', 'CAD', 'CHF', 'CNY', 'CZK', 'DKK', 'EUR', 'GBP', 'HKD',
-				'HRK', 'HUF', 'IDR', 'ILS', 'INR', 'ISK', 'JPY', 'KRW', 'MXN', 'MYR', 'NOK',
-				'NZD', 'PHP', 'PLN', 'RON', 'RUB', 'SEK', 'SGD', 'THB', 'TRY', 'USD', 'ZAR'
-			));"
-		)
-		.execute(connection)
-		.await
-		.and(Ok(()))
-	}
-
-	/// # Summary
 	///
 	/// Initialize the database for a given [`Store`].
 	async fn init_money(connection: &mut Transaction<'_, Postgres>) -> Result<()>
 	{
-		sqlx::query!(
-			"CREATE TYPE amount_of_currency_unsafe AS
-			(
-				amount text,
-				currency currency
-			);"
-		)
-		.execute(&mut *connection)
-		.await?;
-
-		sqlx::query!(
-			r#"CREATE DOMAIN amount_of_currency AS amount_of_currency_unsafe CHECK
-			(
-				-- NOTE: `IS TRUE` checks for `NULL` as well as `FALSE`
-				(VALUE).amount ~ '^\d+(\.\d+)?$' IS TRUE AND
-				(VALUE).currency IS NOT NULL
-			);"#
-		)
-		.execute(&mut *connection)
-		.await
-		.and(Ok(()))
+		sqlx::query!(r#"CREATE DOMAIN amount_of_currency AS text CHECK (VALUE ~ '^\d+(\.\d+)?$');"#)
+			.execute(connection)
+			.await
+			.and(Ok(()))
 	}
 
 	/// # Summary
@@ -223,11 +189,7 @@ impl PostgresSchema
 				increment interval NOT NULL,
 				invoice_date_issued timestamptz,
 				invoice_date_paid timestamptz,
-				invoice_hourly_rate amount_of_currency CHECK
-				(
-					(invoice_hourly_rate).amount IS NOT NULL AND
-					(invoice_hourly_rate).currency IS NOT NULL
-				),
+				invoice_hourly_rate amount_of_currency NOT NULL,
 				notes text NOT NULL,
 				objectives text NOT NULL,
 

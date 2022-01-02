@@ -9,7 +9,7 @@ use crate::{Currency, ExchangeRates};
 /// # Summary
 ///
 /// Some `amount` of `currency`.
-#[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Copy, Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 pub struct Money
 {
@@ -29,7 +29,7 @@ impl Money
 	/// # Summary
 	///
 	/// Exchange some [`Money`] into another `currency`.
-	pub fn exchange(self, currency: Currency, exchange_rates: &ExchangeRates) -> Self
+	pub fn exchange(self, currency: Currency, rates: &ExchangeRates) -> Self
 	{
 		// noop for same currency
 		if self.currency == currency
@@ -37,8 +37,8 @@ impl Money
 			return self;
 		}
 
-		let eur = self.amount / exchange_rates[self.currency];
-		let mut exchanged = eur * exchange_rates[currency];
+		let eur = self.amount / rates[self.currency];
+		let mut exchanged = eur * rates[currency];
 		exchanged.rescale(2);
 
 		Self {

@@ -50,13 +50,12 @@ impl JobAdapter for PostgresJob
 			"INSERT INTO jobs
 				(client_id, date_close, date_open, increment, invoice_date_issued, invoice_date_paid, invoice_hourly_rate, notes, objectives)
 			VALUES
-				($1,        NULL,       $2,        $3,        NULL,                NULL,              ROW($4, $5),         '',    $6)
+				($1,        NULL,       $2,        $3,        NULL,                NULL,              $4,                  '',    $5)
 			RETURNING id;",
 			client.id,
 			date_open,
 			pg_increment,
-			standardized_rate.amount.to_string(),
-			standardized_rate.currency.as_str() as _,
+			standardized_rate.amount.to_string() as _,
 			objectives,
 		)
 		.fetch_one(connection)
@@ -128,22 +127,19 @@ impl JobAdapter for PostgresJob
 								paid: row.get("invoice_date_paid"),
 							}),
 						hourly_rate: {
-							fn map_err(e: impl std::error::Error) -> Error
-							{
-								Error::Decode(
-									format!(
-										"`invoice_hourly_rate` is not validly formatted: {}\n
-										The constraints on table `jobs` have failed",
-										e
-									)
-									.into(),
-								)
-							}
-
-							let (amount, currency) = row.get::<(String, String), _>("invoice_hourly_rate");
+							let amount = row.get::<String, _>("invoice_hourly_rate");
 							Money {
-								amount: amount.parse().map_err(map_err)?,
-								currency: currency.parse().map_err(map_err)?,
+								amount: amount.parse().map_err(|e| {
+									Error::Decode(
+										format!(
+											"`invoice_hourly_rate` is not validly formatted: {}\n
+										The constraints on table `jobs` have failed",
+											e
+										)
+										.into(),
+									)
+								})?,
+								..Default::default()
 							}
 						},
 					},
@@ -168,6 +164,7 @@ mod tests
 		OrganizationAdapter,
 		PersonAdapter,
 	};
+	use clinvoice_finance::ExchangeRates;
 	use clinvoice_schema::{chrono::Utc, Contact, Currency, Money};
 
 	use super::{JobAdapter, PostgresJob};
@@ -242,8 +239,7 @@ mod tests
 					increment,
 					invoice_date_issued,
 					invoice_date_paid,
-					(invoice_hourly_rate).amount as invoice_hourly_rate_amount,
-					(invoice_hourly_rate).currency as "invoice_hourly_rate_currency: String",
+					invoice_hourly_rate,
 					notes,
 					objectives
 				FROM jobs
@@ -264,12 +260,15 @@ mod tests
 		assert_eq!(None, row.invoice_date_issued);
 		assert_eq!(None, row.invoice_date_paid);
 		assert_eq!(
-			job.invoice.hourly_rate.amount,
-			row.invoice_hourly_rate_amount.unwrap().parse().unwrap()
-		);
-		assert_eq!(
-			job.invoice.hourly_rate.currency,
-			row.invoice_hourly_rate_currency.unwrap().parse().unwrap()
+			job.invoice.hourly_rate,
+			Money {
+				amount: row.invoice_hourly_rate.parse().unwrap(),
+				..Default::default()
+			}
+			.exchange(
+				job.invoice.hourly_rate.currency,
+				&ExchangeRates::new().await.unwrap()
+			),
 		);
 		assert_eq!(job.notes, row.notes);
 		assert_eq!(job.objectives, row.objectives);

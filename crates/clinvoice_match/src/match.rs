@@ -1,9 +1,11 @@
 mod default;
 mod from;
 
-use core::{cmp::Eq, fmt::Debug};
-use std::borrow::Cow;
+use core::{cmp::Eq, fmt::Debug, ops::Deref};
+use std::borrow::Cow::{self, Owned};
 
+use clinvoice_finance::ExchangeRates;
+use clinvoice_schema::{Currency, Money};
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 
@@ -112,4 +114,61 @@ where
 	///
 	/// Match if and only if any of the contained [`Match`]es also match.
 	Or(Vec<Self>),
+}
+
+impl<'m, T> Match<'m, T>
+where
+	T: Clone + Debug,
+{
+	/// # Summary
+	///
+	/// Transform some `Match` of type `T` into another type `U` by providing a mapping function.
+	///
+	/// # See also
+	///
+	/// * [`Iterator::map`]
+	pub fn map<U>(self, f: &impl Fn(&T) -> U) -> Match<'m, U>
+	where
+		U: Clone + Debug,
+	{
+		macro_rules! map {
+			($func:ident, $val:ident) => {
+				Owned($func($val.deref()))
+			};
+		}
+
+		match self
+		{
+			Match::AllGreaterThan(x) => Match::AllGreaterThan(map!(f, x)),
+			Match::AllInRange(low, high) => Match::AllInRange(map!(f, low), map!(f, high)),
+			Match::AllLessThan(x) => Match::AllLessThan(map!(f, x)),
+			Match::And(match_conditions) =>
+			{
+				Match::And(match_conditions.into_iter().map(|m| m.map(f)).collect())
+			},
+			Match::Any => Match::Any,
+			Match::EqualTo(x) => Match::EqualTo(map!(f, x)),
+			Match::GreaterThan(x) => Match::GreaterThan(map!(f, x)),
+			Match::HasAll(collection) => Match::HasAll(collection.into_iter().map(f).collect()),
+			Match::HasAny(collection) => Match::HasAny(collection.into_iter().map(f).collect()),
+			Match::InRange(low, high) => Match::InRange(map!(f, low), map!(f, high)),
+			Match::LessThan(x) => Match::LessThan(map!(f, x)),
+			Match::Not(match_condition) => Match::Not(match_condition.map(f).into()),
+			Match::Or(match_conditions) =>
+			{
+				Match::Or(match_conditions.into_iter().map(|m| m.map(f)).collect())
+			},
+		}
+	}
+}
+
+impl<'m> Match<'m, Money>
+{
+	/// # Summary
+	///
+	/// Exchange a `Match` for an amount of `Money` to another `currency`.
+	pub fn exchange(self, currency: Currency, rates: &ExchangeRates) -> Match<'m, Money>
+	{
+		self.map(&|money| money.exchange(currency, rates))
+	}
 }

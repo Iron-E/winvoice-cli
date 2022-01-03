@@ -17,12 +17,12 @@ mod typecast;
 mod util;
 mod write_where_clause;
 
-pub use employee::PostgresEmployee;
-pub use job::PostgresJob;
-pub use location::PostgresLocation;
-pub use organization::PostgresOrganization;
-pub use person::PostgresPerson;
-pub use timesheet::PostgresTimesheet;
+pub use employee::PgEmployee;
+pub use job::PgJob;
+pub use location::PgLocation;
+pub use organization::PgOrganization;
+pub use person::PgPerson;
+pub use timesheet::PgTimesheet;
 pub(crate) use date_time::PostgresDateTime;
 pub(crate) use option::PostgresOption;
 pub(crate) use typecast::PostgresTypeCast;
@@ -35,9 +35,9 @@ pub(crate) use self::str::PostgresStr;
 /// An empty struct which implements [`Initializable`](clinvoice_adapter::schema::Initializable) so
 /// that the Postgres database can have all of the necessary tables set up if this is the first run
 /// of the program.
-pub struct PostgresSchema;
+pub struct PgSchema;
 
-impl PostgresSchema
+impl PgSchema
 {
 	/// # Summary
 	///

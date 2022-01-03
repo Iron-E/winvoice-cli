@@ -14,11 +14,11 @@ use clinvoice_schema::{
 use futures::TryStreamExt;
 use sqlx::{Error, PgPool, Result, Row};
 
-use super::PostgresEmployee;
-use crate::{schema::PostgresLocation, PostgresSchema as Schema};
+use super::PgEmployee;
+use crate::{schema::PgLocation, PgSchema as Schema};
 
 #[async_trait::async_trait]
-impl EmployeeAdapter for PostgresEmployee
+impl EmployeeAdapter for PgEmployee
 {
 	async fn create(
 		connection: &PgPool,
@@ -119,7 +119,7 @@ impl EmployeeAdapter for PostgresEmployee
 		match_condition: &MatchEmployee,
 	) -> Result<Vec<EmployeeView>>
 	{
-		let id_match = PostgresLocation::retrieve_matching_ids(
+		let id_match = PgLocation::retrieve_matching_ids(
 			connection,
 			&match_condition.organization.location,
 		);
@@ -153,7 +153,7 @@ impl EmployeeAdapter for PostgresEmployee
 					organization: OrganizationView {
 						id: row.get("organization_id"),
 						name: row.get("organization_name"),
-						location: PostgresLocation::retrieve_view_by_id(
+						location: PgLocation::retrieve_view_by_id(
 							connection,
 							row.get("location_id"),
 						)
@@ -173,7 +173,7 @@ impl EmployeeAdapter for PostgresEmployee
 								if let Some(id) = contact.2
 								{
 									ContactView::Address {
-										location: PostgresLocation::retrieve_view_by_id(connection, id)
+										location: PgLocation::retrieve_view_by_id(connection, id)
 											.await?,
 										export: contact.0,
 									}
@@ -223,8 +223,8 @@ mod tests
 		Contact,
 	};
 
-	use super::{EmployeeAdapter, PostgresEmployee};
-	use crate::schema::{util, PostgresLocation, PostgresOrganization, PostgresPerson};
+	use super::{EmployeeAdapter, PgEmployee};
+	use crate::schema::{util, PgLocation, PgOrganization, PgPerson};
 
 	/// TODO: use fuzzing
 	#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
@@ -232,20 +232,20 @@ mod tests
 	{
 		let connection = util::connect().await;
 
-		let earth = PostgresLocation::create(&connection, "Earth".into())
+		let earth = PgLocation::create(&connection, "Earth".into())
 			.await
 			.unwrap();
 
 		let organization =
-			PostgresOrganization::create(&connection, &earth, "Some Organization".into())
+			PgOrganization::create(&connection, &earth, "Some Organization".into())
 				.await
 				.unwrap();
 
-		let person = PostgresPerson::create(&connection, "My Name".into())
+		let person = PgPerson::create(&connection, "My Name".into())
 			.await
 			.unwrap();
 
-		let employee = PostgresEmployee::create(
+		let employee = PgEmployee::create(
 			&connection,
 			[
 				("Office".into(), Contact::Address {
@@ -323,19 +323,19 @@ mod tests
 	{
 		let connection = util::connect().await;
 
-		let earth = PostgresLocation::create(&connection, "Earth".into())
+		let earth = PgLocation::create(&connection, "Earth".into())
 			.await
 			.unwrap();
 
-		let usa = PostgresLocation::create_inner(&connection, &earth, "USA".into())
+		let usa = PgLocation::create_inner(&connection, &earth, "USA".into())
 			.await
 			.unwrap();
 
-		let arizona = PostgresLocation::create_inner(&connection, &usa, "Arizona".into())
+		let arizona = PgLocation::create_inner(&connection, &usa, "Arizona".into())
 			.await
 			.unwrap();
 
-		let utah = PostgresLocation::create_inner(&connection, &usa, "Utah".into())
+		let utah = PgLocation::create_inner(&connection, &usa, "Utah".into())
 			.await
 			.unwrap();
 
@@ -361,11 +361,11 @@ mod tests
 		};
 
 		let organization =
-			PostgresOrganization::create(&connection, &arizona, "Some Organization".into())
+			PgOrganization::create(&connection, &arizona, "Some Organization".into())
 				.await
 				.unwrap();
 		let organization2 =
-			PostgresOrganization::create(&connection, &utah, "Some Other Organizatión".into())
+			PgOrganization::create(&connection, &utah, "Some Other Organizatión".into())
 				.await
 				.unwrap();
 
@@ -380,10 +380,10 @@ mod tests
 			location: utah_view.clone(),
 		};
 
-		let person = PostgresPerson::create(&connection, "My Name".into())
+		let person = PgPerson::create(&connection, "My Name".into())
 			.await
 			.unwrap();
-		let person2 = PostgresPerson::create(&connection, "Another Gúy".into())
+		let person2 = PgPerson::create(&connection, "Another Gúy".into())
 			.await
 			.unwrap();
 
@@ -396,7 +396,7 @@ mod tests
 			name: person2.name.clone(),
 		};
 
-		let employee = PostgresEmployee::create(
+		let employee = PgEmployee::create(
 			&connection,
 			[
 				("Remote Office".into(), Contact::Address {
@@ -421,7 +421,7 @@ mod tests
 		)
 		.await
 		.unwrap();
-		let employee2 = PostgresEmployee::create(
+		let employee2 = PgEmployee::create(
 			&connection,
 			[
 				("Favorite Pizza Place".into(), Contact::Address {
@@ -495,7 +495,7 @@ mod tests
 		};
 
 		assert_eq!(
-			PostgresEmployee::retrieve_view(&connection, &MatchEmployee {
+			PgEmployee::retrieve_view(&connection, &MatchEmployee {
 				organization: MatchOrganization {
 					name: employee_view.organization.name.clone().into(),
 					location: MatchLocation {

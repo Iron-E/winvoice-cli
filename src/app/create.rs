@@ -23,11 +23,11 @@ use structopt::StructOpt;
 #[cfg(feature = "postgres")]
 use {
 	clinvoice_adapter_postgres::schema::{
-		PostgresEmployee,
-		PostgresJob,
-		PostgresLocation,
-		PostgresOrganization,
-		PostgresPerson,
+		PgEmployee,
+		PgJob,
+		PgLocation,
+		PgOrganization,
+		PgPerson,
 	},
 	sqlx::PgPool,
 };
@@ -368,7 +368,7 @@ impl Create
 			{
 				let pool = PgPool::connect_lazy(&store.url)?;
 				self
-					.create::<_, PostgresEmployee, PostgresJob, PostgresLocation, PostgresOrganization, PostgresPerson>(
+					.create::<_, PgEmployee, PgJob, PgLocation, PgOrganization, PgPerson>(
 						pool,
 						default_currency,
 						default_increment,

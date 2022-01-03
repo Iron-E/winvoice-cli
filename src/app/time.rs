@@ -1,13 +1,13 @@
 mod command;
 
 use clinvoice_adapter::{Adapters, Error as AdapterError, Store};
-use clinvoice_adapter_postgres::schema::PostgresTimesheet;
+use clinvoice_adapter_postgres::schema::PgTimesheet;
 use clinvoice_schema::Id;
 use command::Command;
 use structopt::StructOpt;
 #[cfg(feature = "postgres")]
 use {
-	clinvoice_adapter_postgres::schema::{PostgresEmployee, PostgresJob},
+	clinvoice_adapter_postgres::schema::{PgEmployee, PgJob},
 	sqlx::PgPool,
 };
 
@@ -47,7 +47,7 @@ impl Time
 				let pool = PgPool::connect_lazy(&store.url)?;
 				self
 					.command
-					.run::<_, PostgresEmployee, PostgresJob, PostgresTimesheet>(
+					.run::<_, PgEmployee, PgJob, PgTimesheet>(
 						pool,
 						if self.use_default_employee_id
 						{

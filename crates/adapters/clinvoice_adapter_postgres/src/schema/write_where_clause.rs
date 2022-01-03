@@ -6,7 +6,7 @@ use clinvoice_finance::Money;
 use clinvoice_match::{Match, MatchEmployee, MatchJob, MatchOrganization, MatchPerson, MatchStr};
 use clinvoice_schema::chrono::NaiveDateTime;
 
-use super::{PostgresDateTime, PostgresOption, PostgresSchema as Schema, PostgresStr, PostgresTypeCast};
+use super::{PostgresDateTime, PostgresOption, PgSchema as Schema, PostgresStr, PostgresTypeCast};
 
 /// # Summary
 ///

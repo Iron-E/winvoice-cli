@@ -2,10 +2,10 @@ use clinvoice_adapter::Updatable;
 use clinvoice_schema::Timesheet;
 use sqlx::{Executor, Postgres, Result};
 
-use super::PostgresTimesheet;
+use super::PgTimesheet;
 
 #[async_trait::async_trait]
-impl Updatable for PostgresTimesheet
+impl Updatable for PgTimesheet
 {
 	type Db = Postgres;
 	type Entity = Timesheet;

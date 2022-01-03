@@ -4,11 +4,11 @@ use clinvoice_schema::{views::OrganizationView, Location, Organization};
 use futures::TryStreamExt;
 use sqlx::{PgPool, Result, Row};
 
-use super::PostgresOrganization;
-use crate::{schema::PostgresLocation, PostgresSchema as Schema};
+use super::PgOrganization;
+use crate::{schema::PgLocation, PgSchema as Schema};
 
 #[async_trait::async_trait]
-impl OrganizationAdapter for PostgresOrganization
+impl OrganizationAdapter for PgOrganization
 {
 	async fn create(connection: &PgPool, location: &Location, name: String) -> Result<Organization>
 	{
@@ -32,7 +32,7 @@ impl OrganizationAdapter for PostgresOrganization
 		match_condition: &MatchOrganization,
 	) -> Result<Vec<OrganizationView>>
 	{
-		let id_match = PostgresLocation::retrieve_matching_ids(connection, &match_condition.location);
+		let id_match = PgLocation::retrieve_matching_ids(connection, &match_condition.location);
 		let mut query = String::from(
 			"SELECT O.id, O.location_id, O.name
 			FROM organizations O
@@ -52,7 +52,7 @@ impl OrganizationAdapter for PostgresOrganization
 				Ok(OrganizationView {
 					id: row.get("id"),
 					name: row.get("name"),
-					location: PostgresLocation::retrieve_view_by_id(connection, row.get("location_id"))
+					location: PgLocation::retrieve_view_by_id(connection, row.get("location_id"))
 						.await?,
 				})
 			})
@@ -70,8 +70,8 @@ mod tests
 	use clinvoice_match::{Match, MatchLocation, MatchOrganization, MatchOuterLocation};
 	use clinvoice_schema::views::{LocationView, OrganizationView};
 
-	use super::{OrganizationAdapter, PostgresOrganization};
-	use crate::schema::{util, PostgresLocation};
+	use super::{OrganizationAdapter, PgOrganization};
+	use crate::schema::{util, PgLocation};
 
 	/// TODO: use fuzzing
 	#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
@@ -79,12 +79,12 @@ mod tests
 	{
 		let connection = util::connect().await;
 
-		let earth = PostgresLocation::create(&connection, "Earth".into())
+		let earth = PgLocation::create(&connection, "Earth".into())
 			.await
 			.unwrap();
 
 		let organization =
-			PostgresOrganization::create(&connection, &earth, "Some Organization".into())
+			PgOrganization::create(&connection, &earth, "Some Organization".into())
 				.await
 				.unwrap();
 
@@ -108,19 +108,19 @@ mod tests
 	{
 		let connection = util::connect().await;
 
-		let earth = PostgresLocation::create(&connection, "Earth".into())
+		let earth = PgLocation::create(&connection, "Earth".into())
 			.await
 			.unwrap();
 
-		let usa = PostgresLocation::create_inner(&connection, &earth, "USA".into())
+		let usa = PgLocation::create_inner(&connection, &earth, "USA".into())
 			.await
 			.unwrap();
 
-		let arizona = PostgresLocation::create_inner(&connection, &usa, "Arizona".into())
+		let arizona = PgLocation::create_inner(&connection, &usa, "Arizona".into())
 			.await
 			.unwrap();
 
-		let utah = PostgresLocation::create_inner(&connection, &usa, "Utah".into())
+		let utah = PgLocation::create_inner(&connection, &usa, "Utah".into())
 			.await
 			.unwrap();
 
@@ -149,11 +149,11 @@ mod tests
 		};
 
 		let some_organization =
-			PostgresOrganization::create(&connection, &arizona.into(), "Some Organization".into())
+			PgOrganization::create(&connection, &arizona.into(), "Some Organization".into())
 				.await
 				.unwrap();
 		let some_other_organization =
-			PostgresOrganization::create(&connection, &utah.into(), "Some Other Organizatión".into())
+			PgOrganization::create(&connection, &utah.into(), "Some Other Organizatión".into())
 				.await
 				.unwrap();
 
@@ -170,7 +170,7 @@ mod tests
 
 		// Assert ::retrieve_view gets the right data from the DB
 		assert_eq!(
-			PostgresOrganization::retrieve_view(&connection, &MatchOrganization {
+			PgOrganization::retrieve_view(&connection, &MatchOrganization {
 				id: some_organization_view.id.into(),
 				..Default::default()
 			})
@@ -181,7 +181,7 @@ mod tests
 		);
 
 		assert_eq!(
-			PostgresOrganization::retrieve_view(&connection, &MatchOrganization {
+			PgOrganization::retrieve_view(&connection, &MatchOrganization {
 				location: MatchLocation {
 					outer: MatchOuterLocation::Some(
 						MatchLocation {

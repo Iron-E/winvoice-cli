@@ -2,10 +2,10 @@ use clinvoice_adapter::Updatable;
 use clinvoice_schema::Job;
 use sqlx::{Executor, Postgres, Result};
 
-use super::PostgresJob;
+use super::PgJob;
 
 #[async_trait::async_trait]
-impl Updatable for PostgresJob
+impl Updatable for PgJob
 {
 	type Db = Postgres;
 	type Entity = Job;

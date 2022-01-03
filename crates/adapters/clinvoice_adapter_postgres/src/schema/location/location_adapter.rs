@@ -4,11 +4,11 @@ use clinvoice_schema::{views::LocationView, Location};
 use futures::TryStreamExt;
 use sqlx::{PgPool, Result, Row};
 
-use super::PostgresLocation;
-use crate::PostgresSchema as Schema;
+use super::PgLocation;
+use crate::PgSchema as Schema;
 
 #[async_trait::async_trait]
-impl LocationAdapter for PostgresLocation
+impl LocationAdapter for PgLocation
 {
 	async fn create(connection: &PgPool, name: String) -> Result<Location>
 	{
@@ -55,7 +55,7 @@ impl LocationAdapter for PostgresLocation
 
 		sqlx::query(&query)
 			.fetch(connection)
-			.and_then(|row| PostgresLocation::retrieve_view_by_id(connection, row.get("id")))
+			.and_then(|row| PgLocation::retrieve_view_by_id(connection, row.get("id")))
 			.try_collect()
 			.await
 	}
@@ -69,7 +69,7 @@ mod tests
 	use clinvoice_match::{MatchLocation, MatchOuterLocation};
 	use clinvoice_schema::views::LocationView;
 
-	use super::{LocationAdapter, PostgresLocation};
+	use super::{LocationAdapter, PgLocation};
 	use crate::schema::util;
 
 	/// TODO: use fuzzing
@@ -78,21 +78,21 @@ mod tests
 	{
 		let connection = util::connect().await;
 
-		let earth = PostgresLocation::create(&connection, "Earth".into())
+		let earth = PgLocation::create(&connection, "Earth".into())
 			.await
 			.unwrap();
 
-		let usa = PostgresLocation::create_inner(&connection, &earth, "USA".into())
+		let usa = PgLocation::create_inner(&connection, &earth, "USA".into())
 			.await
 			.unwrap();
 
-		let arizona = PostgresLocation::create_inner(&connection, &usa, "Arizona".into())
+		let arizona = PgLocation::create_inner(&connection, &usa, "Arizona".into())
 			.await
 			.unwrap();
 
 		// Assert ::create_inner works when `outer_id` has already been used for another `Location`
 		assert!(
-			PostgresLocation::create_inner(&connection, &usa, "Utah".into())
+			PgLocation::create_inner(&connection, &usa, "Utah".into())
 				.await
 				.is_ok()
 		);
@@ -136,19 +136,19 @@ mod tests
 	{
 		let connection = util::connect().await;
 
-		let earth = PostgresLocation::create(&connection, "Earth".into())
+		let earth = PgLocation::create(&connection, "Earth".into())
 			.await
 			.unwrap();
 
-		let usa = PostgresLocation::create_inner(&connection, &earth, "USA".into())
+		let usa = PgLocation::create_inner(&connection, &earth, "USA".into())
 			.await
 			.unwrap();
 
-		let arizona = PostgresLocation::create_inner(&connection, &usa, "Arizona".into())
+		let arizona = PgLocation::create_inner(&connection, &usa, "Arizona".into())
 			.await
 			.unwrap();
 
-		let utah = PostgresLocation::create_inner(&connection, &usa, "Utah".into())
+		let utah = PgLocation::create_inner(&connection, &usa, "Utah".into())
 			.await
 			.unwrap();
 
@@ -179,7 +179,7 @@ mod tests
 		// Assert ::retrieve_view retrieves accurately from the DB
 		assert_eq!(
 			&[earth_view],
-			PostgresLocation::retrieve_view(&connection, &MatchLocation {
+			PgLocation::retrieve_view(&connection, &MatchLocation {
 				id: earth.id.into(),
 				..Default::default()
 			})
@@ -192,7 +192,7 @@ mod tests
 			[utah_view, arizona_view]
 				.into_iter()
 				.collect::<HashSet<_>>(),
-			PostgresLocation::retrieve_view(&connection, &MatchLocation {
+			PgLocation::retrieve_view(&connection, &MatchLocation {
 				outer: MatchOuterLocation::Some(Box::new(MatchLocation {
 					id: usa_view.id.into(),
 					..Default::default()

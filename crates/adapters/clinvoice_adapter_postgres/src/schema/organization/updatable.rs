@@ -2,10 +2,10 @@ use clinvoice_adapter::Updatable;
 use clinvoice_schema::Organization;
 use sqlx::{Executor, Postgres, Result};
 
-use super::PostgresOrganization;
+use super::PgOrganization;
 
 #[async_trait::async_trait]
-impl Updatable for PostgresOrganization
+impl Updatable for PgOrganization
 {
 	type Db = Postgres;
 	type Entity = Organization;

@@ -2,10 +2,10 @@ use clinvoice_adapter::Deletable;
 use clinvoice_schema::Job;
 use sqlx::{Acquire, Postgres, Result};
 
-use super::PostgresJob;
+use super::PgJob;
 
 #[async_trait::async_trait]
-impl Deletable for PostgresJob
+impl Deletable for PgJob
 {
 	type Db = Postgres;
 	type Entity = Job;

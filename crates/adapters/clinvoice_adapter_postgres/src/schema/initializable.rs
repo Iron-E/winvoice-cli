@@ -1,10 +1,10 @@
 use clinvoice_adapter::Initializable;
 use sqlx::{Acquire, Error, Postgres, Result};
 
-use super::PostgresSchema;
+use super::PgSchema;
 
 #[async_trait::async_trait]
-impl Initializable for PostgresSchema
+impl Initializable for PgSchema
 {
 	type Db = Postgres;
 	type Error = Error;

@@ -7,15 +7,15 @@ use clinvoice_schema::{views::LocationView, Id};
 use futures::{future, TryFutureExt, TryStreamExt};
 use sqlx::{Executor, PgPool, Postgres, Result, Row};
 
-use crate::PostgresSchema as Schema;
+use crate::PgSchema as Schema;
 
 mod deletable;
 mod location_adapter;
 mod updatable;
 
-pub struct PostgresLocation;
+pub struct PgLocation;
 
-impl PostgresLocation
+impl PgLocation
 {
 	pub(super) async fn retrieve_matching_ids<'a>(
 		connection: &PgPool,

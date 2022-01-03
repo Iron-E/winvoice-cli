@@ -16,14 +16,14 @@ use clinvoice_schema::{
 use futures::{TryFutureExt, TryStreamExt};
 use sqlx::{postgres::types::PgInterval, Error, PgPool, Result, Row};
 
-use super::PostgresJob;
+use super::PgJob;
 use crate::{
-	schema::{util, PostgresLocation},
-	PostgresSchema as Schema,
+	schema::{util, PgLocation},
+	PgSchema as Schema,
 };
 
 #[async_trait::async_trait]
-impl JobAdapter for PostgresJob
+impl JobAdapter for PgJob
 {
 	async fn create(
 		connection: &PgPool,
@@ -87,7 +87,7 @@ impl JobAdapter for PostgresJob
 		});
 
 		let id_match =
-			PostgresLocation::retrieve_matching_ids(connection, &match_condition.client.location);
+			PgLocation::retrieve_matching_ids(connection, &match_condition.client.location);
 		let mut query = String::from(
 			"SELECT
 				J.id, J.client_id, J.date_close, J.date_open, J.increment, J.invoice_date_issued, \
@@ -139,7 +139,7 @@ impl JobAdapter for PostgresJob
 					client: OrganizationView {
 						id: row.get("client_id"),
 						name: row.get("name"),
-						location: PostgresLocation::retrieve_view_by_id(
+						location: PgLocation::retrieve_view_by_id(
 							connection,
 							row.get("location_id"),
 						)
@@ -196,13 +196,13 @@ mod tests
 	use clinvoice_finance::ExchangeRates;
 	use clinvoice_schema::{chrono::Utc, Contact, Currency, Money};
 
-	use super::{JobAdapter, PostgresJob};
+	use super::{JobAdapter, PgJob};
 	use crate::schema::{
 		util,
-		PostgresEmployee,
-		PostgresLocation,
-		PostgresOrganization,
-		PostgresPerson,
+		PgEmployee,
+		PgLocation,
+		PgOrganization,
+		PgPerson,
 	};
 
 	#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
@@ -210,16 +210,16 @@ mod tests
 	{
 		let connection = util::connect().await;
 
-		let earth = PostgresLocation::create(&connection, "Earth".into())
+		let earth = PgLocation::create(&connection, "Earth".into())
 			.await
 			.unwrap();
 
 		let organization =
-			PostgresOrganization::create(&connection, &earth, "Some Organization".into())
+			PgOrganization::create(&connection, &earth, "Some Organization".into())
 				.await
 				.unwrap();
 
-		let person = PostgresPerson::create(&connection, "My Name".into())
+		let person = PgPerson::create(&connection, "My Name".into())
 			.await
 			.unwrap();
 
@@ -237,7 +237,7 @@ mod tests
 			export: true,
 		});
 
-		let employee = PostgresEmployee::create(
+		let employee = PgEmployee::create(
 			&connection,
 			contact_info,
 			&organization,
@@ -248,7 +248,7 @@ mod tests
 		.await
 		.unwrap();
 
-		let job = PostgresJob::create(
+		let job = PgJob::create(
 			&connection,
 			&organization,
 			Utc::now(),

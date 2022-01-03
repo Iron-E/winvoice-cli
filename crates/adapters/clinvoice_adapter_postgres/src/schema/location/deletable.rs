@@ -2,10 +2,10 @@ use clinvoice_adapter::Deletable;
 use clinvoice_schema::Location;
 use sqlx::{Acquire, Postgres, Result};
 
-use super::PostgresLocation;
+use super::PgLocation;
 
 #[async_trait::async_trait]
-impl Deletable for PostgresLocation
+impl Deletable for PgLocation
 {
 	type Db = Postgres;
 	type Entity = Location;

@@ -1,7 +1,7 @@
 use clinvoice_adapter::{Adapters, Error as AdapterError, Initializable, Store};
 #[cfg(feature = "postgres")]
 use {
-	clinvoice_adapter_postgres::PostgresSchema,
+	clinvoice_adapter_postgres::PgSchema,
 	sqlx::{Connection, PgConnection},
 };
 
@@ -18,7 +18,7 @@ pub async fn run<'err>(store: &Store) -> DynResult<'err, ()>
 		Adapters::Postgres =>
 		{
 			let mut connection = PgConnection::connect(&store.url).await?;
-			PostgresSchema::init(&mut connection).await?;
+			PgSchema::init(&mut connection).await?;
 		},
 
 		// NOTE: this is allowed because there may be additional adapters added later, and I want

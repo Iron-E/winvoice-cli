@@ -2,4 +2,4 @@ mod deletable;
 mod job_adapter;
 mod updatable;
 
-pub struct PostgresJob;
+pub struct PgJob;

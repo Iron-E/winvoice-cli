@@ -9,10 +9,10 @@ use clinvoice_schema::{
 };
 use sqlx::{PgPool, Result};
 
-use super::PostgresTimesheet;
+use super::PgTimesheet;
 
 #[async_trait::async_trait]
-impl TimesheetAdapter for PostgresTimesheet
+impl TimesheetAdapter for PgTimesheet
 {
 	async fn create(connection: &PgPool, employee: &Employee, job: &Job) -> Result<Timesheet>
 	{
@@ -68,14 +68,14 @@ mod tests
 	};
 	use clinvoice_schema::{chrono::Utc, Contact, Currency, Expense, Money};
 
-	use super::{PostgresTimesheet, TimesheetAdapter};
+	use super::{PgTimesheet, TimesheetAdapter};
 	use crate::schema::{
 		util,
-		PostgresEmployee,
-		PostgresJob,
-		PostgresLocation,
-		PostgresOrganization,
-		PostgresPerson,
+		PgEmployee,
+		PgJob,
+		PgLocation,
+		PgOrganization,
+		PgPerson,
 	};
 
 	#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
@@ -83,16 +83,16 @@ mod tests
 	{
 		let connection = util::connect().await;
 
-		let earth = PostgresLocation::create(&connection, "Earth".into())
+		let earth = PgLocation::create(&connection, "Earth".into())
 			.await
 			.unwrap();
 
 		let organization =
-			PostgresOrganization::create(&connection, &earth, "Some Organization".into())
+			PgOrganization::create(&connection, &earth, "Some Organization".into())
 				.await
 				.unwrap();
 
-		let job = PostgresJob::create(
+		let job = PgJob::create(
 			&connection,
 			&organization,
 			Utc::now(),
@@ -103,7 +103,7 @@ mod tests
 		.await
 		.unwrap();
 
-		let person = PostgresPerson::create(&connection, "My Name".into())
+		let person = PgPerson::create(&connection, "My Name".into())
 			.await
 			.unwrap();
 
@@ -121,7 +121,7 @@ mod tests
 			export: true,
 		});
 
-		let employee = PostgresEmployee::create(
+		let employee = PgEmployee::create(
 			&connection,
 			contact_info,
 			&organization,
@@ -132,7 +132,7 @@ mod tests
 		.await
 		.unwrap();
 
-		let timesheet = PostgresTimesheet::create(&connection, &employee, &job)
+		let timesheet = PgTimesheet::create(&connection, &employee, &job)
 			.await
 			.unwrap();
 

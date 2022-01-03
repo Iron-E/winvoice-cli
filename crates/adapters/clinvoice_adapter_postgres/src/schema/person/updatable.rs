@@ -2,10 +2,10 @@ use clinvoice_adapter::Updatable;
 use clinvoice_schema::Person;
 use sqlx::{Executor, Postgres, Result};
 
-use super::PostgresPerson;
+use super::PgPerson;
 
 #[async_trait::async_trait]
-impl Updatable for PostgresPerson
+impl Updatable for PgPerson
 {
 	type Db = Postgres;
 	type Entity = Person;

@@ -2,4 +2,4 @@ mod deletable;
 mod timesheet_adapter;
 mod updatable;
 
-pub struct PostgresTimesheet;
+pub struct PgTimesheet;

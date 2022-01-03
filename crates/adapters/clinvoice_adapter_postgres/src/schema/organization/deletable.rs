@@ -2,10 +2,10 @@ use clinvoice_adapter::Deletable;
 use clinvoice_schema::Organization;
 use sqlx::{Acquire, Postgres, Result};
 
-use super::PostgresOrganization;
+use super::PgOrganization;
 
 #[async_trait::async_trait]
-impl Deletable for PostgresOrganization
+impl Deletable for PgOrganization
 {
 	type Db = Postgres;
 	type Entity = Organization;

@@ -2,4 +2,4 @@ mod deletable;
 mod person_adapter;
 mod updatable;
 
-pub struct PostgresPerson;
+pub struct PgPerson;

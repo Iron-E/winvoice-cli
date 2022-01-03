@@ -4,11 +4,11 @@ use clinvoice_schema::{views::PersonView, Person};
 use futures::stream::TryStreamExt;
 use sqlx::{PgPool, Result, Row};
 
-use super::PostgresPerson;
-use crate::PostgresSchema as Schema;
+use super::PgPerson;
+use crate::PgSchema as Schema;
 
 #[async_trait::async_trait]
-impl PersonAdapter for PostgresPerson
+impl PersonAdapter for PgPerson
 {
 	async fn create(connection: &PgPool, name: String) -> Result<Person>
 	{
@@ -42,7 +42,7 @@ impl PersonAdapter for PostgresPerson
 #[cfg(test)]
 mod tests
 {
-	use super::{PersonAdapter, PostgresPerson};
+	use super::{PersonAdapter, PgPerson};
 	use crate::schema::util;
 
 	/// TODO: use fuzzing
@@ -51,7 +51,7 @@ mod tests
 	{
 		let connection = util::connect().await;
 
-		let person = PostgresPerson::create(&connection, "foo".into())
+		let person = PgPerson::create(&connection, "foo".into())
 			.await
 			.unwrap();
 

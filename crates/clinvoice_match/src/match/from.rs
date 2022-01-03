@@ -1,8 +1,6 @@
 use core::fmt::Debug;
 use std::borrow::Cow::{Borrowed, Owned};
 
-use clinvoice_schema::{Decimal, Money};
-
 use super::Match;
 
 impl<'m, T> From<&'m T> for Match<'m, T>

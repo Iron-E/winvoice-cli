@@ -1,8 +1,5 @@
-use std::{
-	borrow::Cow,
-	fmt::{Display, Write},
-	ops::Deref,
-};
+use core::{fmt::{Display, Write}, ops::Deref};
+use std::borrow::Cow;
 
 use clinvoice_adapter::{WriteContext, WriteWhereClause};
 use clinvoice_finance::Money;

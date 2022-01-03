@@ -1,4 +1,5 @@
-use std::{collections::HashMap, fmt::Write};
+use std::collections::HashMap;
+use core::fmt::Write;
 
 use clinvoice_adapter::{schema::EmployeeAdapter, WriteWhereClause};
 use clinvoice_match::MatchEmployee;

@@ -2,10 +2,11 @@ mod error;
 pub mod util;
 
 use core::{
+	any,
 	fmt::{Debug, Display},
 	str::FromStr,
 };
-use std::{any, io};
+use std::io;
 
 use clinvoice_schema::views::RestorableSerde;
 use dialoguer::{Editor, Input, MultiSelect, Select};

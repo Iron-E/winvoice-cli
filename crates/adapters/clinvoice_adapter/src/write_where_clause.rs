@@ -1,5 +1,7 @@
 mod write_context;
 
+use core::fmt::Display;
+
 pub use write_context::WriteContext;
 
 /// # Summary

@@ -196,11 +196,62 @@ impl WriteWhereClause<&Match<'_, i64>> for Schema
 	}
 }
 
+impl WriteWhereClause<&Match<'_, Money>> for Schema
+{
+	fn write_where_clause(
+		context: WriteContext,
+		alias: impl Copy + Display,
+		match_condition: &Match<'_, Money>,
+		query: &mut String,
+	) -> WriteContext
+	{
+		let alias_cast = PostgresTypeCast::numeric(alias);
+		match match_condition
+		{
+			Match::AllGreaterThan(money) | Match::GreaterThan(money) =>
+			{
+				write_comparison(query, context, alias_cast, ">", money.amount)
+			},
+			Match::AllLessThan(money) | Match::LessThan(money) =>
+			{
+				write_comparison(query, context, alias_cast, "<", money)
+			},
+			Match::AllInRange(low, high) | Match::InRange(low, high) =>
+			{
+				write_comparison(query, context, alias_cast, "BETWEEN", low);
+				write_comparison(query, WriteContext::InWhereCondition, "", "AND", high);
+			},
+			Match::And(match_conditions) => write_boolean_group::<_, _, _, true>(
+				query,
+				context,
+				alias_cast,
+				&mut match_conditions.iter().filter(|m| *m != &Match::Any),
+			),
+			Match::Any => return context,
+			Match::EqualTo(money) => write_comparison(query, context, alias_cast, "=", money),
+			Match::HasAll(moneys) => write_has(query, context, alias_cast, moneys.deref(), true),
+			Match::HasAny(moneys) => write_has(query, context, alias_cast, moneys.deref(), false),
+			Match::Not(match_condition) => match match_condition.deref()
+			{
+				Match::Any => write_is_null(query, context, alias_cast),
+				m => write_negated(query, context, alias_cast, m),
+			},
+			Match::Or(match_conditions) => write_boolean_group::<_, _, _, false>(
+				query,
+				context,
+				alias_cast,
+				&mut match_conditions.iter().filter(|m| *m != &Match::Any),
+			),
+		};
+		WriteContext::AfterWhereCondition
+	}
+}
+
 impl WriteWhereClause<&Match<'_, NaiveDateTime>> for Schema
 {
 	fn write_where_clause(
 		context: WriteContext,
-		alias: &str,
+		alias: impl Copy + Display,
 		match_condition: &Match<'_, NaiveDateTime>,
 		query: &mut String,
 	) -> WriteContext

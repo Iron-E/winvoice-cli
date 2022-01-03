@@ -13,18 +13,20 @@ mod organization;
 mod person;
 mod str;
 mod timesheet;
+mod typecast;
 mod util;
 mod write_where_clause;
 
-pub(crate) use date_time::PostgresDateTime;
 pub use employee::PostgresEmployee;
 pub use job::PostgresJob;
 pub use location::PostgresLocation;
-pub(crate) use option::PostgresOption;
 pub use organization::PostgresOrganization;
 pub use person::PostgresPerson;
-use sqlx::{Executor, Postgres, Result, Transaction};
 pub use timesheet::PostgresTimesheet;
+pub(crate) use date_time::PostgresDateTime;
+pub(crate) use option::PostgresOption;
+pub(crate) use typecast::PostgresTypeCast;
+use sqlx::{Executor, Postgres, Result, Transaction};
 
 pub(crate) use self::str::PostgresStr;
 

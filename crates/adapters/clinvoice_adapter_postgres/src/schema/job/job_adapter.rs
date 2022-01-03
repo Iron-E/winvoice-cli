@@ -2,8 +2,8 @@ use core::time::Duration;
 use std::convert::TryFrom;
 
 use clinvoice_adapter::{schema::JobAdapter, WriteWhereClause};
-use clinvoice_finance::{Error as FinanceError, ExchangeRates};
-use clinvoice_match::MatchJob;
+use clinvoice_finance::{Currency, Error as FinanceError, ExchangeRates};
+use clinvoice_match::{MatchInvoice, MatchJob};
 use clinvoice_schema::{
 	chrono::{DateTime, SubsecRound, Utc},
 	views::{JobView, OrganizationView},
@@ -78,6 +78,14 @@ impl JobAdapter for PostgresJob
 
 	async fn retrieve_view(connection: &PgPool, match_condition: &MatchJob) -> Result<Vec<JobView>>
 	{
+		let exchange_rates = ExchangeRates::new().map_err(|e| match e
+		{
+			FinanceError::Decimal(e2) => Error::Decode(e2.into()),
+			FinanceError::Io(e2) => Error::Io(e2),
+			FinanceError::Reqwest(e2) => Error::Protocol(e2.to_string()),
+			FinanceError::UnsupportedCurrency(_) => Error::Decode(e.into()),
+		});
+
 		let id_match =
 			PostgresLocation::retrieve_matching_ids(connection, &match_condition.client.location);
 		let mut query = String::from(
@@ -91,7 +99,28 @@ impl JobAdapter for PostgresJob
 		);
 		Schema::write_where_clause(
 			Schema::write_where_clause(
-				Schema::write_where_clause(Default::default(), "J", match_condition, &mut query),
+				Schema::write_where_clause(
+					Default::default(),
+					"J",
+					&MatchJob {
+						client: match_condition.client,
+						date_close: match_condition.date_close,
+						date_open: match_condition.date_open,
+						id: match_condition.id,
+						increment: match_condition.increment,
+						invoice: MatchInvoice {
+							date_issued: match_condition.invoice.date_issued,
+							date_paid: match_condition.invoice.date_paid,
+							hourly_rate: match_condition
+								.invoice
+								.hourly_rate
+								.exchange(Currency::EUR, &exchange_rates.await?),
+						},
+						notes: match_condition.notes,
+						objectives: match_condition.objectives,
+					},
+					&mut query,
+				),
 				"O",
 				&match_condition.client,
 				&mut query,

@@ -25,7 +25,7 @@ pub trait WriteWhereClause<M>
 	/// the `context` argument of another call to this same method.
 	fn write_where_clause(
 		context: WriteContext,
-		alias: &str,
+		alias: impl Copy + Display,
 		match_condition: M,
 		query: &mut String,
 	) -> WriteContext;

@@ -10,7 +10,7 @@ where
 	{
 		match self.0
 		{
-			Some(s) => write!(f, "{}", s),
+			Some(ref s) => write!(f, "{}", s),
 			_ => write!(f, "NULL"),
 		}
 	}

@@ -21,7 +21,7 @@ use reqwest::Response;
 use rust_decimal::Decimal;
 use zip::{result::ZipError, ZipArchive};
 
-use crate::{Currency, Error, Result};
+use crate::{Currency, Result};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ExchangeRates(HashMap<Currency, Decimal>);
@@ -81,9 +81,9 @@ impl ExchangeRates
 	///
 	/// * [`None`] if this set of exchange rates does not account for the `currency`.
 	/// * [`Some`] if this set of exchange rates accounts for the `currency`.
-	pub fn get(&self, currency: Currency) -> Option<&Decimal>
+	pub fn get(&self, currency: &Currency) -> Option<&Decimal>
 	{
-		self.0.get(&currency)
+		self.0.get(currency)
 	}
 
 	/// # Summary

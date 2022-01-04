@@ -11,4 +11,3 @@ where
 		write!(f, "{}::{}", self.0, self.1)
 	}
 }
-

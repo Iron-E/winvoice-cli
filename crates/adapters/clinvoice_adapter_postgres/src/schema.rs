@@ -17,16 +17,16 @@ mod typecast;
 mod util;
 mod write_where_clause;
 
+pub(crate) use date_time::PostgresDateTime;
 pub use employee::PgEmployee;
 pub use job::PgJob;
 pub use location::PgLocation;
+pub(crate) use option::PostgresOption;
 pub use organization::PgOrganization;
 pub use person::PgPerson;
-pub use timesheet::PgTimesheet;
-pub(crate) use date_time::PostgresDateTime;
-pub(crate) use option::PostgresOption;
-pub(crate) use typecast::PostgresTypeCast;
 use sqlx::{Executor, Postgres, Result, Transaction};
+pub use timesheet::PgTimesheet;
+pub(crate) use typecast::PostgresTypeCast;
 
 pub(crate) use self::str::PostgresStr;
 

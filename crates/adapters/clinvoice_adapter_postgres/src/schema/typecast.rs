@@ -7,7 +7,9 @@ pub(crate) struct PostgresTypeCast<D>(D, &'static str)
 where
 	D: Display;
 
-impl<D> PostgresTypeCast<D> where D : Display
+impl<D> PostgresTypeCast<D>
+where
+	D: Display,
 {
 	pub(crate) fn numeric(d: D) -> Self
 	{

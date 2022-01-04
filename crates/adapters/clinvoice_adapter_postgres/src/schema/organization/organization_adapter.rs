@@ -83,10 +83,9 @@ mod tests
 			.await
 			.unwrap();
 
-		let organization =
-			PgOrganization::create(&connection, &earth, "Some Organization".into())
-				.await
-				.unwrap();
+		let organization = PgOrganization::create(&connection, &earth, "Some Organization".into())
+			.await
+			.unwrap();
 
 		let row = sqlx::query!(
 			"SELECT * FROM organizations WHERE id = $1;",

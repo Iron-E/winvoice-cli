@@ -1,4 +1,7 @@
-use core::{fmt::{Display, Write}, ops::Deref};
+use core::{
+	fmt::{Display, Write},
+	ops::Deref,
+};
 use std::borrow::Cow;
 
 use clinvoice_adapter::{WriteContext, WriteWhereClause};
@@ -6,7 +9,7 @@ use clinvoice_finance::Money;
 use clinvoice_match::{Match, MatchEmployee, MatchJob, MatchOrganization, MatchPerson, MatchStr};
 use clinvoice_schema::chrono::NaiveDateTime;
 
-use super::{PostgresDateTime, PostgresOption, PgSchema as Schema, PostgresStr, PostgresTypeCast};
+use super::{PgSchema as Schema, PostgresDateTime, PostgresOption, PostgresStr, PostgresTypeCast};
 
 /// # Summary
 ///
@@ -132,8 +135,12 @@ fn write_is_null(query: &mut String, context: WriteContext, alias: impl Copy + D
 /// Wrap some `match_condition` in `NOT (…)`.
 ///
 /// The args are the same as [`WriteSql::write_where`].
-fn write_negated<Q>(query: &mut String, context: WriteContext, alias: impl Copy + Display, match_condition: Q)
-where
+fn write_negated<Q>(
+	query: &mut String,
+	context: WriteContext,
+	alias: impl Copy + Display,
+	match_condition: Q,
+) where
 	Schema: WriteWhereClause<Q>,
 {
 	write!(query, "{} NOT (", context.get_prefix()).unwrap();
@@ -582,25 +589,25 @@ impl WriteWhereClause<&MatchJob<'_>> for Schema
 					Schema::write_where_clause(
 						Schema::write_where_clause(
 							// Schema::write_where_clause(
+							Schema::write_where_clause(
 								Schema::write_where_clause(
 									Schema::write_where_clause(
-										Schema::write_where_clause(
-											context,
-											&format!("{}.id", alias),
-											&match_condition.id,
-											query,
-										),
-										&format!("{}.date_close", alias),
-										&match_condition.date_close,
+										context,
+										&format!("{}.id", alias),
+										&match_condition.id,
 										query,
 									),
-									&format!("{}.date_open", alias),
-									&match_condition.date_open,
+									&format!("{}.date_close", alias),
+									&match_condition.date_close,
 									query,
 								),
-								// &format!("{}.increment", alias),
-								// &match_condition.increment,
-								// query,
+								&format!("{}.date_open", alias),
+								&match_condition.date_open,
+								query,
+							),
+							// &format!("{}.increment", alias),
+							// &match_condition.increment,
+							// query,
 							// ),
 							&format!("{}.invoice_date_issued", alias),
 							&match_condition.invoice.date_issued,

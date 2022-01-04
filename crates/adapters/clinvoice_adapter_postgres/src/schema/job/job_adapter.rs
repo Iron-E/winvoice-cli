@@ -102,22 +102,24 @@ impl JobAdapter for PgJob
 				Schema::write_where_clause(
 					Default::default(),
 					"J",
+					// PERF: there must be something to do to remove all of these clones
 					&MatchJob {
-						client: match_condition.client,
-						date_close: match_condition.date_close,
-						date_open: match_condition.date_open,
-						id: match_condition.id,
-						increment: match_condition.increment,
+						client: match_condition.client.clone(),
+						date_close: match_condition.date_close.clone(),
+						date_open: match_condition.date_open.clone(),
+						id: match_condition.id.clone(),
+						increment: match_condition.increment.clone(),
 						invoice: MatchInvoice {
-							date_issued: match_condition.invoice.date_issued,
-							date_paid: match_condition.invoice.date_paid,
+							date_issued: match_condition.invoice.date_issued.clone(),
+							date_paid: match_condition.invoice.date_paid.clone(),
 							hourly_rate: match_condition
 								.invoice
 								.hourly_rate
+								.clone()
 								.exchange(Currency::EUR, &exchange_rates.await?),
 						},
-						notes: match_condition.notes,
-						objectives: match_condition.objectives,
+						notes: match_condition.notes.clone(),
+						objectives: match_condition.objectives.clone(),
 					},
 					&mut query,
 				),
@@ -139,11 +141,8 @@ impl JobAdapter for PgJob
 					client: OrganizationView {
 						id: row.get("client_id"),
 						name: row.get("name"),
-						location: PgLocation::retrieve_view_by_id(
-							connection,
-							row.get("location_id"),
-						)
-						.await?,
+						location: PgLocation::retrieve_view_by_id(connection, row.get("location_id"))
+							.await?,
 					},
 					date_close: row.get("date_close"),
 					date_open: row.get("date_open"),
@@ -185,25 +184,13 @@ impl JobAdapter for PgJob
 mod tests
 {
 	use core::time::Duration;
-	use std::collections::HashMap;
 
-	use clinvoice_adapter::schema::{
-		EmployeeAdapter,
-		LocationAdapter,
-		OrganizationAdapter,
-		PersonAdapter,
-	};
+	use clinvoice_adapter::schema::{LocationAdapter, OrganizationAdapter};
 	use clinvoice_finance::ExchangeRates;
-	use clinvoice_schema::{chrono::Utc, Contact, Currency, Money};
+	use clinvoice_schema::{chrono::Utc, Currency, Money};
 
 	use super::{JobAdapter, PgJob};
-	use crate::schema::{
-		util,
-		PgEmployee,
-		PgLocation,
-		PgOrganization,
-		PgPerson,
-	};
+	use crate::schema::{util, PgLocation, PgOrganization};
 
 	#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 	async fn create()
@@ -214,39 +201,9 @@ mod tests
 			.await
 			.unwrap();
 
-		let organization =
-			PgOrganization::create(&connection, &earth, "Some Organization".into())
-				.await
-				.unwrap();
-
-		let person = PgPerson::create(&connection, "My Name".into())
+		let organization = PgOrganization::create(&connection, &earth, "Some Organization".into())
 			.await
 			.unwrap();
-
-		let mut contact_info = HashMap::new();
-		contact_info.insert("Office".into(), Contact::Address {
-			location_id: earth.id,
-			export: false,
-		});
-		contact_info.insert("Work Email".into(), Contact::Email {
-			email: "foo@bar.io".into(),
-			export: true,
-		});
-		contact_info.insert("Office Phone".into(), Contact::Phone {
-			phone: "555 223 5039".into(),
-			export: true,
-		});
-
-		let employee = PgEmployee::create(
-			&connection,
-			contact_info,
-			&organization,
-			&person,
-			"Employed".into(),
-			"Janitor".into(),
-		)
-		.await
-		.unwrap();
 
 		let job = PgJob::create(
 			&connection,

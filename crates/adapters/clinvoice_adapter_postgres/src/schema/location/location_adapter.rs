@@ -91,11 +91,9 @@ mod tests
 			.unwrap();
 
 		// Assert ::create_inner works when `outer_id` has already been used for another `Location`
-		assert!(
-			PgLocation::create_inner(&connection, &usa, "Utah".into())
-				.await
-				.is_ok()
-		);
+		assert!(PgLocation::create_inner(&connection, &usa, "Utah".into())
+			.await
+			.is_ok());
 
 		macro_rules! select {
 			($id:expr) => {

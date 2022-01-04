@@ -7,13 +7,7 @@ use command::Command;
 use structopt::StructOpt;
 #[cfg(feature = "postgres")]
 use {
-	clinvoice_adapter_postgres::schema::{
-		PgEmployee,
-		PgJob,
-		PgLocation,
-		PgOrganization,
-		PgPerson,
-	},
+	clinvoice_adapter_postgres::schema::{PgEmployee, PgJob, PgLocation, PgOrganization, PgPerson},
 	sqlx::PgPool,
 };
 

@@ -1,5 +1,5 @@
-use std::collections::HashMap;
 use core::fmt::Write;
+use std::collections::HashMap;
 
 use clinvoice_adapter::{schema::EmployeeAdapter, WriteWhereClause};
 use clinvoice_match::MatchEmployee;
@@ -119,10 +119,8 @@ impl EmployeeAdapter for PgEmployee
 		match_condition: &MatchEmployee,
 	) -> Result<Vec<EmployeeView>>
 	{
-		let id_match = PgLocation::retrieve_matching_ids(
-			connection,
-			&match_condition.organization.location,
-		);
+		let id_match =
+			PgLocation::retrieve_matching_ids(connection, &match_condition.organization.location);
 		let mut query = String::from(
 			"SELECT
 				array_agg((C.export, C.label, C.address_id, C.email, C.phone)) AS contact_info,
@@ -153,11 +151,8 @@ impl EmployeeAdapter for PgEmployee
 					organization: OrganizationView {
 						id: row.get("organization_id"),
 						name: row.get("organization_name"),
-						location: PgLocation::retrieve_view_by_id(
-							connection,
-							row.get("location_id"),
-						)
-						.await?,
+						location: PgLocation::retrieve_view_by_id(connection, row.get("location_id"))
+							.await?,
 					},
 					person: PersonView {
 						id: row.get("person_id"),
@@ -173,8 +168,7 @@ impl EmployeeAdapter for PgEmployee
 								if let Some(id) = contact.2
 								{
 									ContactView::Address {
-										location: PgLocation::retrieve_view_by_id(connection, id)
-											.await?,
+										location: PgLocation::retrieve_view_by_id(connection, id).await?,
 										export: contact.0,
 									}
 								}
@@ -236,10 +230,9 @@ mod tests
 			.await
 			.unwrap();
 
-		let organization =
-			PgOrganization::create(&connection, &earth, "Some Organization".into())
-				.await
-				.unwrap();
+		let organization = PgOrganization::create(&connection, &earth, "Some Organization".into())
+			.await
+			.unwrap();
 
 		let person = PgPerson::create(&connection, "My Name".into())
 			.await
@@ -360,10 +353,9 @@ mod tests
 			outer: Some(usa_view.clone().into()),
 		};
 
-		let organization =
-			PgOrganization::create(&connection, &arizona, "Some Organization".into())
-				.await
-				.unwrap();
+		let organization = PgOrganization::create(&connection, &arizona, "Some Organization".into())
+			.await
+			.unwrap();
 		let organization2 =
 			PgOrganization::create(&connection, &utah, "Some Other Organizatión".into())
 				.await

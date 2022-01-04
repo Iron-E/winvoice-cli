@@ -69,14 +69,7 @@ mod tests
 	use clinvoice_schema::{chrono::Utc, Contact, Currency, Expense, Money};
 
 	use super::{PgTimesheet, TimesheetAdapter};
-	use crate::schema::{
-		util,
-		PgEmployee,
-		PgJob,
-		PgLocation,
-		PgOrganization,
-		PgPerson,
-	};
+	use crate::schema::{util, PgEmployee, PgJob, PgLocation, PgOrganization, PgPerson};
 
 	#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 	async fn create()
@@ -87,10 +80,9 @@ mod tests
 			.await
 			.unwrap();
 
-		let organization =
-			PgOrganization::create(&connection, &earth, "Some Organization".into())
-				.await
-				.unwrap();
+		let organization = PgOrganization::create(&connection, &earth, "Some Organization".into())
+			.await
+			.unwrap();
 
 		let job = PgJob::create(
 			&connection,

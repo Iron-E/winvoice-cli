@@ -51,9 +51,7 @@ mod tests
 	{
 		let connection = util::connect().await;
 
-		let person = PgPerson::create(&connection, "foo".into())
-			.await
-			.unwrap();
+		let person = PgPerson::create(&connection, "foo".into()).await.unwrap();
 
 		let row = sqlx::query!("SELECT * FROM people WHERE id = $1;", person.id)
 			.fetch_one(&connection)

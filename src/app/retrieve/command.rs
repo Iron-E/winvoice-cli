@@ -301,10 +301,12 @@ impl Command
 						_ => None,
 					};
 
+					let conn = &connection;
+					let exchange_rates = exchange_rates.as_ref();
 					// WARN: this `let` seems redundant, but the "type needs to be known at this point"
 					let export_result: DynResult<'_, _> = stream::iter(to_export.into_iter().map(Ok))
 						.try_for_each_concurrent(None, |job| async move {
-							let timesheets = TAdapter::retrieve_view(&connection, &MatchTimesheet {
+							let timesheets = TAdapter::retrieve_view(conn, &MatchTimesheet {
 								job: MatchJob {
 									id: job.id.into(),
 									..Default::default()
@@ -362,9 +364,10 @@ impl Command
 						format!("Select the outer Location of {}", name),
 					)?;
 
+					let conn = &connection;
 					stream::iter(create_inner.into_iter().map(Ok).rev())
 						.try_fold(location.into(), |loc: Location, name: String| async move {
-							LAdapter::create_inner(&connection, &loc, name).await
+							LAdapter::create_inner(conn, &loc, name).await
 						})
 						.await?;
 				}

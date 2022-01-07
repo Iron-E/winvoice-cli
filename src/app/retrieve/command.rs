@@ -315,12 +315,7 @@ impl Command
 							})
 							.await?;
 
-							let export = match exchange_rates
-							{
-								Some(_) => JobView {}.export(exchange_rates.as_ref(), &timesheets),
-								_ => job.export(None, &timesheets),
-							}?;
-
+							let export = job.export(exchange_rates, &timesheets)?;
 							fs::write(
 								format!("{}--{}.md", job.client.name.replace(' ', "-"), job.id),
 								export,

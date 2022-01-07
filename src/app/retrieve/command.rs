@@ -13,8 +13,9 @@ use clinvoice_adapter::{
 	Updatable,
 };
 use clinvoice_config::Config;
+use clinvoice_finance::ExchangeRates;
 use clinvoice_match::{MatchJob, MatchTimesheet};
-use clinvoice_schema::{chrono::Utc, views::RestorableSerde, Location};
+use clinvoice_schema::{chrono::Utc, views::RestorableSerde, Currency, Location};
 use futures::{
 	future,
 	stream::{self, TryStreamExt},

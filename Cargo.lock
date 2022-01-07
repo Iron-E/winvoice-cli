@@ -180,6 +180,7 @@ dependencies = [
  "clinvoice_adapter_postgres",
  "clinvoice_config",
  "clinvoice_error",
+ "clinvoice_finance",
  "clinvoice_match",
  "clinvoice_schema",
  "dialoguer",

@@ -281,9 +281,9 @@ impl Command
 						.await?;
 				}
 
-				if export
+				if let Some(e) = export
 				{
-					let exchange_rates = if export == Default::default()
+					let exchange_rates = if e == Default::default()
 					{
 						None
 					}

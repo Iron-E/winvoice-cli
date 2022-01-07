@@ -212,6 +212,7 @@ impl WriteWhereClause<&Match<'_, Money>> for Schema
 		query: &mut String,
 	) -> WriteContext
 	{
+		// BUG: this causes an infinite recursion loop resolving `alias: Sized` on compilation
 		let alias_cast = PostgresTypeCast::numeric(alias);
 		match match_condition
 		{

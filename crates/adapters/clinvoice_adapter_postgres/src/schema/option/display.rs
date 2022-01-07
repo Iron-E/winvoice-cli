@@ -2,9 +2,9 @@ use core::fmt::{Display, Formatter, Result};
 
 use super::PostgresOption;
 
-impl<T> Display for PostgresOption<T>
+impl<D> Display for PostgresOption<D>
 where
-	T: Display,
+	D: Display,
 {
 	fn fmt(&self, f: &mut Formatter<'_>) -> Result
 	{

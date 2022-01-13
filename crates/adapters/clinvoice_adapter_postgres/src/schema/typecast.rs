@@ -3,11 +3,11 @@ mod display;
 use core::fmt::Display;
 
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub(crate) struct PostgresTypeCast<D>(D, &'static str)
+pub(crate) struct PgTypeCast<D>(D, &'static str)
 where
 	D: Display;
 
-impl<D> PostgresTypeCast<D>
+impl<D> PgTypeCast<D>
 where
 	D: Display,
 {

@@ -3,7 +3,7 @@
 //! This module implements adapters (and associated adapter types such as
 //! [`Deletable`](clinvoice_adapter::Deletable)) for a Postgres filesystem.
 
-mod date_time;
+mod interval;
 mod employee;
 mod initializable;
 mod job;
@@ -13,22 +13,24 @@ mod organization;
 mod person;
 mod str;
 mod timesheet;
+mod timestamptz;
 mod typecast;
 mod util;
 mod write_where_clause;
 
-pub(crate) use date_time::PostgresDateTime;
+pub(crate) use timestamptz::PgTimestampTz;
+pub(crate) use interval::PgInterval;
 pub use employee::PgEmployee;
 pub use job::PgJob;
 pub use location::PgLocation;
-pub(crate) use option::PostgresOption;
+pub(crate) use option::PgOption;
 pub use organization::PgOrganization;
 pub use person::PgPerson;
 use sqlx::{Executor, Postgres, Result, Transaction};
 pub use timesheet::PgTimesheet;
-pub(crate) use typecast::PostgresTypeCast;
+pub(crate) use typecast::PgTypeCast;
 
-pub(crate) use self::str::PostgresStr;
+pub(crate) use self::str::PgStr;
 
 /// # Summary
 ///

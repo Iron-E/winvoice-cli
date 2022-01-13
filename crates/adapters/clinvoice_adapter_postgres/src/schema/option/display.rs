@@ -1,8 +1,8 @@
 use core::fmt::{Display, Formatter, Result};
 
-use super::PostgresOption;
+use super::PgOption;
 
-impl<D> Display for PostgresOption<D>
+impl<D> Display for PgOption<D>
 where
 	D: Display,
 {

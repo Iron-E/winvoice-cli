@@ -1,8 +1,8 @@
 use core::fmt::{Display, Formatter, Result};
 
-use super::PostgresDateTime;
+use super::PgTimestampTz;
 
-impl Display for PostgresDateTime
+impl Display for PgTimestampTz
 {
 	fn fmt(&self, f: &mut Formatter<'_>) -> Result
 	{

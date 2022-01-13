@@ -1,8 +1,8 @@
 use core::fmt::{Display, Formatter, Result};
 
-use super::PostgresStr;
+use super::PgStr;
 
-impl Display for PostgresStr<'_>
+impl Display for PgStr<'_>
 {
 	fn fmt(&self, f: &mut Formatter<'_>) -> Result
 	{

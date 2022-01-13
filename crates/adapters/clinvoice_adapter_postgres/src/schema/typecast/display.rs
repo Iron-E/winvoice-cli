@@ -1,8 +1,8 @@
 use core::fmt::{Display, Formatter, Result};
 
-use super::PostgresTypeCast;
+use super::PgTypeCast;
 
-impl<D> Display for PostgresTypeCast<D>
+impl<D> Display for PgTypeCast<D>
 where
 	D: Display,
 {

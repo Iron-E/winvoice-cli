@@ -1,15 +1,15 @@
 use core::{
 	fmt::{Display, Write},
+	time::Duration,
 	ops::Deref,
 };
-use std::borrow::Cow;
 
 use clinvoice_adapter::{WriteContext, WriteWhereClause};
 use clinvoice_finance::Money;
-use clinvoice_match::{Match, MatchEmployee, MatchJob, MatchOrganization, MatchPerson, MatchStr};
+use clinvoice_match::{Match, MatchEmployee, MatchJob, MatchOrganization, MatchPerson, MatchStr, Serde};
 use clinvoice_schema::chrono::NaiveDateTime;
 
-use super::{PgSchema as Schema, PostgresDateTime, PostgresOption, PostgresStr, PostgresTypeCast};
+use super::{PgSchema as Schema, PgTimestampTz, PgOption, PgStr, PgInterval};
 
 /// # Summary
 ///
@@ -342,14 +342,14 @@ impl WriteWhereClause<&Match<'_, Option<NaiveDateTime>>> for Schema
 				context,
 				alias,
 				">",
-				PostgresOption(date.map(PostgresDateTime)),
+				PgOption(date.map(PgTimestampTz)),
 			),
 			Match::AllLessThan(date) | Match::LessThan(date) => write_comparison(
 				query,
 				context,
 				alias,
 				"<",
-				PostgresOption(date.map(PostgresDateTime)),
+				PgOption(date.map(PgTimestampTz)),
 			),
 			Match::AllInRange(low, high) | Match::InRange(low, high) =>
 			{
@@ -358,14 +358,14 @@ impl WriteWhereClause<&Match<'_, Option<NaiveDateTime>>> for Schema
 					context,
 					alias,
 					"BETWEEN",
-					PostgresOption(low.map(PostgresDateTime)),
+					PgOption(low.map(PgTimestampTz)),
 				);
 				write_comparison(
 					query,
 					WriteContext::InWhereCondition,
 					"",
 					"AND",
-					PostgresOption(high.map(PostgresDateTime)),
+					PgOption(high.map(PgTimestampTz)),
 				);
 			},
 			Match::And(match_conditions) => write_boolean_group::<_, _, _, true>(
@@ -380,7 +380,7 @@ impl WriteWhereClause<&Match<'_, Option<NaiveDateTime>>> for Schema
 				context,
 				alias,
 				"=",
-				PostgresOption(date.map(PostgresDateTime)),
+				PgOption(date.map(PgTimestampTz)),
 			),
 			Match::HasAll(dates) => write_has(
 				query,
@@ -388,7 +388,7 @@ impl WriteWhereClause<&Match<'_, Option<NaiveDateTime>>> for Schema
 				alias,
 				dates
 					.iter()
-					.map(|o| PostgresOption(o.map(PostgresDateTime))),
+					.map(|o| PgOption(o.map(PgTimestampTz))),
 				true,
 			),
 			Match::HasAny(dates) => write_has(
@@ -397,7 +397,7 @@ impl WriteWhereClause<&Match<'_, Option<NaiveDateTime>>> for Schema
 				alias,
 				dates
 					.iter()
-					.map(|o| PostgresOption(o.map(PostgresDateTime))),
+					.map(|o| PgOption(o.map(PgTimestampTz))),
 				false,
 			),
 			Match::Not(match_condition) => match match_condition.deref()
@@ -446,7 +446,7 @@ impl WriteWhereClause<&MatchStr<Cow<'_, str>>> for Schema
 			.unwrap(),
 			MatchStr::EqualTo(string) =>
 			{
-				write_comparison(query, context, alias, "=", PostgresStr(string))
+				write_comparison(query, context, alias, "=", PgStr(string))
 			},
 			MatchStr::Not(match_condition) => match match_condition.deref()
 			{
@@ -459,7 +459,7 @@ impl WriteWhereClause<&MatchStr<Cow<'_, str>>> for Schema
 				alias,
 				&mut match_conditions.iter().filter(|m| *m != &MatchStr::Any),
 			),
-			MatchStr::Regex(regex) => write_comparison(query, context, alias, "~", PostgresStr(regex)),
+			MatchStr::Regex(regex) => write_comparison(query, context, alias, "~", PgStr(regex)),
 		};
 		WriteContext::AfterWhereCondition
 	}

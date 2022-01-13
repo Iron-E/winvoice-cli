@@ -593,17 +593,7 @@ impl WriteWhereClause<&MatchEmployee> for Schema
 	{
 		Schema::write_where_clause(
 			Schema::write_where_clause(
-				Schema::write_where_clause(
-					Schema::write_where_clause(
-						Schema::write_where_clause(context, "O", &match_condition.organization, query),
-						"P",
-						&match_condition.person,
-						query,
-					),
-					&format!("{}.id", alias),
-					&match_condition.id,
-					query,
-				),
+				Schema::write_where_clause(context, &format!("{}.id", alias), &match_condition.id, query),
 				&format!("{}.status", alias),
 				&match_condition.status,
 				query,
@@ -686,7 +676,8 @@ impl WriteWhereClause<&MatchJob> for Schema
 #[cfg(test)]
 mod tests
 {
-	use clinvoice_match::{MatchLocation, MatchOuterLocation};
+	use clinvoice_match::{MatchLocation, MatchOuterLocation, MatchJob};
+use clinvoice_schema::chrono::NaiveDate;
 
 	use super::{
 		Match,
@@ -931,6 +922,57 @@ mod tests
 		assert_eq!(
 			query,
 			String::from(" WHERE O.id = 7 AND O.name LIKE '%Gögle%'")
+		);
+	}
+
+	#[test]
+	fn write_job_where_clause()
+	{
+		let mut query = String::new();
+		assert_eq!(
+			Schema::write_where_clause(
+				BeforeWhereClause,
+				"J",
+				&MatchJob::default(),
+				&mut query
+			),
+			BeforeWhereClause
+		);
+		assert!(query.is_empty());
+
+		query.clear();
+		assert_eq!(
+			Schema::write_where_clause(
+				BeforeWhereClause,
+				"J",
+				&MatchJob {
+					id: 7.into(),
+					date_open: Match::LessThan(NaiveDate::from_ymd(2022, 01, 01).and_hms(12, 37, 22)),
+					client: MatchOrganization {
+						id: 7.into(),
+						name: MatchStr::Contains("Gögle".into()),
+						location: MatchLocation {
+							id: 11.into(),
+							outer: MatchOuterLocation::Some(Box::new(MatchLocation {
+								id: 14.into(),
+								outer: MatchOuterLocation::Some(Box::new(MatchLocation {
+									name: "Japan".into(),
+									..Default::default()
+								})),
+								..Default::default()
+							})),
+							..Default::default()
+						},
+					},
+					..Default::default()
+				},
+				&mut query,
+			),
+			AfterWhereCondition
+		);
+		assert_eq!(
+			query,
+			String::from(" WHERE J.id = 7 AND J.date_open < TIMESTAMP WITH TIME ZONE '2022-01-01 12:37:22'")
 		);
 	}
 }

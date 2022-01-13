@@ -133,7 +133,17 @@ impl EmployeeAdapter for PgEmployee
 			JOIN people P ON (P.id = E.person_id)",
 		);
 		Schema::write_where_clause(
-			Schema::write_where_clause(Default::default(), "E", match_condition, &mut query),
+			Schema::write_where_clause(
+				Schema::write_where_clause(
+					Schema::write_where_clause(Default::default(), "E", match_condition, &mut query),
+					"O",
+					&match_condition.organization,
+					&mut query
+				),
+				"P",
+				&match_condition.person,
+				&mut query,
+			),
 			"O.location_id",
 			&id_match.await?,
 			&mut query,

@@ -31,6 +31,9 @@ shellexpand = "2"
 # Errors
 thiserror = "1"
 
+# Serialization
+humantime = "2"
+
 [dev-dependencies]
 dotenv = "0.15.0"
 tokio = {features=["macros", "rt-multi-thread"], version="1"}

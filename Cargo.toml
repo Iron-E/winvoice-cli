@@ -36,7 +36,7 @@ dialoguer = "0.8"
 thiserror = "1"
 
 # Parsing Arguments
-humantime = "2.1.0"
+humantime = "2"
 structopt = "0.3"
 
 # Serialization

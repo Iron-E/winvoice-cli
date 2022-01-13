@@ -153,12 +153,62 @@ fn write_negated<Q>(
 	query.push(')');
 }
 
-impl WriteWhereClause<&Match<'_, i64>> for Schema
+impl WriteWhereClause<&Match<Serde<Duration>>> for Schema
 {
 	fn write_where_clause(
 		context: WriteContext,
 		alias: impl Copy + Display,
-		match_condition: &Match<'_, i64>,
+		match_condition: &Match<Serde<Duration>>,
+		query: &mut String,
+	) -> WriteContext
+	{
+		match match_condition
+		{
+			Match::AllGreaterThan(duration) | Match::GreaterThan(duration) =>
+			{
+				write_comparison(query, context, alias, ">", PgInterval(duration.into_inner()))
+			},
+			Match::AllLessThan(duration) | Match::LessThan(duration) =>
+			{
+				write_comparison(query, context, alias, "<", PgInterval(duration.into_inner()))
+			},
+			Match::AllInRange(low, high) | Match::InRange(low, high) =>
+			{
+				write_comparison(query, context, alias, "BETWEEN", PgInterval(low.into_inner()));
+				write_comparison(query, WriteContext::InWhereCondition, "", "AND", PgInterval(high.into_inner()));
+			},
+			Match::And(match_conditions) => write_boolean_group::<_, _, _, true>(
+				query,
+				context,
+				alias,
+				&mut match_conditions.iter().filter(|m| *m != &Match::Any),
+			),
+			Match::Any => return context,
+			Match::EqualTo(duration) => write_comparison(query, context, alias, "=", PgInterval(duration.into_inner())),
+			Match::HasAll(durations) => write_has(query, context, alias, durations.into_iter().map(|d| PgInterval(d.into_inner())), true),
+			Match::HasAny(durations) => write_has(query, context, alias, durations.into_iter().map(|d| PgInterval(d.into_inner())), false),
+			Match::Not(match_condition) => match match_condition.deref()
+			{
+				Match::Any => write_is_null(query, context, alias),
+				m => write_negated(query, context, alias, m),
+			},
+			Match::Or(match_conditions) => write_boolean_group::<_, _, _, false>(
+				query,
+				context,
+				alias,
+				&mut match_conditions.iter().filter(|m| *m != &Match::Any),
+			),
+		};
+		WriteContext::AfterWhereCondition
+	}
+}
+
+impl WriteWhereClause<&Match<i64>> for Schema
+{
+	fn write_where_clause(
+		context: WriteContext,
+		alias: impl Copy + Display,
+		match_condition: &Match<i64>,
 		query: &mut String,
 	) -> WriteContext
 	{

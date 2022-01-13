@@ -64,8 +64,6 @@ impl OrganizationAdapter for PgOrganization
 #[cfg(test)]
 mod tests
 {
-	use std::borrow::Cow::Owned;
-
 	use clinvoice_adapter::schema::LocationAdapter;
 	use clinvoice_match::{Match, MatchLocation, MatchOrganization, MatchOuterLocation};
 	use clinvoice_schema::views::{LocationView, OrganizationView};
@@ -184,7 +182,7 @@ mod tests
 				location: MatchLocation {
 					outer: MatchOuterLocation::Some(
 						MatchLocation {
-							id: Match::InRange(Owned(usa.id - 1), Owned(usa.id + 1)),
+							id: Match::InRange(usa.id - 1, usa.id + 1),
 							name: usa.name.into(),
 							..Default::default()
 						}

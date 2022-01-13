@@ -19,8 +19,8 @@ impl PgLocation
 {
 	pub(super) async fn retrieve_matching_ids<'a>(
 		connection: &PgPool,
-		match_condition: &MatchLocation<'_>,
-	) -> Result<Match<'a, Id>>
+		match_condition: &MatchLocation,
+	) -> Result<Match<Id>>
 	{
 		struct Cte<'a>
 		{
@@ -122,13 +122,13 @@ impl PgLocation
 			},
 			match_condition,
 		);
-		Ok(Match::HasAny(Owned(
+		Ok(Match::HasAny(
 			sqlx::query(&query)
 				.fetch(connection)
 				.map_ok(|row| row.get::<Id, _>("id"))
 				.try_collect()
 				.await?,
-		)))
+		))
 	}
 
 	pub(super) async fn retrieve_view_by_id(

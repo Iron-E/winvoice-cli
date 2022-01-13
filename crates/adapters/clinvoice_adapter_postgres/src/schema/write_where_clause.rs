@@ -185,8 +185,8 @@ impl WriteWhereClause<&Match<'_, i64>> for Schema
 			),
 			Match::Any => return context,
 			Match::EqualTo(id) => write_comparison(query, context, alias, "=", id),
-			Match::HasAll(ids) => write_has(query, context, alias, ids.deref(), true),
-			Match::HasAny(ids) => write_has(query, context, alias, ids.deref(), false),
+			Match::HasAll(ids) => write_has(query, context, alias, ids, true),
+			Match::HasAny(ids) => write_has(query, context, alias, ids, false),
 			Match::Not(match_condition) => match match_condition.deref()
 			{
 				Match::Any => write_is_null(query, context, alias),
@@ -203,51 +203,51 @@ impl WriteWhereClause<&Match<'_, i64>> for Schema
 	}
 }
 
-impl WriteWhereClause<&Match<'_, Money>> for Schema
+impl WriteWhereClause<&Match<Money>> for Schema
 {
 	fn write_where_clause(
 		context: WriteContext,
 		alias: impl Copy + Display,
-		match_condition: &Match<'_, Money>,
+		match_condition: &Match<Money>,
 		query: &mut String,
 	) -> WriteContext
 	{
-		// BUG: this causes an infinite recursion loop resolving `alias: Sized` on compilation
-		let alias_cast = PostgresTypeCast::numeric(alias);
+		// BUG: `PgTypecast::numeric(alias)` causes infinite recursion resolving `alias: Sized` on compilation
+		let alias_cast = format!("{}::numeric", alias); // PgTypeCast::numeric(alias);
 		match match_condition
 		{
 			Match::AllGreaterThan(money) | Match::GreaterThan(money) =>
 			{
-				write_comparison(query, context, alias_cast, ">", money.amount)
+				write_comparison(query, context, &alias_cast, ">", money.amount)
 			},
 			Match::AllLessThan(money) | Match::LessThan(money) =>
 			{
-				write_comparison(query, context, alias_cast, "<", money)
+				write_comparison(query, context, &alias_cast, "<", money)
 			},
 			Match::AllInRange(low, high) | Match::InRange(low, high) =>
 			{
-				write_comparison(query, context, alias_cast, "BETWEEN", low);
+				write_comparison(query, context, &alias_cast, "BETWEEN", low);
 				write_comparison(query, WriteContext::InWhereCondition, "", "AND", high);
 			},
 			Match::And(match_conditions) => write_boolean_group::<_, _, _, true>(
 				query,
 				context,
-				alias_cast,
+				&alias_cast,
 				&mut match_conditions.iter().filter(|m| *m != &Match::Any),
 			),
 			Match::Any => return context,
-			Match::EqualTo(money) => write_comparison(query, context, alias_cast, "=", money),
-			Match::HasAll(moneys) => write_has(query, context, alias_cast, moneys.deref(), true),
-			Match::HasAny(moneys) => write_has(query, context, alias_cast, moneys.deref(), false),
+			Match::EqualTo(money) => write_comparison(query, context, &alias_cast, "=", money),
+			Match::HasAll(moneys) => write_has(query, context, &alias_cast, moneys, true),
+			Match::HasAny(moneys) => write_has(query, context, &alias_cast, moneys, false),
 			Match::Not(match_condition) => match match_condition.deref()
 			{
-				Match::Any => write_is_null(query, context, alias_cast),
-				m => write_negated(query, context, alias_cast, m),
+				Match::Any => write_is_null(query, context, &alias_cast),
+				m => write_negated(query, context, &alias_cast, m),
 			},
 			Match::Or(match_conditions) => write_boolean_group::<_, _, _, false>(
 				query,
 				context,
-				alias_cast,
+				&alias_cast,
 				&mut match_conditions.iter().filter(|m| *m != &Match::Any),
 			),
 		};
@@ -255,12 +255,12 @@ impl WriteWhereClause<&Match<'_, Money>> for Schema
 	}
 }
 
-impl WriteWhereClause<&Match<'_, NaiveDateTime>> for Schema
+impl WriteWhereClause<&Match<NaiveDateTime>> for Schema
 {
 	fn write_where_clause(
 		context: WriteContext,
 		alias: impl Copy + Display,
-		match_condition: &Match<'_, NaiveDateTime>,
+		match_condition: &Match<NaiveDateTime>,
 		query: &mut String,
 	) -> WriteContext
 	{
@@ -268,21 +268,21 @@ impl WriteWhereClause<&Match<'_, NaiveDateTime>> for Schema
 		{
 			Match::AllGreaterThan(date) | Match::GreaterThan(date) =>
 			{
-				write_comparison(query, context, alias, ">", PostgresDateTime(**date))
+				write_comparison(query, context, alias, ">", PgTimestampTz(*date))
 			},
 			Match::AllLessThan(date) | Match::LessThan(date) =>
 			{
-				write_comparison(query, context, alias, "<", PostgresDateTime(**date))
+				write_comparison(query, context, alias, "<", PgTimestampTz(*date))
 			},
 			Match::AllInRange(low, high) | Match::InRange(low, high) =>
 			{
-				write_comparison(query, context, alias, "BETWEEN", PostgresDateTime(**low));
+				write_comparison(query, context, alias, "BETWEEN", PgTimestampTz(*low));
 				write_comparison(
 					query,
 					WriteContext::InWhereCondition,
 					"",
 					"AND",
-					PostgresDateTime(**high),
+					PgTimestampTz(*high),
 				);
 			},
 			Match::And(match_conditions) => write_boolean_group::<_, _, _, true>(
@@ -294,20 +294,20 @@ impl WriteWhereClause<&Match<'_, NaiveDateTime>> for Schema
 			Match::Any => return context,
 			Match::EqualTo(date) =>
 			{
-				write_comparison(query, context, alias, "=", PostgresDateTime(**date))
+				write_comparison(query, context, alias, "=", PgTimestampTz(*date))
 			},
 			Match::HasAll(dates) => write_has(
 				query,
 				context,
 				alias,
-				dates.iter().copied().map(PostgresDateTime),
+				dates.iter().copied().map(PgTimestampTz),
 				true,
 			),
 			Match::HasAny(dates) => write_has(
 				query,
 				context,
 				alias,
-				dates.iter().copied().map(PostgresDateTime),
+				dates.iter().copied().map(PgTimestampTz),
 				false,
 			),
 			Match::Not(match_condition) => match match_condition.deref()
@@ -326,12 +326,12 @@ impl WriteWhereClause<&Match<'_, NaiveDateTime>> for Schema
 	}
 }
 
-impl WriteWhereClause<&Match<'_, Option<NaiveDateTime>>> for Schema
+impl WriteWhereClause<&Match<Option<NaiveDateTime>>> for Schema
 {
 	fn write_where_clause(
 		context: WriteContext,
 		alias: impl Copy + Display,
-		match_condition: &Match<'_, Option<NaiveDateTime>>,
+		match_condition: &Match<Option<NaiveDateTime>>,
 		query: &mut String,
 	) -> WriteContext
 	{
@@ -416,14 +416,14 @@ impl WriteWhereClause<&Match<'_, Option<NaiveDateTime>>> for Schema
 	}
 }
 
-impl WriteWhereClause<&MatchStr<Cow<'_, str>>> for Schema
+impl WriteWhereClause<&MatchStr<String>> for Schema
 {
 	/// FIXME: `MatchStr::EqualTo("Foo's Place")` would break this, because of the apostraphe.
 	///        Might be able to fix by replacing `'` with `''` before entering.
 	fn write_where_clause(
 		context: WriteContext,
 		alias: impl Copy + Display,
-		match_condition: &MatchStr<Cow<'_, str>>,
+		match_condition: &MatchStr<String>,
 		query: &mut String,
 	) -> WriteContext
 	{
@@ -465,7 +465,7 @@ impl WriteWhereClause<&MatchStr<Cow<'_, str>>> for Schema
 	}
 }
 
-impl WriteWhereClause<&MatchPerson<'_>> for Schema
+impl WriteWhereClause<&MatchPerson> for Schema
 {
 	fn write_where_clause(
 		context: WriteContext,
@@ -489,7 +489,7 @@ impl WriteWhereClause<&MatchPerson<'_>> for Schema
 	}
 }
 
-impl WriteWhereClause<&MatchOrganization<'_>> for Schema
+impl WriteWhereClause<&MatchOrganization> for Schema
 {
 	/// # Panics
 	///
@@ -522,7 +522,7 @@ impl WriteWhereClause<&MatchOrganization<'_>> for Schema
 	}
 }
 
-impl WriteWhereClause<&MatchEmployee<'_>> for Schema
+impl WriteWhereClause<&MatchEmployee> for Schema
 {
 	/// # Panics
 	///
@@ -565,7 +565,7 @@ impl WriteWhereClause<&MatchEmployee<'_>> for Schema
 	}
 }
 
-impl WriteWhereClause<&MatchJob<'_>> for Schema
+impl WriteWhereClause<&MatchJob> for Schema
 {
 	/// # Panics
 	///
@@ -589,27 +589,27 @@ impl WriteWhereClause<&MatchJob<'_>> for Schema
 				Schema::write_where_clause(
 					Schema::write_where_clause(
 						Schema::write_where_clause(
-							// Schema::write_where_clause(
 							Schema::write_where_clause(
 								Schema::write_where_clause(
 									Schema::write_where_clause(
-										context,
-										&format!("{}.id", alias),
-										&match_condition.id,
+										Schema::write_where_clause(
+											context,
+											&format!("{}.id", alias),
+											&match_condition.id,
+											query,
+										),
+										&format!("{}.date_close", alias),
+										&match_condition.date_close,
 										query,
 									),
-									&format!("{}.date_close", alias),
-									&match_condition.date_close,
+									&format!("{}.date_open", alias),
+									&match_condition.date_open,
 									query,
 								),
-								&format!("{}.date_open", alias),
-								&match_condition.date_open,
+								&format!("{}.increment", alias),
+								&match_condition.increment,
 								query,
 							),
-							// &format!("{}.increment", alias),
-							// &match_condition.increment,
-							// query,
-							// ),
 							&format!("{}.invoice_date_issued", alias),
 							&match_condition.invoice.date_issued,
 							query,
@@ -636,8 +636,6 @@ impl WriteWhereClause<&MatchJob<'_>> for Schema
 #[cfg(test)]
 mod tests
 {
-	use std::borrow::Cow::{Borrowed, Owned};
-
 	use clinvoice_match::{MatchLocation, MatchOuterLocation};
 
 	use super::{
@@ -666,11 +664,11 @@ mod tests
 				InWhereCondition,
 				"bar",
 				&Match::And(vec![
-					Match::Not(Box::new(Match::InRange(Owned(0), Owned(10)))),
-					Match::HasAny(Borrowed(&[0, 9, 7, 4])),
+					Match::Not(Box::new(Match::InRange(0, 10))),
+					Match::HasAny(vec![0, 9, 7, 4]),
 					Match::Or(vec![
 						Match::Not(Box::new(Match::Any)),
-						Match::GreaterThan(Owned(-1)),
+						Match::GreaterThan(-1),
 					]),
 					Match::Any,
 				]),
@@ -694,7 +692,7 @@ mod tests
 				Schema::write_where_clause(
 					InWhereCondition,
 					"another_row",
-					&Match::<i64>::AllInRange(Owned(0), Owned(2)),
+					&Match::<i64>::AllInRange(0, 2),
 					&mut query,
 				),
 				AfterWhereCondition,
@@ -703,7 +701,7 @@ mod tests
 				Schema::write_where_clause(
 					InWhereCondition,
 					"another_row",
-					&Match::<i64>::InRange(Owned(0), Owned(2)),
+					&Match::<i64>::InRange(0, 2),
 					&mut query2,
 				),
 				AfterWhereCondition,
@@ -716,7 +714,7 @@ mod tests
 				Schema::write_where_clause(
 					InWhereCondition,
 					"another_row",
-					&Match::<i64>::AllLessThan(Owned(0)),
+					&Match::<i64>::AllLessThan(0),
 					&mut query,
 				),
 				AfterWhereCondition,
@@ -725,7 +723,7 @@ mod tests
 				Schema::write_where_clause(
 					InWhereCondition,
 					"another_row",
-					&Match::<i64>::LessThan(Owned(0)),
+					&Match::<i64>::LessThan(0),
 					&mut query2,
 				),
 				AfterWhereCondition,
@@ -738,7 +736,7 @@ mod tests
 				Schema::write_where_clause(
 					InWhereCondition,
 					"another_row",
-					&Match::<i64>::AllGreaterThan(Owned(0)),
+					&Match::<i64>::AllGreaterThan(0),
 					&mut query,
 				),
 				AfterWhereCondition,
@@ -747,7 +745,7 @@ mod tests
 				Schema::write_where_clause(
 					InWhereCondition,
 					"another_row",
-					&Match::<i64>::GreaterThan(Owned(0)),
+					&Match::<i64>::GreaterThan(0),
 					&mut query2,
 				),
 				AfterWhereCondition,
@@ -771,7 +769,7 @@ mod tests
 			Schema::write_where_clause(
 				AfterWhereCondition,
 				"bar",
-				&MatchStr::Contains(Borrowed("punky brüster")),
+				&MatchStr::Contains("punky brüster".into()),
 				&mut query,
 			),
 			AfterWhereCondition,
@@ -784,7 +782,7 @@ mod tests
 				BeforeWhereClause,
 				"some_row",
 				&MatchStr::Or(vec![
-					MatchStr::Regex(Borrowed(r#"^f.rk.*\bit\b.*over$"#)),
+					MatchStr::Regex(r#"^f.rk.*\bit\b.*over$"#.into()),
 					MatchStr::Not(Box::new("not equal".into())),
 				]),
 				&mut query,
@@ -794,7 +792,7 @@ mod tests
 		assert_eq!(
 			query,
 			String::from(
-				r#" WHERE ( some_row ~ ^f.rk.*\bit\b.*over$ OR NOT ( some_row = 'not equal'))"#
+				r#" WHERE ( some_row ~ '^f.rk.*\bit\b.*over$' OR NOT ( some_row = 'not equal'))"#
 			),
 		);
 	}
@@ -813,7 +811,7 @@ mod tests
 		assert_eq!(
 			Schema::write_where_clause(
 				BeforeWhereClause,
-				"",
+				"P",
 				&MatchPerson {
 					id: 7.into(),
 					..Default::default()
@@ -822,13 +820,13 @@ mod tests
 			),
 			AfterWhereCondition
 		);
-		assert_eq!(query, String::from(" WHERE id = 7"));
+		assert_eq!(query, String::from(" WHERE P.id = 7"));
 
 		query.clear();
 		assert_eq!(
 			Schema::write_where_clause(
 				AfterWhereCondition,
-				"",
+				"P",
 				&MatchPerson {
 					id: 7.into(),
 					name: "stuff".into(),
@@ -837,7 +835,7 @@ mod tests
 			),
 			AfterWhereCondition
 		);
-		assert_eq!(query, String::from(" AND id = 7 AND name = 'stuff'"));
+		assert_eq!(query, String::from(" AND P.id = 7 AND P.name = 'stuff'"));
 	}
 
 	#[test]
@@ -862,7 +860,7 @@ mod tests
 				"O",
 				&MatchOrganization {
 					id: 7.into(),
-					name: MatchStr::Contains(Borrowed("Gögle")),
+					name: MatchStr::Contains("Gögle".into()),
 					location: MatchLocation {
 						id: 11.into(),
 						outer: MatchOuterLocation::Some(Box::new(MatchLocation {

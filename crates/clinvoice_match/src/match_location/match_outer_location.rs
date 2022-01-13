@@ -7,7 +7,7 @@ use super::MatchLocation;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
-pub enum MatchOuterLocation<'m>
+pub enum MatchOuterLocation
 {
 	/// # Summary
 	///
@@ -23,5 +23,5 @@ pub enum MatchOuterLocation<'m>
 	///
 	/// Match only when a specific [`outer_id`](clinvoice_schema::Location) resolves to a
 	/// matching [`Location`].
-	Some(Box<MatchLocation<'m>>),
+	Some(Box<MatchLocation>),
 }

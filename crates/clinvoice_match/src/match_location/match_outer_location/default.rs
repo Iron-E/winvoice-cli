@@ -1,6 +1,6 @@
 use super::MatchOuterLocation;
 
-impl Default for MatchOuterLocation<'_>
+impl Default for MatchOuterLocation
 {
 	fn default() -> Self
 	{

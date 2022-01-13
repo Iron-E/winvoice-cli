@@ -1,5 +1,3 @@
-use std::borrow::Cow;
-
 use clinvoice_schema::chrono::NaiveDateTime;
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
@@ -11,23 +9,23 @@ use super::{Match, MatchEmployee, MatchExpense, MatchJob, MatchStr};
 /// An [`Timesheet`](clinvoice_schema::Timesheet) with [matchable](Match) fields.
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
-pub struct MatchTimesheet<'m>
+pub struct MatchTimesheet
 {
 	#[cfg_attr(feature = "serde_support", serde(default))]
-	pub employee: MatchEmployee<'m>,
+	pub employee: MatchEmployee,
 
 	#[cfg_attr(feature = "serde_support", serde(default))]
-	pub expenses: MatchExpense<'m>,
+	pub expenses: MatchExpense,
 
 	#[cfg_attr(feature = "serde_support", serde(default))]
-	pub job: MatchJob<'m>,
+	pub job: MatchJob,
 
 	#[cfg_attr(feature = "serde_support", serde(default))]
-	pub time_begin: Match<'m, NaiveDateTime>,
+	pub time_begin: Match<NaiveDateTime>,
 
 	#[cfg_attr(feature = "serde_support", serde(default))]
-	pub time_end: Match<'m, Option<NaiveDateTime>>,
+	pub time_end: Match<Option<NaiveDateTime>>,
 
 	#[cfg_attr(feature = "serde_support", serde(default))]
-	pub work_notes: MatchStr<Cow<'m, str>>,
+	pub work_notes: MatchStr<String>,
 }

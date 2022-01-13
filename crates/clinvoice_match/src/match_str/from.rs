@@ -1,19 +1,17 @@
-use std::borrow::Cow::{self, Borrowed, Owned};
-
 use super::MatchStr;
 
-impl<'m> From<&'m str> for MatchStr<Cow<'m, str>>
+impl From<&str> for MatchStr<String>
 {
-	fn from(s: &'m str) -> Self
+	fn from(s: &str) -> Self
 	{
-		Self::EqualTo(Borrowed(s))
+		Self::from(s.to_string())
 	}
 }
 
-impl<'m> From<String> for MatchStr<Cow<'_, str>>
+impl From<String> for MatchStr<String>
 {
 	fn from(s: String) -> Self
 	{
-		Self::EqualTo(Owned(s))
+		Self::EqualTo(s)
 	}
 }

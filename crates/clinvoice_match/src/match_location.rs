@@ -1,7 +1,5 @@
 mod match_outer_location;
 
-use std::borrow::Cow;
-
 use clinvoice_schema::Id;
 pub use match_outer_location::MatchOuterLocation;
 #[cfg(feature = "serde_support")]
@@ -14,14 +12,14 @@ use super::{Match, MatchStr};
 /// An [`Location`](clinvoice_schema::Location) with [matchable](Match) fields.
 #[derive(Clone, Default, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
-pub struct MatchLocation<'m>
+pub struct MatchLocation
 {
 	#[cfg_attr(feature = "serde_support", serde(default))]
-	pub id: Match<'m, Id>,
+	pub id: Match<Id>,
 
 	#[cfg_attr(feature = "serde_support", serde(default))]
-	pub outer: MatchOuterLocation<'m>,
+	pub outer: MatchOuterLocation,
 
 	#[cfg_attr(feature = "serde_support", serde(default))]
-	pub name: MatchStr<Cow<'m, str>>,
+	pub name: MatchStr<String>,
 }

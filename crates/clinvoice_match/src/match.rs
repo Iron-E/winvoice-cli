@@ -1,8 +1,7 @@
 mod default;
 mod from;
 
-use core::{cmp::Eq, fmt::Debug, ops::Deref};
-use std::borrow::Cow::{self, Owned};
+use core::{cmp::Eq, fmt::Debug};
 
 use clinvoice_finance::ExchangeRates;
 use clinvoice_schema::{Currency, Money};
@@ -14,14 +13,17 @@ use serde::{Deserialize, Serialize};
 /// A value in a retrieval operation.
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
-pub enum Match<'element, T>
+pub enum Match<T>
 where
 	T: Clone + Debug,
 {
-	#[cfg_attr(
-		feature = "serde_support",
-		serde(bound(deserialize = "T : Deserialize<'de>"))
-	)]
+	/// # Summary
+	///
+	/// For some value `v`, match if and only if:
+	///
+	/// * `v` equals this value.
+	/// * A set of `v`'s type has one element, and is equal to `v`.
+	AllGreaterThan(T),
 
 	/// # Summary
 	///
@@ -29,15 +31,7 @@ where
 	///
 	/// * `v` equals this value.
 	/// * A set of `v`'s type has one element, and is equal to `v`.
-	AllGreaterThan(Cow<'element, T>),
-
-	/// # Summary
-	///
-	/// For some value `v`, match if and only if:
-	///
-	/// * `v` equals this value.
-	/// * A set of `v`'s type has one element, and is equal to `v`.
-	AllLessThan(Cow<'element, T>),
+	AllLessThan(T),
 
 	/// # Summary
 	///
@@ -45,7 +39,7 @@ where
 	///
 	/// * The value of `v` is greater than or equal to the first value.
 	/// * The value of `v` is less than the first value.
-	AllInRange(Cow<'element, T>, Cow<'element, T>),
+	AllInRange(T, T),
 
 	/// # Summary
 	///
@@ -63,7 +57,7 @@ where
 	///
 	/// * `v` equals this value.
 	/// * A set of `v`'s type has one element, and is equal to `v`.
-	EqualTo(Cow<'element, T>),
+	EqualTo(T),
 
 	/// # Summary
 	///
@@ -71,7 +65,7 @@ where
 	///
 	/// * `v` equals this value.
 	/// * A set of `v`'s type has one element, and is equal to `v`.
-	GreaterThan(Cow<'element, T>),
+	GreaterThan(T),
 
 	/// # Summary
 	///
@@ -79,7 +73,7 @@ where
 	///
 	/// * A set of `v` is made up of elements which are contained in this set.
 	/// * This set has one element, and `v` is equivalent.
-	HasAll(Cow<'element, [T]>),
+	HasAll(Vec<T>),
 
 	/// # Summary
 	///
@@ -87,7 +81,7 @@ where
 	///
 	/// * A set of `v`'s type has any value contained in this set.
 	/// * `v` is contained within this set.
-	HasAny(Cow<'element, [T]>),
+	HasAny(Vec<T>),
 
 	/// # Summary
 	///
@@ -95,7 +89,7 @@ where
 	///
 	/// * The value of `v` is greater than or equal to the first value.
 	/// * The value of `v` is less than the first value.
-	InRange(Cow<'element, T>, Cow<'element, T>),
+	InRange(T, T),
 
 	/// # Summary
 	///
@@ -103,7 +97,7 @@ where
 	///
 	/// * `v` equals this value.
 	/// * A set of `v`'s type has one element, and is equal to `v`.
-	LessThan(Cow<'element, T>),
+	LessThan(T),
 
 	/// # Summary
 	///
@@ -116,7 +110,7 @@ where
 	Or(Vec<Self>),
 }
 
-impl<'m, T> Match<'m, T>
+impl<T> Match<T>
 where
 	T: Clone + Debug,
 {
@@ -127,13 +121,13 @@ where
 	/// # See also
 	///
 	/// * [`Iterator::map`]
-	pub fn map<U>(self, f: &impl Fn(&T) -> U) -> Match<'m, U>
+	pub fn map<U>(self, f: &impl Fn(T) -> U) -> Match<U>
 	where
 		U: Clone + Debug,
 	{
 		macro_rules! map {
 			($func:ident, $val:ident) => {
-				Owned($func($val.deref()))
+				$func($val)
 			};
 		}
 
@@ -162,12 +156,12 @@ where
 	}
 }
 
-impl<'m> Match<'m, Money>
+impl Match<Money>
 {
 	/// # Summary
 	///
 	/// Exchange a `Match` for an amount of `Money` to another `currency`.
-	pub fn exchange(self, currency: Currency, rates: &ExchangeRates) -> Match<'m, Money>
+	pub fn exchange(self, currency: Currency, rates: &ExchangeRates) -> Match<Money>
 	{
 		self.map(&|money| money.exchange(currency, rates))
 	}

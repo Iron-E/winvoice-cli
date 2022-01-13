@@ -43,3 +43,5 @@ pub use match_person::MatchPerson;
 pub use match_str::MatchStr;
 pub use match_timesheet::MatchTimesheet;
 pub use r#match::Match;
+
+pub use humantime_serde::Serde;

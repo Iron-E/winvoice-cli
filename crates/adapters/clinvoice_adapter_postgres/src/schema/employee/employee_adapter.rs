@@ -138,7 +138,7 @@ impl EmployeeAdapter for PgEmployee
 					Schema::write_where_clause(Default::default(), "E", match_condition, &mut query),
 					"O",
 					&match_condition.organization,
-					&mut query
+					&mut query,
 				),
 				"P",
 				&match_condition.person,

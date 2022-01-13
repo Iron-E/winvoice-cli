@@ -1,15 +1,23 @@
 use core::{
 	fmt::{Display, Write},
-	time::Duration,
 	ops::Deref,
+	time::Duration,
 };
 
 use clinvoice_adapter::{WriteContext, WriteWhereClause};
 use clinvoice_finance::Money;
-use clinvoice_match::{Match, MatchEmployee, MatchJob, MatchOrganization, MatchPerson, MatchStr, Serde};
+use clinvoice_match::{
+	Match,
+	MatchEmployee,
+	MatchJob,
+	MatchOrganization,
+	MatchPerson,
+	MatchStr,
+	Serde,
+};
 use clinvoice_schema::chrono::NaiveDateTime;
 
-use super::{PgSchema as Schema, PgTimestampTz, PgOption, PgStr, PgInterval};
+use super::{PgInterval, PgOption, PgSchema as Schema, PgStr, PgTimestampTz};
 
 /// # Summary
 ///
@@ -164,18 +172,36 @@ impl WriteWhereClause<&Match<Serde<Duration>>> for Schema
 	{
 		match match_condition
 		{
-			Match::AllGreaterThan(duration) | Match::GreaterThan(duration) =>
-			{
-				write_comparison(query, context, alias, ">", PgInterval(duration.into_inner()))
-			},
-			Match::AllLessThan(duration) | Match::LessThan(duration) =>
-			{
-				write_comparison(query, context, alias, "<", PgInterval(duration.into_inner()))
-			},
+			Match::AllGreaterThan(duration) | Match::GreaterThan(duration) => write_comparison(
+				query,
+				context,
+				alias,
+				">",
+				PgInterval(duration.into_inner()),
+			),
+			Match::AllLessThan(duration) | Match::LessThan(duration) => write_comparison(
+				query,
+				context,
+				alias,
+				"<",
+				PgInterval(duration.into_inner()),
+			),
 			Match::AllInRange(low, high) | Match::InRange(low, high) =>
 			{
-				write_comparison(query, context, alias, "BETWEEN", PgInterval(low.into_inner()));
-				write_comparison(query, WriteContext::InWhereCondition, "", "AND", PgInterval(high.into_inner()));
+				write_comparison(
+					query,
+					context,
+					alias,
+					"BETWEEN",
+					PgInterval(low.into_inner()),
+				);
+				write_comparison(
+					query,
+					WriteContext::InWhereCondition,
+					"",
+					"AND",
+					PgInterval(high.into_inner()),
+				);
 			},
 			Match::And(match_conditions) => write_boolean_group::<_, _, _, true>(
 				query,
@@ -184,9 +210,27 @@ impl WriteWhereClause<&Match<Serde<Duration>>> for Schema
 				&mut match_conditions.iter().filter(|m| *m != &Match::Any),
 			),
 			Match::Any => return context,
-			Match::EqualTo(duration) => write_comparison(query, context, alias, "=", PgInterval(duration.into_inner())),
-			Match::HasAll(durations) => write_has(query, context, alias, durations.into_iter().map(|d| PgInterval(d.into_inner())), true),
-			Match::HasAny(durations) => write_has(query, context, alias, durations.into_iter().map(|d| PgInterval(d.into_inner())), false),
+			Match::EqualTo(duration) => write_comparison(
+				query,
+				context,
+				alias,
+				"=",
+				PgInterval(duration.into_inner()),
+			),
+			Match::HasAll(durations) => write_has(
+				query,
+				context,
+				alias,
+				durations.into_iter().map(|d| PgInterval(d.into_inner())),
+				true,
+			),
+			Match::HasAny(durations) => write_has(
+				query,
+				context,
+				alias,
+				durations.into_iter().map(|d| PgInterval(d.into_inner())),
+				false,
+			),
 			Match::Not(match_condition) => match match_condition.deref()
 			{
 				Match::Any => write_is_null(query, context, alias),
@@ -342,10 +386,7 @@ impl WriteWhereClause<&Match<NaiveDateTime>> for Schema
 				&mut match_conditions.iter().filter(|m| *m != &Match::Any),
 			),
 			Match::Any => return context,
-			Match::EqualTo(date) =>
-			{
-				write_comparison(query, context, alias, "=", PgTimestampTz(*date))
-			},
+			Match::EqualTo(date) => write_comparison(query, context, alias, "=", PgTimestampTz(*date)),
 			Match::HasAll(dates) => write_has(
 				query,
 				context,
@@ -436,18 +477,14 @@ impl WriteWhereClause<&Match<Option<NaiveDateTime>>> for Schema
 				query,
 				context,
 				alias,
-				dates
-					.iter()
-					.map(|o| PgOption(o.map(PgTimestampTz))),
+				dates.iter().map(|o| PgOption(o.map(PgTimestampTz))),
 				true,
 			),
 			Match::HasAny(dates) => write_has(
 				query,
 				context,
 				alias,
-				dates
-					.iter()
-					.map(|o| PgOption(o.map(PgTimestampTz))),
+				dates.iter().map(|o| PgOption(o.map(PgTimestampTz))),
 				false,
 			),
 			Match::Not(match_condition) => match match_condition.deref()
@@ -494,10 +531,7 @@ impl WriteWhereClause<&MatchStr<String>> for Schema
 				string
 			)
 			.unwrap(),
-			MatchStr::EqualTo(string) =>
-			{
-				write_comparison(query, context, alias, "=", PgStr(string))
-			},
+			MatchStr::EqualTo(string) => write_comparison(query, context, alias, "=", PgStr(string)),
 			MatchStr::Not(match_condition) => match match_condition.deref()
 			{
 				MatchStr::Any => write_is_null(query, context, alias),
@@ -593,7 +627,12 @@ impl WriteWhereClause<&MatchEmployee> for Schema
 	{
 		Schema::write_where_clause(
 			Schema::write_where_clause(
-				Schema::write_where_clause(context, &format!("{}.id", alias), &match_condition.id, query),
+				Schema::write_where_clause(
+					context,
+					&format!("{}.id", alias),
+					&match_condition.id,
+					query,
+				),
 				&format!("{}.status", alias),
 				&match_condition.status,
 				query,
@@ -676,8 +715,8 @@ impl WriteWhereClause<&MatchJob> for Schema
 #[cfg(test)]
 mod tests
 {
-	use clinvoice_match::{MatchLocation, MatchOuterLocation, MatchJob};
-use clinvoice_schema::chrono::NaiveDate;
+	use clinvoice_match::{MatchJob, MatchLocation, MatchOuterLocation};
+	use clinvoice_schema::chrono::NaiveDate;
 
 	use super::{
 		Match,
@@ -930,12 +969,7 @@ use clinvoice_schema::chrono::NaiveDate;
 	{
 		let mut query = String::new();
 		assert_eq!(
-			Schema::write_where_clause(
-				BeforeWhereClause,
-				"J",
-				&MatchJob::default(),
-				&mut query
-			),
+			Schema::write_where_clause(BeforeWhereClause, "J", &MatchJob::default(), &mut query),
 			BeforeWhereClause
 		);
 		assert!(query.is_empty());
@@ -972,7 +1006,9 @@ use clinvoice_schema::chrono::NaiveDate;
 		);
 		assert_eq!(
 			query,
-			String::from(" WHERE J.id = 7 AND J.date_open < TIMESTAMP WITH TIME ZONE '2022-01-01 12:37:22'")
+			String::from(
+				" WHERE J.id = 7 AND J.date_open < TIMESTAMP WITH TIME ZONE '2022-01-01 12:37:22'"
+			)
 		);
 	}
 }

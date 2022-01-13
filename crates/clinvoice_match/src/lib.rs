@@ -32,6 +32,7 @@ mod match_person;
 mod match_str;
 mod match_timesheet;
 
+pub use humantime_serde::Serde;
 pub use match_contact::MatchContact;
 pub use match_employee::MatchEmployee;
 pub use match_expense::MatchExpense;
@@ -43,5 +44,3 @@ pub use match_person::MatchPerson;
 pub use match_str::MatchStr;
 pub use match_timesheet::MatchTimesheet;
 pub use r#match::Match;
-
-pub use humantime_serde::Serde;

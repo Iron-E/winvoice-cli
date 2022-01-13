@@ -1,7 +1,8 @@
 use core::fmt::{Display, Formatter, Result};
 
-use super::PgInterval;
 use humantime::Duration;
+
+use super::PgInterval;
 
 impl Display for PgInterval
 {

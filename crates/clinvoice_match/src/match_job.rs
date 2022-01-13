@@ -1,7 +1,7 @@
 use core::time::Duration;
-use humantime_serde::Serde;
 
 use clinvoice_schema::{chrono::NaiveDateTime, Id};
+use humantime_serde::Serde;
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 

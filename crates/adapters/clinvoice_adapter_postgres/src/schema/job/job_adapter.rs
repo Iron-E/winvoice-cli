@@ -92,8 +92,7 @@ impl JobAdapter for PgJob
 			"SELECT
 				J.id, J.client_id, J.date_close, J.date_open, J.increment, J.invoice_date_issued, \
 			 J.invoice_date_paid, J.invoice_hourly_rate, J.notes, J.objectives,
-				O.name, O.location_id,
-				P.name
+				O.name, O.location_id
 			FROM jobs J
 			JOIN organizations O ON (O.id = J.client_id)",
 		);
@@ -127,7 +126,7 @@ impl JobAdapter for PgJob
 				&match_condition.client,
 				&mut query,
 			),
-			"L.id",
+			"O.location_id",
 			&id_match.await?,
 			&mut query,
 		);

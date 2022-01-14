@@ -186,7 +186,13 @@ mod tests
 
 	use clinvoice_adapter::schema::{LocationAdapter, OrganizationAdapter};
 	use clinvoice_finance::ExchangeRates;
-	use clinvoice_schema::{chrono::Utc, Currency, Money};
+	use clinvoice_match::MatchJob;
+	use clinvoice_schema::{
+		chrono::{TimeZone, Utc},
+		views::{JobView, LocationView, OrganizationView},
+		Currency,
+		Money,
+	};
 
 	use super::{JobAdapter, PgJob};
 	use crate::schema::{util, PgLocation, PgOrganization};
@@ -262,6 +268,144 @@ mod tests
 	#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 	async fn retrieve_view()
 	{
-		// TODO: write test
+		let connection = util::connect().await;
+
+		let earth = PgLocation::create(&connection, "Earth".into())
+			.await
+			.unwrap();
+		let usa = PgLocation::create_inner(&connection, &earth, "USA".into())
+			.await
+			.unwrap();
+		let (arizona, utah) = futures::try_join!(
+			PgLocation::create_inner(&connection, &usa, "Arizona".into()),
+			PgLocation::create_inner(&connection, &usa, "Utah".into()),
+		)
+		.unwrap();
+
+		let (some_organization, some_other_organization) = futures::try_join!(
+			PgOrganization::create(&connection, &arizona, "Some Organization".into()),
+			PgOrganization::create(&connection, &utah, "Some Other Organizatión".into()),
+		)
+		.unwrap();
+
+		let (job_one, job_two, job_three, job_four) = futures::try_join!(
+			PgJob::create(
+				&connection,
+				&some_organization,
+				Utc.ymd(1990, 07, 12).and_hms(14, 10, 00),
+				Money::new(20_00, 2, Currency::USD),
+				Duration::from_secs(900),
+				"Do something".into()
+			),
+			PgJob::create(
+				&connection,
+				&some_other_organization,
+				Utc.ymd(3000, 01, 12).and_hms(09, 15, 42),
+				Money::new(200_00, 2, Currency::JPY),
+				Duration::from_secs(900),
+				"Do something".into()
+			),
+			PgJob::create(
+				&connection,
+				&some_organization,
+				Utc.ymd(2011, 03, 17).and_hms(13, 07, 07),
+				Money::new(20_00, 2, Currency::EUR),
+				Duration::from_secs(900),
+				"Do something".into()
+			),
+			PgJob::create(
+				&connection,
+				&some_other_organization,
+				Utc.ymd(2022, 01, 02).and_hms(01, 01, 01),
+				Money::new(200_00, 2, Currency::NOK),
+				Duration::from_secs(900),
+				"Do something".into()
+			),
+		)
+		.unwrap();
+
+		let earth_view = LocationView {
+			id: earth.id,
+			name: earth.name.clone(),
+			outer: None,
+		};
+		let usa_view = LocationView {
+			id: usa.id,
+			name: usa.name.clone(),
+			outer: Some(earth_view.clone().into()),
+		};
+		let arizona_view = LocationView {
+			id: arizona.id,
+			name: arizona.name.clone(),
+			outer: Some(usa_view.clone().into()),
+		};
+		let utah_view = LocationView {
+			id: utah.id,
+			name: utah.name.clone(),
+			outer: Some(usa_view.clone().into()),
+		};
+
+		let some_organization_view = OrganizationView {
+			id: some_organization.id,
+			name: some_organization.name.clone(),
+			location: arizona_view,
+		};
+		let some_other_organization_view = OrganizationView {
+			id: some_other_organization.id,
+			name: some_other_organization.name.clone(),
+			location: utah_view,
+		};
+
+		let job_one_view = JobView {
+			client: some_organization_view.clone(),
+			date_close: job_one.date_close,
+			date_open: job_one.date_open,
+			id: job_one.id,
+			increment: job_one.increment,
+			invoice: job_one.invoice,
+			notes: job_one.notes,
+			objectives: job_one.objectives,
+		};
+		let job_two_view = JobView {
+			client: some_other_organization_view.clone(),
+			date_close: job_two.date_close,
+			date_open: job_two.date_open,
+			id: job_two.id,
+			increment: job_two.increment,
+			invoice: job_two.invoice,
+			notes: job_two.notes,
+			objectives: job_two.objectives,
+		};
+		let job_three_view = JobView {
+			client: some_organization_view,
+			date_close: job_three.date_close,
+			date_open: job_three.date_open,
+			id: job_three.id,
+			increment: job_three.increment,
+			invoice: job_three.invoice,
+			notes: job_three.notes,
+			objectives: job_three.objectives,
+		};
+		let job_four_view = JobView {
+			client: some_other_organization_view,
+			date_close: job_four.date_close,
+			date_open: job_four.date_open,
+			id: job_four.id,
+			increment: job_four.increment,
+			invoice: job_four.invoice,
+			notes: job_four.notes,
+			objectives: job_four.objectives,
+		};
+
+		assert_eq!(
+			PgJob::retrieve_view(&connection, &MatchJob {
+				id: job_one.id.into(),
+				..Default::default()
+			})
+			.await
+			.unwrap()
+			.as_slice(),
+			&[job_one_view.clone()],
+		);
 	}
 }

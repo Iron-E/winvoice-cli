@@ -113,13 +113,17 @@ mod tests
 			.await
 			.unwrap();
 
-		let arizona = PgLocation::create_inner(&connection, &usa, "Arizona".into())
-			.await
-			.unwrap();
+		let (arizona, utah) = futures::try_join!(
+			PgLocation::create_inner(&connection, &usa, "Arizona".into()),
+			PgLocation::create_inner(&connection, &usa, "Utah".into()),
+		)
+		.unwrap();
 
-		let utah = PgLocation::create_inner(&connection, &usa, "Utah".into())
-			.await
-			.unwrap();
+		let (some_organization, some_other_organization) = futures::try_join!(
+			PgOrganization::create(&connection, &arizona, "Some Organization".into()),
+			PgOrganization::create(&connection, &utah, "Some Other Organizatión".into()),
+		)
+		.unwrap();
 
 		let earth_view = LocationView {
 			id: earth.id,
@@ -144,15 +148,6 @@ mod tests
 			name: utah.name.clone(),
 			outer: Some(usa_view.clone().into()),
 		};
-
-		let some_organization =
-			PgOrganization::create(&connection, &arizona.into(), "Some Organization".into())
-				.await
-				.unwrap();
-		let some_other_organization =
-			PgOrganization::create(&connection, &utah.into(), "Some Other Organizatión".into())
-				.await
-				.unwrap();
 
 		let some_organization_view = OrganizationView {
 			id: some_organization.id,

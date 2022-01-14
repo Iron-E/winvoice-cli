@@ -69,7 +69,7 @@ impl JobAdapter for PgJob
 			increment,
 			invoice: Invoice {
 				date: None,
-				hourly_rate,
+				hourly_rate: standardized_rate,
 			},
 			notes: String::new(),
 			objectives,

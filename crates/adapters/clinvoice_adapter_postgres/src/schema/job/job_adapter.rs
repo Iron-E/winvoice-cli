@@ -183,10 +183,11 @@ impl JobAdapter for PgJob
 mod tests
 {
 	use core::time::Duration;
+	use std::collections::HashSet;
 
 	use clinvoice_adapter::schema::{LocationAdapter, OrganizationAdapter};
 	use clinvoice_finance::ExchangeRates;
-	use clinvoice_match::MatchJob;
+	use clinvoice_match::{Match, MatchJob, MatchLocation, MatchOrganization};
 	use clinvoice_schema::{
 		chrono::{TimeZone, Utc},
 		views::{JobView, LocationView, OrganizationView},
@@ -377,7 +378,7 @@ mod tests
 			objectives: job_two.objectives,
 		};
 		let job_three_view = JobView {
-			client: some_organization_view,
+			client: some_organization_view.clone(),
 			date_close: job_three.date_close,
 			date_open: job_three.date_open,
 			id: job_three.id,
@@ -387,7 +388,7 @@ mod tests
 			objectives: job_three.objectives,
 		};
 		let job_four_view = JobView {
-			client: some_other_organization_view,
+			client: some_other_organization_view.clone(),
 			date_close: job_four.date_close,
 			date_open: job_four.date_open,
 			id: job_four.id,
@@ -406,6 +407,34 @@ mod tests
 			.unwrap()
 			.as_slice(),
 			&[job_one_view.clone()],
+		);
+
+		assert_eq!(
+			PgJob::retrieve_view(&connection, &MatchJob {
+				client: MatchOrganization {
+					location: MatchLocation {
+						id: Match::Or(vec![
+							some_organization_view.location.id.into(),
+							some_other_organization_view.location.id.into()
+						]),
+						..Default::default()
+					},
+					..Default::default()
+				},
+				..Default::default()
+			})
+			.await
+			.unwrap()
+			.into_iter()
+			.collect::<HashSet<_>>(),
+			[
+				job_one_view.clone(),
+				job_two_view.clone(),
+				job_three_view.clone(),
+				job_four_view.clone(),
+			]
+			.into_iter()
+			.collect::<HashSet<_>>(),
 		);
 	}
 }

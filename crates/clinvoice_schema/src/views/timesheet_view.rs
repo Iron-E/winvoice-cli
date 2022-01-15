@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 use super::{
 	markdown::{Element, Text},
 	ContactView,
-	EmployeeView,
+	EmployeeView, JobView,
 };
 use crate::{Expense, Id};
 
@@ -41,8 +41,7 @@ pub struct TimesheetView
 	/// # Summary
 	///
 	/// The ID of the [`Job`](crate::Job) this [`Timesheet`] is attached to.
-	#[cfg_attr(feature = "serde_support", serde(skip))]
-	pub job_id: Id,
+	pub job: JobView,
 
 	/// # Summary
 	///

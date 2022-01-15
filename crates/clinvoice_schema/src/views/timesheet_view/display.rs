@@ -49,14 +49,15 @@ impl Display for TimesheetView
 mod tests
 {
 	use std::collections::HashMap;
+	use core::time::Duration;
 
 	use chrono::Utc;
 	use clinvoice_finance::{Currency, Money};
 
 	use super::{DateTime, Local, TimesheetView};
 	use crate::{
-		views::{ContactView, EmployeeView, LocationView, OrganizationView, PersonView},
-		Expense,
+		views::{ContactView, EmployeeView, LocationView, OrganizationView, PersonView, JobView},
+		Expense, Invoice,
 	};
 
 	#[test]
@@ -115,7 +116,7 @@ mod tests
 				id: 0,
 				organization: OrganizationView {
 					id: 0,
-					location: street_view,
+					location: street_view.clone(),
 					name: "Big Test Organization".into(),
 				},
 				person: PersonView {
@@ -137,7 +138,23 @@ mod tests
 					description: "Gas".into(),
 				},
 			],
-			job_id: 0,
+			job: JobView {
+				id: 0,
+				client: OrganizationView {
+					id: 0,
+					location: street_view,
+					name: "Big Test Organization".into(),
+				},
+				date_close: None,
+				date_open: Utc::now(),
+				increment: Duration::new(900, 0),
+				invoice: Invoice {
+					date: None,
+					hourly_rate: Money::new(13_00, 2, Currency::USD),
+				},
+				notes: Default::default(),
+				objectives: Default::default(),
+			},
 			time_begin: Utc::now(),
 			time_end: Some(Utc::today().and_hms(23, 59, 59)),
 			work_notes: "Went to non-corporate fast food restaurant for business meeting".into(),

@@ -368,7 +368,7 @@ mod tests
 			TimesheetView {
 				employee: testy_mctesterson,
 				expenses: Vec::new(),
-				job_id: job.id,
+				job: job.clone(),
 				time_begin: Utc::today().and_hms(2, 0, 0),
 				time_end: Some(Utc::today().and_hms(2, 30, 0)),
 				work_notes: "- Wrote the test.".into(),
@@ -380,7 +380,7 @@ mod tests
 					cost: Money::new(20_00, 2, Currency::USD),
 					description: "Paid for someone else to clean".into(),
 				}],
-				job_id: job.id,
+				job: job.clone(),
 				time_begin: Utc::today().and_hms(3, 0, 0),
 				time_end: Some(Utc::today().and_hms(3, 30, 0)),
 				work_notes: "- Clean the deck.".into(),

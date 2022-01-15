@@ -78,19 +78,19 @@ where
 	{
 		match self
 		{
-			Self::BlockText(text) => writeln!(formatter, "{}", text),
+			Self::BlockText(text) => writeln!(formatter, "{text}"),
 			Self::Break => write!(formatter, ""),
 			Self::Heading { depth, text } =>
 			{
-				writeln!(formatter, "{} {}", "#".repeat(1.max(*depth)), text)
+				writeln!(formatter, "{} {text}", "#".repeat(1.max(*depth)))
 			},
 			Self::OrderedList { depth, text } =>
 			{
-				write!(formatter, "{}1. {}", "\t".repeat(*depth), text)
+				write!(formatter, "{}1. {text}", "\t".repeat(*depth))
 			},
 			Self::UnorderedList { depth, text } =>
 			{
-				write!(formatter, "{}- {}", "\t".repeat(*depth), text)
+				write!(formatter, "{}- {text}", "\t".repeat(*depth))
 			},
 		}
 	}

@@ -35,7 +35,7 @@ where
 	loop
 	{
 		let match_condition: MatchOrganization =
-			input::edit_default(format!("{}\n{}organizations", prompt, MATCH_PROMPT))?;
+			input::edit_default(format!("{prompt}\n{MATCH_PROMPT}organizations"))?;
 
 		let results = OAdapter::retrieve_view(connection, &match_condition).await?;
 

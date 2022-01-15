@@ -22,7 +22,7 @@ fn exit_with_err(error: impl Error) -> !
 		panic!("{:?}", error)
 	}
 
-	eprintln!("\nERROR: {}", error);
+	eprintln!("\nERROR: {error}");
 	process::exit(1)
 }
 

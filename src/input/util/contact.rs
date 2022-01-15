@@ -34,10 +34,7 @@ where
 	/// Get whether or not a user wants to export a piece of contact information.
 	fn get_export(entity: impl Display) -> input::Result<bool>
 	{
-		menu::confirm(format!(
-			"Do you want \"{}\" to be listed when exporting `Job`s?",
-			entity
-		))
+		menu::confirm(format!("Do you want \"{entity}\" to be listed when exporting `Job`s?"))
 	}
 
 	/// # Summary
@@ -45,7 +42,7 @@ where
 	/// Get what a user wants to call a piece of contact information.
 	fn get_label(entity: impl Display) -> io::Result<String>
 	{
-		input::text(None, format!("Please enter a label for \"{}\"", entity))
+		input::text(None, format!("Please enter a label for \"{entity}\""))
 	}
 
 	/// # Summary
@@ -148,8 +145,8 @@ fn edit_menu(contact_info: &mut HashMap<String, ContactView>) -> input::Result<(
 	if keys_differ && contact_info.contains_key(&typed_key)
 	{
 		eprintln!(
-			"The label \"{}\" is already being used by \"{}\"",
-			typed_key, contact_info[&typed_key]
+			"The label \"{typed_key}\" is already being used by \"{}\"",
+			contact_info[&typed_key]
 		);
 		return Ok(());
 	}
@@ -169,7 +166,7 @@ fn edit_menu(contact_info: &mut HashMap<String, ContactView>) -> input::Result<(
 	{
 		match input::edit_and_restore(
 			&contact_info[&selected_key],
-			format!("Please edit the {}", selected_key),
+			format!("Please edit the {selected_key}"),
 		)
 		{
 			Ok(edit) => contact_info.insert(typed_key, edit),

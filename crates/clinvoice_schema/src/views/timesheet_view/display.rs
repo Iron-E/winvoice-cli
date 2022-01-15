@@ -35,8 +35,7 @@ impl Display for TimesheetView
 		{
 			write!(
 				formatter,
-				"\tWork Notes:{}{}",
-				DEPTH_2,
+				"\tWork Notes:{DEPTH_2}{}",
 				self.work_notes.replace('\n', DEPTH_2)
 			)?;
 		}
@@ -161,7 +160,7 @@ mod tests
 		};
 
 		assert_eq!(
-			format!("{}", timesheet),
+			format!("{timesheet}"),
 			format!(
 				"{} – {}: CEO of Tests Testy McTesterson from Big Test Organization @ 1337 Some \
 				 Street, Phoenix, Arizona, USA, Earth

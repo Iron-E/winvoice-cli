@@ -35,9 +35,9 @@ where
 	{
 		match self
 		{
-			Self::Bold(text) => write!(formatter, "**{}**", text),
-			Self::Italic(text) => write!(formatter, "*{}*", text),
-			Self::Math(text) => write!(formatter, "${}$", text),
+			Self::Bold(text) => write!(formatter, "**{text}**"),
+			Self::Italic(text) => write!(formatter, "*{text}*"),
+			Self::Math(text) => write!(formatter, "${text}$"),
 		}
 	}
 }

@@ -12,8 +12,7 @@ impl Display for ContactView
 				location,
 				export: _,
 			} => location.fmt(formatter),
-			ContactView::Email { email, export: _ } => write!(formatter, "{}", email),
-			ContactView::Phone { phone, export: _ } => write!(formatter, "{}", phone),
+			ContactView::Email { email: s, export: _ } | ContactView::Phone { phone: s, export: _ } => write!(formatter, "{s}"),
 		}
 	}
 }

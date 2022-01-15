@@ -35,7 +35,7 @@ where
 	loop
 	{
 		let match_condition: MatchLocation =
-			input::edit_default(format!("{}\n{}locations", prompt, MATCH_PROMPT))?;
+			input::edit_default(format!("{prompt}\n{MATCH_PROMPT}locations"))?;
 
 		let results = LAdapter::retrieve_view(connection, &match_condition).await?;
 

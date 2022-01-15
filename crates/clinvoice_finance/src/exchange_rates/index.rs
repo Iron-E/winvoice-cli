@@ -13,6 +13,6 @@ impl Index<Currency> for ExchangeRates
 	{
 		self
 			.get(&index)
-			.unwrap_or_else(|| panic!("{} was not found in this set of exchange rates", index))
+			.unwrap_or_else(|| panic!("{index} was not found in this set of exchange rates"))
 	}
 }

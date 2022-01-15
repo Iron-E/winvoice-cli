@@ -61,7 +61,7 @@ mod tests
 		};
 
 		assert_eq!(
-			format!("{}", street_view),
+			format!("{street_view}"),
 			"1337 Some Street, Phoenix, Arizona, USA, Earth"
 		);
 	}

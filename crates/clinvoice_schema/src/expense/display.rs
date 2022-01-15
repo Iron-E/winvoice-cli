@@ -28,7 +28,7 @@ mod tests
 		};
 
 		assert_eq!(
-			format!("{}", expense),
+			format!("{expense}"),
 			"Food – 20.00 USD
 	Take-out for 2",
 		);

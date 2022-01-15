@@ -159,9 +159,8 @@ impl JobAdapter for PgJob
 								amount: amount.parse().map_err(|e| {
 									Error::Decode(
 										format!(
-											"`invoice_hourly_rate` is not validly formatted: {}\n
+											"`invoice_hourly_rate` is not validly formatted: {e}\n
 										The constraints on table `jobs` have failed",
-											e
 										)
 										.into(),
 									)

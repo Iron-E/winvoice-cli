@@ -34,8 +34,7 @@ impl Display for JobView
 
 		write!(
 			formatter,
-			"\tInvoice:{}{}",
-			DEPTH_2,
+			"\tInvoice:{DEPTH_2}{}",
 			self.invoice.to_string().replace('\n', DEPTH_2)
 		)?;
 
@@ -43,8 +42,7 @@ impl Display for JobView
 		{
 			write!(
 				formatter,
-				"\n\tObjectives:{}{}",
-				DEPTH_2,
+				"\n\tObjectives:{DEPTH_2}{}",
 				self.objectives.replace('\n', DEPTH_2)
 			)?;
 		}
@@ -53,8 +51,7 @@ impl Display for JobView
 		{
 			write!(
 				formatter,
-				"\n\tNotes:{}{}",
-				DEPTH_2,
+				"\n\tNotes:{DEPTH_2}{}",
 				self.notes.replace('\n', DEPTH_2)
 			)?;
 		}
@@ -122,7 +119,7 @@ mod tests
 		};
 
 		assert_eq!(
-			format!("{}", create_job_view),
+			format!("{create_job_view}"),
 			format!(
 				"Job #{} for Big Old Test: {} – {}
 	Invoice:

@@ -114,7 +114,7 @@ impl Command
 
 		let selected_job = input::select_one(
 			&job_results_view,
-			format!("Select the job to {} working on", self),
+			format!("Select the job to {self} working on"),
 		)?;
 
 		match self

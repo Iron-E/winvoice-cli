@@ -70,8 +70,7 @@ impl EmployeeAdapter for PgEmployee
 				sqlx::query(&format!(
 					"INSERT INTO contact_information
 					(employee_id, label, export, address_id, email, phone)
-				VALUES {};",
-					contact_info_values,
+				VALUES {contact_info_values};",
 				)),
 				|mut query, (label, contact)| {
 					query = query.bind(row.id).bind(label);

@@ -44,7 +44,7 @@ mod tests
 		};
 
 		assert_eq!(
-			format!("{}", organization),
+			format!("{organization}"),
 			"Big Old Test @ Arizona, USA, Earth"
 		);
 	}

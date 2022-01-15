@@ -24,7 +24,7 @@ mod tests
 		};
 
 		assert_eq!(
-			format!("{}", person_view),
+			format!("{person_view}"),
 			format!("#{}: Someone", person_view.id)
 		);
 	}

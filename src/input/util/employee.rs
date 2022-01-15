@@ -41,7 +41,7 @@ where
 				id: id.into(),
 				..Default::default()
 			},
-			_ => input::edit_default(format!("{}\n{}employees", prompt, MATCH_PROMPT))?,
+			_ => input::edit_default(format!("{prompt}\n{MATCH_PROMPT}employees"))?,
 		};
 
 		let results = EAdapter::retrieve_view(connection, &query).await?;

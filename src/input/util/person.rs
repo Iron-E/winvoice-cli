@@ -35,7 +35,7 @@ where
 	loop
 	{
 		let match_condition: MatchPerson =
-			input::edit_default(format!("{}\n{}persons", prompt, MATCH_PROMPT))?;
+			input::edit_default(format!("{prompt}\n{MATCH_PROMPT}persons"))?;
 
 		let results = PAdapter::retrieve_view(connection, &match_condition).await?;
 

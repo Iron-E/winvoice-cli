@@ -33,9 +33,8 @@ where
 {
 	let serialized = yaml::to_string(&entity)?;
 	let to_edit = format!(
-		"# {}\n\n{}",
+		"# {}\n\n{serialized}",
 		prompt.as_ref().replace('\n', "\n# "),
-		serialized
 	);
 
 	let result = Editor::new().extension(".yaml").edit(&to_edit)?;

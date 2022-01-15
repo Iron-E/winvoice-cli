@@ -221,7 +221,7 @@ impl Command
 				}
 				else if !(delete || update)
 				{
-					results_view.into_iter().for_each(|e| println!("{}", e));
+					results_view.into_iter().for_each(|e| println!("{e}"));
 				}
 			},
 
@@ -328,7 +328,7 @@ impl Command
 				}
 				else if !(close || delete || reopen || update)
 				{
-					results_view.iter().for_each(|j| println!("{}", j));
+					results_view.iter().for_each(|j| println!("{j}"));
 				}
 			},
 
@@ -356,7 +356,7 @@ impl Command
 				{
 					let location = input::select_one(
 						&results_view,
-						format!("Select the outer Location of {}", name),
+						format!("Select the outer Location of {name}"),
 					)?;
 
 					let conn = &connection;
@@ -368,7 +368,7 @@ impl Command
 				}
 				else if !(delete || update)
 				{
-					results_view.iter().for_each(|l| println!("{}", l));
+					results_view.iter().for_each(|l| println!("{l}"));
 				}
 			},
 
@@ -393,7 +393,7 @@ impl Command
 				}
 				else if !delete
 				{
-					results_view.iter().for_each(|o| println!("{}", o));
+					results_view.iter().for_each(|o| println!("{o}"));
 				}
 			},
 
@@ -418,7 +418,7 @@ impl Command
 				}
 				else if !delete
 				{
-					results_view.iter().for_each(|p| println!("{}", p));
+					results_view.iter().for_each(|p| println!("{p}"));
 				}
 			},
 		};

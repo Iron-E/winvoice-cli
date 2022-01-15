@@ -35,7 +35,7 @@ where
 	loop
 	{
 		let match_condition: MatchJob =
-			input::edit_default(format!("{}\n{}jobs", prompt, MATCH_PROMPT))?;
+			input::edit_default(format!("{prompt}\n{MATCH_PROMPT}jobs"))?;
 
 		let results = JAdapter::retrieve_view(connection, &match_condition).await?;
 

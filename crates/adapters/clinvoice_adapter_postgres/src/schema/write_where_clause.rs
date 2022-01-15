@@ -66,19 +66,11 @@ fn write_comparison(
 	query: &mut String,
 	context: WriteContext,
 	alias: impl Copy + Display,
-	comperator: &str,
+	comparator: &str,
 	comparand: impl Copy + Display,
 )
 {
-	write!(
-		query,
-		"{} {} {} {}",
-		context.get_prefix(),
-		alias,
-		comperator,
-		comparand
-	)
-	.unwrap()
+	write!(query, "{} {alias} {comparator} {comparand}", context.get_prefix()).unwrap()
 }
 
 /// # Summary
@@ -107,16 +99,14 @@ fn write_has<T>(
 	{
 		write!(
 			query,
-			"{} {} {}{}",
+			"{} {alias} {}{id}",
 			context.get_prefix(),
-			alias,
 			if union { "= ALL(ARRAY[" } else { "IN (" },
-			id
 		)
 		.unwrap()
 	}
 
-	iter.for_each(|id| write!(query, ", {}", id).unwrap());
+	iter.for_each(|id| write!(query, ", {id}").unwrap());
 
 	if union
 	{
@@ -135,7 +125,7 @@ fn write_has<T>(
 /// The rest of the args are the same as [`WriteSql::write_where`].
 fn write_is_null(query: &mut String, context: WriteContext, alias: impl Copy + Display)
 {
-	write!(query, "{} {} IS NULL", context.get_prefix(), alias).unwrap()
+	write!(query, "{} {alias} IS NULL", context.get_prefix()).unwrap()
 }
 
 /// # Summary
@@ -307,7 +297,7 @@ impl WriteWhereClause<&Match<Money>> for Schema
 	) -> WriteContext
 	{
 		// BUG: `PgTypecast::numeric(alias)` causes infinite recursion resolving `alias: Sized` on compilation
-		let alias_cast = format!("{}::numeric", alias); // PgTypeCast::numeric(alias);
+		let alias_cast = format!("{alias}::numeric"); // PgTypeCast::numeric(alias);
 		match match_condition
 		{
 			Match::AllGreaterThan(money) | Match::GreaterThan(money) =>
@@ -525,10 +515,8 @@ impl WriteWhereClause<&MatchStr<String>> for Schema
 			MatchStr::Any => return context,
 			MatchStr::Contains(string) => write!(
 				query,
-				"{} {} LIKE '%{}%'",
+				"{} {alias} LIKE '%{string}%'",
 				context.get_prefix(),
-				alias,
-				string
 			)
 			.unwrap(),
 			MatchStr::EqualTo(string) => write_comparison(query, context, alias, "=", PgStr(string)),
@@ -562,7 +550,7 @@ impl WriteWhereClause<&MatchPerson> for Schema
 			($context:expr, $column:expr, $match_field:ident) => {
 				Schema::write_where_clause(
 					$context,
-					&format!("{}.{}", alias, $column),
+					&format!("{alias}.{}", $column),
 					&match_condition.$match_field,
 					query,
 				)
@@ -595,11 +583,11 @@ impl WriteWhereClause<&MatchOrganization> for Schema
 		Schema::write_where_clause(
 			Schema::write_where_clause(
 				context,
-				&format!("{}.id", alias),
+				&format!("{alias}.id"),
 				&match_condition.id,
 				query,
 			),
-			&format!("{}.name", alias),
+			&format!("{alias}.name"),
 			&match_condition.name,
 			query,
 		)
@@ -629,7 +617,7 @@ impl WriteWhereClause<&MatchEmployee> for Schema
 			Schema::write_where_clause(
 				Schema::write_where_clause(
 					context,
-					&format!("{}.id", alias),
+					&format!("{alias}.id"),
 					&match_condition.id,
 					query,
 				),

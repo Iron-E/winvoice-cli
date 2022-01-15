@@ -17,7 +17,7 @@ impl Display for EmployeeView
 			sorted_employee_contact_info.sort();
 			sorted_employee_contact_info
 				.into_iter()
-				.try_for_each(|c| writeln!(formatter, "\t\t- {}: {}", c, self.contact_info[c]))?;
+				.try_for_each(|c| writeln!(formatter, "\t\t- {c}: {}", self.contact_info[c]))?;
 		}
 
 		write!(formatter, "\tStatus: {}", self.status)
@@ -91,7 +91,7 @@ mod tests
 		};
 
 		assert_eq!(
-			format!("{}", employee),
+			format!("{employee}"),
 			"CEO of Tests Testy McTesterson
 	Employer: Big Old Test @ 1234 Work Street, Phoenix, Arizona, USA, Earth
 	Employee Contact Info:

@@ -341,7 +341,7 @@ impl Create
 		.await?;
 
 		let selected_view =
-			input::select_one(&location_views, format!("Select a location for {}", name))?;
+			input::select_one(&location_views, format!("Select a location for {name}"))?;
 
 		OAdapter::create(connection, &selected_view.into(), name).await?;
 

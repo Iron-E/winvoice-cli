@@ -44,14 +44,14 @@ mod tests
 		};
 
 		assert_eq!(
-			format!("{}", date),
+			format!("{date}"),
 			format!(
 				"Issued on {}; Outstanding",
 				DateTime::<Local>::from(date.issued),
 			)
 		);
 		assert_eq!(
-			format!("{}", other_date),
+			format!("{other_date}"),
 			format!(
 				"Issued on {}; Paid on {}",
 				DateTime::<Local>::from(other_date.issued),

@@ -1,15 +1,20 @@
+use std::{collections::HashMap, str::FromStr};
+
 use clinvoice_adapter::{schema::TimesheetAdapter, WriteWhereClause};
-use clinvoice_finance::{Error as FinanceError, ExchangeRates};
+use clinvoice_finance::{Decimal, ExchangeRates, Money};
 use clinvoice_match::MatchTimesheet;
 use clinvoice_schema::{
 	chrono::{SubsecRound, Utc},
-	views::{TimesheetView, EmployeeView},
+	views::{ContactView, EmployeeView, JobView, OrganizationView, PersonView, TimesheetView},
 	Employee,
+	Expense,
+	Invoice,
+	InvoiceDate,
 	Job,
 	Timesheet,
 };
 use futures::{TryFutureExt, TryStreamExt};
-use sqlx::{Error, PgPool, Result};
+use sqlx::{Error, PgPool, Result, Row};
 
 use super::PgTimesheet;
 use crate::{
@@ -64,29 +69,159 @@ impl TimesheetAdapter for PgTimesheet
 		let mut query = String::from(
 			"SELECT
 				array_agg((C.export, C.label, C.address_id, C.email, C.phone)) AS contact_info,
-				E.organization_id, E.person_id, E.status, E.title,
+				Client.name AS client_name, CLient.location_id as client_location_id,
+				E.organization_id as employer_id, E.person_id, E.status, E.title,
+				Employer.name AS employer_name, Employer.location_id as employer_location_id,
 				J.client_id, J.date_close, J.date_open, J.increment, J.invoice_date_issued, J.invoice_date_paid,
 					J.invoice_hourly_rate, J.notes, J.objectives,
-				O.name AS organization_name, O.location_id,
 				P.name AS person_name,
-			 T.employee_id, T.job_id, T.expenses, T.time_begin, T.time_end, T.work_notes
+				T.employee_id, T.job_id, T.expenses, T.time_begin, T.time_end, T.work_notes
 			FROM timesheets T
 			JOIN contact_information C ON (C.employee_id = T.employee_id)
 			JOIN employees E ON (E.id = T.employee_id)
 			JOIN jobs J ON (E.id = T.employee_id)
-			JOIN organizations O ON (O.id = J.client_id)
+			JOIN organizations Client ON (O.id = J.client_id)
+			JOIN organizations Employer ON (Employer.id = E.organization_id)
 			JOIN people P ON (P.id = E.person_id)
 			",
 		);
-		todo!();
+		// TODO: `write_where_clause`
 		query.push(';');
 
 		sqlx::query(&query)
 			.fetch(connection)
-			.and_then(|row| async move { Ok(TimesheetView {
-				employee: EmployeeView {
-				}
-			}) })
+			.and_then(|row| async move {
+				Ok(TimesheetView {
+					employee: EmployeeView {
+						id: row.get("employee_id"),
+						organization: OrganizationView {
+							id: row.get("employer_id"),
+							name: row.get("employer_name"),
+							location: PgLocation::retrieve_view_by_id(
+								connection,
+								row.get("employer_location_id"),
+							)
+							.await?,
+						},
+						person: PersonView {
+							id: row.get("person_id"),
+							name: row.get("person_name"),
+						},
+						contact_info: {
+							let vec: Vec<(_, _, _, _, _)> = row.get("contact_info");
+							let mut map = HashMap::with_capacity(vec.len());
+							for contact in vec
+							{
+								map.insert(
+									contact.1,
+									if let Some(id) = contact.2
+									{
+										ContactView::Address {
+											location: PgLocation::retrieve_view_by_id(connection, id).await?,
+											export: contact.0,
+										}
+									}
+									else if let Some(email) = contact.3
+									{
+										ContactView::Email {
+											email,
+											export: contact.0,
+										}
+									}
+									else if let Some(phone) = contact.4
+									{
+										ContactView::Phone {
+											export: contact.0,
+											phone,
+										}
+									}
+									else
+									{
+										return Err(Error::Decode(
+											"Row of `contact_info` did not match any `Contact` equivalent"
+												.into(),
+										));
+									},
+								);
+							}
+							map
+						},
+						status: row.get("status"),
+						title: row.get("title"),
+					},
+					expenses: {
+						let foo: Vec<(String, String, String)> = row.get("expenses");
+						let foo_len = foo.len();
+						foo.into_iter()
+							.try_fold(
+								Vec::with_capacity(foo_len),
+								|mut v, (category, cost, description)| {
+									v.push(Expense {
+										category,
+										cost: Money {
+											amount: cost.parse()?,
+											..Default::default()
+										},
+										description,
+									});
+									Ok(v)
+								},
+							)
+							.map_err(|e: <Decimal as FromStr>::Err| {
+								Error::Decode(
+									format!(
+										"`expense.cost` is not validly formatted: {e}\nThe constraints on \
+										 table `jobs` have failed"
+									)
+									.into(),
+								)
+							})?
+					},
+					job: JobView {
+						id: row.get("job_id"),
+						client: OrganizationView {
+							id: row.get("client_id"),
+							name: row.get("client_name"),
+							location: PgLocation::retrieve_view_by_id(
+								connection,
+								row.get("client_location_id"),
+							)
+							.await?,
+						},
+						date_close: row.get("date_close"),
+						date_open: row.get("date_open"),
+						increment: util::duration_from(row.get("increment"))?,
+						invoice: Invoice {
+							date: row
+								.get::<Option<_>, _>("invoice_date_issued")
+								.map(|d| InvoiceDate {
+									issued: d,
+									paid: row.get("invoice_date_paid"),
+								}),
+							hourly_rate: {
+								let amount = row.get::<String, _>("invoice_hourly_rate");
+								Money {
+									amount: amount.parse().map_err(|e| {
+										Error::Decode(
+											format!(
+												"`invoice_hourly_rate` is not validly formatted: {e}\n
+											The constraints on table `jobs` have failed",
+											)
+											.into(),
+										)
+									})?,
+									..Default::default()
+								}
+							},
+						},
+						notes: row.get("notes"),
+						objectives: row.get("objectives"),
+					},
+					time_begin: row.get("time_begin"),
+					time_end: row.get("time_end"),
+					work_notes: row.get("work_notes"),
+				})
+			})
 			.try_collect()
 			.await
 	}
@@ -171,7 +306,7 @@ mod tests
 			r#"SELECT
 					employee_id,
 					job_id,
-					expenses as "expenses: Vec<(String, (String, String), String)>",
+					expenses as "expenses: Vec<(String, String, String)>",
 					time_begin,
 					time_end,
 					work_notes
@@ -188,11 +323,11 @@ mod tests
 			timesheet.expenses,
 			row.expenses
 				.into_iter()
-				.map(|(ctg, (amnt, curr), description)| Expense {
+				.map(|(ctg, cost, description)| Expense {
 					category: ctg.parse().unwrap(),
 					cost: Money {
-						amount: amnt.parse().unwrap(),
-						currency: curr.parse().unwrap(),
+						amount: cost.parse().unwrap(),
+						..Default::default()
 					},
 					description
 				})

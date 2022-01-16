@@ -8,7 +8,7 @@ use clinvoice_adapter::{
 	Store,
 };
 use clinvoice_schema::{
-	chrono::{Datelike, Local, TimeZone, Timelike},
+	chrono::{Local, TimeZone},
 	Currency,
 	Decimal,
 	Money,
@@ -158,11 +158,12 @@ impl Create
 						currency: currency.unwrap_or(default_currency),
 					},
 					increment.map(Duration::into).unwrap_or(default_increment),
-					year,
-					month,
-					day,
-					hour,
-					minute,
+					year.map(|y| (
+						y,
+						month.expect("`month` requires `year`"),
+						day.expect("`day` requires `month`"),
+						hour.map(|h| (h, minute.expect("`hour` requires `minute`"))),
+					)),
 				)
 				.await
 			},
@@ -242,11 +243,7 @@ impl Create
 		connection: &Pool<Db>,
 		hourly_rate: Money,
 		increment: StdDuration,
-		year: Option<i32>,
-		month: Option<u32>,
-		day: Option<u32>,
-		hour: Option<u32>,
-		minute: Option<u32>,
+		year_month_day_hour_minute: Option<(i32, u32, u32, Option<(u32, u32)>)>,
 	) -> DynResult<'err, ()>
 	where
 		Db: Database,
@@ -265,31 +262,15 @@ impl Create
 
 		let objectives = input::edit_markdown("* List your objectives\n* All markdown syntax works")?;
 
-		// [null]                               = current date and time
-		// <year> <month> <day>                 = that day, midnight
-		// <year> <month> <day> <hour> <minute> = that day and time
-		let local_date_open = {
-			let now = Local::now();
-
-			let date = Local.ymd(
-				year.unwrap_or_else(|| now.year()),
-				month.unwrap_or_else(|| now.month()),
-				day.unwrap_or_else(|| now.day()),
-			);
-
-			if year.is_some() && hour.is_none()
-			{
-				date.and_hms(0, 0, 0)
-			}
-			else
-			{
-				date.and_hms(
-					hour.unwrap_or_else(|| now.hour()),
-					minute.unwrap_or_else(|| now.minute()),
-					0,
-				)
-			}
-		};
+		// [null]                            = current date and time
+		// <year><month><day>                = that day, midnight
+		// <year><month><day> <hour><minute> = that day and time
+		let local_date_open = year_month_day_hour_minute
+			.map(|(year, month, day, hour_minute)| {
+				let (hour, minute) = hour_minute.unwrap_or((0, 0));
+				Local.ymd(year, month, day).and_hms(hour, minute, 0)
+			})
+			.unwrap_or_else(Local::now);
 
 		JAdapter::create(
 			connection,

@@ -47,16 +47,17 @@ impl Display for TimesheetView
 #[cfg(test)]
 mod tests
 {
-	use std::collections::HashMap;
 	use core::time::Duration;
+	use std::collections::HashMap;
 
 	use chrono::Utc;
 	use clinvoice_finance::{Currency, Money};
 
 	use super::{DateTime, Local, TimesheetView};
 	use crate::{
-		views::{ContactView, EmployeeView, LocationView, OrganizationView, PersonView, JobView},
-		Expense, Invoice,
+		views::{ContactView, EmployeeView, JobView, LocationView, OrganizationView, PersonView},
+		Expense,
+		Invoice,
 	};
 
 	#[test]

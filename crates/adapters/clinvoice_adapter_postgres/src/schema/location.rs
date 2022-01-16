@@ -1,5 +1,4 @@
 use core::fmt::Write;
-use std::borrow::Cow::Owned;
 
 use clinvoice_adapter::WriteWhereClause;
 use clinvoice_match::{Match, MatchLocation, MatchOuterLocation};

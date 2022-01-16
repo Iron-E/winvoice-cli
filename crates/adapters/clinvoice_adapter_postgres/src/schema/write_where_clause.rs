@@ -216,14 +216,14 @@ impl WriteWhereClause<&Match<Serde<Duration>>> for Schema
 				query,
 				context,
 				alias,
-				durations.into_iter().map(|d| PgInterval(d.into_inner())),
+				durations.iter().map(|d| PgInterval(d.into_inner())),
 				true,
 			),
 			Match::HasAny(durations) => write_has(
 				query,
 				context,
 				alias,
-				durations.into_iter().map(|d| PgInterval(d.into_inner())),
+				durations.iter().map(|d| PgInterval(d.into_inner())),
 				false,
 			),
 			Match::Not(match_condition) => match match_condition.deref()

@@ -10,7 +10,8 @@ use serde::{Deserialize, Serialize};
 use super::{
 	markdown::{Element, Text},
 	ContactView,
-	EmployeeView, JobView,
+	EmployeeView,
+	JobView,
 };
 use crate::{Expense, Id};
 

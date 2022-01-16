@@ -33,10 +33,13 @@ fn exit_with_err(error: impl Error) -> !
 async fn main()
 {
 	// Create a default user configuration if not already present.
+	#[allow(clippy::redundant_closure)]
 	Config::init().unwrap_or_else(|e| exit_with_err(e));
 
 	// Get the user configuration.
+	#[allow(clippy::redundant_closure)]
 	let config_bytes = fs::read(Config::path()).unwrap_or_else(|e| exit_with_err(e));
+	#[allow(clippy::redundant_closure)]
 	let config: Config = toml::from_slice(&config_bytes).unwrap_or_else(|e| exit_with_err(e));
 
 	// Run the CLInvoice application.

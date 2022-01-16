@@ -42,7 +42,7 @@ fn write_boolean_group<D, I, Q, const UNION: bool>(
 	I: Iterator<Item = Q>,
 	Schema: WriteWhereClause<Q>,
 {
-	write!(query, "{} (", context.get_prefix()).unwrap();
+	write!(query, "{context} (").unwrap();
 	if let Some(m) = match_conditions.next()
 	{
 		Schema::write_where_clause(WriteContext::InWhereCondition, alias, m, query);
@@ -70,12 +70,7 @@ fn write_comparison(
 	comparand: impl Copy + Display,
 )
 {
-	write!(
-		query,
-		"{} {alias} {comparator} {comparand}",
-		context.get_prefix()
-	)
-	.unwrap()
+	write!(query, "{context} {alias} {comparator} {comparand}").unwrap()
 }
 
 /// # Summary
@@ -104,8 +99,7 @@ fn write_has<T>(
 	{
 		write!(
 			query,
-			"{} {alias} {}{id}",
-			context.get_prefix(),
+			"{context} {alias} {}{id}",
 			if union { "= ALL(ARRAY[" } else { "IN (" },
 		)
 		.unwrap()
@@ -130,7 +124,7 @@ fn write_has<T>(
 /// The rest of the args are the same as [`WriteSql::write_where`].
 fn write_is_null(query: &mut String, context: WriteContext, alias: impl Copy + Display)
 {
-	write!(query, "{} {alias} IS NULL", context.get_prefix()).unwrap()
+	write!(query, "{context} {alias} IS NULL").unwrap()
 }
 
 /// # Summary
@@ -146,7 +140,7 @@ fn write_negated<Q>(
 ) where
 	Schema: WriteWhereClause<Q>,
 {
-	write!(query, "{} NOT (", context.get_prefix()).unwrap();
+	write!(query, "{context} NOT (").unwrap();
 	Schema::write_where_clause(
 		WriteContext::InWhereCondition,
 		alias,
@@ -520,7 +514,7 @@ impl WriteWhereClause<&MatchStr<String>> for Schema
 			MatchStr::Any => return context,
 			MatchStr::Contains(string) =>
 			{
-				write!(query, "{} {alias} LIKE '%{string}%'", context.get_prefix(),).unwrap()
+				write!(query, "{context} {alias} LIKE '%{string}%'").unwrap()
 			},
 			MatchStr::EqualTo(string) => write_comparison(query, context, alias, "=", PgStr(string)),
 			MatchStr::Not(match_condition) => match match_condition.deref()

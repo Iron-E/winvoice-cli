@@ -164,7 +164,7 @@ impl TimesheetView
 						writeln!(output, "{}: {contact}", Element::UnorderedList {
 							depth: 1,
 							text: Text::Bold(label),
-						},)
+						})
 					})
 					.unwrap();
 			}

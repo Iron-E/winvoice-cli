@@ -1,4 +1,5 @@
 mod default;
+mod display;
 
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
@@ -42,17 +43,4 @@ pub enum WriteContext
 	/// SELECT * FROM foo WHERE bar = 7
 	/// ```
 	AfterWhereCondition,
-}
-
-impl WriteContext
-{
-	pub const fn get_prefix(&self) -> &'static str
-	{
-		match self
-		{
-			WriteContext::AfterWhereCondition => " AND",
-			WriteContext::BeforeWhereClause => " WHERE",
-			WriteContext::InWhereCondition => "",
-		}
-	}
 }

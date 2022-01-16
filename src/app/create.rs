@@ -158,12 +158,14 @@ impl Create
 						currency: currency.unwrap_or(default_currency),
 					},
 					increment.map(Duration::into).unwrap_or(default_increment),
-					year.map(|y| (
-						y,
-						month.expect("`month` requires `year`"),
-						day.expect("`day` requires `month`"),
-						hour.map(|h| (h, minute.expect("`hour` requires `minute`"))),
-					)),
+					year.map(|y| {
+						(
+							y,
+							month.expect("`month` requires `year`"),
+							day.expect("`day` requires `month`"),
+							hour.map(|h| (h, minute.expect("`hour` requires `minute`"))),
+						)
+					}),
 				)
 				.await
 			},

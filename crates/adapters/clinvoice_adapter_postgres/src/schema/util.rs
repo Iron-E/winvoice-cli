@@ -1,5 +1,6 @@
 use core::time::Duration;
 
+use clinvoice_finance::Error as FinanceError;
 use sqlx::{postgres::types::PgInterval, Error, Result};
 #[cfg(test)]
 use {lazy_static::lazy_static, sqlx::PgPool};
@@ -53,6 +54,20 @@ pub(super) fn duration_from(interval: PgInterval) -> Result<Duration>
 		} + microseconds_into_secs,
 		microseconds_into_nanos,
 	))
+}
+
+/// # Summary
+///
+/// Map some [error](clinvoice_finance::Error) `e` to an [`Error`]
+pub(super) fn finance_err_to_sqlx(e: FinanceError) -> Error
+{
+	match e
+	{
+		FinanceError::Decimal(e2) => Error::Decode(e2.into()),
+		FinanceError::Io(e2) => Error::Io(e2),
+		FinanceError::Reqwest(e2) => Error::Protocol(e2.to_string()),
+		FinanceError::UnsupportedCurrency(_) => Error::Decode(e.into()),
+	}
 }
 
 #[cfg(test)]

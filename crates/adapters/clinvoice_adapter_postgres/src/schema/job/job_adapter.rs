@@ -2,7 +2,7 @@ use core::time::Duration;
 use std::convert::TryFrom;
 
 use clinvoice_adapter::{schema::JobAdapter, WriteWhereClause};
-use clinvoice_finance::{Currency, Error as FinanceError, ExchangeRates};
+use clinvoice_finance::{Currency, ExchangeRates};
 use clinvoice_match::{MatchInvoice, MatchJob};
 use clinvoice_schema::{
 	chrono::{DateTime, SubsecRound, Utc},
@@ -36,13 +36,7 @@ impl JobAdapter for PgJob
 	{
 		let standardized_rate_fut = ExchangeRates::new()
 			.map_ok(|r| hourly_rate.exchange(Default::default(), &r))
-			.map_err(|e| match e
-			{
-				FinanceError::Decimal(e2) => Error::Decode(e2.into()),
-				FinanceError::Io(e2) => Error::Io(e2),
-				FinanceError::Reqwest(e2) => Error::Protocol(e2.to_string()),
-				FinanceError::UnsupportedCurrency(_) => Error::Decode(e.into()),
-			});
+			.map_err(util::finance_err_to_sqlx);
 		let pg_increment = PgInterval::try_from(increment).map_err(Error::Decode)?;
 		let standardized_rate = standardized_rate_fut.await?;
 
@@ -78,14 +72,7 @@ impl JobAdapter for PgJob
 
 	async fn retrieve_view(connection: &PgPool, match_condition: &MatchJob) -> Result<Vec<JobView>>
 	{
-		let exchange_rates = ExchangeRates::new().map_err(|e| match e
-		{
-			FinanceError::Decimal(e2) => Error::Decode(e2.into()),
-			FinanceError::Io(e2) => Error::Io(e2),
-			FinanceError::Reqwest(e2) => Error::Protocol(e2.to_string()),
-			FinanceError::UnsupportedCurrency(_) => Error::Decode(e.into()),
-		});
-
+		let exchange_rates = ExchangeRates::new().map_err(util::finance_err_to_sqlx);
 		let id_match =
 			PgLocation::retrieve_matching_ids(connection, &match_condition.client.location);
 

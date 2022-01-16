@@ -33,6 +33,7 @@ impl OrganizationAdapter for PgOrganization
 	) -> Result<Vec<OrganizationView>>
 	{
 		let id_match = PgLocation::retrieve_matching_ids(connection, &match_condition.location);
+
 		let mut query = String::from(
 			"SELECT O.id, O.location_id, O.name
 			FROM organizations O

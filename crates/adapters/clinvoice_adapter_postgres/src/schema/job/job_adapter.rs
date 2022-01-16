@@ -88,6 +88,7 @@ impl JobAdapter for PgJob
 
 		let id_match =
 			PgLocation::retrieve_matching_ids(connection, &match_condition.client.location);
+
 		let mut query = String::from(
 			"SELECT
 				J.id, J.client_id, J.date_close, J.date_open, J.increment, J.invoice_date_issued, \

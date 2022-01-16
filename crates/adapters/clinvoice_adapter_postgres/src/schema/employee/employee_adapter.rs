@@ -120,6 +120,7 @@ impl EmployeeAdapter for PgEmployee
 	{
 		let id_match =
 			PgLocation::retrieve_matching_ids(connection, &match_condition.organization.location);
+
 		let mut query = String::from(
 			"SELECT
 				array_agg((C.export, C.label, C.address_id, C.email, C.phone)) AS contact_info,

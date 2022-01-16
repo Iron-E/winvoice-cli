@@ -70,7 +70,12 @@ fn write_comparison(
 	comparand: impl Copy + Display,
 )
 {
-	write!(query, "{} {alias} {comparator} {comparand}", context.get_prefix()).unwrap()
+	write!(
+		query,
+		"{} {alias} {comparator} {comparand}",
+		context.get_prefix()
+	)
+	.unwrap()
 }
 
 /// # Summary
@@ -513,12 +518,10 @@ impl WriteWhereClause<&MatchStr<String>> for Schema
 				&mut match_conditions.iter().filter(|m| *m != &MatchStr::Any),
 			),
 			MatchStr::Any => return context,
-			MatchStr::Contains(string) => write!(
-				query,
-				"{} {alias} LIKE '%{string}%'",
-				context.get_prefix(),
-			)
-			.unwrap(),
+			MatchStr::Contains(string) =>
+			{
+				write!(query, "{} {alias} LIKE '%{string}%'", context.get_prefix(),).unwrap()
+			},
 			MatchStr::EqualTo(string) => write_comparison(query, context, alias, "=", PgStr(string)),
 			MatchStr::Not(match_condition) => match match_condition.deref()
 			{
@@ -581,12 +584,7 @@ impl WriteWhereClause<&MatchOrganization> for Schema
 	) -> WriteContext
 	{
 		Schema::write_where_clause(
-			Schema::write_where_clause(
-				context,
-				&format!("{alias}.id"),
-				&match_condition.id,
-				query,
-			),
+			Schema::write_where_clause(context, &format!("{alias}.id"), &match_condition.id, query),
 			&format!("{alias}.name"),
 			&match_condition.name,
 			query,
@@ -615,17 +613,12 @@ impl WriteWhereClause<&MatchEmployee> for Schema
 	{
 		Schema::write_where_clause(
 			Schema::write_where_clause(
-				Schema::write_where_clause(
-					context,
-					&format!("{alias}.id"),
-					&match_condition.id,
-					query,
-				),
-				&format!("{}.status", alias),
+				Schema::write_where_clause(context, &format!("{alias}.id"), &match_condition.id, query),
+				&format!("{alias}.status"),
 				&match_condition.status,
 				query,
 			),
-			&format!("{}.title", alias),
+			&format!("{alias}.title"),
 			&match_condition.title,
 			query,
 		)
@@ -661,39 +654,39 @@ impl WriteWhereClause<&MatchJob> for Schema
 									Schema::write_where_clause(
 										Schema::write_where_clause(
 											context,
-											&format!("{}.id", alias),
+											&format!("{alias}.id"),
 											&match_condition.id,
 											query,
 										),
-										&format!("{}.date_close", alias),
+										&format!("{alias}.date_close"),
 										&match_condition.date_close,
 										query,
 									),
-									&format!("{}.date_open", alias),
+									&format!("{alias}.date_open"),
 									&match_condition.date_open,
 									query,
 								),
-								&format!("{}.increment", alias),
+								&format!("{alias}.increment"),
 								&match_condition.increment,
 								query,
 							),
-							&format!("{}.invoice_date_issued", alias),
+							&format!("{alias}.invoice_date_issued"),
 							&match_condition.invoice.date_issued,
 							query,
 						),
-						&format!("{}.invoice_date_paid", alias),
+						&format!("{alias}.invoice_date_paid"),
 						&match_condition.invoice.date_paid,
 						query,
 					),
-					&format!("{}.invoice_hourly_rate", alias),
+					&format!("{alias}.invoice_hourly_rate"),
 					&match_condition.invoice.hourly_rate,
 					query,
 				),
-				&format!("{}.notes", alias),
+				&format!("{alias}.notes"),
 				&match_condition.notes,
 				query,
 			),
-			&format!("{}.objectives", alias),
+			&format!("{alias}.objectives"),
 			&match_condition.objectives,
 			query,
 		)

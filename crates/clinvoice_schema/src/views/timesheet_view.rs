@@ -160,14 +160,10 @@ impl TimesheetView
 				sorted_employee_contact_info
 					.into_iter()
 					.try_for_each(|(label, contact)| {
-						writeln!(
-							output,
-							"{}: {contact}",
-							Element::UnorderedList {
-								depth: 1,
-								text: Text::Bold(label),
-							},
-						)
+						writeln!(output, "{}: {contact}", Element::UnorderedList {
+							depth: 1,
+							text: Text::Bold(label),
+						},)
 					})
 					.unwrap();
 			}

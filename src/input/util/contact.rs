@@ -34,7 +34,9 @@ where
 	/// Get whether or not a user wants to export a piece of contact information.
 	fn get_export(entity: impl Display) -> input::Result<bool>
 	{
-		menu::confirm(format!("Do you want \"{entity}\" to be listed when exporting `Job`s?"))
+		menu::confirm(format!(
+			"Do you want \"{entity}\" to be listed when exporting `Job`s?"
+		))
 	}
 
 	/// # Summary

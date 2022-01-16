@@ -1,15 +1,21 @@
-use clinvoice_adapter::schema::TimesheetAdapter;
+use clinvoice_adapter::{schema::TimesheetAdapter, WriteWhereClause};
+use clinvoice_finance::{Error as FinanceError, ExchangeRates};
 use clinvoice_match::MatchTimesheet;
 use clinvoice_schema::{
 	chrono::{SubsecRound, Utc},
-	views::TimesheetView,
+	views::{TimesheetView, EmployeeView},
 	Employee,
 	Job,
 	Timesheet,
 };
-use sqlx::{PgPool, Result};
+use futures::{TryFutureExt, TryStreamExt};
+use sqlx::{Error, PgPool, Result};
 
 use super::PgTimesheet;
+use crate::{
+	schema::{util, PgLocation},
+	PgSchema as Schema,
+};
 
 #[async_trait::async_trait]
 impl TimesheetAdapter for PgTimesheet
@@ -49,7 +55,40 @@ impl TimesheetAdapter for PgTimesheet
 		match_condition: &MatchTimesheet,
 	) -> Result<Vec<TimesheetView>>
 	{
-		todo!()
+		let exchange_rates = ExchangeRates::new().map_err(util::finance_err_to_sqlx);
+		let id_match = PgLocation::retrieve_matching_ids(
+			connection,
+			&match_condition.employee.organization.location,
+		);
+
+		let mut query = String::from(
+			"SELECT
+				array_agg((C.export, C.label, C.address_id, C.email, C.phone)) AS contact_info,
+				E.organization_id, E.person_id, E.status, E.title,
+				J.client_id, J.date_close, J.date_open, J.increment, J.invoice_date_issued, J.invoice_date_paid,
+					J.invoice_hourly_rate, J.notes, J.objectives,
+				O.name AS organization_name, O.location_id,
+				P.name AS person_name,
+			 T.employee_id, T.job_id, T.expenses, T.time_begin, T.time_end, T.work_notes
+			FROM timesheets T
+			JOIN contact_information C ON (C.employee_id = T.employee_id)
+			JOIN employees E ON (E.id = T.employee_id)
+			JOIN jobs J ON (E.id = T.employee_id)
+			JOIN organizations O ON (O.id = J.client_id)
+			JOIN people P ON (P.id = E.person_id)
+			",
+		);
+		todo!();
+		query.push(';');
+
+		sqlx::query(&query)
+			.fetch(connection)
+			.and_then(|row| async move { Ok(TimesheetView {
+				employee: EmployeeView {
+				}
+			}) })
+			.try_collect()
+			.await
 	}
 }
 

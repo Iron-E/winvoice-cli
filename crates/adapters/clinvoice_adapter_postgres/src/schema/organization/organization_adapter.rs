@@ -2,7 +2,7 @@ use clinvoice_adapter::{schema::OrganizationAdapter, WriteWhereClause};
 use clinvoice_match::MatchOrganization;
 use clinvoice_schema::{views::OrganizationView, Location, Organization};
 use futures::TryStreamExt;
-use sqlx::{PgPool, Result, Row};
+use sqlx::{PgPool, Result};
 
 use super::PgOrganization;
 use crate::{schema::PgLocation, PgSchema as Schema};
@@ -50,12 +50,7 @@ impl OrganizationAdapter for PgOrganization
 		sqlx::query(&query)
 			.fetch(connection)
 			.and_then(|row| async move {
-				Ok(OrganizationView {
-					id: row.get("id"),
-					name: row.get("name"),
-					location: PgLocation::retrieve_view_by_id(connection, row.get("location_id"))
-						.await?,
-				})
+				Self::row_to_view(&row, connection, "id", "location_id", "name").await
 			})
 			.try_collect()
 			.await

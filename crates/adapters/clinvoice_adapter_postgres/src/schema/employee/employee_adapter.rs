@@ -3,16 +3,9 @@ use std::collections::HashMap;
 
 use clinvoice_adapter::{schema::EmployeeAdapter, WriteWhereClause};
 use clinvoice_match::MatchEmployee;
-use clinvoice_schema::{
-	views::{ContactView, EmployeeView, OrganizationView, PersonView},
-	Contact,
-	Employee,
-	Id,
-	Organization,
-	Person,
-};
+use clinvoice_schema::{views::EmployeeView, Contact, Employee, Id, Organization, Person};
 use futures::TryStreamExt;
-use sqlx::{Error, PgPool, Result, Row};
+use sqlx::{PgPool, Result};
 
 use super::PgEmployee;
 use crate::{schema::PgLocation, PgSchema as Schema};
@@ -156,59 +149,20 @@ impl EmployeeAdapter for PgEmployee
 		sqlx::query(&query)
 			.fetch(connection)
 			.and_then(|row| async move {
-				Ok(EmployeeView {
-					id: row.get("id"),
-					organization: OrganizationView {
-						id: row.get("organization_id"),
-						name: row.get("organization_name"),
-						location: PgLocation::retrieve_view_by_id(connection, row.get("location_id"))
-							.await?,
-					},
-					person: PersonView {
-						id: row.get("person_id"),
-						name: row.get("name"),
-					},
-					contact_info: {
-						let vec: Vec<(_, _, _, _, _)> = row.get("contact_info");
-						let mut map = HashMap::with_capacity(vec.len());
-						for contact in vec
-						{
-							map.insert(
-								contact.1,
-								if let Some(id) = contact.2
-								{
-									ContactView::Address {
-										location: PgLocation::retrieve_view_by_id(connection, id).await?,
-										export: contact.0,
-									}
-								}
-								else if let Some(email) = contact.3
-								{
-									ContactView::Email {
-										email,
-										export: contact.0,
-									}
-								}
-								else if let Some(phone) = contact.4
-								{
-									ContactView::Phone {
-										export: contact.0,
-										phone,
-									}
-								}
-								else
-								{
-									return Err(Error::Decode(
-										"Row of `contact_info` did not match any `Contact` equivalent".into(),
-									));
-								},
-							);
-						}
-						map
-					},
-					status: row.get("status"),
-					title: row.get("title"),
-				})
+				Self::row_to_view(
+					&row,
+					connection,
+					"contact_info",
+					"id",
+					"name",
+					"organization_id",
+					"location_id",
+					"organization_name",
+					"person_id",
+					"status",
+					"title",
+				)
+				.await
 			})
 			.try_collect()
 			.await

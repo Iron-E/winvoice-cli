@@ -1,20 +1,15 @@
-use std::{collections::HashMap, str::FromStr};
-
 use clinvoice_adapter::{schema::TimesheetAdapter, WriteWhereClause};
-use clinvoice_finance::{Decimal, ExchangeRates, Money};
+use clinvoice_finance::ExchangeRates;
 use clinvoice_match::MatchTimesheet;
 use clinvoice_schema::{
 	chrono::{SubsecRound, Utc},
-	views::{ContactView, EmployeeView, JobView, OrganizationView, PersonView, TimesheetView},
+	views::TimesheetView,
 	Employee,
-	Expense,
-	Invoice,
-	InvoiceDate,
 	Job,
 	Timesheet,
 };
 use futures::{TryFutureExt, TryStreamExt};
-use sqlx::{Error, PgPool, Result, Row};
+use sqlx::{PgPool, Result};
 
 use super::PgTimesheet;
 use crate::{
@@ -91,136 +86,35 @@ impl TimesheetAdapter for PgTimesheet
 		sqlx::query(&query)
 			.fetch(connection)
 			.and_then(|row| async move {
-				Ok(TimesheetView {
-					employee: EmployeeView {
-						id: row.get("employee_id"),
-						organization: OrganizationView {
-							id: row.get("employer_id"),
-							name: row.get("employer_name"),
-							location: PgLocation::retrieve_view_by_id(
-								connection,
-								row.get("employer_location_id"),
-							)
-							.await?,
-						},
-						person: PersonView {
-							id: row.get("person_id"),
-							name: row.get("person_name"),
-						},
-						contact_info: {
-							let vec: Vec<(_, _, _, _, _)> = row.get("contact_info");
-							let mut map = HashMap::with_capacity(vec.len());
-							for contact in vec
-							{
-								map.insert(
-									contact.1,
-									if let Some(id) = contact.2
-									{
-										ContactView::Address {
-											location: PgLocation::retrieve_view_by_id(connection, id).await?,
-											export: contact.0,
-										}
-									}
-									else if let Some(email) = contact.3
-									{
-										ContactView::Email {
-											email,
-											export: contact.0,
-										}
-									}
-									else if let Some(phone) = contact.4
-									{
-										ContactView::Phone {
-											export: contact.0,
-											phone,
-										}
-									}
-									else
-									{
-										return Err(Error::Decode(
-											"Row of `contact_info` did not match any `Contact` equivalent"
-												.into(),
-										));
-									},
-								);
-							}
-							map
-						},
-						status: row.get("status"),
-						title: row.get("title"),
-					},
-					expenses: {
-						let foo: Vec<(String, String, String)> = row.get("expenses");
-						let foo_len = foo.len();
-						foo.into_iter()
-							.try_fold(
-								Vec::with_capacity(foo_len),
-								|mut v, (category, cost, description)| {
-									v.push(Expense {
-										category,
-										cost: Money {
-											amount: cost.parse()?,
-											..Default::default()
-										},
-										description,
-									});
-									Ok(v)
-								},
-							)
-							.map_err(|e: <Decimal as FromStr>::Err| {
-								Error::Decode(
-									format!(
-										"`expense.cost` is not validly formatted: {e}\nThe constraints on \
-										 table `jobs` have failed"
-									)
-									.into(),
-								)
-							})?
-					},
-					job: JobView {
-						id: row.get("job_id"),
-						client: OrganizationView {
-							id: row.get("client_id"),
-							name: row.get("client_name"),
-							location: PgLocation::retrieve_view_by_id(
-								connection,
-								row.get("client_location_id"),
-							)
-							.await?,
-						},
-						date_close: row.get("date_close"),
-						date_open: row.get("date_open"),
-						increment: util::duration_from(row.get("increment"))?,
-						invoice: Invoice {
-							date: row
-								.get::<Option<_>, _>("invoice_date_issued")
-								.map(|d| InvoiceDate {
-									issued: d,
-									paid: row.get("invoice_date_paid"),
-								}),
-							hourly_rate: {
-								let amount = row.get::<String, _>("invoice_hourly_rate");
-								Money {
-									amount: amount.parse().map_err(|e| {
-										Error::Decode(
-											format!(
-												"`invoice_hourly_rate` is not validly formatted: {e}\n
-											The constraints on table `jobs` have failed",
-											)
-											.into(),
-										)
-									})?,
-									..Default::default()
-								}
-							},
-						},
-						notes: row.get("notes"),
-						objectives: row.get("objectives"),
-					},
-					time_begin: row.get("time_begin"),
-					time_end: row.get("time_end"),
-					work_notes: row.get("work_notes"),
-				})
+				Self::row_to_view(
+					&row,
+					connection,
+					"client_id",
+					"client_location_id",
+					"client_name",
+					"contact_info",
+					"employee_id",
+					"person_name",
+					"person_id",
+					"status",
+					"title",
+					"employer_id",
+					"employer_location_id",
+					"employer_name",
+					"expenses",
+					"invoice_date_issued",
+					"invoice_date_paid",
+					"invoice_hourly_rate",
+					"date_close",
+					"date_open",
+					"job_id",
+					"increment",
+					"notes",
+					"objectives",
+					"time_begin",
+					"time_end",
+					"work_notes",
+				).await
 			})
 			.try_collect()
 			.await

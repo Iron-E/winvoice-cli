@@ -6,15 +6,14 @@ use clinvoice_finance::{Currency, ExchangeRates};
 use clinvoice_match::{MatchInvoice, MatchJob};
 use clinvoice_schema::{
 	chrono::{DateTime, SubsecRound, Utc},
-	views::{JobView, OrganizationView},
+	views::JobView,
 	Invoice,
-	InvoiceDate,
 	Job,
 	Money,
 	Organization,
 };
 use futures::{TryFutureExt, TryStreamExt};
-use sqlx::{postgres::types::PgInterval, Error, PgPool, Result, Row};
+use sqlx::{postgres::types::PgInterval, Error, PgPool, Result};
 
 use super::PgJob;
 use crate::{
@@ -123,43 +122,23 @@ impl JobAdapter for PgJob
 		sqlx::query(&query)
 			.fetch(connection)
 			.and_then(|row| async move {
-				Ok(JobView {
-					id: row.get("id"),
-					client: OrganizationView {
-						id: row.get("client_id"),
-						name: row.get("name"),
-						location: PgLocation::retrieve_view_by_id(connection, row.get("location_id"))
-							.await?,
-					},
-					date_close: row.get("date_close"),
-					date_open: row.get("date_open"),
-					increment: util::duration_from(row.get("increment"))?,
-					invoice: Invoice {
-						date: row
-							.get::<Option<_>, _>("invoice_date_issued")
-							.map(|d| InvoiceDate {
-								issued: d,
-								paid: row.get("invoice_date_paid"),
-							}),
-						hourly_rate: {
-							let amount = row.get::<String, _>("invoice_hourly_rate");
-							Money {
-								amount: amount.parse().map_err(|e| {
-									Error::Decode(
-										format!(
-											"`invoice_hourly_rate` is not validly formatted: {e}\n
-										The constraints on table `jobs` have failed",
-										)
-										.into(),
-									)
-								})?,
-								..Default::default()
-							}
-						},
-					},
-					notes: row.get("notes"),
-					objectives: row.get("objectives"),
-				})
+				Self::row_to_view(
+					&row,
+					connection,
+					"date_close",
+					"date_open",
+					"id",
+					"increment",
+					"invoice_date_issued",
+					"invoice_date_paid",
+					"invoice_hourly_rate",
+					"notes",
+					"objectives",
+					"client_id",
+					"location_id",
+					"name",
+				)
+				.await
 			})
 			.try_collect()
 			.await

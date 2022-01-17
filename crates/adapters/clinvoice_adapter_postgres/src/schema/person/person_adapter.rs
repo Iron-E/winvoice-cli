@@ -2,7 +2,7 @@ use clinvoice_adapter::{schema::PersonAdapter, WriteWhereClause};
 use clinvoice_match::MatchPerson;
 use clinvoice_schema::{views::PersonView, Person};
 use futures::stream::TryStreamExt;
-use sqlx::{PgPool, Result, Row};
+use sqlx::{PgPool, Result};
 
 use super::PgPerson;
 use crate::PgSchema as Schema;
@@ -30,10 +30,7 @@ impl PersonAdapter for PgPerson
 
 		sqlx::query(&query)
 			.fetch(connection)
-			.map_ok(|row| PersonView {
-				id: row.get("id"),
-				name: row.get("name"),
-			})
+			.map_ok(|row| Self::row_to_view(&row, "id", "name"))
 			.try_collect()
 			.await
 	}

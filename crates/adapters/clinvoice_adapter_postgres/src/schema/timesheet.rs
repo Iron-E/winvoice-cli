@@ -44,20 +44,38 @@ impl PgTimesheet
 		work_notes: &str,
 	) -> Result<TimesheetView>
 	{
+		let employee = PgEmployee::row_to_view(
+			&row,
+			connection,
+			contact_info,
+			employee_id,
+			employee_name,
+			employer_id,
+			employer_location_id,
+			employer_name,
+			employee_person_id,
+			employee_status,
+			employee_title,
+		);
+		let job = PgJob::row_to_view(
+			&row,
+			connection,
+			job_date_close,
+			job_date_open,
+			job_id,
+			job_increment,
+			invoice_date_issued,
+			invoice_date_paid,
+			invoice_hourly_rate,
+			job_notes,
+			job_objectives,
+			client_id,
+			client_location_id,
+			client_name,
+		);
+
 		Ok(TimesheetView {
-			employee: PgEmployee::row_to_view(
-				&row,
-				connection,
-				contact_info,
-				employee_id,
-				employee_name,
-				employer_id,
-				employer_location_id,
-				employer_name,
-				employee_person_id,
-				employee_status,
-				employee_title,
-			).await?,
+			employee: employee.await?,
 			expenses: {
 				let vec: Vec<(String, String, String)> = row.get(expenses);
 				let mut expenses = Vec::with_capacity(vec.len());
@@ -82,22 +100,7 @@ impl PgTimesheet
 					)
 				})?
 			},
-			job: PgJob::row_to_view(
-				&row,
-				connection,
-				job_date_close,
-				job_date_open,
-				job_id,
-				job_increment,
-				invoice_date_issued,
-				invoice_date_paid,
-				invoice_hourly_rate,
-				job_notes,
-				job_objectives,
-				client_id,
-				client_location_id,
-				client_name,
-			).await?,
+			job: job.await?,
 			time_begin: row.get(time_begin),
 			time_end: row.get(time_end),
 			work_notes: row.get(work_notes),

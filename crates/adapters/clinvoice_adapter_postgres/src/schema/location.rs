@@ -4,7 +4,7 @@ use clinvoice_adapter::WriteWhereClause;
 use clinvoice_match::{Match, MatchLocation, MatchOuterLocation};
 use clinvoice_schema::{views::LocationView, Id};
 use futures::{future, TryFutureExt, TryStreamExt};
-use sqlx::{Executor, PgPool, Postgres, Result, Row};
+use sqlx::{Executor, Postgres, Result, Row};
 
 use crate::PgSchema as Schema;
 
@@ -17,7 +17,7 @@ pub struct PgLocation;
 impl PgLocation
 {
 	pub(super) async fn retrieve_matching_ids<'a>(
-		connection: &PgPool,
+		connection: impl Executor<'_, Database = Postgres>,
 		match_condition: &MatchLocation,
 	) -> Result<Match<Id>>
 	{

@@ -18,7 +18,7 @@
 //! * [`Organization`](crate::schema::OrganizationAdapter)
 //! * [`Person`](crate::schema::PersonAdapter)
 
-#![allow(clippy::tabs_in_doc_comments)]
+#![allow(clippy::unit_arg)]
 
 mod r#match;
 mod match_contact;

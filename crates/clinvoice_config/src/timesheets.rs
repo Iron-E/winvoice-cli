@@ -12,7 +12,7 @@ pub struct Timesheets
 {
 	/// # Summary
 	///
-	/// The amount of time between increments to the [`crate::toml::Timesheet::time_end`] on a timesheet.
+	/// The amount of time between increments to the `time_end` on a [`clinvoice_schema::Timesheet`].
 	///
 	/// # Example
 	///
@@ -23,7 +23,7 @@ pub struct Timesheets
 	///
 	/// // 5 minute increment
 	/// Timesheets {
-	/// 	default_increment: Duration::new(300, 0),
+	///   default_increment: Duration::new(300, 0),
 	/// };
 	/// ```
 	#[serde(with = "humantime_serde")]

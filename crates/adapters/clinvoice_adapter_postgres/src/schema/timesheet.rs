@@ -45,7 +45,7 @@ impl PgTimesheet
 	) -> Result<TimesheetView>
 	{
 		let employee = PgEmployee::row_to_view(
-			&row,
+			row,
 			connection,
 			contact_info,
 			employee_id,
@@ -58,7 +58,7 @@ impl PgTimesheet
 			employee_title,
 		);
 		let job = PgJob::row_to_view(
-			&row,
+			row,
 			connection,
 			job_date_close,
 			job_date_open,

@@ -241,6 +241,7 @@ impl Create
 		Ok(())
 	}
 
+	#[allow(clippy::type_complexity)]
 	async fn create_job<'err, Db, JAdapter, OAdapter>(
 		connection: &Pool<Db>,
 		hourly_rate: Money,

@@ -20,13 +20,11 @@ fn add_menu(expenses: &mut Vec<Expense>, default_currency: Currency) -> input::R
 	let description = input::edit_markdown(&format!(
 		"* Describe the {category}\n* All markdown syntax is valid"
 	))?;
-	expenses.push(Expense {
+	Ok(expenses.push(Expense {
 		category,
 		cost,
 		description,
-	});
-
-	Ok(())
+	}))
 }
 
 /// # Summary

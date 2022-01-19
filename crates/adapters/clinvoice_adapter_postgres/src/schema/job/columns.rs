@@ -37,7 +37,8 @@ impl PgJobColumns<'_>
 						amount: amount.parse().map_err(|e| {
 							Error::Decode(
 								format!(
-									"Value `{amount}` of column `invoice_hourly_rate` is not validly formatted: {e}",
+									"Value `{amount}` of column `invoice_hourly_rate` is not validly \
+									 formatted: {e}",
 								)
 								.into(),
 							)

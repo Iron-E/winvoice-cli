@@ -34,12 +34,11 @@ impl PgEmployeeColumns<'_>
 			|(export, label, contact_location_id, contact_email, contact_phone)| {
 				let view = if let Some(contact_location_id) = contact_location_id
 				{
-					futures.push((
+					return Ok(futures.push((
 						export,
 						label,
 						PgLocation::retrieve_view_by_id(connection, contact_location_id),
-					));
-					return Ok(());
+					)));
 				}
 				else if let Some(contact_email) = contact_email
 				{

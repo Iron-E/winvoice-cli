@@ -12,7 +12,7 @@ use crate::DynResult;
 /// Execute the constructed command.
 pub async fn run<'err>(store: &Store) -> DynResult<'err, ()>
 {
-	match store.adapter
+	Ok(match store.adapter
 	{
 		#[cfg(feature = "postgres")]
 		Adapters::Postgres =>
@@ -25,7 +25,5 @@ pub async fn run<'err>(store: &Store) -> DynResult<'err, ()>
 		//       to define this behavior now.
 		#[allow(unreachable_patterns)]
 		_ => return Err(AdapterError(store.adapter).into()),
-	};
-
-	Ok(())
+	})
 }

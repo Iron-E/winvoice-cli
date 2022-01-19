@@ -12,6 +12,7 @@ use clinvoice_schema::{
 	Id,
 	Job,
 };
+use futures::TryFutureExt;
 use sqlx::{Database, Executor, Pool, Result};
 use structopt::StructOpt;
 
@@ -85,9 +86,9 @@ impl Command
 		timesheet.time_begin = timesheet.time_begin.duration_round(increment)?;
 		timesheet.time_end = Some(Utc::now().duration_round(increment)?);
 
-		TAdapter::update(connection, timesheet.into()).await?;
-
-		Ok(())
+		TAdapter::update(connection, timesheet.into())
+			.err_into()
+			.await
 	}
 
 	pub async fn run<'err, Db, EAdapter, JAdapter, TAdapter>(
@@ -117,7 +118,7 @@ impl Command
 			format!("Select the job to {self} working on"),
 		)?;
 
-		match self
+		Ok(match self
 		{
 			Self::Start =>
 			{
@@ -146,8 +147,6 @@ impl Command
 			{
 				Self::stop::<_, TAdapter>(&connection, default_employee_id, &selected_job).await?
 			},
-		};
-
-		Ok(())
+		})
 	}
 }

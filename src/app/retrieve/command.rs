@@ -19,6 +19,7 @@ use clinvoice_schema::{chrono::Utc, views::RestorableSerde, Currency, Location};
 use futures::{
 	future,
 	stream::{self, TryStreamExt},
+	TryFutureExt,
 };
 use serde::{de::DeserializeOwned, Serialize};
 use sqlx::{Database, Executor, Pool};
@@ -108,8 +109,9 @@ impl Command
 			cascade,
 			selection.into_iter().map(EntityView::into),
 		)
-		.await?;
-		Ok(())
+		.err_into()
+		.await
+		.and(Ok(()))
 	}
 
 	/// # Summary
@@ -145,8 +147,7 @@ impl Command
 				Ok(v)
 			})?;
 
-		future::try_join_all(updates).await?;
-		Ok(())
+		future::try_join_all(updates).err_into().await.and(Ok(()))
 	}
 
 	pub async fn run<'err, Db, EAdapter, JAdapter, LAdapter, OAdapter, PAdapter, TAdapter>(
@@ -167,7 +168,7 @@ impl Command
 		TAdapter: Deletable<Db = Db> + TimesheetAdapter + Send,
 		for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 	{
-		match self
+		Ok(match self
 		{
 			Self::Employee {
 				default,
@@ -320,8 +321,9 @@ impl Command
 								format!("{}--{}.md", job.client.name.replace(' ', "-"), job.id),
 								export,
 							)
-							.await?;
-							Ok(())
+							.err_into()
+							.await
+							.and(Ok(()))
 						})
 						.await;
 					export_result?;
@@ -421,8 +423,6 @@ impl Command
 					results_view.iter().for_each(|p| println!("{p}"));
 				}
 			},
-		};
-
-		Ok(())
+		})
 	}
 }

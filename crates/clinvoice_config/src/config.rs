@@ -114,9 +114,7 @@ impl Config<'_, '_>
 	pub fn update(&self) -> Result<()>
 	{
 		let serialized = toml::to_string_pretty(self)?;
-		fs::write(Self::path(), serialized)?;
-
-		Ok(())
+		fs::write(Self::path(), serialized).map_err(Error::from)
 	}
 }
 

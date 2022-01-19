@@ -236,9 +236,9 @@ impl Create
 			employee_status,
 			title,
 		)
-		.await?;
-
-		Ok(())
+		.err_into()
+		.await
+		.and(Ok(()))
 	}
 
 	#[allow(clippy::type_complexity)]
@@ -283,9 +283,9 @@ impl Create
 			increment,
 			objectives,
 		)
-		.await?;
-
-		Ok(())
+		.err_into()
+		.await
+		.and(Ok(()))
 	}
 
 	async fn create_location<Db, LAdapter>(connection: &Pool<Db>, names: Vec<String>) -> Result<()>
@@ -327,9 +327,10 @@ impl Create
 		let selected_view =
 			input::select_one(&location_views, format!("Select a location for {name}"))?;
 
-		OAdapter::create(connection, &selected_view.into(), name).await?;
-
-		Ok(())
+		OAdapter::create(connection, &selected_view.into(), name)
+			.err_into()
+			.await
+			.and(Ok(()))
 	}
 
 	pub async fn run<'err>(

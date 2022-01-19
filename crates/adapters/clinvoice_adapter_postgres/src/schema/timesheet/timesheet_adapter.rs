@@ -69,24 +69,37 @@ impl TimesheetAdapter for PgTimesheet
 		let mut query = String::from(
 			"SELECT
 				array_agg((C.export, C.label, C.address_id, C.email, C.phone)) AS contact_info,
-				Client.name AS client_name, CLient.location_id as client_location_id,
+				Client.name AS client_name, Client.location_id as client_location_id,
 				E.organization_id as employer_id, E.person_id, E.status, E.title,
 				Employer.name AS employer_name, Employer.location_id as employer_location_id,
 				J.client_id, J.date_close, J.date_open, J.increment, J.invoice_date_issued, J.invoice_date_paid,
 					J.invoice_hourly_rate, J.notes, J.objectives,
 				P.name AS person_name,
-				T.id, T.employee_id, T.job_id, T.expenses, T.time_begin, T.time_end, T.work_notes
+				T.id, T.employee_id, T.job_id, T.time_begin, T.time_end, T.work_notes,
+				array_agg((X1.id, X1.category, X1.cost, X1.description)) AS expenses
 			FROM timesheets T
 			JOIN contact_information C ON (C.employee_id = T.employee_id)
 			JOIN employees E ON (E.id = T.employee_id)
+			JOIN expenses X1 ON (X1.timesheet_id = T.id)
+			-- WARN: we *need* `X2`. It can be bound by a where clause while allowing `X1` to be unbound
+			JOIN expenses X2 ON (X2.id = X1.id)
 			JOIN jobs J ON (E.id = T.employee_id)
-			JOIN organizations Client ON (O.id = J.client_id)
+			JOIN organizations Client ON (Client.id = J.client_id)
 			JOIN organizations Employer ON (Employer.id = E.organization_id)
-			JOIN people P ON (P.id = E.person_id)
-			",
+			JOIN people P ON (P.id = E.person_id)",
 		);
 		// TODO: `write_where_clause`
-		query.push(';');
+		query.push_str(
+			" GROUP BY
+				Client.name, Client.location_id,
+				E.organization_id, E.person_id, E.status, E.title,
+				Employer.name, Employer.location_id,
+				J.client_id, J.date_close, J.date_open, J.increment, J.invoice_date_issued, J.invoice_date_paid,
+					J.invoice_hourly_rate, J.notes, J.objectives,
+				P.name,
+				T.id, T.employee_id, T.job_id, T.time_begin, T.time_end, T.work_notes
+			;",
+		);
 
 		const COLUMNS: PgTimesheetColumns<'static> = PgTimesheetColumns {
 			id: "id",

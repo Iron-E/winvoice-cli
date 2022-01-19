@@ -4,7 +4,7 @@ use clinvoice_schema::{views::PersonView, Person};
 use futures::stream::TryStreamExt;
 use sqlx::{PgPool, Result};
 
-use super::PgPerson;
+use super::{columns::PgPersonColumns, PgPerson};
 use crate::PgSchema as Schema;
 
 #[async_trait::async_trait]
@@ -28,9 +28,14 @@ impl PersonAdapter for PgPerson
 		Schema::write_where_clause(Default::default(), "P", match_condition, &mut query);
 		query.push(';');
 
+		const COLUMNS: PgPersonColumns<'static> = PgPersonColumns {
+			id: "id",
+			name: "name",
+		};
+
 		sqlx::query(&query)
 			.fetch(connection)
-			.map_ok(|row| Self::row_to_view(&row, "id", "name"))
+			.map_ok(|row| COLUMNS.row_to_view(&row))
 			.try_collect()
 			.await
 	}

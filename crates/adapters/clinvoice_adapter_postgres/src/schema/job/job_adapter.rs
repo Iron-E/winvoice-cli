@@ -17,7 +17,12 @@ use sqlx::{postgres::types::PgInterval, Error, PgPool, Result};
 
 use super::PgJob;
 use crate::{
-	schema::{util, PgLocation},
+	schema::{
+		job::columns::PgJobColumns,
+		organization::columns::PgOrganizationColumns,
+		util,
+		PgLocation,
+	},
 	PgSchema as Schema,
 };
 
@@ -119,27 +124,26 @@ impl JobAdapter for PgJob
 		);
 		query.push(';');
 
+		const COLUMNS: PgJobColumns<'static> = PgJobColumns {
+			client: PgOrganizationColumns {
+				id: "client_id",
+				location_id: "location_id",
+				name: "name",
+			},
+			date_close: "date_close",
+			date_open: "date_open",
+			id: "id",
+			increment: "increment",
+			notes: "notes",
+			objectives: "objectives",
+			invoice_date_issued: "invoice_date_issued",
+			invoice_date_paid: "invoice_date_paid",
+			invoice_hourly_rate: "invoice_hourly_rate",
+		};
+
 		sqlx::query(&query)
 			.fetch(connection)
-			.and_then(|row| async move {
-				Self::row_to_view(
-					&row,
-					connection,
-					"date_close",
-					"date_open",
-					"id",
-					"increment",
-					"invoice_date_issued",
-					"invoice_date_paid",
-					"invoice_hourly_rate",
-					"notes",
-					"objectives",
-					"client_id",
-					"location_id",
-					"name",
-				)
-				.await
-			})
+			.and_then(|row| async move { COLUMNS.row_to_view(connection, &row).await })
 			.try_collect()
 			.await
 	}

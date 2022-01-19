@@ -4,7 +4,7 @@ use clinvoice_schema::{views::OrganizationView, Location, Organization};
 use futures::TryStreamExt;
 use sqlx::{PgPool, Result};
 
-use super::PgOrganization;
+use super::{columns::PgOrganizationColumns, PgOrganization};
 use crate::{schema::PgLocation, PgSchema as Schema};
 
 #[async_trait::async_trait]
@@ -47,11 +47,15 @@ impl OrganizationAdapter for PgOrganization
 		);
 		query.push(';');
 
+		const COLUMNS: PgOrganizationColumns<'static> = PgOrganizationColumns {
+			id: "id",
+			location_id: "location_id",
+			name: "name",
+		};
+
 		sqlx::query(&query)
 			.fetch(connection)
-			.and_then(|row| async move {
-				Self::row_to_view(&row, connection, "id", "location_id", "name").await
-			})
+			.and_then(|row| async move { COLUMNS.row_to_view(connection, &row).await })
 			.try_collect()
 			.await
 	}

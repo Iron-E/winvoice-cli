@@ -7,8 +7,15 @@ use clinvoice_schema::{views::EmployeeView, Contact, Employee, Id, Organization,
 use futures::TryStreamExt;
 use sqlx::{PgPool, Result};
 
-use super::PgEmployee;
-use crate::{schema::PgLocation, PgSchema as Schema};
+use super::{columns::PgEmployeeColumns, PgEmployee};
+use crate::{
+	schema::{
+		organization::columns::PgOrganizationColumns,
+		person::columns::PgPersonColumns,
+		PgLocation,
+	},
+	PgSchema as Schema,
+};
 
 #[async_trait::async_trait]
 impl EmployeeAdapter for PgEmployee
@@ -146,24 +153,25 @@ impl EmployeeAdapter for PgEmployee
 			 O.name, O.location_id, P.name;",
 		);
 
+		const COLUMNS: PgEmployeeColumns<'static> = PgEmployeeColumns {
+			contact_info: "contact_info",
+			id: "id",
+			organization: PgOrganizationColumns {
+				id: "organization_id",
+				location_id: "location_id",
+				name: "organization_name",
+			},
+			person: PgPersonColumns {
+				name: "name",
+				id: "person_id",
+			},
+			status: "status",
+			title: "title",
+		};
+
 		sqlx::query(&query)
 			.fetch(connection)
-			.and_then(|row| async move {
-				Self::row_to_view(
-					&row,
-					connection,
-					"contact_info",
-					"id",
-					"name",
-					"organization_id",
-					"location_id",
-					"organization_name",
-					"person_id",
-					"status",
-					"title",
-				)
-				.await
-			})
+			.and_then(|row| async move { COLUMNS.row_to_view(connection, &row).await })
 			.try_collect()
 			.await
 	}

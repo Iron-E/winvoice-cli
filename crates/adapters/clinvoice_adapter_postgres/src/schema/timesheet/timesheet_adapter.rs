@@ -11,9 +11,16 @@ use clinvoice_schema::{
 use futures::{TryFutureExt, TryStreamExt};
 use sqlx::{PgPool, Result};
 
-use super::PgTimesheet;
+use super::{columns::PgTimesheetColumns, PgTimesheet};
 use crate::{
-	schema::{util, PgLocation},
+	schema::{
+		employee::columns::PgEmployeeColumns,
+		job::columns::PgJobColumns,
+		organization::columns::PgOrganizationColumns,
+		person::columns::PgPersonColumns,
+		util,
+		PgLocation,
+	},
 	PgSchema as Schema,
 };
 
@@ -83,39 +90,47 @@ impl TimesheetAdapter for PgTimesheet
 		// TODO: `write_where_clause`
 		query.push(';');
 
+		const COLUMNS: PgTimesheetColumns<'static> = PgTimesheetColumns {
+			employee: PgEmployeeColumns {
+				contact_info: "contact_info",
+				id: "employee_id",
+				organization: PgOrganizationColumns {
+					id: "employer_id",
+					location_id: "employer_location_id",
+					name: "employer_name",
+				},
+				person: PgPersonColumns {
+					id: "person_id",
+					name: "person_name",
+				},
+				status: "status",
+				title: "title",
+			},
+			expenses: "expenses",
+			job: PgJobColumns {
+				client: PgOrganizationColumns {
+					id: "client_id",
+					location_id: "client_location_id",
+					name: "client_name",
+				},
+				invoice_date_issued: "invoice_date_issued",
+				invoice_date_paid: "invoice_date_paid",
+				invoice_hourly_rate: "invoice_hourly_rate",
+				date_close: "date_close",
+				date_open: "date_open",
+				id: "job_id",
+				increment: "increment",
+				notes: "notes",
+				objectives: "objectives",
+			},
+			time_begin: "time_begin",
+			time_end: "time_end",
+			work_notes: "work_notes",
+		};
+
 		sqlx::query(&query)
 			.fetch(connection)
-			.and_then(|row| async move {
-				Self::row_to_view(
-					&row,
-					connection,
-					"client_id",
-					"client_location_id",
-					"client_name",
-					"contact_info",
-					"employee_id",
-					"person_name",
-					"person_id",
-					"status",
-					"title",
-					"employer_id",
-					"employer_location_id",
-					"employer_name",
-					"expenses",
-					"invoice_date_issued",
-					"invoice_date_paid",
-					"invoice_hourly_rate",
-					"date_close",
-					"date_open",
-					"job_id",
-					"increment",
-					"notes",
-					"objectives",
-					"time_begin",
-					"time_end",
-					"work_notes",
-				).await
-			})
+			.and_then(|row| async move { COLUMNS.row_to_view(connection, &row).await })
 			.try_collect()
 			.await
 	}

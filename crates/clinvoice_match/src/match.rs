@@ -11,7 +11,7 @@ use serde::{Deserialize, Serialize};
 /// # Summary
 ///
 /// A value in a retrieval operation.
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 pub enum Match<T>
 where

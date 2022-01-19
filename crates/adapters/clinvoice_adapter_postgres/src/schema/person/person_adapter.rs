@@ -65,6 +65,6 @@ mod tests
 	#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 	async fn retrieve()
 	{
-		// TODO: write test; `SET SCHEMA 'pg_temp';`
+		// TODO: write test
 	}
 }

@@ -154,7 +154,6 @@ impl EmployeeAdapter for PgEmployee
 		);
 
 		const COLUMNS: PgEmployeeColumns<'static> = PgEmployeeColumns {
-			contact_info: "contact_info",
 			id: "id",
 			organization: PgOrganizationColumns {
 				id: "organization_id",
@@ -165,8 +164,6 @@ impl EmployeeAdapter for PgEmployee
 				name: "name",
 				id: "person_id",
 			},
-			status: "status",
-			title: "title",
 		};
 
 		sqlx::query(&query)

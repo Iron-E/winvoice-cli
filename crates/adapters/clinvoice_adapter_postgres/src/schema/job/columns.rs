@@ -7,15 +7,7 @@ use crate::schema::{organization::columns::PgOrganizationColumns, util};
 pub(in crate::schema) struct PgJobColumns<'col>
 {
 	pub client: PgOrganizationColumns<'col>,
-	pub date_close: &'col str,
-	pub date_open: &'col str,
 	pub id: &'col str,
-	pub increment: &'col str,
-	pub invoice_date_issued: &'col str,
-	pub invoice_date_paid: &'col str,
-	pub invoice_hourly_rate: &'col str,
-	pub notes: &'col str,
-	pub objectives: &'col str,
 }
 
 impl PgJobColumns<'_>
@@ -29,24 +21,23 @@ impl PgJobColumns<'_>
 		Ok(JobView {
 			id: row.get(self.id),
 			client: self.client.row_to_view(connection, row).await?,
-			date_close: row.get(self.date_close),
-			date_open: row.get(self.date_open),
-			increment: util::duration_from(row.get(self.increment))?,
+			date_close: row.get("date_close"),
+			date_open: row.get("date_open"),
+			increment: util::duration_from(row.get("increment"))?,
 			invoice: Invoice {
 				date: row
-					.get::<Option<_>, _>(self.invoice_date_issued)
+					.get::<Option<_>, _>("invoice_date_issued")
 					.map(|d| InvoiceDate {
 						issued: d,
-						paid: row.get(self.invoice_date_paid),
+						paid: row.get("invoice_date_paid"),
 					}),
 				hourly_rate: {
-					let amount = row.get::<String, _>(self.invoice_hourly_rate);
+					let amount = row.get::<String, _>("invoice_hourly_rate");
 					Money {
 						amount: amount.parse().map_err(|e| {
 							Error::Decode(
 								format!(
-									"Value `{amount}` of column `{}` is not validly formatted: {e}",
-									self.invoice_hourly_rate,
+									"Value `{amount}` of column `invoice_hourly_rate` is not validly formatted: {e}",
 								)
 								.into(),
 							)
@@ -55,8 +46,8 @@ impl PgJobColumns<'_>
 					}
 				},
 			},
-			notes: row.get(self.notes),
-			objectives: row.get(self.objectives),
+			notes: row.get("notes"),
+			objectives: row.get("objectives"),
 		})
 	}
 }

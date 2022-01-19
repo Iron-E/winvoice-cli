@@ -92,7 +92,6 @@ impl TimesheetAdapter for PgTimesheet
 
 		const COLUMNS: PgTimesheetColumns<'static> = PgTimesheetColumns {
 			employee: PgEmployeeColumns {
-				contact_info: "contact_info",
 				id: "employee_id",
 				organization: PgOrganizationColumns {
 					id: "employer_id",
@@ -103,8 +102,6 @@ impl TimesheetAdapter for PgTimesheet
 					id: "person_id",
 					name: "person_name",
 				},
-				status: "status",
-				title: "title",
 			},
 			expenses: "expenses",
 			job: PgJobColumns {
@@ -113,15 +110,7 @@ impl TimesheetAdapter for PgTimesheet
 					location_id: "client_location_id",
 					name: "client_name",
 				},
-				invoice_date_issued: "invoice_date_issued",
-				invoice_date_paid: "invoice_date_paid",
-				invoice_hourly_rate: "invoice_hourly_rate",
-				date_close: "date_close",
-				date_open: "date_open",
 				id: "job_id",
-				increment: "increment",
-				notes: "notes",
-				objectives: "objectives",
 			},
 			time_begin: "time_begin",
 			time_end: "time_end",

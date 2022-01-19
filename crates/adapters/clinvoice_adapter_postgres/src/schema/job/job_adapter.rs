@@ -130,15 +130,7 @@ impl JobAdapter for PgJob
 				location_id: "location_id",
 				name: "name",
 			},
-			date_close: "date_close",
-			date_open: "date_open",
 			id: "id",
-			increment: "increment",
-			notes: "notes",
-			objectives: "objectives",
-			invoice_date_issued: "invoice_date_issued",
-			invoice_date_paid: "invoice_date_paid",
-			invoice_hourly_rate: "invoice_hourly_rate",
 		};
 
 		sqlx::query(&query)

@@ -2,7 +2,7 @@ use clinvoice_schema::Id;
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 
-use super::{Match, MatchContact, MatchOrganization, MatchPerson, MatchStr};
+use super::{Match, MatchOrganization, MatchPerson, MatchStr};
 
 /// # Summary
 ///
@@ -11,9 +11,6 @@ use super::{Match, MatchContact, MatchOrganization, MatchPerson, MatchStr};
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 pub struct MatchEmployee
 {
-	#[cfg_attr(feature = "serde_support", serde(default))]
-	pub contact_info: MatchContact,
-
 	#[cfg_attr(feature = "serde_support", serde(default))]
 	pub id: Match<Id>,
 

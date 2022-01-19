@@ -297,7 +297,7 @@ impl WriteWhereClause<&Match<Money>> for Schema
 		query: &mut String,
 	) -> WriteContext
 	{
-		// BUG: `PgTypecast::numeric(alias)` causes infinite recursion resolving `alias: Sized` on compilation
+		// TODO: use `PgTypecast::numeric(alias)` after rust-lang/rust#39959
 		let alias_cast = format!("{alias}::numeric"); // PgTypeCast::numeric(alias);
 		match match_condition
 		{

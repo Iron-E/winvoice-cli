@@ -27,10 +27,11 @@ mod invoice;
 mod invoice_date;
 mod job;
 mod location;
+mod markdown;
 mod organization;
 mod person;
+mod restorable_serde;
 mod timesheet;
-pub mod views;
 
 pub use chrono;
 pub use clinvoice_finance::{Currency, Decimal, Money};
@@ -45,4 +46,5 @@ pub use job::Job;
 pub use location::Location;
 pub use organization::Organization;
 pub use person::Person;
+pub use restorable_serde::RestorableSerde;
 pub use timesheet::Timesheet;

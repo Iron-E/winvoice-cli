@@ -1,8 +1,8 @@
 use core::fmt::{Display, Formatter, Result};
 
-use super::PersonView;
+use super::Person;
 
-impl Display for PersonView
+impl Display for Person
 {
 	fn fmt(&self, formatter: &mut Formatter) -> Result
 	{
@@ -13,12 +13,12 @@ impl Display for PersonView
 #[cfg(test)]
 mod tests
 {
-	use super::PersonView;
+	use super::Person;
 
 	#[test]
 	fn display()
 	{
-		let person_view = PersonView {
+		let person_view = Person {
 			id: 0,
 			name: "Someone".into(),
 		};

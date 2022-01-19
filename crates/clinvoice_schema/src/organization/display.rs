@@ -1,8 +1,8 @@
 use core::fmt::{Display, Formatter, Result};
 
-use super::OrganizationView;
+use super::Organization;
 
-impl Display for OrganizationView
+impl Display for Organization
 {
 	fn fmt(&self, formatter: &mut Formatter) -> Result
 	{
@@ -13,23 +13,23 @@ impl Display for OrganizationView
 #[cfg(test)]
 mod tests
 {
-	use super::OrganizationView;
-	use crate::views::LocationView;
+	use super::Organization;
+	use crate::Location;
 
 	#[test]
 	fn display()
 	{
-		let organization = OrganizationView {
+		let organization = Organization {
 			id: 0,
-			location: LocationView {
+			location: Location {
 				id: 0,
 				name: "Arizona".into(),
 				outer: Some(
-					LocationView {
+					Location {
 						id: 0,
 						name: "USA".into(),
 						outer: Some(
-							LocationView {
+							Location {
 								id: 0,
 								name: "Earth".into(),
 								outer: None,

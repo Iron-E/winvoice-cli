@@ -1,6 +1,6 @@
 use clinvoice_adapter::{schema::OrganizationAdapter, WriteWhereClause};
 use clinvoice_match::MatchOrganization;
-use clinvoice_schema::{views::OrganizationView, Location, Organization};
+use clinvoice_schema::{Location, Organization};
 use futures::TryStreamExt;
 use sqlx::{PgPool, Result};
 
@@ -10,7 +10,7 @@ use crate::{schema::PgLocation, PgSchema as Schema};
 #[async_trait::async_trait]
 impl OrganizationAdapter for PgOrganization
 {
-	async fn create(connection: &PgPool, location: &Location, name: String) -> Result<Organization>
+	async fn create(connection: &PgPool, location: Location, name: String) -> Result<Organization>
 	{
 		let row = sqlx::query!(
 			"INSERT INTO organizations (location_id, name) VALUES ($1, $2) RETURNING id;",
@@ -22,15 +22,15 @@ impl OrganizationAdapter for PgOrganization
 
 		Ok(Organization {
 			id: row.id,
-			location_id: location.id,
+			location,
 			name,
 		})
 	}
 
-	async fn retrieve_view(
+	async fn retrieve(
 		connection: &PgPool,
 		match_condition: MatchOrganization,
-	) -> Result<Vec<OrganizationView>>
+	) -> Result<Vec<Organization>>
 	{
 		let id_match = PgLocation::retrieve_matching_ids(connection, &match_condition.location);
 
@@ -66,7 +66,6 @@ mod tests
 {
 	use clinvoice_adapter::schema::LocationAdapter;
 	use clinvoice_match::{Match, MatchLocation, MatchOrganization, MatchOuterLocation};
-	use clinvoice_schema::views::{LocationView, OrganizationView};
 
 	use super::{OrganizationAdapter, PgOrganization};
 	use crate::schema::{util, PgLocation};
@@ -81,9 +80,10 @@ mod tests
 			.await
 			.unwrap();
 
-		let organization = PgOrganization::create(&connection, &earth, "Some Organization".into())
-			.await
-			.unwrap();
+		let organization =
+			PgOrganization::create(&connection, earth.clone(), "Some Organization".into())
+				.await
+				.unwrap();
 
 		let row = sqlx::query!(
 			"SELECT * FROM organizations WHERE id = $1;",
@@ -95,13 +95,13 @@ mod tests
 
 		// Assert ::create writes accurately to the DB
 		assert_eq!(organization.id, row.id);
-		assert_eq!(organization.location_id, earth.id);
-		assert_eq!(organization.location_id, row.location_id);
+		assert_eq!(organization.location.id, earth.id);
+		assert_eq!(organization.location.id, row.location_id);
 		assert_eq!(organization.name, row.name);
 	}
 
 	#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
-	async fn retrieve_view()
+	async fn retrieve()
 	{
 		let connection = util::connect().await;
 
@@ -109,71 +109,36 @@ mod tests
 			.await
 			.unwrap();
 
-		let usa = PgLocation::create_inner(&connection, &earth, "USA".into())
+		let usa = PgLocation::create_inner(&connection, earth, "USA".into())
 			.await
 			.unwrap();
 
 		let (arizona, utah) = futures::try_join!(
-			PgLocation::create_inner(&connection, &usa, "Arizona".into()),
-			PgLocation::create_inner(&connection, &usa, "Utah".into()),
+			PgLocation::create_inner(&connection, usa.clone(), "Arizona".into()),
+			PgLocation::create_inner(&connection, usa.clone(), "Utah".into()),
 		)
 		.unwrap();
 
 		let (some_organization, some_other_organization) = futures::try_join!(
-			PgOrganization::create(&connection, &arizona, "Some Organization".into()),
-			PgOrganization::create(&connection, &utah, "Some Other Organizatión".into()),
+			PgOrganization::create(&connection, arizona, "Some Organization".into()),
+			PgOrganization::create(&connection, utah, "Some Other Organizatión".into()),
 		)
 		.unwrap();
 
-		let earth_view = LocationView {
-			id: earth.id,
-			name: earth.name.clone(),
-			outer: None,
-		};
-
-		let usa_view = LocationView {
-			id: usa.id,
-			name: usa.name.clone(),
-			outer: Some(earth_view.clone().into()),
-		};
-
-		let arizona_view = LocationView {
-			id: arizona.id,
-			name: arizona.name.clone(),
-			outer: Some(usa_view.clone().into()),
-		};
-
-		let utah_view = LocationView {
-			id: utah.id,
-			name: utah.name.clone(),
-			outer: Some(usa_view.clone().into()),
-		};
-
-		let some_organization_view = OrganizationView {
-			id: some_organization.id,
-			name: some_organization.name.clone(),
-			location: arizona_view,
-		};
-		let some_other_organization_view = OrganizationView {
-			id: some_other_organization.id,
-			name: some_other_organization.name.clone(),
-			location: utah_view,
-		};
-
-		// Assert ::retrieve_view gets the right data from the DB
+		// Assert ::retrieve gets the right data from the DB
 		assert_eq!(
-			PgOrganization::retrieve_view(&connection, MatchOrganization {
-				id: some_organization_view.id.into(),
+			PgOrganization::retrieve(&connection, MatchOrganization {
+				id: some_organization.id.into(),
 				..Default::default()
 			})
 			.await
 			.unwrap()
 			.as_slice(),
-			&[some_organization_view.clone()],
+			&[some_organization.clone()],
 		);
 
 		assert_eq!(
-			PgOrganization::retrieve_view(&connection, MatchOrganization {
+			PgOrganization::retrieve(&connection, MatchOrganization {
 				location: MatchLocation {
 					outer: MatchOuterLocation::Some(
 						MatchLocation {
@@ -190,7 +155,7 @@ mod tests
 			.await
 			.unwrap()
 			.as_slice(),
-			&[some_organization_view, some_other_organization_view],
+			&[some_organization, some_other_organization],
 		);
 	}
 }

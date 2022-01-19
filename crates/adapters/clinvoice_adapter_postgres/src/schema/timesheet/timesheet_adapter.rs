@@ -3,7 +3,6 @@ use clinvoice_finance::ExchangeRates;
 use clinvoice_match::MatchTimesheet;
 use clinvoice_schema::{
 	chrono::{SubsecRound, Utc},
-	views::TimesheetView,
 	Employee,
 	Job,
 	Timesheet,
@@ -27,40 +26,39 @@ use crate::{
 #[async_trait::async_trait]
 impl TimesheetAdapter for PgTimesheet
 {
-	async fn create(connection: &PgPool, employee: &Employee, job: &Job) -> Result<Timesheet>
+	async fn create(connection: &PgPool, employee: Employee, job: Job) -> Result<Timesheet>
 	{
 		let time_begin = Utc::now();
 		let work_notes =
 			String::from("* Work which was done goes here\n* Supports markdown formatting");
 
-		sqlx::query!(
+		let row = sqlx::query!(
 			"INSERT INTO timesheets
-				(employee_id, job_id, expenses,           time_begin, work_notes)
+				(employee_id, job_id, time_begin, work_notes)
 			VALUES
-				($1,          $2,     ARRAY[]::expense[], $3,         $4)
-			;",
+				($1,          $2,     $3,         $4)
+			RETURNING id;",
 			employee.id,
 			job.id,
 			time_begin,
 			work_notes,
 		)
-		.execute(connection)
+		.fetch_one(connection)
 		.await?;
 
 		Ok(Timesheet {
-			employee_id: employee.id,
+			id: row.id,
+			employee,
 			expenses: Vec::new(),
-			job_id: job.id,
+			job,
 			time_begin: time_begin.trunc_subsecs(6),
 			time_end: None,
 			work_notes,
 		})
 	}
 
-	async fn retrieve_view(
-		connection: &PgPool,
-		match_condition: MatchTimesheet,
-	) -> Result<Vec<TimesheetView>>
+	async fn retrieve(connection: &PgPool, match_condition: MatchTimesheet)
+		-> Result<Vec<Timesheet>>
 	{
 		let exchange_rates = ExchangeRates::new().map_err(util::finance_err_to_sqlx);
 		let id_match = PgLocation::retrieve_matching_ids(
@@ -77,7 +75,7 @@ impl TimesheetAdapter for PgTimesheet
 				J.client_id, J.date_close, J.date_open, J.increment, J.invoice_date_issued, J.invoice_date_paid,
 					J.invoice_hourly_rate, J.notes, J.objectives,
 				P.name AS person_name,
-				T.employee_id, T.job_id, T.expenses, T.time_begin, T.time_end, T.work_notes
+				T.id, T.employee_id, T.job_id, T.expenses, T.time_begin, T.time_end, T.work_notes
 			FROM timesheets T
 			JOIN contact_information C ON (C.employee_id = T.employee_id)
 			JOIN employees E ON (E.id = T.employee_id)
@@ -91,6 +89,7 @@ impl TimesheetAdapter for PgTimesheet
 		query.push(';');
 
 		const COLUMNS: PgTimesheetColumns<'static> = PgTimesheetColumns {
+			id: "id",
 			employee: PgEmployeeColumns {
 				id: "employee_id",
 				organization: PgOrganizationColumns {
@@ -138,7 +137,7 @@ mod tests
 		OrganizationAdapter,
 		PersonAdapter,
 	};
-	use clinvoice_schema::{chrono::Utc, Contact, Currency, Expense, Money};
+	use clinvoice_schema::{chrono::Utc, Contact, Currency, Money};
 
 	use super::{PgTimesheet, TimesheetAdapter};
 	use crate::schema::{util, PgEmployee, PgJob, PgLocation, PgOrganization, PgPerson};
@@ -152,13 +151,14 @@ mod tests
 			.await
 			.unwrap();
 
-		let organization = PgOrganization::create(&connection, &earth, "Some Organization".into())
-			.await
-			.unwrap();
+		let organization =
+			PgOrganization::create(&connection, earth.clone(), "Some Organization".into())
+				.await
+				.unwrap();
 
 		let job = PgJob::create(
 			&connection,
-			&organization,
+			organization.clone(),
 			Utc::now(),
 			Money::new(13_27, 2, Currency::USD),
 			Duration::new(7640, 0),
@@ -173,7 +173,7 @@ mod tests
 
 		let mut contact_info = HashMap::new();
 		contact_info.insert("Office".into(), Contact::Address {
-			location_id: earth.id,
+			location: earth,
 			export: false,
 		});
 		contact_info.insert("Work Email".into(), Contact::Email {
@@ -188,15 +188,15 @@ mod tests
 		let employee = PgEmployee::create(
 			&connection,
 			contact_info,
-			&organization,
-			&person,
+			organization,
+			person,
 			"Employed".into(),
 			"Janitor".into(),
 		)
 		.await
 		.unwrap();
 
-		let timesheet = PgTimesheet::create(&connection, &employee, &job)
+		let timesheet = PgTimesheet::create(&connection, employee, job)
 			.await
 			.unwrap();
 
@@ -204,7 +204,6 @@ mod tests
 			r#"SELECT
 					employee_id,
 					job_id,
-					expenses as "expenses: Vec<(String, String, String)>",
 					time_begin,
 					time_end,
 					work_notes
@@ -216,29 +215,15 @@ mod tests
 		.await
 		.unwrap();
 
-		assert_eq!(timesheet.employee_id, row.employee_id);
-		assert_eq!(
-			timesheet.expenses,
-			row.expenses
-				.into_iter()
-				.map(|(ctg, cost, description)| Expense {
-					category: ctg.parse().unwrap(),
-					cost: Money {
-						amount: cost.parse().unwrap(),
-						..Default::default()
-					},
-					description
-				})
-				.collect::<Vec<_>>()
-		);
-		assert_eq!(timesheet.job_id, row.job_id);
+		assert_eq!(timesheet.employee.id, row.employee_id);
+		assert_eq!(timesheet.job.id, row.job_id);
 		assert_eq!(timesheet.time_begin, row.time_begin);
 		assert_eq!(timesheet.time_end, row.time_end);
 		assert_eq!(timesheet.work_notes, row.work_notes);
 	}
 
 	#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
-	async fn retrieve_view()
+	async fn retrieve()
 	{
 		// TODO: write test
 	}

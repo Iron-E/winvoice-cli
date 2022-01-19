@@ -1,7 +1,7 @@
-use super::JobView;
-use crate::views::RestorableSerde;
+use super::Job;
+use crate::RestorableSerde;
 
-impl RestorableSerde for JobView
+impl RestorableSerde for Job
 {
 	fn restore(&mut self, original: &Self)
 	{

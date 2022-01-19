@@ -3,7 +3,6 @@ use core::time::Duration;
 use clinvoice_match::MatchJob;
 use clinvoice_schema::{
 	chrono::{DateTime, Utc},
-	views::JobView,
 	Job,
 	Money,
 	Organization,
@@ -30,7 +29,7 @@ pub trait JobAdapter:
 	/// The newly created [`Job`].
 	async fn create(
 		connection: &Pool<<Self as Deletable>::Db>,
-		client: &Organization,
+		client: Organization,
 		date_open: DateTime<Utc>,
 		hourly_rate: Money,
 		increment: Duration,
@@ -39,14 +38,14 @@ pub trait JobAdapter:
 
 	/// # Summary
 	///
-	/// Retrieve some [`JobView`]s from the database using a [query](MatchJob).
+	/// Retrieve some [`Job`]s from the database using a [query](MatchJob).
 	///
 	/// # Returns
 	///
 	/// * An `Error`, if something goes wrong.
-	/// * A list of matching [`JobView`]s.
-	async fn retrieve_view(
+	/// * A list of matching [`Job`]s.
+	async fn retrieve(
 		connection: &Pool<<Self as Deletable>::Db>,
 		match_condition: MatchJob,
-	) -> Result<Vec<JobView>>;
+	) -> Result<Vec<<Self as Deletable>::Entity>>;
 }

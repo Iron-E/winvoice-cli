@@ -2,7 +2,7 @@ use core::fmt::Display;
 
 use clinvoice_adapter::{schema::PersonAdapter, Deletable};
 use clinvoice_match::MatchPerson;
-use clinvoice_schema::views::PersonView;
+use clinvoice_schema::Person;
 use sqlx::{Database, Executor, Pool};
 
 use super::{menu, MATCH_PROMPT};
@@ -21,11 +21,11 @@ use crate::{input, DynResult};
 ///
 /// [P_retrieve]: clinvoice_adapter::schema::PersonAdapter::retrieve
 /// [person]: clinvoice_schema::Person
-pub async fn retrieve_view<'err, D, Db, PAdapter>(
+pub async fn retrieve<'err, D, Db, PAdapter>(
 	connection: &Pool<Db>,
 	prompt: D,
 	retry_on_empty: bool,
-) -> DynResult<'err, Vec<PersonView>>
+) -> DynResult<'err, Vec<Person>>
 where
 	D: Display,
 	Db: Database,
@@ -37,7 +37,7 @@ where
 		let match_condition: MatchPerson =
 			input::edit_default(format!("{prompt}\n{MATCH_PROMPT}persons"))?;
 
-		let results = PAdapter::retrieve_view(connection, match_condition).await?;
+		let results = PAdapter::retrieve(connection, match_condition).await?;
 
 		if retry_on_empty && results.is_empty() && menu::ask_to_retry()?
 		{

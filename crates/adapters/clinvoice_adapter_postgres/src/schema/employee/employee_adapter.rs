@@ -3,7 +3,7 @@ use std::collections::HashMap;
 
 use clinvoice_adapter::{schema::EmployeeAdapter, WriteWhereClause};
 use clinvoice_match::MatchEmployee;
-use clinvoice_schema::{views::EmployeeView, Contact, Employee, Id, Organization, Person};
+use clinvoice_schema::{Contact, Employee, Id, Organization, Person};
 use futures::TryStreamExt;
 use sqlx::{PgPool, Result};
 
@@ -23,8 +23,8 @@ impl EmployeeAdapter for PgEmployee
 	async fn create(
 		connection: &PgPool,
 		contact_info: HashMap<String, Contact>,
-		organization: &Organization,
-		person: &Person,
+		organization: Organization,
+		person: Person,
 		status: String,
 		title: String,
 	) -> Result<Employee>
@@ -77,12 +77,9 @@ impl EmployeeAdapter for PgEmployee
 
 					match contact
 					{
-						Contact::Address {
-							location_id,
-							export,
-						} => query
+						Contact::Address { location, export } => query
 							.bind(export)
-							.bind(location_id)
+							.bind(location.id)
 							.bind(None::<String>)
 							.bind(None::<String>),
 						Contact::Email { email, export } => query
@@ -106,17 +103,14 @@ impl EmployeeAdapter for PgEmployee
 		Ok(Employee {
 			contact_info,
 			id: row.id,
-			organization_id: organization.id,
-			person_id: person.id,
+			organization,
+			person,
 			status,
 			title,
 		})
 	}
 
-	async fn retrieve_view(
-		connection: &PgPool,
-		match_condition: MatchEmployee,
-	) -> Result<Vec<EmployeeView>>
+	async fn retrieve(connection: &PgPool, match_condition: MatchEmployee) -> Result<Vec<Employee>>
 	{
 		let id_match =
 			PgLocation::retrieve_matching_ids(connection, &match_condition.organization.location);
@@ -149,8 +143,11 @@ impl EmployeeAdapter for PgEmployee
 			&mut query,
 		);
 		query.push_str(
-			" GROUP BY C.employee_id, E.id, E.organization_id, E.person_id, E.status, E.title, \
-			 O.name, O.location_id, P.name;",
+			" GROUP BY
+				C.employee_id,
+				E.id, E.organization_id, E.person_id, E.status, E.title,
+				O.name, O.location_id,
+				P.name;",
 		);
 
 		const COLUMNS: PgEmployeeColumns<'static> = PgEmployeeColumns {
@@ -181,10 +178,8 @@ mod tests
 
 	use clinvoice_adapter::schema::{LocationAdapter, OrganizationAdapter, PersonAdapter};
 	use clinvoice_match::{MatchEmployee, MatchLocation, MatchOrganization, MatchPerson, MatchStr};
-	use clinvoice_schema::{
-		views::{ContactView, EmployeeView, LocationView, OrganizationView, PersonView},
-		Contact,
-	};
+	use clinvoice_schema::Contact;
+	use futures::TryStreamExt;
 
 	use super::{EmployeeAdapter, PgEmployee};
 	use crate::schema::{util, PgLocation, PgOrganization, PgPerson};
@@ -199,9 +194,10 @@ mod tests
 			.await
 			.unwrap();
 
-		let organization = PgOrganization::create(&connection, &earth, "Some Organization".into())
-			.await
-			.unwrap();
+		let organization =
+			PgOrganization::create(&connection, earth.clone(), "Some Organization".into())
+				.await
+				.unwrap();
 
 		let person = PgPerson::create(&connection, "My Name".into())
 			.await
@@ -211,7 +207,7 @@ mod tests
 			&connection,
 			[
 				("Office".into(), Contact::Address {
-					location_id: earth.id,
+					location: earth,
 					export: false,
 				}),
 				("Work Email".into(), Contact::Email {
@@ -225,8 +221,8 @@ mod tests
 			]
 			.into_iter()
 			.collect(),
-			&organization,
-			&person,
+			organization.clone(),
+			person.clone(),
 			"Employed".into(),
 			"Janitor".into(),
 		)
@@ -238,50 +234,57 @@ mod tests
 			.await
 			.unwrap();
 
-		let contact_info_row = sqlx::query!(
-			"SELECT * FROM contact_information WHERE employee_id = $1;",
-			employee.id
-		)
-		.fetch_all(&connection)
-		.await
-		.unwrap()
-		.into_iter()
-		.fold(HashMap::new(), |mut contact, row| {
-			contact.insert(
-				row.label,
-				row.address_id
-					.map(|id| Contact::Address {
-						location_id: id,
-						export: row.export,
-					})
-					.unwrap_or_else(|| {
-						row.email
-							.map(|e| Contact::Email {
-								email: e,
-								export: row.export,
-							})
-							.unwrap_or_else(|| Contact::Phone {
-								phone: row.phone.unwrap(),
-								export: row.export,
-							})
-					}),
-			);
-			contact
-		});
+		let contact_info_row = {
+			let connection_borrow = &connection;
+			sqlx::query!(
+				"SELECT * FROM contact_information WHERE employee_id = $1;",
+				employee.id
+			)
+			.fetch(&connection)
+			.try_fold(HashMap::new(), |mut contact, row| async move {
+				contact.insert(
+					row.label,
+					if let Some(id) = row.address_id
+					{
+						Contact::Address {
+							location: PgLocation::retrieve_by_id(connection_borrow, id).await?,
+							export: row.export,
+						}
+					}
+					else if let Some(e) = row.email
+					{
+						Contact::Email {
+							email: e,
+							export: row.export,
+						}
+					}
+					else
+					{
+						Contact::Phone {
+							phone: row.phone.unwrap(),
+							export: row.export,
+						}
+					},
+				);
+				Ok(contact)
+			})
+			.await
+			.unwrap()
+		};
 
 		// Assert ::create writes accurately to the DB
 		assert_eq!(employee.id, row.id);
 		assert_eq!(employee.contact_info, contact_info_row);
-		assert_eq!(employee.organization_id, row.organization_id);
+		assert_eq!(employee.organization.id, row.organization_id);
 		assert_eq!(organization.id, row.organization_id);
-		assert_eq!(employee.person_id, row.person_id);
+		assert_eq!(employee.person.id, row.person_id);
 		assert_eq!(person.id, row.person_id);
 		assert_eq!(employee.status, row.status);
 		assert_eq!(employee.title, row.title);
 	}
 
 	#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
-	async fn retrieve_view()
+	async fn retrieve()
 	{
 		let connection = util::connect().await;
 
@@ -289,57 +292,26 @@ mod tests
 			.await
 			.unwrap();
 
-		let usa = PgLocation::create_inner(&connection, &earth, "USA".into())
+		let usa = PgLocation::create_inner(&connection, earth, "USA".into())
 			.await
 			.unwrap();
 
-		let arizona = PgLocation::create_inner(&connection, &usa, "Arizona".into())
+		let arizona = PgLocation::create_inner(&connection, usa.clone(), "Arizona".into())
 			.await
 			.unwrap();
 
-		let utah = PgLocation::create_inner(&connection, &usa, "Utah".into())
+		let utah = PgLocation::create_inner(&connection, usa.clone(), "Utah".into())
 			.await
 			.unwrap();
 
-		let earth_view = LocationView {
-			id: earth.id,
-			name: earth.name.clone(),
-			outer: None,
-		};
-		let usa_view = LocationView {
-			id: usa.id,
-			name: usa.name.clone(),
-			outer: Some(earth_view.clone().into()),
-		};
-		let arizona_view = LocationView {
-			id: arizona.id,
-			name: arizona.name.clone(),
-			outer: Some(usa_view.clone().into()),
-		};
-		let utah_view = LocationView {
-			id: utah.id,
-			name: utah.name.clone(),
-			outer: Some(usa_view.clone().into()),
-		};
-
-		let organization = PgOrganization::create(&connection, &arizona, "Some Organization".into())
-			.await
-			.unwrap();
-		let organization2 =
-			PgOrganization::create(&connection, &utah, "Some Other Organizatión".into())
+		let organization =
+			PgOrganization::create(&connection, arizona.clone(), "Some Organization".into())
 				.await
 				.unwrap();
-
-		let organization_view = OrganizationView {
-			id: organization.id,
-			name: organization.name.clone(),
-			location: arizona_view.clone(),
-		};
-		let organization2_view = OrganizationView {
-			id: organization2.id,
-			name: organization2.name.clone(),
-			location: utah_view.clone(),
-		};
+		let organization2 =
+			PgOrganization::create(&connection, utah.clone(), "Some Other Organizatión".into())
+				.await
+				.unwrap();
 
 		let person = PgPerson::create(&connection, "My Name".into())
 			.await
@@ -348,20 +320,11 @@ mod tests
 			.await
 			.unwrap();
 
-		let person_view = PersonView {
-			id: person.id,
-			name: person.name.clone(),
-		};
-		let person2_view = PersonView {
-			id: person2.id,
-			name: person2.name.clone(),
-		};
-
 		let employee = PgEmployee::create(
 			&connection,
 			[
 				("Remote Office".into(), Contact::Address {
-					location_id: utah.id,
+					location: utah,
 					export: false,
 				}),
 				("Work Email".into(), Contact::Email {
@@ -375,8 +338,8 @@ mod tests
 			]
 			.into_iter()
 			.collect(),
-			&organization,
-			&person,
+			organization,
+			person.clone(),
 			"Employed".into(),
 			"Janitor".into(),
 		)
@@ -386,7 +349,7 @@ mod tests
 			&connection,
 			[
 				("Favorite Pizza Place".into(), Contact::Address {
-					location_id: arizona.id,
+					location: arizona,
 					export: false,
 				}),
 				("Work Email".into(), Contact::Email {
@@ -400,69 +363,22 @@ mod tests
 			]
 			.into_iter()
 			.collect(),
-			&organization2,
-			&person2,
+			organization2,
+			person2,
 			"Management".into(),
 			"Assistant to Regional Manager".into(),
 		)
 		.await
 		.unwrap();
 
-		let employee_view = EmployeeView {
-			id: employee.id,
-			contact_info: [
-				("Remote Office".into(), ContactView::Address {
-					location: utah_view,
-					export: false,
-				}),
-				("Work Email".into(), ContactView::Email {
-					email: "foo@bar.io".into(),
-					export: true,
-				}),
-				("Office's Phone".into(), ContactView::Phone {
-					phone: "555 223 5039".into(),
-					export: true,
-				}),
-			]
-			.into_iter()
-			.collect(),
-			organization: organization_view,
-			person: person_view,
-			status: "Employed".into(),
-			title: "Janitor".into(),
-		};
-		let employee2_view = EmployeeView {
-			id: employee2.id,
-			contact_info: [
-				("Favorite Pizza Place".into(), ContactView::Address {
-					location: arizona_view,
-					export: false,
-				}),
-				("Work Email".into(), ContactView::Email {
-					email: "some_kind_of_email@f.com".into(),
-					export: true,
-				}),
-				("Office's Phone".into(), ContactView::Phone {
-					phone: "555-555-8008".into(),
-					export: true,
-				}),
-			]
-			.into_iter()
-			.collect(),
-			organization: organization2_view,
-			person: person2_view,
-			status: "Management".into(),
-			title: "Assistant to Regional Manager".into(),
-		};
-
 		assert_eq!(
-			PgEmployee::retrieve_view(&connection, MatchEmployee {
+			PgEmployee::retrieve(&connection, MatchEmployee {
 				organization: MatchOrganization {
-					name: employee_view.organization.name.clone().into(),
+					name: employee.organization.name.clone().into(),
 					location: MatchLocation {
 						name: MatchStr::Or(vec![
-							employee_view.organization.location.name.clone().into(),
-							MatchStr::Contains(employee2_view.organization.location.name.into())
+							employee.organization.location.name.clone().into(),
+							MatchStr::Contains(employee2.organization.location.name.into())
 						]),
 						..Default::default()
 					},
@@ -477,7 +393,7 @@ mod tests
 			.await
 			.unwrap()
 			.as_slice(),
-			&[employee_view],
+			&[employee],
 		);
 	}
 }

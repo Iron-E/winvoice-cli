@@ -13,7 +13,7 @@ use clinvoice_adapter_bincode::schema::{
 	BincodePerson,
 };
 use clinvoice_schema::{
-	views::{ContactView, EmployeeView, LocationView, OrganizationView, PersonView},
+	Employee,
 	Contact,
 	Id,
 	Location,
@@ -55,26 +55,26 @@ async fn into_view()
 	.await
 	.unwrap();
 
-	let earth_view = LocationView {
+	let earth_view = Location {
 		id:    earth.id,
 		name:  earth.name,
 		outer: None,
 	};
 
-	let ceo_testy_view = EmployeeView {
-		contact_info: vec![("Work".into(), ContactView::Address {
+	let ceo_testy_view = Employee {
+		contact_info: vec![("Work".into(), Contact::Address {
 			location: earth_view.clone(),
 			export:   false,
 		})]
 		.into_iter()
 		.collect(),
 		id: ceo_testy.id,
-		organization: OrganizationView {
+		organization: Organization {
 			id: big_old_test.id,
 			location: earth_view.clone(),
 			name: big_old_test.name,
 		},
-		person: PersonView {
+		person: Person {
 			id:   testy.id,
 			name: testy.name,
 		},

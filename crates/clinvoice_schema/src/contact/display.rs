@@ -1,22 +1,22 @@
 use core::fmt::{Display, Formatter, Result};
 
-use super::ContactView;
+use super::Contact;
 
-impl Display for ContactView
+impl Display for Contact
 {
 	fn fmt(&self, formatter: &mut Formatter) -> Result
 	{
 		match self
 		{
-			ContactView::Address {
+			Contact::Address {
 				location,
 				export: _,
 			} => location.fmt(formatter),
-			ContactView::Email {
+			Contact::Email {
 				email: s,
 				export: _,
 			} |
-			ContactView::Phone {
+			Contact::Phone {
 				phone: s,
 				export: _,
 			} => write!(formatter, "{s}"),
@@ -27,8 +27,8 @@ impl Display for ContactView
 #[cfg(test)]
 mod tests
 {
-	use super::ContactView;
-	use crate::views::LocationView;
+	use super::Contact;
+	use crate::Location;
 
 	/// # Summary
 	///
@@ -36,52 +36,52 @@ mod tests
 	#[test]
 	fn display()
 	{
-		let earth_view = LocationView {
+		let earth_view = Location {
 			name: "Earth".into(),
 			id: 0,
 			outer: None,
 		};
 
-		let usa_view = LocationView {
+		let usa_view = Location {
 			name: "USA".into(),
 			id: 0,
 			outer: Some(earth_view.into()),
 		};
 
-		let arizona_view = LocationView {
+		let arizona_view = Location {
 			name: "Arizona".into(),
 			id: 0,
 			outer: Some(usa_view.into()),
 		};
 
-		let phoenix_view = LocationView {
+		let phoenix_view = Location {
 			name: "Phoenix".into(),
 			id: 0,
 			outer: Some(arizona_view.into()),
 		};
 
-		let street_view = LocationView {
+		let street_view = Location {
 			name: "1337 Some Street".into(),
 			id: 0,
 			outer: Some(phoenix_view.into()),
 		};
 
 		assert_eq!(
-			format!("{}", ContactView::Address {
+			format!("{}", Contact::Address {
 				location: street_view,
 				export: false,
 			}),
 			"1337 Some Street, Phoenix, Arizona, USA, Earth"
 		);
 		assert_eq!(
-			format!("{}", ContactView::Email {
+			format!("{}", Contact::Email {
 				email: "foo@bar.io".into(),
 				export: false,
 			}),
 			"foo@bar.io"
 		);
 		assert_eq!(
-			format!("{}", ContactView::Phone {
+			format!("{}", Contact::Phone {
 				phone: "1-603-555-5555".into(),
 				export: false,
 			}),

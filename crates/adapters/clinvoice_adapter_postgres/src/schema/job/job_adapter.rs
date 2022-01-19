@@ -6,7 +6,6 @@ use clinvoice_finance::{Currency, ExchangeRates};
 use clinvoice_match::{MatchInvoice, MatchJob};
 use clinvoice_schema::{
 	chrono::{DateTime, SubsecRound, Utc},
-	views::JobView,
 	Invoice,
 	Job,
 	Money,
@@ -31,7 +30,7 @@ impl JobAdapter for PgJob
 {
 	async fn create(
 		connection: &PgPool,
-		client: &Organization,
+		client: Organization,
 		date_open: DateTime<Utc>,
 		hourly_rate: Money,
 		increment: Duration,
@@ -60,7 +59,7 @@ impl JobAdapter for PgJob
 		.await?;
 
 		Ok(Job {
-			client_id: client.id,
+			client,
 			date_close: None,
 			date_open: date_open.trunc_subsecs(6),
 			id: row.id,
@@ -74,7 +73,7 @@ impl JobAdapter for PgJob
 		})
 	}
 
-	async fn retrieve_view(connection: &PgPool, match_condition: MatchJob) -> Result<Vec<JobView>>
+	async fn retrieve(connection: &PgPool, match_condition: MatchJob) -> Result<Vec<Job>>
 	{
 		let exchange_rates = ExchangeRates::new().map_err(util::finance_err_to_sqlx);
 		let id_match =
@@ -150,7 +149,6 @@ mod tests
 	use clinvoice_match::{Match, MatchJob, MatchLocation, MatchOrganization};
 	use clinvoice_schema::{
 		chrono::{TimeZone, Utc},
-		views::{JobView, LocationView, OrganizationView},
 		Currency,
 		Money,
 	};
@@ -167,13 +165,13 @@ mod tests
 			.await
 			.unwrap();
 
-		let organization = PgOrganization::create(&connection, &earth, "Some Organization".into())
+		let organization = PgOrganization::create(&connection, earth, "Some Organization".into())
 			.await
 			.unwrap();
 
 		let job = PgJob::create(
 			&connection,
-			&organization,
+			organization.clone(),
 			Utc::now(),
 			Money::new(13_27, 2, Currency::USD),
 			Duration::new(7640, 0),
@@ -204,7 +202,7 @@ mod tests
 
 		// Assert ::create writes accurately to the DB
 		assert_eq!(job.id, row.id);
-		assert_eq!(job.client_id, row.client_id);
+		assert_eq!(job.client.id, row.client_id);
 		assert_eq!(organization.id, row.client_id);
 		assert_eq!(job.date_close, row.date_close);
 		assert_eq!(job.date_open, row.date_open);
@@ -227,32 +225,32 @@ mod tests
 	}
 
 	#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
-	async fn retrieve_view()
+	async fn retrieve()
 	{
 		let connection = util::connect().await;
 
 		let earth = PgLocation::create(&connection, "Earth".into())
 			.await
 			.unwrap();
-		let usa = PgLocation::create_inner(&connection, &earth, "USA".into())
+		let usa = PgLocation::create_inner(&connection, earth, "USA".into())
 			.await
 			.unwrap();
 		let (arizona, utah) = futures::try_join!(
-			PgLocation::create_inner(&connection, &usa, "Arizona".into()),
-			PgLocation::create_inner(&connection, &usa, "Utah".into()),
+			PgLocation::create_inner(&connection, usa.clone(), "Arizona".into()),
+			PgLocation::create_inner(&connection, usa.clone(), "Utah".into()),
 		)
 		.unwrap();
 
 		let (some_organization, some_other_organization) = futures::try_join!(
-			PgOrganization::create(&connection, &arizona, "Some Organization".into()),
-			PgOrganization::create(&connection, &utah, "Some Other Organizatión".into()),
+			PgOrganization::create(&connection, arizona.clone(), "Some Organization".into()),
+			PgOrganization::create(&connection, utah.clone(), "Some Other Organizatión".into()),
 		)
 		.unwrap();
 
 		let (job_one, job_two, job_three, job_four) = futures::try_join!(
 			PgJob::create(
 				&connection,
-				&some_organization,
+				some_organization.clone(),
 				Utc.ymd(1990, 07, 12).and_hms(14, 10, 00),
 				Money::new(20_00, 2, Currency::USD),
 				Duration::from_secs(900),
@@ -260,7 +258,7 @@ mod tests
 			),
 			PgJob::create(
 				&connection,
-				&some_other_organization,
+				some_other_organization.clone(),
 				Utc.ymd(3000, 01, 12).and_hms(09, 15, 42),
 				Money::new(200_00, 2, Currency::JPY),
 				Duration::from_secs(900),
@@ -268,7 +266,7 @@ mod tests
 			),
 			PgJob::create(
 				&connection,
-				&some_organization,
+				some_organization.clone(),
 				Utc.ymd(2011, 03, 17).and_hms(13, 07, 07),
 				Money::new(20_00, 2, Currency::EUR),
 				Duration::from_secs(900),
@@ -276,7 +274,7 @@ mod tests
 			),
 			PgJob::create(
 				&connection,
-				&some_other_organization,
+				some_other_organization.clone(),
 				Utc.ymd(2022, 01, 02).and_hms(01, 01, 01),
 				Money::new(200_00, 2, Currency::NOK),
 				Duration::from_secs(900),
@@ -285,97 +283,24 @@ mod tests
 		)
 		.unwrap();
 
-		let earth_view = LocationView {
-			id: earth.id,
-			name: earth.name.clone(),
-			outer: None,
-		};
-		let usa_view = LocationView {
-			id: usa.id,
-			name: usa.name.clone(),
-			outer: Some(earth_view.clone().into()),
-		};
-		let arizona_view = LocationView {
-			id: arizona.id,
-			name: arizona.name.clone(),
-			outer: Some(usa_view.clone().into()),
-		};
-		let utah_view = LocationView {
-			id: utah.id,
-			name: utah.name.clone(),
-			outer: Some(usa_view.clone().into()),
-		};
-
-		let some_organization_view = OrganizationView {
-			id: some_organization.id,
-			name: some_organization.name.clone(),
-			location: arizona_view,
-		};
-		let some_other_organization_view = OrganizationView {
-			id: some_other_organization.id,
-			name: some_other_organization.name.clone(),
-			location: utah_view,
-		};
-
-		let job_one_view = JobView {
-			client: some_organization_view.clone(),
-			date_close: job_one.date_close,
-			date_open: job_one.date_open,
-			id: job_one.id,
-			increment: job_one.increment,
-			invoice: job_one.invoice,
-			notes: job_one.notes,
-			objectives: job_one.objectives,
-		};
-		let job_two_view = JobView {
-			client: some_other_organization_view.clone(),
-			date_close: job_two.date_close,
-			date_open: job_two.date_open,
-			id: job_two.id,
-			increment: job_two.increment,
-			invoice: job_two.invoice,
-			notes: job_two.notes,
-			objectives: job_two.objectives,
-		};
-		let job_three_view = JobView {
-			client: some_organization_view.clone(),
-			date_close: job_three.date_close,
-			date_open: job_three.date_open,
-			id: job_three.id,
-			increment: job_three.increment,
-			invoice: job_three.invoice,
-			notes: job_three.notes,
-			objectives: job_three.objectives,
-		};
-		let job_four_view = JobView {
-			client: some_other_organization_view.clone(),
-			date_close: job_four.date_close,
-			date_open: job_four.date_open,
-			id: job_four.id,
-			increment: job_four.increment,
-			invoice: job_four.invoice,
-			notes: job_four.notes,
-			objectives: job_four.objectives,
-		};
-
 		assert_eq!(
-			PgJob::retrieve_view(&connection, MatchJob {
+			PgJob::retrieve(&connection, MatchJob {
 				id: job_one.id.into(),
 				..Default::default()
 			})
 			.await
 			.unwrap()
 			.as_slice(),
-			&[job_one_view.clone()],
+			&[job_one.clone()],
 		);
 
 		assert_eq!(
-			PgJob::retrieve_view(&connection, MatchJob {
+			PgJob::retrieve(&connection, MatchJob {
 				client: MatchOrganization {
 					location: MatchLocation {
 						id: Match::Or(vec![
-							some_organization_view.location.id.into(),
-							some_other_organization_view.location.id.into()
+							some_organization.location.id.into(),
+							some_other_organization.location.id.into()
 						]),
 						..Default::default()
 					},
@@ -388,10 +313,10 @@ mod tests
 			.into_iter()
 			.collect::<HashSet<_>>(),
 			[
-				job_one_view.clone(),
-				job_two_view.clone(),
-				job_three_view.clone(),
-				job_four_view.clone(),
+				job_one.clone(),
+				job_two.clone(),
+				job_three.clone(),
+				job_four.clone(),
 			]
 			.into_iter()
 			.collect::<HashSet<_>>(),

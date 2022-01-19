@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use clinvoice_match::MatchEmployee;
-use clinvoice_schema::{views::EmployeeView, Contact, Employee, Organization, Person};
+use clinvoice_schema::{Contact, Employee, Organization, Person};
 use sqlx::{Pool, Result};
 
 use crate::{Deletable, Updatable};
@@ -26,15 +26,15 @@ pub trait EmployeeAdapter:
 	async fn create(
 		connection: &Pool<<Self as Deletable>::Db>,
 		contact_info: HashMap<String, Contact>,
-		organization: &Organization,
-		person: &Person,
+		organization: Organization,
+		person: Person,
 		status: String,
 		title: String,
 	) -> Result<<Self as Deletable>::Entity>;
 
 	/// # Summary
 	///
-	/// Retrieve some [`EmployeeView`]s from the database using a [query](MatchEmployee).
+	/// Retrieve some [`Employee`]s from the database using a [query](MatchEmployee).
 	///
 	/// # Parameters
 	///
@@ -44,8 +44,8 @@ pub trait EmployeeAdapter:
 	///
 	/// * Any matching [`Employee`]s.
 	/// * An [`Error`], should something go wrong.
-	async fn retrieve_view(
+	async fn retrieve(
 		connection: &Pool<<Self as Deletable>::Db>,
 		match_condition: MatchEmployee,
-	) -> Result<Vec<EmployeeView>>;
+	) -> Result<Vec<<Self as Deletable>::Entity>>;
 }

@@ -2,7 +2,7 @@ use core::fmt::Display;
 
 use clinvoice_adapter::{schema::LocationAdapter, Deletable};
 use clinvoice_match::MatchLocation;
-use clinvoice_schema::views::LocationView;
+use clinvoice_schema::Location;
 use sqlx::{Database, Executor, Pool};
 
 use super::{menu, MATCH_PROMPT};
@@ -21,11 +21,11 @@ use crate::{input, DynResult};
 ///
 /// [L_retrieve]: clinvoice_adapter::schema::LocationAdapter::retrieve
 /// [location]: clinvoice_schema::Location
-pub async fn retrieve_view<'err, D, Db, LAdapter>(
+pub async fn retrieve<'err, D, Db, LAdapter>(
 	connection: &Pool<Db>,
 	prompt: D,
 	retry_on_empty: bool,
-) -> DynResult<'err, Vec<LocationView>>
+) -> DynResult<'err, Vec<Location>>
 where
 	D: Display,
 	Db: Database,
@@ -37,7 +37,7 @@ where
 		let match_condition: MatchLocation =
 			input::edit_default(format!("{prompt}\n{MATCH_PROMPT}locations"))?;
 
-		let results = LAdapter::retrieve_view(connection, match_condition).await?;
+		let results = LAdapter::retrieve(connection, match_condition).await?;
 
 		if retry_on_empty && results.is_empty() && menu::ask_to_retry()?
 		{

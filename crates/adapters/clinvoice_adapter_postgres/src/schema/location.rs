@@ -2,7 +2,7 @@ use core::fmt::Write;
 
 use clinvoice_adapter::WriteWhereClause;
 use clinvoice_match::{Match, MatchLocation, MatchOuterLocation};
-use clinvoice_schema::{views::LocationView, Id};
+use clinvoice_schema::{Id, Location};
 use futures::{future, TryFutureExt, TryStreamExt};
 use sqlx::{Executor, Postgres, Result, Row};
 
@@ -130,10 +130,10 @@ impl PgLocation
 		))
 	}
 
-	pub(super) async fn retrieve_view_by_id(
+	pub(super) async fn retrieve_by_id(
 		connection: impl Executor<'_, Database = Postgres>,
 		id: Id,
-	) -> Result<LocationView>
+	) -> Result<Location>
 	{
 		sqlx::query!(
 			"WITH RECURSIVE location_view AS
@@ -145,8 +145,8 @@ impl PgLocation
 			id,
 		)
 		.fetch(connection)
-		.try_fold(None, |previous: Option<LocationView>, view| {
-			future::ok(Some(LocationView {
+		.try_fold(None, |previous: Option<Location>, view| {
+			future::ok(Some(Location {
 				id: view.id.expect("`locations` table should have non-null ID"),
 				name: view
 					.name

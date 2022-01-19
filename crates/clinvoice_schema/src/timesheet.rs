@@ -1,4 +1,9 @@
-mod from_view;
+mod default;
+mod display;
+mod restorable_serde;
+
+use core::fmt::Write;
+use std::collections::HashSet;
 
 use chrono::{DateTime, Utc};
 use clinvoice_finance::{Decimal, ExchangeRates, Money};
@@ -6,6 +11,12 @@ use lazy_static::lazy_static;
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 
+use super::{
+	markdown::{Element, Text},
+	Contact,
+	Employee,
+	Job,
+};
 use crate::{Expense, Id};
 
 /// # Summary
@@ -18,14 +29,20 @@ use crate::{Expense, Id};
 /// It is likely that a given CLInvoice business object will contain multiple timesheets. As such,
 /// it is proposed that the container for business logic contain an array of `Timesheet`, rather
 /// than only one.
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 pub struct Timesheet
 {
 	/// # Summary
 	///
+	/// The ID of this [`Timesheet`](crate::Employee).
+	#[cfg_attr(feature = "serde_support", serde(skip))]
+	pub id: Id,
+
+	/// # Summary
+	///
 	/// The ID of the [`Employee`](crate::Employee) who performed this work.
-	pub employee_id: Id,
+	pub employee: Employee,
 
 	/// # Summary
 	///
@@ -35,7 +52,7 @@ pub struct Timesheet
 	/// # Summary
 	///
 	/// The ID of the [`Job`](crate::Job) this [`Timesheet`] is attached to.
-	pub job_id: Id,
+	pub job: Job,
 
 	/// # Summary
 	///
@@ -71,6 +88,140 @@ impl Timesheet
 {
 	/// # Summary
 	///
+	/// Export some `job` to the [`Target`] specified. Appends to some pre-existing `output`, in
+	/// case multiple [`Timesheet`]s must be serialized sequentially.
+	///
+	/// Tracks the previously `serialized_employees` so that their contact information is not
+	/// reiterated every time.
+	pub(super) fn export(&self, serialized_employees: &mut HashSet<Id>, output: &mut String)
+	{
+		writeln!(output, "{}", Element::Heading {
+			depth: 3,
+			text: self
+				.time_end
+				.map(|time_end| format!("{} – {}", self.time_begin, time_end.naive_local()))
+				.unwrap_or_else(|| format!("{} – Current", self.time_begin)),
+		})
+		.unwrap();
+
+		writeln!(output, "{}", Element::Heading {
+			depth: 4,
+			text: "Employee Information",
+		})
+		.unwrap();
+		writeln!(
+			output,
+			"{}: {}",
+			Element::UnorderedList {
+				depth: 0,
+				text: Text::Bold("Name"),
+			},
+			self.employee.person.name,
+		)
+		.unwrap();
+		writeln!(
+			output,
+			"{}: {}",
+			Element::UnorderedList {
+				depth: 0,
+				text: Text::Bold("Employer"),
+			},
+			self.employee.organization,
+		)
+		.unwrap();
+		writeln!(
+			output,
+			"{}: {}",
+			Element::UnorderedList {
+				depth: 0,
+				text: Text::Bold("Title"),
+			},
+			self.employee.title,
+		)
+		.unwrap();
+
+		if serialized_employees.contains(&self.employee.id)
+		{
+			let employee_contact_info: Vec<_> = self
+				.employee
+				.contact_info
+				.iter()
+				.filter(|(_, c)| match c
+				{
+					Contact::Address {
+						location: _,
+						export,
+					} => *export,
+					Contact::Email { email: _, export } => *export,
+					Contact::Phone { phone: _, export } => *export,
+				})
+				.collect();
+
+			if !employee_contact_info.is_empty()
+			{
+				writeln!(output, "{}:", Element::UnorderedList {
+					depth: 0,
+					text: Text::Bold("Contact Information"),
+				})
+				.unwrap();
+
+				let mut sorted_employee_contact_info = employee_contact_info;
+				sorted_employee_contact_info.sort_by_key(|(label, _)| *label);
+
+				sorted_employee_contact_info
+					.into_iter()
+					.try_for_each(|(label, contact)| {
+						writeln!(output, "{}: {contact}", Element::UnorderedList {
+							depth: 1,
+							text: Text::Bold(label),
+						})
+					})
+					.unwrap();
+			}
+		}
+
+		writeln!(output, "{}", Element::<&str>::Break).unwrap();
+
+		if !self.expenses.is_empty()
+		{
+			writeln!(output, "{}", Element::Heading {
+				depth: 4,
+				text: "Expenses",
+			})
+			.unwrap();
+
+			self
+				.expenses
+				.iter()
+				.try_for_each(|e| {
+					writeln!(
+						output,
+						"{}\n{}",
+						Element::Heading {
+							depth: 5,
+							text: format!("#{} – {} ({})", e.id, e.category, e.cost),
+						},
+						Element::BlockText(&e.description),
+					)
+				})
+				.unwrap();
+		}
+
+		if !self.work_notes.is_empty()
+		{
+			writeln!(output, "{}", Element::Heading {
+				depth: 4,
+				text: "Work Notes",
+			})
+			.unwrap();
+			writeln!(output, "{}", Element::BlockText(&self.work_notes)).unwrap();
+		}
+
+		serialized_employees.insert(self.employee.id);
+	}
+
+	/// # Summary
+	///
 	/// Get the amount of [`Money`] which is owed by the client on the [`Inovice`](crate::Invoice).
 	///
 	/// # Panics
@@ -82,7 +233,7 @@ impl Timesheet
 	pub fn total(
 		exchange_rates: Option<&ExchangeRates>,
 		hourly_rate: Money,
-		timesheets: &[Timesheet],
+		timesheets: &[Self],
 	) -> Money
 	{
 		lazy_static! {
@@ -146,25 +297,24 @@ mod tests
 		let mut timesheets = Vec::new();
 
 		timesheets.push(Timesheet {
-			employee_id: 0,
-			expenses: Vec::new(),
-			job_id: 0,
+			id: 0,
 			time_begin: Utc::today().and_hms(2, 0, 0),
 			time_end: Some(Utc::today().and_hms(2, 30, 0)),
 			work_notes: "- Wrote the test.".into(),
+			..Default::default()
 		});
 
 		timesheets.push(Timesheet {
-			employee_id: 0,
 			expenses: vec![Expense {
+				id: 102,
 				category: "Item".into(),
 				cost: Money::new(20_00, 2, Currency::USD),
 				description: "Paid for someone else to clean".into(),
 			}],
-			job_id: 0,
 			time_begin: Utc::today().and_hms(3, 0, 0),
 			time_end: Some(Utc::today().and_hms(3, 30, 0)),
 			work_notes: "- Clean the deck.".into(),
+			..Default::default()
 		});
 
 		assert_eq!(

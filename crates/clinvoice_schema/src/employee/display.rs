@@ -1,8 +1,8 @@
 use core::fmt::{Display, Formatter, Result};
 
-use super::EmployeeView;
+use super::Employee;
 
-impl Display for EmployeeView
+impl Display for Employee
 {
 	fn fmt(&self, formatter: &mut Formatter) -> Result
 	{
@@ -27,49 +27,49 @@ impl Display for EmployeeView
 #[cfg(test)]
 mod tests
 {
-	use super::EmployeeView;
-	use crate::views::{ContactView, LocationView, OrganizationView, PersonView};
+	use super::Employee;
+	use crate::{Contact, Location, Organization, Person};
 
 	#[test]
 	fn display()
 	{
-		let earth_view = LocationView {
+		let earth_view = Location {
 			id: 0,
 			name: "Earth".into(),
 			outer: None,
 		};
 
-		let usa_view = LocationView {
+		let usa_view = Location {
 			id: 0,
 			name: "USA".into(),
 			outer: Some(earth_view.into()),
 		};
 
-		let arizona_view = LocationView {
+		let arizona_view = Location {
 			id: 0,
 			name: "Arizona".into(),
 			outer: Some(usa_view.into()),
 		};
 
-		let phoenix_view = LocationView {
+		let phoenix_view = Location {
 			id: 0,
 			name: "Phoenix".into(),
 			outer: Some(arizona_view.into()),
 		};
 
-		let work_street_view = LocationView {
+		let work_street_view = Location {
 			id: 0,
 			name: "1234 Work Street".into(),
 			outer: Some(phoenix_view.into()),
 		};
 
-		let employee = EmployeeView {
+		let employee = Employee {
 			contact_info: vec![
-				("Place of Work".into(), ContactView::Address {
+				("Place of Work".into(), Contact::Address {
 					location: work_street_view.clone(),
 					export: false,
 				}),
-				("Work Email".into(), ContactView::Email {
+				("Work Email".into(), Contact::Email {
 					email: "foo@bar.io".into(),
 					export: false,
 				}),
@@ -77,12 +77,12 @@ mod tests
 			.into_iter()
 			.collect(),
 			id: 0,
-			organization: OrganizationView {
+			organization: Organization {
 				id: 0,
 				location: work_street_view,
 				name: "Big Old Test".into(),
 			},
-			person: PersonView {
+			person: Person {
 				id: 0,
 				name: "Testy McTesterson".into(),
 			},

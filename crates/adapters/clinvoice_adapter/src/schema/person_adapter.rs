@@ -1,5 +1,5 @@
 use clinvoice_match::MatchPerson;
-use clinvoice_schema::{views::PersonView, Person};
+use clinvoice_schema::Person;
 use sqlx::{Pool, Result};
 
 use crate::{Deletable, Updatable};
@@ -27,14 +27,14 @@ pub trait PersonAdapter:
 
 	/// # Summary
 	///
-	/// Retrieve some [`PersonView`]s from the database using a [query](MatchPerson).
+	/// Retrieve some [`Person`]s from the database using a [query](MatchPerson).
 	///
 	/// # Returns
 	///
 	/// * An `Error`, if something goes wrong.
-	/// * A list of matching [`PersonView`]s.
-	async fn retrieve_view(
+	/// * A list of matching [`Person`]s.
+	async fn retrieve(
 		connection: &Pool<<Self as Deletable>::Db>,
 		match_condition: MatchPerson,
-	) -> Result<Vec<PersonView>>;
+	) -> Result<Vec<<Self as Deletable>::Entity>>;
 }

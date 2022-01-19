@@ -4,7 +4,7 @@ use std::collections::HashSet;
 
 use clinvoice_adapter::schema::{EmployeeAdapter, LocationAdapter, OrganizationAdapter};
 use clinvoice_adapter_bincode::schema::{BincodeEmployee, BincodeLocation, BincodeOrganization};
-use clinvoice_schema::{views::OrganizationView, Contact, Id, Location, Person};
+use clinvoice_schema::{Organization, Contact, Id, Location, Person};
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn into_view()
 {
@@ -58,31 +58,31 @@ async fn into_view()
 
 	let phoenix_view = BincodeLocation::into_view(phoenix, &store).await.unwrap();
 
-	assert_eq!(alsd_view, OrganizationView {
+	assert_eq!(alsd_view, Organization {
 		id: alsd.id,
 		location: BincodeLocation::into_view(earth, &store).await.unwrap(),
 		name: alsd.name,
 	});
 
-	assert_eq!(eal_view, OrganizationView {
+	assert_eq!(eal_view, Organization {
 		id: eal.id,
 		location: BincodeLocation::into_view(usa, &store).await.unwrap(),
 		name: eal.name,
 	});
 
-	assert_eq!(aaa_view, OrganizationView {
+	assert_eq!(aaa_view, Organization {
 		id: aaa.id,
 		location: BincodeLocation::into_view(arizona, &store).await.unwrap(),
 		name: aaa.name,
 	});
 
-	assert_eq!(focj_view, OrganizationView {
+	assert_eq!(focj_view, Organization {
 		id: focj.id,
 		location: phoenix_view.clone(),
 		name: focj.name,
 	});
 
-	assert_eq!(giguy_view, OrganizationView {
+	assert_eq!(giguy_view, Organization {
 		id: giguy.id,
 		location: phoenix_view,
 		name: giguy.name,

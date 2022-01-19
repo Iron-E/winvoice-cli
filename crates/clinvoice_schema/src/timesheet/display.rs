@@ -2,9 +2,9 @@ use core::fmt::{Display, Formatter, Result};
 
 use chrono::{DateTime, Local};
 
-use super::TimesheetView;
+use super::Timesheet;
 
-impl Display for TimesheetView
+impl Display for Timesheet
 {
 	fn fmt(&self, formatter: &mut Formatter) -> Result
 	{
@@ -53,56 +53,52 @@ mod tests
 	use chrono::Utc;
 	use clinvoice_finance::{Currency, Money};
 
-	use super::{DateTime, Local, TimesheetView};
-	use crate::{
-		views::{ContactView, EmployeeView, JobView, LocationView, OrganizationView, PersonView},
-		Expense,
-		Invoice,
-	};
+	use super::{DateTime, Local, Timesheet};
+	use crate::{Contact, Employee, Expense, Invoice, Job, Location, Organization, Person};
 
 	#[test]
 	fn display()
 	{
-		let earth_view = LocationView {
+		let earth_view = Location {
 			id: 0,
 			name: "Earth".into(),
 			outer: None,
 		};
 
-		let usa_view = LocationView {
+		let usa_view = Location {
 			id: 0,
 			name: "USA".into(),
 			outer: Some(earth_view.into()),
 		};
 
-		let arizona_view = LocationView {
+		let arizona_view = Location {
 			id: 0,
 			name: "Arizona".into(),
 			outer: Some(usa_view.into()),
 		};
 
-		let phoenix_view = LocationView {
+		let phoenix_view = Location {
 			id: 0,
 			name: "Phoenix".into(),
 			outer: Some(arizona_view.into()),
 		};
 
-		let street_view = LocationView {
+		let street_view = Location {
 			id: 0,
 			name: "1337 Some Street".into(),
 			outer: Some(phoenix_view.into()),
 		};
 
-		let contact_info: HashMap<String, ContactView> = vec![
-			("Street Address".into(), ContactView::Address {
+		let contact_info: HashMap<String, Contact> = vec![
+			("Street Address".into(), Contact::Address {
 				location: street_view.clone(),
 				export: false,
 			}),
-			("Email".into(), ContactView::Email {
+			("Email".into(), Contact::Email {
 				email: "foo@bar.io".into(),
 				export: false,
 			}),
-			("Phone".into(), ContactView::Phone {
+			("Phone".into(), Contact::Phone {
 				phone: "1-800-555-5555".into(),
 				export: false,
 			}),
@@ -110,54 +106,52 @@ mod tests
 		.into_iter()
 		.collect();
 
-		let timesheet = TimesheetView {
-			employee: EmployeeView {
+		let timesheet = Timesheet {
+			employee: Employee {
 				contact_info: contact_info.clone(),
-				id: 0,
-				organization: OrganizationView {
-					id: 0,
+				organization: Organization {
 					location: street_view.clone(),
 					name: "Big Test Organization".into(),
+					..Default::default()
 				},
-				person: PersonView {
-					id: 0,
+				person: Person {
 					name: "Testy McTesterson".into(),
+					..Default::default()
 				},
 				status: "Representative".into(),
 				title: "CEO of Tests".into(),
+				..Default::default()
 			},
 			expenses: vec![
 				Expense {
+					id: 405,
 					category: "Food".into(),
 					cost: Money::new(20_50, 2, Currency::USD),
 					description: "Fast Food™".into(),
 				},
 				Expense {
+					id: 901,
 					category: "Travel".into(),
 					cost: Money::new(10_00, 2, Currency::USD),
 					description: "Gas".into(),
 				},
 			],
-			job: JobView {
-				id: 0,
-				client: OrganizationView {
-					id: 0,
+			job: Job {
+				client: Organization {
 					location: street_view,
 					name: "Big Test Organization".into(),
+					..Default::default()
 				},
-				date_close: None,
-				date_open: Utc::now(),
 				increment: Duration::new(900, 0),
 				invoice: Invoice {
-					date: None,
 					hourly_rate: Money::new(13_00, 2, Currency::USD),
+					..Default::default()
 				},
-				notes: Default::default(),
-				objectives: Default::default(),
+				..Default::default()
 			},
-			time_begin: Utc::now(),
 			time_end: Some(Utc::today().and_hms(23, 59, 59)),
 			work_notes: "Went to non-corporate fast food restaurant for business meeting".into(),
+			..Default::default()
 		};
 
 		assert_eq!(
@@ -166,9 +160,9 @@ mod tests
 				"{} – {}: CEO of Tests Testy McTesterson from Big Test Organization @ 1337 Some \
 				 Street, Phoenix, Arizona, USA, Earth
 	Expenses:
-		Food – 20.50 USD
+		#405 – Food (20.50 USD)
 			Fast Food™
-		Travel – 10.00 USD
+		#901 – Travel (10.00 USD)
 			Gas
 	Work Notes:
 		Went to non-corporate fast food restaurant for business meeting",

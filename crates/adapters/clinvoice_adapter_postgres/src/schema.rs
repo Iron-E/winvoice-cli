@@ -115,7 +115,7 @@ impl PgSchema
 		sqlx::query!(
 			"CREATE TABLE IF NOT EXISTS employees
 			(
-				id bigint GENERATED ALWAYS AS IDENTITY UNIQUE,
+				id bigint GENERATED ALWAYS AS IDENTITY,
 				organization_id bigint NOT NULL,
 				person_id bigint NOT NULL,
 				status text NOT NULL,
@@ -213,25 +213,19 @@ impl PgSchema
 	async fn init_expenses(connection: &mut Transaction<'_, Postgres>) -> Result<()>
 	{
 		sqlx::query!(
-			"CREATE TYPE expense_unsafe AS
+			"CREATE TABLE IF NOT EXISTS expenses
 			(
-				category text,
-				cost amount_of_currency,
-				description text
-			);"
-		)
-		.execute(&mut *connection)
-		.await?;
+				id bigint GENERATED ALWAYS AS IDENTITY,
+				timesheet_id bigint NOT NULL,
+				category text NOT NULL,
+				cost amount_of_currency NOT NULL,
+				description text NOT NULL,
 
-		sqlx::query!(
-			"CREATE DOMAIN expense AS expense_unsafe CHECK
-			(
-				(VALUE).category IS NOT NULL AND
-				(VALUE).cost IS NOT NULL AND
-				(VALUE).description IS NOT NULL
+				PRIMARY KEY(id),
+				CONSTRAINT expenses__timesheet_id_fk FOREIGN KEY(timesheet_id) REFERENCES timesheets(id)
 			);"
 		)
-		.execute(&mut *connection)
+		.execute(connection)
 		.await
 		.and(Ok(()))
 	}
@@ -245,15 +239,16 @@ impl PgSchema
 		sqlx::query!(
 			"CREATE TABLE IF NOT EXISTS timesheets
 			(
+				id bigint GENERATED ALWAYS AS IDENTITY,
 				employee_id bigint NOT NULL,
 				job_id bigint NOT NULL,
-				expenses expense ARRAY NOT NULL,
 				time_begin timestamptz NOT NULL,
 				time_end timestamptz,
 				work_notes text NOT NULL,
 
-				PRIMARY KEY(employee_id, job_id, time_begin),
+				PRIMARY KEY(id),
 				CONSTRAINT timesheets__employee_id_fk FOREIGN KEY(employee_id) REFERENCES employees(id),
+				CONSTRAINT timesheets__employee_job_time_uq UNIQUE (employee_id, job_id, time_begin),
 				CONSTRAINT timesheets__job_id_fk FOREIGN KEY(job_id) REFERENCES jobs(id)
 			);"
 		)

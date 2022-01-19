@@ -21,6 +21,7 @@ fn add_menu(expenses: &mut Vec<Expense>, default_currency: Currency) -> input::R
 		"* Describe the {category}\n* All markdown syntax is valid"
 	))?;
 	Ok(expenses.push(Expense {
+		id: Default::default(), // HACK: what should I do here?
 		category,
 		cost,
 		description,

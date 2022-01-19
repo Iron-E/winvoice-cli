@@ -201,7 +201,7 @@ impl Create
 		PAdapter: Deletable<Db = Db> + PersonAdapter + Send,
 		for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 	{
-		let organization_views = input::util::organization::retrieve_view::<&str, _, OAdapter>(
+		let organization_views = input::util::organization::retrieve::<&str, _, OAdapter>(
 			connection,
 			"Query the `Organization` where this `Employee` works",
 			false,
@@ -213,7 +213,7 @@ impl Create
 			"Which organization does this employee work at?",
 		)?;
 
-		let person_views = input::util::person::retrieve_view::<&str, _, PAdapter>(
+		let person_views = input::util::person::retrieve::<&str, _, PAdapter>(
 			connection,
 			"Query the `Person` who this `Employee` is",
 			true,
@@ -231,8 +231,8 @@ impl Create
 				.into_iter()
 				.map(|(label, contact)| (label, contact.into()))
 				.collect(),
-			&organization.into(),
-			&person.into(),
+			organization,
+			person,
 			employee_status,
 			title,
 		)
@@ -254,7 +254,7 @@ impl Create
 		OAdapter: Deletable<Db = Db> + OrganizationAdapter + Send,
 		for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 	{
-		let organization_views = input::util::organization::retrieve_view::<&str, _, OAdapter>(
+		let organization_views = input::util::organization::retrieve::<&str, _, OAdapter>(
 			connection,
 			"Query the client `Organization` for this `Job`",
 			false,
@@ -277,7 +277,7 @@ impl Create
 
 		JAdapter::create(
 			connection,
-			&client.into(),
+			client,
 			local_date_open.into(),
 			hourly_rate,
 			increment,
@@ -299,7 +299,7 @@ impl Create
 			let outer = LAdapter::create(connection, name.clone()).await?;
 			stream::iter(names.into_iter().rev().skip(1).map(Ok))
 				.try_fold(outer, |outer, name| async move {
-					LAdapter::create_inner(connection, &outer, name).await
+					LAdapter::create_inner(connection, outer, name).await
 				})
 				.await?;
 		}
@@ -317,7 +317,7 @@ impl Create
 		OAdapter: Deletable<Db = Db> + OrganizationAdapter,
 		for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 	{
-		let location_views = input::util::location::retrieve_view::<&str, _, LAdapter>(
+		let location_views = input::util::location::retrieve::<&str, _, LAdapter>(
 			connection,
 			"Query the `Location` of this `Organization`",
 			false,
@@ -327,7 +327,7 @@ impl Create
 		let selected_view =
 			input::select_one(&location_views, format!("Select a location for {name}"))?;
 
-		OAdapter::create(connection, &selected_view.into(), name)
+		OAdapter::create(connection, selected_view, name)
 			.err_into()
 			.await
 			.and(Ok(()))

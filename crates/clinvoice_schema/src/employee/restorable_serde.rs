@@ -1,7 +1,7 @@
-use super::EmployeeView;
-use crate::views::RestorableSerde;
+use super::Employee;
+use crate::RestorableSerde;
 
-impl RestorableSerde for EmployeeView
+impl RestorableSerde for Employee
 {
 	fn restore(&mut self, original: &Self)
 	{

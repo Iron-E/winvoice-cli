@@ -25,8 +25,8 @@ impl Initializable for PgSchema
 		Self::init_contact_info(&mut transaction).await?;
 		Self::init_money(&mut transaction).await?;
 		Self::init_jobs(&mut transaction).await?;
-		Self::init_expenses(&mut transaction).await?;
 		Self::init_timesheets(&mut transaction).await?;
+		Self::init_expenses(&mut transaction).await?;
 
 		transaction.commit().await
 	}

@@ -15,7 +15,7 @@ use clinvoice_adapter::{
 use clinvoice_config::Config;
 use clinvoice_finance::ExchangeRates;
 use clinvoice_match::{MatchJob, MatchTimesheet};
-use clinvoice_schema::{chrono::Utc, views::RestorableSerde, Currency, Location};
+use clinvoice_schema::{chrono::Utc, Currency, Location, RestorableSerde};
 use futures::{
 	future,
 	stream::{self, TryStreamExt},
@@ -92,26 +92,22 @@ impl Command
 	/// Delete some `entities`
 	///
 	/// `delete_entity` determines how the entities are deleted.
-	async fn delete<'err, D, Db, Entity, EntityView>(
+	async fn delete<'err, D, Db, Entity>(
 		connection: &Pool<Db>,
 		cascade: bool,
-		entities: &[EntityView],
+		entities: &[Entity],
 	) -> DynResult<'err, ()>
 	where
 		D: Deletable<Db = Db, Entity = Entity>,
 		Db: Database,
-		EntityView: Clone + Display + Into<Entity> + Send,
+		Entity: Clone + Display + Into<Entity> + Send,
 		for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 	{
 		let selection = input::select(entities, "Select the entities you want to delete")?;
-		D::delete(
-			connection,
-			cascade,
-			selection.into_iter().map(EntityView::into),
-		)
-		.err_into()
-		.await
-		.and(Ok(()))
+		D::delete(connection, cascade, selection.into_iter().map(Entity::into))
+			.err_into()
+			.await
+			.and(Ok(()))
 	}
 
 	/// # Summary
@@ -119,13 +115,13 @@ impl Command
 	/// Edit some `entities`, and then update them.
 	///
 	/// `update_entity` determines how the entities are updated.
-	async fn update<'err, Db, Entity, EntityView, U>(
+	async fn update<'err, Db, Entity, U>(
 		connection: &Pool<Db>,
-		entities: &[EntityView],
+		entities: &[Entity],
 	) -> DynResult<'err, ()>
 	where
 		Db: Database,
-		EntityView:
+		Entity:
 			Clone + DeserializeOwned + Display + Into<Entity> + RestorableSerde + Serialize + Send,
 		U: Updatable<Db = Db, Entity = Entity>,
 		for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
@@ -175,7 +171,7 @@ impl Command
 				set_default,
 			} =>
 			{
-				let results_view = input::util::employee::retrieve_view::<&str, _, EAdapter>(
+				let results_view = input::util::employee::retrieve::<&str, _, EAdapter>(
 					&connection,
 					if default
 					{
@@ -192,13 +188,12 @@ impl Command
 
 				if delete
 				{
-					Self::delete::<EAdapter, _, _, _>(&connection, cascade_delete, &results_view)
-						.await?;
+					Self::delete::<EAdapter, _, _>(&connection, cascade_delete, &results_view).await?;
 				}
 
 				if update
 				{
-					Self::update::<_, _, _, EAdapter>(&connection, &results_view).await?
+					Self::update::<_, _, EAdapter>(&connection, &results_view).await?
 				}
 
 				if set_default
@@ -232,7 +227,7 @@ impl Command
 				reopen,
 			} =>
 			{
-				let results_view = input::util::job::retrieve_view::<&str, _, JAdapter>(
+				let results_view = input::util::job::retrieve::<&str, _, JAdapter>(
 					&connection,
 					"Query the `Job` you are looking for",
 					false,
@@ -241,13 +236,12 @@ impl Command
 
 				if delete
 				{
-					Self::delete::<JAdapter, _, _, _>(&connection, cascade_delete, &results_view)
-						.await?;
+					Self::delete::<JAdapter, _, _>(&connection, cascade_delete, &results_view).await?;
 				}
 
 				if update
 				{
-					Self::update::<_, _, _, JAdapter>(&connection, &results_view).await?
+					Self::update::<_, _, JAdapter>(&connection, &results_view).await?
 				}
 
 				if close
@@ -307,7 +301,7 @@ impl Command
 					// WARN: this `let` seems redundant, but the "type needs to be known at this point"
 					let export_result: DynResult<'_, _> = stream::iter(to_export.into_iter().map(Ok))
 						.try_for_each_concurrent(None, |job| async move {
-							let timesheets = TAdapter::retrieve_view(conn, MatchTimesheet {
+							let timesheets = TAdapter::retrieve(conn, MatchTimesheet {
 								job: MatchJob {
 									id: job.id.into(),
 									..Default::default()
@@ -336,7 +330,7 @@ impl Command
 
 			Self::Location { create_inner } =>
 			{
-				let results_view = input::util::location::retrieve_view::<&str, _, LAdapter>(
+				let results_view = input::util::location::retrieve::<&str, _, LAdapter>(
 					&connection,
 					"Query the `Location` you are looking for",
 					false,
@@ -345,13 +339,12 @@ impl Command
 
 				if delete
 				{
-					Self::delete::<LAdapter, _, _, _>(&connection, cascade_delete, &results_view)
-						.await?;
+					Self::delete::<LAdapter, _, _>(&connection, cascade_delete, &results_view).await?;
 				}
 
 				if update
 				{
-					Self::update::<_, _, _, LAdapter>(&connection, &results_view).await?
+					Self::update::<_, _, LAdapter>(&connection, &results_view).await?
 				}
 
 				if let Some(name) = create_inner.last()
@@ -364,7 +357,7 @@ impl Command
 					let conn = &connection;
 					stream::iter(create_inner.into_iter().map(Ok).rev())
 						.try_fold(location.into(), |loc: Location, name: String| async move {
-							LAdapter::create_inner(conn, &loc, name).await
+							LAdapter::create_inner(conn, loc, name).await
 						})
 						.await?;
 				}
@@ -376,7 +369,7 @@ impl Command
 
 			Self::Organization =>
 			{
-				let results_view = input::util::organization::retrieve_view::<&str, _, OAdapter>(
+				let results_view = input::util::organization::retrieve::<&str, _, OAdapter>(
 					&connection,
 					"Query the `Organization` you are looking for",
 					false,
@@ -385,13 +378,12 @@ impl Command
 
 				if delete
 				{
-					Self::delete::<OAdapter, _, _, _>(&connection, cascade_delete, &results_view)
-						.await?;
+					Self::delete::<OAdapter, _, _>(&connection, cascade_delete, &results_view).await?;
 				}
 
 				if update
 				{
-					Self::update::<_, _, _, OAdapter>(&connection, &results_view).await?
+					Self::update::<_, _, OAdapter>(&connection, &results_view).await?
 				}
 				else if !delete
 				{
@@ -401,7 +393,7 @@ impl Command
 
 			Self::Person =>
 			{
-				let results_view = input::util::person::retrieve_view::<&str, _, PAdapter>(
+				let results_view = input::util::person::retrieve::<&str, _, PAdapter>(
 					&connection,
 					"Query the `Person` you are looking for",
 					false,
@@ -410,13 +402,12 @@ impl Command
 
 				if delete
 				{
-					Self::delete::<PAdapter, _, _, _>(&connection, cascade_delete, &results_view)
-						.await?;
+					Self::delete::<PAdapter, _, _>(&connection, cascade_delete, &results_view).await?;
 				}
 
 				if update
 				{
-					Self::update::<_, _, _, PAdapter>(&connection, &results_view).await?
+					Self::update::<_, _, PAdapter>(&connection, &results_view).await?
 				}
 				else if !delete
 				{

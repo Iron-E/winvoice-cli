@@ -18,20 +18,16 @@ use clinvoice_adapter_bincode::schema::{
 };
 use clinvoice_schema::{
 	chrono::Utc,
-	Currency,
-	Money,
-	views::{
-		ContactView,
-		EmployeeView,
-		JobView,
-		LocationView,
-		OrganizationView,
-		PersonView,
-		TimesheetView,
-	},
 	Contact,
+	Currency,
+	Employee,
 	Id,
+	Job,
 	Location,
+	Money,
+	Organization,
+	Person,
+	Timesheet,
 };
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
@@ -80,29 +76,29 @@ async fn into_view()
 	.await
 	.unwrap();
 
-	let earth_view = LocationView {
+	let earth_view = Location {
 		id:    earth.id,
 		name:  earth.name,
 		outer: None,
 	};
 
-	let contact_info_view: HashMap<String, ContactView> =
-		vec![("Address View".into(), ContactView::Address {
+	let contact_info_view: HashMap<String, Contact> =
+		vec![("Address ".into(), Contact::Address {
 			location: earth_view.clone(),
 			export:   false,
 		})]
 		.into_iter()
 		.collect();
 
-	let ceo_testy_view = EmployeeView {
+	let ceo_testy_view = Employee {
 		contact_info: contact_info_view.clone(),
 		id: ceo_testy.id,
-		organization: OrganizationView {
+		organization: Organization {
 			id: big_test.id,
 			location: earth_view,
 			name: big_test.name,
 		},
-		person: PersonView {
+		person: Person {
 			id:   testy.id,
 			name: testy.name,
 		},
@@ -112,7 +108,7 @@ async fn into_view()
 
 	create_job.start_timesheet(ceo_testy.id);
 
-	let create_job_view = JobView {
+	let create_job_view = Job {
 		client: ceo_testy_view.organization.clone(),
 		date_close: create_job.date_close,
 		date_open: create_job.date_open,
@@ -120,7 +116,7 @@ async fn into_view()
 		invoice: create_job.invoice.clone(),
 		notes: create_job.notes.clone(),
 		objectives: create_job.objectives.clone(),
-		timesheets: vec![TimesheetView {
+		timesheets: vec![Timesheet {
 			employee:   ceo_testy_view,
 			expenses:   Vec::new(),
 			time_begin: create_job

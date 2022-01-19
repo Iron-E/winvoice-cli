@@ -1,5 +1,5 @@
 use clinvoice_finance::Money;
-use clinvoice_schema::{views::JobView, Invoice, InvoiceDate};
+use clinvoice_schema::{Invoice, InvoiceDate, Job};
 use sqlx::{postgres::PgRow, Error, Executor, Postgres, Result, Row};
 
 use crate::schema::{organization::columns::PgOrganizationColumns, util};
@@ -16,9 +16,9 @@ impl PgJobColumns<'_>
 		self,
 		connection: impl Executor<'_, Database = Postgres>,
 		row: &PgRow,
-	) -> Result<JobView>
+	) -> Result<Job>
 	{
-		Ok(JobView {
+		Ok(Job {
 			id: row.get(self.id),
 			client: self.client.row_to_view(connection, row).await?,
 			date_close: row.get("date_close"),

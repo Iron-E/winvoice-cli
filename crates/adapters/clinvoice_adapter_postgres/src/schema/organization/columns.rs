@@ -1,4 +1,4 @@
-use clinvoice_schema::views::OrganizationView;
+use clinvoice_schema::Organization;
 use sqlx::{postgres::PgRow, Executor, Postgres, Result, Row};
 
 use crate::schema::PgLocation;
@@ -17,11 +17,11 @@ impl PgOrganizationColumns<'_>
 		self,
 		connection: impl Executor<'_, Database = Postgres>,
 		row: &PgRow,
-	) -> Result<OrganizationView>
+	) -> Result<Organization>
 	{
-		Ok(OrganizationView {
+		Ok(Organization {
 			id: row.get(self.id),
-			location: PgLocation::retrieve_view_by_id(connection, row.get(self.location_id)).await?,
+			location: PgLocation::retrieve_by_id(connection, row.get(self.location_id)).await?,
 			name: row.get(self.name),
 		})
 	}

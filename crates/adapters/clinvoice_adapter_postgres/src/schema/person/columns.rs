@@ -1,4 +1,4 @@
-use clinvoice_schema::views::PersonView;
+use clinvoice_schema::Person;
 use sqlx::{postgres::PgRow, Row};
 
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -10,9 +10,9 @@ pub(in crate::schema) struct PgPersonColumns<'col>
 
 impl PgPersonColumns<'_>
 {
-	pub(in crate::schema) fn row_to_view(self, row: &PgRow) -> PersonView
+	pub(in crate::schema) fn row_to_view(self, row: &PgRow) -> Person
 	{
-		PersonView {
+		Person {
 			id: row.get(self.id),
 			name: row.get(self.name),
 		}

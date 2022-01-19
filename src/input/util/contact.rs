@@ -2,7 +2,7 @@ use core::fmt::Display;
 use std::{collections::HashMap, io};
 
 use clinvoice_adapter::{schema::LocationAdapter, Deletable};
-use clinvoice_schema::views::ContactView;
+use clinvoice_schema::Contact;
 use sqlx::{Database, Executor, Pool};
 
 use super::menu;
@@ -17,7 +17,7 @@ use crate::{input, DynResult};
 /// Will error whenever [`input::select_one`] or [`input::text`] does.
 async fn add_menu<'err, Db, LAdapter>(
 	connection: &Pool<Db>,
-	contact_info: &mut HashMap<String, ContactView>,
+	contact_info: &mut HashMap<String, Contact>,
 ) -> DynResult<'err, ()>
 where
 	Db: Database,
@@ -54,7 +54,7 @@ where
 		($variant:ident, $var:ident) => {
 			let label = get_label(&$var)?;
 			let export = get_export(&$var)?;
-			contact_info.insert(label, ContactView::$variant { $var, export });
+			contact_info.insert(label, Contact::$variant { $var, export });
 		};
 	}
 
@@ -66,7 +66,7 @@ where
 	{
 		ADDRESS =>
 		{
-			let locations = input::util::location::retrieve_view::<&str, _, LAdapter>(
+			let locations = input::util::location::retrieve::<&str, _, LAdapter>(
 				connection,
 				"Query the `Location` which can be used to reach this `Employee`",
 				true,
@@ -98,7 +98,7 @@ where
 /// # Errors
 ///
 /// Will error whenever [`input::select_one`] does.
-fn delete_menu(contact_info: &mut HashMap<String, ContactView>) -> input::Result<()>
+fn delete_menu(contact_info: &mut HashMap<String, Contact>) -> input::Result<()>
 {
 	if !contact_info.is_empty()
 	{
@@ -119,7 +119,7 @@ fn delete_menu(contact_info: &mut HashMap<String, ContactView>) -> input::Result
 ///
 /// Will error whenever [`input::edit_and_restore`] and [`input::select_one`] does,
 /// but will ignore [`input::Error::NotEdited`].
-fn edit_menu(contact_info: &mut HashMap<String, ContactView>) -> input::Result<()>
+fn edit_menu(contact_info: &mut HashMap<String, Contact>) -> input::Result<()>
 {
 	if contact_info.is_empty()
 	{
@@ -155,10 +155,10 @@ fn edit_menu(contact_info: &mut HashMap<String, ContactView>) -> input::Result<(
 	// Users can only ever relabel an address, thus we have to gate addresses for below.
 	if matches!(
 		contact_info[&selected_key],
-		ContactView::Email {
+		Contact::Email {
 			email: _,
 			export: _,
-		} | ContactView::Phone {
+		} | Contact::Phone {
 			phone: _,
 			export: _,
 		}
@@ -179,9 +179,9 @@ fn edit_menu(contact_info: &mut HashMap<String, ContactView>) -> input::Result<(
 	else if keys_differ
 	// `&& let`, but that syntax isn't available yet
 	{
-		if let ContactView::Address { location, export } = contact_info[&selected_key].clone()
+		if let Contact::Address { location, export } = contact_info[&selected_key].clone()
 		{
-			contact_info.insert(typed_key, ContactView::Address { location, export });
+			contact_info.insert(typed_key, Contact::Address { location, export });
 		}
 	}
 
@@ -209,13 +209,13 @@ fn edit_menu(contact_info: &mut HashMap<String, ContactView>) -> input::Result<(
 /// unrecoverable state of the program.
 pub async fn menu<'err, Db, LAdapter>(
 	connection: &Pool<Db>,
-) -> DynResult<'err, HashMap<String, ContactView>>
+) -> DynResult<'err, HashMap<String, Contact>>
 where
 	Db: Database,
 	LAdapter: Deletable<Db = Db> + LocationAdapter + Send,
 	for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 {
-	let mut contact_info = HashMap::<String, ContactView>::new();
+	let mut contact_info = HashMap::<String, Contact>::new();
 
 	loop
 	{

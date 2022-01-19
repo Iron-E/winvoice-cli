@@ -2,7 +2,7 @@ mod util;
 
 use clinvoice_adapter::schema::LocationAdapter;
 use clinvoice_adapter_bincode::schema::BincodeLocation;
-use clinvoice_schema::views::LocationView;
+use clinvoice_schema::Location;
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn into_view()
@@ -37,19 +37,19 @@ async fn into_view()
 	.await
 	.unwrap();
 
-	let phoenix_view = LocationView {
+	let phoenix_view = Location {
 		id:    phoenix.id,
 		name:  phoenix.name.clone(),
 		outer: Some(
-			LocationView {
+			Location {
 				id:    arizona.id,
 				name:  arizona.name,
 				outer: Some(
-					LocationView {
+					Location {
 						id:    usa.id,
 						name:  usa.name,
 						outer: Some(
-							LocationView {
+							Location {
 								id:    earth.id,
 								name:  earth.name,
 								outer: None,

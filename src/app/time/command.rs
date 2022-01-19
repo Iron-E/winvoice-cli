@@ -7,7 +7,6 @@ use clinvoice_adapter::{
 use clinvoice_match::{Match, MatchEmployee, MatchTimesheet};
 use clinvoice_schema::{
 	chrono::{Duration, DurationRound, Utc},
-	views::JobView,
 	Employee,
 	Id,
 	Job,
@@ -32,8 +31,8 @@ impl Command
 {
 	async fn start<'err, Db, TAdapter>(
 		connection: &Pool<Db>,
-		employee: &Employee,
-		job: &Job,
+		employee: Employee,
+		job: Job,
 	) -> Result<()>
 	where
 		Db: Database,
@@ -48,7 +47,7 @@ impl Command
 	async fn stop<'err, Db, TAdapter>(
 		connection: &Pool<Db>,
 		default_employee_id: Option<Id>,
-		job: &JobView,
+		job: Job,
 	) -> DynResult<'err, ()>
 	where
 		Db: Database,
@@ -56,7 +55,7 @@ impl Command
 		for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 	{
 		let mut timesheet = {
-			let timesheets = TAdapter::retrieve_view(connection, MatchTimesheet {
+			let timesheets = TAdapter::retrieve(connection, MatchTimesheet {
 				employee: MatchEmployee {
 					id: if let Some(default) = default_employee_id
 					{
@@ -103,7 +102,7 @@ impl Command
 		TAdapter: Deletable<Db = Db> + TimesheetAdapter + Send,
 		for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 	{
-		let job_results_view: Vec<_> = input::util::job::retrieve_view::<&str, _, JAdapter>(
+		let job_results_view: Vec<_> = input::util::job::retrieve::<&str, _, JAdapter>(
 			&connection,
 			"Query the `Job` which you are working on",
 			false,
@@ -122,7 +121,7 @@ impl Command
 		{
 			Self::Start =>
 			{
-				let results_view = input::util::employee::retrieve_view::<&str, _, EAdapter>(
+				let results_view = input::util::employee::retrieve::<&str, _, EAdapter>(
 					&connection,
 					default_employee_id,
 					"Query the `Employee` who will be doing the work",
@@ -135,17 +134,12 @@ impl Command
 					"Select the `Employee` who is doing the work".to_string(),
 				)?;
 
-				Self::start::<_, TAdapter>(
-					&connection,
-					&selected_employee.into(),
-					&selected_job.into(),
-				)
-				.await?;
+				Self::start::<_, TAdapter>(&connection, selected_employee, selected_job).await?;
 			},
 
 			Self::Stop =>
 			{
-				Self::stop::<_, TAdapter>(&connection, default_employee_id, &selected_job).await?
+				Self::stop::<_, TAdapter>(&connection, default_employee_id, selected_job).await?
 			},
 		})
 	}

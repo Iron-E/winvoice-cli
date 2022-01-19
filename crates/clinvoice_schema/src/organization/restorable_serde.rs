@@ -1,7 +1,7 @@
-use super::OrganizationView;
-use crate::views::RestorableSerde;
+use super::Organization;
+use crate::RestorableSerde;
 
-impl RestorableSerde for OrganizationView
+impl RestorableSerde for Organization
 {
 	fn restore(&mut self, original: &Self)
 	{

@@ -9,10 +9,12 @@ use clinvoice_finance::Money;
 use clinvoice_match::{
 	Match,
 	MatchEmployee,
+	MatchExpense,
 	MatchJob,
 	MatchOrganization,
 	MatchPerson,
 	MatchStr,
+	MatchTimesheet,
 	Serde,
 };
 use clinvoice_schema::chrono::NaiveDateTime;
@@ -29,7 +31,7 @@ use super::{PgInterval, PgOption, PgSchema as Schema, PgStr, PgTimestampTz};
 ///   `[Match::EqualTo(3), Match::LessThan(4)]` is interpreted as `(foo = 3 OR foo < 4)`.
 ///
 /// NOTE: the above is not proper [`Match`] syntax, since they need to wrap their inner value in a
-///       [`std::borrow::Cow`]. View the linked documentation for proper examples.
+///       [`std::borrow::Cow`].  the linked documentation for proper examples.
 ///
 /// The rest of the args are the same as [`WriteSql::write_where`].
 fn write_boolean_group<D, I, Q, const UNION: bool>(
@@ -81,7 +83,7 @@ fn write_comparison(
 /// * If `union` is `false`, a check is done to see if `ANY` of the `values` are `alias`.
 ///
 /// NOTE: the above is not proper [`Match`] syntax, since they need to wrap their inner value in a
-///       [`std::borrow::Cow`]. View the linked documentation for proper examples.
+///       [`std::borrow::Cow`].  the linked documentation for proper examples.
 ///
 /// The rest of the args are the same as [`WriteSql::write_where`].
 fn write_has<T>(
@@ -534,58 +536,6 @@ impl WriteWhereClause<&MatchStr<String>> for Schema
 	}
 }
 
-impl WriteWhereClause<&MatchPerson> for Schema
-{
-	fn write_where_clause(
-		context: WriteContext,
-		alias: impl Copy + Display,
-		match_condition: &MatchPerson,
-		query: &mut String,
-	) -> WriteContext
-	{
-		macro_rules! write_where_clause {
-			($context:expr, $column:expr, $match_field:ident) => {
-				Schema::write_where_clause(
-					$context,
-					&format!("{alias}.{}", $column),
-					&match_condition.$match_field,
-					query,
-				)
-			};
-		}
-
-		write_where_clause!(write_where_clause!(context, "id", id), "name", name)
-	}
-}
-
-impl WriteWhereClause<&MatchOrganization> for Schema
-{
-	/// # Panics
-	///
-	/// If any the following:
-	///
-	/// * `context` is not `BeforeWhereClause`
-	/// * `alias` is an empty string.
-	///
-	/// # See
-	///
-	/// * [`WriteWhereClause::write_where_clause`]
-	fn write_where_clause(
-		context: WriteContext,
-		alias: impl Copy + Display,
-		match_condition: &MatchOrganization,
-		query: &mut String,
-	) -> WriteContext
-	{
-		Schema::write_where_clause(
-			Schema::write_where_clause(context, &format!("{alias}.id"), &match_condition.id, query),
-			&format!("{alias}.name"),
-			&match_condition.name,
-			query,
-		)
-	}
-}
-
 impl WriteWhereClause<&MatchEmployee> for Schema
 {
 	/// # Panics
@@ -614,6 +564,44 @@ impl WriteWhereClause<&MatchEmployee> for Schema
 			),
 			&format!("{alias}.title"),
 			&match_condition.title,
+			query,
+		)
+	}
+}
+
+impl WriteWhereClause<&MatchExpense> for Schema
+{
+	/// # Panics
+	///
+	/// If any the following:
+	///
+	/// * `context` is not `BeforeWhereClause`
+	/// * `alias` is an empty string.
+	///
+	/// # See
+	///
+	/// * [`WriteWhereClause::write_where_clause`]
+	fn write_where_clause(
+		context: WriteContext,
+		alias: impl Copy + Display,
+		match_condition: &MatchExpense,
+		query: &mut String,
+	) -> WriteContext
+	{
+		Schema::write_where_clause(
+			Schema::write_where_clause(
+				Schema::write_where_clause(
+					context,
+					&format!("{alias}.category"),
+					&match_condition.category,
+					query,
+				),
+				&format!("{alias}.cost"),
+				&match_condition.cost,
+				query,
+			),
+			&format!("{alias}.description"),
+			&match_condition.description,
 			query,
 		)
 	}
@@ -682,6 +670,101 @@ impl WriteWhereClause<&MatchJob> for Schema
 			),
 			&format!("{alias}.objectives"),
 			&match_condition.objectives,
+			query,
+		)
+	}
+}
+
+impl WriteWhereClause<&MatchOrganization> for Schema
+{
+	/// # Panics
+	///
+	/// If any the following:
+	///
+	/// * `context` is not `BeforeWhereClause`
+	/// * `alias` is an empty string.
+	///
+	/// # See
+	///
+	/// * [`WriteWhereClause::write_where_clause`]
+	fn write_where_clause(
+		context: WriteContext,
+		alias: impl Copy + Display,
+		match_condition: &MatchOrganization,
+		query: &mut String,
+	) -> WriteContext
+	{
+		Schema::write_where_clause(
+			Schema::write_where_clause(context, &format!("{alias}.id"), &match_condition.id, query),
+			&format!("{alias}.name"),
+			&match_condition.name,
+			query,
+		)
+	}
+}
+
+impl WriteWhereClause<&MatchPerson> for Schema
+{
+	fn write_where_clause(
+		context: WriteContext,
+		alias: impl Copy + Display,
+		match_condition: &MatchPerson,
+		query: &mut String,
+	) -> WriteContext
+	{
+		macro_rules! write_where_clause {
+			($context:expr, $column:expr, $match_field:ident) => {
+				Schema::write_where_clause(
+					$context,
+					&format!("{alias}.{}", $column),
+					&match_condition.$match_field,
+					query,
+				)
+			};
+		}
+
+		write_where_clause!(write_where_clause!(context, "id", id), "name", name)
+	}
+}
+
+impl WriteWhereClause<&MatchTimesheet> for Schema
+{
+	/// # Panics
+	///
+	/// If any the following:
+	///
+	/// * `context` is not `BeforeWhereClause`
+	/// * `alias` is an empty string.
+	///
+	/// # See
+	///
+	/// * [`WriteWhereClause::write_where_clause`]
+	fn write_where_clause(
+		context: WriteContext,
+		alias: impl Copy + Display,
+		match_condition: &MatchTimesheet,
+		query: &mut String,
+	) -> WriteContext
+	{
+		Schema::write_where_clause(
+			Schema::write_where_clause(
+				Schema::write_where_clause(
+					Schema::write_where_clause(
+						context,
+						&format!("{alias}.expenses"),
+						&match_condition.expenses,
+						query,
+					),
+					&format!("{alias}.time_begin"),
+					&match_condition.time_begin,
+					query,
+				),
+				&format!("{alias}.time_end"),
+				&match_condition.time_end,
+				query,
+			),
+			&format!("{alias}.work_notes"),
+			&match_condition.work_notes,
 			query,
 		)
 	}

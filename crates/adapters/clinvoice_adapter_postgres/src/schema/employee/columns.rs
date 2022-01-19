@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use clinvoice_schema::views::{ContactView, EmployeeView};
+use clinvoice_schema::{Contact, Employee};
 use sqlx::{postgres::PgRow, Error, PgPool, Result, Row};
 
 use crate::schema::{
@@ -23,7 +23,7 @@ impl PgEmployeeColumns<'_>
 		self,
 		connection: &PgPool,
 		row: &PgRow,
-	) -> Result<EmployeeView>
+	) -> Result<Employee>
 	{
 		let organization = self.organization.row_to_view(connection, row);
 
@@ -37,19 +37,19 @@ impl PgEmployeeColumns<'_>
 					return Ok(futures.push((
 						export,
 						label,
-						PgLocation::retrieve_view_by_id(connection, contact_location_id),
+						PgLocation::retrieve_by_id(connection, contact_location_id),
 					)));
 				}
 				else if let Some(contact_email) = contact_email
 				{
-					ContactView::Email {
+					Contact::Email {
 						email: contact_email,
 						export,
 					}
 				}
 				else if let Some(contact_phone) = contact_phone
 				{
-					ContactView::Phone {
+					Contact::Phone {
 						export,
 						phone: contact_phone,
 					}
@@ -66,14 +66,14 @@ impl PgEmployeeColumns<'_>
 			},
 		)?;
 
-		Ok(EmployeeView {
+		Ok(Employee {
 			id: row.get(self.id),
 			organization: organization.await?,
 			person: self.person.row_to_view(row),
 			contact_info: {
 				for (export, label, future) in futures
 				{
-					map.insert(label, ContactView::Address {
+					map.insert(label, Contact::Address {
 						location: future.await?,
 						export,
 					});

@@ -1,8 +1,10 @@
-mod from_view;
+mod display;
+mod restorable_serde;
 
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 
+use super::Location;
 use crate::Id;
 
 /// # Summary
@@ -16,20 +18,21 @@ use crate::Id;
 ///
 /// An `Organization` has no specific affitilation to the user, and as such can be both a
 /// Client and an Emlpoyer at the same time.
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 pub struct Organization
 {
 	/// # Summary
 	///
 	/// The unique reference number for this [`Organization`].
+	#[cfg_attr(feature = "serde_support", serde(skip))]
 	pub id: Id,
 
 	/// # Summary
 	///
 	/// The reference umber of the [`Location`](super::location::Location) where this
 	/// [`Organization`] resides.
-	pub location_id: Id,
+	pub location: Location,
 
 	/// # Summary
 	///

@@ -1,6 +1,6 @@
 use clinvoice_adapter::{schema::LocationAdapter, WriteWhereClause};
 use clinvoice_match::MatchLocation;
-use clinvoice_schema::{views::LocationView, Location};
+use clinvoice_schema::Location;
 use futures::TryStreamExt;
 use sqlx::{PgPool, Result, Row};
 
@@ -22,11 +22,11 @@ impl LocationAdapter for PgLocation
 		Ok(Location {
 			id: row.id,
 			name,
-			outer_id: None,
+			outer: None,
 		})
 	}
 
-	async fn create_inner(connection: &PgPool, outer: &Location, name: String) -> Result<Location>
+	async fn create_inner(connection: &PgPool, outer: Location, name: String) -> Result<Location>
 	{
 		let row = sqlx::query!(
 			"INSERT INTO locations (name, outer_id) VALUES ($1, $2) RETURNING id;",
@@ -39,14 +39,11 @@ impl LocationAdapter for PgLocation
 		Ok(Location {
 			id: row.id,
 			name,
-			outer_id: Some(outer.id),
+			outer: Some(outer.into()),
 		})
 	}
 
-	async fn retrieve_view(
-		connection: &PgPool,
-		match_condition: MatchLocation,
-	) -> Result<Vec<LocationView>>
+	async fn retrieve(connection: &PgPool, match_condition: MatchLocation) -> Result<Vec<Location>>
 	{
 		let id_match = Self::retrieve_matching_ids(connection, &match_condition);
 
@@ -56,7 +53,7 @@ impl LocationAdapter for PgLocation
 
 		sqlx::query(&query)
 			.fetch(connection)
-			.and_then(|row| PgLocation::retrieve_view_by_id(connection, row.get("id")))
+			.and_then(|row| PgLocation::retrieve_by_id(connection, row.get("id")))
 			.try_collect()
 			.await
 	}
@@ -68,7 +65,6 @@ mod tests
 	use std::collections::HashSet;
 
 	use clinvoice_match::{MatchLocation, MatchOuterLocation};
-	use clinvoice_schema::views::LocationView;
 
 	use super::{LocationAdapter, PgLocation};
 	use crate::schema::util;
@@ -83,18 +79,18 @@ mod tests
 			.await
 			.unwrap();
 
-		let usa = PgLocation::create_inner(&connection, &earth, "USA".into())
+		let usa = PgLocation::create_inner(&connection, earth.clone(), "USA".into())
 			.await
 			.unwrap();
 
-		let arizona = PgLocation::create_inner(&connection, &usa, "Arizona".into())
+		let arizona = PgLocation::create_inner(&connection, usa.clone(), "Arizona".into())
 			.await
 			.unwrap();
 
 		// Assert ::create_inner works when `outer_id` has already been used for another `Location`
-		assert!(PgLocation::create_inner(&connection, &usa, "Utah".into())
+		let utah = PgLocation::create_inner(&connection, usa.clone(), "Utah".into())
 			.await
-			.is_ok());
+			.unwrap();
 
 		macro_rules! select {
 			($id:expr) => {
@@ -105,33 +101,39 @@ mod tests
 			};
 		}
 
-		let database_earth = select!(earth.id);
-
 		// Assert ::create writes accurately to the DB
+		let database_earth = select!(earth.id);
 		assert_eq!(earth.id, database_earth.id);
 		assert_eq!(earth.name, database_earth.name);
-		assert_eq!(earth.outer_id, None);
-		assert_eq!(earth.outer_id, database_earth.outer_id);
-
-		let database_usa = select!(usa.id);
+		assert_eq!(earth.outer, None);
+		assert_eq!(earth.outer.map(|o| o.id), database_earth.outer_id);
 
 		// Assert ::create_inner writes accurately to the DB when `outer_id` is `None`
+		let database_usa = select!(usa.id);
 		assert_eq!(usa.id, database_usa.id);
 		assert_eq!(usa.name, database_usa.name);
-		assert_eq!(usa.outer_id, Some(earth.id));
-		assert_eq!(usa.outer_id, database_usa.outer_id);
-
-		let database_arizona = select!(arizona.id);
+		let usa_outer_id = usa.outer.map(|o| o.id);
+		assert_eq!(usa_outer_id, Some(earth.id));
+		assert_eq!(usa_outer_id, database_usa.outer_id);
 
 		// Assert ::create_inner writes accurately to the DB when `outer_id` is `Some(…)`
+		let database_arizona = select!(arizona.id);
 		assert_eq!(arizona.id, database_arizona.id);
 		assert_eq!(arizona.name, database_arizona.name);
-		assert_eq!(arizona.outer_id, Some(usa.id));
-		assert_eq!(arizona.outer_id, database_arizona.outer_id);
+		let arizona_outer_id = arizona.outer.map(|o| o.id);
+		assert_eq!(arizona_outer_id, Some(usa.id));
+		assert_eq!(arizona_outer_id, database_arizona.outer_id);
+
+		let database_utah = select!(utah.id);
+		assert_eq!(utah.id, database_utah.id);
+		assert_eq!(utah.name, database_utah.name);
+		let utah_outer_id = utah.outer.map(|o| o.id);
+		assert_eq!(utah_outer_id, Some(usa.id));
+		assert_eq!(utah_outer_id, database_utah.outer_id);
 	}
 
 	#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
-	async fn retrieve_view()
+	async fn retrieve()
 	{
 		let connection = util::connect().await;
 
@@ -139,46 +141,22 @@ mod tests
 			.await
 			.unwrap();
 
-		let usa = PgLocation::create_inner(&connection, &earth, "USA".into())
+		let usa = PgLocation::create_inner(&connection, earth.clone(), "USA".into())
 			.await
 			.unwrap();
 
-		let arizona = PgLocation::create_inner(&connection, &usa, "Arizona".into())
+		let arizona = PgLocation::create_inner(&connection, usa.clone(), "Arizona".into())
 			.await
 			.unwrap();
 
-		let utah = PgLocation::create_inner(&connection, &usa, "Utah".into())
+		let utah = PgLocation::create_inner(&connection, usa.clone(), "Utah".into())
 			.await
 			.unwrap();
 
-		let earth_view = LocationView {
-			id: earth.id,
-			name: earth.name.clone(),
-			outer: None,
-		};
-
-		let usa_view = LocationView {
-			id: usa.id,
-			name: usa.name.clone(),
-			outer: Some(earth_view.clone().into()),
-		};
-
-		let arizona_view = LocationView {
-			id: arizona.id,
-			name: arizona.name.clone(),
-			outer: Some(usa_view.clone().into()),
-		};
-
-		let utah_view = LocationView {
-			id: utah.id,
-			name: utah.name.clone(),
-			outer: Some(usa_view.clone().into()),
-		};
-
-		// Assert ::retrieve_view retrieves accurately from the DB
+		// Assert ::retrieve retrieves accurately from the DB
 		assert_eq!(
-			&[earth_view],
-			PgLocation::retrieve_view(&connection, MatchLocation {
+			&[earth.clone()],
+			PgLocation::retrieve(&connection, MatchLocation {
 				id: earth.id.into(),
 				..Default::default()
 			})
@@ -188,12 +166,10 @@ mod tests
 		);
 
 		assert_eq!(
-			[utah_view, arizona_view]
-				.into_iter()
-				.collect::<HashSet<_>>(),
-			PgLocation::retrieve_view(&connection, MatchLocation {
+			[utah, arizona].into_iter().collect::<HashSet<_>>(),
+			PgLocation::retrieve(&connection, MatchLocation {
 				outer: MatchOuterLocation::Some(Box::new(MatchLocation {
-					id: usa_view.id.into(),
+					id: usa.id.into(),
 					..Default::default()
 				})),
 				..Default::default()

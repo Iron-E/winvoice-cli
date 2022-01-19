@@ -1,13 +1,14 @@
 use core::str::FromStr;
 
 use clinvoice_finance::{Decimal, Money};
-use clinvoice_schema::{views::TimesheetView, Expense};
+use clinvoice_schema::{Expense, Id, Timesheet};
 use sqlx::{postgres::PgRow, Error, PgPool, Result, Row};
 
 use crate::schema::{employee::columns::PgEmployeeColumns, job::columns::PgJobColumns};
 
 pub(in crate::schema) struct PgTimesheetColumns<'col>
 {
+	pub id: &'col str,
 	pub employee: PgEmployeeColumns<'col>,
 	pub expenses: &'col str,
 	pub job: PgJobColumns<'col>,
@@ -22,19 +23,21 @@ impl PgTimesheetColumns<'_>
 		self,
 		connection: &PgPool,
 		row: &PgRow,
-	) -> Result<TimesheetView>
+	) -> Result<Timesheet>
 	{
 		let employee = self.employee.row_to_view(connection, row);
 		let job = self.job.row_to_view(connection, row);
 
-		Ok(TimesheetView {
+		Ok(Timesheet {
+			id: row.get(self.id),
 			employee: employee.await?,
 			expenses: {
-				let vec: Vec<(String, String, String)> = row.get(self.expenses);
+				let vec: Vec<(Id, String, String, String)> = row.get(self.expenses);
 				let mut expenses = Vec::with_capacity(vec.len());
 				vec.into_iter()
-					.try_for_each(|(category, cost, description)| {
+					.try_for_each(|(id, category, cost, description)| {
 						Ok(expenses.push(Expense {
+							id,
 							category,
 							cost: Money {
 								amount: cost.parse()?,

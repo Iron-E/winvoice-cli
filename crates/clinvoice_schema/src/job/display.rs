@@ -2,9 +2,9 @@ use core::fmt::{Display, Formatter, Result};
 
 use chrono::{DateTime, Local};
 
-use super::JobView;
+use super::Job;
 
-impl Display for JobView
+impl Display for Job
 {
 	fn fmt(&self, formatter: &mut Formatter) -> Result
 	{
@@ -68,35 +68,32 @@ mod tests
 	use chrono::Utc;
 	use clinvoice_finance::{Currency, Money};
 
-	use super::{DateTime, JobView, Local};
-	use crate::{
-		views::{ContactView, EmployeeView, LocationView, OrganizationView, PersonView},
-		Invoice,
-	};
+	use super::{DateTime, Job, Local};
+	use crate::{Contact, Employee, Invoice, Location, Organization, Person};
 
 	#[test]
 	fn display()
 	{
-		let earth_view = LocationView {
+		let earth_view = Location {
 			id: 0,
 			name: "Earth".into(),
 			outer: None,
 		};
 
-		let ceo_testy_view = EmployeeView {
-			contact_info: vec![("Office".into(), ContactView::Address {
+		let ceo_testy_view = Employee {
+			contact_info: vec![("Office".into(), Contact::Address {
 				location: earth_view.clone(),
 				export: false,
 			})]
 			.into_iter()
 			.collect(),
 			id: 0,
-			organization: OrganizationView {
+			organization: Organization {
 				id: 0,
 				location: earth_view.clone(),
 				name: "Big Old Test".into(),
 			},
-			person: PersonView {
+			person: Person {
 				id: 0,
 				name: "Testy McTesterson".into(),
 			},
@@ -104,7 +101,7 @@ mod tests
 			title: "CEO of Tests".into(),
 		};
 
-		let create_job_view = JobView {
+		let create_job_view = Job {
 			client: ceo_testy_view.organization.clone(),
 			date_close: Some(Utc::today().and_hms(23, 59, 59)),
 			date_open: Utc::now(),

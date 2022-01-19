@@ -1,19 +1,20 @@
-mod from_view;
+mod display;
 mod hash;
 mod partial_eq;
+mod restorable_serde;
 
 use std::collections::HashMap;
 
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 
-use crate::{Contact, Id};
+use super::{Contact, Organization, Person};
+use crate::Id;
 
 /// # Summary
 ///
-/// An `Employee` is a [`Person`](super::person::Person) who completes [`Job`](super::job::Job)s
-/// for an [employer](crate::Organization).
-#[derive(Clone, Debug, Eq)]
+/// A view of [`Employee`](crate::Employee).
+#[derive(Clone, Debug, Default, Eq)]
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 pub struct Employee
 {
@@ -30,19 +31,20 @@ pub struct Employee
 	///
 	/// The reference number of this [`Employee`], which can be used instead of the compound key
 	/// {`organization`, `person_id`}.
+	#[cfg_attr(feature = "serde_support", serde(skip))]
 	pub id: Id,
 
 	/// # Summary
 	///
 	/// The reference number of the [`Organization`](crate::Organization) which this
 	/// [`Employee`] is in reference to.
-	pub organization_id: Id,
+	pub organization: Organization,
 
 	/// # Summary
 	///
 	/// The reference number of the [`Person`](super::person::Person) which this
 	/// [`Employee`] is in reference to.
-	pub person_id: Id,
+	pub person: Person,
 
 	/// # Summary
 	///

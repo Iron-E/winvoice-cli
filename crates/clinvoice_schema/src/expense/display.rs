@@ -6,7 +6,11 @@ impl Display for Expense
 {
 	fn fmt(&self, formatter: &mut Formatter) -> Result
 	{
-		writeln!(formatter, "{} – {}", self.category, self.cost)?;
+		writeln!(
+			formatter,
+			"#{} – {} ({})",
+			self.id, self.category, self.cost
+		)?;
 		write!(formatter, "\t{}", self.description.replace('\n', "\n\t"))
 	}
 }
@@ -22,6 +26,7 @@ mod tests
 	fn display()
 	{
 		let expense = Expense {
+			id: 10,
 			category: "Food".into(),
 			cost: Money::new(20_00, 2, Currency::USD),
 			description: "Take-out for 2".into(),
@@ -29,7 +34,7 @@ mod tests
 
 		assert_eq!(
 			format!("{expense}"),
-			"Food – 20.00 USD
+			"#10 – Food (20.00 USD)
 	Take-out for 2",
 		);
 	}

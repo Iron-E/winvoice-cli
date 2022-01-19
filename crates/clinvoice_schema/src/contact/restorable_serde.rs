@@ -1,16 +1,16 @@
-use super::ContactView;
-use crate::views::RestorableSerde;
+use super::Contact;
+use crate::RestorableSerde;
 
-impl RestorableSerde for ContactView
+impl RestorableSerde for Contact
 {
 	fn restore(&mut self, original: &Self)
 	{
-		if let ContactView::Address {
+		if let Contact::Address {
 			location,
 			export: _,
 		} = self
 		{
-			if let ContactView::Address {
+			if let Contact::Address {
 				location: original_location,
 				export: _,
 			} = original
@@ -19,7 +19,7 @@ impl RestorableSerde for ContactView
 				return;
 			}
 
-			panic!("`original` ContactView was not an Address!")
+			panic!("`original` Contact was not an Address!")
 		}
 	}
 }

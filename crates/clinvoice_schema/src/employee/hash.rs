@@ -8,7 +8,7 @@ impl Hash for Employee
 	where
 		H: Hasher,
 	{
-		self.organization_id.hash(state);
-		self.person_id.hash(state);
+		self.organization.hash(state);
+		self.person.hash(state);
 	}
 }

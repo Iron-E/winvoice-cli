@@ -2,7 +2,7 @@ use core::fmt::Display;
 
 use clinvoice_adapter::{schema::EmployeeAdapter, Deletable};
 use clinvoice_match::MatchEmployee;
-use clinvoice_schema::{views::EmployeeView, Id};
+use clinvoice_schema::{Employee, Id};
 use sqlx::{Database, Executor, Pool};
 
 use super::{menu, MATCH_PROMPT};
@@ -21,12 +21,12 @@ use crate::{input, DynResult};
 ///
 /// [L_retrieve]: clinvoice_adapter::schema::EmployeeAdapter::retrieve
 /// [location]: clinvoice_schema::Employee
-pub async fn retrieve_view<'err, D, Db, EAdapter>(
+pub async fn retrieve<'err, D, Db, EAdapter>(
 	connection: &Pool<Db>,
 	default_id: Option<Id>,
 	prompt: D,
 	retry_on_empty: bool,
-) -> DynResult<'err, Vec<EmployeeView>>
+) -> DynResult<'err, Vec<Employee>>
 where
 	D: Display,
 	Db: Database,
@@ -44,7 +44,7 @@ where
 			_ => input::edit_default(format!("{prompt}\n{MATCH_PROMPT}employees"))?,
 		};
 
-		let results = EAdapter::retrieve_view(connection, match_condition).await?;
+		let results = EAdapter::retrieve(connection, match_condition).await?;
 
 		if retry_on_empty && results.is_empty() && menu::ask_to_retry()?
 		{

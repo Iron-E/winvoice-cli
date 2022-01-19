@@ -1,8 +1,8 @@
 use core::fmt::{Display, Formatter, Result};
 
-use super::LocationView;
+use super::Location;
 
-impl Display for LocationView
+impl Display for Location
 {
 	fn fmt(&self, formatter: &mut Formatter) -> Result
 	{
@@ -22,7 +22,7 @@ impl Display for LocationView
 #[cfg(test)]
 mod tests
 {
-	use super::LocationView;
+	use super::Location;
 
 	/// # Summary
 	///
@@ -30,31 +30,31 @@ mod tests
 	#[test]
 	fn display()
 	{
-		let earth_view = LocationView {
+		let earth_view = Location {
 			name: "Earth".into(),
 			id: 0,
 			outer: None,
 		};
 
-		let usa_view = LocationView {
+		let usa_view = Location {
 			name: "USA".into(),
 			id: 0,
 			outer: Some(earth_view.into()),
 		};
 
-		let arizona_view = LocationView {
+		let arizona_view = Location {
 			name: "Arizona".into(),
 			id: 0,
 			outer: Some(usa_view.into()),
 		};
 
-		let phoenix_view = LocationView {
+		let phoenix_view = Location {
 			name: "Phoenix".into(),
 			id: 0,
 			outer: Some(arizona_view.into()),
 		};
 
-		let street_view = LocationView {
+		let street_view = Location {
 			name: "1337 Some Street".into(),
 			id: 0,
 			outer: Some(phoenix_view.into()),

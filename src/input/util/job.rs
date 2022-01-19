@@ -2,7 +2,7 @@ use core::fmt::Display;
 
 use clinvoice_adapter::{schema::JobAdapter, Deletable};
 use clinvoice_match::MatchJob;
-use clinvoice_schema::views::JobView;
+use clinvoice_schema::Job;
 use sqlx::{Database, Executor, Pool};
 
 use super::{menu, MATCH_PROMPT};
@@ -21,11 +21,11 @@ use crate::{input, DynResult};
 ///
 /// [L_retrieve]: clinvoice_adapter::schema::LocationAdapter::retrieve
 /// [location]: clinvoice_schema::Location
-pub async fn retrieve_view<'err, D, Db, JAdapter>(
+pub async fn retrieve<'err, D, Db, JAdapter>(
 	connection: &Pool<Db>,
 	prompt: D,
 	retry_on_empty: bool,
-) -> DynResult<'err, Vec<JobView>>
+) -> DynResult<'err, Vec<Job>>
 where
 	D: Display,
 	Db: Database,
@@ -36,7 +36,7 @@ where
 	{
 		let match_condition: MatchJob = input::edit_default(format!("{prompt}\n{MATCH_PROMPT}jobs"))?;
 
-		let results = JAdapter::retrieve_view(connection, match_condition).await?;
+		let results = JAdapter::retrieve(connection, match_condition).await?;
 
 		if retry_on_empty && results.is_empty() && menu::ask_to_retry()?
 		{

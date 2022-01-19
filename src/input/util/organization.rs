@@ -2,7 +2,7 @@ use core::fmt::Display;
 
 use clinvoice_adapter::{schema::OrganizationAdapter, Deletable};
 use clinvoice_match::MatchOrganization;
-use clinvoice_schema::views::OrganizationView;
+use clinvoice_schema::Organization;
 use sqlx::{Database, Executor, Pool};
 
 use super::{menu, MATCH_PROMPT};
@@ -21,11 +21,11 @@ use crate::{input, DynResult};
 ///
 /// [P_retrieve]: clinvoice_adapter::schema::OrganizationAdapter::retrieve
 /// [organization]: clinvoice_schema::Organization
-pub async fn retrieve_view<'err, D, Db, OAdapter>(
+pub async fn retrieve<'err, D, Db, OAdapter>(
 	connection: &Pool<Db>,
 	prompt: D,
 	retry_on_empty: bool,
-) -> DynResult<'err, Vec<OrganizationView>>
+) -> DynResult<'err, Vec<Organization>>
 where
 	D: Display,
 	Db: Database,
@@ -37,7 +37,7 @@ where
 		let match_condition: MatchOrganization =
 			input::edit_default(format!("{prompt}\n{MATCH_PROMPT}organizations"))?;
 
-		let results = OAdapter::retrieve_view(connection, match_condition).await?;
+		let results = OAdapter::retrieve(connection, match_condition).await?;
 
 		if retry_on_empty && results.is_empty() && menu::ask_to_retry()?
 		{

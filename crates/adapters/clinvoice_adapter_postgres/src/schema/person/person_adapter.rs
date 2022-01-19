@@ -1,6 +1,6 @@
 use clinvoice_adapter::{schema::PersonAdapter, WriteWhereClause};
 use clinvoice_match::MatchPerson;
-use clinvoice_schema::{views::PersonView, Person};
+use clinvoice_schema::Person;
 use futures::stream::TryStreamExt;
 use sqlx::{PgPool, Result};
 
@@ -19,10 +19,7 @@ impl PersonAdapter for PgPerson
 		Ok(Person { id: row.id, name })
 	}
 
-	async fn retrieve_view(
-		connection: &PgPool,
-		match_condition: MatchPerson,
-	) -> Result<Vec<PersonView>>
+	async fn retrieve(connection: &PgPool, match_condition: MatchPerson) -> Result<Vec<Person>>
 	{
 		let mut query = String::from("SELECT * FROM people P");
 		Schema::write_where_clause(Default::default(), "P", &match_condition, &mut query);
@@ -66,7 +63,7 @@ mod tests
 	}
 
 	#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
-	async fn retrieve_view()
+	async fn retrieve()
 	{
 		// TODO: write test; `SET SCHEMA 'pg_temp';`
 	}

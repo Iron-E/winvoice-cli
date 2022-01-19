@@ -13,11 +13,11 @@ mod person_view;
 mod restorable_serde;
 mod timesheet_view;
 
-pub use contact_view::ContactView;
-pub use employee_view::EmployeeView;
-pub use job_view::JobView;
-pub use location_view::LocationView;
-pub use organization_view::OrganizationView;
-pub use person_view::PersonView;
+pub use contact_view::Contact;
+pub use employee_view::Employee;
+pub use job_view::Job;
+pub use location_view::Location;
+pub use organization_view::Organization;
+pub use person_view::Person;
 pub use restorable_serde::RestorableSerde;
-pub use timesheet_view::TimesheetView;
+pub use timesheet_view::Timesheet;

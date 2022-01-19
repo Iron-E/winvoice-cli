@@ -23,7 +23,7 @@ pub struct Timesheets
 	///
 	/// // 5 minute increment
 	/// Timesheets {
-	///   default_increment: Duration::new(300, 0),
+	/// 	default_increment: Duration::new(300, 0),
 	/// };
 	/// ```
 	#[serde(with = "humantime_serde")]

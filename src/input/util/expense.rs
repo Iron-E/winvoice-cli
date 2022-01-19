@@ -21,7 +21,7 @@ fn add_menu(expenses: &mut Vec<Expense>, default_currency: Currency) -> input::R
 		"* Describe the {category}\n* All markdown syntax is valid"
 	))?;
 	Ok(expenses.push(Expense {
-		id: Default::default(), // HACK: what should I do here?
+		id: Default::default(), // HACK: what should I do here? How will we tell new `Expense`s from old `Expense`s when running `PgTimesheet::update`? Do we need an `ExpenseAdapter`?
 		category,
 		cost,
 		description,

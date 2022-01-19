@@ -115,7 +115,7 @@ impl EmployeeAdapter for PgEmployee
 
 	async fn retrieve_view(
 		connection: &PgPool,
-		match_condition: &MatchEmployee,
+		match_condition: MatchEmployee,
 	) -> Result<Vec<EmployeeView>>
 	{
 		let id_match =
@@ -135,7 +135,7 @@ impl EmployeeAdapter for PgEmployee
 		Schema::write_where_clause(
 			Schema::write_where_clause(
 				Schema::write_where_clause(
-					Schema::write_where_clause(Default::default(), "E", match_condition, &mut query),
+					Schema::write_where_clause(Default::default(), "E", &match_condition, &mut query),
 					"O",
 					&match_condition.organization,
 					&mut query,
@@ -456,7 +456,7 @@ mod tests
 		};
 
 		assert_eq!(
-			PgEmployee::retrieve_view(&connection, &MatchEmployee {
+			PgEmployee::retrieve_view(&connection, MatchEmployee {
 				organization: MatchOrganization {
 					name: employee_view.organization.name.clone().into(),
 					location: MatchLocation {

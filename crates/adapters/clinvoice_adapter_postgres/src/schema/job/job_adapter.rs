@@ -74,7 +74,7 @@ impl JobAdapter for PgJob
 		})
 	}
 
-	async fn retrieve_view(connection: &PgPool, match_condition: &MatchJob) -> Result<Vec<JobView>>
+	async fn retrieve_view(connection: &PgPool, match_condition: MatchJob) -> Result<Vec<JobView>>
 	{
 		let exchange_rates = ExchangeRates::new().map_err(util::finance_err_to_sqlx);
 		let id_match =
@@ -92,34 +92,32 @@ impl JobAdapter for PgJob
 			Schema::write_where_clause(
 				Schema::write_where_clause(
 					Default::default(),
-					"J",
-					// PERF: there must be something to do to remove all of these clones
-					&MatchJob {
-						client: match_condition.client.clone(),
-						date_close: match_condition.date_close.clone(),
-						date_open: match_condition.date_open.clone(),
-						id: match_condition.id.clone(),
-						increment: match_condition.increment.clone(),
-						invoice: MatchInvoice {
-							date_issued: match_condition.invoice.date_issued.clone(),
-							date_paid: match_condition.invoice.date_paid.clone(),
-							hourly_rate: match_condition
-								.invoice
-								.hourly_rate
-								.clone()
-								.exchange(Currency::EUR, &exchange_rates.await?),
-						},
-						notes: match_condition.notes.clone(),
-						objectives: match_condition.objectives.clone(),
-					},
+					"O",
+					&match_condition.client,
 					&mut query,
 				),
-				"O",
-				&match_condition.client,
+				"O.location_id",
+				&id_match.await?,
 				&mut query,
 			),
-			"O.location_id",
-			&id_match.await?,
+			"J",
+			&MatchJob {
+				client: match_condition.client,
+				date_close: match_condition.date_close,
+				date_open: match_condition.date_open,
+				id: match_condition.id,
+				increment: match_condition.increment,
+				invoice: MatchInvoice {
+					date_issued: match_condition.invoice.date_issued,
+					date_paid: match_condition.invoice.date_paid,
+					hourly_rate: match_condition
+						.invoice
+						.hourly_rate
+						.exchange(Currency::EUR, &exchange_rates.await?),
+				},
+				notes: match_condition.notes,
+				objectives: match_condition.objectives,
+			},
 			&mut query,
 		);
 		query.push(';');
@@ -361,7 +359,7 @@ mod tests
 		};
 
 		assert_eq!(
-			PgJob::retrieve_view(&connection, &MatchJob {
+			PgJob::retrieve_view(&connection, MatchJob {
 				id: job_one.id.into(),
 				..Default::default()
 			})
@@ -372,7 +370,7 @@ mod tests
 		);
 
 		assert_eq!(
-			PgJob::retrieve_view(&connection, &MatchJob {
+			PgJob::retrieve_view(&connection, MatchJob {
 				client: MatchOrganization {
 					location: MatchLocation {
 						id: Match::Or(vec![

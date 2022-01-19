@@ -45,10 +45,10 @@ impl LocationAdapter for PgLocation
 
 	async fn retrieve_view(
 		connection: &PgPool,
-		match_condition: &MatchLocation,
+		match_condition: MatchLocation,
 	) -> Result<Vec<LocationView>>
 	{
-		let id_match = Self::retrieve_matching_ids(connection, match_condition);
+		let id_match = Self::retrieve_matching_ids(connection, &match_condition);
 
 		let mut query = String::from("SELECT name, outer_id, id FROM locations");
 		Schema::write_where_clause(Default::default(), "id", &id_match.await?, &mut query);
@@ -178,7 +178,7 @@ mod tests
 		// Assert ::retrieve_view retrieves accurately from the DB
 		assert_eq!(
 			&[earth_view],
-			PgLocation::retrieve_view(&connection, &MatchLocation {
+			PgLocation::retrieve_view(&connection, MatchLocation {
 				id: earth.id.into(),
 				..Default::default()
 			})
@@ -191,7 +191,7 @@ mod tests
 			[utah_view, arizona_view]
 				.into_iter()
 				.collect::<HashSet<_>>(),
-			PgLocation::retrieve_view(&connection, &MatchLocation {
+			PgLocation::retrieve_view(&connection, MatchLocation {
 				outer: MatchOuterLocation::Some(Box::new(MatchLocation {
 					id: usa_view.id.into(),
 					..Default::default()

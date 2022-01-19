@@ -35,6 +35,6 @@ pub trait PersonAdapter:
 	/// * A list of matching [`PersonView`]s.
 	async fn retrieve_view(
 		connection: &Pool<<Self as Deletable>::Db>,
-		match_condition: &MatchPerson,
+		match_condition: MatchPerson,
 	) -> Result<Vec<PersonView>>;
 }

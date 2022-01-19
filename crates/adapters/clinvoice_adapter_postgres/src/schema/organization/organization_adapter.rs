@@ -29,7 +29,7 @@ impl OrganizationAdapter for PgOrganization
 
 	async fn retrieve_view(
 		connection: &PgPool,
-		match_condition: &MatchOrganization,
+		match_condition: MatchOrganization,
 	) -> Result<Vec<OrganizationView>>
 	{
 		let id_match = PgLocation::retrieve_matching_ids(connection, &match_condition.location);
@@ -40,7 +40,7 @@ impl OrganizationAdapter for PgOrganization
 			JOIN locations L ON (L.id = O.location_id)",
 		);
 		Schema::write_where_clause(
-			Schema::write_where_clause(Default::default(), "O", match_condition, &mut query),
+			Schema::write_where_clause(Default::default(), "O", &match_condition, &mut query),
 			"L.id",
 			&id_match.await?,
 			&mut query,
@@ -162,7 +162,7 @@ mod tests
 
 		// Assert ::retrieve_view gets the right data from the DB
 		assert_eq!(
-			PgOrganization::retrieve_view(&connection, &MatchOrganization {
+			PgOrganization::retrieve_view(&connection, MatchOrganization {
 				id: some_organization_view.id.into(),
 				..Default::default()
 			})
@@ -173,7 +173,7 @@ mod tests
 		);
 
 		assert_eq!(
-			PgOrganization::retrieve_view(&connection, &MatchOrganization {
+			PgOrganization::retrieve_view(&connection, MatchOrganization {
 				location: MatchLocation {
 					outer: MatchOuterLocation::Some(
 						MatchLocation {

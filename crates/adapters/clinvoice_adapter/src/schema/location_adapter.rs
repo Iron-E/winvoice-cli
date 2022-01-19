@@ -52,6 +52,6 @@ pub trait LocationAdapter:
 	/// * A list of matching [`LocationView`]s.
 	async fn retrieve_view(
 		connection: &Pool<<Self as Deletable>::Db>,
-		match_condition: &MatchLocation,
+		match_condition: MatchLocation,
 	) -> Result<Vec<LocationView>>;
 }

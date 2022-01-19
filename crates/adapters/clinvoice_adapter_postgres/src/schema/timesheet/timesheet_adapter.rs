@@ -59,7 +59,7 @@ impl TimesheetAdapter for PgTimesheet
 
 	async fn retrieve_view(
 		connection: &PgPool,
-		match_condition: &MatchTimesheet,
+		match_condition: MatchTimesheet,
 	) -> Result<Vec<TimesheetView>>
 	{
 		let exchange_rates = ExchangeRates::new().map_err(util::finance_err_to_sqlx);

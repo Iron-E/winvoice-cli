@@ -36,6 +36,6 @@ pub trait TimesheetAdapter:
 	/// * A list of matching [`TimesheetView`]s.
 	async fn retrieve_view(
 		connection: &Pool<<Self as Deletable>::Db>,
-		match_condition: &MatchTimesheet,
+		match_condition: MatchTimesheet,
 	) -> Result<Vec<TimesheetView>>;
 }

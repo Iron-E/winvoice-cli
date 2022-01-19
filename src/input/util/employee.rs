@@ -35,7 +35,7 @@ where
 {
 	loop
 	{
-		let query = match default_id
+		let match_condition = match default_id
 		{
 			Some(id) => MatchEmployee {
 				id: id.into(),
@@ -44,7 +44,7 @@ where
 			_ => input::edit_default(format!("{prompt}\n{MATCH_PROMPT}employees"))?,
 		};
 
-		let results = EAdapter::retrieve_view(connection, &query).await?;
+		let results = EAdapter::retrieve_view(connection, match_condition).await?;
 
 		if retry_on_empty && results.is_empty() && menu::ask_to_retry()?
 		{

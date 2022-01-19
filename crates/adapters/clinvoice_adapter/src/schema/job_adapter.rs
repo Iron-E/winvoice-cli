@@ -47,6 +47,6 @@ pub trait JobAdapter:
 	/// * A list of matching [`JobView`]s.
 	async fn retrieve_view(
 		connection: &Pool<<Self as Deletable>::Db>,
-		match_condition: &MatchJob,
+		match_condition: MatchJob,
 	) -> Result<Vec<JobView>>;
 }

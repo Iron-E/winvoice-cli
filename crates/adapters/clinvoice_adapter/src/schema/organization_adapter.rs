@@ -36,6 +36,6 @@ pub trait OrganizationAdapter:
 	/// * A list of matching [`OrganizationView`]s.
 	async fn retrieve_view(
 		connection: &Pool<<Self as Deletable>::Db>,
-		match_condition: &MatchOrganization,
+		match_condition: MatchOrganization,
 	) -> Result<Vec<OrganizationView>>;
 }

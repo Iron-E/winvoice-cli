@@ -1,6 +1,6 @@
 use clinvoice_adapter::{schema::TimesheetAdapter, WriteWhereClause};
 use clinvoice_finance::ExchangeRates;
-use clinvoice_match::MatchTimesheet;
+use clinvoice_match::{MatchTimesheet, MatchExpense};
 use clinvoice_schema::{
 	chrono::{SubsecRound, Utc},
 	Employee,
@@ -61,7 +61,11 @@ impl TimesheetAdapter for PgTimesheet
 		-> Result<Vec<Timesheet>>
 	{
 		let exchange_rates = ExchangeRates::new().map_err(util::finance_err_to_sqlx);
-		let id_match = PgLocation::retrieve_matching_ids(
+		let client_location_id_match = PgLocation::retrieve_matching_ids(
+			connection,
+			&match_condition.job.client.location,
+		);
+		let employer_location_id_match = PgLocation::retrieve_matching_ids(
 			connection,
 			&match_condition.employee.organization.location,
 		);
@@ -76,7 +80,7 @@ impl TimesheetAdapter for PgTimesheet
 					J.invoice_hourly_rate, J.notes, J.objectives,
 				P.name AS person_name,
 				T.id, T.employee_id, T.job_id, T.time_begin, T.time_end, T.work_notes,
-				array_agg((X1.id, X1.category, X1.cost, X1.description)) AS expenses
+				array_agg(DISTINCT (X1.id, X1.category, X1.cost, X1.description)) AS expenses
 			FROM timesheets T
 			JOIN contact_information C ON (C.employee_id = T.employee_id)
 			JOIN employees E ON (E.id = T.employee_id)
@@ -88,7 +92,57 @@ impl TimesheetAdapter for PgTimesheet
 			JOIN organizations Employer ON (Employer.id = E.organization_id)
 			JOIN people P ON (P.id = E.person_id)",
 		);
-		// TODO: `write_where_clause`
+		Schema::write_where_clause(
+			Schema::write_where_clause(
+				Schema::write_where_clause(
+					Schema::write_where_clause(
+						Schema::write_where_clause(
+							Schema::write_where_clause(
+								Schema::write_where_clause(
+									Schema::write_where_clause(
+										Schema::write_where_clause(
+											Default::default(),
+											"Client",
+											&match_condition.job.client,
+											&mut query,
+										),
+										"E",
+										&match_condition.employee,
+										&mut query,
+									),
+									"Employer",
+									&match_condition.employee.organization,
+									&mut query,
+								),
+								"J",
+								&match_condition.job,
+								&mut query,
+							),
+							"P",
+							&match_condition.employee.person,
+							&mut query,
+						),
+						"T",
+						&match_condition,
+						&mut query,
+					),
+					"X2",
+					&MatchExpense {
+						id: match_condition.expenses.id,
+						category: match_condition.expenses.category,
+						cost: match_condition.expenses.cost.exchange(Default::default(), &exchange_rates.await?),
+						description: match_condition.expenses.description,
+					},
+					&mut query,
+				),
+				"Client.location_id",
+				&client_location_id_match.await?,
+				&mut query,
+			),
+			"Employer.location_id",
+			&employer_location_id_match.await?,
+			&mut query,
+		);
 		query.push_str(
 			" GROUP BY
 				Client.name, Client.location_id,

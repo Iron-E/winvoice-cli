@@ -112,7 +112,7 @@ impl JobAdapter for PgJob
 					hourly_rate: match_condition
 						.invoice
 						.hourly_rate
-						.exchange(Currency::EUR, &exchange_rates.await?),
+						.exchange(Default::default(), &exchange_rates.await?),
 				},
 				notes: match_condition.notes,
 				objectives: match_condition.objectives,

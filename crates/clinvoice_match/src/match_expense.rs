@@ -1,4 +1,4 @@
-use clinvoice_schema::Money;
+use clinvoice_schema::{Money, Id};
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 
@@ -11,6 +11,9 @@ use super::{Match, MatchStr};
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 pub struct MatchExpense
 {
+	#[cfg_attr(feature = "serde_support", serde(default))]
+	pub id: Match<Id>,
+
 	#[cfg_attr(feature = "serde_support", serde(default))]
 	pub category: MatchStr<String>,
 

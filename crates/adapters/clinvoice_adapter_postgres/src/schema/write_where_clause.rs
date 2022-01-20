@@ -591,7 +591,12 @@ impl WriteWhereClause<&MatchExpense> for Schema
 		Schema::write_where_clause(
 			Schema::write_where_clause(
 				Schema::write_where_clause(
-					context,
+					Schema::write_where_clause(
+						context,
+						&format!("{alias}.id"),
+						&match_condition.id,
+						query,
+					),
 					&format!("{alias}.category"),
 					&match_condition.category,
 					query,
@@ -749,12 +754,7 @@ impl WriteWhereClause<&MatchTimesheet> for Schema
 		Schema::write_where_clause(
 			Schema::write_where_clause(
 				Schema::write_where_clause(
-					Schema::write_where_clause(
-						context,
-						&format!("{alias}.expenses"),
-						&match_condition.expenses,
-						query,
-					),
+					context,
 					&format!("{alias}.time_begin"),
 					&match_condition.time_begin,
 					query,

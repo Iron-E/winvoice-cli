@@ -773,7 +773,7 @@ impl WriteWhereClause<&MatchTimesheet> for Schema
 #[cfg(test)]
 mod tests
 {
-	use clinvoice_match::{MatchJob, MatchLocation, MatchOuterLocation};
+	use clinvoice_match::{MatchJob, MatchLocation, MatchOuterLocation, MatchTimesheet};
 	use clinvoice_schema::chrono::NaiveDate;
 
 	use super::{
@@ -1068,5 +1068,18 @@ mod tests
 				" WHERE J.id = 7 AND J.date_open < TIMESTAMP WITH TIME ZONE '2022-01-01 12:37:22'"
 			)
 		);
+	}
+
+	#[test]
+	fn write_timesheet_where_clause()
+	{
+		let mut query = String::new();
+		assert_eq!(
+			Schema::write_where_clause(BeforeWhereClause, "T", &MatchTimesheet::default(), &mut query),
+			BeforeWhereClause
+		);
+		assert!(query.is_empty());
+
+		query.clear();
 	}
 }

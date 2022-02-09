@@ -773,7 +773,13 @@ impl WriteWhereClause<&MatchTimesheet> for Schema
 #[cfg(test)]
 mod tests
 {
-	use clinvoice_match::{MatchJob, MatchLocation, MatchOuterLocation, MatchTimesheet};
+	use clinvoice_match::{
+		MatchEmployee,
+		MatchJob,
+		MatchLocation,
+		MatchOuterLocation,
+		MatchTimesheet,
+	};
 	use clinvoice_schema::chrono::NaiveDate;
 
 	use super::{
@@ -1075,10 +1081,73 @@ mod tests
 	{
 		let mut query = String::new();
 		assert_eq!(
-			Schema::write_where_clause(BeforeWhereClause, "T", &MatchTimesheet::default(), &mut query),
+			Schema::write_where_clause(
+				BeforeWhereClause,
+				"T",
+				&MatchTimesheet::default(),
+				&mut query
+			),
 			BeforeWhereClause
 		);
 		assert!(query.is_empty());
+
+		query.clear();
+		assert_eq!(
+			Schema::write_where_clause(
+				BeforeWhereClause,
+				"T",
+				&MatchTimesheet {
+					employee: MatchEmployee {
+						id: 37.into(),
+						organization: MatchOrganization {
+							id: Match::InRange(10, 20),
+							location: MatchLocation {
+								id: Match::LessThan(100),
+								outer: todo!(),
+								name: todo!(),
+							},
+							name: todo!()
+						},
+						person: MatchPerson {
+							id: Match::Not(
+								Match::Or(vec![11.into(), 55.into(), 99.into(), 17.into()]).into()
+							),
+							name: todo!(),
+						},
+						status: todo!(),
+						title: todo!(),
+					},
+					expenses: todo!(),
+					job: MatchJob {
+						client: MatchOrganization {
+							id: Match::Or(vec![Match::LessThan(7), 55.into()]),
+							location: MatchLocation {
+								id: todo!(),
+								outer: todo!(),
+								name: todo!(),
+							},
+							name: todo!(),
+						},
+						date_close: todo!(),
+						date_open: todo!(),
+						id: Match::Any,
+						increment: todo!(),
+						invoice: todo!(),
+						notes: todo!(),
+						objectives: todo!()
+					},
+					time_begin: todo!(),
+					time_end: todo!(),
+					work_notes: todo!(),
+				},
+				&mut query
+			),
+			AfterWhereCondition
+		);
+		assert_eq!(
+			query,
+			String::from("")
+		);
 
 		query.clear();
 	}

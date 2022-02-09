@@ -1,6 +1,6 @@
 use clinvoice_adapter::{schema::TimesheetAdapter, WriteWhereClause};
 use clinvoice_finance::ExchangeRates;
-use clinvoice_match::{MatchTimesheet, MatchExpense};
+use clinvoice_match::{MatchExpense, MatchTimesheet};
 use clinvoice_schema::{
 	chrono::{SubsecRound, Utc},
 	Employee,
@@ -61,10 +61,8 @@ impl TimesheetAdapter for PgTimesheet
 		-> Result<Vec<Timesheet>>
 	{
 		let exchange_rates = ExchangeRates::new().map_err(util::finance_err_to_sqlx);
-		let client_location_id_match = PgLocation::retrieve_matching_ids(
-			connection,
-			&match_condition.job.client.location,
-		);
+		let client_location_id_match =
+			PgLocation::retrieve_matching_ids(connection, &match_condition.job.client.location);
 		let employer_location_id_match = PgLocation::retrieve_matching_ids(
 			connection,
 			&match_condition.employee.organization.location,
@@ -130,7 +128,10 @@ impl TimesheetAdapter for PgTimesheet
 					&MatchExpense {
 						id: match_condition.expenses.id,
 						category: match_condition.expenses.category,
-						cost: match_condition.expenses.cost.exchange(Default::default(), &exchange_rates.await?),
+						cost: match_condition
+							.expenses
+							.cost
+							.exchange(Default::default(), &exchange_rates.await?),
 						description: match_condition.expenses.description,
 					},
 					&mut query,

@@ -1,4 +1,4 @@
-use clinvoice_schema::{Money, Id};
+use clinvoice_schema::{Id, Money};
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 

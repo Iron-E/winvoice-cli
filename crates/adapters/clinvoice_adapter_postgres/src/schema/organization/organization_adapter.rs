@@ -64,6 +64,8 @@ impl OrganizationAdapter for PgOrganization
 #[cfg(test)]
 mod tests
 {
+	use std::collections::HashSet;
+
 	use clinvoice_adapter::schema::LocationAdapter;
 	use clinvoice_match::{Match, MatchLocation, MatchOrganization, MatchOuterLocation};
 
@@ -154,8 +156,11 @@ mod tests
 			})
 			.await
 			.unwrap()
-			.as_slice(),
-			&[some_organization, some_other_organization],
+			.into_iter()
+			.collect::<HashSet<_>>(),
+			[some_organization, some_other_organization]
+				.into_iter()
+				.collect(),
 		);
 	}
 }

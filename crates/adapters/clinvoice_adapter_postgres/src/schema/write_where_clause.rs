@@ -1097,48 +1097,9 @@ mod tests
 				BeforeWhereClause,
 				"T",
 				&MatchTimesheet {
-					employee: MatchEmployee {
-						id: 37.into(),
-						organization: MatchOrganization {
-							id: Match::InRange(10, 20),
-							location: MatchLocation {
-								id: Match::LessThan(100),
-								outer: todo!(),
-								name: todo!(),
-							},
-							name: todo!()
-						},
-						person: MatchPerson {
-							id: Match::Not(
-								Match::Or(vec![11.into(), 55.into(), 99.into(), 17.into()]).into()
-							),
-							name: todo!(),
-						},
-						status: todo!(),
-						title: todo!(),
-					},
-					expenses: todo!(),
-					job: MatchJob {
-						client: MatchOrganization {
-							id: Match::Or(vec![Match::LessThan(7), 55.into()]),
-							location: MatchLocation {
-								id: todo!(),
-								outer: todo!(),
-								name: todo!(),
-							},
-							name: todo!(),
-						},
-						date_close: todo!(),
-						date_open: todo!(),
-						id: Match::Any,
-						increment: todo!(),
-						invoice: todo!(),
-						notes: todo!(),
-						objectives: todo!()
-					},
-					time_begin: todo!(),
-					time_end: todo!(),
-					work_notes: todo!(),
+					time_begin: Match::GreaterThan(NaiveDate::from_ymd(2020, 01, 01).and_hms(0, 0, 0)),
+					time_end: Match::LessThan(Some(NaiveDate::from_ymd(2022, 01, 01).and_hms(0, 0, 0))),
+					..Default::default()
 				},
 				&mut query
 			),
@@ -1146,7 +1107,10 @@ mod tests
 		);
 		assert_eq!(
 			query,
-			String::from("")
+			String::from(
+				" WHERE T.time_begin > TIMESTAMP WITH TIME ZONE '2020-01-01 00:00:00' AND T.time_end \
+				 < TIMESTAMP WITH TIME ZONE '2022-01-01 00:00:00'"
+			)
 		);
 
 		query.clear();

@@ -83,7 +83,8 @@ impl TimesheetAdapter for PgTimesheet
 			JOIN contact_information C ON (C.employee_id = T.employee_id)
 			JOIN employees E ON (E.id = T.employee_id)
 			JOIN expenses X1 ON (X1.timesheet_id = T.id)
-			-- WARN: we *need* `X2`. It can be bound by a where clause while allowing `X1` to be unbound
+			-- WARN: we *need* `X2` so it can be bound by a WHERE clause while not binding `X1` (this works \
+			 because WHERE is a post-JOIN condition)
 			JOIN expenses X2 ON (X2.id = X1.id)
 			JOIN jobs J ON (E.id = T.employee_id)
 			JOIN organizations Client ON (Client.id = J.client_id)

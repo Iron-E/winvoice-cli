@@ -241,16 +241,16 @@ mod tests
 		)
 		.unwrap();
 
-		let (some_organization, some_other_organization) = futures::try_join!(
+		let (organization, organization2) = futures::try_join!(
 			PgOrganization::create(&connection, arizona.clone(), "Some Organization".into()),
 			PgOrganization::create(&connection, utah.clone(), "Some Other Organizatión".into()),
 		)
 		.unwrap();
 
-		let (job_one, job_two, job_three, job_four) = futures::try_join!(
+		let (job, job2, job3, job4) = futures::try_join!(
 			PgJob::create(
 				&connection,
-				some_organization.clone(),
+				organization.clone(),
 				Utc.ymd(1990, 07, 12).and_hms(14, 10, 00),
 				Money::new(20_00, 2, Currency::USD),
 				Duration::from_secs(900),
@@ -258,7 +258,7 @@ mod tests
 			),
 			PgJob::create(
 				&connection,
-				some_other_organization.clone(),
+				organization2.clone(),
 				Utc.ymd(3000, 01, 12).and_hms(09, 15, 42),
 				Money::new(200_00, 2, Currency::JPY),
 				Duration::from_secs(900),
@@ -266,7 +266,7 @@ mod tests
 			),
 			PgJob::create(
 				&connection,
-				some_organization.clone(),
+				organization.clone(),
 				Utc.ymd(2011, 03, 17).and_hms(13, 07, 07),
 				Money::new(20_00, 2, Currency::EUR),
 				Duration::from_secs(900),
@@ -274,7 +274,7 @@ mod tests
 			),
 			PgJob::create(
 				&connection,
-				some_other_organization.clone(),
+				organization2.clone(),
 				Utc.ymd(2022, 01, 02).and_hms(01, 01, 01),
 				Money::new(200_00, 2, Currency::NOK),
 				Duration::from_secs(900),
@@ -285,13 +285,13 @@ mod tests
 
 		assert_eq!(
 			PgJob::retrieve(&connection, MatchJob {
-				id: job_one.id.into(),
+				id: job.id.into(),
 				..Default::default()
 			})
 			.await
 			.unwrap()
 			.as_slice(),
-			&[job_one.clone()],
+			&[job.clone()],
 		);
 
 		assert_eq!(
@@ -299,8 +299,8 @@ mod tests
 				client: MatchOrganization {
 					location: MatchLocation {
 						id: Match::Or(vec![
-							some_organization.location.id.into(),
-							some_other_organization.location.id.into()
+							organization.location.id.into(),
+							organization2.location.id.into()
 						]),
 						..Default::default()
 					},
@@ -312,14 +312,9 @@ mod tests
 			.unwrap()
 			.into_iter()
 			.collect::<HashSet<_>>(),
-			[
-				job_one.clone(),
-				job_two.clone(),
-				job_three.clone(),
-				job_four.clone(),
-			]
-			.into_iter()
-			.collect::<HashSet<_>>(),
+			[job.clone(), job2.clone(), job3.clone(), job4.clone(),]
+				.into_iter()
+				.collect::<HashSet<_>>(),
 		);
 	}
 }

@@ -296,79 +296,72 @@ mod tests
 			.await
 			.unwrap();
 
-		let arizona = PgLocation::create_inner(&connection, usa.clone(), "Arizona".into())
-			.await
-			.unwrap();
-
-		let utah = PgLocation::create_inner(&connection, usa.clone(), "Utah".into())
-			.await
-			.unwrap();
-
-		let organization =
-			PgOrganization::create(&connection, arizona.clone(), "Some Organization".into())
-				.await
-				.unwrap();
-		let organization2 =
-			PgOrganization::create(&connection, utah.clone(), "Some Other Organizatión".into())
-				.await
-				.unwrap();
-
-		let person = PgPerson::create(&connection, "My Name".into())
-			.await
-			.unwrap();
-		let person2 = PgPerson::create(&connection, "Another Gúy".into())
-			.await
-			.unwrap();
-
-		let employee = PgEmployee::create(
-			&connection,
-			[
-				("Remote Office".into(), Contact::Address {
-					location: utah,
-					export: false,
-				}),
-				("Work Email".into(), Contact::Email {
-					email: "foo@bar.io".into(),
-					export: true,
-				}),
-				("Office's Phone".into(), Contact::Phone {
-					phone: "555 223 5039".into(),
-					export: true,
-				}),
-			]
-			.into_iter()
-			.collect(),
-			organization,
-			person.clone(),
-			"Employed".into(),
-			"Janitor".into(),
+		let (arizona, utah) = futures::try_join!(
+			PgLocation::create_inner(&connection, usa.clone(), "Arizona".into()),
+			PgLocation::create_inner(&connection, usa.clone(), "Utah".into()),
 		)
-		.await
 		.unwrap();
-		let employee2 = PgEmployee::create(
-			&connection,
-			[
-				("Favorite Pizza Place".into(), Contact::Address {
-					location: arizona,
-					export: false,
-				}),
-				("Work Email".into(), Contact::Email {
-					email: "some_kind_of_email@f.com".into(),
-					export: true,
-				}),
-				("Office's Phone".into(), Contact::Phone {
-					phone: "555-555-8008".into(),
-					export: true,
-				}),
-			]
-			.into_iter()
-			.collect(),
-			organization2,
-			person2,
-			"Management".into(),
-			"Assistant to Regional Manager".into(),
+
+		let (organization, organization2) = futures::try_join!(
+			PgOrganization::create(&connection, arizona.clone(), "Some Organization".into()),
+			PgOrganization::create(&connection, utah.clone(), "Some Other Organizatión".into()),
 		)
-		.await
+		.unwrap();
+
+		let (person, person2) = futures::try_join!(
+			PgPerson::create(&connection, "My Name".into()),
+			PgPerson::create(&connection, "Another Gúy".into()),
+		)
+		.unwrap();
+
+		let (employee, employee2) = futures::try_join!(
+			PgEmployee::create(
+				&connection,
+				[
+					("Remote Office".into(), Contact::Address {
+						location: utah,
+						export: false,
+					}),
+					("Work Email".into(), Contact::Email {
+						email: "foo@bar.io".into(),
+						export: true,
+					}),
+					("Office's Phone".into(), Contact::Phone {
+						phone: "555 223 5039".into(),
+						export: true,
+					}),
+				]
+				.into_iter()
+				.collect(),
+				organization,
+				person.clone(),
+				"Employed".into(),
+				"Janitor".into(),
+			),
+			PgEmployee::create(
+				&connection,
+				[
+					("Favorite Pizza Place".into(), Contact::Address {
+						location: arizona,
+						export: false,
+					}),
+					("Work Email".into(), Contact::Email {
+						email: "some_kind_of_email@f.com".into(),
+						export: true,
+					}),
+					("Office's Phone".into(), Contact::Phone {
+						phone: "555-555-8008".into(),
+						export: true,
+					}),
+				]
+				.into_iter()
+				.collect(),
+				organization2,
+				person2,
+				"Management".into(),
+				"Assistant to Regional Manager".into(),
+			),
+		)
 		.unwrap();
 
 		assert_eq!(

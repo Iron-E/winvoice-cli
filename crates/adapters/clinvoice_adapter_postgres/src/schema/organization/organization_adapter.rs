@@ -121,7 +121,7 @@ mod tests
 		)
 		.unwrap();
 
-		let (some_organization, some_other_organization) = futures::try_join!(
+		let (organization, organization2) = futures::try_join!(
 			PgOrganization::create(&connection, arizona, "Some Organization".into()),
 			PgOrganization::create(&connection, utah, "Some Other Organizatión".into()),
 		)
@@ -130,13 +130,13 @@ mod tests
 		// Assert ::retrieve gets the right data from the DB
 		assert_eq!(
 			PgOrganization::retrieve(&connection, MatchOrganization {
-				id: some_organization.id.into(),
+				id: organization.id.into(),
 				..Default::default()
 			})
 			.await
 			.unwrap()
 			.as_slice(),
-			&[some_organization.clone()],
+			&[organization.clone()],
 		);
 
 		assert_eq!(
@@ -158,9 +158,7 @@ mod tests
 			.unwrap()
 			.into_iter()
 			.collect::<HashSet<_>>(),
-			[some_organization, some_other_organization]
-				.into_iter()
-				.collect(),
+			[organization, organization2].into_iter().collect(),
 		);
 	}
 }

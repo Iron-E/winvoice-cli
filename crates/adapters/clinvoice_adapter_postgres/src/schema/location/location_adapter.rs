@@ -83,14 +83,11 @@ mod tests
 			.await
 			.unwrap();
 
-		let arizona = PgLocation::create_inner(&connection, usa.clone(), "Arizona".into())
-			.await
-			.unwrap();
-
-		// Assert ::create_inner works when `outer_id` has already been used for another `Location`
-		let utah = PgLocation::create_inner(&connection, usa.clone(), "Utah".into())
-			.await
-			.unwrap();
+		let (arizona, utah) = futures::try_join!(
+			PgLocation::create_inner(&connection, usa.clone(), "Arizona".into()),
+			PgLocation::create_inner(&connection, usa.clone(), "Utah".into()),
+		)
+		.unwrap();
 
 		macro_rules! select {
 			($id:expr) => {

@@ -21,6 +21,7 @@
 #![allow(clippy::unit_arg)]
 
 mod r#match;
+mod match_contact;
 mod match_employee;
 mod match_expense;
 mod match_invoice;
@@ -32,6 +33,8 @@ mod match_str;
 mod match_timesheet;
 
 pub use humantime_serde::Serde;
+pub use r#match::Match;
+pub use match_contact::MatchContact;
 pub use match_employee::MatchEmployee;
 pub use match_expense::MatchExpense;
 pub use match_invoice::MatchInvoice;
@@ -41,4 +44,3 @@ pub use match_organization::MatchOrganization;
 pub use match_person::MatchPerson;
 pub use match_str::MatchStr;
 pub use match_timesheet::MatchTimesheet;
-pub use r#match::Match;

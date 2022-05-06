@@ -1,6 +1,10 @@
-use clinvoice_schema::Id;
+use std::collections::HashMap;
+
+use clinvoice_schema::{Id, Contact};
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
+
+use crate::MatchContact;
 
 use super::{Match, MatchOrganization, MatchPerson, MatchStr};
 
@@ -11,6 +15,9 @@ use super::{Match, MatchOrganization, MatchPerson, MatchStr};
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 pub struct MatchEmployee
 {
+	#[cfg_attr(feature = "serde_support", serde(default))]
+	pub contact_info: HashMap<MatchStr<String>, MatchContact>,
+
 	#[cfg_attr(feature = "serde_support", serde(default))]
 	pub id: Match<Id>,
 

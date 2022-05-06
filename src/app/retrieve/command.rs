@@ -139,7 +139,7 @@ impl Command
 					Err(e) => return Err(e),
 				};
 
-				v.push(U::update(connection, edited.into()));
+				v.push(U::update(connection, edited));
 				Ok(v)
 			})?;
 
@@ -164,7 +164,7 @@ impl Command
 		TAdapter: Deletable<Db = Db> + TimesheetAdapter + Send,
 		for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 	{
-		Ok(match self
+		match self
 		{
 			Self::Employee {
 				default,
@@ -255,7 +255,7 @@ impl Command
 					stream::iter(selected.into_iter().map(Ok))
 						.try_for_each_concurrent(None, |mut j| async {
 							j.date_close = Some(Utc::now());
-							JAdapter::update(&connection, j.into()).await
+							JAdapter::update(&connection, j).await
 						})
 						.await?;
 				}
@@ -271,7 +271,7 @@ impl Command
 					stream::iter(selected.into_iter().map(Ok))
 						.try_for_each_concurrent(None, |mut j| async {
 							j.date_close = None;
-							JAdapter::update(&connection, j.into()).await
+							JAdapter::update(&connection, j).await
 						})
 						.await?;
 				}
@@ -356,7 +356,7 @@ impl Command
 
 					let conn = &connection;
 					stream::iter(create_inner.into_iter().map(Ok).rev())
-						.try_fold(location.into(), |loc: Location, name: String| async move {
+						.try_fold(location, |loc: Location, name: String| async move {
 							LAdapter::create_inner(conn, loc, name).await
 						})
 						.await?;
@@ -414,6 +414,8 @@ impl Command
 					results_view.iter().for_each(|p| println!("{p}"));
 				}
 			},
-		})
+		};
+
+		Ok(())
 	}
 }

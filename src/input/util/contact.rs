@@ -62,7 +62,8 @@ where
 		&ALL_CONTACT_TYPES,
 		"Select which type of contact info to add",
 	)?;
-	Ok(match contact_type
+
+	match contact_type
 	{
 		ADDRESS =>
 		{
@@ -89,7 +90,9 @@ where
 		}
 
 		_ => unreachable!("Unkown contact type. This should not have happened, please file an issue at https://github.com/Iron-E/clinvoice/issues"),
-	})
+	};
+
+	Ok(())
 }
 /// # Summary
 ///

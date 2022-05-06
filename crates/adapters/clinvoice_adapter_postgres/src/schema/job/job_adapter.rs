@@ -2,7 +2,7 @@ use core::time::Duration;
 use std::convert::TryFrom;
 
 use clinvoice_adapter::{schema::JobAdapter, WriteWhereClause};
-use clinvoice_finance::{Currency, ExchangeRates};
+use clinvoice_finance::ExchangeRates;
 use clinvoice_match::{MatchInvoice, MatchJob};
 use clinvoice_schema::{
 	chrono::{DateTime, SubsecRound, Utc},

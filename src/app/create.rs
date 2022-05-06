@@ -227,10 +227,7 @@ impl Create
 
 		EAdapter::create(
 			connection,
-			contact_info
-				.into_iter()
-				.map(|(label, contact)| (label, contact.into()))
-				.collect(),
+			contact_info,
 			organization,
 			person,
 			employee_status,

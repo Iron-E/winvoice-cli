@@ -13,19 +13,24 @@ use crate::input;
 fn add_menu(expenses: &mut Vec<Expense>, default_currency: Currency) -> input::Result<()>
 {
 	let category = input::text(None, "What type of `Expense` is this?")?;
+
 	let cost = input::edit(
 		&Money::new(20_00, 2, default_currency),
 		format!("What is the cost of the {category}?"),
 	)?;
+
 	let description = input::edit_markdown(&format!(
 		"* Describe the {category}\n* All markdown syntax is valid"
 	))?;
-	Ok(expenses.push(Expense {
+
+	expenses.push(Expense {
 		id: Default::default(), // HACK: what should I do here? How will we tell new `Expense`s from old `Expense`s when running `PgTimesheet::update`? Do we need an `ExpenseAdapter`?
 		category,
 		cost,
 		description,
-	}))
+	});
+
+	Ok(())
 }
 
 /// # Summary
@@ -96,7 +101,7 @@ fn delete_menu(expenses: &mut Vec<Expense>) -> input::Result<()>
 ///
 /// Will error whenever [`input::edit_and_restore`] and [`input::select_one`] does,
 /// but will ignore [`input::Error::NotEdited`].
-fn edit_menu(expenses: &mut Vec<Expense>) -> input::Result<()>
+fn edit_menu(expenses: &mut [Expense]) -> input::Result<()>
 {
 	if !expenses.is_empty()
 	{

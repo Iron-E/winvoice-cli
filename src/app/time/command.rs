@@ -85,7 +85,7 @@ impl Command
 		timesheet.time_begin = timesheet.time_begin.duration_round(increment)?;
 		timesheet.time_end = Some(Utc::now().duration_round(increment)?);
 
-		TAdapter::update(connection, timesheet.into())
+		TAdapter::update(connection, timesheet)
 			.err_into()
 			.await
 	}
@@ -117,7 +117,7 @@ impl Command
 			format!("Select the job to {self} working on"),
 		)?;
 
-		Ok(match self
+		match self
 		{
 			Self::Start =>
 			{
@@ -141,6 +141,8 @@ impl Command
 			{
 				Self::stop::<_, TAdapter>(&connection, default_employee_id, selected_job).await?
 			},
-		})
+		};
+
+		Ok(())
 	}
 }

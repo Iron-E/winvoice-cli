@@ -12,7 +12,7 @@ pub enum MatchOuterLocation
 	/// # Summary
 	///
 	/// Always match.
-	Any,
+	Always,
 
 	/// # Summary
 	///

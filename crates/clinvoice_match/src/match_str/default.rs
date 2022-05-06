@@ -4,6 +4,6 @@ impl<S> Default for MatchStr<S>
 {
 	fn default() -> Self
 	{
-		Self::Any
+		Self::Always
 	}
 }

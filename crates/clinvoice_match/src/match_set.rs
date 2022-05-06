@@ -13,15 +13,10 @@ use serde::{Deserialize, Serialize};
 /// A value in a retrieval operation.
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
-pub enum Match<T>
+pub enum MatchSet<T>
 where
 	T: Clone + Debug,
 {
-	/// # Summary
-	///
-	/// Match if and only if all of the contained [`Match`]es also match.
-	And(Vec<Self>),
-
 	/// # Summary
 	///
 	/// Always match.
@@ -29,23 +24,18 @@ where
 
 	/// # Summary
 	///
-	/// For some value `v`, match if and only if `v` equals this value.
-	EqualTo(T),
+	/// Match if and only if all of the contained [`Match`]es also match.
+	And(Vec<Self>),
 
 	/// # Summary
 	///
-	/// For some value `v`, match if and only if `v` is greater than this value.
-	GreaterThan(T),
+	/// Match if and only if all of the elements of a set of type `T` contain the elements provided and no others.
+	EqualTo(Vec<T>),
 
 	/// # Summary
 	///
-	/// For some value `v`, match if and only if `v` is greater than or equal to the first value and `v` is less than the second value.
-	InRange(T, T),
-
-	/// # Summary
-	///
-	/// For some value `v`, match if and only if `v` is less than this value.
-	LessThan(T),
+	/// Match if and only if any of the elements of the provided set are in a given set of type `T`.
+	Has(T),
 
 	/// # Summary
 	///
@@ -58,7 +48,7 @@ where
 	Or(Vec<Self>),
 }
 
-impl<T> Match<T>
+impl<T> MatchSet<T>
 where
 	T: Clone + Debug,
 {
@@ -69,7 +59,7 @@ where
 	/// # See also
 	///
 	/// * [`Iterator::map`]
-	pub fn map<U>(self, f: &impl Fn(T) -> U) -> Match<U>
+	pub fn map<U>(self, f: &impl Fn(T) -> U) -> MatchSet<U>
 	where
 		U: Clone + Debug,
 	{
@@ -77,28 +67,26 @@ where
 		{
 			Self::And(match_conditions) =>
 			{
-				Match::And(match_conditions.into_iter().map(|m| m.map(f)).collect())
+				MatchSet::And(match_conditions.into_iter().map(|m| m.map(f)).collect())
 			},
-			Self::Always => Match::Always,
-			Self::EqualTo(x) => Match::EqualTo(f(x)),
-			Self::GreaterThan(x) => Match::GreaterThan(f(x)),
-			Self::InRange(low, high) => Match::InRange(f(low), f(high)),
-			Self::LessThan(x) => Match::LessThan(f(x)),
-			Self::Not(match_condition) => Match::Not(match_condition.map(f).into()),
+			Self::Always => MatchSet::Always,
+			Self::EqualTo(set) => MatchSet::EqualTo(set.into_iter().map(f).collect()),
+			Self::Has(x) => MatchSet::Has(f(x)),
+			Self::Not(match_condition) => MatchSet::Not(match_condition.map(f).into()),
 			Self::Or(match_conditions) =>
 			{
-				Match::Or(match_conditions.into_iter().map(|m| m.map(f)).collect())
+				MatchSet::Or(match_conditions.into_iter().map(|m| m.map(f)).collect())
 			},
 		}
 	}
 }
 
-impl Match<Money>
+impl MatchSet<Money>
 {
 	/// # Summary
 	///
 	/// Exchange a `Match` for an amount of `Money` to another `currency`.
-	pub fn exchange(self, currency: Currency, rates: &ExchangeRates) -> Match<Money>
+	pub fn exchange(self, currency: Currency, rates: &ExchangeRates) -> MatchSet<Money>
 	{
 		self.map(&|money| money.exchange(currency, rates))
 	}

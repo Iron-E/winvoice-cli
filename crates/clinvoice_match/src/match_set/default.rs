@@ -1,8 +1,8 @@
 use core::fmt::Debug;
 
-use super::Match;
+use super::MatchSet;
 
-impl<T> Default for Match<T>
+impl<T> Default for MatchSet<T>
 where
 	T: Clone + Debug,
 {

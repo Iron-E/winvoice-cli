@@ -117,19 +117,29 @@ impl EmployeeAdapter for PgEmployee
 
 		let mut query = String::from(
 			"SELECT
-				array_agg((C.export, C.label, C.address_id, C.email, C.phone)) AS contact_info,
+				array_agg((C1.export, C1.label, C1.address_id, C1.email, C1.phone)) AS contact_info,
 				E.id, E.organization_id, E.person_id, E.status, E.title,
 				O.name AS organization_name, O.location_id,
 				P.name
 			FROM employees E
-			JOIN contact_information C ON (C.employee_id = E.id)
+			JOIN contact_information C1 ON (C1.employee_id = E.id)
 			JOIN organizations O ON (O.id = E.organization_id)
 			JOIN people P ON (P.id = E.person_id)",
 		);
 		Schema::write_where_clause(
 			Schema::write_where_clause(
 				Schema::write_where_clause(
-					Schema::write_where_clause(Default::default(), "E", &match_condition, &mut query),
+					Schema::write_where_clause(
+						Schema::write_where_clause(
+							Default::default(),
+							"C1",
+							&match_condition.contact_info,
+							&mut query,
+						),
+						"E",
+						&match_condition,
+						&mut query,
+					),
 					"O",
 					&match_condition.organization,
 					&mut query,
@@ -144,13 +154,14 @@ impl EmployeeAdapter for PgEmployee
 		);
 		query.push_str(
 			" GROUP BY
-				C.employee_id,
+				C1.employee_id,
 				E.id, E.organization_id, E.person_id, E.status, E.title,
 				O.name, O.location_id,
 				P.name;",
 		);
 
 		const COLUMNS: PgEmployeeColumns<'static> = PgEmployeeColumns {
+			contact_info: "contact_info",
 			id: "id",
 			organization: PgOrganizationColumns {
 				id: "organization_id",
@@ -161,6 +172,8 @@ impl EmployeeAdapter for PgEmployee
 				name: "name",
 				id: "person_id",
 			},
+			status: "status",
+			title: "title",
 		};
 
 		sqlx::query(&query)

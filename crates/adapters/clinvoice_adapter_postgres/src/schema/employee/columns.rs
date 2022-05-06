@@ -12,9 +12,12 @@ use crate::schema::{
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub(in crate::schema) struct PgEmployeeColumns<'col>
 {
+	pub contact_info: &'col str,
 	pub id: &'col str,
 	pub organization: PgOrganizationColumns<'col>,
 	pub person: PgPersonColumns<'col>,
+	pub status: &'col str,
+	pub title: &'col str,
 }
 
 impl PgEmployeeColumns<'_>
@@ -28,7 +31,7 @@ impl PgEmployeeColumns<'_>
 		let organization = self.organization.row_to_view(connection, row);
 
 		let mut futures = Vec::new();
-		let vec: Vec<(_, _, _, _, _)> = row.get("contact_info");
+		let vec: Vec<(_, _, _, _, _)> = row.get(self.contact_info);
 		let mut map = HashMap::with_capacity(vec.len());
 		vec.into_iter().try_for_each(
 			|(export, label, contact_location_id, contact_email, contact_phone)| {
@@ -81,8 +84,8 @@ impl PgEmployeeColumns<'_>
 
 				map
 			},
-			status: row.get("status"),
-			title: row.get("title"),
+			status: row.get(self.status),
+			title: row.get(self.title),
 		})
 	}
 }

@@ -28,7 +28,6 @@ pub use person::PgPerson;
 use sqlx::{Executor, Postgres, Result, Transaction};
 pub use timesheet::PgTimesheet;
 pub(crate) use timestamptz::PgTimestampTz;
-pub(crate) use typecast::PgTypeCast;
 
 pub(crate) use self::str::PgStr;
 
@@ -121,7 +120,8 @@ impl PgSchema
 				status text NOT NULL,
 				title text NOT NULL,
 
-				PRIMARY KEY(organization_id, person_id),
+				PRIMARY KEY(id),
+				CONSTRAINT employees__organization_and_person_ids_uq UNIQUE (organization_id, person_id),
 				CONSTRAINT employees__organization_id_fk FOREIGN KEY(organization_id) REFERENCES organizations(id),
 				CONSTRAINT employees__person_id_fk FOREIGN KEY(person_id) REFERENCES people(id)
 			);"
@@ -210,29 +210,6 @@ impl PgSchema
 	/// # Summary
 	///
 	/// Initialize the database for a given [`Store`].
-	async fn init_expenses(connection: &mut Transaction<'_, Postgres>) -> Result<()>
-	{
-		sqlx::query!(
-			"CREATE TABLE IF NOT EXISTS expenses
-			(
-				id bigint GENERATED ALWAYS AS IDENTITY,
-				timesheet_id bigint NOT NULL,
-				category text NOT NULL,
-				cost amount_of_currency NOT NULL,
-				description text NOT NULL,
-
-				PRIMARY KEY(id),
-				CONSTRAINT expenses__timesheet_id_fk FOREIGN KEY(timesheet_id) REFERENCES timesheets(id)
-			);"
-		)
-		.execute(connection)
-		.await
-		.and(Ok(()))
-	}
-
-	/// # Summary
-	///
-	/// Initialize the database for a given [`Store`].
 	async fn init_timesheets(connection: impl Executor<'_, Database = Postgres> + Send)
 		-> Result<()>
 	{
@@ -250,6 +227,29 @@ impl PgSchema
 				CONSTRAINT timesheets__employee_id_fk FOREIGN KEY(employee_id) REFERENCES employees(id),
 				CONSTRAINT timesheets__employee_job_time_uq UNIQUE (employee_id, job_id, time_begin),
 				CONSTRAINT timesheets__job_id_fk FOREIGN KEY(job_id) REFERENCES jobs(id)
+			);"
+		)
+		.execute(connection)
+		.await
+		.and(Ok(()))
+	}
+
+	/// # Summary
+	///
+	/// Initialize the database for a given [`Store`].
+	async fn init_expenses(connection: &mut Transaction<'_, Postgres>) -> Result<()>
+	{
+		sqlx::query!(
+			"CREATE TABLE IF NOT EXISTS expenses
+			(
+				id bigint GENERATED ALWAYS AS IDENTITY,
+				timesheet_id bigint NOT NULL,
+				category text NOT NULL,
+				cost amount_of_currency NOT NULL,
+				description text NOT NULL,
+
+				PRIMARY KEY(id),
+				CONSTRAINT expenses__timesheet_id_fk FOREIGN KEY(timesheet_id) REFERENCES timesheets(id)
 			);"
 		)
 		.execute(connection)

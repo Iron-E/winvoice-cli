@@ -85,9 +85,7 @@ impl Command
 		timesheet.time_begin = timesheet.time_begin.duration_round(increment)?;
 		timesheet.time_end = Some(Utc::now().duration_round(increment)?);
 
-		TAdapter::update(connection, timesheet)
-			.err_into()
-			.await
+		TAdapter::update(connection, timesheet).err_into().await
 	}
 
 	pub async fn run<'err, Db, EAdapter, JAdapter, TAdapter>(

@@ -41,6 +41,8 @@ impl PersonAdapter for PgPerson
 #[cfg(test)]
 mod tests
 {
+	use clinvoice_match::{Match, MatchPerson};
+
 	use super::{PersonAdapter, PgPerson};
 	use crate::schema::util;
 
@@ -62,9 +64,38 @@ mod tests
 		assert_eq!(person.name, row.name);
 	}
 
+	/// TODO: use fuzzing
 	#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 	async fn retrieve()
 	{
-		// TODO: write test
+		let connection = util::connect().await;
+
+		let (person, person2) = futures::try_join!(
+			PgPerson::create(&connection, "My Name".into()),
+			PgPerson::create(&connection, "Another Gúy".into()),
+		)
+		.unwrap();
+
+		assert_eq!(
+			PgPerson::retrieve(&connection, MatchPerson {
+				id: person.id.into(),
+				..Default::default()
+			})
+			.await
+			.unwrap()
+			.as_slice(),
+			&[person.clone()],
+		);
+
+		assert_eq!(
+			PgPerson::retrieve(&connection, MatchPerson {
+				id: Match::HasAny(vec![person.id, person2.id]),
+				name: person2.name.clone().into(),
+			})
+			.await
+			.unwrap()
+			.as_slice(),
+			&[person2],
+		);
 	}
 }

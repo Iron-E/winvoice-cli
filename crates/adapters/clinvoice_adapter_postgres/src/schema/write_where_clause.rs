@@ -224,14 +224,14 @@ impl WriteWhereClause<&Match<Serde<Duration>>> for Schema
 			),
 			Match::Not(match_condition) => match match_condition.deref()
 			{
-				Match::Any => write_is_null(query, context, alias),
+				Match::Always => write_is_null(query, context, alias),
 				m => write_negated(query, context, alias, m),
 			},
 			Match::Or(match_conditions) => write_boolean_group::<_, _, _, false>(
 				query,
 				context,
 				alias,
-				&mut match_conditions.iter().filter(|m| *m != &Match::Any),
+				&mut match_conditions.iter().filter(|m| *m != &Match::Always),
 			),
 		};
 		WriteContext::AfterWhereCondition
@@ -266,22 +266,22 @@ impl WriteWhereClause<&Match<i64>> for Schema
 				query,
 				context,
 				alias,
-				&mut match_conditions.iter().filter(|m| *m != &Match::Any),
+				&mut match_conditions.iter().filter(|m| *m != &Match::Always),
 			),
-			Match::Any => return context,
+			Match::Always => return context,
 			Match::EqualTo(id) => write_comparison(query, context, alias, "=", id),
 			Match::HasAll(ids) => write_has(query, context, alias, ids, true),
 			Match::HasAny(ids) => write_has(query, context, alias, ids, false),
 			Match::Not(match_condition) => match match_condition.deref()
 			{
-				Match::Any => write_is_null(query, context, alias),
+				Match::Always => write_is_null(query, context, alias),
 				m => write_negated(query, context, alias, m),
 			},
 			Match::Or(match_conditions) => write_boolean_group::<_, _, _, false>(
 				query,
 				context,
 				alias,
-				&mut match_conditions.iter().filter(|m| *m != &Match::Any),
+				&mut match_conditions.iter().filter(|m| *m != &Match::Always),
 			),
 		};
 		WriteContext::AfterWhereCondition
@@ -326,14 +326,14 @@ impl WriteWhereClause<&Match<Money>> for Schema
 			Match::HasAny(moneys) => write_has(query, context, &alias_cast, moneys, false),
 			Match::Not(match_condition) => match match_condition.deref()
 			{
-				Match::Any => write_is_null(query, context, &alias_cast),
+				Match::Always => write_is_null(query, context, &alias_cast),
 				m => write_negated(query, context, &alias_cast, m),
 			},
 			Match::Or(match_conditions) => write_boolean_group::<_, _, _, false>(
 				query,
 				context,
 				&alias_cast,
-				&mut match_conditions.iter().filter(|m| *m != &Match::Any),
+				&mut match_conditions.iter().filter(|m| *m != &Match::Always),
 			),
 		};
 		WriteContext::AfterWhereCondition
@@ -394,14 +394,14 @@ impl WriteWhereClause<&Match<NaiveDateTime>> for Schema
 			),
 			Match::Not(match_condition) => match match_condition.deref()
 			{
-				Match::Any => write_is_null(query, context, alias),
+				Match::Always => write_is_null(query, context, alias),
 				m => write_negated(query, context, alias, m),
 			},
 			Match::Or(match_conditions) => write_boolean_group::<_, _, _, false>(
 				query,
 				context,
 				alias,
-				&mut match_conditions.iter().filter(|m| *m != &Match::Any),
+				&mut match_conditions.iter().filter(|m| *m != &Match::Always),
 			),
 		};
 		WriteContext::AfterWhereCondition
@@ -480,14 +480,14 @@ impl WriteWhereClause<&Match<Option<NaiveDateTime>>> for Schema
 			),
 			Match::Not(match_condition) => match match_condition.deref()
 			{
-				Match::Any => write_is_null(query, context, alias),
+				Match::Always => write_is_null(query, context, alias),
 				m => write_negated(query, context, alias, m),
 			},
 			Match::Or(match_conditions) => write_boolean_group::<_, _, _, false>(
 				query,
 				context,
 				alias,
-				&mut match_conditions.iter().filter(|m| *m != &Match::Any),
+				&mut match_conditions.iter().filter(|m| *m != &Match::Always),
 			),
 		};
 		WriteContext::AfterWhereCondition
@@ -511,9 +511,9 @@ impl WriteWhereClause<&MatchStr<String>> for Schema
 				query,
 				context,
 				alias,
-				&mut match_conditions.iter().filter(|m| *m != &MatchStr::Any),
+				&mut match_conditions.iter().filter(|m| *m != &MatchStr::Always),
 			),
-			MatchStr::Any => return context,
+			MatchStr::Always => return context,
 			MatchStr::Contains(string) =>
 			{
 				write!(query, "{context} {alias} LIKE '%{string}%'").unwrap()
@@ -521,14 +521,14 @@ impl WriteWhereClause<&MatchStr<String>> for Schema
 			MatchStr::EqualTo(string) => write_comparison(query, context, alias, "=", PgStr(string)),
 			MatchStr::Not(match_condition) => match match_condition.deref()
 			{
-				MatchStr::Any => write_is_null(query, context, alias),
+				MatchStr::Always => write_is_null(query, context, alias),
 				m => write_negated(query, context, alias, m),
 			},
 			MatchStr::Or(match_conditions) => write_boolean_group::<_, _, _, false>(
 				query,
 				context,
 				alias,
-				&mut match_conditions.iter().filter(|m| *m != &MatchStr::Any),
+				&mut match_conditions.iter().filter(|m| *m != &MatchStr::Always),
 			),
 			MatchStr::Regex(regex) => write_comparison(query, context, alias, "~", PgStr(regex)),
 		};

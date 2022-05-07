@@ -48,7 +48,7 @@ impl PgLocation
 						Schema::write_where_clause(
 							Default::default(),
 							"LO.outer_id",
-							&Match::Not(Match::<i64>::Any.into()),
+							&Match::Not(Match::<i64>::Always.into()),
 							query,
 						)
 					}
@@ -68,7 +68,7 @@ impl PgLocation
 
 			match match_condition.outer
 			{
-				MatchOuterLocation::Any | MatchOuterLocation::None =>
+				MatchOuterLocation::Always | MatchOuterLocation::None =>
 				{
 					if first
 					{

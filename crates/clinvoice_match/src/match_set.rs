@@ -29,13 +29,8 @@ where
 
 	/// # Summary
 	///
-	/// Match if and only if all of the elements of a set of type `T` contain the elements provided and no others.
-	EqualTo(Vec<T>),
-
-	/// # Summary
-	///
 	/// Match if and only if any of the elements of the provided set are in a given set of type `T`.
-	Has(T),
+	Contains(T),
 
 	/// # Summary
 	///
@@ -70,8 +65,7 @@ where
 				MatchSet::And(match_conditions.into_iter().map(|m| m.map(f)).collect())
 			},
 			Self::Always => MatchSet::Always,
-			Self::EqualTo(set) => MatchSet::EqualTo(set.into_iter().map(f).collect()),
-			Self::Has(x) => MatchSet::Has(f(x)),
+			Self::Contains(x) => MatchSet::Contains(f(x)),
 			Self::Not(match_condition) => MatchSet::Not(match_condition.map(f).into()),
 			Self::Or(match_conditions) =>
 			{

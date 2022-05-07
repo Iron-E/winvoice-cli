@@ -8,6 +8,6 @@ where
 {
 	fn from(t: T) -> Self
 	{
-		Self::Has(t)
+		Self::Contains(t)
 	}
 }

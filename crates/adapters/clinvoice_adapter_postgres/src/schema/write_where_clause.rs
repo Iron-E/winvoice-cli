@@ -8,11 +8,13 @@ use clinvoice_adapter::{WriteContext, WriteWhereClause};
 use clinvoice_finance::Money;
 use clinvoice_match::{
 	Match,
+	MatchContact,
 	MatchEmployee,
 	MatchExpense,
 	MatchJob,
 	MatchOrganization,
 	MatchPerson,
+	MatchSet,
 	MatchStr,
 	MatchTimesheet,
 	Serde,
@@ -163,21 +165,28 @@ impl WriteWhereClause<&Match<Serde<Duration>>> for Schema
 	{
 		match match_condition
 		{
-			Match::AllGreaterThan(duration) | Match::GreaterThan(duration) => write_comparison(
+			Match::And(match_conditions) => write_boolean_group::<_, _, _, true>(
+				query,
+				context,
+				alias,
+				&mut match_conditions.iter().filter(|m| *m != &Match::Always),
+			),
+			Match::Always => return context,
+			Match::EqualTo(duration) => write_comparison(
+				query,
+				context,
+				alias,
+				"=",
+				PgInterval(duration.into_inner()),
+			),
+			Match::GreaterThan(duration) => write_comparison(
 				query,
 				context,
 				alias,
 				">",
 				PgInterval(duration.into_inner()),
 			),
-			Match::AllLessThan(duration) | Match::LessThan(duration) => write_comparison(
-				query,
-				context,
-				alias,
-				"<",
-				PgInterval(duration.into_inner()),
-			),
-			Match::AllInRange(low, high) | Match::InRange(low, high) =>
+			Match::InRange(low, high) =>
 			{
 				write_comparison(
 					query,
@@ -194,33 +203,12 @@ impl WriteWhereClause<&Match<Serde<Duration>>> for Schema
 					PgInterval(high.into_inner()),
 				);
 			},
-			Match::And(match_conditions) => write_boolean_group::<_, _, _, true>(
+			Match::LessThan(duration) => write_comparison(
 				query,
 				context,
 				alias,
-				&mut match_conditions.iter().filter(|m| *m != &Match::Any),
-			),
-			Match::Any => return context,
-			Match::EqualTo(duration) => write_comparison(
-				query,
-				context,
-				alias,
-				"=",
+				"<",
 				PgInterval(duration.into_inner()),
-			),
-			Match::HasAll(durations) => write_has(
-				query,
-				context,
-				alias,
-				durations.iter().map(|d| PgInterval(d.into_inner())),
-				true,
-			),
-			Match::HasAny(durations) => write_has(
-				query,
-				context,
-				alias,
-				durations.iter().map(|d| PgInterval(d.into_inner())),
-				false,
 			),
 			Match::Not(match_condition) => match match_condition.deref()
 			{
@@ -249,19 +237,6 @@ impl WriteWhereClause<&Match<i64>> for Schema
 	{
 		match match_condition
 		{
-			Match::AllGreaterThan(id) | Match::GreaterThan(id) =>
-			{
-				write_comparison(query, context, alias, ">", id)
-			},
-			Match::AllLessThan(id) | Match::LessThan(id) =>
-			{
-				write_comparison(query, context, alias, "<", id)
-			},
-			Match::AllInRange(low, high) | Match::InRange(low, high) =>
-			{
-				write_comparison(query, context, alias, "BETWEEN", low);
-				write_comparison(query, WriteContext::InWhereCondition, "", "AND", high);
-			},
 			Match::And(match_conditions) => write_boolean_group::<_, _, _, true>(
 				query,
 				context,
@@ -270,8 +245,13 @@ impl WriteWhereClause<&Match<i64>> for Schema
 			),
 			Match::Always => return context,
 			Match::EqualTo(id) => write_comparison(query, context, alias, "=", id),
-			Match::HasAll(ids) => write_has(query, context, alias, ids, true),
-			Match::HasAny(ids) => write_has(query, context, alias, ids, false),
+			Match::GreaterThan(id) => write_comparison(query, context, alias, ">", id),
+			Match::InRange(low, high) =>
+			{
+				write_comparison(query, context, alias, "BETWEEN", low);
+				write_comparison(query, WriteContext::InWhereCondition, "", "AND", high);
+			},
+			Match::LessThan(id) => write_comparison(query, context, alias, "<", id),
 			Match::Not(match_condition) => match match_condition.deref()
 			{
 				Match::Always => write_is_null(query, context, alias),
@@ -284,6 +264,29 @@ impl WriteWhereClause<&Match<i64>> for Schema
 				&mut match_conditions.iter().filter(|m| *m != &Match::Always),
 			),
 		};
+		WriteContext::AfterWhereCondition
+	}
+}
+
+impl WriteWhereClause<&MatchSet<MatchContact>> for Schema
+{
+	/// # Panics
+	///
+	/// If any the following:
+	///
+	/// * `alias` is an empty string.
+	///
+	/// # See
+	///
+	/// * [`WriteWhereClause::write_where_clause`]
+	fn write_where_clause(
+		context: WriteContext,
+		alias: impl Copy + Display,
+		match_condition: &MatchSet<MatchContact>,
+		query: &mut String,
+	) -> WriteContext
+	{
+		todo!();
 		WriteContext::AfterWhereCondition
 	}
 }
@@ -301,29 +304,24 @@ impl WriteWhereClause<&Match<Money>> for Schema
 		let alias_cast = format!("{alias}::numeric"); // PgTypeCast::numeric(alias);
 		match match_condition
 		{
-			Match::AllGreaterThan(money) | Match::GreaterThan(money) =>
-			{
-				write_comparison(query, context, &alias_cast, ">", money.amount)
-			},
-			Match::AllLessThan(money) | Match::LessThan(money) =>
-			{
-				write_comparison(query, context, &alias_cast, "<", money)
-			},
-			Match::AllInRange(low, high) | Match::InRange(low, high) =>
-			{
-				write_comparison(query, context, &alias_cast, "BETWEEN", low);
-				write_comparison(query, WriteContext::InWhereCondition, "", "AND", high);
-			},
 			Match::And(match_conditions) => write_boolean_group::<_, _, _, true>(
 				query,
 				context,
 				&alias_cast,
-				&mut match_conditions.iter().filter(|m| *m != &Match::Any),
+				&mut match_conditions.iter().filter(|m| *m != &Match::Always),
 			),
-			Match::Any => return context,
+			Match::Always => return context,
 			Match::EqualTo(money) => write_comparison(query, context, &alias_cast, "=", money),
-			Match::HasAll(moneys) => write_has(query, context, &alias_cast, moneys, true),
-			Match::HasAny(moneys) => write_has(query, context, &alias_cast, moneys, false),
+			Match::GreaterThan(money) =>
+			{
+				write_comparison(query, context, &alias_cast, ">", money.amount)
+			},
+			Match::InRange(low, high) =>
+			{
+				write_comparison(query, context, &alias_cast, "BETWEEN", low);
+				write_comparison(query, WriteContext::InWhereCondition, "", "AND", high);
+			},
+			Match::LessThan(money) => write_comparison(query, context, &alias_cast, "<", money),
 			Match::Not(match_condition) => match match_condition.deref()
 			{
 				Match::Always => write_is_null(query, context, &alias_cast),
@@ -351,15 +349,19 @@ impl WriteWhereClause<&Match<NaiveDateTime>> for Schema
 	{
 		match match_condition
 		{
-			Match::AllGreaterThan(date) | Match::GreaterThan(date) =>
+			Match::And(match_conditions) => write_boolean_group::<_, _, _, true>(
+				query,
+				context,
+				alias,
+				&mut match_conditions.iter().filter(|m| *m != &Match::Always),
+			),
+			Match::Always => return context,
+			Match::EqualTo(date) => write_comparison(query, context, alias, "=", PgTimestampTz(*date)),
+			Match::GreaterThan(date) =>
 			{
 				write_comparison(query, context, alias, ">", PgTimestampTz(*date))
 			},
-			Match::AllLessThan(date) | Match::LessThan(date) =>
-			{
-				write_comparison(query, context, alias, "<", PgTimestampTz(*date))
-			},
-			Match::AllInRange(low, high) | Match::InRange(low, high) =>
+			Match::InRange(low, high) =>
 			{
 				write_comparison(query, context, alias, "BETWEEN", PgTimestampTz(*low));
 				write_comparison(
@@ -370,28 +372,10 @@ impl WriteWhereClause<&Match<NaiveDateTime>> for Schema
 					PgTimestampTz(*high),
 				);
 			},
-			Match::And(match_conditions) => write_boolean_group::<_, _, _, true>(
-				query,
-				context,
-				alias,
-				&mut match_conditions.iter().filter(|m| *m != &Match::Any),
-			),
-			Match::Any => return context,
-			Match::EqualTo(date) => write_comparison(query, context, alias, "=", PgTimestampTz(*date)),
-			Match::HasAll(dates) => write_has(
-				query,
-				context,
-				alias,
-				dates.iter().copied().map(PgTimestampTz),
-				true,
-			),
-			Match::HasAny(dates) => write_has(
-				query,
-				context,
-				alias,
-				dates.iter().copied().map(PgTimestampTz),
-				false,
-			),
+			Match::LessThan(date) =>
+			{
+				write_comparison(query, context, alias, "<", PgTimestampTz(*date))
+			},
 			Match::Not(match_condition) => match match_condition.deref()
 			{
 				Match::Always => write_is_null(query, context, alias),
@@ -419,21 +403,28 @@ impl WriteWhereClause<&Match<Option<NaiveDateTime>>> for Schema
 	{
 		match match_condition
 		{
-			Match::AllGreaterThan(date) | Match::GreaterThan(date) => write_comparison(
+			Match::And(match_conditions) => write_boolean_group::<_, _, _, true>(
+				query,
+				context,
+				alias,
+				&mut match_conditions.iter().filter(|m| *m != &Match::Always),
+			),
+			Match::Always => return context,
+			Match::EqualTo(date) => write_comparison(
+				query,
+				context,
+				alias,
+				"=",
+				PgOption(date.map(PgTimestampTz)),
+			),
+			Match::GreaterThan(date) => write_comparison(
 				query,
 				context,
 				alias,
 				">",
 				PgOption(date.map(PgTimestampTz)),
 			),
-			Match::AllLessThan(date) | Match::LessThan(date) => write_comparison(
-				query,
-				context,
-				alias,
-				"<",
-				PgOption(date.map(PgTimestampTz)),
-			),
-			Match::AllInRange(low, high) | Match::InRange(low, high) =>
+			Match::InRange(low, high) =>
 			{
 				write_comparison(
 					query,
@@ -450,33 +441,12 @@ impl WriteWhereClause<&Match<Option<NaiveDateTime>>> for Schema
 					PgOption(high.map(PgTimestampTz)),
 				);
 			},
-			Match::And(match_conditions) => write_boolean_group::<_, _, _, true>(
+			Match::LessThan(date) => write_comparison(
 				query,
 				context,
 				alias,
-				&mut match_conditions.iter().filter(|m| *m != &Match::Any),
-			),
-			Match::Any => return context,
-			Match::EqualTo(date) => write_comparison(
-				query,
-				context,
-				alias,
-				"=",
+				"<",
 				PgOption(date.map(PgTimestampTz)),
-			),
-			Match::HasAll(dates) => write_has(
-				query,
-				context,
-				alias,
-				dates.iter().map(|o| PgOption(o.map(PgTimestampTz))),
-				true,
-			),
-			Match::HasAny(dates) => write_has(
-				query,
-				context,
-				alias,
-				dates.iter().map(|o| PgOption(o.map(PgTimestampTz))),
-				false,
 			),
 			Match::Not(match_condition) => match match_condition.deref()
 			{
@@ -542,7 +512,6 @@ impl WriteWhereClause<&MatchEmployee> for Schema
 	///
 	/// If any the following:
 	///
-	/// * `context` is not `BeforeWhereClause`
 	/// * `alias` is an empty string.
 	///
 	/// # See
@@ -575,7 +544,6 @@ impl WriteWhereClause<&MatchExpense> for Schema
 	///
 	/// If any the following:
 	///
-	/// * `context` is not `BeforeWhereClause`
 	/// * `alias` is an empty string.
 	///
 	/// # See
@@ -618,7 +586,6 @@ impl WriteWhereClause<&MatchJob> for Schema
 	///
 	/// If any the following:
 	///
-	/// * `context` is not `BeforeWhereClause`
 	/// * `alias` is an empty string.
 	///
 	/// # See
@@ -686,7 +653,6 @@ impl WriteWhereClause<&MatchOrganization> for Schema
 	///
 	/// If any the following:
 	///
-	/// * `context` is not `BeforeWhereClause`
 	/// * `alias` is an empty string.
 	///
 	/// # See
@@ -738,7 +704,6 @@ impl WriteWhereClause<&MatchTimesheet> for Schema
 	///
 	/// If any the following:
 	///
-	/// * `context` is not `BeforeWhereClause`
 	/// * `alias` is an empty string.
 	///
 	/// # See

@@ -9,6 +9,7 @@ use clinvoice_finance::Money;
 use clinvoice_match::{
 	Match,
 	MatchContact,
+	MatchContactKind,
 	MatchEmployee,
 	MatchExpense,
 	MatchJob,
@@ -20,8 +21,9 @@ use clinvoice_match::{
 	Serde,
 };
 use clinvoice_schema::chrono::NaiveDateTime;
+use sqlx::{Result, PgPool};
 
-use super::{PgInterval, PgOption, PgSchema as Schema, PgStr, PgTimestampTz};
+use super::{PgInterval, PgLocation, PgOption, PgSchema as Schema, PgStr, PgTimestampTz};
 
 /// # Summary
 ///
@@ -75,6 +77,103 @@ fn write_comparison(
 )
 {
 	write!(query, "{context} {alias} {comparator} {comparand}").unwrap()
+}
+
+/// # Panics
+///
+/// If any the following:
+///
+/// * `alias` is an empty string.
+///
+/// # See
+///
+/// * [`WriteWhereClause::write_where_clause`]
+pub(super) async fn write_contact_set_where_clause(
+	connection: &PgPool,
+	context: WriteContext,
+	alias: impl Copy + Display,
+	match_condition: &MatchSet<MatchContact>,
+	query: &mut String,
+) -> Result<WriteContext>
+{
+	match match_condition
+	{
+		MatchSet::Always => return Ok(context),
+
+		MatchSet::And(conditions) | MatchSet::Or(conditions) => {
+			let iter = &mut conditions.iter().filter(|m| *m != &MatchSet::Always);
+			write!(query, "{context} (").unwrap();
+			if let Some(c) = iter.next()
+			{
+				write_contact_set_where_clause(connection, WriteContext::InWhereCondition, alias, c, query).await?;
+			}
+
+			let separator = if matches!(match_condition, MatchSet::And(_)) { " AND" } else { " OR" };
+			for c in conditions
+			{
+				query.push_str(separator);
+				write_contact_set_where_clause(connection, WriteContext::InWhereCondition, alias, c, query).await?;
+			}
+
+			query.push(')');
+		},
+
+		MatchSet::Contains(match_contact) =>
+		{
+			let subquery_alias = format!("{alias}_2");
+			write!(
+				query,
+				r#"{context} EXISTS (
+				SELECT FROM contact_information {subquery_alias}
+				WHERE {subquery_alias}.employee_id = {alias}.employee_id"#
+			)
+			.unwrap();
+
+			let ctx = Schema::write_where_clause(
+				Schema::write_where_clause(
+					context,
+					&format!("{alias}.label"),
+					&match_contact.label,
+					query,
+				),
+				&format!("{alias}.export"),
+				&match_contact.export,
+				query,
+			);
+
+			match match_contact.kind
+			{
+				MatchContactKind::Always => return Ok(ctx),
+
+				MatchContactKind::SomeAddress(ref location) =>
+				{
+					let location_id_query =
+						PgLocation::retrieve_matching_ids(connection, location).await?;
+					Schema::write_where_clause(ctx, &format!("{alias}.address_id"), &location_id_query, query)
+				},
+
+				MatchContactKind::SomeEmail(ref email_address) =>
+				{
+					Schema::write_where_clause(ctx, &format!("{alias}.email"), email_address, query)
+				},
+
+				MatchContactKind::SomePhone(ref phone_number) =>
+				{
+					Schema::write_where_clause(ctx, &format!("{alias}.phone"), phone_number, query)
+				},
+			};
+
+			query.push(')');
+		},
+
+		MatchSet::Not(condition) => {
+			write!(query, "{context} NOT (").unwrap();
+			write_contact_set_where_clause(connection, WriteContext::InWhereCondition, alias, condition, query);
+			query.push(')');
+		}
+	};
+
+	Ok(WriteContext::AfterWhereCondition)
 }
 
 /// # Summary

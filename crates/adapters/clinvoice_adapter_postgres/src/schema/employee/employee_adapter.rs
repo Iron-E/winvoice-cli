@@ -130,12 +130,14 @@ impl EmployeeAdapter for PgEmployee
 			Schema::write_where_clause(
 				Schema::write_where_clause(
 					Schema::write_where_clause(
-						Schema::write_where_clause(
+						crate::schema::write_where_clause::write_contact_set_where_clause(
+							connection,
 							Default::default(),
 							"C1",
 							&match_condition.contact_info,
 							&mut query,
-						),
+						)
+						.await?,
 						"E",
 						&match_condition,
 						&mut query,

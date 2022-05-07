@@ -4,6 +4,7 @@ use core::{
 	time::Duration,
 };
 
+use async_recursion::async_recursion;
 use clinvoice_adapter::{WriteContext, WriteWhereClause};
 use clinvoice_finance::Money;
 use clinvoice_match::{
@@ -21,7 +22,7 @@ use clinvoice_match::{
 	Serde,
 };
 use clinvoice_schema::chrono::NaiveDateTime;
-use sqlx::{Result, PgPool};
+use sqlx::{PgPool, Result};
 
 use super::{PgInterval, PgLocation, PgOption, PgSchema as Schema, PgStr, PgTimestampTz};
 
@@ -83,36 +84,61 @@ fn write_comparison(
 ///
 /// If any the following:
 ///
-/// * `alias` is an empty string.
+/// * `alias` is empty.
 ///
 /// # See
 ///
 /// * [`WriteWhereClause::write_where_clause`]
-pub(super) async fn write_contact_set_where_clause(
+#[async_recursion]
+pub(super) async fn write_contact_set_where_clause<A>(
 	connection: &PgPool,
 	context: WriteContext,
-	alias: impl Copy + Display,
+	alias: A,
 	match_condition: &MatchSet<MatchContact>,
 	query: &mut String,
 ) -> Result<WriteContext>
+where
+	A: Copy + Display + Send,
 {
 	match match_condition
 	{
 		MatchSet::Always => return Ok(context),
 
-		MatchSet::And(conditions) | MatchSet::Or(conditions) => {
+		MatchSet::And(conditions) | MatchSet::Or(conditions) =>
+		{
 			let iter = &mut conditions.iter().filter(|m| *m != &MatchSet::Always);
 			write!(query, "{context} (").unwrap();
 			if let Some(c) = iter.next()
 			{
-				write_contact_set_where_clause(connection, WriteContext::InWhereCondition, alias, c, query).await?;
+				write_contact_set_where_clause(
+					connection,
+					WriteContext::InWhereCondition,
+					alias,
+					c,
+					query,
+				)
+				.await?;
 			}
 
-			let separator = if matches!(match_condition, MatchSet::And(_)) { " AND" } else { " OR" };
+			let separator = if matches!(match_condition, MatchSet::And(_))
+			{
+				" AND"
+			}
+			else
+			{
+				" OR"
+			};
 			for c in conditions
 			{
 				query.push_str(separator);
-				write_contact_set_where_clause(connection, WriteContext::InWhereCondition, alias, c, query).await?;
+				write_contact_set_where_clause(
+					connection,
+					WriteContext::InWhereCondition,
+					alias,
+					c,
+					query,
+				)
+				.await?;
 			}
 
 			query.push(')');
@@ -149,7 +175,12 @@ pub(super) async fn write_contact_set_where_clause(
 				{
 					let location_id_query =
 						PgLocation::retrieve_matching_ids(connection, location).await?;
-					Schema::write_where_clause(ctx, &format!("{alias}.address_id"), &location_id_query, query)
+					Schema::write_where_clause(
+						ctx,
+						&format!("{alias}.address_id"),
+						&location_id_query,
+						query,
+					)
 				},
 
 				MatchContactKind::SomeEmail(ref email_address) =>
@@ -166,11 +197,18 @@ pub(super) async fn write_contact_set_where_clause(
 			query.push(')');
 		},
 
-		MatchSet::Not(condition) => {
+		MatchSet::Not(condition) =>
+		{
 			write!(query, "{context} NOT (").unwrap();
-			write_contact_set_where_clause(connection, WriteContext::InWhereCondition, alias, condition, query);
+			write_contact_set_where_clause(
+				connection,
+				WriteContext::InWhereCondition,
+				alias,
+				condition,
+				query,
+			);
 			query.push(')');
-		}
+		},
 	};
 
 	Ok(WriteContext::AfterWhereCondition)

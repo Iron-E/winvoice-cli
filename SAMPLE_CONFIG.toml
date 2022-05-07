@@ -1,13 +1,12 @@
-[stores]
-default = "name_one"
-name_one = {adapter="Bincode", path="/home/user/Documents/foo"}
-name_two = {adapter="Postgres", path="pgsql://foo", pass="word", user="name"}
-
 [employees]
 default_id = "95d053c5-4be5-45bf-90f6-5e63cb43fb9c"
 
 [invoices]
 default_currency = "USD"
+
+[stores]
+default = "name_one"
+name_one = {adapter="Postgres", path="postgres://username:password@localhost:5432/database_name"}
 
 [timesheets]
 default_increment = "5min"

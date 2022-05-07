@@ -31,6 +31,9 @@ pub struct Config<'alias, 'name>
 	/// # Summary
 	///
 	/// Configurations for data storages.
+	///
+	/// NOTE: this is a [`BTreeMap`] because it is desirable for configuration files to be
+	///       serialized in a consistent order.
 	#[serde(borrow)]
 	stores: BTreeMap<&'name str, StoreValue<'alias>>,
 

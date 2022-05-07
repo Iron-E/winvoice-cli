@@ -1,5 +1,5 @@
 use core::{
-	fmt::{Display, Write},
+	fmt::{Debug, Display, Write},
 	ops::Deref,
 	time::Duration,
 };
@@ -154,75 +154,65 @@ fn write_negated<Q>(
 	query.push(')');
 }
 
-impl WriteWhereClause<&Match<Serde<Duration>>> for Schema
+/// # Summary
+///
+/// A blanket implementation of [`WriteWhereClause`].
+///
+/// Requires access to something else that has already implemented [`WriteWhereClause`] for
+/// [`Schema`], so that methods like [`write_boolean_group`] can be abstracted away from _this_
+/// implementation.
+fn write_where_clause<T>(
+	context: WriteContext,
+	alias: impl Copy + Display,
+	match_condition: &Match<T>,
+	query: &mut String,
+) -> WriteContext
+where
+	T: Clone + Debug + Display + PartialEq,
+	for<'a> Schema: WriteWhereClause<&'a Match<T>>,
+{
+	match match_condition
+	{
+		Match::And(conditions) => write_boolean_group::<_, _, _, true>(
+			query,
+			context,
+			alias,
+			&mut conditions.iter().filter(|m| *m != &Match::Always),
+		),
+		Match::Always => return context,
+		Match::EqualTo(id) => write_comparison(query, context, alias, "=", id),
+		Match::GreaterThan(id) => write_comparison(query, context, alias, ">", id),
+		Match::InRange(low, high) =>
+		{
+			write_comparison(query, context, alias, "BETWEEN", low);
+			write_comparison(query, WriteContext::InWhereCondition, "", "AND", high);
+		},
+		Match::LessThan(id) => write_comparison(query, context, alias, "<", id),
+		Match::Not(condition) => match condition.deref()
+		{
+			Match::Always => write_is_null(query, context, alias),
+			m => write_negated(query, context, alias, m),
+		},
+		Match::Or(conditions) => write_boolean_group::<_, _, _, false>(
+			query,
+			context,
+			alias,
+			&mut conditions.iter().filter(|m| *m != &Match::Always),
+		),
+	};
+	WriteContext::AfterWhereCondition
+}
+
+impl WriteWhereClause<&Match<bool>> for Schema
 {
 	fn write_where_clause(
 		context: WriteContext,
 		alias: impl Copy + Display,
-		match_condition: &Match<Serde<Duration>>,
+		match_condition: &Match<bool>,
 		query: &mut String,
 	) -> WriteContext
 	{
-		match match_condition
-		{
-			Match::And(conditions) => write_boolean_group::<_, _, _, true>(
-				query,
-				context,
-				alias,
-				&mut conditions.iter().filter(|m| *m != &Match::Always),
-			),
-			Match::Always => return context,
-			Match::EqualTo(duration) => write_comparison(
-				query,
-				context,
-				alias,
-				"=",
-				PgInterval(duration.into_inner()),
-			),
-			Match::GreaterThan(duration) => write_comparison(
-				query,
-				context,
-				alias,
-				">",
-				PgInterval(duration.into_inner()),
-			),
-			Match::InRange(low, high) =>
-			{
-				write_comparison(
-					query,
-					context,
-					alias,
-					"BETWEEN",
-					PgInterval(low.into_inner()),
-				);
-				write_comparison(
-					query,
-					WriteContext::InWhereCondition,
-					"",
-					"AND",
-					PgInterval(high.into_inner()),
-				);
-			},
-			Match::LessThan(duration) => write_comparison(
-				query,
-				context,
-				alias,
-				"<",
-				PgInterval(duration.into_inner()),
-			),
-			Match::Not(condition) => match condition.deref()
-			{
-				Match::Always => write_is_null(query, context, alias),
-				m => write_negated(query, context, alias, m),
-			},
-			Match::Or(conditions) => write_boolean_group::<_, _, _, false>(
-				query,
-				context,
-				alias,
-				&mut conditions.iter().filter(|m| *m != &Match::Always),
-			),
-		};
-		WriteContext::AfterWhereCondition
+		write_where_clause(context, alias, match_condition, query)
 	}
 }
 
@@ -235,92 +225,7 @@ impl WriteWhereClause<&Match<i64>> for Schema
 		query: &mut String,
 	) -> WriteContext
 	{
-		match match_condition
-		{
-			Match::And(conditions) => write_boolean_group::<_, _, _, true>(
-				query,
-				context,
-				alias,
-				&mut conditions.iter().filter(|m| *m != &Match::Always),
-			),
-			Match::Always => return context,
-			Match::EqualTo(id) => write_comparison(query, context, alias, "=", id),
-			Match::GreaterThan(id) => write_comparison(query, context, alias, ">", id),
-			Match::InRange(low, high) =>
-			{
-				write_comparison(query, context, alias, "BETWEEN", low);
-				write_comparison(query, WriteContext::InWhereCondition, "", "AND", high);
-			},
-			Match::LessThan(id) => write_comparison(query, context, alias, "<", id),
-			Match::Not(condition) => match condition.deref()
-			{
-				Match::Always => write_is_null(query, context, alias),
-				m => write_negated(query, context, alias, m),
-			},
-			Match::Or(conditions) => write_boolean_group::<_, _, _, false>(
-				query,
-				context,
-				alias,
-				&mut conditions.iter().filter(|m| *m != &Match::Always),
-			),
-		};
-		WriteContext::AfterWhereCondition
-	}
-}
-
-impl WriteWhereClause<&MatchSet<MatchContact>> for Schema
-{
-	/// # Panics
-	///
-	/// If any the following:
-	///
-	/// * `alias` is an empty string.
-	///
-	/// # See
-	///
-	/// * [`WriteWhereClause::write_where_clause`]
-	fn write_where_clause(
-		context: WriteContext,
-		alias: impl Copy + Display,
-		match_condition: &MatchSet<MatchContact>,
-		query: &mut String,
-	) -> WriteContext
-	{
-		match match_condition {
-			MatchSet::Always => return context,
-
-			MatchSet::And(conditions) => write_boolean_group::<_, _, _, true>(
-				query,
-				context,
-				&alias,
-				&mut conditions.iter().filter(|m| *m != &MatchSet::Always),
-			),
-
-			MatchSet::Contains(match_contact) =>
-			{
-				let subquery_alias = format!("{alias}_2");
-				// NOTE: `{alias}_2` is the name of the dummy table
-				write!(query, "{context} EXISTS (SELECT FROM contact_information {subquery_alias} WHERE {subquery_alias}.employee_id = {alias}.employee_id").unwrap();
-				Schema::write_where_clause(
-					WriteContext::AfterWhereCondition,
-					&subquery_alias,
-					match_contact,
-					query,
-				);
-				query.push(')');
-			},
-
-			MatchSet::Not(condition) => write_negated(query, context, alias, condition.deref()),
-
-			MatchSet::Or(conditions) => write_boolean_group::<_, _, _, false>(
-				query,
-				context,
-				&alias,
-				&mut conditions.iter().filter(|m| *m != &MatchSet::Always),
-			),
-		};
-
-		WriteContext::AfterWhereCondition
+		write_where_clause(context, alias, match_condition, query)
 	}
 }
 
@@ -334,40 +239,12 @@ impl WriteWhereClause<&Match<Money>> for Schema
 	) -> WriteContext
 	{
 		// TODO: use `PgTypecast::numeric(alias)` after rust-lang/rust#39959
-		let alias_cast = format!("{alias}::numeric"); // PgTypeCast::numeric(alias);
-		match match_condition
-		{
-			Match::And(conditions) => write_boolean_group::<_, _, _, true>(
-				query,
-				context,
-				&alias_cast,
-				&mut conditions.iter().filter(|m| *m != &Match::Always),
-			),
-			Match::Always => return context,
-			Match::EqualTo(money) => write_comparison(query, context, &alias_cast, "=", money),
-			Match::GreaterThan(money) =>
-			{
-				write_comparison(query, context, &alias_cast, ">", money.amount)
-			},
-			Match::InRange(low, high) =>
-			{
-				write_comparison(query, context, &alias_cast, "BETWEEN", low);
-				write_comparison(query, WriteContext::InWhereCondition, "", "AND", high);
-			},
-			Match::LessThan(money) => write_comparison(query, context, &alias_cast, "<", money),
-			Match::Not(condition) => match condition.deref()
-			{
-				Match::Always => write_is_null(query, context, &alias_cast),
-				m => write_negated(query, context, &alias_cast, m),
-			},
-			Match::Or(conditions) => write_boolean_group::<_, _, _, false>(
-				query,
-				context,
-				&alias_cast,
-				&mut conditions.iter().filter(|m| *m != &Match::Always),
-			),
-		};
-		WriteContext::AfterWhereCondition
+		write_where_clause(
+			context,
+			&format!("{alias}::numeric"),
+			match_condition,
+			query,
+		)
 	}
 }
 
@@ -480,6 +357,78 @@ impl WriteWhereClause<&Match<Option<NaiveDateTime>>> for Schema
 				alias,
 				"<",
 				PgOption(date.map(PgTimestampTz)),
+			),
+			Match::Not(condition) => match condition.deref()
+			{
+				Match::Always => write_is_null(query, context, alias),
+				m => write_negated(query, context, alias, m),
+			},
+			Match::Or(conditions) => write_boolean_group::<_, _, _, false>(
+				query,
+				context,
+				alias,
+				&mut conditions.iter().filter(|m| *m != &Match::Always),
+			),
+		};
+		WriteContext::AfterWhereCondition
+	}
+}
+
+impl WriteWhereClause<&Match<Serde<Duration>>> for Schema
+{
+	fn write_where_clause(
+		context: WriteContext,
+		alias: impl Copy + Display,
+		match_condition: &Match<Serde<Duration>>,
+		query: &mut String,
+	) -> WriteContext
+	{
+		match match_condition
+		{
+			Match::And(conditions) => write_boolean_group::<_, _, _, true>(
+				query,
+				context,
+				alias,
+				&mut conditions.iter().filter(|m| *m != &Match::Always),
+			),
+			Match::Always => return context,
+			Match::EqualTo(duration) => write_comparison(
+				query,
+				context,
+				alias,
+				"=",
+				PgInterval(duration.into_inner()),
+			),
+			Match::GreaterThan(duration) => write_comparison(
+				query,
+				context,
+				alias,
+				">",
+				PgInterval(duration.into_inner()),
+			),
+			Match::InRange(low, high) =>
+			{
+				write_comparison(
+					query,
+					context,
+					alias,
+					"BETWEEN",
+					PgInterval(low.into_inner()),
+				);
+				write_comparison(
+					query,
+					WriteContext::InWhereCondition,
+					"",
+					"AND",
+					PgInterval(high.into_inner()),
+				);
+			},
+			Match::LessThan(duration) => write_comparison(
+				query,
+				context,
+				alias,
+				"<",
+				PgInterval(duration.into_inner()),
 			),
 			Match::Not(condition) => match condition.deref()
 			{

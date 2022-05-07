@@ -89,7 +89,7 @@ mod tests
 
 		assert_eq!(
 			PgPerson::retrieve(&connection, MatchPerson {
-				id: Match::HasAny(vec![person.id, person2.id]),
+				id: Match::Or(vec![person.id.into(), person2.id.into()]),
 				name: person2.name.clone().into(),
 			})
 			.await

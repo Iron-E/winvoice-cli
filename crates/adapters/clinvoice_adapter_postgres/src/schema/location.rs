@@ -121,10 +121,10 @@ impl PgLocation
 			},
 			match_condition,
 		);
-		Ok(Match::HasAny(
+		Ok(Match::Or(
 			sqlx::query(&query)
 				.fetch(connection)
-				.map_ok(|row| row.get::<Id, _>("id"))
+				.map_ok(|row| row.get::<Id, _>("id").into())
 				.try_collect()
 				.await?,
 		))

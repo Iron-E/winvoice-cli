@@ -286,7 +286,40 @@ impl WriteWhereClause<&MatchSet<MatchContact>> for Schema
 		query: &mut String,
 	) -> WriteContext
 	{
-		todo!();
+		match match_condition {
+			MatchSet::Always => return context,
+
+			MatchSet::And(conditions) => write_boolean_group::<_, _, _, true>(
+				query,
+				context,
+				&alias,
+				&mut conditions.iter().filter(|m| *m != &MatchSet::Always),
+			),
+
+			MatchSet::Contains(match_contact) =>
+			{
+				let subquery_alias = format!("{alias}_2");
+				// NOTE: `{alias}_2` is the name of the dummy table
+				write!(query, "{context} EXISTS (SELECT FROM contact_information {subquery_alias} WHERE {subquery_alias}.employee_id = {alias}.employee_id").unwrap();
+				Schema::write_where_clause(
+					WriteContext::AfterWhereCondition,
+					&subquery_alias,
+					match_contact,
+					query,
+				);
+				query.push(')');
+			},
+
+			MatchSet::Not(condition) => write_negated(query, context, alias, condition.deref()),
+
+			MatchSet::Or(conditions) => write_boolean_group::<_, _, _, false>(
+				query,
+				context,
+				&alias,
+				&mut conditions.iter().filter(|m| *m != &MatchSet::Always),
+			),
+		};
+
 		WriteContext::AfterWhereCondition
 	}
 }

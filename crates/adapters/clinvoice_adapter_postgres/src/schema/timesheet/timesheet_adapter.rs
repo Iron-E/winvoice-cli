@@ -70,6 +70,7 @@ impl TimesheetAdapter for PgTimesheet
 
 		let mut query = String::from(
 			"SELECT
+				-- FIX: use latest PostgresEmployee code
 				array_agg((C.export, C.label, C.address_id, C.email, C.phone)) AS contact_info,
 				Client.name AS client_name, Client.location_id as client_location_id,
 				E.organization_id as employer_id, E.person_id, E.status, E.title,
@@ -83,8 +84,8 @@ impl TimesheetAdapter for PgTimesheet
 			JOIN contact_information C ON (C.employee_id = T.employee_id)
 			JOIN employees E ON (E.id = T.employee_id)
 			JOIN expenses X1 ON (X1.timesheet_id = T.id)
-			-- WARN: we *need* `X2` so it can be bound by a WHERE clause while not binding `X1` (this works \
-			 because WHERE is a post-JOIN condition)
+			-- WARN: we *need* `X2` so it can be bound by a WHERE clause while not binding `X1`
+			-- TODO: use `WHERE EXISTS` instead
 			JOIN expenses X2 ON (X2.id = X1.id)
 			JOIN jobs J ON (E.id = T.employee_id)
 			JOIN organizations Client ON (Client.id = J.client_id)
@@ -197,7 +198,7 @@ impl TimesheetAdapter for PgTimesheet
 mod tests
 {
 	use core::time::Duration;
-	use std::collections::HashMap;
+	use std::collections::{HashMap, HashSet};
 
 	use clinvoice_adapter::schema::{
 		EmployeeAdapter,
@@ -206,7 +207,21 @@ mod tests
 		OrganizationAdapter,
 		PersonAdapter,
 	};
-	use clinvoice_schema::{chrono::Utc, Contact, Currency, Money};
+	use clinvoice_match::{
+		Match,
+		MatchEmployee,
+		MatchJob,
+		MatchLocation,
+		MatchOrganization,
+		MatchPerson,
+		MatchTimesheet,
+	};
+	use clinvoice_schema::{
+		chrono::{TimeZone, Utc},
+		Contact,
+		Currency,
+		Money,
+	};
 
 	use super::{PgTimesheet, TimesheetAdapter};
 	use crate::schema::{util, PgEmployee, PgJob, PgLocation, PgOrganization, PgPerson};
@@ -291,9 +306,156 @@ mod tests
 		assert_eq!(timesheet.work_notes, row.work_notes);
 	}
 
+	/// TODO: use fuzzing
 	#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 	async fn retrieve()
 	{
-		// TODO: write test
+		let connection = util::connect().await;
+
+		let (person, person2) = futures::try_join!(
+			PgPerson::create(&connection, "My Name".into()),
+			PgPerson::create(&connection, "Another Gúy".into()),
+		)
+		.unwrap();
+
+		let earth = PgLocation::create(&connection, "Earth".into())
+			.await
+			.unwrap();
+		let usa = PgLocation::create_inner(&connection, earth, "USA".into())
+			.await
+			.unwrap();
+		let (arizona, utah) = futures::try_join!(
+			PgLocation::create_inner(&connection, usa.clone(), "Arizona".into()),
+			PgLocation::create_inner(&connection, usa.clone(), "Utah".into()),
+		)
+		.unwrap();
+
+		let (organization, organization2) = futures::try_join!(
+			PgOrganization::create(&connection, arizona.clone(), "Some Organization".into()),
+			PgOrganization::create(&connection, utah.clone(), "Some Other Organizatión".into()),
+		)
+		.unwrap();
+
+		let (employee, employee2) = futures::try_join!(
+			PgEmployee::create(
+				&connection,
+				[
+					("Remote Office".into(), Contact::Address {
+						location: utah,
+						export: false,
+					}),
+					("Work Email".into(), Contact::Email {
+						email: "foo@bar.io".into(),
+						export: true,
+					}),
+					("Office's Phone".into(), Contact::Phone {
+						phone: "555 223 5039".into(),
+						export: true,
+					}),
+				]
+				.into_iter()
+				.collect(),
+				organization.clone(),
+				person.clone(),
+				"Employed".into(),
+				"Janitor".into(),
+			),
+			PgEmployee::create(
+				&connection,
+				[
+					("Favorite Pizza Place".into(), Contact::Address {
+						location: arizona,
+						export: false,
+					}),
+					("Work Email".into(), Contact::Email {
+						email: "some_kind_of_email@f.com".into(),
+						export: true,
+					}),
+					("Office's Phone".into(), Contact::Phone {
+						phone: "555-555-8008".into(),
+						export: true,
+					}),
+				]
+				.into_iter()
+				.collect(),
+				organization2.clone(),
+				person2,
+				"Management".into(),
+				"Assistant to Regional Manager".into(),
+			),
+		)
+		.unwrap();
+
+		let (job, job2) = futures::try_join!(
+			PgJob::create(
+				&connection,
+				organization.clone(),
+				Utc.ymd(1990, 07, 12).and_hms(14, 10, 00),
+				Money::new(20_00, 2, Currency::USD),
+				Duration::from_secs(900),
+				"Do something".into()
+			),
+			PgJob::create(
+				&connection,
+				organization2.clone(),
+				Utc.ymd(3000, 01, 12).and_hms(09, 15, 42),
+				Money::new(200_00, 2, Currency::JPY),
+				Duration::from_secs(900),
+				"Do something".into()
+			),
+		)
+		.unwrap();
+
+		let (timesheet, timesheet2) = futures::try_join!(
+			PgTimesheet::create(&connection, employee, job),
+			PgTimesheet::create(&connection, employee2, job2),
+		)
+		.unwrap();
+
+		todo!("Finish this test");
+
+		// assert_eq!(
+		// 	PgTimesheet::retrieve(&connection, MatchTimesheet {
+		// 		employee: MatchEmployee {
+		// 			person: MatchPerson {
+		// 				name: employee.person.name.clone().into(),
+		// 				..Default::default()
+		// 			},
+		// 			..Default::default()
+		// 		},
+		// 	})
+		// 	.await
+		// 	.unwrap()
+		// 	.as_slice(),
+		// 	&[timesheet.clone()],
+		// );
+
+		// assert_eq!(
+		// 	PgJob::retrieve(&connection, MatchJob {
+		// 		client: MatchOrganization {
+		// 			location: MatchLocation {
+		// 				id: Match::Or(vec![
+		// 					organization.location.id.into(),
+		// 					organization2.location.id.into()
+		// 				]),
+		// 				..Default::default()
+		// 			},
+		// 			..Default::default()
+		// 		},
+		// 		..Default::default()
+		// 	})
+		// 	.await
+		// 	.unwrap()
+		// 	.into_iter()
+		// 	.collect::<HashSet<_>>(),
+		// 	[
+		// 		job_one.clone(),
+		// 		job_two.clone(),
+		// 		job_three.clone(),
+		// 		job_four.clone(),
+		// 	]
+		// 	.into_iter()
+		// 	.collect::<HashSet<_>>(),
+		// );
 	}
 }

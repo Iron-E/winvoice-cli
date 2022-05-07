@@ -161,6 +161,7 @@ impl TimesheetAdapter for PgTimesheet
 		const COLUMNS: PgTimesheetColumns<'static> = PgTimesheetColumns {
 			id: "id",
 			employee: PgEmployeeColumns {
+				contact_info: "contact_information",
 				id: "employee_id",
 				organization: PgOrganizationColumns {
 					id: "employer_id",
@@ -171,6 +172,8 @@ impl TimesheetAdapter for PgTimesheet
 					id: "person_id",
 					name: "person_name",
 				},
+				status: "status",
+				title: "title",
 			},
 			expenses: "expenses",
 			job: PgJobColumns {

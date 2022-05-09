@@ -139,10 +139,7 @@ mod tests
 {
 	use std::collections::HashMap;
 
-	use clinvoice_adapter::{
-		schema::{LocationAdapter, OrganizationAdapter, PersonAdapter},
-		WriteWhereClause,
-	};
+	use clinvoice_adapter::schema::{LocationAdapter, OrganizationAdapter, PersonAdapter};
 	use clinvoice_match::{
 		MatchEmployee,
 		MatchLocation,

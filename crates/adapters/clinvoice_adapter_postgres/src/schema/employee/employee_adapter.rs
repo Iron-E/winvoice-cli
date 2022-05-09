@@ -141,6 +141,7 @@ mod tests
 
 	use clinvoice_adapter::schema::{LocationAdapter, OrganizationAdapter, PersonAdapter};
 	use clinvoice_match::{
+		Match,
 		MatchEmployee,
 		MatchLocation,
 		MatchOrganization,
@@ -344,26 +345,44 @@ mod tests
 			&[employee.clone()],
 		);
 
-		assert_eq!(
-			PgEmployee::retrieve(&connection, MatchEmployee {
-				contact_info: MatchSet::Contains(Default::default()),
+		assert!(PgEmployee::retrieve(&connection, MatchEmployee {
+			contact_info: MatchSet::Contains(Default::default()),
+			organization: MatchOrganization {
+				id: Match::Or(vec![
+					employee.organization.id.into(),
+					employee2.organization.id.into(),
+				]),
 				..Default::default()
-			})
-			.await
-			.unwrap()
-			.as_slice(),
-			&[employee],
-		);
+			},
+			..Default::default()
+		})
+		.await
+		.unwrap()
+		.into_iter()
+		.all(|e| e.organization.name == employee.organization.name &&
+			e.organization.location.name == employee.organization.location.name &&
+			e.person.name == employee.person.name &&
+			e.status == employee.status &&
+			e.title == employee.title));
 
-		assert_eq!(
-			PgEmployee::retrieve(&connection, MatchEmployee {
-				contact_info: MatchSet::Not(MatchSet::Contains(Default::default()).into()),
+		assert!(PgEmployee::retrieve(&connection, MatchEmployee {
+			contact_info: MatchSet::Not(MatchSet::Contains(Default::default()).into()),
+			organization: MatchOrganization {
+				id: Match::Or(vec![
+					employee.organization.id.into(),
+					employee2.organization.id.into(),
+				]),
 				..Default::default()
-			})
-			.await
-			.unwrap()
-			.as_slice(),
-			&[employee2],
-		);
+			},
+			..Default::default()
+		})
+		.await
+		.unwrap()
+		.into_iter()
+		.all(|e| e.organization.name == employee2.organization.name &&
+			e.organization.location.name == employee2.organization.location.name &&
+			e.person.name == employee2.person.name &&
+			e.status == employee2.status &&
+			e.title == employee2.title));
 	}
 }

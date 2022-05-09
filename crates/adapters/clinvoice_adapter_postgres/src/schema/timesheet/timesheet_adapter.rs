@@ -205,7 +205,7 @@ impl TimesheetAdapter for PgTimesheet
 mod tests
 {
 	use core::time::Duration;
-	use std::collections::{HashMap, HashSet};
+	use std::collections::HashMap;
 
 	use clinvoice_adapter::schema::{
 		EmployeeAdapter,
@@ -214,15 +214,7 @@ mod tests
 		OrganizationAdapter,
 		PersonAdapter,
 	};
-	use clinvoice_match::{
-		Match,
-		MatchEmployee,
-		MatchJob,
-		MatchLocation,
-		MatchOrganization,
-		MatchPerson,
-		MatchTimesheet,
-	};
+	use clinvoice_match::{MatchEmployee, MatchPerson, MatchTimesheet, MatchExpense, MatchSet};
 	use clinvoice_schema::{
 		chrono::{TimeZone, Utc},
 		Contact,
@@ -419,50 +411,16 @@ mod tests
 		)
 		.unwrap();
 
-		todo!("Finish this test");
-
-		// assert_eq!(
-		// 	PgTimesheet::retrieve(&connection, MatchTimesheet {
-		// 		employee: MatchEmployee {
-		// 			person: MatchPerson {
-		// 				name: employee.person.name.clone().into(),
-		// 				..Default::default()
-		// 			},
-		// 			..Default::default()
-		// 		},
-		// 	})
-		// 	.await
-		// 	.unwrap()
-		// 	.as_slice(),
-		// 	&[timesheet.clone()],
-		// );
-
-		// assert_eq!(
-		// 	PgJob::retrieve(&connection, MatchJob {
-		// 		client: MatchOrganization {
-		// 			location: MatchLocation {
-		// 				id: Match::Or(vec![
-		// 					organization.location.id.into(),
-		// 					organization2.location.id.into()
-		// 				]),
-		// 				..Default::default()
-		// 			},
-		// 			..Default::default()
-		// 		},
-		// 		..Default::default()
-		// 	})
-		// 	.await
-		// 	.unwrap()
-		// 	.into_iter()
-		// 	.collect::<HashSet<_>>(),
-		// 	[
-		// 		job_one.clone(),
-		// 		job_two.clone(),
-		// 		job_three.clone(),
-		// 		job_four.clone(),
-		// 	]
-		// 	.into_iter()
-		// 	.collect::<HashSet<_>>(),
-		// );
+		assert_eq!(
+			PgTimesheet::retrieve(&connection, MatchTimesheet {
+				expenses: MatchSet::Contains(MatchExpense {
+				}),
+				..Default::default()
+			})
+			.await
+			.unwrap()
+			.as_slice(),
+			&[timesheet],
+		);
 	}
 }

@@ -120,14 +120,12 @@ where
 				.await?;
 			}
 
-			let separator = if matches!(match_condition, MatchSet::And(_))
+			let separator = match match_condition
 			{
-				" AND"
-			}
-			else
-			{
-				" OR"
+				MatchSet::And(_) => " AND",
+				_ => " OR",
 			};
+
 			for c in conditions
 			{
 				query.push_str(separator);

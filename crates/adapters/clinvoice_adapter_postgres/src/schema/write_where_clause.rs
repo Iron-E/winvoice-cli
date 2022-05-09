@@ -205,7 +205,8 @@ where
 				alias,
 				condition,
 				query,
-			).await?;
+			)
+			.await?;
 			query.push(')');
 		},
 	};

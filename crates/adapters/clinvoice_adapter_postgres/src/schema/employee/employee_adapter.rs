@@ -1,9 +1,8 @@
-use core::fmt::Write;
 use std::collections::HashMap;
 
 use clinvoice_adapter::{schema::EmployeeAdapter, WriteWhereClause};
 use clinvoice_match::MatchEmployee;
-use clinvoice_schema::{Contact, Employee, Id, Organization, Person};
+use clinvoice_schema::{Contact, Employee, Organization, Person};
 use futures::TryStreamExt;
 use sqlx::{PgPool, Result};
 
@@ -45,58 +44,7 @@ impl EmployeeAdapter for PgEmployee
 		.fetch_one(&mut transaction)
 		.await?;
 
-		const INSERT_VALUES_APPROX_LEN: u8 = 39;
-		let mut contact_info_values =
-			String::with_capacity((INSERT_VALUES_APPROX_LEN as usize) * contact_info.len());
-
-		(0..contact_info.len()).map(|i| i * 6).for_each(|i| {
-			write!(
-				contact_info_values,
-				"(${}, ${}, ${}, ${}, ${}, ${}),",
-				i + 1,
-				i + 2,
-				i + 3,
-				i + 4,
-				i + 5,
-				i + 6,
-			)
-			.unwrap()
-		});
-		contact_info_values.pop(); // get rid of the trailing `,` since SQL can't handle that :/
-
-		contact_info
-			.iter()
-			.fold(
-				sqlx::query(&format!(
-					"INSERT INTO contact_information
-					(employee_id, label, export, address_id, email, phone)
-				VALUES {contact_info_values};",
-				)),
-				|mut query, (label, contact)| {
-					query = query.bind(row.id).bind(label);
-
-					match contact
-					{
-						Contact::Address { location, export } => query
-							.bind(export)
-							.bind(location.id)
-							.bind(None::<String>)
-							.bind(None::<String>),
-						Contact::Email { email, export } => query
-							.bind(export)
-							.bind(None::<Id>)
-							.bind(email)
-							.bind(None::<String>),
-						Contact::Phone { phone, export } => query
-							.bind(export)
-							.bind(None::<Id>)
-							.bind(None::<String>)
-							.bind(phone),
-					}
-				},
-			)
-			.execute(&mut transaction)
-			.await?;
+		Self::create_contact_info(&mut transaction, &contact_info, row.id).await?;
 
 		transaction.commit().await?;
 

@@ -19,7 +19,7 @@ pub enum MatchStr<S>
 	/// # Summary
 	///
 	/// Always match.
-	Always,
+	Any,
 
 	/// # Summary
 	///

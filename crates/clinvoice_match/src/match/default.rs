@@ -8,6 +8,6 @@ where
 {
 	fn default() -> Self
 	{
-		Self::Always
+		Self::Any
 	}
 }

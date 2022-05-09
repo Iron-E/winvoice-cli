@@ -25,7 +25,7 @@ where
 	/// # Summary
 	///
 	/// Always match.
-	Always,
+	Any,
 
 	/// # Summary
 	///
@@ -79,7 +79,7 @@ where
 			{
 				Match::And(match_conditions.into_iter().map(|m| m.map(f)).collect())
 			},
-			Self::Always => Match::Always,
+			Self::Any => Match::Any,
 			Self::EqualTo(x) => Match::EqualTo(f(x)),
 			Self::GreaterThan(x) => Match::GreaterThan(f(x)),
 			Self::InRange(low, high) => Match::InRange(f(low), f(high)),

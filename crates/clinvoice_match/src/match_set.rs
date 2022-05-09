@@ -19,13 +19,13 @@ where
 {
 	/// # Summary
 	///
-	/// Always match.
-	Always,
+	/// Match if and only if all of the contained [`Match`]es also match.
+	And(Vec<Self>),
 
 	/// # Summary
 	///
-	/// Match if and only if all of the contained [`Match`]es also match.
-	And(Vec<Self>),
+	/// Always match.
+	Any,
 
 	/// # Summary
 	///
@@ -64,7 +64,7 @@ where
 			{
 				MatchSet::And(match_conditions.into_iter().map(|m| m.map(f)).collect())
 			},
-			Self::Always => MatchSet::Always,
+			Self::Any => MatchSet::Any,
 			Self::Contains(x) => MatchSet::Contains(f(x)),
 			Self::Not(match_condition) => MatchSet::Not(match_condition.map(f).into()),
 			Self::Or(match_conditions) =>

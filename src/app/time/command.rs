@@ -63,7 +63,7 @@ impl Command
 					}
 					else
 					{
-						Match::Always
+						Match::Any
 					},
 					..Default::default()
 				},

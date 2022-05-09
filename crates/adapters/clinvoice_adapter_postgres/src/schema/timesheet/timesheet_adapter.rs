@@ -71,7 +71,7 @@ impl TimesheetAdapter for PgTimesheet
 		let mut query = String::from(
 			"SELECT
 				-- FIX: use latest PostgresEmployee code
-				array_agg((C.export, C.label, C.address_id, C.email, C.phone)) AS contact_info,
+				array_agg((C1.export, C1.label, C1.address_id, C1.email, C1.phone)) AS contact_info,
 				Client.name AS client_name, Client.location_id as client_location_id,
 				E.organization_id as employer_id, E.person_id, E.status, E.title,
 				Employer.name AS employer_name, Employer.location_id as employer_location_id,
@@ -81,12 +81,9 @@ impl TimesheetAdapter for PgTimesheet
 				T.id, T.employee_id, T.job_id, T.time_begin, T.time_end, T.work_notes,
 				array_agg(DISTINCT (X1.id, X1.category, X1.cost, X1.description)) AS expenses
 			FROM timesheets T
-			JOIN contact_information C ON (C.employee_id = T.employee_id)
+			JOIN contact_information C1 ON (C1.employee_id = T.id)
 			JOIN employees E ON (E.id = T.employee_id)
 			JOIN expenses X1 ON (X1.timesheet_id = T.id)
-			-- WARN: we *need* `X2` so it can be bound by a WHERE clause while not binding `X1`
-			-- TODO: use `WHERE EXISTS` instead
-			JOIN expenses X2 ON (X2.id = X1.id)
 			JOIN jobs J ON (E.id = T.employee_id)
 			JOIN organizations Client ON (Client.id = J.client_id)
 			JOIN organizations Employer ON (Employer.id = E.organization_id)
@@ -101,7 +98,14 @@ impl TimesheetAdapter for PgTimesheet
 								Schema::write_where_clause(
 									Schema::write_where_clause(
 										Schema::write_where_clause(
-											Default::default(),
+											crate::schema::write_where_clause::write_contact_set_where_clause(
+												connection,
+												Default::default(),
+												"C1",
+												&match_condition.employee.contact_info,
+												&mut query,
+											)
+											.await?,
 											"Client",
 											&match_condition.job.client,
 											&mut query,
@@ -126,15 +130,15 @@ impl TimesheetAdapter for PgTimesheet
 						&match_condition,
 						&mut query,
 					),
-					"X2",
-					&MatchExpense {
-						id: match_condition.expenses.id,
-						category: match_condition.expenses.category,
-						cost: match_condition
-							.expenses
-							.cost
-							.exchange(Default::default(), &exchange_rates.await?),
-						description: match_condition.expenses.description,
+					"X1",
+					{
+						let rates = exchange_rates.await?;
+						&match_condition.expenses.map(&|e| MatchExpense {
+							id: e.id,
+							category: e.category,
+							cost: e.cost.exchange(Default::default(), &rates),
+							description: e.description,
+						})
 					},
 					&mut query,
 				),

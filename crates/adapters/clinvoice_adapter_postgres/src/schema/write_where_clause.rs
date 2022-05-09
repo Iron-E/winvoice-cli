@@ -525,16 +525,91 @@ impl WriteWhereClause<&Match<Serde<Duration>>> for Schema
 			),
 			Match::Not(condition) => match condition.deref()
 			{
-				Match::Always => write_is_null(query, context, alias),
+				Match::Any => write_is_null(query, context, alias),
 				m => write_negated(query, context, alias, m),
 			},
 			Match::Or(conditions) => write_boolean_group::<_, _, _, false>(
 				query,
 				context,
 				alias,
-				&mut conditions.iter().filter(|m| *m != &Match::Always),
+				&mut conditions.iter().filter(|m| *m != &Match::Any),
 			),
 		};
+		WriteContext::AfterWhereCondition
+	}
+}
+
+impl WriteWhereClause<&MatchSet<MatchExpense>> for Schema
+{
+	fn write_where_clause(
+		context: WriteContext,
+		alias: impl Copy + Display,
+		match_condition: &MatchSet<MatchExpense>,
+		query: &mut String,
+	) -> WriteContext
+	{
+		match match_condition
+		{
+			MatchSet::Any => return context,
+
+			MatchSet::And(conditions) | MatchSet::Or(conditions) =>
+			{
+				let iter = &mut conditions.iter().filter(|m| *m != &MatchSet::Any);
+				write!(query, "{context} (").unwrap();
+				if let Some(c) = iter.next()
+				{
+					Schema::write_where_clause(WriteContext::InWhereCondition, alias, c, query);
+				}
+
+				let separator = match match_condition
+				{
+					MatchSet::And(_) => " AND",
+					_ => " OR",
+				};
+
+				for c in conditions
+				{
+					query.push_str(separator);
+					Schema::write_where_clause(WriteContext::InWhereCondition, alias, c, query);
+				}
+
+				query.push(')');
+			},
+
+			MatchSet::Contains(match_expense) =>
+			{
+				let subquery_alias = format!("{alias}_2");
+				write!(
+					query,
+					"{context} EXISTS (
+					SELECT FROM contact_information {subquery_alias}
+					WHERE {subquery_alias}.employee_id = {alias}.employee_id"
+				)
+				.unwrap();
+
+				Schema::write_where_clause(
+					WriteContext::AfterWhereCondition,
+					&subquery_alias,
+					match_expense,
+					query,
+				);
+
+				query.push(')');
+			},
+
+			MatchSet::Not(condition) =>
+			{
+				write!(query, "{context} NOT (").unwrap();
+				Schema::write_where_clause(
+					WriteContext::InWhereCondition,
+					alias,
+					condition.deref(),
+					query,
+				);
+				query.push(')');
+			},
+		};
+
 		WriteContext::AfterWhereCondition
 	}
 }

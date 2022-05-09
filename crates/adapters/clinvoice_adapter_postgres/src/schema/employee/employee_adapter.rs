@@ -139,8 +139,18 @@ mod tests
 {
 	use std::collections::HashMap;
 
-	use clinvoice_adapter::schema::{LocationAdapter, OrganizationAdapter, PersonAdapter};
-	use clinvoice_match::{MatchEmployee, MatchLocation, MatchOrganization, MatchPerson, MatchStr};
+	use clinvoice_adapter::{
+		schema::{LocationAdapter, OrganizationAdapter, PersonAdapter},
+		WriteWhereClause,
+	};
+	use clinvoice_match::{
+		MatchEmployee,
+		MatchLocation,
+		MatchOrganization,
+		MatchPerson,
+		MatchSet,
+		MatchStr,
+	};
 	use clinvoice_schema::Contact;
 	use futures::TryStreamExt;
 

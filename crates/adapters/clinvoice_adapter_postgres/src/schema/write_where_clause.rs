@@ -147,9 +147,9 @@ where
 			let subquery_alias = format!("{alias}_2");
 			write!(
 				query,
-				r#"{context} EXISTS (
+				"{context} EXISTS (
 				SELECT FROM contact_information {subquery_alias}
-				WHERE {subquery_alias}.employee_id = {alias}.employee_id"#
+				WHERE {subquery_alias}.employee_id = {alias}.employee_id"
 			)
 			.unwrap();
 

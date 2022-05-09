@@ -313,22 +313,7 @@ mod tests
 			),
 			PgEmployee::create(
 				&connection,
-				[
-					("Favorite Pizza Place".into(), Contact::Address {
-						location: arizona,
-						export: false,
-					}),
-					("Work Email".into(), Contact::Email {
-						email: "some_kind_of_email@f.com".into(),
-						export: true,
-					}),
-					("Office's Phone".into(), Contact::Phone {
-						phone: "555-555-8008".into(),
-						export: true,
-					}),
-				]
-				.into_iter()
-				.collect(),
+				Default::default(),
 				organization2,
 				person2,
 				"Management".into(),
@@ -344,7 +329,7 @@ mod tests
 					location: MatchLocation {
 						name: MatchStr::Or(vec![
 							employee.organization.location.name.clone().into(),
-							MatchStr::Contains(employee2.organization.location.name.into())
+							MatchStr::Contains(employee2.organization.location.name.clone())
 						]),
 						..Default::default()
 					},
@@ -359,7 +344,29 @@ mod tests
 			.await
 			.unwrap()
 			.as_slice(),
+			&[employee.clone()],
+		);
+
+		assert_eq!(
+			PgEmployee::retrieve(&connection, MatchEmployee {
+				contact_info: MatchSet::Contains(Default::default()),
+				..Default::default()
+			})
+			.await
+			.unwrap()
+			.as_slice(),
 			&[employee],
+		);
+
+		assert_eq!(
+			PgEmployee::retrieve(&connection, MatchEmployee {
+				contact_info: MatchSet::Not(MatchSet::Contains(Default::default()).into()),
+				..Default::default()
+			})
+			.await
+			.unwrap()
+			.as_slice(),
+			&[employee2],
 		);
 	}
 }

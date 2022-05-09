@@ -155,7 +155,7 @@ where
 
 			let ctx = Schema::write_where_clause(
 				Schema::write_where_clause(
-					context,
+					WriteContext::AfterWhereCondition,
 					&format!("{alias}.label"),
 					&match_contact.label,
 					query,
@@ -167,28 +167,29 @@ where
 
 			match match_contact.kind
 			{
-				MatchContactKind::Always => return Ok(ctx),
+				MatchContactKind::Always => (),
 
 				MatchContactKind::SomeAddress(ref location) =>
 				{
 					let location_id_query =
 						PgLocation::retrieve_matching_ids(connection, location).await?;
+
 					Schema::write_where_clause(
 						ctx,
 						&format!("{alias}.address_id"),
 						&location_id_query,
 						query,
-					)
+					);
 				},
 
 				MatchContactKind::SomeEmail(ref email_address) =>
 				{
-					Schema::write_where_clause(ctx, &format!("{alias}.email"), email_address, query)
+					Schema::write_where_clause(ctx, &format!("{alias}.email"), email_address, query);
 				},
 
 				MatchContactKind::SomePhone(ref phone_number) =>
 				{
-					Schema::write_where_clause(ctx, &format!("{alias}.phone"), phone_number, query)
+					Schema::write_where_clause(ctx, &format!("{alias}.phone"), phone_number, query);
 				},
 			};
 
@@ -210,50 +211,6 @@ where
 	};
 
 	Ok(WriteContext::AfterWhereCondition)
-}
-
-/// # Summary
-///
-/// Check if some `alias` has `ANY` or `ALL` of the `values` provided.
-///
-/// * If `union` is `true`, a check is done to see if `ALL` of the `values` are `alias`.
-/// * If `union` is `false`, a check is done to see if `ANY` of the `values` are `alias`.
-///
-/// NOTE: the above is not proper [`Match`] syntax, since they need to wrap their inner value in a
-///       [`std::borrow::Cow`].  the linked documentation for proper examples.
-///
-/// The rest of the args are the same as [`WriteSql::write_where`].
-fn write_has<T>(
-	query: &mut String,
-	context: WriteContext,
-	alias: impl Copy + Display,
-	values: impl IntoIterator<Item = T>,
-	union: bool,
-) where
-	T: Copy + Display,
-{
-	let mut iter = values.into_iter();
-
-	if let Some(id) = iter.next()
-	{
-		write!(
-			query,
-			"{context} {alias} {}{id}",
-			if union { "= ALL(ARRAY[" } else { "IN (" },
-		)
-		.unwrap()
-	}
-
-	iter.for_each(|id| write!(query, ", {id}").unwrap());
-
-	if union
-	{
-		query.push_str("])")
-	}
-	else
-	{
-		query.push(')')
-	}
 }
 
 /// # Summary

@@ -582,8 +582,8 @@ impl WriteWhereClause<&MatchSet<MatchExpense>> for Schema
 				write!(
 					query,
 					"{context} EXISTS (
-					SELECT FROM contact_information {subquery_alias}
-					WHERE {subquery_alias}.employee_id = {alias}.employee_id"
+					SELECT FROM expenses {subquery_alias}
+					WHERE {subquery_alias}.id = {alias}.id"
 				)
 				.unwrap();
 

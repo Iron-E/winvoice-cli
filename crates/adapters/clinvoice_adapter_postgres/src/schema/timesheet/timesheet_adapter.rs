@@ -165,7 +165,7 @@ impl TimesheetAdapter for PgTimesheet
 		const COLUMNS: PgTimesheetColumns<'static> = PgTimesheetColumns {
 			id: "id",
 			employee: PgEmployeeColumns {
-				contact_info: "contact_information",
+				contact_info: "contact_info",
 				id: "employee_id",
 				organization: PgOrganizationColumns {
 					id: "employer_id",
@@ -205,7 +205,7 @@ impl TimesheetAdapter for PgTimesheet
 mod tests
 {
 	use core::time::Duration;
-	use std::collections::HashMap;
+	use std::collections::{HashMap, HashSet};
 
 	use clinvoice_adapter::schema::{
 		EmployeeAdapter,
@@ -214,7 +214,7 @@ mod tests
 		OrganizationAdapter,
 		PersonAdapter,
 	};
-	use clinvoice_match::{MatchEmployee, MatchPerson, MatchTimesheet, MatchExpense, MatchSet};
+	use clinvoice_match::{Match, MatchEmployee, MatchOrganization, MatchSet, MatchTimesheet};
 	use clinvoice_schema::{
 		chrono::{TimeZone, Utc},
 		Contact,
@@ -413,14 +413,24 @@ mod tests
 
 		assert_eq!(
 			PgTimesheet::retrieve(&connection, MatchTimesheet {
-				expenses: MatchSet::Contains(MatchExpense {
-				}),
+				expenses: MatchSet::Not(MatchSet::Contains(Default::default()).into()),
+				employee: MatchEmployee {
+					organization: MatchOrganization {
+						id: Match::Or(vec![
+							timesheet.employee.organization.id.into(),
+							timesheet2.employee.organization.id.into(),
+						]),
+						..Default::default()
+					},
+					..Default::default()
+				},
 				..Default::default()
 			})
 			.await
 			.unwrap()
-			.as_slice(),
-			&[timesheet],
+			.into_iter()
+			.collect::<HashSet<_>>(),
+			[timesheet, timesheet2].into_iter().collect(),
 		);
 	}
 }

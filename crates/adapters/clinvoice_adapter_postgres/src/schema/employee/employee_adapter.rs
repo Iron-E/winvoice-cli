@@ -70,7 +70,7 @@ impl EmployeeAdapter for PgEmployee
 				O.name AS organization_name, O.location_id,
 				P.name
 			FROM employees E
-			JOIN contact_information C1 ON (C1.employee_id = E.id)
+			LEFT JOIN contact_information C1 ON (C1.employee_id = E.id)
 			JOIN organizations O ON (O.id = E.organization_id)
 			JOIN people P ON (P.id = E.person_id)",
 		);

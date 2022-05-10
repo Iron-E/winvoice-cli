@@ -81,9 +81,9 @@ impl TimesheetAdapter for PgTimesheet
 				T.id, T.employee_id, T.job_id, T.time_begin, T.time_end, T.work_notes,
 				array_agg(DISTINCT (X1.id, X1.category, X1.cost, X1.description)) AS expenses
 			FROM timesheets T
-			JOIN contact_information C1 ON (C1.employee_id = T.id)
+			LEFT JOIN contact_information C1 ON (C1.employee_id = T.employee_id)
+			LEFT JOIN expenses X1 ON (X1.timesheet_id = T.id)
 			JOIN employees E ON (E.id = T.employee_id)
-			JOIN expenses X1 ON (X1.timesheet_id = T.id)
 			JOIN jobs J ON (E.id = T.employee_id)
 			JOIN organizations Client ON (Client.id = J.client_id)
 			JOIN organizations Employer ON (Employer.id = E.organization_id)

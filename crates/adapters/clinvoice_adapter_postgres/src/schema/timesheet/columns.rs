@@ -32,30 +32,41 @@ impl PgTimesheetColumns<'_>
 			id: row.get(self.id),
 			employee: employee.await?,
 			expenses: {
-				let vec: Vec<(Id, String, String, String)> = row.get(self.expenses);
-				let mut expenses = Vec::with_capacity(vec.len());
-				vec.into_iter()
-					.try_for_each(|(id, category, cost, description)| {
-						Ok(expenses.push(Expense {
-							id,
-							category,
-							cost: Money {
-								amount: cost.parse()?,
-								..Default::default()
-							},
-							description,
-						}))
-					})
-					.and(Ok(expenses))
-					.map_err(|e: <Decimal as FromStr>::Err| {
-						Error::Decode(
-							format!(
-								"`expense.cost` is not validly formatted: {e}\nThe constraints on table \
-								 `jobs` have failed"
+				match row.try_get::<Vec<(Id, String, String, String)>, _>(self.expenses)
+				{
+					Ok(expenses) =>
+					{
+						let len = expenses.len();
+						expenses
+							.into_iter()
+							.try_fold(
+								Vec::with_capacity(len),
+								|mut v, (id, category, cost, description)| {
+									v.push(Expense {
+										id,
+										category,
+										cost: Money {
+											amount: cost.parse()?,
+											..Default::default()
+										},
+										description,
+									});
+									Ok(v)
+								},
 							)
-							.into(),
-						)
-					})?
+							.map_err(|e: <Decimal as FromStr>::Err| {
+								Error::Decode(
+									format!(
+										"`expense.cost` is not validly formatted: {e}\nThe constraints on \
+										 table `jobs` have failed"
+									)
+									.into(),
+								)
+							})?
+					},
+					Err(Error::ColumnNotFound(_)) => Vec::with_capacity(0),
+					Err(e) => return Err(e),
+				}
 			},
 			job: job.await?,
 			time_begin: row.get(self.time_begin),

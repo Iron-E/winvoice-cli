@@ -64,15 +64,15 @@ impl EmployeeAdapter for PgEmployee
 			PgLocation::retrieve_matching_ids(connection, &match_condition.organization.location);
 
 		let mut query = String::from(
-			"SELECT
-				array_agg((C1.export, C1.label, C1.address_id, C1.email, C1.phone)) AS contact_info,
+			r#"SELECT
+				array_agg((C1.export, C1.label, C1.address_id, C1.email, C1.phone)) AS "contact_info?",
 				E.id, E.organization_id, E.person_id, E.status, E.title,
 				O.name AS organization_name, O.location_id,
 				P.name
 			FROM employees E
 			LEFT JOIN contact_information C1 ON (C1.employee_id = E.id)
 			JOIN organizations O ON (O.id = E.organization_id)
-			JOIN people P ON (P.id = E.person_id)",
+			JOIN people P ON (P.id = E.person_id)"#,
 		);
 		Schema::write_where_clause(
 			Schema::write_where_clause(

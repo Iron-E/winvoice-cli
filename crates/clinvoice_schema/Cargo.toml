@@ -16,7 +16,6 @@ futures = "0.3"
 
 # CLInvoice
 clinvoice_finance = {path='../clinvoice_finance', version="0.2"}
-clinvoice_error = {path='../clinvoice_error', version="0.2"}
 
 # Date/Time
 chrono = {version="0.4", features=["serde"]}

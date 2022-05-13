@@ -359,7 +359,8 @@ mod tests
 		.await
 		.unwrap()
 		.into_iter()
-		.all(|e| e.organization.name == employee.organization.name &&
+		.all(|e| e.contact_info == employee.contact_info &&
+			e.organization.name == employee.organization.name &&
 			e.organization.location.name == employee.organization.location.name &&
 			e.person.name == employee.person.name &&
 			e.status == employee.status &&
@@ -379,7 +380,8 @@ mod tests
 		.await
 		.unwrap()
 		.into_iter()
-		.all(|e| e.organization.name == employee2.organization.name &&
+		.all(|e| e.contact_info == employee2.contact_info &&
+			e.organization.name == employee2.organization.name &&
 			e.organization.location.name == employee2.organization.location.name &&
 			e.person.name == employee2.person.name &&
 			e.status == employee2.status &&

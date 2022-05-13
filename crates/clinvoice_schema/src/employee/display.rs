@@ -13,11 +13,11 @@ impl Display for Employee
 		{
 			writeln!(formatter, "\tEmployee Contact Info:")?;
 
-			let mut sorted_employee_contact_info: Vec<&String> = self.contact_info.keys().collect();
-			sorted_employee_contact_info.sort();
+			let mut sorted_employee_contact_info = self.contact_info.clone();
+			sorted_employee_contact_info.sort_by(|c1, c2| c1.label().cmp(c2.label()));
 			sorted_employee_contact_info
 				.into_iter()
-				.try_for_each(|c| writeln!(formatter, "\t\t- {c}: {}", self.contact_info[c]))?;
+				.try_for_each(|c| writeln!(formatter, "\t\t- {c}"))?;
 		}
 
 		write!(formatter, "\tStatus: {}", self.status)
@@ -65,14 +65,16 @@ mod tests
 
 		let employee = Employee {
 			contact_info: vec![
-				("Place of Work".into(), Contact::Address {
+				Contact::Address {
 					location: work_street_view.clone(),
+					label: "Place of Work".into(),
 					export: false,
-				}),
-				("Work Email".into(), Contact::Email {
+				},
+				Contact::Email {
 					email: "foo@bar.io".into(),
+					label: "Work Email".into(),
 					export: false,
-				}),
+				},
 			]
 			.into_iter()
 			.collect(),

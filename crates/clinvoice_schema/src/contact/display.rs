@@ -10,16 +10,19 @@ impl Display for Contact
 		{
 			Contact::Address {
 				location,
+				label,
 				export: _,
-			} => location.fmt(formatter),
+			} => write!(formatter, "{label}: {location}"),
 			Contact::Email {
 				email: s,
+				label,
 				export: _,
 			} |
 			Contact::Phone {
 				phone: s,
+				label,
 				export: _,
-			} => write!(formatter, "{s}"),
+			} => write!(formatter, "{label}: {s}"),
 		}
 	}
 }
@@ -68,24 +71,27 @@ mod tests
 
 		assert_eq!(
 			format!("{}", Contact::Address {
+				label: "Office".into(),
 				location: street_view,
 				export: false,
 			}),
-			"1337 Some Street, Phoenix, Arizona, USA, Earth"
+			"Office: 1337 Some Street, Phoenix, Arizona, USA, Earth"
 		);
 		assert_eq!(
 			format!("{}", Contact::Email {
 				email: "foo@bar.io".into(),
+				label: "Email".into(),
 				export: false,
 			}),
-			"foo@bar.io"
+			"Email: foo@bar.io"
 		);
 		assert_eq!(
 			format!("{}", Contact::Phone {
 				phone: "1-603-555-5555".into(),
+				label: "Cellphone".into(),
 				export: false,
 			}),
-			"1-603-555-5555"
+			"Cellphone: 1-603-555-5555"
 		);
 	}
 }

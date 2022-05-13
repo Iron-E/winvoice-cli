@@ -1,13 +1,13 @@
 use super::Employee;
-use crate::RestorableSerde;
+use crate::{RestorableSerde, RestoreResult};
 
 impl RestorableSerde for Employee
 {
-	fn restore(&mut self, original: &Self)
+	fn try_restore(&mut self, original: &Self) -> RestoreResult<()>
 	{
-		self.contact_info.restore(&original.contact_info);
+		self.contact_info.try_restore(&original.contact_info)?;
 		self.id = original.id;
-		self.organization.restore(&original.organization);
-		self.person.restore(&original.person);
+		self.organization.try_restore(&original.organization)?;
+		self.person.try_restore(&original.person)
 	}
 }

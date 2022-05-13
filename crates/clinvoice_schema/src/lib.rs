@@ -31,6 +31,7 @@ mod markdown;
 mod organization;
 mod person;
 mod restorable_serde;
+mod restore_error;
 mod timesheet;
 
 pub use chrono;
@@ -47,4 +48,5 @@ pub use location::Location;
 pub use organization::Organization;
 pub use person::Person;
 pub use restorable_serde::RestorableSerde;
+pub use restore_error::{RestoreError, RestoreResult};
 pub use timesheet::Timesheet;

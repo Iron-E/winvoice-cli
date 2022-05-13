@@ -1,10 +1,11 @@
 use super::Location;
-use crate::RestorableSerde;
+use crate::{RestorableSerde, RestoreResult};
 
 impl RestorableSerde for Location
 {
-	fn restore(&mut self, original: &Self)
+	fn try_restore(&mut self, original: &Self) -> RestoreResult<()>
 	{
 		self.id = original.id;
+		Ok(())
 	}
 }

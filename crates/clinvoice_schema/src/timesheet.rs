@@ -13,7 +13,6 @@ use serde::{Deserialize, Serialize};
 
 use super::{
 	markdown::{Element, Text},
-	Contact,
 	Employee,
 	Job,
 };
@@ -146,15 +145,7 @@ impl Timesheet
 				.employee
 				.contact_info
 				.iter()
-				.filter(|(_, c)| match c
-				{
-					Contact::Address {
-						location: _,
-						export,
-					} => *export,
-					Contact::Email { email: _, export } => *export,
-					Contact::Phone { phone: _, export } => *export,
-				})
+				.filter(|c| c.export())
 				.collect();
 
 			if !employee_contact_info.is_empty()
@@ -166,15 +157,23 @@ impl Timesheet
 				.unwrap();
 
 				let mut sorted_employee_contact_info = employee_contact_info;
-				sorted_employee_contact_info.sort_by_key(|(label, _)| *label);
+				sorted_employee_contact_info.sort_by_key(|c| c.label());
 
 				sorted_employee_contact_info
 					.into_iter()
-					.try_for_each(|(label, contact)| {
-						writeln!(output, "{}: {contact}", Element::UnorderedList {
-							depth: 1,
-							text: Text::Bold(label),
-						})
+					.try_for_each(|contact| {
+						writeln!(
+							output,
+							"{}: {}",
+							Element::UnorderedList {
+								depth: 1,
+								text: Text::Bold(contact.label()),
+							},
+							// The part we want is in `[`, `]`.
+							// The matches are in `(`, `)`.
+							// "Multiple colons(: )this is the end(: )[555-555-5555]"
+							contact.to_string().split(": ").last().unwrap_or(""),
+						)
 					})
 					.unwrap();
 			}

@@ -1,11 +1,11 @@
 use super::Organization;
-use crate::RestorableSerde;
+use crate::{RestorableSerde, RestoreResult};
 
 impl RestorableSerde for Organization
 {
-	fn restore(&mut self, original: &Self)
+	fn try_restore(&mut self, original: &Self) -> RestoreResult<()>
 	{
 		self.id = original.id;
-		self.location.restore(&original.location);
+		self.location.try_restore(&original.location)
 	}
 }

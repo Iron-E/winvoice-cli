@@ -1,10 +1,11 @@
 use super::Person;
-use crate::RestorableSerde;
+use crate::{RestorableSerde, RestoreResult};
 
 impl RestorableSerde for Person
 {
-	fn restore(&mut self, original: &Self)
+	fn try_restore(&mut self, original: &Self) -> RestoreResult<()>
 	{
 		self.id = original.id;
+		Ok(())
 	}
 }

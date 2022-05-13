@@ -1,11 +1,11 @@
 use super::Job;
-use crate::RestorableSerde;
+use crate::{RestorableSerde, RestoreResult};
 
 impl RestorableSerde for Job
 {
-	fn restore(&mut self, original: &Self)
+	fn try_restore(&mut self, original: &Self) -> RestoreResult<()>
 	{
-		self.client.restore(&original.client);
 		self.id = original.id;
+		self.client.try_restore(&original.client)
 	}
 }

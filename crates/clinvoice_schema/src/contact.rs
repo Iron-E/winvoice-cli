@@ -19,7 +19,9 @@ pub enum Contact
 	/// A [`Location`](crate::Location).
 	Address
 	{
-		location: Location, export: bool
+		location: Location,
+		label: String,
+		export: bool,
 	},
 
 	/// # Summary
@@ -31,7 +33,9 @@ pub enum Contact
 	/// * 'foo@bar.io'
 	Email
 	{
-		email: String, export: bool
+		email: String,
+		label: String,
+		export: bool,
 	},
 
 	/// # Summary
@@ -53,6 +57,55 @@ pub enum Contact
 	/// * '6035551234'
 	Phone
 	{
-		phone: String, export: bool
+		phone: String,
+		export: bool,
+		label: String,
 	},
+}
+
+impl Contact
+{
+	pub fn export(&self) -> bool
+	{
+		match self
+		{
+			Self::Address {
+				location: _,
+				label: _,
+				export,
+			} |
+			Self::Email {
+				label: _,
+				email: _,
+				export,
+			} |
+			Self::Phone {
+				label: _,
+				phone: _,
+				export,
+			} => *export,
+		}
+	}
+
+	pub fn label(&self) -> &str
+	{
+		match self
+		{
+			Contact::Address {
+				location: _,
+				label,
+				export: _,
+			} |
+			Contact::Email {
+				email: _,
+				export: _,
+				label,
+			} |
+			Contact::Phone {
+				export: _,
+				label,
+				phone: _,
+			} => label,
+		}
+	}
 }

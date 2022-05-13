@@ -48,7 +48,6 @@ impl Display for Timesheet
 mod tests
 {
 	use core::time::Duration;
-	use std::collections::HashMap;
 
 	use chrono::Utc;
 	use clinvoice_finance::{Currency, Money};
@@ -89,26 +88,25 @@ mod tests
 			outer: Some(phoenix_view.into()),
 		};
 
-		let contact_info: HashMap<String, Contact> = vec![
-			("Street Address".into(), Contact::Address {
-				location: street_view.clone(),
-				export: false,
-			}),
-			("Email".into(), Contact::Email {
-				email: "foo@bar.io".into(),
-				export: false,
-			}),
-			("Phone".into(), Contact::Phone {
-				phone: "1-800-555-5555".into(),
-				export: false,
-			}),
-		]
-		.into_iter()
-		.collect();
-
 		let timesheet = Timesheet {
 			employee: Employee {
-				contact_info: contact_info.clone(),
+				contact_info: vec![
+					Contact::Address {
+						location: street_view.clone(),
+						label: "Street Address".into(),
+						export: false,
+					},
+					Contact::Email {
+						email: "foo@bar.io".into(),
+						label: "Email".into(),
+						export: false,
+					},
+					Contact::Phone {
+						phone: "1-800-555-5555".into(),
+						label: "Phone".into(),
+						export: false,
+					},
+				],
 				organization: Organization {
 					location: street_view.clone(),
 					name: "Big Test Organization".into(),

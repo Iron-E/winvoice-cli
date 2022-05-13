@@ -1,5 +1,4 @@
-use core::hash::Hash;
-use std::collections::HashMap;
+use crate::RestoreResult;
 
 /// # Summary
 ///
@@ -11,21 +10,18 @@ pub trait RestorableSerde
 	///
 	/// Take some elements of an `original` and restore them from the defaults which were assigned
 	/// upon deserialization.
-	fn restore(&mut self, original: &Self);
+	fn try_restore(&mut self, original: &Self) -> RestoreResult<()>;
 }
 
-impl<K, V> RestorableSerde for HashMap<K, V>
+impl<T> RestorableSerde for Vec<T>
 where
-	K: Eq + Hash,
-	V: RestorableSerde,
+	T: RestorableSerde,
 {
-	fn restore(&mut self, original: &Self)
+	fn try_restore(&mut self, original: &Self) -> RestoreResult<()>
 	{
-		self.iter_mut().for_each(|(key, value)| {
-			if let Some(original_value) = original.get(key)
-			{
-				value.restore(original_value)
-			}
-		});
+		self
+			.iter_mut()
+			.zip(original)
+			.try_for_each(|(edited, original)| edited.try_restore(original))
 	}
 }

@@ -290,7 +290,7 @@ mod tests
 		};
 
 		let testy_mctesterson = Employee {
-			contact_info: vec![].into_iter().collect(),
+			contact_info: Vec::new(),
 			id: 0,
 			organization: organization.clone(),
 			person: Person {
@@ -302,7 +302,7 @@ mod tests
 		};
 
 		let bob = Employee {
-			contact_info: HashMap::new(),
+			contact_info: Vec::new(),
 			id: 0,
 			organization: organization.clone(),
 			person: Person {

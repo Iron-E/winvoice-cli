@@ -3,8 +3,6 @@ mod hash;
 mod partial_eq;
 mod restorable_serde;
 
-use std::collections::HashMap;
-
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 
@@ -21,11 +19,7 @@ pub struct Employee
 	/// # Summary
 	///
 	/// Contact information specific to the [`Organization`] that the [`Employee`] does work for.
-	///
-	/// # Remarks
-	///
-	/// Keys in the [map](HashMap) are labels of the contact is (e.g. "Primary Phone").
-	pub contact_info: HashMap<String, Contact>,
+	pub contact_info: Vec<Contact>,
 
 	/// # Summary
 	///

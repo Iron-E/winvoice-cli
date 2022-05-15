@@ -202,8 +202,7 @@ impl TimesheetAdapter for PgTimesheet
 							.map_ok(Some)
 							.await
 					},
-					// If `PgContactInfo::retrieve` does not match, then the whole `employee` does not
-					// match.
+					// If `PgContactInfo::retrieve` does not match, then the whole `timesheet` does not match.
 					_ => return Ok(None),
 				}
 			})

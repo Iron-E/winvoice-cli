@@ -340,14 +340,12 @@ mod tests
 		.await
 		.unwrap()
 		.into_iter()
-		.all(|e|
-			e.contact_info == employee.contact_info &&
+		.all(|e| e.contact_info == employee.contact_info &&
 			e.organization.name == employee.organization.name &&
 			e.organization.location.name == employee.organization.location.name &&
 			e.person.name == employee.person.name &&
 			e.status == employee.status &&
-			e.title == employee.title
-		));
+			e.title == employee.title));
 
 		assert!(PgEmployee::retrieve(&connection, MatchEmployee {
 			contact_info: MatchSet::Not(MatchSet::Contains(Default::default()).into()),

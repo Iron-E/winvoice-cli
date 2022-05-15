@@ -1,6 +1,6 @@
 use clinvoice_schema::{Contact, ContactKind};
 use futures::TryFutureExt;
-use sqlx::{postgres::PgRow, Error, PgPool, Result, Row, error::UnexpectedNullError};
+use sqlx::{error::UnexpectedNullError, postgres::PgRow, Error, PgPool, Result, Row};
 
 use crate::schema::PgLocation;
 
@@ -26,7 +26,10 @@ impl PgContactColumns<'_>
 		let label = match row.try_get(self.label)
 		{
 			Ok(l) => l,
-			Err(Error::ColumnDecode { index: _, source: s }) if s.is::<UnexpectedNullError>() => return Ok(None),
+			Err(Error::ColumnDecode {
+				index: _,
+				source: s,
+			}) if s.is::<UnexpectedNullError>() => return Ok(None),
 			Err(e) => return Err(e),
 		};
 		let kind_fut = async {

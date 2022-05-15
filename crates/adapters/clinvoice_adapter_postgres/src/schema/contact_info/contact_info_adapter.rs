@@ -1,10 +1,11 @@
 use core::fmt::Write;
+use std::collections::HashMap;
 
 use clinvoice_adapter::schema::ContactInfoAdapter;
 use clinvoice_match::{MatchContact, MatchSet};
 use clinvoice_schema::{Contact, ContactKind, Id};
-use futures::stream::TryStreamExt;
-use sqlx::{Executor, PgPool, Postgres, Result};
+use futures::StreamExt;
+use sqlx::{Executor, PgPool, Postgres, Result, Row};
 
 use super::{columns::PgContactColumns, PgContactInfo};
 use crate::schema::write_where_clause;
@@ -89,9 +90,19 @@ impl ContactInfoAdapter for PgContactInfo
 	async fn retrieve(
 		connection: &PgPool,
 		match_condition: MatchSet<MatchContact>,
-	) -> Result<Vec<Contact>>
+	) -> Result<HashMap<Id, Vec<Contact>>>
 	{
-		let mut query = String::from("SELECT * FROM contact_info C");
+		let mut query = String::from(
+			r#"SELECT
+				C.address_id,
+				C.email,
+				E.id as "employee_id",
+				C.export as "export",
+				C.label as "label",
+				C.phone
+			FROM employees E
+			LEFT JOIN contact_information C ON (C.employee_id = E.id)"#,
+		);
 		write_where_clause::write_contact_set_where_clause(
 			connection,
 			Default::default(),
@@ -111,10 +122,26 @@ impl ContactInfoAdapter for PgContactInfo
 			phone: "phone",
 		};
 
-		sqlx::query(&query)
-			.fetch(connection)
-			.and_then(|row| async move { COLUMNS.row_to_view(connection, &row).await })
-			.try_collect()
-			.await
+		let mut map = HashMap::new();
+		let mut rows = sqlx::query(&query).fetch(connection);
+		while let Some(result) = rows.next().await
+		{
+			let row = result?;
+			let employee_id = row.get::<Id, _>(COLUMNS.employee_id);
+			if !map.contains_key(&employee_id)
+			{
+				map.insert(employee_id, Vec::new());
+			}
+
+			if let Some(contact) = COLUMNS.row_to_view(connection, &row).await?
+			{
+				// TODO: use `IndexSet` or let chains
+				if let Some(ref mut contact_info) = map.get_mut(&employee_id)
+				{
+					contact_info.push(contact);
+				}
+			}
+		}
+		Ok(map)
 	}
 }

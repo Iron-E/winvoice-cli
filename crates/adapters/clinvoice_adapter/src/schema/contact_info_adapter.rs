@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use clinvoice_match::{MatchContact, MatchSet};
 use clinvoice_schema::{Contact, ContactKind, Id};
 use sqlx::{Executor, Pool, Result};
@@ -37,5 +39,5 @@ pub trait ContactInfoAdapter:
 	async fn retrieve(
 		connection: &Pool<<Self as Deletable>::Db>,
 		match_condition: MatchSet<MatchContact>,
-	) -> Result<Vec<<Self as Deletable>::Entity>>;
+	) -> Result<HashMap<Id, Vec<<Self as Deletable>::Entity>>>;
 }

@@ -192,18 +192,20 @@ impl TimesheetAdapter for PgTimesheet
 		let contact_info = &contact_info_fut.await?;
 		sqlx::query(&query)
 			.fetch(connection)
-			.and_then(|row| async move {
-				COLUMNS
-					.row_to_view(
-						connection,
-						contact_info
-							.iter()
-							.filter(|c| c.employee_id == row.get::<Id, _>(COLUMNS.employee.id))
-							.cloned()
-							.collect(),
-						&row,
-					)
-					.await
+			.try_filter_map(|row| async move {
+				match contact_info.get(&row.get::<Id, _>(COLUMNS.employee.id))
+				{
+					Some(employee_contact_info) =>
+					{
+						COLUMNS
+							.row_to_view(connection, employee_contact_info.clone(), &row)
+							.map_ok(Some)
+							.await
+					},
+					// If `PgContactInfo::retrieve` does not match, then the whole `employee` does not
+					// match.
+					_ => return Ok(None),
+				}
 			})
 			.try_collect()
 			.await

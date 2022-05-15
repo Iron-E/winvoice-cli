@@ -1,5 +1,6 @@
 use clinvoice_schema::{Contact, ContactKind};
-use sqlx::{postgres::PgRow, Error, PgPool, Result, Row};
+use futures::TryFutureExt;
+use sqlx::{postgres::PgRow, Error, PgPool, Result, Row, error::UnexpectedNullError};
 
 use crate::schema::PgLocation;
 
@@ -20,30 +21,41 @@ impl PgContactColumns<'_>
 		self,
 		connection: &PgPool,
 		row: &PgRow,
-	) -> Result<Contact>
+	) -> Result<Option<Contact>>
 	{
-		Ok(Contact {
-			label: row.get(self.label),
-			export: row.get(self.export),
-			employee_id: row.get(self.employee_id),
-			kind: match row
+		let label = match row.try_get(self.label)
+		{
+			Ok(l) => l,
+			Err(Error::ColumnDecode { index: _, source: s }) if s.is::<UnexpectedNullError>() => return Ok(None),
+			Err(e) => return Err(e),
+		};
+		let kind_fut = async {
+			match row
 				.get::<Option<_>, _>(self.email)
 				.map(ContactKind::Email)
 				.or_else(|| row.get::<Option<_>, _>(self.phone).map(ContactKind::Phone))
+				.map(Ok)
 			{
 				Some(kind) => kind,
-				_ => ContactKind::Address(
-					PgLocation::retrieve_by_id(
-						connection,
-						row.get::<Option<_>, _>(self.address_id).ok_or_else(|| {
-							Error::Decode(
-								"Row of `contact_info` did not match any `Contact` equivalent".into(),
-							)
-						})?,
-					)
-					.await?,
-				),
-			},
-		})
+				_ =>
+				{
+					let address_id = row.get::<Option<_>, _>(self.address_id).ok_or_else(|| {
+						Error::Decode(
+							"Row of `contact_info` did not match any `Contact` equivalent".into(),
+						)
+					})?;
+					PgLocation::retrieve_by_id(connection, address_id)
+						.map_ok(|location| ContactKind::Address(location))
+						.await
+				},
+			}
+		};
+
+		Ok(Some(Contact {
+			label,
+			export: row.get(self.export),
+			employee_id: row.get(self.employee_id),
+			kind: kind_fut.await?,
+		}))
 	}
 }

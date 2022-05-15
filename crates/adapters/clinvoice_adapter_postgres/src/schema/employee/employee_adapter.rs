@@ -4,7 +4,7 @@ use clinvoice_adapter::{
 };
 use clinvoice_match::MatchEmployee;
 use clinvoice_schema::{ContactKind, Employee, Id, Organization, Person};
-use futures::TryStreamExt;
+use futures::{TryFutureExt, TryStreamExt};
 use sqlx::{PgPool, Result, Row};
 
 use super::{columns::PgEmployeeColumns, PgEmployee};
@@ -112,20 +112,20 @@ impl EmployeeAdapter for PgEmployee
 		let contact_info = &contact_info_fut.await?;
 		sqlx::query(&query)
 			.fetch(connection)
-			.and_then(|row| async move {
-				COLUMNS
-					.row_to_view(
-						connection,
-						// Contact info may belong to multiple different employees.
-						// We must filter it before associating it with a specific employee.
-						contact_info
-							.iter()
-							.filter(|c| c.employee_id == row.get::<Id, _>(COLUMNS.id))
-							.cloned()
-							.collect(),
-						&row,
-					)
-					.await
+			.try_filter_map(|row| async move {
+				match contact_info.get(&row.get::<Id, _>(COLUMNS.id))
+				{
+					Some(employee_contact_info) =>
+					{
+						COLUMNS
+							.row_to_view(connection, employee_contact_info.clone(), &row)
+							.map_ok(Some)
+							.await
+					},
+					// If `PgContactInfo::retrieve` does not match, then the whole `employee` does not
+					// match.
+					_ => return Ok(None),
+				}
 			})
 			.try_collect()
 			.await
@@ -340,12 +340,14 @@ mod tests
 		.await
 		.unwrap()
 		.into_iter()
-		.all(|e| e.contact_info == employee.contact_info &&
+		.all(|e|
+			e.contact_info == employee.contact_info &&
 			e.organization.name == employee.organization.name &&
 			e.organization.location.name == employee.organization.location.name &&
 			e.person.name == employee.person.name &&
 			e.status == employee.status &&
-			e.title == employee.title));
+			e.title == employee.title
+		));
 
 		assert!(PgEmployee::retrieve(&connection, MatchEmployee {
 			contact_info: MatchSet::Not(MatchSet::Contains(Default::default()).into()),

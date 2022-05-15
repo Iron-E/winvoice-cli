@@ -3,6 +3,7 @@
 //! This module implements adapters (and associated adapter types such as
 //! [`Deletable`](clinvoice_adapter::Deletable)) for a Postgres filesystem.
 
+mod contact_info;
 mod employee;
 mod initializable;
 mod interval;
@@ -18,6 +19,7 @@ mod typecast;
 mod util;
 mod write_where_clause;
 
+pub use contact_info::PgContactInfo;
 pub use employee::PgEmployee;
 pub(crate) use interval::PgInterval;
 pub use job::PgJob;
@@ -155,10 +157,10 @@ impl PgSchema
 				(
 					address_id IS NULL AND
 					(
-						(email IS NOT NULL AND phone IS NULL) OR -- Contact::Email
-						(email IS NULL AND phone IS NOT NULL) -- Contact::Phone
+						(email IS NOT NULL AND phone IS NULL) OR -- ContactKind::Email
+						(email IS NULL AND phone IS NOT NULL) -- ContactKind::Phone
 					)
-					OR email IS NULL AND phone IS NULL -- Contact::Address
+					OR email IS NULL AND phone IS NULL -- ContactKind::Address
 				)
 			);"#
 		)

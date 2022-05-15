@@ -1,24 +1,18 @@
 use super::Contact;
-use crate::{RestorableSerde, RestoreError, RestoreResult};
+use crate::{ContactKind, RestorableSerde, RestoreError, RestoreResult};
 
 impl RestorableSerde for Contact
 {
 	fn try_restore(&mut self, original: &Self) -> RestoreResult<()>
 	{
-		if let Contact::Address {
-			label: _,
-			location,
-			export: _,
-		} = self
+		if let ContactKind::Address(ref mut location) = self.kind
 		{
-			match original
+			match original.kind
 			{
-				Contact::Address {
-					label: _,
-					location: original_location,
-					export: _,
-				} => location.try_restore(original_location)?,
-
+				ContactKind::Address(ref original_location) =>
+				{
+					location.try_restore(&original_location)?
+				},
 				_ => return Err(RestoreError),
 			}
 		}

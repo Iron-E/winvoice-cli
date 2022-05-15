@@ -54,12 +54,11 @@ async fn into_view()
 	.await
 	.unwrap();
 
-	let contact_info: HashMap<_, _> = vec![("Address".into(), Contact::Address {
+	let contact_info = vec![Contact::Address {
 		location_id: earth.id,
+		label: "Address".into(),
 		export:      false,
-	})]
-	.into_iter()
-	.collect();
+	}];
 
 	let testy = BincodePerson::create("Testy Mćtesterson".into(), &store)
 		.await
@@ -82,13 +81,11 @@ async fn into_view()
 		outer: None,
 	};
 
-	let contact_info_view: HashMap<String, Contact> =
-		vec![("Address ".into(), Contact::Address {
-			location: earth_view.clone(),
-			export:   false,
-		})]
-		.into_iter()
-		.collect();
+	let contact_info_view = vec![Contact::Address {
+		location: earth_view.clone(),
+		label: "Address ".into(),
+		export:   false,
+	}];
 
 	let ceo_testy_view = Employee {
 		contact_info: contact_info_view.clone(),

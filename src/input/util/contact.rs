@@ -1,8 +1,8 @@
 use core::fmt::Display;
-use std::{collections::HashMap, io};
+use std::io;
 
 use clinvoice_adapter::{schema::LocationAdapter, Deletable};
-use clinvoice_schema::Contact;
+use clinvoice_schema::ContactKind;
 use sqlx::{Database, Executor, Pool};
 
 use super::menu;
@@ -17,7 +17,7 @@ use crate::{input, DynResult};
 /// Will error whenever [`input::select_one`] or [`input::text`] does.
 async fn add_menu<'err, Db, LAdapter>(
 	connection: &Pool<Db>,
-	contact_info: &mut HashMap<String, Contact>,
+	contact_info: &mut Vec<(bool, ContactKind, String)>,
 ) -> DynResult<'err, ()>
 where
 	Db: Database,
@@ -54,7 +54,7 @@ where
 		($variant:ident, $var:ident) => {
 			let label = get_label(&$var)?;
 			let export = get_export(&$var)?;
-			contact_info.insert(label, Contact::$variant { $var, export });
+			contact_info.push((export, ContactKind::$variant($var), label));
 		};
 	}
 
@@ -67,13 +67,12 @@ where
 	{
 		ADDRESS =>
 		{
-			let locations = input::util::location::retrieve::<&str, _, LAdapter>(
+			let location = input::util::location::select_one::<&str, _, LAdapter>(
 				connection,
 				"Query the `Location` which can be used to reach this `Employee`",
 				true,
-			).await?;
-
-			let location = input::select_one(&locations, "Select the location to add")?;
+			)
+			.await?;
 			insert!(Address, location);
 		}
 
@@ -101,14 +100,21 @@ where
 /// # Errors
 ///
 /// Will error whenever [`input::select_one`] does.
-fn delete_menu(contact_info: &mut HashMap<String, Contact>) -> input::Result<()>
+fn delete_menu(contact_info: &mut Vec<(bool, ContactKind, String)>) -> input::Result<()>
 {
 	if !contact_info.is_empty()
 	{
-		contact_info.remove(&input::select_one(
-			&contact_info.keys().cloned().collect::<Vec<_>>(),
-			"Select a piece of contact information to remove",
-		)?);
+		let to_remove = input::select_as_indices(
+			&contact_info
+				.iter()
+				.map(|(_, _, label)| label)
+				.collect::<Vec<_>>(),
+			"Select a contact information to remove",
+		)?;
+
+		to_remove.into_iter().for_each(|i| {
+			contact_info.remove(i);
+		});
 	}
 
 	Ok(())
@@ -122,78 +128,101 @@ fn delete_menu(contact_info: &mut HashMap<String, Contact>) -> input::Result<()>
 ///
 /// Will error whenever [`input::edit_and_restore`] and [`input::select_one`] does,
 /// but will ignore [`input::Error::NotEdited`].
-fn edit_menu(contact_info: &mut HashMap<String, Contact>) -> input::Result<()>
+async fn edit_menu<'err, Db, LAdapter>(
+	connection: &Pool<Db>,
+	contact_info: &mut Vec<(bool, ContactKind, String)>,
+) -> DynResult<'err, ()>
+where
+	Db: Database,
+	LAdapter: Deletable<Db = Db> + LocationAdapter + Send,
+	for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 {
 	if contact_info.is_empty()
 	{
 		return Ok(());
 	}
 
-	let selected_key = input::select_one(
-		&contact_info.keys().cloned().collect::<Vec<_>>(),
+	let selected_index = input::select_one_as_index(
+		&contact_info
+			.iter()
+			.map(|(_, _, label)| label)
+			.collect::<Vec<_>>(),
 		"Select a piece of contact information to edit",
 	)?;
-	let typed_key = input::text(
-		Some(selected_key.clone()),
-		format!(
-			"Edit the label for \"{}\" (optional)",
-			contact_info[&selected_key]
-		),
+
+	let (selected_contact_export, selected_contact_kind, selected_contact_label) =
+		contact_info[selected_index].clone();
+	let edited_contact_label = input::text(
+		Some(selected_contact_label.clone()),
+		format!("Edit the label for \"{selected_contact_kind}\" (optional)"),
 	)?;
-	let keys_differ = selected_key != typed_key;
 
-	/* This section is a little complicated, so there is some annotation to explain what is happening. */
+	let labels_differ = selected_contact_label != edited_contact_label;
 
-	// If the user edited the selected key, it must be that the new key does not already exist.
-	if keys_differ && contact_info.contains_key(&typed_key)
+	// If the user edited the selected key, we must assert that the new key does not already exist. Otherwise, we will invalidate a constraint on the database that a label be unique per `employee_id`.
+	if labels_differ
 	{
-		eprintln!(
-			"The label \"{typed_key}\" is already being used by \"{}\"",
-			contact_info[&typed_key]
-		);
-		return Ok(());
-	}
-
-	// We allow users to edit email addresses and phone numebrs during this process, but not addresses.
-	// Users can only ever relabel an address, thus we have to gate addresses for below.
-	if matches!(
-		contact_info[&selected_key],
-		Contact::Email {
-			email: _,
-			export: _,
-		} | Contact::Phone {
-			phone: _,
-			export: _,
-		}
-	)
-	{
-		match input::edit_and_restore(
-			&contact_info[&selected_key],
-			format!("Please edit the {selected_key}"),
-		)
+		// TODO: `if let` chain
+		if let Some((_, kind, _)) = contact_info
+			.iter()
+			.find(|(_, _, label)| label == &edited_contact_label)
 		{
-			Ok(edit) => contact_info.insert(typed_key, edit),
-			Err(input::Error::NotEdited) => None,
-			Err(e) => return Err(e),
-		};
-	}
-	// This check must come after, because the keys could differ but not be an `Address`.
-	// Further, we want an `else if` to avoid an unecessary clone of `typed_key`.
-	else if keys_differ
-	// `&& let`, but that syntax isn't available yet
-	{
-		if let Contact::Address { location, export } = contact_info[&selected_key].clone()
-		{
-			contact_info.insert(typed_key, Contact::Address { location, export });
+			eprintln!("The label \"{edited_contact_label}\" is already being used by \"{kind}\"");
+			return Ok(());
 		}
 	}
 
-	// Finally we have to check _again_ if the keys differ, so that we can remove the old key if need-be.
-	if keys_differ
-	{
-		contact_info.remove(&selected_key);
-	}
+	contact_info.push((
+		menu::confirm(format!(
+			"Do you want \"{edited_contact_label}\" to be listed when exporting `Job`s?"
+		))?,
+		match selected_contact_kind
+		{
+			ContactKind::Email(email) =>
+			{
+				match input::text(
+					Some(email),
+					format!("Please edit the {selected_contact_label}"),
+				)
+				{
+					Ok(text) => ContactKind::Email(text),
+					Err(e) => return Err(e.into()),
+				}
+			},
+			ContactKind::Phone(phone) =>
+			{
+				match input::text(
+					Some(phone),
+					format!("Please edit the {selected_contact_label}"),
+				)
+				{
+					Ok(text) => ContactKind::Phone(text),
+					Err(e) => return Err(e.into()),
+				}
+			},
+			ContactKind::Address(location) => ContactKind::Address(
+				if menu::confirm(format!(
+					"Would you like to change the location of {edited_contact_label}? It is currently \
+					 {location}."
+				))?
+				{
+					input::util::location::select_one::<&str, _, LAdapter>(
+						connection,
+						"Query the `Location` which can be used to reach this `Employee`",
+						true,
+					)
+					.await?
+				}
+				else
+				{
+					location
+				},
+			),
+		},
+		edited_contact_label,
+	));
 
+	contact_info.remove(selected_index);
 	Ok(())
 }
 
@@ -212,13 +241,13 @@ fn edit_menu(contact_info: &mut HashMap<String, Contact>) -> input::Result<()>
 /// unrecoverable state of the program.
 pub async fn menu<'err, Db, LAdapter>(
 	connection: &Pool<Db>,
-) -> DynResult<'err, HashMap<String, Contact>>
+) -> DynResult<'err, Vec<(bool, ContactKind, String)>>
 where
 	Db: Database,
 	LAdapter: Deletable<Db = Db> + LocationAdapter + Send,
 	for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 {
-	let mut contact_info = HashMap::<String, Contact>::new();
+	let mut contact_info = Vec::new();
 
 	loop
 	{
@@ -231,7 +260,7 @@ where
 			menu::ADD => add_menu::<_, LAdapter>(connection, &mut contact_info).await?,
 			menu::CONTINUE => break,
 			menu::DELETE => delete_menu(&mut contact_info)?,
-			menu::EDIT => edit_menu(&mut contact_info)?,
+			menu::EDIT => edit_menu::<_, LAdapter>(connection, &mut contact_info).await?,
 			_ => unreachable!("Unknown action. This should not have happened, please file an issue at https://github.com/Iron-E/clinvoice/issues"),
 		};
 	}

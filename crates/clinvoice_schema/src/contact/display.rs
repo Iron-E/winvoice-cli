@@ -6,24 +6,7 @@ impl Display for Contact
 {
 	fn fmt(&self, formatter: &mut Formatter) -> Result
 	{
-		match self
-		{
-			Contact::Address {
-				location,
-				label,
-				export: _,
-			} => write!(formatter, "{label}: {location}"),
-			Contact::Email {
-				email: s,
-				label,
-				export: _,
-			} |
-			Contact::Phone {
-				phone: s,
-				label,
-				export: _,
-			} => write!(formatter, "{label}: {s}"),
-		}
+		write!(formatter, "{}: {}", self.label, self.kind)
 	}
 }
 
@@ -31,7 +14,7 @@ impl Display for Contact
 mod tests
 {
 	use super::Contact;
-	use crate::Location;
+	use crate::{ContactKind, Location};
 
 	/// # Summary
 	///
@@ -70,24 +53,27 @@ mod tests
 		};
 
 		assert_eq!(
-			format!("{}", Contact::Address {
+			format!("{}", Contact {
 				label: "Office".into(),
-				location: street_view,
+				kind: ContactKind::Address(street_view),
+				employee_id: Default::default(),
 				export: false,
 			}),
 			"Office: 1337 Some Street, Phoenix, Arizona, USA, Earth"
 		);
 		assert_eq!(
-			format!("{}", Contact::Email {
-				email: "foo@bar.io".into(),
+			format!("{}", Contact {
+				employee_id: Default::default(),
+				kind: ContactKind::Email("foo@bar.io".into()),
 				label: "Email".into(),
 				export: false,
 			}),
 			"Email: foo@bar.io"
 		);
 		assert_eq!(
-			format!("{}", Contact::Phone {
-				phone: "1-603-555-5555".into(),
+			format!("{}", Contact {
+				employee_id: Default::default(),
+				kind: ContactKind::Phone("1-603-555-5555".into()),
 				label: "Cellphone".into(),
 				export: false,
 			}),

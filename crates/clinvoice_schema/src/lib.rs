@@ -36,7 +36,7 @@ mod timesheet;
 
 pub use chrono;
 pub use clinvoice_finance::{Currency, Decimal, Money};
-pub use contact::Contact;
+pub use contact::{Contact, ContactKind};
 pub use employee::Employee;
 pub use expense::Expense;
 pub use from_str_error::{FromStrError, FromStrResult};

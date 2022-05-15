@@ -76,18 +76,11 @@ fn delete_menu(expenses: &mut Vec<Expense>) -> input::Result<()>
 {
 	if !expenses.is_empty()
 	{
-		let remove = input::select_one(expenses, "Select an expense to remove")?;
+		let to_remove = input::select_as_indices(expenses, "Select expenses to remove")?;
 
-		expenses.remove(expenses.iter().enumerate().fold(0, |i, enumeration| {
-			if &remove == enumeration.1
-			{
-				enumeration.0
-			}
-			else
-			{
-				i
-			}
-		}));
+		to_remove.into_iter().for_each(|i| {
+			expenses.remove(i);
+		});
 	}
 
 	Ok(())

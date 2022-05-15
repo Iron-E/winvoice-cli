@@ -240,7 +240,6 @@ impl Job
 mod tests
 {
 	use core::time::Duration;
-	use std::collections::HashMap;
 
 	use chrono::Utc;
 	use clinvoice_finance::{Currency, Money};

@@ -1,7 +1,7 @@
 use core::str::FromStr;
 
 use clinvoice_finance::{Decimal, Money};
-use clinvoice_schema::{Expense, Id, Timesheet};
+use clinvoice_schema::{Contact, Expense, Id, Timesheet};
 use sqlx::{postgres::PgRow, Error, PgPool, Result, Row};
 
 use crate::schema::{employee::columns::PgEmployeeColumns, job::columns::PgJobColumns};
@@ -22,10 +22,11 @@ impl PgTimesheetColumns<'_>
 	pub(in crate::schema) async fn row_to_view(
 		self,
 		connection: &PgPool,
+		contact_info: Vec<Contact>,
 		row: &PgRow,
 	) -> Result<Timesheet>
 	{
-		let employee = self.employee.row_to_view(connection, row);
+		let employee = self.employee.row_to_view(connection, contact_info, row);
 		let job = self.job.row_to_view(connection, row);
 
 		Ok(Timesheet {

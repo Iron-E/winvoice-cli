@@ -69,7 +69,7 @@ mod tests
 	use clinvoice_finance::{Currency, Money};
 
 	use super::{DateTime, Job, Local};
-	use crate::{Contact, Employee, Invoice, Location, Organization, Person};
+	use crate::{Contact, ContactKind, Employee, Invoice, Location, Organization, Person};
 
 	#[test]
 	fn display()
@@ -81,8 +81,9 @@ mod tests
 		};
 
 		let ceo_testy_view = Employee {
-			contact_info: vec![Contact::Address {
-				location: earth_view.clone(),
+			contact_info: vec![Contact {
+				employee_id: 0,
+				kind: ContactKind::Address(earth_view.clone()),
 				label: "Office".into(),
 				export: false,
 			}],

@@ -1,7 +1,5 @@
-use std::collections::HashMap;
-
 use clinvoice_match::MatchEmployee;
-use clinvoice_schema::{Contact, Employee, Organization, Person};
+use clinvoice_schema::{Contact, ContactKind, Employee, Organization, Person};
 use sqlx::{Pool, Result};
 
 use crate::{Deletable, Updatable};
@@ -25,7 +23,7 @@ pub trait EmployeeAdapter:
 	/// * An [`Error`], if something goes wrong.
 	async fn create(
 		connection: &Pool<<Self as Deletable>::Db>,
-		contact_info: HashMap<String, Contact>,
+		contact_info: Vec<(bool, ContactKind, String)>,
 		organization: Organization,
 		person: Person,
 		status: String,

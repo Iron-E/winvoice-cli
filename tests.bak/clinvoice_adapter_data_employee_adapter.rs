@@ -40,12 +40,12 @@ async fn into_view()
 		.unwrap();
 
 	let ceo_testy = BincodeEmployee::create(
-		vec![("Work".into(), Contact::Address {
-			location_id: earth.id,
+		vec![Contact {
+			employee_id: Default::default(),
+			kind: ContactKind::Address(earth),
+			label: "Work".into(),
 			export:      false,
-		})]
-		.into_iter()
-		.collect(),
+		}],
 		big_old_test.clone(),
 		testy.clone(),
 		"Employed".into(),
@@ -62,12 +62,12 @@ async fn into_view()
 	};
 
 	let ceo_testy_view = Employee {
-		contact_info: vec![("Work".into(), Contact::Address {
-			location: earth_view.clone(),
+		contact_info: vec![Contact {
+			employee_id: Default::default(),
+			location: ContactKind::Address(earth_view.clone()),
+			label: "Work".into()
 			export:   false,
-		})]
-		.into_iter()
-		.collect(),
+		}],
 		id: ceo_testy.id,
 		organization: Organization {
 			id: big_old_test.id,
@@ -110,12 +110,12 @@ async fn to_organization()
 	.unwrap();
 
 	let testy = BincodeEmployee::create(
-		vec![("Work Email".into(), Contact::Email {
-			email:  "foo".into(),
+		vec![Contact {
+			employee_id: Default::default(),
+			email:  ContactKind::Email("foo".into()),
+			label: "Work Email".into(),
 			export: false,
-		})]
-		.into_iter()
-		.collect(),
+		}],
 		dogood.clone(),
 		Person {
 			id:   Id::new_v4(),
@@ -143,12 +143,12 @@ async fn to_person()
 		.unwrap();
 
 	let testy_employed = BincodeEmployee::create(
-		vec![("Work Email".into(), Contact::Email {
-			email:  "foo".into(),
+		vec![Contact {
+			employee_id: Default::default(),
+			email:  ContactKind::Email("foo".into()0,
+			label: "Work Email".into(),
 			export: false,
-		})]
-		.into_iter()
-		.collect(),
+		}],
 		Organization {
 			id: Id::new_v4(),
 			location_id: Id::new_v4(),

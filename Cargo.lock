@@ -294,7 +294,6 @@ name = "clinvoice_schema"
 version = "0.6.0"
 dependencies = [
  "chrono",
- "clinvoice_error",
  "clinvoice_finance",
  "futures",
  "humantime-serde",

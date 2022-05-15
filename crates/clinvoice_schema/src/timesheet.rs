@@ -145,7 +145,7 @@ impl Timesheet
 				.employee
 				.contact_info
 				.iter()
-				.filter(|c| c.export())
+				.filter(|c| c.export)
 				.collect();
 
 			if !employee_contact_info.is_empty()
@@ -157,7 +157,7 @@ impl Timesheet
 				.unwrap();
 
 				let mut sorted_employee_contact_info = employee_contact_info;
-				sorted_employee_contact_info.sort_by_key(|c| c.label());
+				sorted_employee_contact_info.sort_by_key(|c| &c.label);
 
 				sorted_employee_contact_info
 					.into_iter()
@@ -167,12 +167,9 @@ impl Timesheet
 							"{}: {}",
 							Element::UnorderedList {
 								depth: 1,
-								text: Text::Bold(contact.label()),
+								text: Text::Bold(&contact.label),
 							},
-							// The part we want is in `[`, `]`.
-							// The matches are in `(`, `)`.
-							// "Multiple colons(: )this is the end(: )[555-555-5555]"
-							contact.to_string().split(": ").last().unwrap_or(""),
+							contact.kind,
 						)
 					})
 					.unwrap();

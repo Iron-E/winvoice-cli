@@ -14,7 +14,7 @@ impl Display for Employee
 			writeln!(formatter, "\tEmployee Contact Info:")?;
 
 			let mut sorted_employee_contact_info = self.contact_info.clone();
-			sorted_employee_contact_info.sort_by(|c1, c2| c1.label().cmp(c2.label()));
+			sorted_employee_contact_info.sort_by(|c1, c2| c1.label.cmp(&c2.label));
 			sorted_employee_contact_info
 				.into_iter()
 				.try_for_each(|c| writeln!(formatter, "\t\t- {c}"))?;
@@ -28,7 +28,7 @@ impl Display for Employee
 mod tests
 {
 	use super::Employee;
-	use crate::{Contact, Location, Organization, Person};
+	use crate::{Contact, ContactKind, Location, Organization, Person};
 
 	#[test]
 	fn display()
@@ -65,19 +65,19 @@ mod tests
 
 		let employee = Employee {
 			contact_info: vec![
-				Contact::Address {
-					location: work_street_view.clone(),
+				Contact {
+					employee_id: 0,
+					kind: ContactKind::Address(work_street_view.clone()),
 					label: "Place of Work".into(),
 					export: false,
 				},
-				Contact::Email {
-					email: "foo@bar.io".into(),
+				Contact {
+					employee_id: 0,
+					kind: ContactKind::Email("foo@bar.io".into()),
 					label: "Work Email".into(),
 					export: false,
 				},
-			]
-			.into_iter()
-			.collect(),
+			],
 			id: 0,
 			organization: Organization {
 				id: 0,

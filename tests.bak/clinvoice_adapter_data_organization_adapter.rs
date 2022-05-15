@@ -126,12 +126,11 @@ async fn to_vec_employee()
 	.unwrap();
 
 	let testy = BincodeEmployee::create(
-		vec![("Work Email".into(), Contact::Email {
+		vec![Contact::Email {
 			email:  "foo@bar.io".into(),
+			label: "Work Email".into(),
 			export: false,
-		})]
-		.into_iter()
-		.collect(),
+		}],
 		dogood.clone(),
 		Person {
 			id:   Id::new_v4(),
@@ -145,12 +144,11 @@ async fn to_vec_employee()
 	.unwrap();
 
 	let mr_flu = BincodeEmployee::create(
-		vec![("Work Email".into(), Contact::Email {
+		vec![Contact::Email {
 			email:  "flu@bar.io".into(),
+			label: "Work Email".into(),
 			export: false,
-		})]
-		.into_iter()
-		.collect(),
+		}],
 		dogood.clone(),
 		Person {
 			id:   Id::new_v4(),

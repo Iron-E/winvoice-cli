@@ -1,14 +1,18 @@
-use clinvoice_adapter::{schema::TimesheetAdapter, WriteWhereClause};
+use clinvoice_adapter::{
+	schema::{ContactInfoAdapter, TimesheetAdapter},
+	WriteWhereClause,
+};
 use clinvoice_finance::ExchangeRates;
 use clinvoice_match::{MatchExpense, MatchTimesheet};
 use clinvoice_schema::{
 	chrono::{SubsecRound, Utc},
 	Employee,
+	Id,
 	Job,
 	Timesheet,
 };
 use futures::{TryFutureExt, TryStreamExt};
-use sqlx::{PgPool, Result};
+use sqlx::{PgPool, Result, Row};
 
 use super::{columns::PgTimesheetColumns, PgTimesheet};
 use crate::{
@@ -18,6 +22,7 @@ use crate::{
 		organization::columns::PgOrganizationColumns,
 		person::columns::PgPersonColumns,
 		util,
+		PgContactInfo,
 		PgLocation,
 	},
 	PgSchema as Schema,
@@ -60,18 +65,18 @@ impl TimesheetAdapter for PgTimesheet
 	async fn retrieve(connection: &PgPool, match_condition: MatchTimesheet)
 		-> Result<Vec<Timesheet>>
 	{
-		let exchange_rates = ExchangeRates::new().map_err(util::finance_err_to_sqlx);
 		let client_location_id_match =
 			PgLocation::retrieve_matching_ids(connection, &match_condition.job.client.location);
+		let contact_info_fut =
+			PgContactInfo::retrieve(connection, match_condition.employee.contact_info.clone());
 		let employer_location_id_match = PgLocation::retrieve_matching_ids(
 			connection,
 			&match_condition.employee.organization.location,
 		);
+		let exchange_rates = ExchangeRates::new().map_err(util::finance_err_to_sqlx);
 
 		let mut query = String::from(
 			r#"SELECT
-				-- FIX: use latest PostgresEmployee code
-				array_agg((C1.export, C1.label, C1.address_id, C1.email, C1.phone)) AS "contact_info?",
 				Client.name AS client_name, Client.location_id as client_location_id,
 				E.organization_id as employer_id, E.person_id, E.status, E.title,
 				Employer.name AS employer_name, Employer.location_id as employer_location_id,
@@ -81,7 +86,6 @@ impl TimesheetAdapter for PgTimesheet
 				T.id, T.employee_id, T.job_id, T.time_begin, T.time_end, T.work_notes,
 				array_agg(DISTINCT (X1.id, X1.category, X1.cost, X1.description)) AS "expenses?"
 			FROM timesheets T
-			LEFT JOIN contact_information C1 ON (C1.employee_id = T.employee_id)
 			LEFT JOIN expenses X1 ON (X1.timesheet_id = T.id)
 			JOIN employees E ON (E.id = T.employee_id)
 			JOIN jobs J ON (E.id = T.employee_id)
@@ -98,14 +102,7 @@ impl TimesheetAdapter for PgTimesheet
 								Schema::write_where_clause(
 									Schema::write_where_clause(
 										Schema::write_where_clause(
-											crate::schema::write_where_clause::write_contact_set_where_clause(
-												connection,
-												Default::default(),
-												"C1",
-												&match_condition.employee.contact_info,
-												&mut query,
-											)
-											.await?,
+											Default::default(),
 											"Client",
 											&match_condition.job.client,
 											&mut query,
@@ -165,7 +162,6 @@ impl TimesheetAdapter for PgTimesheet
 		const COLUMNS: PgTimesheetColumns<'static> = PgTimesheetColumns {
 			id: "id",
 			employee: PgEmployeeColumns {
-				contact_info: "contact_info",
 				id: "employee_id",
 				organization: PgOrganizationColumns {
 					id: "employer_id",
@@ -193,9 +189,22 @@ impl TimesheetAdapter for PgTimesheet
 			work_notes: "work_notes",
 		};
 
+		let contact_info = &contact_info_fut.await?;
 		sqlx::query(&query)
 			.fetch(connection)
-			.and_then(|row| async move { COLUMNS.row_to_view(connection, &row).await })
+			.and_then(|row| async move {
+				COLUMNS
+					.row_to_view(
+						connection,
+						contact_info
+							.iter()
+							.filter(|c| c.employee_id == row.get::<Id, _>(COLUMNS.employee.id))
+							.cloned()
+							.collect(),
+						&row,
+					)
+					.await
+			})
 			.try_collect()
 			.await
 	}
@@ -205,7 +214,7 @@ impl TimesheetAdapter for PgTimesheet
 mod tests
 {
 	use core::time::Duration;
-	use std::collections::{HashMap, HashSet};
+	use std::collections::HashSet;
 
 	use clinvoice_adapter::schema::{
 		EmployeeAdapter,
@@ -217,7 +226,7 @@ mod tests
 	use clinvoice_match::{Match, MatchEmployee, MatchOrganization, MatchSet, MatchTimesheet};
 	use clinvoice_schema::{
 		chrono::{TimeZone, Utc},
-		Contact,
+		ContactKind,
 		Currency,
 		Money,
 	};
@@ -254,19 +263,19 @@ mod tests
 			.await
 			.unwrap();
 
-		let mut contact_info = HashMap::new();
-		contact_info.insert("Office".into(), Contact::Address {
-			location: earth,
-			export: false,
-		});
-		contact_info.insert("Work Email".into(), Contact::Email {
-			email: "foo@bar.io".into(),
-			export: true,
-		});
-		contact_info.insert("Office Phone".into(), Contact::Phone {
-			phone: "555 223 5039".into(),
-			export: true,
-		});
+		let contact_info = vec![
+			(false, ContactKind::Address(earth), "Office".into()),
+			(
+				true,
+				ContactKind::Email("foo@bar.io".into()),
+				"Work Email".into(),
+			),
+			(
+				true,
+				ContactKind::Phone("555 223 5039".into()),
+				"Office Phone".into(),
+			),
+		];
 
 		let employee = PgEmployee::create(
 			&connection,
@@ -338,22 +347,19 @@ mod tests
 		let (employee, employee2) = futures::try_join!(
 			PgEmployee::create(
 				&connection,
-				[
-					("Remote Office".into(), Contact::Address {
-						location: utah,
-						export: false,
-					}),
-					("Work Email".into(), Contact::Email {
-						email: "foo@bar.io".into(),
-						export: true,
-					}),
-					("Office's Phone".into(), Contact::Phone {
-						phone: "555 223 5039".into(),
-						export: true,
-					}),
-				]
-				.into_iter()
-				.collect(),
+				vec![
+					(false, ContactKind::Address(utah), "Remote Office".into()),
+					(
+						true,
+						ContactKind::Email("foo@bar.io".into()),
+						"Work Email".into(),
+					),
+					(
+						true,
+						ContactKind::Phone("555 223 5039".into()),
+						"Office's Phone".into(),
+					),
+				],
 				organization.clone(),
 				person.clone(),
 				"Employed".into(),
@@ -361,22 +367,23 @@ mod tests
 			),
 			PgEmployee::create(
 				&connection,
-				[
-					("Favorite Pizza Place".into(), Contact::Address {
-						location: arizona,
-						export: false,
-					}),
-					("Work Email".into(), Contact::Email {
-						email: "some_kind_of_email@f.com".into(),
-						export: true,
-					}),
-					("Office's Phone".into(), Contact::Phone {
-						phone: "555-555-8008".into(),
-						export: true,
-					}),
-				]
-				.into_iter()
-				.collect(),
+				vec![
+					(
+						false,
+						ContactKind::Address(arizona),
+						"Favorite Pizza Place".into()
+					),
+					(
+						true,
+						ContactKind::Email("some_kind_of_email@f.com".into()),
+						"Work Email".into(),
+					),
+					(
+						true,
+						ContactKind::Phone("555-555-8008".into()),
+						"Office's Phone".into(),
+					),
+				],
 				organization2.clone(),
 				person2,
 				"Management".into(),

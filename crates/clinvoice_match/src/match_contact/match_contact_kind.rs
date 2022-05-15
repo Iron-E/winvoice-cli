@@ -16,12 +16,12 @@ pub enum MatchContactKind
 	/// Same as [`Always`](crate::Match::Always).
 	Always,
 
-	/// Same as [`Contact::Address`](clinvoice_schema::Contact::Address).
+	/// Same as [`ContactKind::Address`](clinvoice_schema::ContactKind::Address).
 	SomeAddress(#[cfg_attr(feature = "serde_support", serde(default))] MatchLocation),
 
-	/// Same as [`Contact::Email`](clinvoice_schema::Contact::Email).
+	/// Same as [`ContactKind::Email`](clinvoice_schema::ContactKind::Email).
 	SomeEmail(#[cfg_attr(feature = "serde_support", serde(default))] MatchStr<String>),
 
-	/// Same as [`Contact::Phone`](clinvoice_schema::Contact::Phone).
+	/// Same as [`ContactKind::Phone`](clinvoice_schema::ContactKind::Phone).
 	SomePhone(#[cfg_attr(feature = "serde_support", serde(default))] MatchStr<String>),
 }

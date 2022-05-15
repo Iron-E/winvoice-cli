@@ -60,7 +60,7 @@ where
 	T: DeserializeOwned + RestorableSerde + Serialize,
 {
 	let mut edited = edit(entity, prompt)?;
-	edited.restore(entity);
+	edited.try_restore(entity)?;
 	Ok(edited)
 }
 
@@ -118,6 +118,23 @@ pub fn select<T>(entities: &[T], prompt: impl Into<String>) -> io::Result<Vec<T>
 where
 	T: Clone + Display,
 {
+	select_as_indices(entities, prompt)
+		.map(|selection| selection.into_iter().map(|i| entities[i].clone()).collect())
+}
+
+/// # Summary
+///
+/// `prompt` users to select elements from `entities`, then return the indices where they were
+/// found.
+///
+/// # Returns
+///
+/// * The selected entities.
+/// * An [`Error`] incurred while selecting.
+pub fn select_as_indices<T>(entities: &[T], prompt: impl Into<String>) -> io::Result<Vec<usize>>
+where
+	T: Clone + Display,
+{
 	if entities.is_empty()
 	{
 		return Ok(Vec::new());
@@ -129,15 +146,7 @@ where
 		.with_prompt(prompt)
 		.interact()?;
 
-	Ok(entities
-		.iter()
-		.enumerate()
-		.filter_map(|(i, entity)| match selection.binary_search(&i)
-		{
-			Ok(_) => Some(entity.clone()),
-			_ => None,
-		})
-		.collect())
+	Ok(selection)
 }
 
 /// # Summary
@@ -149,6 +158,22 @@ where
 /// * The selected entity.
 /// * An [`Error`] incurred while selecting.
 pub fn select_one<T>(entities: &[T], prompt: impl Into<String>) -> Result<T>
+where
+	T: Clone + Display,
+{
+	let selection = select_one_as_index(entities, prompt)?;
+	Ok(entities[selection].clone())
+}
+
+/// # Summary
+///
+/// `prompt` users to select one element from `entities`, then return the index where it was found.
+///
+/// # Returns
+///
+/// * The selected entity.
+/// * An [`Error`] incurred while selecting.
+pub fn select_one_as_index<T>(entities: &[T], prompt: impl Into<String>) -> Result<usize>
 where
 	T: Clone + Display,
 {
@@ -167,7 +192,7 @@ where
 	{
 		return match selector.interact()
 		{
-			Ok(index) => Ok(entities[index].clone()),
+			Ok(index) => Ok(index),
 			Err(e)
 				if !(e.kind() == io::ErrorKind::Other &&
 					e.to_string().contains("Quit not allowed")) =>

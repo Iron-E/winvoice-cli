@@ -1,16 +1,18 @@
-use std::collections::HashMap;
-
-use clinvoice_adapter::{schema::EmployeeAdapter, WriteWhereClause};
+use clinvoice_adapter::{
+	schema::{ContactInfoAdapter, EmployeeAdapter},
+	WriteWhereClause,
+};
 use clinvoice_match::MatchEmployee;
-use clinvoice_schema::{Contact, Employee, Organization, Person};
+use clinvoice_schema::{ContactKind, Employee, Id, Organization, Person};
 use futures::TryStreamExt;
-use sqlx::{PgPool, Result};
+use sqlx::{PgPool, Result, Row};
 
 use super::{columns::PgEmployeeColumns, PgEmployee};
 use crate::{
 	schema::{
 		organization::columns::PgOrganizationColumns,
 		person::columns::PgPersonColumns,
+		PgContactInfo,
 		PgLocation,
 	},
 	PgSchema as Schema,
@@ -21,7 +23,7 @@ impl EmployeeAdapter for PgEmployee
 {
 	async fn create(
 		connection: &PgPool,
-		contact_info: HashMap<String, Contact>,
+		contact_info: Vec<(bool, ContactKind, String)>,
 		organization: Organization,
 		person: Person,
 		status: String,
@@ -44,12 +46,12 @@ impl EmployeeAdapter for PgEmployee
 		.fetch_one(&mut transaction)
 		.await?;
 
-		Self::create_contact_info(&mut transaction, &contact_info, row.id).await?;
+		let contact_info_db = PgContactInfo::create(&mut transaction, &contact_info, row.id).await?;
 
 		transaction.commit().await?;
 
 		Ok(Employee {
-			contact_info,
+			contact_info: contact_info_db,
 			id: row.id,
 			organization,
 			person,
@@ -60,36 +62,24 @@ impl EmployeeAdapter for PgEmployee
 
 	async fn retrieve(connection: &PgPool, match_condition: MatchEmployee) -> Result<Vec<Employee>>
 	{
+		let contact_info_fut =
+			PgContactInfo::retrieve(connection, match_condition.contact_info.clone());
 		let id_match =
 			PgLocation::retrieve_matching_ids(connection, &match_condition.organization.location);
 
 		let mut query = String::from(
-			r#"SELECT
-				array_agg((C1.export, C1.label, C1.address_id, C1.email, C1.phone)) AS "contact_info?",
+			"SELECT
 				E.id, E.organization_id, E.person_id, E.status, E.title,
 				O.name AS organization_name, O.location_id,
 				P.name
 			FROM employees E
-			LEFT JOIN contact_information C1 ON (C1.employee_id = E.id)
 			JOIN organizations O ON (O.id = E.organization_id)
-			JOIN people P ON (P.id = E.person_id)"#,
+			JOIN people P ON (P.id = E.person_id)",
 		);
 		Schema::write_where_clause(
 			Schema::write_where_clause(
 				Schema::write_where_clause(
-					Schema::write_where_clause(
-						crate::schema::write_where_clause::write_contact_set_where_clause(
-							connection,
-							Default::default(),
-							"C1",
-							&match_condition.contact_info,
-							&mut query,
-						)
-						.await?,
-						"E",
-						&match_condition,
-						&mut query,
-					),
+					Schema::write_where_clause(Default::default(), "E", &match_condition, &mut query),
 					"O",
 					&match_condition.organization,
 					&mut query,
@@ -102,16 +92,9 @@ impl EmployeeAdapter for PgEmployee
 			&id_match.await?,
 			&mut query,
 		);
-		query.push_str(
-			" GROUP BY
-				C1.employee_id,
-				E.id, E.organization_id, E.person_id, E.status, E.title,
-				O.name, O.location_id,
-				P.name;",
-		);
+		query.push(';');
 
 		const COLUMNS: PgEmployeeColumns<'static> = PgEmployeeColumns {
-			contact_info: "contact_info",
 			id: "id",
 			organization: PgOrganizationColumns {
 				id: "organization_id",
@@ -126,9 +109,24 @@ impl EmployeeAdapter for PgEmployee
 			title: "title",
 		};
 
+		let contact_info = &contact_info_fut.await?;
 		sqlx::query(&query)
 			.fetch(connection)
-			.and_then(|row| async move { COLUMNS.row_to_view(connection, &row).await })
+			.and_then(|row| async move {
+				COLUMNS
+					.row_to_view(
+						connection,
+						// Contact info may belong to multiple different employees.
+						// We must filter it before associating it with a specific employee.
+						contact_info
+							.iter()
+							.filter(|c| c.employee_id == row.get::<Id, _>(COLUMNS.id))
+							.cloned()
+							.collect(),
+						&row,
+					)
+					.await
+			})
 			.try_collect()
 			.await
 	}
@@ -137,8 +135,6 @@ impl EmployeeAdapter for PgEmployee
 #[cfg(test)]
 mod tests
 {
-	use std::collections::HashMap;
-
 	use clinvoice_adapter::schema::{LocationAdapter, OrganizationAdapter, PersonAdapter};
 	use clinvoice_match::{
 		Match,
@@ -149,7 +145,7 @@ mod tests
 		MatchSet,
 		MatchStr,
 	};
-	use clinvoice_schema::Contact;
+	use clinvoice_schema::{Contact, ContactKind};
 	use futures::TryStreamExt;
 
 	use super::{EmployeeAdapter, PgEmployee};
@@ -176,22 +172,19 @@ mod tests
 
 		let employee = PgEmployee::create(
 			&connection,
-			[
-				("Office".into(), Contact::Address {
-					location: earth,
-					export: false,
-				}),
-				("Work Email".into(), Contact::Email {
-					email: "foo@bar.io".into(),
-					export: true,
-				}),
-				("Office's Email".into(), Contact::Phone {
-					phone: "555 223 5039".into(),
-					export: true,
-				}),
-			]
-			.into_iter()
-			.collect(),
+			vec![
+				(true, ContactKind::Address(earth), "Office".into()),
+				(
+					true,
+					ContactKind::Email("foo@bar.io".into()),
+					"Work Email".into(),
+				),
+				(
+					true,
+					ContactKind::Phone("555 223 5039".into()),
+					"Office's Email".into(),
+				),
+			],
 			organization.clone(),
 			person.clone(),
 			"Employed".into(),
@@ -205,47 +198,38 @@ mod tests
 			.await
 			.unwrap();
 
-		let contact_info_row = {
+		let contact_info_row = async {
 			let connection_borrow = &connection;
 			sqlx::query!(
 				"SELECT * FROM contact_information WHERE employee_id = $1;",
 				employee.id
 			)
-			.fetch(&connection)
-			.try_fold(HashMap::new(), |mut contact, row| async move {
-				contact.insert(
-					row.label,
-					if let Some(id) = row.address_id
+			.fetch(connection_borrow)
+			.and_then(|row| async move {
+				Ok(Contact {
+					employee_id: row.employee_id,
+					export: row.export,
+					label: row.label,
+					kind: match row
+						.email
+						.map(ContactKind::Email)
+						.or_else(|| row.phone.map(ContactKind::Phone))
 					{
-						Contact::Address {
-							location: PgLocation::retrieve_by_id(connection_borrow, id).await?,
-							export: row.export,
-						}
-					}
-					else if let Some(e) = row.email
-					{
-						Contact::Email {
-							email: e,
-							export: row.export,
-						}
-					}
-					else
-					{
-						Contact::Phone {
-							phone: row.phone.unwrap(),
-							export: row.export,
-						}
+						Some(k) => k,
+						_ => ContactKind::Address(
+							PgLocation::retrieve_by_id(connection_borrow, row.address_id.unwrap()).await?,
+						),
 					},
-				);
-				Ok(contact)
+				})
 			})
+			.try_collect::<Vec<_>>()
 			.await
 			.unwrap()
 		};
 
 		// Assert ::create writes accurately to the DB
 		assert_eq!(employee.id, row.id);
-		assert_eq!(employee.contact_info, contact_info_row);
+		assert_eq!(employee.contact_info, contact_info_row.await);
 		assert_eq!(employee.organization.id, row.organization_id);
 		assert_eq!(organization.id, row.organization_id);
 		assert_eq!(employee.person.id, row.person_id);
@@ -288,22 +272,19 @@ mod tests
 		let (employee, employee2) = futures::try_join!(
 			PgEmployee::create(
 				&connection,
-				[
-					("Remote Office".into(), Contact::Address {
-						location: utah,
-						export: false,
-					}),
-					("Work Email".into(), Contact::Email {
-						email: "foo@bar.io".into(),
-						export: true,
-					}),
-					("Office's Phone".into(), Contact::Phone {
-						phone: "555 223 5039".into(),
-						export: true,
-					}),
-				]
-				.into_iter()
-				.collect(),
+				vec![
+					(false, ContactKind::Address(utah), "Remote Office".into()),
+					(
+						true,
+						ContactKind::Email("foo@bar.io".into()),
+						"Work Email".into(),
+					),
+					(
+						true,
+						ContactKind::Phone("555 223 5039".into()),
+						"Office's Phone".into(),
+					),
+				],
 				organization,
 				person.clone(),
 				"Employed".into(),

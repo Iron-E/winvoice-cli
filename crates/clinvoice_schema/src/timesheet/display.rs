@@ -53,7 +53,17 @@ mod tests
 	use clinvoice_finance::{Currency, Money};
 
 	use super::{DateTime, Local, Timesheet};
-	use crate::{Contact, Employee, Expense, Invoice, Job, Location, Organization, Person};
+	use crate::{
+		Contact,
+		ContactKind,
+		Employee,
+		Expense,
+		Invoice,
+		Job,
+		Location,
+		Organization,
+		Person,
+	};
 
 	#[test]
 	fn display()
@@ -90,19 +100,23 @@ mod tests
 
 		let timesheet = Timesheet {
 			employee: Employee {
+				id: 0,
 				contact_info: vec![
-					Contact::Address {
-						location: street_view.clone(),
+					Contact {
+						employee_id: 0,
+						kind: ContactKind::Address(street_view.clone()),
 						label: "Street Address".into(),
 						export: false,
 					},
-					Contact::Email {
-						email: "foo@bar.io".into(),
+					Contact {
+						employee_id: 0,
+						kind: ContactKind::Email("foo@bar.io".into()),
 						label: "Email".into(),
 						export: false,
 					},
-					Contact::Phone {
-						phone: "1-800-555-5555".into(),
+					Contact {
+						employee_id: 0,
+						kind: ContactKind::Phone("1-800-555-5555".into()),
 						label: "Phone".into(),
 						export: false,
 					},

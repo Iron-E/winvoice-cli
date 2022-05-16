@@ -93,15 +93,15 @@ impl ContactInfoAdapter for PgContactInfo
 	) -> Result<HashMap<Id, Vec<Contact>>>
 	{
 		let mut query = String::from(
-			r#"SELECT
+			"SELECT
 				C.address_id,
 				C.email,
-				E.id as "employee_id",
-				C.export as "export",
-				C.label as "label",
+				E.id as employee_id,
+				C.export,
+				C.label,
 				C.phone
 			FROM employees E
-			LEFT JOIN contact_information C ON (C.employee_id = E.id)"#,
+			LEFT JOIN contact_information C ON (C.employee_id = E.id)",
 		);
 		write_where_clause::write_contact_set_where_clause(
 			connection,

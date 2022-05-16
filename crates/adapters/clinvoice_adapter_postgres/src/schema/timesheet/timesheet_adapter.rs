@@ -88,7 +88,7 @@ impl TimesheetAdapter for PgTimesheet
 			FROM timesheets T
 			LEFT JOIN expenses X1 ON (X1.timesheet_id = T.id)
 			JOIN employees E ON (E.id = T.employee_id)
-			JOIN jobs J ON (E.id = T.employee_id)
+			JOIN jobs J ON (J.id = T.job_id)
 			JOIN organizations Client ON (Client.id = J.client_id)
 			JOIN organizations Employer ON (Employer.id = E.organization_id)
 			JOIN people P ON (P.id = E.person_id)"#,

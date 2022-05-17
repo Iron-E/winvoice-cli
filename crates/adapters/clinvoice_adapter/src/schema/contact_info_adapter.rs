@@ -13,11 +13,12 @@ pub trait ContactInfoAdapter:
 {
 	/// # Summary
 	///
-	/// Create a new [`Contact`] on the database.
+	/// Create new [`Contact`]s on the database.
 	///
 	/// # Parameters
 	///
-	/// See [`Contact`].
+	/// `contact_info` is a slice of `(bool, ContactKind, String)`, which represents `(export, kind,
+	/// label)` for the created [`Contact`]s.
 	///
 	/// # Returns
 	///

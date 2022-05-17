@@ -140,12 +140,14 @@ mod tests
 					category: "Food".into(),
 					cost: Money::new(20_50, 2, Currency::USD),
 					description: "Fast Food™".into(),
+					..Default::default()
 				},
 				Expense {
 					id: 901,
 					category: "Travel".into(),
 					cost: Money::new(10_00, 2, Currency::USD),
 					description: "Gas".into(),
+					..Default::default()
 				},
 			],
 			job: Job {

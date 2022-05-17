@@ -1,5 +1,5 @@
 use clinvoice_match::MatchEmployee;
-use clinvoice_schema::{Contact, ContactKind, Employee, Organization, Person};
+use clinvoice_schema::{ContactKind, Employee, Organization, Person};
 use sqlx::{Pool, Result};
 
 use crate::{Deletable, Updatable};

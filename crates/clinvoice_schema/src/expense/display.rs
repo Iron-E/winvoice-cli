@@ -30,6 +30,7 @@ mod tests
 			category: "Food".into(),
 			cost: Money::new(20_00, 2, Currency::USD),
 			description: "Take-out for 2".into(),
+			..Default::default()
 		};
 
 		assert_eq!(

@@ -73,7 +73,7 @@ impl TimesheetAdapter for PgTimesheet
 			connection,
 			&match_condition.employee.organization.location,
 		);
-		let exchange_rates = ExchangeRates::new().map_err(util::finance_err_to_sqlx);
+		let exchange_rates_fut = ExchangeRates::new().map_err(util::finance_err_to_sqlx);
 
 		let mut query = String::from(
 			r#"SELECT
@@ -129,11 +129,11 @@ impl TimesheetAdapter for PgTimesheet
 					),
 					"X1",
 					{
-						let rates = exchange_rates.await?;
+						let exchange_rates = exchange_rates_fut.await?;
 						&match_condition.expenses.map(&|e| MatchExpense {
 							id: e.id,
 							category: e.category,
-							cost: e.cost.exchange(Default::default(), &rates),
+							cost: e.cost.exchange(Default::default(), &exchange_rates),
 							description: e.description,
 						})
 					},

@@ -25,13 +25,13 @@ impl ContactInfoAdapter for PgContactInfo
 		}
 
 		const INSERT_VALUES_APPROX_LEN: u8 = 39;
-		let mut contact_info_values =
+		let mut contact_values =
 			String::with_capacity((INSERT_VALUES_APPROX_LEN as usize) * contact_info.len());
 
 		// NOTE: `i * 6` is the number of values each iteration inserts
 		(0..contact_info.len()).map(|i| i * 6).for_each(|i| {
 			write!(
-				contact_info_values,
+				contact_values,
 				"(${}, ${}, ${}, ${}, ${}, ${}),",
 				i + 1,
 				i + 2,
@@ -42,7 +42,7 @@ impl ContactInfoAdapter for PgContactInfo
 			)
 			.unwrap()
 		});
-		contact_info_values.pop(); // get rid of the trailing `,` since SQL can't handle that :/
+		contact_values.pop(); // get rid of the trailing `,` since SQL can't handle that :/
 
 		contact_info
 			.iter()
@@ -50,7 +50,7 @@ impl ContactInfoAdapter for PgContactInfo
 				sqlx::query(&format!(
 					"INSERT INTO contact_information
 					(employee_id, label, export, address_id, email, phone)
-				VALUES {contact_info_values};",
+				VALUES {contact_values};",
 				)),
 				|mut query, (export, kind, label)| {
 					query = query.bind(employee_id).bind(label).bind(export);
@@ -122,8 +122,8 @@ impl ContactInfoAdapter for PgContactInfo
 			phone: "phone",
 		};
 
-		let mut map = HashMap::new();
 		let mut rows = sqlx::query(&query).fetch(connection);
+		let mut map = HashMap::new();
 		while let Some(result) = rows.next().await
 		{
 			let row = result?;

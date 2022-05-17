@@ -33,4 +33,10 @@ pub struct Expense
 	///
 	/// A description of what this [`Expense`] is.
 	pub description: String,
+
+	/// # Summary
+	///
+	/// The [`Timesheet`] that this [`Expense`] is attached to.
+	#[cfg_attr(feature = "serde_support", serde(skip))]
+	pub timesheet_id: Id,
 }

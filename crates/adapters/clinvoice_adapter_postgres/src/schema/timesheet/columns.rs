@@ -44,6 +44,7 @@ impl PgTimesheetColumns<'_>
 								Vec::with_capacity(len),
 								|mut v, (id, category, cost, description)| {
 									v.push(Expense {
+										timesheet_id: row.get(self.id),
 										id,
 										category,
 										cost: Money {

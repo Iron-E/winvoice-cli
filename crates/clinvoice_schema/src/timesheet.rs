@@ -306,6 +306,7 @@ mod tests
 				category: "Item".into(),
 				cost: Money::new(20_00, 2, Currency::USD),
 				description: "Paid for someone else to clean".into(),
+				..Default::default()
 			}],
 			time_begin: Utc::today().and_hms(3, 0, 0),
 			time_end: Some(Utc::today().and_hms(3, 30, 0)),

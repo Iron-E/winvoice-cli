@@ -5,6 +5,7 @@
 
 mod contact_info;
 mod employee;
+mod expenses;
 mod initializable;
 mod interval;
 mod job;
@@ -21,6 +22,7 @@ mod write_where_clause;
 
 pub use contact_info::PgContactInfo;
 pub use employee::PgEmployee;
+pub use expenses::PgExpenses;
 pub(crate) use interval::PgInterval;
 pub use job::PgJob;
 pub use location::PgLocation;

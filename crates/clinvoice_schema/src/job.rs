@@ -369,6 +369,7 @@ mod tests
 					category: "Service".into(),
 					cost: Money::new(20_00, 2, Currency::USD),
 					description: "Paid for someone else to clean".into(),
+					..Default::default()
 				}],
 				job: job.clone(),
 				time_begin: Utc::today().and_hms(3, 0, 0),

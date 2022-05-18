@@ -5,7 +5,7 @@ use clinvoice_adapter::{schema::ExpensesAdapter, WriteWhereClause};
 use clinvoice_finance::{ExchangeRates, Money};
 use clinvoice_match::{MatchExpense, MatchSet};
 use clinvoice_schema::{Expense, Id};
-use futures::{stream, StreamExt, TryFutureExt, TryStreamExt};
+use futures::{future, stream, StreamExt, TryFutureExt, TryStreamExt};
 use sqlx::{Executor, PgPool, Postgres, Result, Row};
 
 use super::{columns::PgExpenseColumns, PgExpenses};
@@ -27,11 +27,11 @@ impl ExpensesAdapter for PgExpenses
 
 		let exchange_rates_fut = ExchangeRates::new().map_err(util::finance_err_to_sqlx);
 
-		const INSERT_VALUES_APPROX_LEN: u8 = 39;
+		const INSERT_VALUES_APPROX_LEN: u8 = 60;
 		let mut expense_values =
 			String::with_capacity((INSERT_VALUES_APPROX_LEN as usize) * expenses.len());
 
-		// NOTE: `i * 6` is the number of values each iteration inserts
+		// NOTE: `i * 4` is the number of values each iteration inserts
 		(0..expenses.len()).map(|i| i * 4).for_each(|i| {
 			write!(
 				expense_values,
@@ -55,7 +55,7 @@ impl ExpensesAdapter for PgExpenses
 					VALUES {expense_values}
 					RETURNING id;",
 				)),
-				|mut query, (category, cost, description)| {
+				|query, (category, cost, description)| {
 					query
 						.bind(timesheet_id)
 						.bind(category)
@@ -72,10 +72,10 @@ impl ExpensesAdapter for PgExpenses
 			.zip(stream::iter(expenses.iter().cloned()))
 			.map(|(result, (category, cost, description))| {
 				result.map(|row| Expense {
-					id: row.get::<Id, _>("id"),
 					category,
 					cost,
 					description,
+					id: row.get::<Id, _>("id"),
 					timesheet_id,
 				})
 			})
@@ -109,26 +109,21 @@ impl ExpensesAdapter for PgExpenses
 			description: "description",
 		};
 
-		let mut rows = sqlx::query(&query).fetch(connection);
-		let mut map = HashMap::new();
-		while let Some(result) = rows.next().await
-		{
-			let row = result?;
-			let timesheet_id = row.get::<Id, _>(COLUMNS.timesheet_id);
-			if !map.contains_key(&timesheet_id)
-			{
-				map.insert(timesheet_id, Vec::new());
-			}
-
-			if let Some(contact) = COLUMNS.row_to_view(connection, &row).await?
-			{
-				// TODO: use `IndexSet` or let chains
-				if let Some(ref mut contact_info) = map.get_mut(&timesheet_id)
+		sqlx::query(&query)
+			.fetch(connection)
+			.try_fold(HashMap::new(), |mut map, row| {
+				match COLUMNS.row_to_view(&row)
 				{
-					contact_info.push(contact);
-				}
-			}
-		}
-		Ok(map)
+					Ok(Some(expense)) => map
+						.entry(expense.timesheet_id)
+						.or_insert_with(|| Vec::with_capacity(1))
+						.push(expense),
+					Err(e) => return future::err(e),
+					_ => (),
+				};
+
+				future::ok(map)
+			})
+			.await
 	}
 }

@@ -10,7 +10,7 @@
 
 mod contact_info_adapter;
 mod employee_adapter;
-mod expense_adapter;
+mod expenses_adapter;
 mod job_adapter;
 mod location_adapter;
 mod organization_adapter;
@@ -19,7 +19,7 @@ mod timesheet_adapter;
 
 pub use contact_info_adapter::ContactInfoAdapter;
 pub use employee_adapter::EmployeeAdapter;
-pub use expense_adapter::ExpensesAdapter;
+pub use expenses_adapter::ExpensesAdapter;
 pub use job_adapter::JobAdapter;
 pub use location_adapter::LocationAdapter;
 pub use organization_adapter::OrganizationAdapter;

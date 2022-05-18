@@ -4,8 +4,8 @@ use std::collections::HashMap;
 use clinvoice_adapter::schema::ContactInfoAdapter;
 use clinvoice_match::{MatchContact, MatchSet};
 use clinvoice_schema::{Contact, ContactKind, Id};
-use futures::StreamExt;
-use sqlx::{Executor, PgPool, Postgres, Result, Row};
+use futures::TryStreamExt;
+use sqlx::{Executor, PgPool, Postgres, Result};
 
 use super::{columns::PgContactColumns, PgContactInfo};
 use crate::schema::write_where_clause;
@@ -122,26 +122,18 @@ impl ContactInfoAdapter for PgContactInfo
 			phone: "phone",
 		};
 
-		let mut rows = sqlx::query(&query).fetch(connection);
-		let mut map = HashMap::new();
-		while let Some(result) = rows.next().await
-		{
-			let row = result?;
-			let employee_id = row.get::<Id, _>(COLUMNS.employee_id);
-			if !map.contains_key(&employee_id)
-			{
-				map.insert(employee_id, Vec::new());
-			}
-
-			if let Some(contact) = COLUMNS.row_to_view(connection, &row).await?
-			{
-				// TODO: use `IndexSet` or let chains
-				if let Some(ref mut contact_info) = map.get_mut(&employee_id)
+		sqlx::query(&query)
+			.fetch(connection)
+			.try_fold(HashMap::new(), |mut map, row| async move {
+				if let Some(contact) = COLUMNS.row_to_view(connection, &row).await?
 				{
-					contact_info.push(contact);
+					map.entry(contact.employee_id)
+						.or_insert_with(|| Vec::with_capacity(1))
+						.push(contact);
 				}
-			}
-		}
-		Ok(map)
+
+				Ok(map)
+			})
+			.await
 	}
 }

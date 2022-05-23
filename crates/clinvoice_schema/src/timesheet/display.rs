@@ -17,7 +17,7 @@ impl Display for Timesheet
 				.map(|time| DateTime::<Local>::from(time).naive_local().to_string())
 				.unwrap_or_else(|| "Current".into()),
 			self.employee.title,
-			self.employee.person.name,
+			self.employee.name,
 			self.employee.organization,
 		)?;
 
@@ -62,7 +62,6 @@ mod tests
 		Job,
 		Location,
 		Organization,
-		Person,
 	};
 
 	#[test]
@@ -126,10 +125,7 @@ mod tests
 					name: "Big Test Organization".into(),
 					..Default::default()
 				},
-				person: Person {
-					name: "Testy McTesterson".into(),
-					..Default::default()
-				},
+				name: "Testy McTesterson".into(),
 				status: "Representative".into(),
 				title: "CEO of Tests".into(),
 				..Default::default()

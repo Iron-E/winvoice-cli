@@ -245,7 +245,7 @@ mod tests
 	use clinvoice_finance::{Currency, Money};
 
 	use super::{DateTime, Job, Local, Timesheet};
-	use crate::{Employee, Expense, Invoice, Location, Organization, Person};
+	use crate::{Employee, Expense, Invoice, Location, Organization};
 
 	#[test]
 	fn export()
@@ -292,10 +292,7 @@ mod tests
 			contact_info: Vec::new(),
 			id: 0,
 			organization: organization.clone(),
-			person: Person {
-				id: 0,
-				name: "Testy McTesterson".into(),
-			},
+			name: "Testy McTesterson".into(),
 			status: "Representative".into(),
 			title: "CEO of Tests".into(),
 		};
@@ -304,10 +301,7 @@ mod tests
 			contact_info: Vec::new(),
 			id: 0,
 			organization: organization.clone(),
-			person: Person {
-				id: 0,
-				name: "Bob".into(),
-			},
+			name: "Bob".into(),
 			status: "Employed".into(),
 			title: "Janitor".into(),
 		};

@@ -6,7 +6,7 @@ impl Display for Employee
 {
 	fn fmt(&self, formatter: &mut Formatter) -> Result
 	{
-		writeln!(formatter, "{} {}", self.title, self.person.name)?;
+		writeln!(formatter, "{} {}", self.title, self.name)?;
 		writeln!(formatter, "\tEmployer: {}", self.organization)?;
 
 		if !self.contact_info.is_empty()
@@ -28,7 +28,7 @@ impl Display for Employee
 mod tests
 {
 	use super::Employee;
-	use crate::{Contact, ContactKind, Location, Organization, Person};
+	use crate::{Contact, ContactKind, Location, Organization};
 
 	#[test]
 	fn display()
@@ -84,10 +84,7 @@ mod tests
 				location: work_street_view,
 				name: "Big Old Test".into(),
 			},
-			person: Person {
-				id: 0,
-				name: "Testy McTesterson".into(),
-			},
+			name: "Testy McTesterson".into(),
 			status: "Representative".into(),
 			title: "CEO of Tests".into(),
 		};

@@ -69,7 +69,7 @@ mod tests
 	use clinvoice_finance::{Currency, Money};
 
 	use super::{DateTime, Job, Local};
-	use crate::{Contact, ContactKind, Employee, Invoice, Location, Organization, Person};
+	use crate::{Contact, ContactKind, Employee, Invoice, Location, Organization};
 
 	#[test]
 	fn display()
@@ -93,10 +93,7 @@ mod tests
 				location: earth_view.clone(),
 				name: "Big Old Test".into(),
 			},
-			person: Person {
-				id: 0,
-				name: "Testy McTesterson".into(),
-			},
+			name: "Testy McTesterson".into(),
 			status: "Representative".into(),
 			title: "CEO of Tests".into(),
 		};

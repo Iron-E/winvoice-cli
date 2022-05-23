@@ -115,7 +115,7 @@ impl Timesheet
 				depth: 0,
 				text: Text::Bold("Name"),
 			},
-			self.employee.person.name,
+			self.employee.name,
 		)
 		.unwrap();
 		writeln!(

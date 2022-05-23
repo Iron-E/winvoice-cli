@@ -1,18 +1,16 @@
 mod display;
-mod hash;
-mod partial_eq;
 mod restorable_serde;
 
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 
-use super::{Contact, Organization, Person};
+use super::{Contact, Organization};
 use crate::Id;
 
 /// # Summary
 ///
 /// A view of [`Employee`](crate::Employee).
-#[derive(Clone, Debug, Default, Eq)]
+#[derive(Clone, Default, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 pub struct Employee
 {
@@ -23,22 +21,20 @@ pub struct Employee
 
 	/// # Summary
 	///
-	/// The reference number of this [`Employee`], which can be used instead of the compound key
-	/// {`organization`, `person_id`}.
+	/// The reference number of this [`Employee`], which is unique to each [`employee`].
 	#[cfg_attr(feature = "serde_support", serde(skip))]
 	pub id: Id,
+
+	/// # Summary
+	///
+	/// The name of the [`Employee`].
+	pub name: String,
 
 	/// # Summary
 	///
 	/// The reference number of the [`Organization`](crate::Organization) which this
 	/// [`Employee`] is in reference to.
 	pub organization: Organization,
-
-	/// # Summary
-	///
-	/// The reference number of the [`Person`](super::person::Person) which this
-	/// [`Employee`] is in reference to.
-	pub person: Person,
 
 	/// # Summary
 	///

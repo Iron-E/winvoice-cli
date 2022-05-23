@@ -25,7 +25,7 @@ pub trait ContactInfoAdapter:
 	/// The newly created [`Contact`].
 	async fn create(
 		connection: impl 'async_trait + Executor<'_, Database = <Self as Deletable>::Db> + Send,
-		contact_info: &[(bool, ContactKind, String)],
+		contact_info: Vec<(bool, ContactKind, String)>,
 		employee_id: Id,
 	) -> Result<Vec<Contact>>;
 

@@ -16,7 +16,7 @@ impl ExpensesAdapter for PgExpenses
 {
 	async fn create(
 		connection: impl 'async_trait + Executor<'_, Database = Postgres> + Send,
-		expenses: &[(String, Money, String)],
+		expenses: Vec<(String, Money, String)>,
 		timesheet_id: Id,
 	) -> Result<Vec<Expense>>
 	{

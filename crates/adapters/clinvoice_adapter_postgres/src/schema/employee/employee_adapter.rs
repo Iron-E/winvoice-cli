@@ -46,7 +46,7 @@ impl EmployeeAdapter for PgEmployee
 		.fetch_one(&mut transaction)
 		.await?;
 
-		let contact_info_db = PgContactInfo::create(&mut transaction, &contact_info, row.id).await?;
+		let contact_info_db = PgContactInfo::create(&mut transaction, contact_info, row.id).await?;
 
 		transaction.commit().await?;
 

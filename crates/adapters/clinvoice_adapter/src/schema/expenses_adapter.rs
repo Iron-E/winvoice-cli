@@ -25,7 +25,7 @@ pub trait ExpensesAdapter:
 	/// The newly created [`Expense`]s.
 	async fn create(
 		connection: impl 'async_trait + Executor<'_, Database = <Self as Deletable>::Db> + Send,
-		expenses: &[(String, Money, String)],
+		expenses: Vec<(String, Money, String)>,
 		timesheet_id: Id,
 	) -> Result<Vec<Expense>>;
 

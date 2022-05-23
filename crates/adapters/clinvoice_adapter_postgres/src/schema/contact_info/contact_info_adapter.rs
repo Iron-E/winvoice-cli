@@ -15,7 +15,7 @@ impl ContactInfoAdapter for PgContactInfo
 {
 	async fn create(
 		connection: impl 'async_trait + Executor<'_, Database = Postgres> + Send,
-		contact_info: &[(bool, ContactKind, String)],
+		contact_info: Vec<(bool, ContactKind, String)>,
 		employee_id: Id,
 	) -> Result<Vec<Contact>>
 	{
@@ -76,8 +76,7 @@ impl ContactInfoAdapter for PgContactInfo
 			.await?;
 
 		Ok(contact_info
-			.iter()
-			.cloned()
+			.into_iter()
 			.map(|(export, kind, label)| Contact {
 				employee_id,
 				export,

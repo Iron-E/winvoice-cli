@@ -1,7 +1,7 @@
 mod display;
 
 use clinvoice_adapter::{
-	schema::{EmployeeAdapter, JobAdapter, TimesheetAdapter},
+	schema::{EmployeeAdapter, ExpensesAdapter, JobAdapter, TimesheetAdapter},
 	Deletable,
 };
 use clinvoice_match::{Match, MatchEmployee, MatchTimesheet};
@@ -44,7 +44,7 @@ impl Command
 			.and(Ok(()))
 	}
 
-	async fn stop<'err, Db, TAdapter>(
+	async fn stop<'err, Db, TAdapter, XAdapter>(
 		connection: &Pool<Db>,
 		default_employee_id: Option<Id>,
 		job: Job,
@@ -52,6 +52,7 @@ impl Command
 	where
 		Db: Database,
 		TAdapter: Deletable<Db = Db> + TimesheetAdapter + Send,
+		XAdapter: Deletable<Db = Db> + ExpensesAdapter + Send,
 		for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 	{
 		let mut timesheet = {
@@ -78,7 +79,13 @@ impl Command
 
 		timesheet.work_notes = input::edit_markdown(&timesheet.work_notes)?;
 
-		input::util::expense::menu(&mut timesheet.expenses, job.invoice.hourly_rate.currency)?;
+		input::util::expense::menu::<_, XAdapter>(
+			connection,
+			&mut timesheet.expenses,
+			job.invoice.hourly_rate.currency,
+			job.id,
+		)
+		.await?;
 
 		// Stop time on the `Job` AFTER requiring users to enter information. Users shouldn't enter things for free ;)
 		let increment = Duration::from_std(job.increment)?;
@@ -88,7 +95,7 @@ impl Command
 		TAdapter::update(connection, timesheet).err_into().await
 	}
 
-	pub async fn run<'err, Db, EAdapter, JAdapter, TAdapter>(
+	pub async fn run<'err, Db, EAdapter, JAdapter, TAdapter, XAdapter>(
 		&self,
 		connection: Pool<Db>,
 		default_employee_id: Option<Id>,
@@ -98,6 +105,7 @@ impl Command
 		EAdapter: Deletable<Db = Db> + EmployeeAdapter + Send,
 		JAdapter: Deletable<Db = Db> + JobAdapter + Send,
 		TAdapter: Deletable<Db = Db> + TimesheetAdapter + Send,
+		XAdapter: Deletable<Db = Db> + ExpensesAdapter + Send,
 		for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 	{
 		let job_results_view: Vec<_> = input::util::job::retrieve::<&str, _, JAdapter>(
@@ -137,7 +145,8 @@ impl Command
 
 			Self::Stop =>
 			{
-				Self::stop::<_, TAdapter>(&connection, default_employee_id, selected_job).await?
+				Self::stop::<_, TAdapter, XAdapter>(&connection, default_employee_id, selected_job)
+					.await?
 			},
 		};
 

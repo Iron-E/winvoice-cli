@@ -88,6 +88,7 @@ impl ExpensesAdapter for PgExpenses
 		match_condition: MatchSet<MatchExpense>,
 	) -> Result<HashMap<Id, Vec<Expense>>>
 	{
+		let exchange_rates_fut = ExchangeRates::new().map_err(util::finance_err_to_sqlx);
 		let mut query = String::from(
 			"SELECT
 				T.id as timesheet_id,
@@ -98,7 +99,18 @@ impl ExpensesAdapter for PgExpenses
 			FROM timesheets T
 			LEFT JOIN expenses X ON (X.timesheet_id = T.id)",
 		);
-		PgSchema::write_where_clause(Default::default(), "X", &match_condition, &mut query);
+		let exchange_rates = exchange_rates_fut.await?;
+		PgSchema::write_where_clause(
+			Default::default(),
+			"X",
+			&match_condition.map(&|e| MatchExpense {
+				id: e.id,
+				category: e.category,
+				cost: e.cost.exchange(Default::default(), &exchange_rates),
+				description: e.description,
+			}),
+			&mut query,
+		);
 		query.push(';');
 
 		const COLUMNS: PgExpenseColumns<'static> = PgExpenseColumns {
@@ -112,7 +124,9 @@ impl ExpensesAdapter for PgExpenses
 		sqlx::query(&query)
 			.fetch(connection)
 			.try_fold(HashMap::new(), |mut map, row| {
-				let entry = map.entry(row.get::<Id, _>(COLUMNS.timesheet_id)).or_insert_with(|| Vec::with_capacity(1));
+				let entry = map
+					.entry(row.get::<Id, _>(COLUMNS.timesheet_id))
+					.or_insert_with(|| Vec::with_capacity(1));
 				match COLUMNS.row_to_view(&row)
 				{
 					Ok(Some(expense)) => entry.push(expense),

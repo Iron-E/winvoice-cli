@@ -1,14 +1,7 @@
 use core::fmt::Display;
 
 use clinvoice_adapter::{
-	schema::{
-		EmployeeAdapter,
-		JobAdapter,
-		LocationAdapter,
-		OrganizationAdapter,
-		PersonAdapter,
-		TimesheetAdapter,
-	},
+	schema::{EmployeeAdapter, JobAdapter, LocationAdapter, OrganizationAdapter, TimesheetAdapter},
 	Deletable,
 	Updatable,
 };
@@ -80,9 +73,6 @@ pub enum Command
 
 	#[structopt(about = "Retrieve existing records about organizations")]
 	Organization,
-
-	#[structopt(about = "Retrieve existing records about people")]
-	Person,
 }
 
 impl Command
@@ -146,7 +136,7 @@ impl Command
 		future::try_join_all(updates).err_into().await.and(Ok(()))
 	}
 
-	pub async fn run<'err, Db, EAdapter, JAdapter, LAdapter, OAdapter, PAdapter, TAdapter>(
+	pub async fn run<'err, Db, EAdapter, JAdapter, LAdapter, OAdapter, TAdapter>(
 		self,
 		connection: Pool<Db>,
 		cascade_delete: bool,
@@ -160,7 +150,6 @@ impl Command
 		JAdapter: Deletable<Db = Db> + JobAdapter + Send,
 		LAdapter: Deletable<Db = Db> + LocationAdapter + Send,
 		OAdapter: Deletable<Db = Db> + OrganizationAdapter + Send,
-		PAdapter: Deletable<Db = Db> + PersonAdapter + Send,
 		TAdapter: Deletable<Db = Db> + TimesheetAdapter + Send,
 		for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 	{
@@ -388,30 +377,6 @@ impl Command
 				else if !delete
 				{
 					results_view.iter().for_each(|o| println!("{o}"));
-				}
-			},
-
-			Self::Person =>
-			{
-				let results_view = input::util::person::retrieve::<&str, _, PAdapter>(
-					&connection,
-					"Query the `Person` you are looking for",
-					false,
-				)
-				.await?;
-
-				if delete
-				{
-					Self::delete::<PAdapter, _, _>(&connection, cascade_delete, &results_view).await?;
-				}
-
-				if update
-				{
-					Self::update::<_, _, PAdapter>(&connection, &results_view).await?
-				}
-				else if !delete
-				{
-					results_view.iter().for_each(|p| println!("{p}"));
 				}
 			},
 		};

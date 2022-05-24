@@ -1,7 +1,7 @@
 use core::time::Duration as StdDuration;
 
 use clinvoice_adapter::{
-	schema::{EmployeeAdapter, JobAdapter, LocationAdapter, OrganizationAdapter, PersonAdapter},
+	schema::{EmployeeAdapter, JobAdapter, LocationAdapter, OrganizationAdapter},
 	Adapters,
 	Deletable,
 	Error as FeatureNotFoundError,
@@ -22,7 +22,7 @@ use sqlx::{Database, Executor, Pool, Result};
 use structopt::StructOpt;
 #[cfg(feature = "postgres")]
 use {
-	clinvoice_adapter_postgres::schema::{PgEmployee, PgJob, PgLocation, PgOrganization, PgPerson},
+	clinvoice_adapter_postgres::schema::{PgEmployee, PgJob, PgLocation, PgOrganization},
 	sqlx::PgPool,
 };
 
@@ -35,6 +35,9 @@ pub enum Create
 	#[structopt(about = "Create a new employee record")]
 	Employee
 	{
+		#[structopt(help = "The name of the person to create (e.g. 'John')")]
+		name: String,
+
 		#[structopt(help = "The job title of the employee (e.g. 'Hal'")]
 		title: String,
 	},
@@ -106,18 +109,11 @@ pub enum Create
 		#[structopt(help = "The name of the organization to create (e.g. 'FooCorp')")]
 		name: String,
 	},
-
-	#[structopt(about = "Create a new person record")]
-	Person
-	{
-		#[structopt(help = "The name of the person to create (e.g. 'John')")]
-		name: String,
-	},
 }
 
 impl Create
 {
-	async fn create<'err, Db, EAdapter, JAdapter, LAdapter, OAdapter, PAdapter>(
+	async fn create<'err, Db, EAdapter, JAdapter, LAdapter, OAdapter>(
 		self,
 		connection: Pool<Db>,
 		default_currency: Currency,
@@ -129,15 +125,13 @@ impl Create
 		JAdapter: Deletable<Db = Db> + JobAdapter + Send,
 		LAdapter: Deletable<Db = Db> + LocationAdapter + Send,
 		OAdapter: Deletable<Db = Db> + OrganizationAdapter + Send,
-		PAdapter: Deletable<Db = Db> + PersonAdapter + Send,
 		for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 	{
 		match self
 		{
-			Self::Employee { title } =>
+			Self::Employee { name, title } =>
 			{
-				Self::create_employee::<_, EAdapter, LAdapter, OAdapter, PAdapter>(&connection, title)
-					.await
+				Self::create_employee::<_, EAdapter, LAdapter, OAdapter>(&connection, name, title).await
 			},
 
 			Self::Job {
@@ -181,16 +175,12 @@ impl Create
 			{
 				Self::create_organization::<_, LAdapter, OAdapter>(&connection, name).await
 			},
-
-			Self::Person { name } => PAdapter::create(&connection, name)
-				.err_into()
-				.await
-				.and(Ok(())),
 		}
 	}
 
-	async fn create_employee<'err, Db, EAdapter, LAdapter, OAdapter, PAdapter>(
+	async fn create_employee<'err, Db, EAdapter, LAdapter, OAdapter>(
 		connection: &Pool<Db>,
+		name: String,
 		title: String,
 	) -> DynResult<'err, ()>
 	where
@@ -198,7 +188,6 @@ impl Create
 		EAdapter: Deletable<Db = Db> + EmployeeAdapter + Send,
 		LAdapter: Deletable<Db = Db> + LocationAdapter + Send,
 		OAdapter: Deletable<Db = Db> + OrganizationAdapter + Send,
-		PAdapter: Deletable<Db = Db> + PersonAdapter + Send,
 		for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 	{
 		let organization_views = input::util::organization::retrieve::<&str, _, OAdapter>(
@@ -213,23 +202,14 @@ impl Create
 			"Which organization does this employee work at?",
 		)?;
 
-		let person_views = input::util::person::retrieve::<&str, _, PAdapter>(
-			connection,
-			"Query the `Person` who this `Employee` is",
-			true,
-		)
-		.await?;
-
-		let person = input::select_one(&person_views, "Which `Person` is this `Employee`?")?;
-
 		let contact_info = input::util::contact::menu::<_, LAdapter>(connection).await?;
 		let employee_status = input::text(None, "What is the status of the employee?")?;
 
 		EAdapter::create(
 			connection,
 			contact_info,
+			name,
 			organization,
-			person,
 			employee_status,
 			title,
 		)
@@ -344,7 +324,7 @@ impl Create
 			{
 				let pool = PgPool::connect_lazy(&store.url)?;
 				self
-					.create::<_, PgEmployee, PgJob, PgLocation, PgOrganization, PgPerson>(
+					.create::<_, PgEmployee, PgJob, PgLocation, PgOrganization>(
 						pool,
 						default_currency,
 						default_increment,

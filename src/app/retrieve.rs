@@ -7,7 +7,7 @@ use command::Command;
 use structopt::StructOpt;
 #[cfg(feature = "postgres")]
 use {
-	clinvoice_adapter_postgres::schema::{PgEmployee, PgJob, PgLocation, PgOrganization, PgPerson},
+	clinvoice_adapter_postgres::schema::{PgEmployee, PgJob, PgLocation, PgOrganization},
 	sqlx::PgPool,
 };
 
@@ -50,7 +50,7 @@ impl Retrieve
 				let pool = PgPool::connect_lazy(&store.url)?;
 				self
 					.command
-					.run::<_, PgEmployee, PgJob, PgLocation, PgOrganization, PgPerson, PgTimesheet>(
+					.run::<_, PgEmployee, PgJob, PgLocation, PgOrganization, PgTimesheet>(
 						pool,
 						self.cascade_delete,
 						config,

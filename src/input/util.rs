@@ -5,7 +5,6 @@ pub mod job;
 pub mod location;
 mod menu;
 pub mod organization;
-pub mod person;
 
 /// # Summary
 ///

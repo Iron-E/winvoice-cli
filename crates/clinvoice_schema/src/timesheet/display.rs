@@ -53,16 +53,7 @@ mod tests
 	use clinvoice_finance::{Currency, Money};
 
 	use super::{DateTime, Local, Timesheet};
-	use crate::{
-		Contact,
-		ContactKind,
-		Employee,
-		Expense,
-		Invoice,
-		Job,
-		Location,
-		Organization,
-	};
+	use crate::{Contact, ContactKind, Employee, Expense, Invoice, Job, Location, Organization};
 
 	#[test]
 	fn display()

@@ -14,7 +14,6 @@ mod expenses_adapter;
 mod job_adapter;
 mod location_adapter;
 mod organization_adapter;
-mod person_adapter;
 mod timesheet_adapter;
 
 pub use contact_info_adapter::ContactInfoAdapter;
@@ -23,5 +22,4 @@ pub use expenses_adapter::ExpensesAdapter;
 pub use job_adapter::JobAdapter;
 pub use location_adapter::LocationAdapter;
 pub use organization_adapter::OrganizationAdapter;
-pub use person_adapter::PersonAdapter;
 pub use timesheet_adapter::TimesheetAdapter;

@@ -1,9 +1,8 @@
 use clinvoice_adapter::{
-	schema::{ContactInfoAdapter, TimesheetAdapter},
+	schema::{ContactInfoAdapter, TimesheetAdapter, ExpensesAdapter},
 	WriteWhereClause,
 };
-use clinvoice_finance::ExchangeRates;
-use clinvoice_match::{MatchExpense, MatchTimesheet};
+use clinvoice_match::MatchTimesheet;
 use clinvoice_schema::{
 	chrono::{SubsecRound, Utc},
 	Employee,
@@ -20,9 +19,8 @@ use crate::{
 		employee::columns::PgEmployeeColumns,
 		job::columns::PgJobColumns,
 		organization::columns::PgOrganizationColumns,
-		util,
 		PgContactInfo,
-		PgLocation,
+		PgLocation, PgExpenses,
 	},
 	PgSchema as Schema,
 };
@@ -72,7 +70,8 @@ impl TimesheetAdapter for PgTimesheet
 			connection,
 			&match_condition.employee.organization.location,
 		);
-		let exchange_rates_fut = ExchangeRates::new().map_err(util::finance_err_to_sqlx);
+		let expenses_fut =
+			PgExpenses::retrieve(connection, match_condition.expenses.clone());
 
 		let mut query = String::from(
 			r#"SELECT
@@ -81,10 +80,8 @@ impl TimesheetAdapter for PgTimesheet
 				Employer.name AS employer_name, Employer.location_id as employer_location_id,
 				J.client_id, J.date_close, J.date_open, J.increment, J.invoice_date_issued, J.invoice_date_paid,
 					J.invoice_hourly_rate, J.notes, J.objectives,
-				T.id, T.employee_id, T.job_id, T.time_begin, T.time_end, T.work_notes,
-				array_agg(DISTINCT (X1.id, X1.category, X1.cost, X1.description)) AS "expenses?"
+				T.id, T.employee_id, T.job_id, T.time_begin, T.time_end, T.work_notes
 			FROM timesheets T
-			LEFT JOIN expenses X1 ON (X1.timesheet_id = T.id)
 			JOIN employees E ON (E.id = T.employee_id)
 			JOIN jobs J ON (J.id = T.job_id)
 			JOIN organizations Client ON (Client.id = J.client_id)
@@ -97,38 +94,25 @@ impl TimesheetAdapter for PgTimesheet
 						Schema::write_where_clause(
 							Schema::write_where_clause(
 								Schema::write_where_clause(
-									Schema::write_where_clause(
-										Default::default(),
-										"Client",
-										&match_condition.job.client,
-										&mut query,
-									),
-									"E",
-									&match_condition.employee,
+									Default::default(),
+									"Client",
+									&match_condition.job.client,
 									&mut query,
 								),
-								"Employer",
-								&match_condition.employee.organization,
+								"E",
+								&match_condition.employee,
 								&mut query,
 							),
-							"J",
-							&match_condition.job,
+							"Employer",
+							&match_condition.employee.organization,
 							&mut query,
 						),
-						"T",
-						&match_condition,
+						"J",
+						&match_condition.job,
 						&mut query,
 					),
-					"X1",
-					{
-						let exchange_rates = exchange_rates_fut.await?;
-						&match_condition.expenses.map(&|e| MatchExpense {
-							id: e.id,
-							category: e.category,
-							cost: e.cost.exchange(Default::default(), &exchange_rates),
-							description: e.description,
-						})
-					},
+					"T",
+					&match_condition,
 					&mut query,
 				),
 				"Client.location_id",
@@ -139,16 +123,7 @@ impl TimesheetAdapter for PgTimesheet
 			&employer_location_id_match.await?,
 			&mut query,
 		);
-		query.push_str(
-			" GROUP BY
-				Client.name, Client.location_id,
-				E.name, E.organization_id, E.status, E.title,
-				Employer.name, Employer.location_id,
-				J.client_id, J.date_close, J.date_open, J.increment, J.invoice_date_issued, J.invoice_date_paid,
-					J.invoice_hourly_rate, J.notes, J.objectives,
-				T.id, T.employee_id, T.job_id, T.time_begin, T.time_end, T.work_notes
-			;",
-		);
+		query.push(';');
 
 		const COLUMNS: PgTimesheetColumns<'static> = PgTimesheetColumns {
 			id: "id",
@@ -163,7 +138,6 @@ impl TimesheetAdapter for PgTimesheet
 				status: "status",
 				title: "title",
 			},
-			expenses: "expenses",
 			job: PgJobColumns {
 				client: PgOrganizationColumns {
 					id: "client_id",
@@ -178,21 +152,22 @@ impl TimesheetAdapter for PgTimesheet
 		};
 
 		let contact_info = &contact_info_fut.await?;
+		let expenses = &expenses_fut.await?;
 		sqlx::query(&query)
 			.fetch(connection)
 			.try_filter_map(|row| async move {
-				match contact_info.get(&row.get::<Id, _>(COLUMNS.employee.id))
+				if let Some(c) = contact_info.get(&row.get::<Id, _>(COLUMNS.employee.id))
 				{
-					Some(employee_contact_info) =>
+					if let Some(e) = expenses.get(&row.get::<Id, _>(COLUMNS.id))
 					{
-						COLUMNS
-							.row_to_view(connection, employee_contact_info.clone(), &row)
+						return COLUMNS
+							.row_to_view(connection, c.clone(), e.clone(), &row)
 							.map_ok(Some)
-							.await
-					},
-					// If `PgContactInfo::retrieve` does not match, then the whole `timesheet` does not match.
-					_ => return Ok(None),
+							.await;
+					}
 				}
+
+				Ok(None)
 			})
 			.try_collect()
 			.await

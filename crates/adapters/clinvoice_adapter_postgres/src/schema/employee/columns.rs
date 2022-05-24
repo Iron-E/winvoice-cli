@@ -1,17 +1,14 @@
 use clinvoice_schema::{Contact, Employee};
 use sqlx::{postgres::PgRow, PgPool, Result, Row};
 
-use crate::schema::{
-	organization::columns::PgOrganizationColumns,
-	person::columns::PgPersonColumns,
-};
+use crate::schema::organization::columns::PgOrganizationColumns;
 
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub(in crate::schema) struct PgEmployeeColumns<'col>
 {
 	pub id: &'col str,
+	pub name: &'col str,
 	pub organization: PgOrganizationColumns<'col>,
-	pub person: PgPersonColumns<'col>,
 	pub status: &'col str,
 	pub title: &'col str,
 }
@@ -30,9 +27,9 @@ impl PgEmployeeColumns<'_>
 		Ok(Employee {
 			contact_info,
 			id: row.get(self.id),
+			name: row.get(self.name),
 			status: row.get(self.status),
 			title: row.get(self.title),
-			person: self.person.row_to_view(row),
 			organization: organization.await?,
 		})
 	}

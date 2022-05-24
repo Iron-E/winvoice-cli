@@ -20,7 +20,6 @@ use crate::{
 		employee::columns::PgEmployeeColumns,
 		job::columns::PgJobColumns,
 		organization::columns::PgOrganizationColumns,
-		person::columns::PgPersonColumns,
 		util,
 		PgContactInfo,
 		PgLocation,
@@ -78,11 +77,10 @@ impl TimesheetAdapter for PgTimesheet
 		let mut query = String::from(
 			r#"SELECT
 				Client.name AS client_name, Client.location_id as client_location_id,
-				E.organization_id as employer_id, E.person_id, E.status, E.title,
+				E.name as employee_name, E.organization_id as employer_id, E.status, E.title,
 				Employer.name AS employer_name, Employer.location_id as employer_location_id,
 				J.client_id, J.date_close, J.date_open, J.increment, J.invoice_date_issued, J.invoice_date_paid,
 					J.invoice_hourly_rate, J.notes, J.objectives,
-				P.name AS person_name,
 				T.id, T.employee_id, T.job_id, T.time_begin, T.time_end, T.work_notes,
 				array_agg(DISTINCT (X1.id, X1.category, X1.cost, X1.description)) AS "expenses?"
 			FROM timesheets T
@@ -90,8 +88,7 @@ impl TimesheetAdapter for PgTimesheet
 			JOIN employees E ON (E.id = T.employee_id)
 			JOIN jobs J ON (J.id = T.job_id)
 			JOIN organizations Client ON (Client.id = J.client_id)
-			JOIN organizations Employer ON (Employer.id = E.organization_id)
-			JOIN people P ON (P.id = E.person_id)"#,
+			JOIN organizations Employer ON (Employer.id = E.organization_id)"#,
 		);
 		Schema::write_where_clause(
 			Schema::write_where_clause(
@@ -101,26 +98,21 @@ impl TimesheetAdapter for PgTimesheet
 							Schema::write_where_clause(
 								Schema::write_where_clause(
 									Schema::write_where_clause(
-										Schema::write_where_clause(
-											Default::default(),
-											"Client",
-											&match_condition.job.client,
-											&mut query,
-										),
-										"E",
-										&match_condition.employee,
+										Default::default(),
+										"Client",
+										&match_condition.job.client,
 										&mut query,
 									),
-									"Employer",
-									&match_condition.employee.organization,
+									"E",
+									&match_condition.employee,
 									&mut query,
 								),
-								"J",
-								&match_condition.job,
+								"Employer",
+								&match_condition.employee.organization,
 								&mut query,
 							),
-							"P",
-							&match_condition.employee.person,
+							"J",
+							&match_condition.job,
 							&mut query,
 						),
 						"T",
@@ -150,11 +142,10 @@ impl TimesheetAdapter for PgTimesheet
 		query.push_str(
 			" GROUP BY
 				Client.name, Client.location_id,
-				E.organization_id, E.person_id, E.status, E.title,
+				E.name, E.organization_id, E.status, E.title,
 				Employer.name, Employer.location_id,
 				J.client_id, J.date_close, J.date_open, J.increment, J.invoice_date_issued, J.invoice_date_paid,
 					J.invoice_hourly_rate, J.notes, J.objectives,
-				P.name,
 				T.id, T.employee_id, T.job_id, T.time_begin, T.time_end, T.work_notes
 			;",
 		);
@@ -168,10 +159,7 @@ impl TimesheetAdapter for PgTimesheet
 					location_id: "employer_location_id",
 					name: "employer_name",
 				},
-				person: PgPersonColumns {
-					id: "person_id",
-					name: "person_name",
-				},
+				name: "employee_name",
 				status: "status",
 				title: "title",
 			},
@@ -222,7 +210,6 @@ mod tests
 		JobAdapter,
 		LocationAdapter,
 		OrganizationAdapter,
-		PersonAdapter,
 	};
 	use clinvoice_match::{Match, MatchEmployee, MatchOrganization, MatchSet, MatchTimesheet};
 	use clinvoice_schema::{
@@ -233,7 +220,7 @@ mod tests
 	};
 
 	use super::{PgTimesheet, TimesheetAdapter};
-	use crate::schema::{util, PgEmployee, PgJob, PgLocation, PgOrganization, PgPerson};
+	use crate::schema::{util, PgEmployee, PgJob, PgLocation, PgOrganization};
 
 	#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 	async fn create()
@@ -260,10 +247,6 @@ mod tests
 		.await
 		.unwrap();
 
-		let person = PgPerson::create(&connection, "My Name".into())
-			.await
-			.unwrap();
-
 		let contact_info = vec![
 			(false, ContactKind::Address(earth), "Office".into()),
 			(
@@ -281,8 +264,8 @@ mod tests
 		let employee = PgEmployee::create(
 			&connection,
 			contact_info,
+			"My Name".into(),
 			organization,
-			person,
 			"Employed".into(),
 			"Janitor".into(),
 		)
@@ -321,12 +304,6 @@ mod tests
 	{
 		let connection = util::connect().await;
 
-		let (person, person2) = futures::try_join!(
-			PgPerson::create(&connection, "My Name".into()),
-			PgPerson::create(&connection, "Another Gúy".into()),
-		)
-		.unwrap();
-
 		let earth = PgLocation::create(&connection, "Earth".into())
 			.await
 			.unwrap();
@@ -361,8 +338,8 @@ mod tests
 						"Office's Phone".into(),
 					),
 				],
+				"My Name".into(),
 				organization.clone(),
-				person.clone(),
 				"Employed".into(),
 				"Janitor".into(),
 			),
@@ -385,8 +362,8 @@ mod tests
 						"Office's Phone".into(),
 					),
 				],
+				"Another Gúy".into(),
 				organization2.clone(),
-				person2,
 				"Management".into(),
 				"Assistant to Regional Manager".into(),
 			),

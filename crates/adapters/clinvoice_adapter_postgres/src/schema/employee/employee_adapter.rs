@@ -3,18 +3,13 @@ use clinvoice_adapter::{
 	WriteWhereClause,
 };
 use clinvoice_match::MatchEmployee;
-use clinvoice_schema::{ContactKind, Employee, Id, Organization, Person};
+use clinvoice_schema::{ContactKind, Employee, Id, Organization};
 use futures::{TryFutureExt, TryStreamExt};
 use sqlx::{PgPool, Result, Row};
 
 use super::{columns::PgEmployeeColumns, PgEmployee};
 use crate::{
-	schema::{
-		organization::columns::PgOrganizationColumns,
-		person::columns::PgPersonColumns,
-		PgContactInfo,
-		PgLocation,
-	},
+	schema::{organization::columns::PgOrganizationColumns, PgContactInfo, PgLocation},
 	PgSchema as Schema,
 };
 
@@ -24,8 +19,8 @@ impl EmployeeAdapter for PgEmployee
 	async fn create(
 		connection: &PgPool,
 		contact_info: Vec<(bool, ContactKind, String)>,
+		name: String,
 		organization: Organization,
-		person: Person,
 		status: String,
 		title: String,
 	) -> Result<Employee>
@@ -34,13 +29,13 @@ impl EmployeeAdapter for PgEmployee
 
 		let row = sqlx::query!(
 			"INSERT INTO employees
-				(organization_id, person_id, status, title)
+				(name, organization_id, status, title)
 			VALUES
 				($1, $2, $3, $4)
 			RETURNING id;",
+			name,
 			organization.id,
-			person.id,
-			status.as_str(),
+			status,
 			title,
 		)
 		.fetch_one(&mut transaction)
@@ -53,8 +48,8 @@ impl EmployeeAdapter for PgEmployee
 		Ok(Employee {
 			contact_info: contact_info_db,
 			id: row.id,
+			name,
 			organization,
-			person,
 			status,
 			title,
 		})
@@ -69,23 +64,16 @@ impl EmployeeAdapter for PgEmployee
 
 		let mut query = String::from(
 			"SELECT
-				E.id, E.organization_id, E.person_id, E.status, E.title,
-				O.name AS organization_name, O.location_id,
-				P.name
+				E.id, E.name, E.organization_id, E.status, E.title,
+				O.name AS organization_name, O.location_id
 			FROM employees E
-			JOIN organizations O ON (O.id = E.organization_id)
-			JOIN people P ON (P.id = E.person_id)",
+			JOIN organizations O ON (O.id = E.organization_id)",
 		);
 		Schema::write_where_clause(
 			Schema::write_where_clause(
-				Schema::write_where_clause(
-					Schema::write_where_clause(Default::default(), "E", &match_condition, &mut query),
-					"O",
-					&match_condition.organization,
-					&mut query,
-				),
-				"P",
-				&match_condition.person,
+				Schema::write_where_clause(Default::default(), "E", &match_condition, &mut query),
+				"O",
+				&match_condition.organization,
 				&mut query,
 			),
 			"O.location_id",
@@ -101,10 +89,7 @@ impl EmployeeAdapter for PgEmployee
 				location_id: "location_id",
 				name: "organization_name",
 			},
-			person: PgPersonColumns {
-				name: "name",
-				id: "person_id",
-			},
+			name: "name",
 			status: "status",
 			title: "title",
 		};
@@ -135,21 +120,13 @@ impl EmployeeAdapter for PgEmployee
 #[cfg(test)]
 mod tests
 {
-	use clinvoice_adapter::schema::{LocationAdapter, OrganizationAdapter, PersonAdapter};
-	use clinvoice_match::{
-		Match,
-		MatchEmployee,
-		MatchLocation,
-		MatchOrganization,
-		MatchPerson,
-		MatchSet,
-		MatchStr,
-	};
+	use clinvoice_adapter::schema::{LocationAdapter, OrganizationAdapter};
+	use clinvoice_match::{Match, MatchEmployee, MatchLocation, MatchOrganization, MatchSet};
 	use clinvoice_schema::{Contact, ContactKind};
 	use futures::TryStreamExt;
 
 	use super::{EmployeeAdapter, PgEmployee};
-	use crate::schema::{util, PgLocation, PgOrganization, PgPerson};
+	use crate::schema::{util, PgLocation, PgOrganization};
 
 	/// TODO: use fuzzing
 	#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
@@ -166,10 +143,6 @@ mod tests
 				.await
 				.unwrap();
 
-		let person = PgPerson::create(&connection, "My Name".into())
-			.await
-			.unwrap();
-
 		let employee = PgEmployee::create(
 			&connection,
 			vec![
@@ -185,8 +158,8 @@ mod tests
 					"Office's Email".into(),
 				),
 			],
+			"My Name".into(),
 			organization.clone(),
-			person.clone(),
 			"Employed".into(),
 			"Janitor".into(),
 		)
@@ -230,10 +203,9 @@ mod tests
 		// Assert ::create writes accurately to the DB
 		assert_eq!(employee.id, row.id);
 		assert_eq!(employee.contact_info, contact_info_row.await);
+		assert_eq!(employee.name, row.name);
 		assert_eq!(employee.organization.id, row.organization_id);
 		assert_eq!(organization.id, row.organization_id);
-		assert_eq!(employee.person.id, row.person_id);
-		assert_eq!(person.id, row.person_id);
 		assert_eq!(employee.status, row.status);
 		assert_eq!(employee.title, row.title);
 	}
@@ -263,12 +235,6 @@ mod tests
 		)
 		.unwrap();
 
-		let (person, person2) = futures::try_join!(
-			PgPerson::create(&connection, "My Name".into()),
-			PgPerson::create(&connection, "Another Gúy".into()),
-		)
-		.unwrap();
-
 		let (employee, employee2) = futures::try_join!(
 			PgEmployee::create(
 				&connection,
@@ -285,16 +251,16 @@ mod tests
 						"Office's Phone".into(),
 					),
 				],
+				"My Name".into(),
 				organization,
-				person.clone(),
 				"Employed".into(),
 				"Janitor".into(),
 			),
 			PgEmployee::create(
 				&connection,
 				Default::default(),
+				"Another Gúy".into(),
 				organization2,
-				person2,
 				"Management".into(),
 				"Assistant to Regional Manager".into(),
 			),
@@ -306,16 +272,12 @@ mod tests
 				organization: MatchOrganization {
 					name: employee.organization.name.clone().into(),
 					location: MatchLocation {
-						name: MatchStr::Or(vec![
-							employee.organization.location.name.clone().into(),
-							MatchStr::Contains(employee2.organization.location.name.clone())
+						id: Match::Or(vec![
+							employee.organization.location.id.into(),
+							employee2.organization.location.id.into(),
 						]),
 						..Default::default()
 					},
-					..Default::default()
-				},
-				person: MatchPerson {
-					id: person.id.into(),
 					..Default::default()
 				},
 				..Default::default()
@@ -343,7 +305,7 @@ mod tests
 		.all(|e| e.contact_info == employee.contact_info &&
 			e.organization.name == employee.organization.name &&
 			e.organization.location.name == employee.organization.location.name &&
-			e.person.name == employee.person.name &&
+			e.name == employee.name &&
 			e.status == employee.status &&
 			e.title == employee.title));
 
@@ -364,7 +326,7 @@ mod tests
 		.all(|e| e.contact_info == employee2.contact_info &&
 			e.organization.name == employee2.organization.name &&
 			e.organization.location.name == employee2.organization.location.name &&
-			e.person.name == employee2.person.name &&
+			e.name == employee2.name &&
 			e.status == employee2.status &&
 			e.title == employee2.title));
 	}

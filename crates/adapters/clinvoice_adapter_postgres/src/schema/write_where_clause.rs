@@ -15,7 +15,6 @@ use clinvoice_match::{
 	MatchExpense,
 	MatchJob,
 	MatchOrganization,
-	MatchPerson,
 	MatchSet,
 	MatchStr,
 	MatchTimesheet,
@@ -676,7 +675,17 @@ impl WriteWhereClause<&MatchEmployee> for Schema
 	{
 		Schema::write_where_clause(
 			Schema::write_where_clause(
-				Schema::write_where_clause(context, &format!("{alias}.id"), &match_condition.id, query),
+				Schema::write_where_clause(
+					Schema::write_where_clause(
+						context,
+						&format!("{alias}.id"),
+						&match_condition.id,
+						query,
+					),
+					&format!("{alias}.name"),
+					&match_condition.name,
+					query,
+				),
 				&format!("{alias}.status"),
 				&match_condition.status,
 				query,
@@ -821,30 +830,6 @@ impl WriteWhereClause<&MatchOrganization> for Schema
 			&match_condition.name,
 			query,
 		)
-	}
-}
-
-impl WriteWhereClause<&MatchPerson> for Schema
-{
-	fn write_where_clause(
-		context: WriteContext,
-		alias: impl Copy + Display,
-		match_condition: &MatchPerson,
-		query: &mut String,
-	) -> WriteContext
-	{
-		macro_rules! write_where_clause {
-			($context:expr, $column:expr, $match_field:ident) => {
-				Schema::write_where_clause(
-					$context,
-					&format!("{alias}.{}", $column),
-					&match_condition.$match_field,
-					query,
-				)
-			};
-		}
-
-		write_where_clause!(write_where_clause!(context, "id", id), "name", name)
 	}
 }
 

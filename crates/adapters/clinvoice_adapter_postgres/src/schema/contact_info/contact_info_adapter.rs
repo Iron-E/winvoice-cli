@@ -5,7 +5,7 @@ use clinvoice_adapter::schema::ContactInfoAdapter;
 use clinvoice_match::{MatchContact, MatchSet};
 use clinvoice_schema::{Contact, ContactKind, Id};
 use futures::TryStreamExt;
-use sqlx::{Executor, PgPool, Postgres, Result};
+use sqlx::{Executor, PgPool, Postgres, Result, Row};
 
 use super::{columns::PgContactColumns, PgContactInfo};
 use crate::schema::write_where_clause;
@@ -124,11 +124,12 @@ impl ContactInfoAdapter for PgContactInfo
 		sqlx::query(&query)
 			.fetch(connection)
 			.try_fold(HashMap::new(), |mut map, row| async move {
+				let entry = map
+					.entry(row.get::<Id, _>(COLUMNS.employee_id))
+					.or_insert_with(|| Vec::with_capacity(1));
 				if let Some(contact) = COLUMNS.row_to_view(connection, &row).await?
 				{
-					map.entry(contact.employee_id)
-						.or_insert_with(|| Vec::with_capacity(1))
-						.push(contact);
+					entry.push(contact);
 				}
 
 				Ok(map)

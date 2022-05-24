@@ -288,46 +288,40 @@ mod tests
 			&[employee.clone()],
 		);
 
-		assert!(PgEmployee::retrieve(&connection, MatchEmployee {
-			contact_info: MatchSet::Contains(Default::default()),
-			organization: MatchOrganization {
-				id: Match::Or(vec![
-					employee.organization.id.into(),
-					employee2.organization.id.into(),
-				]),
+		assert_eq!(
+			PgEmployee::retrieve(&connection, MatchEmployee {
+				contact_info: MatchSet::Contains(Default::default()),
+				organization: MatchOrganization {
+					id: Match::Or(vec![
+						employee.organization.id.into(),
+						employee2.organization.id.into(),
+					]),
+					..Default::default()
+				},
 				..Default::default()
-			},
-			..Default::default()
-		})
-		.await
-		.unwrap()
-		.into_iter()
-		.all(|e| e.contact_info == employee.contact_info &&
-			e.organization.name == employee.organization.name &&
-			e.organization.location.name == employee.organization.location.name &&
-			e.name == employee.name &&
-			e.status == employee.status &&
-			e.title == employee.title));
+			})
+			.await
+			.unwrap()
+			.as_slice(),
+			&[employee.clone()]
+		);
 
-		assert!(PgEmployee::retrieve(&connection, MatchEmployee {
-			contact_info: MatchSet::Not(MatchSet::Contains(Default::default()).into()),
-			organization: MatchOrganization {
-				id: Match::Or(vec![
-					employee.organization.id.into(),
-					employee2.organization.id.into(),
-				]),
+		assert_eq!(
+			PgEmployee::retrieve(&connection, MatchEmployee {
+				contact_info: MatchSet::Not(MatchSet::Contains(Default::default()).into()),
+				organization: MatchOrganization {
+					id: Match::Or(vec![
+						employee.organization.id.into(),
+						employee2.organization.id.into(),
+					]),
+					..Default::default()
+				},
 				..Default::default()
-			},
-			..Default::default()
-		})
-		.await
-		.unwrap()
-		.into_iter()
-		.all(|e| e.contact_info == employee2.contact_info &&
-			e.organization.name == employee2.organization.name &&
-			e.organization.location.name == employee2.organization.location.name &&
-			e.name == employee2.name &&
-			e.status == employee2.status &&
-			e.title == employee2.title));
+			})
+			.await
+			.unwrap()
+			.as_slice(),
+			&[employee2]
+		);
 	}
 }

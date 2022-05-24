@@ -112,12 +112,10 @@ impl ExpensesAdapter for PgExpenses
 		sqlx::query(&query)
 			.fetch(connection)
 			.try_fold(HashMap::new(), |mut map, row| {
+				let entry = map.entry(row.get::<Id, _>(COLUMNS.timesheet_id)).or_insert_with(|| Vec::with_capacity(1));
 				match COLUMNS.row_to_view(&row)
 				{
-					Ok(Some(expense)) => map
-						.entry(expense.timesheet_id)
-						.or_insert_with(|| Vec::with_capacity(1))
-						.push(expense),
+					Ok(Some(expense)) => entry.push(expense),
 					Err(e) => return future::err(e),
 					_ => (),
 				};

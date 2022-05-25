@@ -81,14 +81,14 @@ mod tests
 		};
 
 		let ceo_testy_view = Employee {
-			contact_info: vec![Contact {
-				employee_id: 0,
-				kind: ContactKind::Address(earth_view.clone()),
-				label: "Office".into(),
-				export: false,
-			}],
 			id: 0,
 			organization: Organization {
+				contact_info: vec![Contact {
+					export: false,
+					kind: ContactKind::Address(earth_view.clone()),
+					label: "Office".into(),
+					organization_id: 0,
+				}],
 				id: 0,
 				location: earth_view.clone(),
 				name: "Big Old Test".into(),

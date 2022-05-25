@@ -90,9 +90,13 @@ impl Timesheet
 	/// Export some `job` to the [`Target`] specified. Appends to some pre-existing `output`, in
 	/// case multiple [`Timesheet`]s must be serialized sequentially.
 	///
-	/// Tracks the previously `serialized_employees` so that their contact information is not
+	/// Tracks the `organizations_with_serialized_contact_info` so that their contact information is not
 	/// reiterated every time.
-	pub(super) fn export(&self, serialized_employees: &mut HashSet<Id>, output: &mut String)
+	pub(super) fn export(
+		&self,
+		organizations_with_serialized_contact_info: &mut HashSet<Id>,
+		output: &mut String,
+	)
 	{
 		writeln!(output, "{}", Element::Heading {
 			depth: 3,
@@ -103,21 +107,18 @@ impl Timesheet
 		})
 		.unwrap();
 
-		writeln!(output, "{}", Element::Heading {
-			depth: 4,
-			text: "Employee Information",
-		})
-		.unwrap();
 		writeln!(
 			output,
-			"{}: {}",
+			"{}: {} {}",
 			Element::UnorderedList {
 				depth: 0,
-				text: Text::Bold("Name"),
+				text: Text::Bold("Employee"),
 			},
+			self.employee.title,
 			self.employee.name,
 		)
 		.unwrap();
+
 		writeln!(
 			output,
 			"{}: {}",
@@ -128,21 +129,12 @@ impl Timesheet
 			self.employee.organization,
 		)
 		.unwrap();
-		writeln!(
-			output,
-			"{}: {}",
-			Element::UnorderedList {
-				depth: 0,
-				text: Text::Bold("Title"),
-			},
-			self.employee.title,
-		)
-		.unwrap();
 
-		if serialized_employees.contains(&self.employee.id)
+		if !organizations_with_serialized_contact_info.contains(&self.employee.id)
 		{
 			let employee_contact_info: Vec<_> = self
 				.employee
+				.organization
 				.contact_info
 				.iter()
 				.filter(|c| c.export)
@@ -156,10 +148,10 @@ impl Timesheet
 				})
 				.unwrap();
 
-				let mut sorted_employee_contact_info = employee_contact_info;
-				sorted_employee_contact_info.sort_by_key(|c| &c.label);
+				let mut sorted_organization_contact_info = employee_contact_info;
+				sorted_organization_contact_info.sort_by_key(|c| &c.label);
 
-				sorted_employee_contact_info
+				sorted_organization_contact_info
 					.into_iter()
 					.try_for_each(|contact| {
 						writeln!(
@@ -169,7 +161,10 @@ impl Timesheet
 								depth: 1,
 								text: Text::Bold(&contact.label),
 							},
-							contact.kind,
+							// The part we want is in `[`, `]`.
+							// The matches are in `(`, `)`.
+							// "Multiple colons(: )this is the end(: )[555-555-5555]"
+							contact.to_string().split(": ").last().unwrap_or_default(),
 						)
 					})
 					.unwrap();
@@ -213,7 +208,7 @@ impl Timesheet
 			writeln!(output, "{}", Element::BlockText(&self.work_notes)).unwrap();
 		}
 
-		serialized_employees.insert(self.employee.id);
+		organizations_with_serialized_contact_info.insert(self.employee.organization.id);
 	}
 
 	/// # Summary

@@ -91,27 +91,27 @@ mod tests
 		let timesheet = Timesheet {
 			employee: Employee {
 				id: 0,
-				contact_info: vec![
-					Contact {
-						employee_id: 0,
-						kind: ContactKind::Address(street_view.clone()),
-						label: "Street Address".into(),
-						export: false,
-					},
-					Contact {
-						employee_id: 0,
-						kind: ContactKind::Email("foo@bar.io".into()),
-						label: "Email".into(),
-						export: false,
-					},
-					Contact {
-						employee_id: 0,
-						kind: ContactKind::Phone("1-800-555-5555".into()),
-						label: "Phone".into(),
-						export: false,
-					},
-				],
 				organization: Organization {
+					contact_info: vec![
+						Contact {
+							export: false,
+							kind: ContactKind::Address(street_view.clone()),
+							label: "Street Address".into(),
+							organization_id: 0,
+						},
+						Contact {
+							export: false,
+							kind: ContactKind::Email("foo@bar.io".into()),
+							label: "Email".into(),
+							organization_id: 0,
+						},
+						Contact {
+							export: false,
+							kind: ContactKind::Phone("1-800-555-5555".into()),
+							label: "Phone".into(),
+							organization_id: 0,
+						},
+					],
 					location: street_view.clone(),
 					name: "Big Test Organization".into(),
 					..Default::default()

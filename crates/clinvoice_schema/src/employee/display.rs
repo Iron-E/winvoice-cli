@@ -7,18 +7,13 @@ impl Display for Employee
 	fn fmt(&self, formatter: &mut Formatter) -> Result
 	{
 		writeln!(formatter, "{} {}", self.title, self.name)?;
-		writeln!(formatter, "\tEmployer: {}", self.organization)?;
 
-		if !self.contact_info.is_empty()
-		{
-			writeln!(formatter, "\tEmployee Contact Info:")?;
-
-			let mut sorted_employee_contact_info = self.contact_info.clone();
-			sorted_employee_contact_info.sort_by(|c1, c2| c1.label.cmp(&c2.label));
-			sorted_employee_contact_info
-				.into_iter()
-				.try_for_each(|c| writeln!(formatter, "\t\t- {c}"))?;
-		}
+		const DEPTH_2: &str = "\n\t\t";
+		writeln!(
+			formatter,
+			"\tEmployer: {}",
+			self.organization.to_string().replace('\n', DEPTH_2)
+		)?;
 
 		write!(formatter, "\tStatus: {}", self.status)
 	}
@@ -64,22 +59,22 @@ mod tests
 		};
 
 		let employee = Employee {
-			contact_info: vec![
-				Contact {
-					employee_id: 0,
-					kind: ContactKind::Address(work_street_view.clone()),
-					label: "Place of Work".into(),
-					export: false,
-				},
-				Contact {
-					employee_id: 0,
-					kind: ContactKind::Email("foo@bar.io".into()),
-					label: "Work Email".into(),
-					export: false,
-				},
-			],
 			id: 0,
 			organization: Organization {
+				contact_info: vec![
+					Contact {
+						export: false,
+						kind: ContactKind::Address(work_street_view.clone()),
+						label: "Place of Work".into(),
+						organization_id: 0,
+					},
+					Contact {
+						export: false,
+						kind: ContactKind::Email("foo@bar.io".into()),
+						label: "Work Email".into(),
+						organization_id: 0,
+					},
+				],
 				id: 0,
 				location: work_street_view,
 				name: "Big Old Test".into(),
@@ -93,9 +88,9 @@ mod tests
 			format!("{employee}"),
 			"CEO of Tests Testy McTesterson
 	Employer: Big Old Test @ 1234 Work Street, Phoenix, Arizona, USA, Earth
-	Employee Contact Info:
-		- Place of Work: 1234 Work Street, Phoenix, Arizona, USA, Earth
-		- Work Email: foo@bar.io
+		Contact Info:
+			- Place of Work: 1234 Work Street, Phoenix, Arizona, USA, Earth
+			- Work Email: foo@bar.io
 	Status: Representative",
 		);
 	}

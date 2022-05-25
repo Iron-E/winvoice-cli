@@ -4,7 +4,7 @@ mod restorable_serde;
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 
-use super::{Contact, Organization};
+use super::Organization;
 use crate::Id;
 
 /// # Summary
@@ -14,11 +14,6 @@ use crate::Id;
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 pub struct Employee
 {
-	/// # Summary
-	///
-	/// Contact information specific to the [`Organization`] that the [`Employee`] does work for.
-	pub contact_info: Vec<Contact>,
-
 	/// # Summary
 	///
 	/// The reference number of this [`Employee`], which is unique to each [`employee`].

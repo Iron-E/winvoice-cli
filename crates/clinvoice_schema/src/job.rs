@@ -64,7 +64,7 @@ pub struct Job
 	///
 	/// __Note__ that the duration does not have to be in even minutes. It can be any combination of
 	/// days, hours, minutes, etc.
-	#[serde(with = "humantime_serde")]
+	#[cfg_attr(feature = "serde_support", serde(with = "humantime_serde"))]
 	pub increment: Duration,
 
 	/// # Summary
@@ -226,10 +226,10 @@ impl Job
 				text: "Timesheets",
 			})
 			.unwrap();
-			let mut employees = HashSet::new();
+			let mut organizations = HashSet::new();
 			timesheets
 				.iter()
-				.for_each(|t| t.export(&mut employees, &mut output));
+				.for_each(|t| t.export(&mut organizations, &mut output));
 		}
 
 		Ok(output)
@@ -251,6 +251,7 @@ mod tests
 	fn export()
 	{
 		let organization = Organization {
+			contact_info: Vec::new(),
 			id: 0,
 			location: Location {
 				id: 0,
@@ -289,7 +290,6 @@ mod tests
 		};
 
 		let testy_mctesterson = Employee {
-			contact_info: Vec::new(),
 			id: 0,
 			organization: organization.clone(),
 			name: "Testy McTesterson".into(),
@@ -298,7 +298,6 @@ mod tests
 		};
 
 		let bob = Employee {
-			contact_info: Vec::new(),
 			id: 0,
 			organization: organization.clone(),
 			name: "Bob".into(),
@@ -411,11 +410,8 @@ mod tests
 
 ### {} – {}
 
-#### Employee Information
-
-- **Name**: Bob
+- **Employee**: Janitor Bob
 - **Employer**: Big Old Test @ 1337 Some Street, Phoenix, Arizona, USA, Earth
-- **Title**: Janitor
 
 #### Expenses
 

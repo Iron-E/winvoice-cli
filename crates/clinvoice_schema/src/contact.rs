@@ -17,12 +17,6 @@ pub struct Contact
 {
 	/// # Summary
 	///
-	/// The [`Id`] of the [`Employee`] who this [`Contact`] belongs to.
-	#[cfg_attr(feature = "serde_support", serde(skip))]
-	pub employee_id: Id,
-
-	/// # Summary
-	///
 	/// Whether to show this piece of contact information on exported [`Job`]s.
 	pub export: bool,
 
@@ -35,4 +29,10 @@ pub struct Contact
 	///
 	/// The label for this [`Contact`]. Note that it must be unique per `employee_id`.
 	pub label: String,
+
+	/// # Summary
+	///
+	/// The [`Id`] of the [`Employee`] who this [`Contact`] belongs to.
+	#[cfg_attr(feature = "serde_support", serde(skip))]
+	pub organization_id: Id,
 }

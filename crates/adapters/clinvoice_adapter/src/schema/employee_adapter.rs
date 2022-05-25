@@ -1,5 +1,5 @@
 use clinvoice_match::MatchEmployee;
-use clinvoice_schema::{ContactKind, Employee, Organization};
+use clinvoice_schema::{Employee, Organization};
 use sqlx::{Pool, Result};
 
 use crate::{Deletable, Updatable};
@@ -23,7 +23,6 @@ pub trait EmployeeAdapter:
 	/// * An [`Error`], if something goes wrong.
 	async fn create(
 		connection: &Pool<<Self as Deletable>::Db>,
-		contact_info: Vec<(bool, ContactKind, String)>,
 		name: String,
 		organization: Organization,
 		status: String,

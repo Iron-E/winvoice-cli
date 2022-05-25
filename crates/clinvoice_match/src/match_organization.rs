@@ -3,6 +3,7 @@ use clinvoice_schema::Id;
 use serde::{Deserialize, Serialize};
 
 use super::{Match, MatchLocation, MatchStr};
+use crate::{MatchContact, MatchSet};
 
 /// # Summary
 ///
@@ -11,6 +12,9 @@ use super::{Match, MatchLocation, MatchStr};
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 pub struct MatchOrganization
 {
+	#[cfg_attr(feature = "serde_support", serde(default))]
+	pub contact_info: MatchSet<MatchContact>,
+
 	#[cfg_attr(feature = "serde_support", serde(default))]
 	pub id: Match<Id>,
 

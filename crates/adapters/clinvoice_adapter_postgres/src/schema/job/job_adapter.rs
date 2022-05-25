@@ -89,8 +89,16 @@ impl JobAdapter for PgJob
 
 		let mut query = String::from(
 			"SELECT
-				J.id, J.client_id, J.date_close, J.date_open, J.increment, J.invoice_date_issued,
-				J.invoice_date_paid, J.invoice_hourly_rate, J.notes, J.objectives
+				J.client_id,
+				J.date_close,
+				J.date_open,
+				J.id,
+				J.increment,
+				J.invoice_date_issued,
+				J.invoice_date_paid,
+				J.invoice_hourly_rate,
+				J.notes,
+				J.objectives
 			FROM jobs J",
 		);
 		Schema::write_where_clause(
@@ -187,9 +195,10 @@ mod tests
 			.await
 			.unwrap();
 
-		let organization = PgOrganization::create(&connection, Vec::new(), earth, "Some Organization".into())
-			.await
-			.unwrap();
+		let organization =
+			PgOrganization::create(&connection, Vec::new(), earth, "Some Organization".into())
+				.await
+				.unwrap();
 
 		let job = PgJob::create(
 			&connection,
@@ -264,8 +273,18 @@ mod tests
 		.unwrap();
 
 		let (organization, organization2) = futures::try_join!(
-			PgOrganization::create(&connection, Vec::new(), arizona.clone(), "Some Organization".into()),
-			PgOrganization::create(&connection, Vec::new(), utah.clone(), "Some Other Organizatión".into()),
+			PgOrganization::create(
+				&connection,
+				Vec::new(),
+				arizona.clone(),
+				"Some Organization".into()
+			),
+			PgOrganization::create(
+				&connection,
+				Vec::new(),
+				utah.clone(),
+				"Some Other Organizatión".into()
+			),
 		)
 		.unwrap();
 

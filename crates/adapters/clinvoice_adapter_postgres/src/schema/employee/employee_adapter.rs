@@ -57,8 +57,15 @@ impl EmployeeAdapter for PgEmployee
 					.collect::<HashMap<_, _>>()
 			});
 
-		let mut query =
-			String::from("SELECT E.id, E.name, E.organization_id, E.status, E.title FROM employees E");
+		let mut query = String::from(
+			"SELECT
+				E.id,
+				E.name,
+				E.organization_id,
+				E.status,
+				E.title
+			FROM employees E",
+		);
 		Schema::write_where_clause(Default::default(), "E", &match_condition, &mut query);
 		query.push(';');
 

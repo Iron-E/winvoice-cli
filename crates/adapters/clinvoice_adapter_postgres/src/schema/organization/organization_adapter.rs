@@ -55,9 +55,11 @@ impl OrganizationAdapter for PgOrganization
 		let id_match = PgLocation::retrieve_matching_ids(connection, &match_condition.location);
 
 		let mut query = String::from(
-			"SELECT O.id, O.location_id, O.name
-			FROM organizations O
-			JOIN locations L ON (L.id = O.location_id)",
+			"SELECT
+				O.id,
+				O.location_id,
+				O.name
+			FROM organizations O",
 		);
 		Schema::write_where_clause(
 			Schema::write_where_clause(Default::default(), "O", &match_condition, &mut query),

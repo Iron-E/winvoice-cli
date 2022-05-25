@@ -854,7 +854,12 @@ impl WriteWhereClause<&MatchTimesheet> for Schema
 		Schema::write_where_clause(
 			Schema::write_where_clause(
 				Schema::write_where_clause(
-					context,
+					Schema::write_where_clause(
+						context,
+						&format!("{alias}.id"),
+						&match_condition.id,
+						query,
+					),
 					&format!("{alias}.time_begin"),
 					&match_condition.time_begin,
 					query,

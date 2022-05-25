@@ -114,11 +114,11 @@ impl ExpensesAdapter for PgExpenses
 		query.push(';');
 
 		const COLUMNS: PgExpenseColumns<'static> = PgExpenseColumns {
-			id: "id",
-			timesheet_id: "timesheet_id",
 			category: "category",
 			cost: "cost",
 			description: "description",
+			id: "id",
+			timesheet_id: "timesheet_id",
 		};
 
 		sqlx::query(&query)

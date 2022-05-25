@@ -76,8 +76,8 @@ impl JobAdapter for PgJob
 	{
 		// TODO: separate into `retrieve_all() -> Vec` and `retrieve -> Stream` to skip `Vec`
 		//       collection?
-		let organizations_fut =
-			PgOrganization::retrieve(connection, match_condition.client).map_ok(|vec| {
+		let organizations_fut = PgOrganization::retrieve(connection, match_condition.client.clone())
+			.map_ok(|vec| {
 				vec.into_iter()
 					.map(|o| (o.id, o))
 					.collect::<HashMap<_, _>>()
@@ -137,8 +137,8 @@ impl JobAdapter for PgJob
 
 		const COLUMNS: PgJobColumns<'static> = PgJobColumns {
 			client_id: "client_id",
-			date_open: "date_open",
 			date_close: "date_close",
+			date_open: "date_open",
 			id: "id",
 			increment: "increment",
 			invoice_date_issued: "invoice_date_issued",

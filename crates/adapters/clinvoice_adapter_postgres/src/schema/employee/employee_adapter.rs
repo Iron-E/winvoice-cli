@@ -50,8 +50,8 @@ impl EmployeeAdapter for PgEmployee
 	{
 		// TODO: separate into `retrieve_all() -> Vec` and `retrieve -> Stream` to skip `Vec`
 		//       collection?
-		let organizations_fut = PgOrganization::retrieve(connection, match_condition.organization)
-			.map_ok(|vec| {
+		let organizations_fut =
+			PgOrganization::retrieve(connection, match_condition.organization.clone()).map_ok(|vec| {
 				vec.into_iter()
 					.map(|o| (o.id, o))
 					.collect::<HashMap<_, _>>()
@@ -120,7 +120,7 @@ mod tests
 		let organization = PgOrganization::create(
 			&connection,
 			vec![
-				(true, ContactKind::Address(earth), "Office".into()),
+				(true, ContactKind::Address(earth.clone()), "Office".into()),
 				(
 					true,
 					ContactKind::Email("foo@bar.io".into()),
@@ -132,7 +132,7 @@ mod tests
 					"Office's Email".into(),
 				),
 			],
-			earth.clone(),
+			earth,
 			"Some Organization".into(),
 		)
 		.await
@@ -185,7 +185,7 @@ mod tests
 			PgOrganization::create(
 				&connection,
 				vec![
-					(false, ContactKind::Address(utah), "Remote Office".into()),
+					(false, ContactKind::Address(utah.clone()), "Remote Office".into()),
 					(
 						true,
 						ContactKind::Email("foo@bar.io".into()),
@@ -203,7 +203,7 @@ mod tests
 			PgOrganization::create(
 				&connection,
 				Default::default(),
-				utah.clone(),
+				utah,
 				"Some Other Organizatión".into(),
 			),
 		)

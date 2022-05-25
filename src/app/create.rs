@@ -202,12 +202,10 @@ impl Create
 			"Which organization does this employee work at?",
 		)?;
 
-		let contact_info = input::util::contact::menu::<_, LAdapter>(connection).await?;
 		let employee_status = input::text(None, "What is the status of the employee?")?;
 
 		EAdapter::create(
 			connection,
-			contact_info,
 			name,
 			organization,
 			employee_status,
@@ -303,8 +301,9 @@ impl Create
 
 		let selected_view =
 			input::select_one(&location_views, format!("Select a location for {name}"))?;
+		let contact_info = input::util::contact::menu::<_, LAdapter>(connection).await?;
 
-		OAdapter::create(connection, selected_view, name)
+		OAdapter::create(connection, contact_info, selected_view, name)
 			.err_into()
 			.await
 			.and(Ok(()))

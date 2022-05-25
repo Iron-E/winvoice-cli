@@ -1,28 +1,22 @@
+use std::collections::HashMap;
+
 use clinvoice_adapter::{
-	schema::{ContactInfoAdapter, ExpensesAdapter, TimesheetAdapter},
+	schema::{EmployeeAdapter, ExpensesAdapter, JobAdapter, TimesheetAdapter},
 	WriteWhereClause,
 };
 use clinvoice_match::MatchTimesheet;
 use clinvoice_schema::{
 	chrono::{SubsecRound, Utc},
 	Employee,
-	Id,
 	Job,
 	Timesheet,
 };
-use futures::{TryFutureExt, TryStreamExt};
+use futures::{future, TryFutureExt, TryStreamExt};
 use sqlx::{PgPool, Result, Row};
 
 use super::{columns::PgTimesheetColumns, PgTimesheet};
 use crate::{
-	schema::{
-		employee::columns::PgEmployeeColumns,
-		job::columns::PgJobColumns,
-		organization::columns::PgOrganizationColumns,
-		PgContactInfo,
-		PgExpenses,
-		PgLocation,
-	},
+	schema::{PgEmployee, PgExpenses, PgJob},
 	PgSchema as Schema,
 };
 
@@ -63,111 +57,63 @@ impl TimesheetAdapter for PgTimesheet
 	async fn retrieve(connection: &PgPool, match_condition: MatchTimesheet)
 		-> Result<Vec<Timesheet>>
 	{
-		let client_location_id_match =
-			PgLocation::retrieve_matching_ids(connection, &match_condition.job.client.location);
-		let contact_info_fut =
-			PgContactInfo::retrieve(connection, match_condition.employee.contact_info.clone());
-		let employer_location_id_match = PgLocation::retrieve_matching_ids(
-			connection,
-			&match_condition.employee.organization.location,
-		);
 		let expenses_fut = PgExpenses::retrieve(connection, match_condition.expenses.clone());
+		let employees_fut = PgEmployee::retrieve(connection, match_condition.employee.clone())
+			.map_ok(|vec| {
+				vec.into_iter()
+					.map(|e| (e.id, e))
+					.collect::<HashMap<_, _>>()
+			});
+		let jobs_fut = PgJob::retrieve(connection, match_condition.job.clone()).map_ok(|vec| {
+			vec.into_iter()
+				.map(|j| (j.id, j))
+				.collect::<HashMap<_, _>>()
+		});
 
 		let mut query = String::from(
-			r#"SELECT
-				Client.name AS client_name, Client.location_id as client_location_id,
-				E.name as employee_name, E.organization_id as employer_id, E.status, E.title,
-				Employer.name AS employer_name, Employer.location_id as employer_location_id,
-				J.client_id, J.date_close, J.date_open, J.increment, J.invoice_date_issued, J.invoice_date_paid,
-					J.invoice_hourly_rate, J.notes, J.objectives,
-				T.id, T.employee_id, T.job_id, T.time_begin, T.time_end, T.work_notes
-			FROM timesheets T
-			JOIN employees E ON (E.id = T.employee_id)
-			JOIN jobs J ON (J.id = T.job_id)
-			JOIN organizations Client ON (Client.id = J.client_id)
-			JOIN organizations Employer ON (Employer.id = E.organization_id)"#,
+			"SELECT
+				T.id,
+				T.employee_id,
+				T.job_id,
+				T.time_begin,
+				T.time_end,
+				T.work_notes
+			FROM timesheets T",
 		);
-		Schema::write_where_clause(
-			Schema::write_where_clause(
-				Schema::write_where_clause(
-					Schema::write_where_clause(
-						Schema::write_where_clause(
-							Schema::write_where_clause(
-								Schema::write_where_clause(
-									Default::default(),
-									"Client",
-									&match_condition.job.client,
-									&mut query,
-								),
-								"E",
-								&match_condition.employee,
-								&mut query,
-							),
-							"Employer",
-							&match_condition.employee.organization,
-							&mut query,
-						),
-						"J",
-						&match_condition.job,
-						&mut query,
-					),
-					"T",
-					&match_condition,
-					&mut query,
-				),
-				"Client.location_id",
-				&client_location_id_match.await?,
-				&mut query,
-			),
-			"Employer.location_id",
-			&employer_location_id_match.await?,
-			&mut query,
-		);
+		Schema::write_where_clause(Default::default(), "T", &match_condition, &mut query);
 		query.push(';');
 
 		const COLUMNS: PgTimesheetColumns<'static> = PgTimesheetColumns {
 			id: "id",
-			employee: PgEmployeeColumns {
-				id: "employee_id",
-				organization: PgOrganizationColumns {
-					id: "employer_id",
-					location_id: "employer_location_id",
-					name: "employer_name",
-				},
-				name: "employee_name",
-				status: "status",
-				title: "title",
-			},
-			job: PgJobColumns {
-				client: PgOrganizationColumns {
-					id: "client_id",
-					location_id: "client_location_id",
-					name: "client_name",
-				},
-				id: "job_id",
-			},
+			employee_id: "employee_id",
+			job_id: "job_id",
 			time_begin: "time_begin",
 			time_end: "time_end",
 			work_notes: "work_notes",
 		};
 
-		let contact_info = &contact_info_fut.await?;
 		let expenses = &expenses_fut.await?;
+		let employees = &employees_fut.await?;
+		let jobs = &jobs_fut.await?;
 		sqlx::query(&query)
 			.fetch(connection)
-			.try_filter_map(|row| async move {
-				if let Some(c) = contact_info.get(&row.get::<Id, _>(COLUMNS.employee.id))
+			.try_filter_map(|row| {
+				if let Some(e) = employees.get(&row.get(COLUMNS.employee_id))
 				{
-					if let Some(e) = expenses.get(&row.get::<Id, _>(COLUMNS.id))
+					if let Some(x) = expenses.get(&row.get(COLUMNS.id))
 					{
-						return COLUMNS
-							.row_to_view(connection, c.clone(), e.clone(), &row)
-							.map_ok(Some)
-							.await;
+						if let Some(j) = jobs.get(&row.get(COLUMNS.job_id))
+						{
+							return match COLUMNS.row_to_view(e.clone(), x.clone(), j.clone(), &row)
+							{
+								Ok(t) => future::ok(Some(t)),
+								Err(e) => future::err(e),
+							};
+						}
 					}
 				}
 
-				Ok(None)
+				future::ok(None)
 			})
 			.try_collect()
 			.await
@@ -206,10 +152,26 @@ mod tests
 			.await
 			.unwrap();
 
-		let organization =
-			PgOrganization::create(&connection, earth.clone(), "Some Organization".into())
-				.await
-				.unwrap();
+		let organization = PgOrganization::create(
+			&connection,
+			vec![
+				(false, ContactKind::Address(earth.clone()), "Office".into()),
+				(
+					true,
+					ContactKind::Email("foo@bar.io".into()),
+					"Work Email".into(),
+				),
+				(
+					true,
+					ContactKind::Phone("555 223 5039".into()),
+					"Office Phone".into(),
+				),
+			],
+			earth,
+			"Some Organization".into(),
+		)
+		.await
+		.unwrap();
 
 		let job = PgJob::create(
 			&connection,
@@ -222,23 +184,8 @@ mod tests
 		.await
 		.unwrap();
 
-		let contact_info = vec![
-			(false, ContactKind::Address(earth), "Office".into()),
-			(
-				true,
-				ContactKind::Email("foo@bar.io".into()),
-				"Work Email".into(),
-			),
-			(
-				true,
-				ContactKind::Phone("555 223 5039".into()),
-				"Office Phone".into(),
-			),
-		];
-
 		let employee = PgEmployee::create(
 			&connection,
-			contact_info,
 			"My Name".into(),
 			organization,
 			"Employed".into(),
@@ -292,16 +239,14 @@ mod tests
 		.unwrap();
 
 		let (organization, organization2) = futures::try_join!(
-			PgOrganization::create(&connection, arizona.clone(), "Some Organization".into()),
-			PgOrganization::create(&connection, utah.clone(), "Some Other Organizatión".into()),
-		)
-		.unwrap();
-
-		let (employee, employee2) = futures::try_join!(
-			PgEmployee::create(
+			PgOrganization::create(
 				&connection,
 				vec![
-					(false, ContactKind::Address(utah), "Remote Office".into()),
+					(
+						false,
+						ContactKind::Address(utah.clone()),
+						"Remote Office".into()
+					),
 					(
 						true,
 						ContactKind::Email("foo@bar.io".into()),
@@ -313,12 +258,10 @@ mod tests
 						"Office's Phone".into(),
 					),
 				],
-				"My Name".into(),
-				organization.clone(),
-				"Employed".into(),
-				"Janitor".into(),
+				arizona.clone(),
+				"Some Organization".into()
 			),
-			PgEmployee::create(
+			PgOrganization::create(
 				&connection,
 				vec![
 					(
@@ -337,6 +280,22 @@ mod tests
 						"Office's Phone".into(),
 					),
 				],
+				utah,
+				"Some Other Organizatión".into()
+			),
+		)
+		.unwrap();
+
+		let (employee, employee2) = futures::try_join!(
+			PgEmployee::create(
+				&connection,
+				"My Name".into(),
+				organization.clone(),
+				"Employed".into(),
+				"Janitor".into(),
+			),
+			PgEmployee::create(
+				&connection,
 				"Another Gúy".into(),
 				organization2.clone(),
 				"Management".into(),

@@ -1,9 +1,11 @@
-use clinvoice_schema::{Expense, Timesheet, Employee, Job};
+use clinvoice_schema::{Employee, Expense, Job, Timesheet};
 use sqlx::{postgres::PgRow, Result, Row};
 
 pub(in crate::schema) struct PgTimesheetColumns<'col>
 {
+	pub employee_id: &'col str,
 	pub id: &'col str,
+	pub job_id: &'col str,
 	pub time_begin: &'col str,
 	pub time_end: &'col str,
 	pub work_notes: &'col str,

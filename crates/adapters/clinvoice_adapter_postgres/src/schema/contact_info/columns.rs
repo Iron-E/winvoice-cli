@@ -7,11 +7,11 @@ use crate::schema::PgLocation;
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub(in crate::schema) struct PgContactColumns<'col>
 {
-	pub employee_id: &'col str,
-	pub export: &'col str,
-	pub label: &'col str,
 	pub address_id: &'col str,
 	pub email: &'col str,
+	pub export: &'col str,
+	pub label: &'col str,
+	pub organization_id: &'col str,
 	pub phone: &'col str,
 }
 
@@ -57,7 +57,7 @@ impl PgContactColumns<'_>
 		Ok(Some(Contact {
 			label,
 			export: row.get(self.export),
-			employee_id: row.get(self.employee_id),
+			organization_id: row.get(self.organization_id),
 			kind: kind_fut.await?,
 		}))
 	}

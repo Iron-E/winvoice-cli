@@ -1,27 +1,26 @@
 use core::time::Duration;
-use std::convert::TryFrom;
+use std::{collections::HashMap, convert::TryFrom};
 
-use clinvoice_adapter::{schema::JobAdapter, WriteWhereClause};
+use clinvoice_adapter::{
+	schema::{JobAdapter, OrganizationAdapter},
+	WriteWhereClause,
+};
 use clinvoice_finance::ExchangeRates;
 use clinvoice_match::{MatchInvoice, MatchJob};
 use clinvoice_schema::{
 	chrono::{DateTime, SubsecRound, Utc},
+	Id,
 	Invoice,
 	Job,
 	Money,
 	Organization,
 };
-use futures::{TryFutureExt, TryStreamExt};
-use sqlx::{postgres::types::PgInterval, Error, PgPool, Result};
+use futures::{future, TryFutureExt, TryStreamExt};
+use sqlx::{postgres::types::PgInterval, Error, PgPool, Result, Row};
 
 use super::PgJob;
 use crate::{
-	schema::{
-		job::columns::PgJobColumns,
-		organization::columns::PgOrganizationColumns,
-		util,
-		PgLocation,
-	},
+	schema::{job::columns::PgJobColumns, util, PgLocation, PgOrganization},
 	PgSchema as Schema,
 };
 
@@ -75,6 +74,15 @@ impl JobAdapter for PgJob
 
 	async fn retrieve(connection: &PgPool, match_condition: MatchJob) -> Result<Vec<Job>>
 	{
+		// TODO: separate into `retrieve_all() -> Vec` and `retrieve -> Stream` to skip `Vec`
+		//       collection?
+		let organizations_fut =
+			PgOrganization::retrieve(connection, match_condition.client).map_ok(|vec| {
+				vec.into_iter()
+					.map(|o| (o.id, o))
+					.collect::<HashMap<_, _>>()
+			});
+
 		let exchange_rates = ExchangeRates::new().map_err(util::finance_err_to_sqlx);
 		let id_match =
 			PgLocation::retrieve_matching_ids(connection, &match_condition.client.location);
@@ -82,10 +90,8 @@ impl JobAdapter for PgJob
 		let mut query = String::from(
 			"SELECT
 				J.id, J.client_id, J.date_close, J.date_open, J.increment, J.invoice_date_issued,
-					J.invoice_date_paid, J.invoice_hourly_rate, J.notes, J.objectives,
-				O.name, O.location_id
-			FROM jobs J
-			JOIN organizations O ON (O.id = J.client_id)",
+				J.invoice_date_paid, J.invoice_hourly_rate, J.notes, J.objectives
+			FROM jobs J",
 		);
 		Schema::write_where_clause(
 			Schema::write_where_clause(
@@ -122,17 +128,33 @@ impl JobAdapter for PgJob
 		query.push(';');
 
 		const COLUMNS: PgJobColumns<'static> = PgJobColumns {
-			client: PgOrganizationColumns {
-				id: "client_id",
-				location_id: "location_id",
-				name: "name",
-			},
+			client_id: "client_id",
+			date_open: "date_open",
+			date_close: "date_close",
 			id: "id",
+			increment: "increment",
+			invoice_date_issued: "invoice_date_issued",
+			invoice_date_paid: "invoice_date_paid",
+			invoice_hourly_rate: "invoice_hourly_rate",
+			notes: "notes",
+			objectives: "objectives",
 		};
 
+		let organizations = organizations_fut.await?;
 		sqlx::query(&query)
 			.fetch(connection)
-			.and_then(|row| async move { COLUMNS.row_to_view(connection, &row).await })
+			.try_filter_map(|row| {
+				if let Some(o) = organizations.get(&row.get::<Id, _>(COLUMNS.client_id))
+				{
+					return match COLUMNS.row_to_view(o.clone(), &row)
+					{
+						Ok(e) => future::ok(Some(e)),
+						Err(e) => future::err(e),
+					};
+				}
+
+				future::ok(None)
+			})
 			.try_collect()
 			.await
 	}
@@ -165,7 +187,7 @@ mod tests
 			.await
 			.unwrap();
 
-		let organization = PgOrganization::create(&connection, earth, "Some Organization".into())
+		let organization = PgOrganization::create(&connection, Vec::new(), earth, "Some Organization".into())
 			.await
 			.unwrap();
 
@@ -242,8 +264,8 @@ mod tests
 		.unwrap();
 
 		let (organization, organization2) = futures::try_join!(
-			PgOrganization::create(&connection, arizona.clone(), "Some Organization".into()),
-			PgOrganization::create(&connection, utah.clone(), "Some Other Organizatión".into()),
+			PgOrganization::create(&connection, Vec::new(), arizona.clone(), "Some Organization".into()),
+			PgOrganization::create(&connection, Vec::new(), utah.clone(), "Some Other Organizatión".into()),
 		)
 		.unwrap();
 

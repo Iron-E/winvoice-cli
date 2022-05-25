@@ -16,7 +16,7 @@ impl ContactInfoAdapter for PgContactInfo
 	async fn create(
 		connection: impl 'async_trait + Executor<'_, Database = Postgres> + Send,
 		contact_info: Vec<(bool, ContactKind, String)>,
-		employee_id: Id,
+		organization_id: Id,
 	) -> Result<Vec<Contact>>
 	{
 		if contact_info.is_empty()
@@ -49,11 +49,11 @@ impl ContactInfoAdapter for PgContactInfo
 			.fold(
 				sqlx::query(&format!(
 					"INSERT INTO contact_information
-					(employee_id, label, export, address_id, email, phone)
+					(organization_id, label, export, address_id, email, phone)
 				VALUES {contact_values};",
 				)),
 				|mut query, (export, kind, label)| {
-					query = query.bind(employee_id).bind(label).bind(export);
+					query = query.bind(organization_id).bind(label).bind(export);
 
 					match kind
 					{
@@ -78,7 +78,7 @@ impl ContactInfoAdapter for PgContactInfo
 		Ok(contact_info
 			.into_iter()
 			.map(|(export, kind, label)| Contact {
-				employee_id,
+				organization_id,
 				export,
 				kind,
 				label,
@@ -95,12 +95,12 @@ impl ContactInfoAdapter for PgContactInfo
 			"SELECT
 				C.address_id,
 				C.email,
-				E.id as employee_id,
 				C.export,
 				C.label,
-				C.phone
-			FROM employees E
-			LEFT JOIN contact_information C ON (C.employee_id = E.id)",
+				C.phone,
+				O.id as organization_id
+			FROM organizations O
+			LEFT JOIN contact_information C ON (C.organization_id = O.id)",
 		);
 		write_where_clause::write_contact_set_where_clause(
 			connection,
@@ -113,11 +113,11 @@ impl ContactInfoAdapter for PgContactInfo
 		query.push(';');
 
 		const COLUMNS: PgContactColumns<'static> = PgContactColumns {
-			employee_id: "employee_id",
-			export: "export",
-			label: "label",
 			address_id: "address_id",
 			email: "email",
+			export: "export",
+			label: "label",
+			organization_id: "organization_id",
 			phone: "phone",
 		};
 
@@ -125,7 +125,7 @@ impl ContactInfoAdapter for PgContactInfo
 			.fetch(connection)
 			.try_fold(HashMap::new(), |mut map, row| async move {
 				let entry = map
-					.entry(row.get::<Id, _>(COLUMNS.employee_id))
+					.entry(row.get::<Id, _>(COLUMNS.organization_id))
 					.or_insert_with(|| Vec::with_capacity(1));
 				if let Some(contact) = COLUMNS.row_to_view(connection, &row).await?
 				{

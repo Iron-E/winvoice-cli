@@ -1,4 +1,4 @@
-use clinvoice_schema::Organization;
+use clinvoice_schema::{Contact, Organization};
 use sqlx::{postgres::PgRow, Executor, Postgres, Result, Row};
 
 use crate::schema::PgLocation;
@@ -16,10 +16,12 @@ impl PgOrganizationColumns<'_>
 	pub(in crate::schema) async fn row_to_view(
 		self,
 		connection: impl Executor<'_, Database = Postgres>,
+		contact_info: Vec<Contact>,
 		row: &PgRow,
 	) -> Result<Organization>
 	{
 		Ok(Organization {
+			contact_info,
 			id: row.get(self.id),
 			location: PgLocation::retrieve_by_id(connection, row.get(self.location_id)).await?,
 			name: row.get(self.name),

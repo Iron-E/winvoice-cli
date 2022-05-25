@@ -80,7 +80,7 @@ async fn init_contact_info(connection: impl Executor<'_, Database = Postgres> + 
 	sqlx::query!(
 		r#"CREATE TABLE IF NOT EXISTS contact_information
 		(
-			employee_id bigint NOT NULL,
+			organization_id bigint NOT NULL,
 			export bool NOT NULL,
 			label text NOT NULL,
 
@@ -88,8 +88,8 @@ async fn init_contact_info(connection: impl Executor<'_, Database = Postgres> + 
 			email text,
 			phone text CHECK (phone ~ '^[0-9\- ]+$'),
 
-			PRIMARY KEY(employee_id, label),
-			CONSTRAINT contact_information__employee_id_fk FOREIGN KEY(employee_id) REFERENCES employees(id),
+			PRIMARY KEY(organization_id, label),
+			CONSTRAINT contact_information__organization_id_fk FOREIGN KEY(organization_id) REFERENCES organizations(id),
 			CONSTRAINT contact_information__address_id_fk FOREIGN KEY(address_id) REFERENCES locations(id),
 			CONSTRAINT contact_information__is_variant CHECK
 			(
@@ -214,8 +214,8 @@ impl Initializable for PgSchema
 			.and_then(|mut transaction| async move {
 				init_locations(&mut transaction).await?;
 				init_organizations(&mut transaction).await?;
-				init_employees(&mut transaction).await?;
 				init_contact_info(&mut transaction).await?;
+				init_employees(&mut transaction).await?;
 				init_money(&mut transaction).await?;
 				init_jobs(&mut transaction).await?;
 				init_timesheets(&mut transaction).await?;

@@ -148,7 +148,7 @@ where
 				query,
 				"{context} EXISTS (
 				SELECT FROM contact_information {subquery_alias}
-				WHERE {subquery_alias}.employee_id = {alias}.employee_id"
+				WHERE {subquery_alias}.organization_id = {alias}.organization_id"
 			)
 			.unwrap();
 

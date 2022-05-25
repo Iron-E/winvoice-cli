@@ -1,32 +1,28 @@
+use std::collections::HashMap;
+
 use clinvoice_adapter::{
-	schema::{ContactInfoAdapter, EmployeeAdapter},
+	schema::{EmployeeAdapter, OrganizationAdapter},
 	WriteWhereClause,
 };
 use clinvoice_match::MatchEmployee;
-use clinvoice_schema::{ContactKind, Employee, Id, Organization};
-use futures::{TryFutureExt, TryStreamExt};
+use clinvoice_schema::{Employee, Id, Organization};
+use futures::{future, TryFutureExt, TryStreamExt};
 use sqlx::{PgPool, Result, Row};
 
 use super::{columns::PgEmployeeColumns, PgEmployee};
-use crate::{
-	schema::{organization::columns::PgOrganizationColumns, PgContactInfo, PgLocation},
-	PgSchema as Schema,
-};
+use crate::{schema::PgOrganization, PgSchema as Schema};
 
 #[async_trait::async_trait]
 impl EmployeeAdapter for PgEmployee
 {
 	async fn create(
 		connection: &PgPool,
-		contact_info: Vec<(bool, ContactKind, String)>,
 		name: String,
 		organization: Organization,
 		status: String,
 		title: String,
 	) -> Result<Employee>
 	{
-		let mut transaction = connection.begin().await?;
-
 		let row = sqlx::query!(
 			"INSERT INTO employees
 				(name, organization_id, status, title)
@@ -38,15 +34,10 @@ impl EmployeeAdapter for PgEmployee
 			status,
 			title,
 		)
-		.fetch_one(&mut transaction)
+		.fetch_one(connection)
 		.await?;
 
-		let contact_info_db = PgContactInfo::create(&mut transaction, contact_info, row.id).await?;
-
-		transaction.commit().await?;
-
 		Ok(Employee {
-			contact_info: contact_info_db,
 			id: row.id,
 			name,
 			organization,
@@ -57,60 +48,42 @@ impl EmployeeAdapter for PgEmployee
 
 	async fn retrieve(connection: &PgPool, match_condition: MatchEmployee) -> Result<Vec<Employee>>
 	{
-		let contact_info_fut =
-			PgContactInfo::retrieve(connection, match_condition.contact_info.clone());
-		let id_match =
-			PgLocation::retrieve_matching_ids(connection, &match_condition.organization.location);
+		// TODO: separate into `retrieve_all() -> Vec` and `retrieve -> Stream` to skip `Vec`
+		//       collection?
+		let organizations_fut = PgOrganization::retrieve(connection, match_condition.organization)
+			.map_ok(|vec| {
+				vec.into_iter()
+					.map(|o| (o.id, o))
+					.collect::<HashMap<_, _>>()
+			});
 
-		let mut query = String::from(
-			"SELECT
-				E.id, E.name, E.organization_id, E.status, E.title,
-				O.name AS organization_name, O.location_id
-			FROM employees E
-			JOIN organizations O ON (O.id = E.organization_id)",
-		);
-		Schema::write_where_clause(
-			Schema::write_where_clause(
-				Schema::write_where_clause(Default::default(), "E", &match_condition, &mut query),
-				"O",
-				&match_condition.organization,
-				&mut query,
-			),
-			"O.location_id",
-			&id_match.await?,
-			&mut query,
-		);
+		let mut query =
+			String::from("SELECT E.id, E.name, E.organization_id, E.status, E.title FROM employees E");
+		Schema::write_where_clause(Default::default(), "E", &match_condition, &mut query);
 		query.push(';');
 
 		const COLUMNS: PgEmployeeColumns<'static> = PgEmployeeColumns {
 			id: "id",
-			organization: PgOrganizationColumns {
-				id: "organization_id",
-				location_id: "location_id",
-				name: "organization_name",
-			},
 			name: "name",
+			organization_id: "organization_id",
 			status: "status",
 			title: "title",
 		};
 
-		let contact_info = &contact_info_fut.await?;
+		let organizations = organizations_fut.await?;
 		sqlx::query(&query)
 			.fetch(connection)
-			.try_filter_map(|row| async move {
-				match contact_info.get(&row.get::<Id, _>(COLUMNS.id))
+			.try_filter_map(|row| {
+				if let Some(o) = organizations.get(&row.get::<Id, _>(COLUMNS.organization_id))
 				{
-					Some(employee_contact_info) =>
+					return match COLUMNS.row_to_view(o.clone(), &row)
 					{
-						COLUMNS
-							.row_to_view(connection, employee_contact_info.clone(), &row)
-							.map_ok(Some)
-							.await
-					},
-					// If `PgContactInfo::retrieve` does not match, then the whole `employee` does not
-					// match.
-					_ => return Ok(None),
+						Ok(e) => future::ok(Some(e)),
+						Err(e) => future::err(e),
+					};
 				}
+
+				future::ok(None)
 			})
 			.try_collect()
 			.await
@@ -122,8 +95,7 @@ mod tests
 {
 	use clinvoice_adapter::schema::{LocationAdapter, OrganizationAdapter};
 	use clinvoice_match::{Match, MatchEmployee, MatchLocation, MatchOrganization, MatchSet};
-	use clinvoice_schema::{Contact, ContactKind};
-	use futures::TryStreamExt;
+	use clinvoice_schema::ContactKind;
 
 	use super::{EmployeeAdapter, PgEmployee};
 	use crate::schema::{util, PgLocation, PgOrganization};
@@ -138,12 +110,7 @@ mod tests
 			.await
 			.unwrap();
 
-		let organization =
-			PgOrganization::create(&connection, earth.clone(), "Some Organization".into())
-				.await
-				.unwrap();
-
-		let employee = PgEmployee::create(
+		let organization = PgOrganization::create(
 			&connection,
 			vec![
 				(true, ContactKind::Address(earth), "Office".into()),
@@ -158,6 +125,14 @@ mod tests
 					"Office's Email".into(),
 				),
 			],
+			earth.clone(),
+			"Some Organization".into(),
+		)
+		.await
+		.unwrap();
+
+		let employee = PgEmployee::create(
+			&connection,
 			"My Name".into(),
 			organization.clone(),
 			"Employed".into(),
@@ -171,38 +146,8 @@ mod tests
 			.await
 			.unwrap();
 
-		let contact_info_row = async {
-			let connection_borrow = &connection;
-			sqlx::query!(
-				"SELECT * FROM contact_information WHERE employee_id = $1;",
-				employee.id
-			)
-			.fetch(connection_borrow)
-			.and_then(|row| async move {
-				Ok(Contact {
-					employee_id: row.employee_id,
-					export: row.export,
-					label: row.label,
-					kind: match row
-						.email
-						.map(ContactKind::Email)
-						.or_else(|| row.phone.map(ContactKind::Phone))
-					{
-						Some(k) => k,
-						_ => ContactKind::Address(
-							PgLocation::retrieve_by_id(connection_borrow, row.address_id.unwrap()).await?,
-						),
-					},
-				})
-			})
-			.try_collect::<Vec<_>>()
-			.await
-			.unwrap()
-		};
-
 		// Assert ::create writes accurately to the DB
 		assert_eq!(employee.id, row.id);
-		assert_eq!(employee.contact_info, contact_info_row.await);
 		assert_eq!(employee.name, row.name);
 		assert_eq!(employee.organization.id, row.organization_id);
 		assert_eq!(organization.id, row.organization_id);
@@ -230,13 +175,7 @@ mod tests
 		.unwrap();
 
 		let (organization, organization2) = futures::try_join!(
-			PgOrganization::create(&connection, arizona.clone(), "Some Organization".into()),
-			PgOrganization::create(&connection, utah.clone(), "Some Other Organizatión".into()),
-		)
-		.unwrap();
-
-		let (employee, employee2) = futures::try_join!(
-			PgEmployee::create(
+			PgOrganization::create(
 				&connection,
 				vec![
 					(false, ContactKind::Address(utah), "Remote Office".into()),
@@ -251,6 +190,21 @@ mod tests
 						"Office's Phone".into(),
 					),
 				],
+				arizona.clone(),
+				"Some Organization".into(),
+			),
+			PgOrganization::create(
+				&connection,
+				Default::default(),
+				utah.clone(),
+				"Some Other Organizatión".into(),
+			),
+		)
+		.unwrap();
+
+		let (employee, employee2) = futures::try_join!(
+			PgEmployee::create(
+				&connection,
 				"My Name".into(),
 				organization,
 				"Employed".into(),
@@ -258,7 +212,6 @@ mod tests
 			),
 			PgEmployee::create(
 				&connection,
-				Default::default(),
 				"Another Gúy".into(),
 				organization2,
 				"Management".into(),
@@ -290,8 +243,8 @@ mod tests
 
 		assert_eq!(
 			PgEmployee::retrieve(&connection, MatchEmployee {
-				contact_info: MatchSet::Contains(Default::default()),
 				organization: MatchOrganization {
+					contact_info: MatchSet::Contains(Default::default()),
 					id: Match::Or(vec![
 						employee.organization.id.into(),
 						employee2.organization.id.into(),
@@ -308,8 +261,8 @@ mod tests
 
 		assert_eq!(
 			PgEmployee::retrieve(&connection, MatchEmployee {
-				contact_info: MatchSet::Not(MatchSet::Contains(Default::default()).into()),
 				organization: MatchOrganization {
+					contact_info: MatchSet::Not(MatchSet::Contains(Default::default()).into()),
 					id: Match::Or(vec![
 						employee.organization.id.into(),
 						employee2.organization.id.into(),

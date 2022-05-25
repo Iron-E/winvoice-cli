@@ -1,5 +1,5 @@
 use clinvoice_adapter::{
-	schema::{ContactInfoAdapter, TimesheetAdapter, ExpensesAdapter},
+	schema::{ContactInfoAdapter, ExpensesAdapter, TimesheetAdapter},
 	WriteWhereClause,
 };
 use clinvoice_match::MatchTimesheet;
@@ -20,7 +20,8 @@ use crate::{
 		job::columns::PgJobColumns,
 		organization::columns::PgOrganizationColumns,
 		PgContactInfo,
-		PgLocation, PgExpenses,
+		PgExpenses,
+		PgLocation,
 	},
 	PgSchema as Schema,
 };
@@ -70,8 +71,7 @@ impl TimesheetAdapter for PgTimesheet
 			connection,
 			&match_condition.employee.organization.location,
 		);
-		let expenses_fut =
-			PgExpenses::retrieve(connection, match_condition.expenses.clone());
+		let expenses_fut = PgExpenses::retrieve(connection, match_condition.expenses.clone());
 
 		let mut query = String::from(
 			r#"SELECT

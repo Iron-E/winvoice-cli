@@ -150,8 +150,7 @@ where
 		"Select a piece of contact information to edit",
 	)?;
 
-	let (selected_contact_export, selected_contact_kind, selected_contact_label) =
-		contact_info[selected_index].clone();
+	let (_, selected_contact_kind, selected_contact_label) = contact_info[selected_index].clone();
 	let edited_contact_label = input::text(
 		Some(selected_contact_label.clone()),
 		format!("Edit the label for \"{selected_contact_kind}\" (optional)"),
@@ -172,34 +171,27 @@ where
 		}
 	}
 
+	let edited_contact_export = menu::confirm(format!(
+		r#"Do you want "{edited_contact_label}" to be listed when exporting `Job`s?"#
+	))?;
 	contact_info.push((
-		menu::confirm(format!(
-			"Do you want \"{edited_contact_label}\" to be listed when exporting `Job`s?"
-		))?,
+		edited_contact_export,
 		match selected_contact_kind
 		{
-			ContactKind::Email(email) =>
-			{
-				match input::text(
-					Some(email),
-					format!("Please edit the {selected_contact_label}"),
-				)
-				{
-					Ok(text) => ContactKind::Email(text),
-					Err(e) => return Err(e.into()),
-				}
-			},
-			ContactKind::Phone(phone) =>
-			{
-				match input::text(
-					Some(phone),
-					format!("Please edit the {selected_contact_label}"),
-				)
-				{
-					Ok(text) => ContactKind::Phone(text),
-					Err(e) => return Err(e.into()),
-				}
-			},
+			ContactKind::Email(email) => input::text(
+				Some(email),
+				format!("Please edit the {selected_contact_label}"),
+			)
+			.map(ContactKind::Email)
+			.map_err(Box::new)?,
+
+			ContactKind::Phone(phone) => input::text(
+				Some(phone),
+				format!("Please edit the {selected_contact_label}"),
+			)
+			.map(ContactKind::Phone)
+			.map_err(Box::new)?,
+
 			ContactKind::Address(location) => ContactKind::Address(
 				if menu::confirm(format!(
 					"Would you like to change the location of {edited_contact_label}? It is currently \
@@ -208,7 +200,7 @@ where
 				{
 					input::util::location::select_one::<&str, _, LAdapter>(
 						connection,
-						"Query the `Location` which can be used to reach this `Employee`",
+						"Query the `Location` which can be used to reach this `Organization`",
 						true,
 					)
 					.await?

@@ -48,7 +48,7 @@ impl PgContactColumns<'_>
 						)
 					})?;
 					PgLocation::retrieve_by_id(connection, address_id)
-						.map_ok(|location| ContactKind::Address(location))
+						.map_ok(ContactKind::Address)
 						.await
 				},
 			}

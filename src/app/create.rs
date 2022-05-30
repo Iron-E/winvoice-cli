@@ -204,16 +204,10 @@ impl Create
 
 		let employee_status = input::text(None, "What is the status of the employee?")?;
 
-		EAdapter::create(
-			connection,
-			name,
-			organization,
-			employee_status,
-			title,
-		)
-		.err_into()
-		.await
-		.and(Ok(()))
+		EAdapter::create(connection, name, organization, employee_status, title)
+			.err_into()
+			.await
+			.and(Ok(()))
 	}
 
 	#[allow(clippy::type_complexity)]

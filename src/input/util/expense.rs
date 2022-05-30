@@ -1,6 +1,5 @@
 use clinvoice_adapter::{schema::ExpensesAdapter, Deletable};
 use clinvoice_schema::{Currency, Expense, Id, Money};
-use futures::{stream, TryFutureExt};
 use sqlx::{Database, Executor, Pool};
 
 use super::menu::{ADD, ALL_ACTIONS, CONTINUE, DELETE, EDIT};
@@ -145,7 +144,7 @@ where
 		let edit_index = input::select_one_as_index(expenses, "Select an expense to edit")?;
 		let to_edit = &expenses[edit_index];
 
-		let edited = match input::edit(
+		match input::edit(
 			to_edit,
 			format!("Add any changes desired to the {}", to_edit.category),
 		)

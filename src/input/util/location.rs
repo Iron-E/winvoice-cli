@@ -72,7 +72,7 @@ where
 	LAdapter: Deletable<Db = Db> + LocationAdapter + Send,
 	for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 {
-	let locations = retrieve::<D, Db, LAdapter>(connection, prompt, true).await?;
+	let locations = retrieve::<D, Db, LAdapter>(connection, prompt, retry_on_empty).await?;
 
 	let location = input::select_one(&locations, "Select the location")?;
 

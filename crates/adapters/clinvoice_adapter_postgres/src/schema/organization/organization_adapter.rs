@@ -208,7 +208,11 @@ mod tests
 			PgOrganization::create(
 				&connection,
 				vec![
-					(false, ContactKind::Address(utah.clone()), "Remote Office".into()),
+					(
+						false,
+						ContactKind::Address(utah.clone()),
+						"Remote Office".into()
+					),
 					(
 						true,
 						ContactKind::Email("foo@bar.io".into()),

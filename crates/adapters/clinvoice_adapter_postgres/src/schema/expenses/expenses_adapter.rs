@@ -6,7 +6,7 @@ use clinvoice_finance::{ExchangeRates, Money};
 use clinvoice_match::{MatchExpense, MatchSet};
 use clinvoice_schema::{Expense, Id};
 use futures::{future, stream, StreamExt, TryFutureExt, TryStreamExt};
-use sqlx::{Executor, PgPool, Postgres, Result, Row};
+use sqlx::{Executor, PgPool, Postgres, QueryBuilder, Result, Row};
 
 use super::{columns::PgExpenseColumns, PgExpenses};
 use crate::{schema::util, PgSchema};
@@ -89,7 +89,7 @@ impl ExpensesAdapter for PgExpenses
 	) -> Result<HashMap<Id, Vec<Expense>>>
 	{
 		let exchange_rates_fut = ExchangeRates::new().map_err(util::finance_err_to_sqlx);
-		let mut query = String::from(
+		let mut query = QueryBuilder::new(
 			"SELECT
 				T.id as timesheet_id,
 				X.category,
@@ -121,7 +121,8 @@ impl ExpensesAdapter for PgExpenses
 			timesheet_id: "timesheet_id",
 		};
 
-		sqlx::query(&query)
+		query
+			.build()
 			.fetch(connection)
 			.try_fold(HashMap::new(), |mut map, row| {
 				let entry = map

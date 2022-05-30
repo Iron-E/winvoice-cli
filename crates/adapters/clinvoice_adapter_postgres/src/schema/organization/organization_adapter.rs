@@ -5,7 +5,7 @@ use clinvoice_adapter::{
 use clinvoice_match::MatchOrganization;
 use clinvoice_schema::{ContactKind, Id, Location, Organization};
 use futures::{TryFutureExt, TryStreamExt};
-use sqlx::{PgPool, Result, Row};
+use sqlx::{PgPool, QueryBuilder, Result, Row};
 
 use super::{columns::PgOrganizationColumns, PgOrganization};
 use crate::{
@@ -54,7 +54,7 @@ impl OrganizationAdapter for PgOrganization
 			PgContactInfo::retrieve(connection, match_condition.contact_info.clone());
 		let id_match = PgLocation::retrieve_matching_ids(connection, &match_condition.location);
 
-		let mut query = String::from(
+		let mut query = QueryBuilder::new(
 			"SELECT
 				O.id,
 				O.location_id,
@@ -76,7 +76,8 @@ impl OrganizationAdapter for PgOrganization
 		};
 
 		let contact_info = &contact_info_fut.await?;
-		sqlx::query(&query)
+		query
+			.build()
 			.fetch(connection)
 			.try_filter_map(|row| async move {
 				if let Some(c) = contact_info.get(&row.get::<Id, _>(COLUMNS.id))

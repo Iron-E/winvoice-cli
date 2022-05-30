@@ -7,7 +7,7 @@ use clinvoice_adapter::{
 use clinvoice_match::MatchEmployee;
 use clinvoice_schema::{Employee, Id, Organization};
 use futures::{future, TryFutureExt, TryStreamExt};
-use sqlx::{PgPool, Result, Row};
+use sqlx::{PgPool, QueryBuilder, Result, Row};
 
 use super::{columns::PgEmployeeColumns, PgEmployee};
 use crate::{schema::PgOrganization, PgSchema as Schema};
@@ -57,7 +57,7 @@ impl EmployeeAdapter for PgEmployee
 					.collect::<HashMap<_, _>>()
 			});
 
-		let mut query = String::from(
+		let mut query = QueryBuilder::new(
 			"SELECT
 				E.id,
 				E.name,
@@ -78,7 +78,8 @@ impl EmployeeAdapter for PgEmployee
 		};
 
 		let organizations = organizations_fut.await?;
-		sqlx::query(&query)
+		query
+			.build()
 			.fetch(connection)
 			.try_filter_map(|row| {
 				if let Some(o) = organizations.get(&row.get::<Id, _>(COLUMNS.organization_id))

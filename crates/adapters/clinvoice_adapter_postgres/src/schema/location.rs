@@ -1,10 +1,8 @@
-use core::fmt::Write;
-
 use clinvoice_adapter::WriteWhereClause;
 use clinvoice_match::{Match, MatchLocation, MatchOuterLocation};
 use clinvoice_schema::{Id, Location};
 use futures::{future, TryFutureExt, TryStreamExt};
-use sqlx::{Executor, Postgres, Result, Row};
+use sqlx::{Executor, Postgres, QueryBuilder, Result, Row};
 
 use crate::PgSchema as Schema;
 
@@ -21,7 +19,7 @@ impl PgLocation
 		match_condition: &MatchLocation,
 	) -> Result<Match<Id>>
 	{
-		struct Cte<'a>
+		struct Aliases<'a>
 		{
 			current: &'a str,
 			previous: &'a str,
@@ -30,17 +28,31 @@ impl PgLocation
 		/// # Summary
 		///
 		/// Generate multiple Common Table Expressions for a recursive query.
-		fn generate_cte(first: bool, query: &mut String, cte: Cte, match_condition: &MatchLocation)
+		fn generate_cte(
+			aliases: Aliases,
+			first: bool,
+			match_condition: &MatchLocation,
+			query: &mut QueryBuilder<Postgres>,
+		)
 		{
-			writeln!(
-				query,
-				" {} as ( SELECT LO.id, LO.name, LO.outer_id FROM locations LO {}JOIN {} L ON (LO.id \
-				 = L.outer_id)",
-				cte.current,
-				if cte.previous.is_empty() { "-- " } else { "" },
-				cte.previous,
-			)
-			.unwrap();
+			// NOTE: this scope exists because we want to get rid of the mutable borrow after we're
+			//       done with it.
+			{
+				let mut separated = query.separated(' ');
+
+				separated
+					.push(aliases.current)
+					.push("as ( SELECT LO.id, LO.name, LO.outer_id FROM locations LO");
+
+				if !aliases.previous.is_empty()
+				{
+					separated
+						.push("JOIN")
+						.push(aliases.previous)
+						.push("L ON (LO.id = L.outer_id)");
+				}
+			}
+
 			Schema::write_where_clause(
 				Schema::write_where_clause(
 					if match_condition.outer == MatchOuterLocation::None
@@ -64,65 +76,71 @@ impl PgLocation
 				&match_condition.name,
 				query,
 			);
-			write!(query, "),").unwrap();
+
+			query.push(')');
 
 			match match_condition.outer
 			{
 				MatchOuterLocation::Always | MatchOuterLocation::None =>
 				{
-					if first
+					if !first
 					{
-						query.pop();
+						query
+							.separated(' ')
+							.push(
+								", location_report AS ( SELECT L.id, L.name, L.outer_id FROM locations L \
+								 JOIN",
+							)
+							.push(aliases.current)
+							.push(
+								"LO ON (L.outer_id = LO.id) UNION SELECT L.id, L.name, L.outer_id FROM \
+								 locations L JOIN location_report LO ON (L.outer_id = LO.id))",
+							);
 					}
-					else
-					{
-						write!(
-							query,
-							" location_report AS ( SELECT L.id, L.name, L.outer_id FROM locations L JOIN \
-							 {} LO ON (L.outer_id = LO.id) UNION SELECT L.id, L.name, L.outer_id FROM \
-							 locations L JOIN location_report LO ON (L.outer_id = LO.id))",
-							cte.current,
+
+					query
+						.push(" SELECT id FROM ")
+						.push(
+							if first
+							{
+								aliases.current
+							}
+							else
+							{
+								"location_report"
+							},
 						)
-						.unwrap()
-					}
-					write!(
-						query,
-						" SELECT id FROM {};",
-						if first
-						{
-							cte.current
-						}
-						else
-						{
-							"location_report"
-						},
-					)
-					.unwrap()
+						.push(';');
 				},
-				MatchOuterLocation::Some(ref outer) => generate_cte(
-					false,
-					query,
-					Cte {
-						current: &format!("{}_outer", cte.current),
-						previous: cte.current,
-					},
-					outer,
-				),
+				MatchOuterLocation::Some(ref outer) =>
+				{
+					query.push(',');
+					generate_cte(
+						Aliases {
+							current: &format!("{}_outer", aliases.current),
+							previous: aliases.current,
+						},
+						false,
+						outer,
+						query,
+					)
+				},
 			}
 		}
 
-		let mut query = String::from("WITH RECURSIVE");
+		let mut query = QueryBuilder::new("WITH RECURSIVE");
 		generate_cte(
-			true,
-			&mut query,
-			Cte {
+			Aliases {
 				current: "location",
 				previous: "",
 			},
+			true,
 			match_condition,
+			&mut query,
 		);
 		Ok(Match::Or(
-			sqlx::query(&query)
+			query
+				.build()
 				.fetch(connection)
 				.map_ok(|row| row.get::<Id, _>("id").into())
 				.try_collect()

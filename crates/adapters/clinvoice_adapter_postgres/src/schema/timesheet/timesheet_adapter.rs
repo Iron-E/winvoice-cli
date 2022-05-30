@@ -12,7 +12,7 @@ use clinvoice_schema::{
 	Timesheet,
 };
 use futures::{future, TryFutureExt, TryStreamExt};
-use sqlx::{PgPool, Result, Row};
+use sqlx::{PgPool, QueryBuilder, Result, Row};
 
 use super::{columns::PgTimesheetColumns, PgTimesheet};
 use crate::{
@@ -70,7 +70,7 @@ impl TimesheetAdapter for PgTimesheet
 				.collect::<HashMap<_, _>>()
 		});
 
-		let mut query = String::from(
+		let mut query = QueryBuilder::new(
 			"SELECT
 				T.id,
 				T.employee_id,
@@ -95,7 +95,8 @@ impl TimesheetAdapter for PgTimesheet
 		let expenses = &expenses_fut.await?;
 		let employees = &employees_fut.await?;
 		let jobs = &jobs_fut.await?;
-		sqlx::query(&query)
+		query
+			.build()
 			.fetch(connection)
 			.try_filter_map(|row| {
 				if let Some(e) = employees.get(&row.get(COLUMNS.employee_id))

@@ -16,7 +16,7 @@ use clinvoice_schema::{
 	Organization,
 };
 use futures::{future, TryFutureExt, TryStreamExt};
-use sqlx::{postgres::types::PgInterval, Error, PgPool, Result, Row};
+use sqlx::{postgres::types::PgInterval, Error, PgPool, QueryBuilder, Result, Row};
 
 use super::PgJob;
 use crate::{
@@ -87,7 +87,7 @@ impl JobAdapter for PgJob
 		let id_match =
 			PgLocation::retrieve_matching_ids(connection, &match_condition.client.location);
 
-		let mut query = String::from(
+		let mut query = QueryBuilder::new(
 			"SELECT
 				J.client_id,
 				J.date_close,
@@ -149,7 +149,8 @@ impl JobAdapter for PgJob
 		};
 
 		let organizations = organizations_fut.await?;
-		sqlx::query(&query)
+		query
+			.build()
 			.fetch(connection)
 			.try_filter_map(|row| {
 				if let Some(o) = organizations.get(&row.get::<Id, _>(COLUMNS.client_id))

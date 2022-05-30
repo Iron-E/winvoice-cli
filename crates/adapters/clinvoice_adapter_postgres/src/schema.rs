@@ -12,7 +12,6 @@ mod job;
 mod location;
 mod option;
 mod organization;
-mod str;
 mod timesheet;
 mod timestamptz;
 mod typecast;
@@ -29,8 +28,6 @@ pub(crate) use option::PgOption;
 pub use organization::PgOrganization;
 pub use timesheet::PgTimesheet;
 pub(crate) use timestamptz::PgTimestampTz;
-
-pub(crate) use self::str::PgStr;
 
 /// # Summary
 ///

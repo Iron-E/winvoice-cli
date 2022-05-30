@@ -2,7 +2,7 @@ use clinvoice_adapter::{schema::LocationAdapter, WriteWhereClause};
 use clinvoice_match::MatchLocation;
 use clinvoice_schema::Location;
 use futures::TryStreamExt;
-use sqlx::{PgPool, Result, Row};
+use sqlx::{PgPool, QueryBuilder, Result, Row};
 
 use super::PgLocation;
 use crate::PgSchema as Schema;
@@ -47,11 +47,12 @@ impl LocationAdapter for PgLocation
 	{
 		let id_match = Self::retrieve_matching_ids(connection, &match_condition);
 
-		let mut query = String::from("SELECT name, outer_id, id FROM locations");
+		let mut query = QueryBuilder::new("SELECT name, outer_id, id FROM locations");
 		Schema::write_where_clause(Default::default(), "id", &id_match.await?, &mut query);
 		query.push(';');
 
-		sqlx::query(&query)
+		query
+			.build()
 			.fetch(connection)
 			.and_then(|row| PgLocation::retrieve_by_id(connection, row.get("id")))
 			.try_collect()

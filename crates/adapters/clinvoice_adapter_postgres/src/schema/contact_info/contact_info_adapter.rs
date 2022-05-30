@@ -5,7 +5,7 @@ use clinvoice_adapter::schema::ContactInfoAdapter;
 use clinvoice_match::{MatchContact, MatchSet};
 use clinvoice_schema::{Contact, ContactKind, Id};
 use futures::TryStreamExt;
-use sqlx::{Executor, PgPool, Postgres, Result, Row};
+use sqlx::{Executor, PgPool, Postgres, QueryBuilder, Result, Row};
 
 use super::{columns::PgContactColumns, PgContactInfo};
 use crate::schema::write_where_clause;
@@ -91,7 +91,7 @@ impl ContactInfoAdapter for PgContactInfo
 		match_condition: MatchSet<MatchContact>,
 	) -> Result<HashMap<Id, Vec<Contact>>>
 	{
-		let mut query = String::from(
+		let mut query = QueryBuilder::new(
 			"SELECT
 				C.address_id,
 				C.email,
@@ -121,7 +121,8 @@ impl ContactInfoAdapter for PgContactInfo
 			phone: "phone",
 		};
 
-		sqlx::query(&query)
+		query
+			.build()
 			.fetch(connection)
 			.try_fold(HashMap::new(), |mut map, row| async move {
 				let entry = map

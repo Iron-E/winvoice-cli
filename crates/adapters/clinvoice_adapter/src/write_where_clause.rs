@@ -2,6 +2,7 @@ mod write_context;
 
 use core::fmt::Display;
 
+use sqlx::{Database, QueryBuilder};
 pub use write_context::WriteContext;
 
 /// # Summary
@@ -10,7 +11,9 @@ pub use write_context::WriteContext;
 ///
 /// Helpful so that multiple implementations of the [`write_where_clause`] method can be
 /// created for a builder.
-pub trait WriteWhereClause<M>
+pub trait WriteWhereClause<Db, M>
+where
+	Db: Database,
 {
 	/// # Summary
 	///
@@ -27,6 +30,6 @@ pub trait WriteWhereClause<M>
 		context: WriteContext,
 		alias: impl Copy + Display,
 		match_condition: M,
-		query: &mut String,
+		query: &mut QueryBuilder<Db>,
 	) -> WriteContext;
 }

@@ -13,34 +13,36 @@ pub enum WriteContext
 {
 	/// # Summary
 	///
+	/// After any number of `WHERE` conditions, but before a post-`WHERE` condition such as `GROUP
+	/// BY`.
+	///
+	/// # Example
+	///
+	/// ```ignore
+	/// SELECT * FROM foo WHERE bar = 7 -- ← a valid SQL query, but would also be valid with another `WHERE` condition
+	/// ```
+	AcceptingAnotherWhereCondition,
+
+	/// # Summary
+	///
 	/// Before any `WHERE` keyword is written. After a `FROM` or `JOIN` clause.
 	///
 	/// # Example
 	///
 	/// ```ignore
-	/// SELECT * FROM foo
+	/// SELECT * FROM foo -- ← no `WHERE` yet
 	/// ```
 	BeforeWhereClause,
 
 	/// # Summary
 	///
-	/// In the middle of writing a complete `WHERE` clause. Syntax is usually invalid at this point.
+	/// In the middle of writing a complete `WHERE` clause. The query is usually not valid syntax
+	/// yet.
 	///
 	/// # Example
 	///
 	/// ```ignore
-	/// SELECT * FROM foo WHERE bar <= 7 AND
+	/// SELECT * FROM foo WHERE bar <= 7 AND -- ← the current `WHERE` condition is not complete.
 	/// ```
 	InWhereCondition,
-
-	/// # Summary
-	///
-	/// After the `WHERE` keyword is written.
-	///
-	/// # Example
-	///
-	/// ```ignore
-	/// SELECT * FROM foo WHERE bar = 7
-	/// ```
-	AfterWhereCondition,
 }

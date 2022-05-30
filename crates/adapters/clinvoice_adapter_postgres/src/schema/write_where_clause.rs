@@ -154,7 +154,7 @@ where
 
 			let ctx = Schema::write_where_clause(
 				Schema::write_where_clause(
-					WriteContext::AfterWhereCondition,
+					WriteContext::AcceptingAnotherWhereCondition,
 					&format!("{alias}.label"),
 					&match_contact.label,
 					query,
@@ -210,7 +210,7 @@ where
 		},
 	};
 
-	Ok(WriteContext::AfterWhereCondition)
+	Ok(WriteContext::AcceptingAnotherWhereCondition)
 }
 
 /// # Summary
@@ -292,7 +292,7 @@ where
 			&mut conditions.iter().filter(|m| *m != &Match::Any),
 		),
 	};
-	WriteContext::AfterWhereCondition
+	WriteContext::AcceptingAnotherWhereCondition
 }
 
 impl WriteWhereClause<&Match<bool>> for Schema
@@ -390,7 +390,7 @@ impl WriteWhereClause<&Match<NaiveDateTime>> for Schema
 				&mut conditions.iter().filter(|m| *m != &Match::Any),
 			),
 		};
-		WriteContext::AfterWhereCondition
+		WriteContext::AcceptingAnotherWhereCondition
 	}
 }
 
@@ -462,7 +462,7 @@ impl WriteWhereClause<&Match<Option<NaiveDateTime>>> for Schema
 				&mut conditions.iter().filter(|m| *m != &Match::Any),
 			),
 		};
-		WriteContext::AfterWhereCondition
+		WriteContext::AcceptingAnotherWhereCondition
 	}
 }
 
@@ -534,7 +534,7 @@ impl WriteWhereClause<&Match<Serde<Duration>>> for Schema
 				&mut conditions.iter().filter(|m| *m != &Match::Any),
 			),
 		};
-		WriteContext::AfterWhereCondition
+		WriteContext::AcceptingAnotherWhereCondition
 	}
 }
 
@@ -587,7 +587,7 @@ impl WriteWhereClause<&MatchSet<MatchExpense>> for Schema
 				.unwrap();
 
 				Schema::write_where_clause(
-					WriteContext::AfterWhereCondition,
+					WriteContext::AcceptingAnotherWhereCondition,
 					&subquery_alias,
 					match_expense,
 					query,
@@ -609,7 +609,7 @@ impl WriteWhereClause<&MatchSet<MatchExpense>> for Schema
 			},
 		};
 
-		WriteContext::AfterWhereCondition
+		WriteContext::AcceptingAnotherWhereCondition
 	}
 }
 
@@ -651,7 +651,7 @@ impl WriteWhereClause<&MatchStr<String>> for Schema
 			),
 			MatchStr::Regex(regex) => write_comparison(query, context, alias, "~", PgStr(regex)),
 		};
-		WriteContext::AfterWhereCondition
+		WriteContext::AcceptingAnotherWhereCondition
 	}
 }
 

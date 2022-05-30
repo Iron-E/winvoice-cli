@@ -8,7 +8,7 @@ impl Display for WriteContext
 	{
 		match self
 		{
-			WriteContext::AfterWhereCondition => write!(f, " AND"),
+			WriteContext::AcceptingAnotherWhereCondition => write!(f, " AND"),
 			WriteContext::BeforeWhereClause => write!(f, " WHERE"),
 			WriteContext::InWhereCondition => Ok(()),
 		}

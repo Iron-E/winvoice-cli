@@ -732,6 +732,7 @@ impl WriteWhereClause<Postgres, &MatchStr<String>> for Schema
 				query
 					.separated(' ')
 					.push(context)
+					.push(alias)
 					.push('=')
 					.push_bind(string.clone());
 			},
@@ -751,6 +752,7 @@ impl WriteWhereClause<Postgres, &MatchStr<String>> for Schema
 				query
 					.separated(' ')
 					.push(context)
+					.push(alias)
 					.push('~')
 					.push_bind(regex.clone());
 			},

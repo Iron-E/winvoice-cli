@@ -128,7 +128,7 @@ impl PgLocation
 			}
 		}
 
-		let mut query = QueryBuilder::new("WITH RECURSIVE");
+		let mut query = QueryBuilder::new("WITH RECURSIVE ");
 		generate_cte(
 			Aliases {
 				current: "location",

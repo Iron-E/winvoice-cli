@@ -20,7 +20,7 @@ use sqlx::{postgres::types::PgInterval, Error, PgPool, QueryBuilder, Result, Row
 
 use super::PgJob;
 use crate::{
-	schema::{job::columns::PgJobColumns, util, PgLocation, PgOrganization},
+	schema::{job::columns::PgJobColumns, util, PgOrganization},
 	PgSchema as Schema,
 };
 
@@ -84,8 +84,6 @@ impl JobAdapter for PgJob
 			});
 
 		let exchange_rates = ExchangeRates::new().map_err(util::finance_err_to_sqlx);
-		let id_match =
-			PgLocation::retrieve_matching_ids(connection, &match_condition.client.location);
 
 		let mut query = QueryBuilder::new(
 			"SELECT
@@ -102,17 +100,7 @@ impl JobAdapter for PgJob
 			FROM jobs J",
 		);
 		Schema::write_where_clause(
-			Schema::write_where_clause(
-				Schema::write_where_clause(
-					Default::default(),
-					"O",
-					&match_condition.client,
-					&mut query,
-				),
-				"O.location_id",
-				&id_match.await?,
-				&mut query,
-			),
+			Default::default(),
 			"J",
 			&MatchJob {
 				client: match_condition.client,

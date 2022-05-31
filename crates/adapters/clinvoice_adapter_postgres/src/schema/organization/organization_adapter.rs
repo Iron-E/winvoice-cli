@@ -1,10 +1,12 @@
+use std::collections::HashMap;
+
 use clinvoice_adapter::{
-	schema::{ContactInfoAdapter, OrganizationAdapter},
+	schema::{ContactInfoAdapter, LocationAdapter, OrganizationAdapter},
 	WriteWhereClause,
 };
 use clinvoice_match::MatchOrganization;
-use clinvoice_schema::{ContactKind, Id, Location, Organization};
-use futures::{TryFutureExt, TryStreamExt};
+use clinvoice_schema::{ContactKind, Location, Organization};
+use futures::{future, TryFutureExt, TryStreamExt};
 use sqlx::{PgPool, QueryBuilder, Result, Row};
 
 use super::{columns::PgOrganizationColumns, PgOrganization};
@@ -52,7 +54,12 @@ impl OrganizationAdapter for PgOrganization
 	{
 		let contact_info_fut =
 			PgContactInfo::retrieve(connection, match_condition.contact_info.clone());
-		let id_match = PgLocation::retrieve_matching_ids(connection, &match_condition.location);
+		let locations_fut = PgLocation::retrieve(connection, match_condition.location.clone())
+			.map_ok(|vec| {
+				vec.into_iter()
+					.map(|l| (l.id, l))
+					.collect::<HashMap<_, _>>()
+			});
 
 		let mut query = QueryBuilder::new(
 			"SELECT
@@ -61,12 +68,7 @@ impl OrganizationAdapter for PgOrganization
 				O.name
 			FROM organizations O",
 		);
-		Schema::write_where_clause(
-			Schema::write_where_clause(Default::default(), "O", &match_condition, &mut query),
-			"L.id",
-			&id_match.await?,
-			&mut query,
-		);
+		Schema::write_where_clause(Default::default(), "O", &match_condition, &mut query);
 		query.push(';');
 
 		const COLUMNS: PgOrganizationColumns<'static> = PgOrganizationColumns {
@@ -75,22 +77,21 @@ impl OrganizationAdapter for PgOrganization
 			name: "name",
 		};
 
-		let contact_info = &contact_info_fut.await?;
+		let contact_info = contact_info_fut.await?;
+		let locations = locations_fut.await?;
 		query
 			.build()
 			.fetch(connection)
-			.try_filter_map(|row| async move {
-				if let Some(c) = contact_info.get(&row.get::<Id, _>(COLUMNS.id))
+			.try_filter_map(|row| {
+				if let Some(c) = contact_info.get(&row.get(COLUMNS.id))
 				{
-					return COLUMNS
-						.row_to_view(connection, c.clone(), &row)
-						.map_ok(Some)
-						.await;
+					if let Some(l) = locations.get(&row.get(COLUMNS.location_id))
+					{
+						return future::ok(Some(COLUMNS.row_to_view(c.clone(), l.clone(), &row)));
+					}
 				}
 
-				// If `PgContactInfo::retrieve` does not match,
-				// then the whole `employee` does not match.
-				Ok(None)
+				future::ok(None)
 			})
 			.try_collect()
 			.await

@@ -22,12 +22,18 @@ impl PgJobColumns<'_>
 {
 	pub(in crate::schema) fn row_to_view(self, client: Organization, row: &PgRow) -> Result<Job>
 	{
+		let increment = util::duration_from(row.get(self.increment))?;
+		let amount = row
+			.get::<String, _>(self.invoice_hourly_rate)
+			.parse::<Decimal>()
+			.map_err(|e| util::finance_err_to_sqlx(e.into()))?;
+
 		Ok(Job {
 			client,
 			date_close: row.get(self.date_close),
 			date_open: row.get(self.date_open),
 			id: row.get(self.id),
-			increment: util::duration_from(row.get(self.increment))?,
+			increment,
 			invoice: Invoice {
 				date: row
 					.get::<Option<_>, _>(self.invoice_date_issued)
@@ -35,14 +41,9 @@ impl PgJobColumns<'_>
 						issued: d,
 						paid: row.get(self.invoice_date_paid),
 					}),
-				hourly_rate: {
-					let amount = row.get::<String, _>(self.invoice_hourly_rate);
-					Money {
-						amount: amount
-							.parse::<Decimal>()
-							.map_err(|e| util::finance_err_to_sqlx(e.into()))?,
-						..Default::default()
-					}
+				hourly_rate: Money {
+					amount,
+					..Default::default()
 				},
 			},
 			notes: row.get(self.notes),

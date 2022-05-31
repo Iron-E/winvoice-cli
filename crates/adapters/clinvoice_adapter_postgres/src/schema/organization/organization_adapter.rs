@@ -185,7 +185,10 @@ mod tests
 		assert_eq!(organization.location.id, row.location_id);
 		assert_eq!(organization.name, row.name);
 		assert_eq!(
-			organization.contact_info.into_iter().collect::<HashSet<_>>(),
+			organization
+				.contact_info
+				.into_iter()
+				.collect::<HashSet<_>>(),
 			contact_info_row.await
 		);
 	}

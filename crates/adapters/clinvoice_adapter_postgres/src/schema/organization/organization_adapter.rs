@@ -174,7 +174,7 @@ mod tests
 					},
 				})
 			})
-			.try_collect::<Vec<_>>()
+			.try_collect::<HashSet<_>>()
 			.await
 			.unwrap()
 		};
@@ -184,7 +184,10 @@ mod tests
 		assert_eq!(organization.location.id, earth.id);
 		assert_eq!(organization.location.id, row.location_id);
 		assert_eq!(organization.name, row.name);
-		assert_eq!(organization.contact_info, contact_info_row.await);
+		assert_eq!(
+			organization.contact_info.into_iter().collect::<HashSet<_>>(),
+			contact_info_row.await
+		);
 	}
 
 	#[tokio::test(flavor = "multi_thread", worker_threads = 2)]

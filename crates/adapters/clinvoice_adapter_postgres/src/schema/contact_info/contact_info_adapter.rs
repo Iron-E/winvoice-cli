@@ -1,4 +1,3 @@
-use core::fmt::Write;
 use std::collections::HashMap;
 
 use clinvoice_adapter::schema::ContactInfoAdapter;
@@ -24,56 +23,35 @@ impl ContactInfoAdapter for PgContactInfo
 			return Ok(Vec::new());
 		}
 
-		const INSERT_VALUES_APPROX_LEN: u8 = 39;
-		let mut contact_values =
-			String::with_capacity((INSERT_VALUES_APPROX_LEN as usize) * contact_info.len());
+		QueryBuilder::new(
+			"INSERT INTO contact_information
+				(organization_id, label, export, address_id, email, phone)",
+		)
+		.push_values(contact_info.iter(), |mut q, (export, kind, label)| {
+			q.push_bind(organization_id)
+				.push_bind(label)
+				.push_bind(export);
 
-		// NOTE: `i * 6` is the number of values each iteration inserts
-		(0..contact_info.len()).map(|i| i * 6).for_each(|i| {
-			write!(
-				contact_values,
-				"(${}, ${}, ${}, ${}, ${}, ${}),",
-				i + 1,
-				i + 2,
-				i + 3,
-				i + 4,
-				i + 5,
-				i + 6,
-			)
-			.unwrap()
-		});
-		contact_values.pop(); // get rid of the trailing `,` since SQL can't handle that :/
-
-		contact_info
-			.iter()
-			.fold(
-				sqlx::query(&format!(
-					"INSERT INTO contact_information
-					(organization_id, label, export, address_id, email, phone)
-				VALUES {contact_values};",
-				)),
-				|mut query, (export, kind, label)| {
-					query = query.bind(organization_id).bind(label).bind(export);
-
-					match kind
-					{
-						ContactKind::Address(location) => query
-							.bind(location.id)
-							.bind(None::<String>)
-							.bind(None::<String>),
-						ContactKind::Email(email) =>
-						{
-							query.bind(None::<Id>).bind(email).bind(None::<String>)
-						},
-						ContactKind::Phone(phone) =>
-						{
-							query.bind(None::<Id>).bind(None::<String>).bind(phone)
-						},
-					}
-				},
-			)
-			.execute(connection)
-			.await?;
+			match kind
+			{
+				ContactKind::Address(location) => q
+					.push_bind(location.id)
+					.push_bind(None::<String>)
+					.push_bind(None::<String>),
+				ContactKind::Email(email) => q
+					.push_bind(None::<Id>)
+					.push_bind(email)
+					.push_bind(None::<String>),
+				ContactKind::Phone(phone) => q
+					.push_bind(None::<Id>)
+					.push_bind(None::<String>)
+					.push_bind(phone),
+			};
+		})
+		.push(';')
+		.build()
+		.execute(connection)
+		.await?;
 
 		Ok(contact_info
 			.into_iter()

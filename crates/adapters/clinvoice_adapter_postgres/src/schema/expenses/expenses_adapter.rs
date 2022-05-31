@@ -1,4 +1,3 @@
-use core::fmt::Write;
 use std::collections::HashMap;
 
 use clinvoice_adapter::{schema::ExpensesAdapter, WriteWhereClause};
@@ -25,62 +24,40 @@ impl ExpensesAdapter for PgExpenses
 			return Ok(Vec::new());
 		}
 
-		let exchange_rates_fut = ExchangeRates::new().map_err(util::finance_err_to_sqlx);
+		let exchange_rates = ExchangeRates::new()
+			.map_err(util::finance_err_to_sqlx)
+			.await?;
 
-		const INSERT_VALUES_APPROX_LEN: u8 = 60;
-		let mut expense_values =
-			String::with_capacity((INSERT_VALUES_APPROX_LEN as usize) * expenses.len());
-
-		// NOTE: `i * 4` is the number of values each iteration inserts
-		(0..expenses.len()).map(|i| i * 4).for_each(|i| {
-			write!(
-				expense_values,
-				"(${}, ${}, ${}, ${}),",
-				i + 1,
-				i + 2,
-				i + 3,
-				i + 4,
-			)
-			.unwrap()
-		});
-		expense_values.pop(); // get rid of the trailing `,` since SQL can't handle that :/
-
-		let exchange_rates = exchange_rates_fut.await?;
-		expenses
-			.iter()
-			.fold(
-				sqlx::query(&format!(
-					"INSERT INTO contact_information
-						(timesheet_id, category, cost, description)
-					VALUES {expense_values}
-					RETURNING id;",
-				)),
-				|query, (category, cost, description)| {
-					query
-						.bind(timesheet_id)
-						.bind(category)
-						.bind(
-							cost
-								.exchange(Default::default(), &exchange_rates)
-								.amount
-								.to_string(),
-						)
-						.bind(description)
-				},
-			)
-			.fetch(connection)
-			.zip(stream::iter(expenses.iter().cloned()))
-			.map(|(result, (category, cost, description))| {
-				result.map(|row| Expense {
-					category,
-					cost,
-					description,
-					id: row.get::<Id, _>("id"),
-					timesheet_id,
-				})
+		QueryBuilder::new(
+			"INSERT INTO contact_information
+				(timesheet_id, category, cost, description)",
+		)
+		.push_values(expenses.iter(), |mut q, (category, cost, description)| {
+			q.push_bind(timesheet_id)
+				.push_bind(category)
+				.push_bind(
+					cost
+						.exchange(Default::default(), &exchange_rates)
+						.amount
+						.to_string(),
+				)
+				.push_bind(description);
+		})
+		.push(';')
+		.build()
+		.fetch(connection)
+		.zip(stream::iter(expenses.iter().cloned()))
+		.map(|(result, (category, cost, description))| {
+			result.map(|row| Expense {
+				category,
+				cost,
+				description,
+				id: row.get::<Id, _>("id"),
+				timesheet_id,
 			})
-			.try_collect::<Vec<_>>()
-			.await
+		})
+		.try_collect::<Vec<_>>()
+		.await
 	}
 
 	async fn retrieve(

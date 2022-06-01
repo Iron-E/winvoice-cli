@@ -7,18 +7,16 @@ use super::PgSchema;
 /// # Summary
 ///
 /// Initialize the database for a given [`Store`].
-async fn init_locations(connection: impl Executor<'_, Database = Postgres> + Send) -> Result<()>
+async fn init_locations(connection: impl Executor<'_, Database = Postgres>) -> Result<()>
 {
 	sqlx::query!(
 		"CREATE TABLE IF NOT EXISTS locations
 		(
-			id bigint GENERATED ALWAYS AS IDENTITY,
-			outer_id bigint,
+			id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+			outer_id bigint REFERENCES locations(id),
 			name text NOT NULL,
 
-			PRIMARY KEY(id),
-			CONSTRAINT locations__not_outside_self CHECK (id <> outer_id),
-			CONSTRAINT locations__outer_id_fk FOREIGN KEY(outer_id) REFERENCES locations(id)
+			CONSTRAINT locations__not_outside_self CHECK (id <> outer_id)
 		);"
 	)
 	.execute(connection)
@@ -29,19 +27,14 @@ async fn init_locations(connection: impl Executor<'_, Database = Postgres> + Sen
 /// # Summary
 ///
 /// Initialize the database for a given [`Store`].
-async fn init_organizations(connection: impl Executor<'_, Database = Postgres> + Send)
-	-> Result<()>
+async fn init_organizations(connection: impl Executor<'_, Database = Postgres>) -> Result<()>
 {
 	sqlx::query!(
 		"CREATE TABLE IF NOT EXISTS organizations
 		(
-			id bigint GENERATED ALWAYS AS IDENTITY,
-			location_id bigint NOT NULL,
-			name text NOT NULL,
-
-			PRIMARY KEY(id),
-			CONSTRAINT organizations__location_id_fk
-				FOREIGN KEY(location_id) REFERENCES locations(id)
+			id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+			location_id bigint NOT NULL REFERENCES locations(id),
+			name text NOT NULL
 		);"
 	)
 	.execute(connection)
@@ -57,14 +50,11 @@ async fn init_employees(connection: impl Executor<'_, Database = Postgres> + Sen
 	sqlx::query!(
 		"CREATE TABLE IF NOT EXISTS employees
 		(
-			id bigint GENERATED ALWAYS AS IDENTITY,
+			id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
 			name text NOT NULL,
-			organization_id bigint NOT NULL,
+			organization_id bigint NOT NULL REFERENCES organizations(id),
 			status text NOT NULL,
-			title text NOT NULL,
-
-			PRIMARY KEY(id),
-			CONSTRAINT employees__organization_id_fk FOREIGN KEY(organization_id) REFERENCES organizations(id)
+			title text NOT NULL
 		);"
 	)
 	.execute(connection)
@@ -74,23 +64,20 @@ async fn init_employees(connection: impl Executor<'_, Database = Postgres> + Sen
 
 /// # Summary
 /// Initialize the database for a given [`Store`].
-async fn init_contact_info(connection: impl Executor<'_, Database = Postgres> + Send)
-	-> Result<()>
+async fn init_contact_info(connection: impl Executor<'_, Database = Postgres>) -> Result<()>
 {
 	sqlx::query!(
 		r#"CREATE TABLE IF NOT EXISTS contact_information
 		(
-			organization_id bigint NOT NULL,
+			organization_id bigint NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
 			export bool NOT NULL,
 			label text NOT NULL,
 
-			address_id bigint,
+			address_id bigint REFERENCES locations(id),
 			email text,
 			phone text CHECK (phone ~ '^[0-9\- ]+$'),
 
 			PRIMARY KEY(organization_id, label),
-			CONSTRAINT contact_information__organization_id_fk FOREIGN KEY(organization_id) REFERENCES organizations(id),
-			CONSTRAINT contact_information__address_id_fk FOREIGN KEY(address_id) REFERENCES locations(id),
 			CONSTRAINT contact_information__is_variant CHECK
 			(
 				address_id IS NULL AND
@@ -110,7 +97,7 @@ async fn init_contact_info(connection: impl Executor<'_, Database = Postgres> + 
 /// # Summary
 ///
 /// Initialize the database for a given [`Store`].
-async fn init_money(connection: impl Executor<'_, Database = Postgres> + Send) -> Result<()>
+async fn init_money(connection: impl Executor<'_, Database = Postgres>) -> Result<()>
 {
 	sqlx::query!(r#"CREATE DOMAIN amount_of_currency AS text CHECK (VALUE ~ '^\d+(\.\d+)?$');"#)
 		.execute(connection)
@@ -121,13 +108,13 @@ async fn init_money(connection: impl Executor<'_, Database = Postgres> + Send) -
 /// # Summary
 ///
 /// Initialize the database for a given [`Store`].
-async fn init_jobs(connection: impl Executor<'_, Database = Postgres> + Send) -> Result<()>
+async fn init_jobs(connection: impl Executor<'_, Database = Postgres>) -> Result<()>
 {
 	sqlx::query!(
 		"CREATE TABLE IF NOT EXISTS jobs
 		(
-			id bigint GENERATED ALWAYS AS IDENTITY,
-			client_id bigint NOT NULL,
+			id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+			client_id bigint NOT NULL REFERENCES organizations(id),
 			date_close timestamptz,
 			date_open timestamptz NOT NULL,
 			increment interval NOT NULL,
@@ -137,8 +124,6 @@ async fn init_jobs(connection: impl Executor<'_, Database = Postgres> + Send) ->
 			notes text NOT NULL,
 			objectives text NOT NULL,
 
-			PRIMARY KEY(id),
-			CONSTRAINT jobs__client_id_fk FOREIGN KEY(client_id) REFERENCES organizations(id),
 			CONSTRAINT jobs__invoice_date CHECK (invoice_date_paid IS NULL OR invoice_date_issued IS NOT NULL)
 		);"
 	)
@@ -150,22 +135,19 @@ async fn init_jobs(connection: impl Executor<'_, Database = Postgres> + Send) ->
 /// # Summary
 ///
 /// Initialize the database for a given [`Store`].
-async fn init_timesheets(connection: impl Executor<'_, Database = Postgres> + Send) -> Result<()>
+async fn init_timesheets(connection: impl Executor<'_, Database = Postgres>) -> Result<()>
 {
 	sqlx::query!(
 		"CREATE TABLE IF NOT EXISTS timesheets
 		(
-			id bigint GENERATED ALWAYS AS IDENTITY,
-			employee_id bigint NOT NULL,
-			job_id bigint NOT NULL,
+			id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+			employee_id bigint NOT NULL REFERENCES employees(id),
+			job_id bigint NOT NULL REFERENCES jobs(id),
 			time_begin timestamptz NOT NULL,
 			time_end timestamptz,
 			work_notes text NOT NULL,
 
-			PRIMARY KEY(id),
-			CONSTRAINT timesheets__employee_id_fk FOREIGN KEY(employee_id) REFERENCES employees(id),
-			CONSTRAINT timesheets__employee_job_time_uq UNIQUE (employee_id, job_id, time_begin),
-			CONSTRAINT timesheets__job_id_fk FOREIGN KEY(job_id) REFERENCES jobs(id)
+			CONSTRAINT timesheets__employee_job_time_uq UNIQUE (employee_id, job_id, time_begin)
 		);"
 	)
 	.execute(connection)
@@ -176,19 +158,16 @@ async fn init_timesheets(connection: impl Executor<'_, Database = Postgres> + Se
 /// # Summary
 ///
 /// Initialize the database for a given [`Store`].
-async fn init_expenses(connection: impl Executor<'_, Database = Postgres> + Send) -> Result<()>
+async fn init_expenses(connection: impl Executor<'_, Database = Postgres>) -> Result<()>
 {
 	sqlx::query!(
 		"CREATE TABLE IF NOT EXISTS expenses
 		(
-			id bigint GENERATED ALWAYS AS IDENTITY,
-			timesheet_id bigint NOT NULL,
+			id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+			timesheet_id bigint NOT NULL REFERENCES timesheets(id) ON DELETE CASCADE,
 			category text NOT NULL,
 			cost amount_of_currency NOT NULL,
-			description text NOT NULL,
-
-			PRIMARY KEY(id),
-			CONSTRAINT expenses__timesheet_id_fk FOREIGN KEY(timesheet_id) REFERENCES timesheets(id)
+			description text NOT NULL
 		);"
 	)
 	.execute(connection)

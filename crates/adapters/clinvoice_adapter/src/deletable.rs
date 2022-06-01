@@ -1,4 +1,4 @@
-use sqlx::{Acquire, Database, Result};
+use sqlx::{Database, Executor, Result};
 
 /// # Summary
 ///
@@ -30,8 +30,7 @@ pub trait Deletable
 	///   * `self.id` had not already been `create`d.
 	///   * Something goes wrong.
 	async fn delete(
-		connection: impl 'async_trait + Acquire<'_, Database = Self::Db> + Send,
-		cascade: bool,
+		connection: impl 'async_trait + Executor<'_, Database = Self::Db>,
 		entities: impl 'async_trait + Iterator<Item = Self::Entity> + Send,
 	) -> Result<()>;
 }

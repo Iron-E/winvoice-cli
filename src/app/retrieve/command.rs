@@ -12,7 +12,6 @@ use clinvoice_schema::{chrono::Utc, Currency, Location, RestorableSerde};
 use futures::{
 	future,
 	stream::{self, TryStreamExt},
-	TryFutureExt,
 };
 use serde::{de::DeserializeOwned, Serialize};
 use sqlx::{Database, Executor, Pool};
@@ -84,20 +83,17 @@ impl Command
 	/// `delete_entity` determines how the entities are deleted.
 	async fn delete<'err, D, Db, Entity>(
 		connection: &Pool<Db>,
-		cascade: bool,
 		entities: &[Entity],
 	) -> DynResult<'err, ()>
 	where
 		D: Deletable<Db = Db, Entity = Entity>,
 		Db: Database,
-		Entity: Clone + Display + Into<Entity> + Send,
+		Entity: Clone + Display + Send,
 		for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 	{
 		let selection = input::select(entities, "Select the entities you want to delete")?;
-		D::delete(connection, cascade, selection.into_iter().map(Entity::into))
-			.err_into()
-			.await
-			.and(Ok(()))
+		D::delete(connection, selection.into_iter()).await?;
+		Ok(())
 	}
 
 	/// # Summary
@@ -133,13 +129,13 @@ impl Command
 				Ok(v)
 			})?;
 
-		future::try_join_all(updates).err_into().await.and(Ok(()))
+		future::try_join_all(updates).await?;
+		Ok(())
 	}
 
 	pub async fn run<'err, Db, EAdapter, JAdapter, LAdapter, OAdapter, TAdapter>(
 		self,
 		connection: Pool<Db>,
-		cascade_delete: bool,
 		config: &Config<'_, '_>,
 		delete: bool,
 		update: bool,
@@ -177,7 +173,7 @@ impl Command
 
 				if delete
 				{
-					Self::delete::<EAdapter, _, _>(&connection, cascade_delete, &results_view).await?;
+					Self::delete::<EAdapter, _, _>(&connection, &results_view).await?;
 				}
 
 				if update
@@ -225,7 +221,7 @@ impl Command
 
 				if delete
 				{
-					Self::delete::<JAdapter, _, _>(&connection, cascade_delete, &results_view).await?;
+					Self::delete::<JAdapter, _, _>(&connection, &results_view).await?;
 				}
 
 				if update
@@ -327,7 +323,7 @@ impl Command
 
 				if delete
 				{
-					Self::delete::<LAdapter, _, _>(&connection, cascade_delete, &results_view).await?;
+					Self::delete::<LAdapter, _, _>(&connection, &results_view).await?;
 				}
 
 				if update
@@ -366,7 +362,7 @@ impl Command
 
 				if delete
 				{
-					Self::delete::<OAdapter, _, _>(&connection, cascade_delete, &results_view).await?;
+					Self::delete::<OAdapter, _, _>(&connection, &results_view).await?;
 				}
 
 				if update

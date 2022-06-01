@@ -1,6 +1,6 @@
 use clinvoice_adapter::Deletable;
 use clinvoice_schema::Organization;
-use sqlx::{Acquire, Postgres, Result};
+use sqlx::{Executor, Postgres, Result};
 
 use super::PgOrganization;
 
@@ -11,8 +11,7 @@ impl Deletable for PgOrganization
 	type Entity = Organization;
 
 	async fn delete(
-		connection: impl 'async_trait + Acquire<'_, Database = Self::Db> + Send,
-		cascade: bool,
+		connection: impl 'async_trait + Executor<'_, Database = Self::Db>,
 		entities: impl 'async_trait + Iterator<Item = Self::Entity> + Send,
 	) -> Result<()>
 	{

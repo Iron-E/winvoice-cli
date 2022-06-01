@@ -1,6 +1,6 @@
 use clinvoice_adapter::Deletable;
 use clinvoice_schema::Contact;
-use sqlx::{Acquire, Postgres, Result};
+use sqlx::{Executor, Postgres, Result};
 
 use super::PgContactInfo;
 
@@ -11,8 +11,7 @@ impl Deletable for PgContactInfo
 	type Entity = Contact;
 
 	async fn delete(
-		connection: impl 'async_trait + Acquire<'_, Database = Self::Db> + Send,
-		cascade: bool,
+		connection: impl 'async_trait + Executor<'_, Database = Self::Db>,
 		entities: impl 'async_trait + Iterator<Item = Self::Entity> + Send,
 	) -> Result<()>
 	{

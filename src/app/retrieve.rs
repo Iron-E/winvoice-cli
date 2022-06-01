@@ -17,16 +17,8 @@ use crate::DynResult;
 #[structopt(about = "Retrieve information that was recorded with CLInvoice")]
 pub struct Retrieve
 {
-	#[structopt(help = "Select retrieved entities for deletion. See -c", long, short)]
+	#[structopt(help = "Select retrieved entities for deletion.", long, short)]
 	delete: bool,
-
-	#[structopt(
-		help = "Cascade -d operations. Without this flag, entities referenced by other entities \
-		        cannot be deleted",
-		long = "cascade",
-		short = "c"
-	)]
-	cascade_delete: bool,
 
 	#[structopt(help = "Select retrieved entities for data updating", long, short)]
 	update: bool,
@@ -52,7 +44,6 @@ impl Retrieve
 					.command
 					.run::<_, PgEmployee, PgJob, PgLocation, PgOrganization, PgTimesheet>(
 						pool,
-						self.cascade_delete,
 						config,
 						self.delete,
 						self.update,

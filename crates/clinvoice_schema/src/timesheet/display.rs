@@ -10,24 +10,30 @@ impl Display for Timesheet
 	{
 		writeln!(
 			formatter,
-			"{} – {}: {} {} from {}",
+			"{} – {}",
 			DateTime::<Local>::from(self.time_begin).naive_local(),
 			self
 				.time_end
 				.map(|time| DateTime::<Local>::from(time).naive_local().to_string())
 				.unwrap_or_else(|| "Current".into()),
+		)?;
+
+		write!(
+			formatter,
+			"\t- Employee: {} {} from {}",
 			self.employee.title,
 			self.employee.name,
 			self.employee.organization,
 		)?;
 
+		const DEPTH_1: &str = "\n\t";
 		const DEPTH_2: &str = "\n\t\t";
 
 		if !self.expenses.is_empty()
 		{
-			writeln!(formatter, "\tExpenses:")?;
+			write!(formatter, "{DEPTH_1}- Expenses:")?;
 			self.expenses.iter().try_for_each(|e| {
-				writeln!(formatter, "\t\t{}", e.to_string().replace('\n', DEPTH_2))
+				write!(formatter, "{DEPTH_2}{}", e.to_string().replace('\n', DEPTH_2))
 			})?;
 		}
 
@@ -35,7 +41,7 @@ impl Display for Timesheet
 		{
 			write!(
 				formatter,
-				"\tWork Notes:{DEPTH_2}{}",
+				"{DEPTH_1}- Work Notes:{DEPTH_2}{}",
 				self.work_notes.replace('\n', DEPTH_2)
 			)?;
 		}
@@ -158,14 +164,18 @@ mod tests
 		assert_eq!(
 			format!("{timesheet}"),
 			format!(
-				"{} – {}: CEO of Tests Testy McTesterson from Big Test Organization @ 1337 Some \
-				 Street, Phoenix, Arizona, USA, Earth
-	Expenses:
-		#405 – Food (20.50 USD)
+				"{} – {}
+	- Employee: CEO of Tests Testy McTesterson from Big Test Organization @ 1337 Some Street, Phoenix, Arizona, USA, Earth
+	- Contact Info:
+		- Email: foo@bar.io
+		- Phone: 1-800-555-5555
+		- Street Address: 1337 Some Street, Phoenix, Arizona, USA, Earth
+	- Expenses:
+		№405 – Food (20.50 USD)
 			Fast Food™
-		#901 – Travel (10.00 USD)
+		№901 – Travel (10.00 USD)
 			Gas
-	Work Notes:
+	- Work Notes:
 		Went to non-corporate fast food restaurant for business meeting",
 				DateTime::<Local>::from(timesheet.time_begin).naive_local(),
 				DateTime::<Local>::from(timesheet.time_end.unwrap()).naive_local(),

@@ -8,11 +8,11 @@ impl Display for Employee
 	{
 		writeln!(formatter, "{} {}", self.title, self.name)?;
 
-		const DEPTH_2: &str = "\n\t\t";
+		const DEPTH_1: &str = "\n\t";
 		writeln!(
 			formatter,
 			"\tEmployer: {}",
-			self.organization.to_string().replace('\n', DEPTH_2)
+			self.organization.to_string().replace('\n', DEPTH_1)
 		)?;
 
 		write!(formatter, "\tStatus: {}", self.status)
@@ -88,7 +88,7 @@ mod tests
 			format!("{employee}"),
 			"CEO of Tests Testy McTesterson
 	Employer: Big Old Test @ 1234 Work Street, Phoenix, Arizona, USA, Earth
-		Contact Info:
+		- Contact Info:
 			- Place of Work: 1234 Work Street, Phoenix, Arizona, USA, Earth
 			- Work Email: foo@bar.io
 	Status: Representative",

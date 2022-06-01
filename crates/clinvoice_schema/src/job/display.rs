@@ -10,20 +10,22 @@ impl Display for Job
 	{
 		write!(
 			formatter,
-			"Job #{} for {}: {} – ",
+			"Job №{} for {}: {} – ",
 			self.id,
 			self.client.name,
 			DateTime::<Local>::from(self.date_open).naive_local(),
 		)?;
 
-		if let Some(date) = self.date_close
+		match self.date_close
 		{
-			writeln!(formatter, "{}", DateTime::<Local>::from(date).naive_local())?;
-		}
-		else
-		{
-			writeln!(formatter, "Current")?;
-		}
+			Some(date) => writeln!(formatter, "{}", DateTime::<Local>::from(date).naive_local()),
+			_ => writeln!(formatter, "Current"),
+		}?;
+
+		/// # Summary
+		///
+		/// One indent in, with a newline.
+		const DEPTH_1: &str = "\n\t";
 
 		/// # Summary
 		///
@@ -42,7 +44,7 @@ impl Display for Job
 		{
 			write!(
 				formatter,
-				"\n\tObjectives:{DEPTH_2}{}",
+				"{DEPTH_1}Objectives:{DEPTH_2}{}",
 				self.objectives.replace('\n', DEPTH_2)
 			)?;
 		}
@@ -51,7 +53,7 @@ impl Display for Job
 		{
 			write!(
 				formatter,
-				"\n\tNotes:{DEPTH_2}{}",
+				"{DEPTH_1}Notes:{DEPTH_2}{}",
 				self.notes.replace('\n', DEPTH_2)
 			)?;
 		}
@@ -109,18 +111,19 @@ mod tests
 				hourly_rate: Money::new(20_00, 2, Currency::USD),
 			},
 			notes: "Remember not to work with these guys again!".into(),
-			objectives: "Get into the mainframe, or something like that".into(),
+			objectives: "Get into the mainframe, or something like that.\nClean the drawer.".into(),
 		};
 
 		assert_eq!(
 			format!("{create_job_view}"),
 			format!(
-				"Job #{} for Big Old Test: {} – {}
+				"Job №{} for Big Old Test: {} – {}
 	Invoice:
 		Hourly Rate: 20.00 USD
 		Status: Not issued
 	Objectives:
-		Get into the mainframe, or something like that
+		Get into the mainframe, or something like that.
+		Clean the drawer.
 	Notes:
 		Remember not to work with these guys again!",
 				create_job_view.id,

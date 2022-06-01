@@ -118,7 +118,7 @@ impl Job
 
 		writeln!(output, "{}", Element::Heading {
 			depth: 1,
-			text: format!("Job #{}", self.id),
+			text: format!("Job №{}", self.id),
 		})
 		.unwrap();
 
@@ -245,14 +245,27 @@ mod tests
 	use clinvoice_finance::{Currency, Money};
 
 	use super::{DateTime, Job, Local, Timesheet};
-	use crate::{Employee, Expense, Invoice, Location, Organization};
+	use crate::{Employee, Expense, Invoice, Location, Organization, Contact, ContactKind};
 
 	#[test]
 	fn export()
 	{
 		let organization = Organization {
-			contact_info: Vec::new(),
-			id: 0,
+			contact_info: vec![
+				Contact {
+					export: false,
+					kind: ContactKind::Email("foo@bar.io".into()),
+					label: "primary email".into(),
+					organization_id: Default::default(),
+				},
+				Contact {
+					export: true,
+					kind: ContactKind::Phone("687 5309".into()),
+					label: "primary phone".into(),
+					organization_id: Default::default(),
+				},
+			],
+			id: Default::default(),
 			location: Location {
 				id: 0,
 				outer: Some(
@@ -291,7 +304,23 @@ mod tests
 
 		let testy_mctesterson = Employee {
 			id: 0,
-			organization: organization.clone(),
+			organization: Organization {
+				contact_info: vec![
+					Contact {
+						export: true,
+						kind: ContactKind::Address(Location {
+							id: Default::default(),
+							name: "TestyCo P.O.".into(),
+							outer: None,
+						}),
+						label: "mailbox".into(),
+						organization_id: Default::default(),
+					},
+				],
+				id: Default::default(),
+				name: "TestyCo".into(),
+				location: organization.location.clone(),
+			},
 			name: "Testy McTesterson".into(),
 			status: "Representative".into(),
 			title: "CEO of Tests".into(),
@@ -322,7 +351,7 @@ mod tests
 		assert_eq!(
 			job.export(None, &[]).unwrap(),
 			format!(
-				"# Job #{}
+				"# Job №{}
 
 - **Client**: Big Old Test @ 1337 Some Street, Phoenix, Arizona, USA, Earth
 - **Date Opened**: {}
@@ -375,7 +404,7 @@ mod tests
 		assert_eq!(
 			job.export(None, &timesheets).unwrap(),
 			format!(
-				"# Job #{}
+				"# Job №{}
 
 - **Client**: Big Old Test @ 1337 Some Street, Phoenix, Arizona, USA, Earth
 - **Date Opened**: {}
@@ -398,11 +427,8 @@ mod tests
 
 ### {} – {}
 
-#### Employee Information
-
-- **Name**: Testy McTesterson
+- **Employee**: CEO of Tests Testy McTesterson
 - **Employer**: Big Old Test @ 1337 Some Street, Phoenix, Arizona, USA, Earth
-- **Title**: CEO of Tests
 
 #### Work Notes
 

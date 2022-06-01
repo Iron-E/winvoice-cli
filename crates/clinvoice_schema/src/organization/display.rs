@@ -10,13 +10,18 @@ impl Display for Organization
 
 		if !self.contact_info.is_empty()
 		{
-			writeln!(formatter, "\tContact Info:")?;
+			write!(formatter, "\n\t- Contact Info:")?;
+
+			/// # Summary
+			///
+			/// Two indents in, with a newline.
+			const DEPTH_2: &str = "\n\t\t";
 
 			let mut sorted_employee_contact_info = self.contact_info.clone();
 			sorted_employee_contact_info.sort_by(|c1, c2| c1.label.cmp(&c2.label));
 			sorted_employee_contact_info
 				.into_iter()
-				.try_for_each(|c| writeln!(formatter, "\t\t- {c}"))?;
+				.try_for_each(|c| write!(formatter, "{DEPTH_2}- {c}"))?;
 		}
 
 		Ok(())
@@ -103,7 +108,7 @@ mod tests
 		assert_eq!(
 			format!("{organization}"),
 			"Big Old Test @ Arizona, USA, Earth
-	Contact Info:
+	- Contact Info:
 		- Place of Work: 1234 Work Street, Phoenix, Arizona, USA, Earth
 		- Work Email: foo@bar.io"
 		);

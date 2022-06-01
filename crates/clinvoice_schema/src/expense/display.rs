@@ -8,7 +8,7 @@ impl Display for Expense
 	{
 		writeln!(
 			formatter,
-			"#{} – {} ({})",
+			"№{} – {} ({})",
 			self.id, self.category, self.cost
 		)?;
 		write!(formatter, "\t{}", self.description.replace('\n', "\n\t"))
@@ -35,7 +35,7 @@ mod tests
 
 		assert_eq!(
 			format!("{expense}"),
-			"#10 – Food (20.00 USD)
+			"№10 – Food (20.00 USD)
 	Take-out for 2",
 		);
 	}

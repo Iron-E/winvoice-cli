@@ -304,9 +304,8 @@ impl Command
 								format!("{}--{}.md", job.client.name.replace(' ', "-"), job.id),
 								export,
 							)
-							.err_into()
-							.await
-							.and(Ok(()))
+							.await?;
+							Ok(())
 						})
 						.await;
 					export_result?;

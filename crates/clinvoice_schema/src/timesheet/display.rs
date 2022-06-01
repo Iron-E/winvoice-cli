@@ -21,9 +21,7 @@ impl Display for Timesheet
 		write!(
 			formatter,
 			"\t- Employee: {} {} from {}",
-			self.employee.title,
-			self.employee.name,
-			self.employee.organization,
+			self.employee.title, self.employee.name, self.employee.organization,
 		)?;
 
 		const DEPTH_1: &str = "\n\t";
@@ -33,7 +31,11 @@ impl Display for Timesheet
 		{
 			write!(formatter, "{DEPTH_1}- Expenses:")?;
 			self.expenses.iter().try_for_each(|e| {
-				write!(formatter, "{DEPTH_2}{}", e.to_string().replace('\n', DEPTH_2))
+				write!(
+					formatter,
+					"{DEPTH_2}{}",
+					e.to_string().replace('\n', DEPTH_2)
+				)
 			})?;
 		}
 
@@ -165,7 +167,8 @@ mod tests
 			format!("{timesheet}"),
 			format!(
 				"{} – {}
-	- Employee: CEO of Tests Testy McTesterson from Big Test Organization @ 1337 Some Street, Phoenix, Arizona, USA, Earth
+	- Employee: CEO of Tests Testy McTesterson from Big Test Organization @ 1337 Some Street, Phoenix, \
+				 Arizona, USA, Earth
 	- Contact Info:
 		- Email: foo@bar.io
 		- Phone: 1-800-555-5555

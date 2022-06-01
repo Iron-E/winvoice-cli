@@ -66,6 +66,15 @@ impl ExpensesAdapter for PgExpenses
 	) -> Result<HashMap<Id, Vec<Expense>>>
 	{
 		let exchange_rates_fut = ExchangeRates::new().map_err(util::finance_err_to_sqlx);
+
+		const COLUMNS: PgExpenseColumns<'static> = PgExpenseColumns {
+			category: "category",
+			cost: "cost",
+			description: "description",
+			id: "id",
+			timesheet_id: "timesheet_id",
+		};
+
 		let mut query = QueryBuilder::new(
 			"SELECT
 				T.id as timesheet_id,
@@ -76,6 +85,7 @@ impl ExpensesAdapter for PgExpenses
 			FROM timesheets T
 			LEFT JOIN expenses X ON (X.timesheet_id = T.id)",
 		);
+
 		let exchange_rates = exchange_rates_fut.await?;
 		PgSchema::write_where_clause(
 			Default::default(),
@@ -88,17 +98,9 @@ impl ExpensesAdapter for PgExpenses
 			}),
 			&mut query,
 		);
-		query.push(';');
-
-		const COLUMNS: PgExpenseColumns<'static> = PgExpenseColumns {
-			category: "category",
-			cost: "cost",
-			description: "description",
-			id: "id",
-			timesheet_id: "timesheet_id",
-		};
 
 		query
+			.push(';')
 			.build()
 			.fetch(connection)
 			.try_fold(HashMap::new(), |mut map, row| {

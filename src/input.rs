@@ -84,9 +84,8 @@ where
 	let default = T::default();
 	match edit(&default, prompt)
 	{
-		Ok(d) => Ok(d),
 		Err(Error::NotEdited) => Ok(default),
-		Err(e) => Err(e),
+		result => result,
 	}
 }
 

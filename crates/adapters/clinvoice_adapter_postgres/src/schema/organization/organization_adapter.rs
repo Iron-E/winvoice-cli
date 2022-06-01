@@ -61,6 +61,12 @@ impl OrganizationAdapter for PgOrganization
 					.collect::<HashMap<_, _>>()
 			});
 
+		const COLUMNS: PgOrganizationColumns<'static> = PgOrganizationColumns {
+			id: "id",
+			location_id: "location_id",
+			name: "name",
+		};
+
 		let mut query = QueryBuilder::new(
 			"SELECT
 				O.id,
@@ -69,17 +75,11 @@ impl OrganizationAdapter for PgOrganization
 			FROM organizations O",
 		);
 		PgSchema::write_where_clause(Default::default(), "O", &match_condition, &mut query);
-		query.push(';');
-
-		const COLUMNS: PgOrganizationColumns<'static> = PgOrganizationColumns {
-			id: "id",
-			location_id: "location_id",
-			name: "name",
-		};
 
 		let contact_info = contact_info_fut.await?;
 		let locations = locations_fut.await?;
 		query
+			.push(';')
 			.build()
 			.fetch(connection)
 			.try_filter_map(|row| {

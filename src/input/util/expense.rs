@@ -113,7 +113,6 @@ where
 
 		XAdapter::delete(
 			connection,
-			false,
 			to_remove.into_iter().map(|i| expenses.remove(i)),
 		)
 		.await?;

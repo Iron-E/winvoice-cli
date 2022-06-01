@@ -13,18 +13,14 @@ pub(in crate::schema) struct PgEmployeeColumns<'col>
 
 impl PgEmployeeColumns<'_>
 {
-	pub(in crate::schema) fn row_to_view(
-		self,
-		organization: Organization,
-		row: &PgRow,
-	) -> Result<Employee>
+	pub(in crate::schema) fn row_to_view(self, organization: Organization, row: &PgRow) -> Employee
 	{
-		Ok(Employee {
+		Employee {
 			id: row.get(self.id),
 			name: row.get(self.name),
 			organization,
 			status: row.get(self.status),
 			title: row.get(self.title),
-		})
+		}
 	}
 }

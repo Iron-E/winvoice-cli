@@ -69,6 +69,15 @@ impl ContactInfoAdapter for PgContactInfo
 		match_condition: MatchSet<MatchContact>,
 	) -> Result<HashMap<Id, Vec<Contact>>>
 	{
+		const COLUMNS: PgContactColumns<'static> = PgContactColumns {
+			address_id: "address_id",
+			email: "email",
+			export: "export",
+			label: "label",
+			organization_id: "organization_id",
+			phone: "phone",
+		};
+
 		let mut query = QueryBuilder::new(
 			"SELECT
 				C.address_id,
@@ -88,18 +97,9 @@ impl ContactInfoAdapter for PgContactInfo
 			&mut query,
 		)
 		.await?;
-		query.push(';');
-
-		const COLUMNS: PgContactColumns<'static> = PgContactColumns {
-			address_id: "address_id",
-			email: "email",
-			export: "export",
-			label: "label",
-			organization_id: "organization_id",
-			phone: "phone",
-		};
 
 		query
+			.push(';')
 			.build()
 			.fetch(connection)
 			.try_fold(HashMap::new(), |mut map, row| async move {

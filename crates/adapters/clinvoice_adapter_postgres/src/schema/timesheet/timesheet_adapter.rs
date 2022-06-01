@@ -70,6 +70,15 @@ impl TimesheetAdapter for PgTimesheet
 				.collect::<HashMap<_, _>>()
 		});
 
+		const COLUMNS: PgTimesheetColumns<'static> = PgTimesheetColumns {
+			id: "id",
+			employee_id: "employee_id",
+			job_id: "job_id",
+			time_begin: "time_begin",
+			time_end: "time_end",
+			work_notes: "work_notes",
+		};
+
 		let mut query = QueryBuilder::new(
 			"SELECT
 				T.id,
@@ -81,21 +90,12 @@ impl TimesheetAdapter for PgTimesheet
 			FROM timesheets T",
 		);
 		PgSchema::write_where_clause(Default::default(), "T", &match_condition, &mut query);
-		query.push(';');
 
-		const COLUMNS: PgTimesheetColumns<'static> = PgTimesheetColumns {
-			id: "id",
-			employee_id: "employee_id",
-			job_id: "job_id",
-			time_begin: "time_begin",
-			time_end: "time_end",
-			work_notes: "work_notes",
-		};
-
-		let expenses = &expenses_fut.await?;
-		let employees = &employees_fut.await?;
-		let jobs = &jobs_fut.await?;
+		let expenses = expenses_fut.await?;
+		let employees = employees_fut.await?;
+		let jobs = jobs_fut.await?;
 		query
+			.push(';')
 			.build()
 			.fetch(connection)
 			.try_filter_map(|row| {
@@ -105,11 +105,12 @@ impl TimesheetAdapter for PgTimesheet
 					{
 						if let Some(j) = jobs.get(&row.get(COLUMNS.job_id))
 						{
-							return match COLUMNS.row_to_view(e.clone(), x.clone(), j.clone(), &row)
-							{
-								Ok(t) => future::ok(Some(t)),
-								Err(e) => future::err(e),
-							};
+							return future::ok(Some(COLUMNS.row_to_view(
+								e.clone(),
+								x.clone(),
+								j.clone(),
+								&row,
+							)));
 						}
 					}
 				}

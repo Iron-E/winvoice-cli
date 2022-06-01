@@ -22,8 +22,8 @@ async fn init_locations(connection: impl Executor<'_, Database = Postgres> + Sen
 		);"
 	)
 	.execute(connection)
-	.await
-	.and(Ok(()))
+	.await?;
+	Ok(())
 }
 
 /// # Summary
@@ -45,8 +45,8 @@ async fn init_organizations(connection: impl Executor<'_, Database = Postgres> +
 		);"
 	)
 	.execute(connection)
-	.await
-	.and(Ok(()))
+	.await?;
+	Ok(())
 }
 
 /// # Summary
@@ -68,8 +68,8 @@ async fn init_employees(connection: impl Executor<'_, Database = Postgres> + Sen
 		);"
 	)
 	.execute(connection)
-	.await
-	.and(Ok(()))
+	.await?;
+	Ok(())
 }
 
 /// # Summary
@@ -103,8 +103,8 @@ async fn init_contact_info(connection: impl Executor<'_, Database = Postgres> + 
 		);"#
 	)
 	.execute(connection)
-	.await
-	.and(Ok(()))
+	.await?;
+	Ok(())
 }
 
 /// # Summary
@@ -114,8 +114,8 @@ async fn init_money(connection: impl Executor<'_, Database = Postgres> + Send) -
 {
 	sqlx::query!(r#"CREATE DOMAIN amount_of_currency AS text CHECK (VALUE ~ '^\d+(\.\d+)?$');"#)
 		.execute(connection)
-		.await
-		.and(Ok(()))
+		.await?;
+	Ok(())
 }
 
 /// # Summary
@@ -143,8 +143,8 @@ async fn init_jobs(connection: impl Executor<'_, Database = Postgres> + Send) ->
 		);"
 	)
 	.execute(connection)
-	.await
-	.and(Ok(()))
+	.await?;
+	Ok(())
 }
 
 /// # Summary
@@ -169,8 +169,8 @@ async fn init_timesheets(connection: impl Executor<'_, Database = Postgres> + Se
 		);"
 	)
 	.execute(connection)
-	.await
-	.and(Ok(()))
+	.await?;
+	Ok(())
 }
 
 /// # Summary
@@ -192,8 +192,8 @@ async fn init_expenses(connection: impl Executor<'_, Database = Postgres> + Send
 		);"
 	)
 	.execute(connection)
-	.await
-	.and(Ok(()))
+	.await?;
+	Ok(())
 }
 
 #[async_trait::async_trait]

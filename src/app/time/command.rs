@@ -39,9 +39,8 @@ impl Command
 		TAdapter: Deletable<Db = Db> + TimesheetAdapter + Send,
 		for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 	{
-		TAdapter::create(connection, employee, job)
-			.await
-			.and(Ok(()))
+		TAdapter::create(connection, employee, job).await?;
+		Ok(())
 	}
 
 	async fn stop<'err, Db, TAdapter, XAdapter>(

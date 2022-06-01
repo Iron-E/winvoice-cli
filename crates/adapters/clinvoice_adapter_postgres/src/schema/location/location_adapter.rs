@@ -49,9 +49,9 @@ impl LocationAdapter for PgLocation
 
 		let mut query = QueryBuilder::new("SELECT name, outer_id, id FROM locations");
 		PgSchema::write_where_clause(Default::default(), "id", &id_match.await?, &mut query);
-		query.push(';');
 
 		query
+			.push(';')
 			.build()
 			.fetch(connection)
 			.and_then(|row| PgLocation::retrieve_by_id(connection, row.get("id")))

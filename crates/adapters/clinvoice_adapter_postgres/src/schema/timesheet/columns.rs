@@ -1,5 +1,5 @@
 use clinvoice_schema::{Employee, Expense, Job, Timesheet};
-use sqlx::{postgres::PgRow, Result, Row};
+use sqlx::{postgres::PgRow, Row};
 
 pub(in crate::schema) struct PgTimesheetColumns<'col>
 {
@@ -19,9 +19,9 @@ impl PgTimesheetColumns<'_>
 		expenses: Vec<Expense>,
 		job: Job,
 		row: &PgRow,
-	) -> Result<Timesheet>
+	) -> Timesheet
 	{
-		Ok(Timesheet {
+		Timesheet {
 			employee,
 			expenses,
 			id: row.get(self.id),
@@ -29,6 +29,6 @@ impl PgTimesheetColumns<'_>
 			time_begin: row.get(self.time_begin),
 			time_end: row.get(self.time_end),
 			work_notes: row.get(self.work_notes),
-		})
+		}
 	}
 }

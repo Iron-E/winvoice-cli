@@ -1,6 +1,6 @@
 use clinvoice_adapter::Deletable;
 use clinvoice_schema::Timesheet;
-use sqlx::{Acquire, Postgres, Result};
+use sqlx::{Executor, Postgres, Result};
 
 use super::PgTimesheet;
 

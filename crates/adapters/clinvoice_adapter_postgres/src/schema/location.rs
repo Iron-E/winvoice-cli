@@ -138,14 +138,14 @@ impl PgLocation
 			match_condition,
 			&mut query,
 		);
-		Ok(Match::Or(
-			query
-				.build()
-				.fetch(connection)
-				.map_ok(|row| row.get::<Id, _>("id").into())
-				.try_collect()
-				.await?,
-		))
+
+		query
+			.build()
+			.fetch(connection)
+			.map_ok(|row| row.get::<Id, _>("id").into())
+			.try_collect()
+			.map_ok(Match::Or)
+			.await
 	}
 
 	pub(super) async fn retrieve_by_id(

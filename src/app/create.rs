@@ -203,11 +203,8 @@ impl Create
 		)?;
 
 		let employee_status = input::text(None, "What is the status of the employee?")?;
-
-		EAdapter::create(connection, name, organization, employee_status, title)
-			.err_into()
-			.await
-			.and(Ok(()))
+		EAdapter::create(connection, name, organization, employee_status, title).await?;
+		Ok(())
 	}
 
 	#[allow(clippy::type_complexity)]
@@ -252,9 +249,9 @@ impl Create
 			increment,
 			objectives,
 		)
-		.err_into()
-		.await
-		.and(Ok(()))
+		.await?;
+
+		Ok(())
 	}
 
 	async fn create_location<Db, LAdapter>(connection: &Pool<Db>, names: Vec<String>) -> Result<()>
@@ -297,10 +294,9 @@ impl Create
 			input::select_one(&location_views, format!("Select a location for {name}"))?;
 		let contact_info = input::util::contact::menu::<_, LAdapter>(connection).await?;
 
-		OAdapter::create(connection, contact_info, selected_view, name)
-			.err_into()
-			.await
-			.and(Ok(()))
+		OAdapter::create(connection, contact_info, selected_view, name).await?;
+
+		Ok(())
 	}
 
 	pub async fn run<'err>(

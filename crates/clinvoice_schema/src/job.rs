@@ -229,10 +229,11 @@ impl Job
 				text: "Timesheets",
 			})
 			.unwrap();
-			timesheets.iter().fold(
-				HashSet::new(),
-				|organizations, timesheet| timesheet.export(organizations, &mut output)
-			);
+			timesheets
+				.iter()
+				.fold(HashSet::new(), |organizations, timesheet| {
+					timesheet.export(organizations, &mut output)
+				});
 		}
 
 		Ok(output)
@@ -248,7 +249,7 @@ mod tests
 	use clinvoice_finance::{Currency, Money};
 
 	use super::{DateTime, Job, Local, Timesheet};
-	use crate::{Employee, Expense, Invoice, Location, Organization, Contact, ContactKind};
+	use crate::{Contact, ContactKind, Employee, Expense, Invoice, Location, Organization};
 
 	#[test]
 	fn export()
@@ -308,18 +309,16 @@ mod tests
 		let testy_mctesterson = Employee {
 			id: Default::default(),
 			organization: Organization {
-				contact_info: vec![
-					Contact {
-						export: true,
-						kind: ContactKind::Address(Location {
-							id: Default::default(),
-							name: "TestyCo P.O.".into(),
-							outer: None,
-						}),
-						label: "mailbox".into(),
-						organization_id: Default::default(),
-					},
-				],
+				contact_info: vec![Contact {
+					export: true,
+					kind: ContactKind::Address(Location {
+						id: Default::default(),
+						name: "TestyCo P.O.".into(),
+						outer: None,
+					}),
+					label: "mailbox".into(),
+					organization_id: Default::default(),
+				}],
 				id: 1,
 				name: "TestyCo".into(),
 				location: organization.location.clone(),

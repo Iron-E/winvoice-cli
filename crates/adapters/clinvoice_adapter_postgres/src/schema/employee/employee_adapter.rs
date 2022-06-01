@@ -57,6 +57,14 @@ impl EmployeeAdapter for PgEmployee
 					.collect::<HashMap<_, _>>()
 			});
 
+		const COLUMNS: PgEmployeeColumns<'static> = PgEmployeeColumns {
+			id: "id",
+			name: "name",
+			organization_id: "organization_id",
+			status: "status",
+			title: "title",
+		};
+
 		let mut query = QueryBuilder::new(
 			"SELECT
 				E.id,
@@ -67,28 +75,16 @@ impl EmployeeAdapter for PgEmployee
 			FROM employees E",
 		);
 		PgSchema::write_where_clause(Default::default(), "E", &match_condition, &mut query);
-		query.push(';');
-
-		const COLUMNS: PgEmployeeColumns<'static> = PgEmployeeColumns {
-			id: "id",
-			name: "name",
-			organization_id: "organization_id",
-			status: "status",
-			title: "title",
-		};
 
 		let organizations = organizations_fut.await?;
 		query
+			.push(';')
 			.build()
 			.fetch(connection)
 			.try_filter_map(|row| {
 				if let Some(o) = organizations.get(&row.get::<Id, _>(COLUMNS.organization_id))
 				{
-					return match COLUMNS.row_to_view(o.clone(), &row)
-					{
-						Ok(e) => future::ok(Some(e)),
-						Err(e) => future::err(e),
-					};
+					return future::ok(Some(COLUMNS.row_to_view(o.clone(), &row)));
 				}
 
 				future::ok(None)

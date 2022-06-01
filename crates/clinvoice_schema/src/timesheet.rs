@@ -94,9 +94,9 @@ impl Timesheet
 	/// reiterated every time.
 	pub(super) fn export(
 		&self,
-		organizations_with_serialized_contact_info: &mut HashSet<Id>,
+		organizations_with_serialized_contact_info: HashSet<Id>,
 		output: &mut String,
-	)
+	) -> HashSet<Id>
 	{
 		writeln!(output, "{}", Element::Heading {
 			depth: 3,
@@ -121,16 +121,17 @@ impl Timesheet
 
 		writeln!(
 			output,
-			"{}: {}",
+			"{}: {} @ {}",
 			Element::UnorderedList {
 				depth: 0,
 				text: Text::Bold("Employer"),
 			},
-			self.employee.organization,
+			self.employee.organization.name,
+			self.employee.organization.location,
 		)
 		.unwrap();
 
-		if !organizations_with_serialized_contact_info.contains(&self.employee.id)
+		if !organizations_with_serialized_contact_info.contains(&self.employee.organization.id)
 		{
 			let employee_contact_info: Vec<_> = self
 				.employee
@@ -208,7 +209,9 @@ impl Timesheet
 			writeln!(output, "{}", Element::BlockText(&self.work_notes)).unwrap();
 		}
 
-		organizations_with_serialized_contact_info.insert(self.employee.organization.id);
+		let mut set = organizations_with_serialized_contact_info;
+		set.insert(self.employee.organization.id);
+		set
 	}
 
 	/// # Summary

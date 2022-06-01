@@ -124,14 +124,17 @@ impl Job
 
 		writeln!(
 			output,
-			"{}: {}",
+			"{}: {} @ {}",
 			Element::UnorderedList {
 				depth: 0,
 				text: Text::Bold("Client"),
 			},
-			self.client,
+			self.client.name,
+			self.client.location,
 		)
 		.unwrap();
+
+		// TODO: write contact info; borrow from `Timesheet`
 
 		writeln!(
 			output,
@@ -226,10 +229,10 @@ impl Job
 				text: "Timesheets",
 			})
 			.unwrap();
-			let mut organizations = HashSet::new();
-			timesheets
-				.iter()
-				.for_each(|t| t.export(&mut organizations, &mut output));
+			timesheets.iter().fold(
+				HashSet::new(),
+				|organizations, timesheet| timesheet.export(organizations, &mut output)
+			);
 		}
 
 		Ok(output)
@@ -265,21 +268,21 @@ mod tests
 					organization_id: Default::default(),
 				},
 			],
-			id: Default::default(),
+			id: 0,
 			location: Location {
 				id: 0,
 				outer: Some(
 					Location {
-						id: 0,
+						id: 1,
 						outer: Some(
 							Location {
-								id: 0,
+								id: 2,
 								outer: Some(
 									Location {
-										id: 0,
+										id: 3,
 										outer: Some(
 											Location {
-												id: 0,
+												id: 4,
 												outer: None,
 												name: "Earth".into(),
 											}
@@ -303,7 +306,7 @@ mod tests
 		};
 
 		let testy_mctesterson = Employee {
-			id: 0,
+			id: Default::default(),
 			organization: Organization {
 				contact_info: vec![
 					Contact {
@@ -317,7 +320,7 @@ mod tests
 						organization_id: Default::default(),
 					},
 				],
-				id: Default::default(),
+				id: 1,
 				name: "TestyCo".into(),
 				location: organization.location.clone(),
 			},
@@ -327,7 +330,7 @@ mod tests
 		};
 
 		let bob = Employee {
-			id: 0,
+			id: Default::default(),
 			organization: organization.clone(),
 			name: "Bob".into(),
 			status: "Employed".into(),
@@ -338,7 +341,7 @@ mod tests
 			client: organization,
 			date_close: None,
 			date_open: Utc::today().and_hms(0, 0, 0),
-			id: 0,
+			id: Default::default(),
 			increment: Duration::from_secs(900),
 			invoice: Invoice {
 				date: None,
@@ -428,7 +431,9 @@ mod tests
 ### {} – {}
 
 - **Employee**: CEO of Tests Testy McTesterson
-- **Employer**: Big Old Test @ 1337 Some Street, Phoenix, Arizona, USA, Earth
+- **Employer**: TestyCo @ 1337 Some Street, Phoenix, Arizona, USA, Earth
+- **Contact Information**:
+	- **mailbox**: TestyCo P.O.
 
 #### Work Notes
 
@@ -438,6 +443,8 @@ mod tests
 
 - **Employee**: Janitor Bob
 - **Employer**: Big Old Test @ 1337 Some Street, Phoenix, Arizona, USA, Earth
+- **Contact Information**:
+	- **primary phone**: 687 5309
 
 #### Expenses
 

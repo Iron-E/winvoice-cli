@@ -17,7 +17,7 @@ use sqlx::{PgPool, QueryBuilder, Result, Row};
 use super::{columns::PgTimesheetColumns, PgTimesheet};
 use crate::{
 	schema::{PgEmployee, PgExpenses, PgJob},
-	PgSchema as Schema,
+	PgSchema,
 };
 
 #[async_trait::async_trait]
@@ -80,7 +80,7 @@ impl TimesheetAdapter for PgTimesheet
 				T.work_notes
 			FROM timesheets T",
 		);
-		Schema::write_where_clause(Default::default(), "T", &match_condition, &mut query);
+		PgSchema::write_where_clause(Default::default(), "T", &match_condition, &mut query);
 		query.push(';');
 
 		const COLUMNS: PgTimesheetColumns<'static> = PgTimesheetColumns {

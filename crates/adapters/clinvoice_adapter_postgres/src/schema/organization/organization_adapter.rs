@@ -12,7 +12,7 @@ use sqlx::{PgPool, QueryBuilder, Result, Row};
 use super::{columns::PgOrganizationColumns, PgOrganization};
 use crate::{
 	schema::{PgContactInfo, PgLocation},
-	PgSchema as Schema,
+	PgSchema,
 };
 
 #[async_trait::async_trait]
@@ -68,7 +68,7 @@ impl OrganizationAdapter for PgOrganization
 				O.name
 			FROM organizations O",
 		);
-		Schema::write_where_clause(Default::default(), "O", &match_condition, &mut query);
+		PgSchema::write_where_clause(Default::default(), "O", &match_condition, &mut query);
 		query.push(';');
 
 		const COLUMNS: PgOrganizationColumns<'static> = PgOrganizationColumns {

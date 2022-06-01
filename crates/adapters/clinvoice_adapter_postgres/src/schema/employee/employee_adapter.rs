@@ -10,7 +10,7 @@ use futures::{future, TryFutureExt, TryStreamExt};
 use sqlx::{PgPool, QueryBuilder, Result, Row};
 
 use super::{columns::PgEmployeeColumns, PgEmployee};
-use crate::{schema::PgOrganization, PgSchema as Schema};
+use crate::{schema::PgOrganization, PgSchema};
 
 #[async_trait::async_trait]
 impl EmployeeAdapter for PgEmployee
@@ -66,7 +66,7 @@ impl EmployeeAdapter for PgEmployee
 				E.title
 			FROM employees E",
 		);
-		Schema::write_where_clause(Default::default(), "E", &match_condition, &mut query);
+		PgSchema::write_where_clause(Default::default(), "E", &match_condition, &mut query);
 		query.push(';');
 
 		const COLUMNS: PgEmployeeColumns<'static> = PgEmployeeColumns {

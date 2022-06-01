@@ -4,7 +4,7 @@ use clinvoice_schema::{Id, Location};
 use futures::{future, TryFutureExt, TryStreamExt};
 use sqlx::{Executor, Postgres, QueryBuilder, Result, Row};
 
-use crate::PgSchema as Schema;
+use crate::PgSchema;
 
 mod deletable;
 mod location_adapter;
@@ -53,11 +53,11 @@ impl PgLocation
 				}
 			}
 
-			Schema::write_where_clause(
-				Schema::write_where_clause(
+			PgSchema::write_where_clause(
+				PgSchema::write_where_clause(
 					if match_condition.outer == MatchOuterLocation::None
 					{
-						Schema::write_where_clause(
+						PgSchema::write_where_clause(
 							Default::default(),
 							"LO.outer_id",
 							&Match::Not(Match::<i64>::Any.into()),

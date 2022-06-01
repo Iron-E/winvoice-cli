@@ -21,7 +21,7 @@ use sqlx::{postgres::types::PgInterval, Error, PgPool, QueryBuilder, Result, Row
 use super::PgJob;
 use crate::{
 	schema::{job::columns::PgJobColumns, util, PgOrganization},
-	PgSchema as Schema,
+	PgSchema,
 };
 
 #[async_trait::async_trait]
@@ -99,7 +99,7 @@ impl JobAdapter for PgJob
 				J.objectives
 			FROM jobs J",
 		);
-		Schema::write_where_clause(
+		PgSchema::write_where_clause(
 			Default::default(),
 			"J",
 			&MatchJob {

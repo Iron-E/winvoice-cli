@@ -5,7 +5,7 @@ use futures::TryStreamExt;
 use sqlx::{PgPool, QueryBuilder, Result, Row};
 
 use super::PgLocation;
-use crate::PgSchema as Schema;
+use crate::PgSchema;
 
 #[async_trait::async_trait]
 impl LocationAdapter for PgLocation
@@ -48,7 +48,7 @@ impl LocationAdapter for PgLocation
 		let id_match = Self::retrieve_matching_ids(connection, &match_condition);
 
 		let mut query = QueryBuilder::new("SELECT name, outer_id, id FROM locations");
-		Schema::write_where_clause(Default::default(), "id", &id_match.await?, &mut query);
+		PgSchema::write_where_clause(Default::default(), "id", &id_match.await?, &mut query);
 		query.push(';');
 
 		query

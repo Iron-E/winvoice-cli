@@ -23,7 +23,7 @@ use clinvoice_match::{
 use clinvoice_schema::chrono::NaiveDateTime;
 use sqlx::{Database, PgPool, Postgres, QueryBuilder, Result};
 
-use super::{PgInterval, PgLocation, PgOption, PgSchema as Schema, PgTimestampTz};
+use super::{PgInterval, PgLocation, PgOption, PgSchema, PgTimestampTz};
 
 /// # Summary
 ///
@@ -73,19 +73,19 @@ fn write_boolean_group<D, Db, I, M, const UNION: bool>(
 	D: Copy + Display,
 	Db: Database,
 	I: Iterator<Item = M>,
-	Schema: WriteWhereClause<Db, M>,
+	PgSchema: WriteWhereClause<Db, M>,
 {
 	write_context_scope_start::<_, false>(query, context);
 
 	if let Some(m) = conditions.next()
 	{
-		Schema::write_where_clause(WriteContext::InWhereCondition, alias, m, query);
+		PgSchema::write_where_clause(WriteContext::InWhereCondition, alias, m, query);
 	}
 
 	let separator = if UNION { " AND" } else { " OR" };
 	conditions.for_each(|c| {
 		query.push(separator);
-		Schema::write_where_clause(WriteContext::InWhereCondition, alias, c, query);
+		PgSchema::write_where_clause(WriteContext::InWhereCondition, alias, c, query);
 	});
 
 	write_context_scope_end(query);
@@ -200,8 +200,8 @@ where
 				.push(alias)
 				.push(".organization_id");
 
-			let ctx = Schema::write_where_clause(
-				Schema::write_where_clause(
+			let ctx = PgSchema::write_where_clause(
+				PgSchema::write_where_clause(
 					WriteContext::AcceptingAnotherWhereCondition,
 					&format!("{alias}.label"),
 					&match_contact.label,
@@ -221,7 +221,7 @@ where
 					let location_id_query =
 						PgLocation::retrieve_matching_ids(connection, location).await?;
 
-					Schema::write_where_clause(
+					PgSchema::write_where_clause(
 						ctx,
 						&format!("{alias}.address_id"),
 						&location_id_query,
@@ -231,12 +231,12 @@ where
 
 				MatchContactKind::SomeEmail(ref email_address) =>
 				{
-					Schema::write_where_clause(ctx, &format!("{alias}.email"), email_address, query);
+					PgSchema::write_where_clause(ctx, &format!("{alias}.email"), email_address, query);
 				},
 
 				MatchContactKind::SomePhone(ref phone_number) =>
 				{
-					Schema::write_where_clause(ctx, &format!("{alias}.phone"), phone_number, query);
+					PgSchema::write_where_clause(ctx, &format!("{alias}.phone"), phone_number, query);
 				},
 			};
 
@@ -302,11 +302,11 @@ fn write_negated<Db, M>(
 	match_condition: M,
 ) where
 	Db: Database,
-	Schema: WriteWhereClause<Db, M>,
+	PgSchema: WriteWhereClause<Db, M>,
 {
 	write_context_scope_start::<_, true>(query, context);
 
-	Schema::write_where_clause(
+	PgSchema::write_where_clause(
 		WriteContext::InWhereCondition,
 		alias,
 		match_condition,
@@ -321,7 +321,7 @@ fn write_negated<Db, M>(
 /// A blanket implementation of [`WriteWhereClause`].
 ///
 /// Requires access to something else that has already implemented [`WriteWhereClause`] for
-/// [`Schema`], so that methods like [`write_boolean_group`] can be abstracted away from _this_
+/// [`PgSchema`], so that methods like [`write_boolean_group`] can be abstracted away from _this_
 /// implementation.
 ///
 /// # Warnings
@@ -336,7 +336,7 @@ fn write_where_clause<Db, T>(
 where
 	Db: Database,
 	T: Clone + Debug + Display + PartialEq,
-	for<'a> Schema: WriteWhereClause<Db, &'a Match<T>>,
+	for<'a> PgSchema: WriteWhereClause<Db, &'a Match<T>>,
 {
 	match match_condition
 	{
@@ -370,7 +370,7 @@ where
 	WriteContext::AcceptingAnotherWhereCondition
 }
 
-impl WriteWhereClause<Postgres, &Match<bool>> for Schema
+impl WriteWhereClause<Postgres, &Match<bool>> for PgSchema
 {
 	fn write_where_clause(
 		context: WriteContext,
@@ -383,7 +383,7 @@ impl WriteWhereClause<Postgres, &Match<bool>> for Schema
 	}
 }
 
-impl WriteWhereClause<Postgres, &Match<i64>> for Schema
+impl WriteWhereClause<Postgres, &Match<i64>> for PgSchema
 {
 	fn write_where_clause(
 		context: WriteContext,
@@ -396,7 +396,7 @@ impl WriteWhereClause<Postgres, &Match<i64>> for Schema
 	}
 }
 
-impl WriteWhereClause<Postgres, &Match<Money>> for Schema
+impl WriteWhereClause<Postgres, &Match<Money>> for PgSchema
 {
 	fn write_where_clause(
 		context: WriteContext,
@@ -415,7 +415,7 @@ impl WriteWhereClause<Postgres, &Match<Money>> for Schema
 	}
 }
 
-impl WriteWhereClause<Postgres, &Match<NaiveDateTime>> for Schema
+impl WriteWhereClause<Postgres, &Match<NaiveDateTime>> for PgSchema
 {
 	fn write_where_clause(
 		context: WriteContext,
@@ -469,7 +469,7 @@ impl WriteWhereClause<Postgres, &Match<NaiveDateTime>> for Schema
 	}
 }
 
-impl WriteWhereClause<Postgres, &Match<Option<NaiveDateTime>>> for Schema
+impl WriteWhereClause<Postgres, &Match<Option<NaiveDateTime>>> for PgSchema
 {
 	fn write_where_clause(
 		context: WriteContext,
@@ -541,7 +541,7 @@ impl WriteWhereClause<Postgres, &Match<Option<NaiveDateTime>>> for Schema
 	}
 }
 
-impl WriteWhereClause<Postgres, &Match<Serde<Duration>>> for Schema
+impl WriteWhereClause<Postgres, &Match<Serde<Duration>>> for PgSchema
 {
 	fn write_where_clause(
 		context: WriteContext,
@@ -613,7 +613,7 @@ impl WriteWhereClause<Postgres, &Match<Serde<Duration>>> for Schema
 	}
 }
 
-impl WriteWhereClause<Postgres, &MatchSet<MatchExpense>> for Schema
+impl WriteWhereClause<Postgres, &MatchSet<MatchExpense>> for PgSchema
 {
 	fn write_where_clause(
 		context: WriteContext,
@@ -633,7 +633,7 @@ impl WriteWhereClause<Postgres, &MatchSet<MatchExpense>> for Schema
 				let iter = &mut conditions.iter().filter(|m| *m != &MatchSet::Any);
 				if let Some(c) = iter.next()
 				{
-					Schema::write_where_clause(WriteContext::InWhereCondition, alias, c, query);
+					PgSchema::write_where_clause(WriteContext::InWhereCondition, alias, c, query);
 				}
 
 				let separator = match match_condition
@@ -645,7 +645,7 @@ impl WriteWhereClause<Postgres, &MatchSet<MatchExpense>> for Schema
 				for c in conditions
 				{
 					query.push(separator);
-					Schema::write_where_clause(WriteContext::InWhereCondition, alias, c, query);
+					PgSchema::write_where_clause(WriteContext::InWhereCondition, alias, c, query);
 				}
 
 				write_context_scope_end(query);
@@ -667,7 +667,7 @@ impl WriteWhereClause<Postgres, &MatchSet<MatchExpense>> for Schema
 					.push(alias)
 					.push(".timesheet_id");
 
-				Schema::write_where_clause(
+				PgSchema::write_where_clause(
 					WriteContext::AcceptingAnotherWhereCondition,
 					&subquery_alias,
 					match_expense,
@@ -681,7 +681,7 @@ impl WriteWhereClause<Postgres, &MatchSet<MatchExpense>> for Schema
 			{
 				write_context_scope_start::<_, true>(query, context);
 
-				Schema::write_where_clause(
+				PgSchema::write_where_clause(
 					WriteContext::InWhereCondition,
 					alias,
 					condition.deref(),
@@ -696,7 +696,7 @@ impl WriteWhereClause<Postgres, &MatchSet<MatchExpense>> for Schema
 	}
 }
 
-impl WriteWhereClause<Postgres, &MatchStr<String>> for Schema
+impl WriteWhereClause<Postgres, &MatchStr<String>> for PgSchema
 {
 	fn write_where_clause(
 		context: WriteContext,
@@ -761,7 +761,7 @@ impl WriteWhereClause<Postgres, &MatchStr<String>> for Schema
 	}
 }
 
-impl WriteWhereClause<Postgres, &MatchEmployee> for Schema
+impl WriteWhereClause<Postgres, &MatchEmployee> for PgSchema
 {
 	/// # Panics
 	///
@@ -779,10 +779,10 @@ impl WriteWhereClause<Postgres, &MatchEmployee> for Schema
 		query: &mut QueryBuilder<Postgres>,
 	) -> WriteContext
 	{
-		Schema::write_where_clause(
-			Schema::write_where_clause(
-				Schema::write_where_clause(
-					Schema::write_where_clause(
+		PgSchema::write_where_clause(
+			PgSchema::write_where_clause(
+				PgSchema::write_where_clause(
+					PgSchema::write_where_clause(
 						context,
 						&format!("{alias}.id"),
 						&match_condition.id,
@@ -803,7 +803,7 @@ impl WriteWhereClause<Postgres, &MatchEmployee> for Schema
 	}
 }
 
-impl WriteWhereClause<Postgres, &MatchExpense> for Schema
+impl WriteWhereClause<Postgres, &MatchExpense> for PgSchema
 {
 	/// # Panics
 	///
@@ -821,10 +821,10 @@ impl WriteWhereClause<Postgres, &MatchExpense> for Schema
 		query: &mut QueryBuilder<Postgres>,
 	) -> WriteContext
 	{
-		Schema::write_where_clause(
-			Schema::write_where_clause(
-				Schema::write_where_clause(
-					Schema::write_where_clause(
+		PgSchema::write_where_clause(
+			PgSchema::write_where_clause(
+				PgSchema::write_where_clause(
+					PgSchema::write_where_clause(
 						context,
 						&format!("{alias}.id"),
 						&match_condition.id,
@@ -845,7 +845,7 @@ impl WriteWhereClause<Postgres, &MatchExpense> for Schema
 	}
 }
 
-impl WriteWhereClause<Postgres, &MatchJob> for Schema
+impl WriteWhereClause<Postgres, &MatchJob> for PgSchema
 {
 	/// # Panics
 	///
@@ -863,15 +863,15 @@ impl WriteWhereClause<Postgres, &MatchJob> for Schema
 		query: &mut QueryBuilder<Postgres>,
 	) -> WriteContext
 	{
-		Schema::write_where_clause(
-			Schema::write_where_clause(
-				Schema::write_where_clause(
-					Schema::write_where_clause(
-						Schema::write_where_clause(
-							Schema::write_where_clause(
-								Schema::write_where_clause(
-									Schema::write_where_clause(
-										Schema::write_where_clause(
+		PgSchema::write_where_clause(
+			PgSchema::write_where_clause(
+				PgSchema::write_where_clause(
+					PgSchema::write_where_clause(
+						PgSchema::write_where_clause(
+							PgSchema::write_where_clause(
+								PgSchema::write_where_clause(
+									PgSchema::write_where_clause(
+										PgSchema::write_where_clause(
 											context,
 											&format!("{alias}.id"),
 											&match_condition.id,
@@ -912,7 +912,7 @@ impl WriteWhereClause<Postgres, &MatchJob> for Schema
 	}
 }
 
-impl WriteWhereClause<Postgres, &MatchOrganization> for Schema
+impl WriteWhereClause<Postgres, &MatchOrganization> for PgSchema
 {
 	/// # Panics
 	///
@@ -930,8 +930,8 @@ impl WriteWhereClause<Postgres, &MatchOrganization> for Schema
 		query: &mut QueryBuilder<Postgres>,
 	) -> WriteContext
 	{
-		Schema::write_where_clause(
-			Schema::write_where_clause(context, &format!("{alias}.id"), &match_condition.id, query),
+		PgSchema::write_where_clause(
+			PgSchema::write_where_clause(context, &format!("{alias}.id"), &match_condition.id, query),
 			&format!("{alias}.name"),
 			&match_condition.name,
 			query,
@@ -939,7 +939,7 @@ impl WriteWhereClause<Postgres, &MatchOrganization> for Schema
 	}
 }
 
-impl WriteWhereClause<Postgres, &MatchTimesheet> for Schema
+impl WriteWhereClause<Postgres, &MatchTimesheet> for PgSchema
 {
 	/// # Panics
 	///
@@ -957,10 +957,10 @@ impl WriteWhereClause<Postgres, &MatchTimesheet> for Schema
 		query: &mut QueryBuilder<Postgres>,
 	) -> WriteContext
 	{
-		Schema::write_where_clause(
-			Schema::write_where_clause(
-				Schema::write_where_clause(
-					Schema::write_where_clause(
+		PgSchema::write_where_clause(
+			PgSchema::write_where_clause(
+				PgSchema::write_where_clause(
+					PgSchema::write_where_clause(
 						context,
 						&format!("{alias}.id"),
 						&match_condition.id,

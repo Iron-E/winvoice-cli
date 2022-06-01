@@ -20,7 +20,7 @@ use clinvoice_match::{
 	MatchTimesheet,
 	Serde,
 };
-use clinvoice_schema::chrono::NaiveDateTime;
+use clinvoice_schema::{chrono::NaiveDateTime, Id};
 use sqlx::{Database, PgPool, Postgres, QueryBuilder, Result};
 
 use super::{PgInterval, PgLocation, PgOption, PgSchema, PgTimestampTz};
@@ -383,12 +383,12 @@ impl WriteWhereClause<Postgres, &Match<bool>> for PgSchema
 	}
 }
 
-impl WriteWhereClause<Postgres, &Match<i64>> for PgSchema
+impl WriteWhereClause<Postgres, &Match<Id>> for PgSchema
 {
 	fn write_where_clause(
 		context: WriteContext,
 		alias: impl Copy + Display,
-		match_condition: &Match<i64>,
+		match_condition: &Match<Id>,
 		query: &mut QueryBuilder<Postgres>,
 	) -> WriteContext
 	{
@@ -405,7 +405,7 @@ impl WriteWhereClause<Postgres, &Match<Money>> for PgSchema
 		query: &mut QueryBuilder<Postgres>,
 	) -> WriteContext
 	{
-		// TODO: use `PgTypecast::numeric(alias)` after rust-lang/rust#39959
+		// TODO: use `PgTypeCast::numeric(alias)` after rust-lang/rust#39959
 		write_where_clause(
 			context,
 			&format!("{alias}::numeric"),

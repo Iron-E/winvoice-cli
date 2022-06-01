@@ -3,6 +3,7 @@ use clinvoice_schema::Expense;
 use sqlx::{Executor, Postgres, Result};
 
 use super::PgExpenses;
+use crate::PgSchema;
 
 #[async_trait::async_trait]
 impl Deletable for PgExpenses
@@ -15,7 +16,7 @@ impl Deletable for PgExpenses
 		entities: impl 'async_trait + Iterator<Item = Self::Entity> + Send,
 	) -> Result<()>
 	{
-		todo!()
+		PgSchema::delete(connection, "expenses", entities.map(|e| e.id)).await
 	}
 }
 

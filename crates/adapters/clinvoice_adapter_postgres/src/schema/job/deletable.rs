@@ -3,6 +3,7 @@ use clinvoice_schema::Job;
 use sqlx::{Executor, Postgres, Result};
 
 use super::PgJob;
+use crate::PgSchema;
 
 #[async_trait::async_trait]
 impl Deletable for PgJob
@@ -15,7 +16,7 @@ impl Deletable for PgJob
 		entities: impl 'async_trait + Iterator<Item = Self::Entity> + Send,
 	) -> Result<()>
 	{
-		todo!()
+		PgSchema::delete(connection, "jobs", entities.map(|e| e.id)).await
 	}
 }
 

@@ -3,6 +3,7 @@ use clinvoice_schema::Timesheet;
 use sqlx::{Executor, Postgres, Result};
 
 use super::PgTimesheet;
+use crate::PgSchema;
 
 #[async_trait::async_trait]
 impl Deletable for PgTimesheet
@@ -15,7 +16,7 @@ impl Deletable for PgTimesheet
 		entities: impl 'async_trait + Iterator<Item = Self::Entity> + Send,
 	) -> Result<()>
 	{
-		todo!()
+		PgSchema::delete(connection, "timesheets", entities.map(|e| e.id)).await
 	}
 }
 

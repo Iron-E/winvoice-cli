@@ -1,7 +1,6 @@
-use clinvoice_adapter::{Deletable, WriteWhereClause};
-use clinvoice_match::Match;
+use clinvoice_adapter::Deletable;
 use clinvoice_schema::Location;
-use sqlx::{Executor, Postgres, QueryBuilder, Result};
+use sqlx::{Executor, Postgres, Result};
 
 use super::PgLocation;
 use crate::PgSchema;
@@ -17,18 +16,7 @@ impl Deletable for PgLocation
 		entities: impl 'async_trait + Iterator<Item = Self::Entity> + Send,
 	) -> Result<()>
 	{
-		let mut query = QueryBuilder::new("DELETE FROM locations");
-
-		PgSchema::write_where_clause(
-			Default::default(),
-			"id",
-			&Match::Or(entities.map(|e| e.id.into()).collect()),
-			&mut query,
-		);
-
-		query.push(';').build().execute(connection).await?;
-
-		Ok(())
+		PgSchema::delete(connection, "locations", entities.map(|e| e.id)).await
 	}
 }
 

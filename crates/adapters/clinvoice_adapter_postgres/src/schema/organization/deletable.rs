@@ -3,6 +3,7 @@ use clinvoice_schema::Organization;
 use sqlx::{Executor, Postgres, Result};
 
 use super::PgOrganization;
+use crate::PgSchema;
 
 #[async_trait::async_trait]
 impl Deletable for PgOrganization
@@ -15,7 +16,7 @@ impl Deletable for PgOrganization
 		entities: impl 'async_trait + Iterator<Item = Self::Entity> + Send,
 	) -> Result<()>
 	{
-		todo!()
+		PgSchema::delete(connection, "organization", entities.map(|e| e.id)).await
 	}
 }
 

@@ -18,6 +18,11 @@ mod typecast;
 mod util;
 mod write_where_clause;
 
+use core::fmt::Display;
+
+use clinvoice_adapter::WriteWhereClause;
+use clinvoice_match::Match;
+use clinvoice_schema::Id;
 pub use contact_info::PgContactInfo;
 pub use employee::PgEmployee;
 pub use expenses::PgExpenses;
@@ -26,6 +31,7 @@ pub use job::PgJob;
 pub use location::PgLocation;
 pub(crate) use option::PgOption;
 pub use organization::PgOrganization;
+use sqlx::{Executor, Postgres, QueryBuilder, Result};
 pub use timesheet::PgTimesheet;
 pub(crate) use timestamptz::PgTimestampTz;
 
@@ -35,3 +41,33 @@ pub(crate) use timestamptz::PgTimestampTz;
 /// that the Postgres database can have all of the necessary tables set up if this is the first run
 /// of the program.
 pub struct PgSchema;
+
+impl PgSchema
+{
+	/// # Summary
+	///
+	/// Generate `DELETE FROM {table} WHERE (id = №) OR … OR (id = №)`
+	/// for each [`Id`] in `entities.
+	///
+	/// Note that a semicolon is not put at the end of the statement.
+	async fn delete(
+		connection: impl Executor<'_, Database = Postgres>,
+		table: impl Display,
+		entities: impl Iterator<Item = Id>,
+	) -> Result<()>
+	{
+		let mut query = QueryBuilder::new("DELETE FROM ");
+		query.push(table);
+
+		PgSchema::write_where_clause(
+			Default::default(),
+			"id",
+			&Match::Or(entities.map(Match::from).collect()),
+			&mut query,
+		);
+
+		query.push(';').build().execute(connection).await?;
+
+		Ok(())
+	}
+}

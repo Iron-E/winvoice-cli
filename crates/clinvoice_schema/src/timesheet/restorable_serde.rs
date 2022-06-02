@@ -7,6 +7,7 @@ impl RestorableSerde for Timesheet
 	{
 		self.id = original.id;
 		self.employee.try_restore(&original.employee)?;
+		self.expenses.try_restore(&original.expenses)?;
 		self.job.try_restore(&original.job)
 	}
 }

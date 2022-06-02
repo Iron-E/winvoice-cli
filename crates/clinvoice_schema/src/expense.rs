@@ -1,4 +1,5 @@
 mod display;
+mod restorable_serde;
 
 use clinvoice_finance::Money;
 #[cfg(feature = "serde_support")]

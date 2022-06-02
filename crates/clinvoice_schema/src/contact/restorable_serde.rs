@@ -6,6 +6,7 @@ impl RestorableSerde for Contact
 	fn try_restore(&mut self, original: &Self) -> RestoreResult<()>
 	{
 		self.organization_id = original.organization_id;
+
 		if let ContactKind::Address(ref mut location) = self.kind
 		{
 			match original.kind

@@ -1,5 +1,5 @@
 use clinvoice_schema::{Employee, Organization};
-use sqlx::{postgres::PgRow, Result, Row};
+use sqlx::{postgres::PgRow, Row};
 
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub(in crate::schema) struct PgEmployeeColumns<'col>

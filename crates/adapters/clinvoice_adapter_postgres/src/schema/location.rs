@@ -26,6 +26,10 @@ impl PgLocation
 			previous: &'a str,
 		}
 
+		const COLUMNS: PgLocationColumns<&'static str> = PgLocationColumns::new();
+		const INNER_IDENT: &'static str = "L";
+		const OUTER_IDENT: &'static str = "LO";
+
 		/// # Summary
 		///
 		/// Generate multiple Common Table Expressions for a recursive query.
@@ -36,21 +40,37 @@ impl PgLocation
 			query: &mut QueryBuilder<Postgres>,
 		)
 		{
+			let inner_columns = COLUMNS.scoped(INNER_IDENT);
+			let outer_columns = COLUMNS.scoped(OUTER_IDENT);
+
 			// NOTE: this scope exists because we want to get rid of the mutable borrow after we're
 			//       done with it.
 			{
+
 				let mut separated = query.separated(' ');
 
 				separated
 					.push(aliases.current)
-					.push("as ( SELECT LO.id, LO.name, LO.outer_id FROM locations LO");
+					.push("AS (SELECT")
+					.push(outer_columns.id)
+					.push(',')
+					.push(outer_columns.name)
+					.push(',')
+					.push(outer_columns.outer_id)
+					.push("FROM locations")
+					.push(OUTER_IDENT);
 
 				if !aliases.previous.is_empty()
 				{
 					separated
 						.push("JOIN")
 						.push(aliases.previous)
-						.push("L ON (LO.id = L.outer_id)");
+						.push(INNER_IDENT)
+						.push("ON (")
+						.push(outer_columns.id)
+						.push('=')
+						.push(inner_columns.outer_id)
+						.push(')');
 				}
 			}
 
@@ -60,7 +80,7 @@ impl PgLocation
 					{
 						PgSchema::write_where_clause(
 							Default::default(),
-							"LO.outer_id",
+							outer_columns.outer_id,
 							&Match::Not(Match::<i64>::Any.into()),
 							query,
 						)
@@ -69,11 +89,11 @@ impl PgLocation
 					{
 						Default::default()
 					},
-					"LO.id",
+					outer_columns.id,
 					&match_condition.id,
 					query,
 				),
-				"LO.name",
+				outer_columns.name,
 				&match_condition.name,
 				query,
 			);
@@ -88,19 +108,43 @@ impl PgLocation
 					{
 						query
 							.separated(' ')
-							.push(
-								", location_report AS ( SELECT L.id, L.name, L.outer_id FROM locations L \
-								 JOIN",
-							)
+							.push(", location_report AS (SELECT")
+							.push(inner_columns.id)
+							.push(',')
+							.push(inner_columns.name)
+							.push(',')
+							.push(inner_columns.outer_id)
+							.push("FROM locations")
+							.push(INNER_IDENT)
+							.push("JOIN")
 							.push(aliases.current)
-							.push(
-								"LO ON (L.outer_id = LO.id) UNION SELECT L.id, L.name, L.outer_id FROM \
-								 locations L JOIN location_report LO ON (L.outer_id = LO.id))",
-							);
+							.push(OUTER_IDENT)
+							.push("ON (")
+							.push(inner_columns.outer_id)
+							.push('=')
+							.push(outer_columns.id)
+							.push(") UNION SELECT")
+							.push(inner_columns.id)
+							.push(',')
+							.push(inner_columns.name)
+							.push(',')
+							.push(inner_columns.outer_id)
+							.push("FROM locations")
+							.push(INNER_IDENT)
+							.push("JOIN location_report")
+							.push(OUTER_IDENT)
+							.push("ON (")
+							.push(inner_columns.outer_id)
+							.push('=')
+							.push(outer_columns.id)
+							.push("))");
 					}
 
 					query
-						.push(" SELECT id FROM ")
+						.separated(' ')
+						.push(" SELECT")
+						.push(COLUMNS.id)
+						.push("FROM")
 						.push(
 							if first
 							{
@@ -139,8 +183,6 @@ impl PgLocation
 			match_condition,
 			&mut query,
 		);
-
-		const COLUMNS: PgLocationColumns<&'static str> = PgLocationColumns::new();
 
 		query
 			.build()

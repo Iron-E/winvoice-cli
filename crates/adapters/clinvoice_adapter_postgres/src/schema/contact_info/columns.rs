@@ -62,3 +62,18 @@ impl PgContactColumns<'_>
 		}))
 	}
 }
+
+impl PgContactColumns<'static>
+{
+	pub(in crate::schema) const fn new() -> Self
+	{
+		Self {
+			address_id: "address_id",
+			email: "email",
+			export: "export",
+			label: "label",
+			organization_id: "organization_id",
+			phone: "phone",
+		}
+	}
+}

@@ -26,3 +26,15 @@ impl PgOrganizationColumns<'_>
 		}
 	}
 }
+
+impl PgOrganizationColumns<'static>
+{
+	pub(in crate::schema) const fn new() -> Self
+	{
+		Self {
+			id: "id",
+			location_id: "location_id",
+			name: "name",
+		}
+	}
+}

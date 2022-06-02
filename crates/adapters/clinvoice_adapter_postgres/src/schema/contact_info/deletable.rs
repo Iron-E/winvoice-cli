@@ -5,6 +5,7 @@ use clinvoice_schema::Contact;
 use sqlx::{query_builder::Separated, Executor, Postgres, QueryBuilder, Result};
 
 use super::PgContactInfo;
+use crate::schema::contact_info::columns::PgContactColumns;
 
 #[async_trait::async_trait]
 impl Deletable for PgContactInfo
@@ -26,9 +27,15 @@ impl Deletable for PgContactInfo
 			where
 				T: Display,
 			{
-				q.push("(organization_id =")
+				const COLUMNS: PgContactColumns<'static> = PgContactColumns::new();
+
+				q.push('(')
+					.push(COLUMNS.organization_id)
+					.push('=')
 					.push(c.organization_id)
-					.push("AND label =")
+					.push("AND")
+					.push(COLUMNS.label)
+					.push('=')
 					.push_bind(c.label)
 					.push(')');
 			}

@@ -45,3 +45,17 @@ impl PgExpenseColumns<'_>
 		}))
 	}
 }
+
+impl PgExpenseColumns<'static>
+{
+	pub(in crate::schema) const fn new() -> Self
+	{
+		Self {
+			category: "category",
+			cost: "cost",
+			description: "description",
+			id: "id",
+			timesheet_id: "timesheet_id",
+		}
+	}
+}

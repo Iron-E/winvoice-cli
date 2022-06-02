@@ -32,3 +32,18 @@ impl PgTimesheetColumns<'_>
 		}
 	}
 }
+
+impl PgTimesheetColumns<'static>
+{
+	pub(in crate::schema) const fn new() -> Self
+	{
+		Self {
+			id: "id",
+			employee_id: "employee_id",
+			job_id: "job_id",
+			time_begin: "time_begin",
+			time_end: "time_end",
+			work_notes: "work_notes",
+		}
+	}
+}

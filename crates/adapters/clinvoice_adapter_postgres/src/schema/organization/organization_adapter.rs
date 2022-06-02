@@ -61,11 +61,7 @@ impl OrganizationAdapter for PgOrganization
 					.collect::<HashMap<_, _>>()
 			});
 
-		const COLUMNS: PgOrganizationColumns<'static> = PgOrganizationColumns {
-			id: "id",
-			location_id: "location_id",
-			name: "name",
-		};
+		const COLUMNS: PgOrganizationColumns<'static> = PgOrganizationColumns::new();
 
 		let mut query = QueryBuilder::new(
 			"SELECT

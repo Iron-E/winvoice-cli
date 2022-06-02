@@ -4,8 +4,9 @@ use clinvoice_schema::{Id, Location};
 use futures::{future, TryFutureExt, TryStreamExt};
 use sqlx::{Executor, Postgres, QueryBuilder, Result, Row};
 
-use crate::PgSchema;
+use crate::{schema::location::columns::PgLocationColumns, PgSchema};
 
+pub(super) mod columns;
 mod deletable;
 mod location_adapter;
 mod updatable;
@@ -139,10 +140,12 @@ impl PgLocation
 			&mut query,
 		);
 
+		const COLUMNS: PgLocationColumns<'static> = PgLocationColumns::new();
+
 		query
 			.build()
 			.fetch(connection)
-			.map_ok(|row| row.get::<Id, _>("id").into())
+			.map_ok(|row| row.get::<Id, _>(COLUMNS.id).into())
 			.try_collect()
 			.map_ok(Match::Or)
 			.await

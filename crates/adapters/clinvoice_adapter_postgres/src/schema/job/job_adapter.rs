@@ -85,18 +85,7 @@ impl JobAdapter for PgJob
 
 		let exchange_rates = ExchangeRates::new().map_err(util::finance_err_to_sqlx);
 
-		const COLUMNS: PgJobColumns<'static> = PgJobColumns {
-			client_id: "client_id",
-			date_close: "date_close",
-			date_open: "date_open",
-			id: "id",
-			increment: "increment",
-			invoice_date_issued: "invoice_date_issued",
-			invoice_date_paid: "invoice_date_paid",
-			invoice_hourly_rate: "invoice_hourly_rate",
-			notes: "notes",
-			objectives: "objectives",
-		};
+		const COLUMNS: PgJobColumns<'static> = PgJobColumns::new();
 
 		let mut query = QueryBuilder::new(
 			"SELECT

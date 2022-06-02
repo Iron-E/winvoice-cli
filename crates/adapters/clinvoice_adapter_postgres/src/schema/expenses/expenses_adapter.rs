@@ -67,13 +67,7 @@ impl ExpensesAdapter for PgExpenses
 	{
 		let exchange_rates_fut = ExchangeRates::new().map_err(util::finance_err_to_sqlx);
 
-		const COLUMNS: PgExpenseColumns<'static> = PgExpenseColumns {
-			category: "category",
-			cost: "cost",
-			description: "description",
-			id: "id",
-			timesheet_id: "timesheet_id",
-		};
+		const COLUMNS: PgExpenseColumns<'static> = PgExpenseColumns::new();
 
 		let mut query = QueryBuilder::new(
 			"SELECT

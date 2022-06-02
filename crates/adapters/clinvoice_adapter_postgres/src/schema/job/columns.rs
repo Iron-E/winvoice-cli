@@ -51,3 +51,22 @@ impl PgJobColumns<'_>
 		})
 	}
 }
+
+impl PgJobColumns<'static>
+{
+	pub(in crate::schema) const fn new() -> Self
+	{
+		Self {
+			client_id: "client_id",
+			date_close: "date_close",
+			date_open: "date_open",
+			id: "id",
+			increment: "increment",
+			invoice_date_issued: "invoice_date_issued",
+			invoice_date_paid: "invoice_date_paid",
+			invoice_hourly_rate: "invoice_hourly_rate",
+			notes: "notes",
+			objectives: "objectives",
+		}
+	}
+}

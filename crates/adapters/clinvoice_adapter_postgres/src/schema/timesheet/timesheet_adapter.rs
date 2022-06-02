@@ -70,14 +70,7 @@ impl TimesheetAdapter for PgTimesheet
 				.collect::<HashMap<_, _>>()
 		});
 
-		const COLUMNS: PgTimesheetColumns<'static> = PgTimesheetColumns {
-			id: "id",
-			employee_id: "employee_id",
-			job_id: "job_id",
-			time_begin: "time_begin",
-			time_end: "time_end",
-			work_notes: "work_notes",
-		};
+		const COLUMNS: PgTimesheetColumns<'static> = PgTimesheetColumns::new();
 
 		let mut query = QueryBuilder::new(
 			"SELECT

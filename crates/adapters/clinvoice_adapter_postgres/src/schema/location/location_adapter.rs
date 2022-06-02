@@ -5,7 +5,7 @@ use futures::TryStreamExt;
 use sqlx::{PgPool, QueryBuilder, Result, Row};
 
 use super::PgLocation;
-use crate::PgSchema;
+use crate::{schema::location::columns::PgLocationColumns, PgSchema};
 
 #[async_trait::async_trait]
 impl LocationAdapter for PgLocation
@@ -50,11 +50,13 @@ impl LocationAdapter for PgLocation
 		let mut query = QueryBuilder::new("SELECT name, outer_id, id FROM locations");
 		PgSchema::write_where_clause(Default::default(), "id", &id_match.await?, &mut query);
 
+		const COLUMNS: PgLocationColumns<'static> = PgLocationColumns::new();
+
 		query
 			.push(';')
 			.build()
 			.fetch(connection)
-			.and_then(|row| PgLocation::retrieve_by_id(connection, row.get("id")))
+			.and_then(|row| PgLocation::retrieve_by_id(connection, row.get(COLUMNS.id)))
 			.try_collect()
 			.await
 	}

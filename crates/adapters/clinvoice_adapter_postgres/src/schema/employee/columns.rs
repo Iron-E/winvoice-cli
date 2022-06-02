@@ -24,3 +24,17 @@ impl PgEmployeeColumns<'_>
 		}
 	}
 }
+
+impl PgEmployeeColumns<'static>
+{
+	pub(in crate::schema) const fn new() -> Self
+	{
+		Self {
+			id: "id",
+			name: "name",
+			organization_id: "organization_id",
+			status: "status",
+			title: "title",
+		}
+	}
+}

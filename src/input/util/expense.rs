@@ -1,5 +1,6 @@
 use clinvoice_adapter::{schema::ExpensesAdapter, Deletable};
 use clinvoice_schema::{Currency, Expense, Id, Money};
+use futures::TryFutureExt;
 use sqlx::{Database, Executor, Pool};
 
 use super::menu::{ADD, ALL_ACTIONS, CONTINUE, DELETE, EDIT};
@@ -150,7 +151,13 @@ where
 		{
 			Ok(edited) =>
 			{
-				XAdapter::update(connection, edited.clone()).await?;
+				connection
+					.begin()
+					.and_then(|mut transaction| async {
+						XAdapter::update(&mut transaction, edited.clone()).await?;
+						transaction.commit().await
+					})
+					.await?;
 				expenses[edit_index] = edited;
 			},
 			Err(input::Error::NotEdited) => (),

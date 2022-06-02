@@ -91,7 +91,15 @@ impl Command
 		timesheet.time_begin = timesheet.time_begin.duration_round(increment)?;
 		timesheet.time_end = Some(Utc::now().duration_round(increment)?);
 
-		TAdapter::update(connection, timesheet).err_into().await
+		connection
+			.begin()
+			.and_then(|mut transaction| async {
+				TAdapter::update(&mut transaction, timesheet).await?;
+				transaction.commit().await
+			})
+			.await?;
+
+		Ok(())
 	}
 
 	pub async fn run<'err, Db, EAdapter, JAdapter, TAdapter, XAdapter>(

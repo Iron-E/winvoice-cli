@@ -12,6 +12,7 @@ use clinvoice_schema::{chrono::Utc, Currency, Location, RestorableSerde};
 use futures::{
 	future,
 	stream::{self, TryStreamExt},
+	TryFutureExt,
 };
 use serde::{de::DeserializeOwned, Serialize};
 use sqlx::{Database, Executor, Pool};
@@ -236,11 +237,19 @@ impl Command
 						.filter(|j| j.date_close.is_none())
 						.cloned()
 						.collect();
+
 					let selected = input::select(&unclosed, "Select the Jobs you want to close")?;
-					stream::iter(selected.into_iter().map(Ok))
-						.try_for_each_concurrent(None, |mut j| async {
-							j.date_close = Some(Utc::now());
-							JAdapter::update(&connection, j).await
+
+					connection
+						.begin()
+						.and_then(|mut transaction| async {
+							for mut job in selected
+							{
+								job.date_close = Some(Utc::now());
+								JAdapter::update(&mut transaction, job).await?;
+							}
+
+							transaction.commit().await
 						})
 						.await?;
 				}
@@ -252,11 +261,19 @@ impl Command
 						.filter(|j| j.date_close.is_some())
 						.cloned()
 						.collect();
+
 					let selected = input::select(&closed, "Select the Jobs you want to reopen")?;
-					stream::iter(selected.into_iter().map(Ok))
-						.try_for_each_concurrent(None, |mut j| async {
-							j.date_close = None;
-							JAdapter::update(&connection, j).await
+
+					connection
+						.begin()
+						.and_then(|mut transaction| async {
+							for mut job in selected
+							{
+								job.date_close = None;
+								JAdapter::update(&mut transaction, job).await?;
+							}
+
+							transaction.commit().await
 						})
 						.await?;
 				}

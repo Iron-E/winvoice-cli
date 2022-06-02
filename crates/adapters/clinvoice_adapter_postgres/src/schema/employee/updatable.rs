@@ -1,6 +1,6 @@
 use clinvoice_adapter::Updatable;
 use clinvoice_schema::Employee;
-use sqlx::{Executor, Postgres, Result};
+use sqlx::{Postgres, Result, Transaction};
 
 use super::PgEmployee;
 
@@ -10,10 +10,7 @@ impl Updatable for PgEmployee
 	type Db = Postgres;
 	type Entity = Employee;
 
-	async fn update(
-		connection: impl 'async_trait + Executor<'_, Database = Self::Db>,
-		entity: Self::Entity,
-	) -> Result<()>
+	async fn update(connection: &mut Transaction<Self::Db>, entity: Self::Entity) -> Result<()>
 	{
 		todo!()
 	}

@@ -17,9 +17,9 @@ impl Updatable for PgLocation
 
 	async fn update(connection: &mut Transaction<Self::Db>, entity: Self::Entity) -> Result<()>
 	{
-		const COLUMNS: PgLocationColumns<'static> = PgLocationColumns::new();
+		const COLUMNS: PgLocationColumns<&'static str> = PgLocationColumns::new();
 
-		let mut query = QueryBuilder::new("UPDATE locations SET ");
+		let mut query = QueryBuilder::new("UPDATE locations AS L SET ");
 
 		{
 			let mut separated = query.separated(' ');
@@ -27,12 +27,24 @@ impl Updatable for PgLocation
 			separated
 				.push(COLUMNS.name)
 				.push('=')
-				.push_bind(entity.name)
+				.push(entity.name)
 				.push(',')
 				.push(COLUMNS.outer_id)
 				.push('=')
 				.push(PgOption(entity.outer.as_ref().map(|o| o.id)));
 		}
+
+		// UPDATE foo AS F SET
+		// 	name = C.name
+		// FROM
+		// (
+		// 	VALUES
+		// 		(2, 'z'),
+		// 		(4, 'seventy')
+		// ) AS C (id, name)
+		// WHERE
+		// 	F.id = C.id
+		// ;
 
 		PgSchema::write_where_clause(
 			Default::default(),

@@ -85,7 +85,7 @@ impl JobAdapter for PgJob
 
 		let exchange_rates = ExchangeRates::new().map_err(util::finance_err_to_sqlx);
 
-		const COLUMNS: PgJobColumns<'static> = PgJobColumns::new();
+		const COLUMNS: PgJobColumns<&'static str> = PgJobColumns::new();
 
 		let mut query = QueryBuilder::new(
 			"SELECT

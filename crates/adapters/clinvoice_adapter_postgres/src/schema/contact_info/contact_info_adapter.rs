@@ -69,7 +69,7 @@ impl ContactInfoAdapter for PgContactInfo
 		match_condition: MatchSet<MatchContact>,
 	) -> Result<HashMap<Id, Vec<Contact>>>
 	{
-		const COLUMNS: PgContactColumns<'static> = PgContactColumns::new();
+		const COLUMNS: PgContactColumns<&'static str> = PgContactColumns::new();
 
 		let mut query = QueryBuilder::new(
 			"SELECT

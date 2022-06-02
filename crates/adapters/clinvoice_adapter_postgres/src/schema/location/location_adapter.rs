@@ -47,10 +47,10 @@ impl LocationAdapter for PgLocation
 	{
 		let id_match = Self::retrieve_matching_ids(connection, &match_condition);
 
-		let mut query = QueryBuilder::new("SELECT name, outer_id, id FROM locations");
-		PgSchema::write_where_clause(Default::default(), "id", &id_match.await?, &mut query);
+		const COLUMNS: PgLocationColumns<&'static str> = PgLocationColumns::new();
 
-		const COLUMNS: PgLocationColumns<'static> = PgLocationColumns::new();
+		let mut query = QueryBuilder::new("SELECT name, outer_id, id FROM locations");
+		PgSchema::write_where_clause(Default::default(), COLUMNS.id, &id_match.await?, &mut query);
 
 		query
 			.push(';')

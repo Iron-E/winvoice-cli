@@ -1,15 +1,44 @@
+use core::fmt::Display;
+
 use clinvoice_schema::{Contact, Location, Organization};
 use sqlx::{postgres::PgRow, Row};
 
+use crate::schema::PgScopedColumn;
+
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub(in crate::schema) struct PgOrganizationColumns<'col>
+pub(in crate::schema) struct PgOrganizationColumns<D>
+where
+	D: Display,
 {
-	pub id: &'col str,
-	pub location_id: &'col str,
-	pub name: &'col str,
+	pub id: D,
+	pub location_id: D,
+	pub name: D,
 }
 
-impl PgOrganizationColumns<'_>
+impl<D> PgOrganizationColumns<D>
+where
+	D: Copy + Display,
+{
+	/// # Summary
+	///
+	/// Returns an alternation of [`PgOrganizationColumns`] which modifies its fields' [`Display`]
+	/// implementation to output `{alias}.{column}`.
+	pub(in crate::schema) fn scoped<TIdent>(
+		&self,
+		ident: TIdent,
+	) -> PgOrganizationColumns<PgScopedColumn<D, TIdent>>
+	where
+		TIdent: Copy + Display,
+	{
+		PgOrganizationColumns {
+			id: PgScopedColumn(ident, self.id),
+			location_id: PgScopedColumn(ident, self.location_id),
+			name: PgScopedColumn(ident, self.name),
+		}
+	}
+}
+
+impl PgOrganizationColumns<&str>
 {
 	pub(in crate::schema) fn row_to_view(
 		self,
@@ -27,7 +56,7 @@ impl PgOrganizationColumns<'_>
 	}
 }
 
-impl PgOrganizationColumns<'static>
+impl PgOrganizationColumns<&'static str>
 {
 	pub(in crate::schema) const fn new() -> Self
 	{

@@ -140,7 +140,7 @@ impl PgLocation
 			&mut query,
 		);
 
-		const COLUMNS: PgLocationColumns<'static> = PgLocationColumns::new();
+		const COLUMNS: PgLocationColumns<&'static str> = PgLocationColumns::new();
 
 		query
 			.build()

@@ -57,7 +57,7 @@ impl EmployeeAdapter for PgEmployee
 					.collect::<HashMap<_, _>>()
 			});
 
-		const COLUMNS: PgEmployeeColumns<'static> = PgEmployeeColumns::new();
+		const COLUMNS: PgEmployeeColumns<&'static str> = PgEmployeeColumns::new();
 
 		let mut query = QueryBuilder::new(
 			"SELECT

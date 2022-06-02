@@ -1,21 +1,51 @@
+use core::fmt::Display;
+
 use clinvoice_schema::{Contact, ContactKind};
 use futures::TryFutureExt;
 use sqlx::{error::UnexpectedNullError, postgres::PgRow, Error, PgPool, Result, Row};
 
-use crate::schema::PgLocation;
+use crate::schema::{PgLocation, PgScopedColumn};
 
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub(in crate::schema) struct PgContactColumns<'col>
+pub(in crate::schema) struct PgContactColumns<D>
+where
+	D: Display,
 {
-	pub address_id: &'col str,
-	pub email: &'col str,
-	pub export: &'col str,
-	pub label: &'col str,
-	pub organization_id: &'col str,
-	pub phone: &'col str,
+	pub address_id: D,
+	pub email: D,
+	pub export: D,
+	pub label: D,
+	pub organization_id: D,
+	pub phone: D,
 }
 
-impl PgContactColumns<'_>
+impl<D> PgContactColumns<D>
+where
+	D: Copy + Display,
+{
+	/// # Summary
+	///
+	/// Returns an alternation of [`PgContactColumns`] which modifies its fields' [`Display`]
+	/// implementation to output `{alias}.{column}`.
+	pub(in crate::schema) fn scoped<TIdent>(
+		&self,
+		ident: TIdent,
+	) -> PgContactColumns<PgScopedColumn<D, TIdent>>
+	where
+		TIdent: Copy + Display,
+	{
+		PgContactColumns {
+			address_id: PgScopedColumn(ident, self.address_id),
+			email: PgScopedColumn(ident, self.email),
+			export: PgScopedColumn(ident, self.export),
+			label: PgScopedColumn(ident, self.label),
+			organization_id: PgScopedColumn(ident, self.organization_id),
+			phone: PgScopedColumn(ident, self.phone),
+		}
+	}
+}
+
+impl PgContactColumns<&str>
 {
 	pub(in crate::schema) async fn row_to_view(
 		self,
@@ -63,7 +93,7 @@ impl PgContactColumns<'_>
 	}
 }
 
-impl PgContactColumns<'static>
+impl PgContactColumns<&'static str>
 {
 	pub(in crate::schema) const fn new() -> Self
 	{

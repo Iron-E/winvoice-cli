@@ -61,7 +61,7 @@ impl OrganizationAdapter for PgOrganization
 					.collect::<HashMap<_, _>>()
 			});
 
-		const COLUMNS: PgOrganizationColumns<'static> = PgOrganizationColumns::new();
+		const COLUMNS: PgOrganizationColumns<&'static str> = PgOrganizationColumns::new();
 
 		let mut query = QueryBuilder::new(
 			"SELECT

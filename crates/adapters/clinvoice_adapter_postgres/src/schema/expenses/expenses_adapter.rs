@@ -28,6 +28,8 @@ impl ExpensesAdapter for PgExpenses
 			.map_err(util::finance_err_to_sqlx)
 			.await?;
 
+		const COLUMNS: PgExpenseColumns<&'static str> = PgExpenseColumns::new();
+
 		QueryBuilder::new(
 			"INSERT INTO contact_information
 				(timesheet_id, category, cost, description)",
@@ -52,7 +54,7 @@ impl ExpensesAdapter for PgExpenses
 				category,
 				cost,
 				description,
-				id: row.get::<Id, _>("id"),
+				id: row.get(COLUMNS.id),
 				timesheet_id,
 			})
 		})
@@ -67,7 +69,7 @@ impl ExpensesAdapter for PgExpenses
 	{
 		let exchange_rates_fut = ExchangeRates::new().map_err(util::finance_err_to_sqlx);
 
-		const COLUMNS: PgExpenseColumns<'static> = PgExpenseColumns::new();
+		const COLUMNS: PgExpenseColumns<&'static str> = PgExpenseColumns::new();
 
 		let mut query = QueryBuilder::new(
 			"SELECT

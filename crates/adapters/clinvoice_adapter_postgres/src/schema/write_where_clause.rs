@@ -23,13 +23,12 @@ use clinvoice_match::{
 use clinvoice_schema::{chrono::NaiveDateTime, Id};
 use sqlx::{Database, PgPool, Postgres, QueryBuilder, Result};
 
-use super::{PgInterval, PgLocation, PgOption, PgSchema, PgTimestampTz};
+use super::{PgInterval, PgLocation, PgOption, PgSchema, PgTimestampTz, organization::columns::PgOrganizationColumns};
 use crate::schema::{
 	contact_info::columns::PgContactColumns,
 	employee::columns::PgEmployeeColumns,
 	expenses::columns::PgExpenseColumns,
 	job::columns::PgJobColumns,
-	location::columns::PgLocationColumns,
 	timesheet::columns::PgTimesheetColumns,
 };
 
@@ -196,32 +195,28 @@ where
 		{
 			let subquery_alias = format!("{alias}_2");
 
+			const COLUMNS: PgContactColumns<&'static str> = PgContactColumns::new();
+			let alias_columns = COLUMNS.scoped(alias);
+			let subquery_columns = COLUMNS.scoped(&subquery_alias);
+
 			query
 				.separated(' ')
 				.push(context)
 				.push("EXISTS (SELECT FROM contact_information")
 				.push(&subquery_alias)
-				.push("WHERE ");
-
-			const COLUMNS: PgContactColumns<'static> = PgContactColumns::new();
-
-			query
-				.push(&subquery_alias)
-				.push('.')
-				.push(COLUMNS.organization_id)
-				.push(" = ")
-				.push(alias)
-				.push('.')
-				.push(COLUMNS.organization_id);
+				.push("WHERE")
+				.push(subquery_columns.organization_id)
+				.push('=')
+				.push(alias_columns.organization_id);
 
 			let ctx = PgSchema::write_where_clause(
 				PgSchema::write_where_clause(
 					WriteContext::AcceptingAnotherWhereCondition,
-					&format!("{alias}.{}", COLUMNS.label),
+					alias_columns.label,
 					&match_contact.label,
 					query,
 				),
-				&format!("{alias}.{}", COLUMNS.export),
+				alias_columns.export,
 				&match_contact.export,
 				query,
 			);
@@ -237,7 +232,7 @@ where
 
 					PgSchema::write_where_clause(
 						ctx,
-						&format!("{alias}.{}", COLUMNS.address_id),
+						alias_columns.address_id,
 						&location_id_query,
 						query,
 					);
@@ -245,22 +240,12 @@ where
 
 				MatchContactKind::SomeEmail(ref email_address) =>
 				{
-					PgSchema::write_where_clause(
-						ctx,
-						&format!("{alias}.{}", COLUMNS.email),
-						email_address,
-						query,
-					);
+					PgSchema::write_where_clause(ctx, alias_columns.email, email_address, query);
 				},
 
 				MatchContactKind::SomePhone(ref phone_number) =>
 				{
-					PgSchema::write_where_clause(
-						ctx,
-						&format!("{alias}.{}", COLUMNS.phone),
-						phone_number,
-						query,
-					);
+					PgSchema::write_where_clause(ctx, alias_columns.phone, phone_number, query);
 				},
 			};
 
@@ -803,26 +788,21 @@ impl WriteWhereClause<Postgres, &MatchEmployee> for PgSchema
 		query: &mut QueryBuilder<Postgres>,
 	) -> WriteContext
 	{
-		const COLUMNS: PgEmployeeColumns<'static> = PgEmployeeColumns::new();
+		let columns = PgEmployeeColumns::new().scoped(alias);
 
 		PgSchema::write_where_clause(
 			PgSchema::write_where_clause(
 				PgSchema::write_where_clause(
-					PgSchema::write_where_clause(
-						context,
-						&format!("{alias}.{}", COLUMNS.id),
-						&match_condition.id,
-						query,
-					),
-					&format!("{alias}.{}", COLUMNS.name),
+					PgSchema::write_where_clause(context, columns.id, &match_condition.id, query),
+					columns.name,
 					&match_condition.name,
 					query,
 				),
-				&format!("{alias}.{}", COLUMNS.status),
+				columns.status,
 				&match_condition.status,
 				query,
 			),
-			&format!("{alias}.{}", COLUMNS.title),
+			columns.title,
 			&match_condition.title,
 			query,
 		)
@@ -847,26 +827,21 @@ impl WriteWhereClause<Postgres, &MatchExpense> for PgSchema
 		query: &mut QueryBuilder<Postgres>,
 	) -> WriteContext
 	{
-		const COLUMNS: PgExpenseColumns<'static> = PgExpenseColumns::new();
+		let columns = PgExpenseColumns::new().scoped(alias);
 
 		PgSchema::write_where_clause(
 			PgSchema::write_where_clause(
 				PgSchema::write_where_clause(
-					PgSchema::write_where_clause(
-						context,
-						&format!("{alias}.{}", COLUMNS.id),
-						&match_condition.id,
-						query,
-					),
-					&format!("{alias}.{}", COLUMNS.category),
+					PgSchema::write_where_clause(context, columns.id, &match_condition.id, query),
+					columns.category,
 					&match_condition.category,
 					query,
 				),
-				&format!("{alias}.{}", COLUMNS.cost),
+				columns.cost,
 				&match_condition.cost,
 				query,
 			),
-			&format!("{alias}.{}", COLUMNS.description),
+			columns.description,
 			&match_condition.description,
 			query,
 		)
@@ -891,7 +866,7 @@ impl WriteWhereClause<Postgres, &MatchJob> for PgSchema
 		query: &mut QueryBuilder<Postgres>,
 	) -> WriteContext
 	{
-		const COLUMNS: PgJobColumns<'static> = PgJobColumns::new();
+		let columns = PgJobColumns::new().scoped(alias);
 
 		PgSchema::write_where_clause(
 			PgSchema::write_where_clause(
@@ -903,39 +878,39 @@ impl WriteWhereClause<Postgres, &MatchJob> for PgSchema
 									PgSchema::write_where_clause(
 										PgSchema::write_where_clause(
 											context,
-											&format!("{alias}.{}", COLUMNS.id),
+											columns.id,
 											&match_condition.id,
 											query,
 										),
-										&format!("{alias}.{}", COLUMNS.date_close),
+										columns.date_close,
 										&match_condition.date_close,
 										query,
 									),
-									&format!("{alias}.{}", COLUMNS.date_open),
+									columns.date_open,
 									&match_condition.date_open,
 									query,
 								),
-								&format!("{alias}.{}", COLUMNS.increment),
+								columns.increment,
 								&match_condition.increment,
 								query,
 							),
-							&format!("{alias}.{}", COLUMNS.invoice_date_issued),
+							columns.invoice_date_issued,
 							&match_condition.invoice.date_issued,
 							query,
 						),
-						&format!("{alias}.{}", COLUMNS.invoice_date_paid),
+						columns.invoice_date_paid,
 						&match_condition.invoice.date_paid,
 						query,
 					),
-					&format!("{alias}.{}", COLUMNS.invoice_hourly_rate),
+					columns.invoice_hourly_rate,
 					&match_condition.invoice.hourly_rate,
 					query,
 				),
-				&format!("{alias}.{}", COLUMNS.notes),
+				columns.notes,
 				&match_condition.notes,
 				query,
 			),
-			&format!("{alias}.{}", COLUMNS.objectives),
+			columns.objectives,
 			&match_condition.objectives,
 			query,
 		)
@@ -960,16 +935,11 @@ impl WriteWhereClause<Postgres, &MatchOrganization> for PgSchema
 		query: &mut QueryBuilder<Postgres>,
 	) -> WriteContext
 	{
-		const COLUMNS: PgLocationColumns<'static> = PgLocationColumns::new();
+		let columns = PgOrganizationColumns::new().scoped(alias);
 
 		PgSchema::write_where_clause(
-			PgSchema::write_where_clause(
-				context,
-				&format!("{alias}.{}", COLUMNS.id),
-				&match_condition.id,
-				query,
-			),
-			&format!("{alias}.{}", COLUMNS.name),
+			PgSchema::write_where_clause(context, columns.id, &match_condition.id, query),
+			columns.name,
 			&match_condition.name,
 			query,
 		)
@@ -994,26 +964,21 @@ impl WriteWhereClause<Postgres, &MatchTimesheet> for PgSchema
 		query: &mut QueryBuilder<Postgres>,
 	) -> WriteContext
 	{
-		const COLUMNS: PgTimesheetColumns<'static> = PgTimesheetColumns::new();
+		let columns = PgTimesheetColumns::new().scoped(alias);
 
 		PgSchema::write_where_clause(
 			PgSchema::write_where_clause(
 				PgSchema::write_where_clause(
-					PgSchema::write_where_clause(
-						context,
-						&format!("{alias}.{}", COLUMNS.id),
-						&match_condition.id,
-						query,
-					),
-					&format!("{alias}.{}", COLUMNS.time_begin),
+					PgSchema::write_where_clause(context, columns.id, &match_condition.id, query),
+					columns.time_begin,
 					&match_condition.time_begin,
 					query,
 				),
-				&format!("{alias}.{}", COLUMNS.time_end),
+				columns.time_end,
 				&match_condition.time_end,
 				query,
 			),
-			&format!("{alias}.{}", COLUMNS.work_notes),
+			columns.work_notes,
 			&match_condition.work_notes,
 			query,
 		)

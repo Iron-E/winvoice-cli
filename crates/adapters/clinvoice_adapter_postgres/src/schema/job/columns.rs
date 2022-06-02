@@ -1,24 +1,58 @@
+use core::fmt::Display;
+
 use clinvoice_finance::{Decimal, Money};
 use clinvoice_schema::{Invoice, InvoiceDate, Job, Organization};
 use sqlx::{postgres::PgRow, Result, Row};
 
-use crate::schema::util;
+use crate::schema::{util, PgScopedColumn};
 
-pub(in crate::schema) struct PgJobColumns<'col>
+pub(in crate::schema) struct PgJobColumns<D>
+where
+	D: Display,
 {
-	pub client_id: &'col str,
-	pub date_open: &'col str,
-	pub date_close: &'col str,
-	pub id: &'col str,
-	pub increment: &'col str,
-	pub invoice_date_issued: &'col str,
-	pub invoice_date_paid: &'col str,
-	pub invoice_hourly_rate: &'col str,
-	pub notes: &'col str,
-	pub objectives: &'col str,
+	pub client_id: D,
+	pub date_open: D,
+	pub date_close: D,
+	pub id: D,
+	pub increment: D,
+	pub invoice_date_issued: D,
+	pub invoice_date_paid: D,
+	pub invoice_hourly_rate: D,
+	pub notes: D,
+	pub objectives: D,
 }
 
-impl PgJobColumns<'_>
+impl<D> PgJobColumns<D>
+where
+	D: Copy + Display,
+{
+	/// # Summary
+	///
+	/// Returns an alternation of [`PgJobColumns`] which modifies its fields' [`Display`]
+	/// implementation to output `{alias}.{column}`.
+	pub(in crate::schema) fn scoped<TIdent>(
+		&self,
+		ident: TIdent,
+	) -> PgJobColumns<PgScopedColumn<D, TIdent>>
+	where
+		TIdent: Copy + Display,
+	{
+		PgJobColumns {
+			client_id: PgScopedColumn(ident, self.client_id),
+			date_open: PgScopedColumn(ident, self.date_open),
+			date_close: PgScopedColumn(ident, self.date_close),
+			id: PgScopedColumn(ident, self.id),
+			increment: PgScopedColumn(ident, self.increment),
+			invoice_date_issued: PgScopedColumn(ident, self.invoice_date_issued),
+			invoice_date_paid: PgScopedColumn(ident, self.invoice_date_paid),
+			invoice_hourly_rate: PgScopedColumn(ident, self.invoice_hourly_rate),
+			notes: PgScopedColumn(ident, self.notes),
+			objectives: PgScopedColumn(ident, self.objectives),
+		}
+	}
+}
+
+impl PgJobColumns<&str>
 {
 	pub(in crate::schema) fn row_to_view(self, client: Organization, row: &PgRow) -> Result<Job>
 	{
@@ -52,7 +86,7 @@ impl PgJobColumns<'_>
 	}
 }
 
-impl PgJobColumns<'static>
+impl PgJobColumns<&'static str>
 {
 	pub(in crate::schema) const fn new() -> Self
 	{

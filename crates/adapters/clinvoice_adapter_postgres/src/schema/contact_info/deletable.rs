@@ -23,13 +23,13 @@ impl Deletable for PgContactInfo
 		{
 			let mut separated = query.separated(' ');
 
-			fn write<T>(q: &mut Separated<Postgres, T>, c: Contact)
+			fn write<T>(s: &mut Separated<Postgres, T>, c: Contact)
 			where
 				T: Display,
 			{
-				const COLUMNS: PgContactColumns<'static> = PgContactColumns::new();
+				const COLUMNS: PgContactColumns<&'static str> = PgContactColumns::new();
 
-				q.push('(')
+				s.push('(')
 					.push(COLUMNS.organization_id)
 					.push('=')
 					.push(c.organization_id)

@@ -1,20 +1,49 @@
+use core::fmt::Display;
+
 use clinvoice_finance::{Decimal, Money};
 use clinvoice_schema::Expense;
 use sqlx::{error::UnexpectedNullError, postgres::PgRow, Error, Result, Row};
 
-use crate::schema::util;
+use crate::schema::{util, PgScopedColumn};
 
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub(in crate::schema) struct PgExpenseColumns<'col>
+pub(in crate::schema) struct PgExpenseColumns<D>
+where
+	D: Display,
 {
-	pub id: &'col str,
-	pub timesheet_id: &'col str,
-	pub category: &'col str,
-	pub cost: &'col str,
-	pub description: &'col str,
+	pub id: D,
+	pub timesheet_id: D,
+	pub category: D,
+	pub cost: D,
+	pub description: D,
 }
 
-impl PgExpenseColumns<'_>
+impl<D> PgExpenseColumns<D>
+where
+	D: Copy + Display,
+{
+	/// # Summary
+	///
+	/// Returns an alternation of [`PgExpenseColumns`] which modifies its fields' [`Display`]
+	/// implementation to output `{alias}.{column}`.
+	pub(in crate::schema) fn scoped<TIdent>(
+		&self,
+		ident: TIdent,
+	) -> PgExpenseColumns<PgScopedColumn<D, TIdent>>
+	where
+		TIdent: Copy + Display,
+	{
+		PgExpenseColumns {
+			id: PgScopedColumn(ident, self.id),
+			timesheet_id: PgScopedColumn(ident, self.timesheet_id),
+			category: PgScopedColumn(ident, self.category),
+			cost: PgScopedColumn(ident, self.cost),
+			description: PgScopedColumn(ident, self.description),
+		}
+	}
+}
+
+impl PgExpenseColumns<&str>
 {
 	pub(in crate::schema) fn row_to_view(self, row: &PgRow) -> Result<Option<Expense>>
 	{
@@ -46,7 +75,7 @@ impl PgExpenseColumns<'_>
 	}
 }
 
-impl PgExpenseColumns<'static>
+impl PgExpenseColumns<&'static str>
 {
 	pub(in crate::schema) const fn new() -> Self
 	{

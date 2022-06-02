@@ -26,7 +26,7 @@ where
 	/// # Summary
 	///
 	/// Returns an alternation of [`PgContactColumns`] which modifies its fields' [`Display`]
-	/// implementation to output `{alias}.{column}`.
+	/// implementation to output `{ident}.{column}`.
 	pub(in crate::schema) fn scoped<TIdent>(
 		&self,
 		ident: TIdent,

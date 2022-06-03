@@ -1,5 +1,3 @@
-use core::fmt::Display;
-
 use clinvoice_schema::{Employee, Expense, Job, Timesheet};
 use sqlx::{postgres::PgRow, Row};
 

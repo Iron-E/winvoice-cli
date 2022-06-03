@@ -18,7 +18,7 @@ use clinvoice_match::{
 	MatchStr,
 	MatchTimesheet,
 };
-use clinvoice_schema::{chrono::NaiveDateTime, Id};
+use clinvoice_schema::Id;
 use sqlx::{Database, PgPool, Postgres, QueryBuilder, Result};
 
 use super::{
@@ -349,7 +349,7 @@ fn write_where_clause<Db, T>(
 ) -> WriteContext
 where
 	Db: Database,
-	T: Clone + Debug + Display + PartialEq,
+	T: Display + PartialEq,
 	for<'a> PgSchema: WriteWhereClause<Db, &'a Match<T>>,
 {
 	match match_condition
@@ -420,132 +420,6 @@ impl WriteWhereClause<Postgres, &Match<Id>> for PgSchema
 	) -> WriteContext
 	{
 		write_where_clause(context, ident, match_condition, query)
-	}
-}
-
-impl WriteWhereClause<Postgres, &Match<NaiveDateTime>> for PgSchema
-{
-	fn write_where_clause(
-		context: WriteContext,
-		ident: impl Copy + Display,
-		match_condition: &Match<NaiveDateTime>,
-		query: &mut QueryBuilder<Postgres>,
-	) -> WriteContext
-	{
-		match match_condition
-		{
-			Match::And(conditions) => write_boolean_group::<_, _, _, _, true>(
-				query,
-				context,
-				ident,
-				&mut conditions.iter().filter(|m| *m != &Match::Any),
-			),
-			Match::Any => return context,
-			Match::EqualTo(date) => write_comparison(query, context, ident, "=", PgTimestampTz(*date)),
-			Match::GreaterThan(date) =>
-			{
-				write_comparison(query, context, ident, ">", PgTimestampTz(*date))
-			},
-			Match::InRange(low, high) =>
-			{
-				write_comparison(query, context, ident, "BETWEEN", PgTimestampTz(*low));
-				write_comparison(
-					query,
-					WriteContext::InWhereCondition,
-					"",
-					"AND",
-					PgTimestampTz(*high),
-				);
-			},
-			Match::LessThan(date) =>
-			{
-				write_comparison(query, context, ident, "<", PgTimestampTz(*date))
-			},
-			Match::Not(condition) => match condition.deref()
-			{
-				Match::Any => write_is_null(query, context, ident),
-				m => write_negated(query, context, ident, m),
-			},
-			Match::Or(conditions) => write_boolean_group::<_, _, _, _, false>(
-				query,
-				context,
-				ident,
-				&mut conditions.iter().filter(|m| *m != &Match::Any),
-			),
-		};
-		WriteContext::AcceptingAnotherWhereCondition
-	}
-}
-
-impl WriteWhereClause<Postgres, &Match<Option<NaiveDateTime>>> for PgSchema
-{
-	fn write_where_clause(
-		context: WriteContext,
-		ident: impl Copy + Display,
-		match_condition: &Match<Option<NaiveDateTime>>,
-		query: &mut QueryBuilder<Postgres>,
-	) -> WriteContext
-	{
-		match match_condition
-		{
-			Match::And(conditions) => write_boolean_group::<_, _, _, _, true>(
-				query,
-				context,
-				ident,
-				&mut conditions.iter().filter(|m| *m != &Match::Any),
-			),
-			Match::Any => return context,
-			Match::EqualTo(date) => write_comparison(
-				query,
-				context,
-				ident,
-				"=",
-				PgOption(date.map(PgTimestampTz)),
-			),
-			Match::GreaterThan(date) => write_comparison(
-				query,
-				context,
-				ident,
-				">",
-				PgOption(date.map(PgTimestampTz)),
-			),
-			Match::InRange(low, high) =>
-			{
-				write_comparison(
-					query,
-					context,
-					ident,
-					"BETWEEN",
-					PgOption(low.map(PgTimestampTz)),
-				);
-				write_comparison(
-					query,
-					WriteContext::InWhereCondition,
-					"",
-					"AND",
-					PgOption(high.map(PgTimestampTz)),
-				);
-			},
-			Match::LessThan(date) => write_comparison(
-				query,
-				context,
-				ident,
-				"<",
-				PgOption(date.map(PgTimestampTz)),
-			),
-			Match::Not(condition) => match condition.deref()
-			{
-				Match::Any => write_is_null(query, context, ident),
-				m => write_negated(query, context, ident, m),
-			},
-			Match::Or(conditions) => write_boolean_group::<_, _, _, _, false>(
-				query,
-				context,
-				ident,
-				&mut conditions.iter().filter(|m| *m != &Match::Any),
-			),
-		};
-		WriteContext::AcceptingAnotherWhereCondition
 	}
 }
 
@@ -638,6 +512,34 @@ impl WriteWhereClause<Postgres, &Match<PgInterval>> for PgSchema
 		context: WriteContext,
 		ident: impl Copy + Display,
 		match_condition: &Match<PgInterval>,
+		query: &mut QueryBuilder<Postgres>,
+	) -> WriteContext
+	{
+		write_where_clause(context, ident, match_condition, query)
+	}
+}
+
+impl<T> WriteWhereClause<Postgres, &Match<PgOption<T>>> for PgSchema
+where
+	T: Display + PartialEq,
+{
+	fn write_where_clause(
+		context: WriteContext,
+		ident: impl Copy + Display,
+		match_condition: &Match<PgOption<T>>,
+		query: &mut QueryBuilder<Postgres>,
+	) -> WriteContext
+	{
+		write_where_clause(context, ident, match_condition, query)
+	}
+}
+
+impl WriteWhereClause<Postgres, &Match<PgTimestampTz>> for PgSchema
+{
+	fn write_where_clause(
+		context: WriteContext,
+		ident: impl Copy + Display,
+		match_condition: &Match<PgTimestampTz>,
 		query: &mut QueryBuilder<Postgres>,
 	) -> WriteContext
 	{
@@ -824,11 +726,14 @@ impl WriteWhereClause<Postgres, &MatchJob> for PgSchema
 											query,
 										),
 										columns.date_close,
-										&match_condition.date_close,
+										&match_condition
+											.date_close
+											.clone()
+											.map(&|d| PgOption(d.map(PgTimestampTz))),
 										query,
 									),
 									columns.date_open,
-									&match_condition.date_open,
+									&match_condition.date_open.clone().map(&|d| PgTimestampTz(d)),
 									query,
 								),
 								columns.increment,
@@ -839,11 +744,19 @@ impl WriteWhereClause<Postgres, &MatchJob> for PgSchema
 								query,
 							),
 							columns.invoice_date_issued,
-							&match_condition.invoice.date_issued,
+							&match_condition
+								.invoice
+								.date_issued
+								.clone()
+								.map(&|d| PgOption(d.map(PgTimestampTz))),
 							query,
 						),
 						columns.invoice_date_paid,
-						&match_condition.invoice.date_paid,
+						&match_condition
+							.invoice
+							.date_paid
+							.clone()
+							.map(&|d| PgOption(d.map(PgTimestampTz))),
 						query,
 					),
 					// NOTE: `hourly_rate` is stored as text on the DB
@@ -920,11 +833,17 @@ impl WriteWhereClause<Postgres, &MatchTimesheet> for PgSchema
 				PgSchema::write_where_clause(
 					PgSchema::write_where_clause(context, columns.id, &match_condition.id, query),
 					columns.time_begin,
-					&match_condition.time_begin,
+					&match_condition
+						.time_begin
+						.clone()
+						.map(&|d| PgTimestampTz(d)),
 					query,
 				),
 				columns.time_end,
-				&match_condition.time_end,
+				&match_condition
+					.time_end
+					.clone()
+					.map(&|d| PgOption(d.map(PgTimestampTz))),
 				query,
 			),
 			columns.work_notes,

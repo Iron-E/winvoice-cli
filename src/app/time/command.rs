@@ -94,7 +94,7 @@ impl Command
 		connection
 			.begin()
 			.and_then(|mut transaction| async {
-				TAdapter::update(&mut transaction, timesheet).await?;
+				TAdapter::update(&mut transaction, [&timesheet].into_iter()).await?;
 				transaction.commit().await
 			})
 			.await?;

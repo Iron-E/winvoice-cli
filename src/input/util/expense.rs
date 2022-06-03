@@ -154,7 +154,7 @@ where
 				connection
 					.begin()
 					.and_then(|mut transaction| async {
-						XAdapter::update(&mut transaction, edited.clone()).await?;
+						XAdapter::update(&mut transaction, [&edited].into_iter()).await?;
 						transaction.commit().await
 					})
 					.await?;

@@ -10,7 +10,6 @@ use clinvoice_finance::ExchangeRates;
 use clinvoice_match::{MatchJob, MatchTimesheet};
 use clinvoice_schema::{chrono::Utc, Currency, Location, RestorableSerde};
 use futures::{
-	future,
 	stream::{self, TryStreamExt},
 	TryFutureExt,
 };
@@ -108,29 +107,40 @@ impl Command
 	) -> DynResult<'err, ()>
 	where
 		Db: Database,
-		Entity:
-			Clone + DeserializeOwned + Display + Into<Entity> + RestorableSerde + Serialize + Send,
+		Entity: Clone
+			+ DeserializeOwned
+			+ Display
+			+ Into<Entity>
+			+ RestorableSerde
+			+ Serialize
+			+ Send
+			+ Sync,
 		U: Updatable<Db = Db, Entity = Entity>,
 		for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 	{
 		let selection = input::select(entities, "Select the entities you want to update")?;
 
-		// PERF: all of the `update_entity` operations are queued in the background while the user keeps editing. this is in case users have slow internet connection
-		let updates = selection
+		let edits = selection
 			.into_iter()
 			.try_fold(Vec::new(), |mut v, entity| {
-				let edited = match input::edit_and_restore(&entity, "Make any desired edits")
+				match input::edit_and_restore(&entity, "Make any desired edits")
 				{
-					Ok(e) => e,
-					Err(input::Error::NotEdited) => entity,
+					Ok(e) => v.push(e),
+					Err(input::Error::NotEdited) => (),
 					Err(e) => return Err(e),
 				};
 
-				v.push(U::update(connection, edited));
 				Ok(v)
 			})?;
 
-		future::try_join_all(updates).await?;
+		connection
+			.begin()
+			.and_then(|mut transaction| async {
+				U::update(&mut transaction, edits.iter()).await?;
+				transaction.commit().await
+			})
+			.await?;
+
 		Ok(())
 	}
 
@@ -232,23 +242,24 @@ impl Command
 
 				if close
 				{
-					let unclosed: Vec<_> = results_view
-						.iter()
-						.filter(|j| j.date_close.is_none())
-						.cloned()
-						.collect();
+					let mut selected = input::select(
+						results_view
+							.iter()
+							.filter(|j| j.date_close.is_none())
+							.cloned()
+							.collect::<Vec<_>>()
+							.as_slice(),
+						"Select the Jobs you want to close",
+					)?;
 
-					let selected = input::select(&unclosed, "Select the Jobs you want to close")?;
+					let transaction_fut = connection.begin();
 
-					connection
-						.begin()
+					let now = Some(Utc::now());
+					selected.iter_mut().for_each(|j| j.date_close = now);
+
+					transaction_fut
 						.and_then(|mut transaction| async {
-							for mut job in selected
-							{
-								job.date_close = Some(Utc::now());
-								JAdapter::update(&mut transaction, job).await?;
-							}
-
+							JAdapter::update(&mut transaction, selected.iter()).await?;
 							transaction.commit().await
 						})
 						.await?;
@@ -256,23 +267,23 @@ impl Command
 
 				if reopen
 				{
-					let closed: Vec<_> = results_view
-						.iter()
-						.filter(|j| j.date_close.is_some())
-						.cloned()
-						.collect();
+					let mut selected = input::select(
+						results_view
+							.iter()
+							.filter(|j| j.date_close.is_some())
+							.cloned()
+							.collect::<Vec<_>>()
+							.as_slice(),
+						"Select the Jobs you want to reopen",
+					)?;
 
-					let selected = input::select(&closed, "Select the Jobs you want to reopen")?;
+					let transaction_fut = connection.begin();
 
-					connection
-						.begin()
+					selected.iter_mut().for_each(|j| j.date_close = None);
+
+					transaction_fut
 						.and_then(|mut transaction| async {
-							for mut job in selected
-							{
-								job.date_close = None;
-								JAdapter::update(&mut transaction, job).await?;
-							}
-
+							JAdapter::update(&mut transaction, selected.iter()).await?;
 							transaction.commit().await
 						})
 						.await?;

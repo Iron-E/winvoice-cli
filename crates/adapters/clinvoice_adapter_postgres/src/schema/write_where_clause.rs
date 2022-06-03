@@ -23,7 +23,14 @@ use clinvoice_match::{
 use clinvoice_schema::{chrono::NaiveDateTime, Id};
 use sqlx::{Database, PgPool, Postgres, QueryBuilder, Result};
 
-use super::{PgInterval, PgLocation, PgOption, PgSchema, PgTimestampTz, organization::columns::PgOrganizationColumns};
+use super::{
+	organization::columns::PgOrganizationColumns,
+	PgInterval,
+	PgLocation,
+	PgOption,
+	PgSchema,
+	PgTimestampTz,
+};
 use crate::schema::{
 	contact_info::columns::PgContactColumns,
 	employee::columns::PgEmployeeColumns,

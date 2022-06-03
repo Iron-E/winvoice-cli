@@ -18,35 +18,42 @@ impl Deletable for PgContactInfo
 		entities: impl 'async_trait + Iterator<Item = Self::Entity> + Send,
 	) -> Result<()>
 	{
+		fn write<T>(s: &mut Separated<Postgres, T>, c: Contact)
+		where
+			T: Display,
+		{
+			const COLUMNS: PgContactColumns<&'static str> = PgContactColumns::new();
+
+			s.push('(')
+				.push(COLUMNS.organization_id)
+				.push('=')
+				.push(c.organization_id)
+				.push("AND")
+				.push(COLUMNS.label)
+				.push('=')
+				.push_bind(c.label)
+				.push(')');
+		}
+
+		let mut peekable_entities = entities.peekable();
+
+		// There is nothing to do.
+		if peekable_entities.peek().is_none()
+		{
+			return Ok(());
+		}
+
 		let mut query = QueryBuilder::new("DELETE FROM contact_information WHERE ");
 
 		{
 			let mut separated = query.separated(' ');
 
-			fn write<T>(s: &mut Separated<Postgres, T>, c: Contact)
-			where
-				T: Display,
-			{
-				const COLUMNS: PgContactColumns<&'static str> = PgContactColumns::new();
-
-				s.push('(')
-					.push(COLUMNS.organization_id)
-					.push('=')
-					.push(c.organization_id)
-					.push("AND")
-					.push(COLUMNS.label)
-					.push('=')
-					.push_bind(c.label)
-					.push(')');
-			}
-
-			let mut entities_mut = entities;
-			if let Some(e) = entities_mut.next()
+			if let Some(e) = peekable_entities.next()
 			{
 				write(&mut separated, e);
 			}
 
-			entities_mut.for_each(|e| {
+			peekable_entities.for_each(|e| {
 				separated.push("OR");
 				write(&mut separated, e);
 			});

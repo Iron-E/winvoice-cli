@@ -58,13 +58,21 @@ impl PgSchema
 		entities: impl Iterator<Item = Id>,
 	) -> Result<()>
 	{
+		let mut peekable_entities = entities.peekable();
+
+		// There is nothing to do
+		if peekable_entities.peek().is_none()
+		{
+			return Ok(());
+		}
+
 		let mut query = QueryBuilder::new("DELETE FROM ");
 		query.push(table);
 
 		PgSchema::write_where_clause(
 			Default::default(),
 			"id",
-			&Match::Or(entities.map(Match::from).collect()),
+			&Match::Or(peekable_entities.map(Match::from).collect()),
 			&mut query,
 		);
 

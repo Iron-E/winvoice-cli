@@ -48,7 +48,9 @@ impl Updatable for PgOrganization
 			.push("FROM (");
 
 		query.push_values(peekable_entities, |mut q, e| {
-			q.push(e.id).push(e.location.id).push_bind(&e.name);
+			q.push_bind(e.id)
+				.push_bind(e.location.id)
+				.push_bind(&e.name);
 		});
 
 		query

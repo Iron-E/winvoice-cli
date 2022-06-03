@@ -3,7 +3,7 @@ use clinvoice_schema::Location;
 use sqlx::{Postgres, QueryBuilder, Result, Transaction};
 
 use super::PgLocation;
-use crate::schema::{location::columns::PgLocationColumns, PgOption};
+use crate::schema::location::columns::PgLocationColumns;
 
 #[async_trait::async_trait]
 impl Updatable for PgLocation
@@ -48,9 +48,9 @@ impl Updatable for PgLocation
 			.push("FROM (");
 
 		query.push_values(peekable_entities, |mut q, e| {
-			q.push(e.id)
+			q.push_bind(e.id)
 				.push_bind(&e.name)
-				.push(PgOption(e.outer.as_ref().map(|o| o.id)));
+				.push_bind(e.outer.as_ref().map(|o| o.id));
 		});
 
 		query

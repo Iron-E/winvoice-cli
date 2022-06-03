@@ -52,10 +52,10 @@ impl PgLocation
 					.push(aliases.current)
 					.push("AS (SELECT")
 					.push(outer_columns.id)
-					.push(',')
-					.push(outer_columns.name)
-					.push(',')
-					.push(outer_columns.outer_id)
+					.push_unseparated(',')
+					.push_unseparated(outer_columns.name)
+					.push_unseparated(',')
+					.push_unseparated(outer_columns.outer_id)
 					.push("FROM locations")
 					.push(OUTER_IDENT);
 
@@ -67,9 +67,9 @@ impl PgLocation
 						.push(INNER_IDENT)
 						.push("ON (")
 						.push(outer_columns.id)
-						.push('=')
-						.push(inner_columns.outer_id)
-						.push(')');
+						.push_unseparated('=')
+						.push_unseparated(inner_columns.outer_id)
+						.push_unseparated(')');
 				}
 			}
 
@@ -109,34 +109,34 @@ impl PgLocation
 							.separated(' ')
 							.push(", location_report AS (SELECT")
 							.push(inner_columns.id)
-							.push(',')
-							.push(inner_columns.name)
-							.push(',')
-							.push(inner_columns.outer_id)
+							.push_unseparated(',')
+							.push_unseparated(inner_columns.name)
+							.push_unseparated(',')
+							.push_unseparated(inner_columns.outer_id)
 							.push("FROM locations")
 							.push(INNER_IDENT)
 							.push("JOIN")
 							.push(aliases.current)
 							.push(OUTER_IDENT)
 							.push("ON (")
-							.push(inner_columns.outer_id)
-							.push('=')
-							.push(outer_columns.id)
-							.push(") UNION SELECT")
+							.push_unseparated(inner_columns.outer_id)
+							.push_unseparated('=')
+							.push_unseparated(outer_columns.id)
+							.push_unseparated(") UNION SELECT")
 							.push(inner_columns.id)
-							.push(',')
-							.push(inner_columns.name)
-							.push(',')
-							.push(inner_columns.outer_id)
+							.push_unseparated(',')
+							.push_unseparated(inner_columns.name)
+							.push_unseparated(',')
+							.push_unseparated(inner_columns.outer_id)
 							.push("FROM locations")
 							.push(INNER_IDENT)
 							.push("JOIN location_report")
 							.push(OUTER_IDENT)
 							.push("ON (")
-							.push(inner_columns.outer_id)
-							.push('=')
-							.push(outer_columns.id)
-							.push("))");
+							.push_unseparated(inner_columns.outer_id)
+							.push_unseparated('=')
+							.push_unseparated(outer_columns.id)
+							.push_unseparated("))");
 					}
 
 					query
@@ -154,7 +154,7 @@ impl PgLocation
 								"location_report"
 							},
 						)
-						.push(';');
+						.push_unseparated(';');
 				},
 				MatchOuterLocation::Some(ref outer) =>
 				{

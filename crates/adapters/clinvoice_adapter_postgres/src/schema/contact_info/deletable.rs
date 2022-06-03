@@ -26,11 +26,11 @@ impl Deletable for PgContactInfo
 
 			s.push('(')
 				.push(COLUMNS.organization_id)
-				.push('=')
-				.push(c.organization_id)
+				.push_unseparated('=')
+				.push_unseparated(c.organization_id)
 				.push("AND")
 				.push(COLUMNS.label)
-				.push('=')
+				.push_unseparated('=')
 				.push_bind(c.label)
 				.push(')');
 		}

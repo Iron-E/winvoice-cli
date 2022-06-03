@@ -11,11 +11,12 @@ impl Updatable for PgOrganization
 	type Db = Postgres;
 	type Entity = Organization;
 
-	async fn update<'e>(
+	async fn update<'e, 'i>(
 		connection: &mut Transaction<Self::Db>,
-		entities: impl 'async_trait + Clone + Iterator<Item = &'e Self::Entity> + Send,
+		entities: impl 'async_trait + Clone + Iterator<Item = &'i Self::Entity> + Send,
 	) -> Result<()>
 	where
+		'e: 'i,
 		Self::Entity: 'e,
 	{
 		const COLUMNS: PgOrganizationColumns<&'static str> = PgOrganizationColumns::new();
@@ -39,12 +40,12 @@ impl Updatable for PgOrganization
 			.push(TABLE_IDENT)
 			.push("SET")
 			.push(COLUMNS.location_id)
-			.push('=')
-			.push(values_columns.location_id)
-			.push(',')
-			.push(COLUMNS.name)
-			.push('=')
-			.push(values_columns.name)
+			.push_unseparated('=')
+			.push_unseparated(values_columns.location_id)
+			.push_unseparated(',')
+			.push_unseparated(COLUMNS.name)
+			.push_unseparated('=')
+			.push_unseparated(values_columns.name)
 			.push("FROM (");
 
 		query.push_values(peekable_entities, |mut q, e| {
@@ -58,16 +59,16 @@ impl Updatable for PgOrganization
 			.push(") AS")
 			.push(VALUES_IDENT)
 			.push('(')
-			.push(COLUMNS.id)
-			.push(',')
-			.push(COLUMNS.location_id)
-			.push(',')
-			.push(COLUMNS.name)
-			.push(')')
+			.push_unseparated(COLUMNS.id)
+			.push_unseparated(',')
+			.push_unseparated(COLUMNS.location_id)
+			.push_unseparated(',')
+			.push_unseparated(COLUMNS.name)
+			.push_unseparated(')')
 			.push("WHERE")
 			.push(COLUMNS.scoped(TABLE_IDENT).id)
-			.push('=')
-			.push(values_columns.id);
+			.push_unseparated('=')
+			.push_unseparated(values_columns.id);
 
 		query.push(';').build().execute(&mut *connection).await?;
 

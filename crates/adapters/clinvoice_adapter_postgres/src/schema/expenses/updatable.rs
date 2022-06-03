@@ -10,11 +10,12 @@ impl Updatable for PgExpenses
 	type Db = Postgres;
 	type Entity = Expense;
 
-	async fn update<'e>(
+	async fn update<'e, 'i>(
 		connection: &mut Transaction<Self::Db>,
-		entities: impl 'async_trait + Clone + Iterator<Item = &'e Self::Entity> + Send,
+		entities: impl 'async_trait + Clone + Iterator<Item = &'i Self::Entity> + Send,
 	) -> Result<()>
 	where
+		'e: 'i,
 		Self::Entity: 'e,
 	{
 		todo!()

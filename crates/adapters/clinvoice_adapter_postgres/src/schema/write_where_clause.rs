@@ -195,11 +195,12 @@ where
 
 		MatchSet::Contains(match_contact) =>
 		{
-			let subquery_ident = format!("{ident}_2");
-
 			const COLUMNS: PgContactColumns<&'static str> = PgContactColumns::new();
-			let alias_columns = COLUMNS.scoped(ident);
-			let subquery_columns = COLUMNS.scoped(&subquery_ident);
+
+			let ident_columns = COLUMNS.scoped(ident);
+
+			let subquery_ident = format!("{ident}_2");
+			let subquery_ident_columns = COLUMNS.scoped(&subquery_ident);
 
 			query
 				.separated(' ')
@@ -207,18 +208,18 @@ where
 				.push("EXISTS (SELECT FROM contact_information")
 				.push(&subquery_ident)
 				.push("WHERE")
-				.push(subquery_columns.organization_id)
-				.push('=')
-				.push(alias_columns.organization_id);
+				.push(subquery_ident_columns.organization_id)
+				.push_unseparated('=')
+				.push_unseparated(ident_columns.organization_id);
 
 			let ctx = PgSchema::write_where_clause(
 				PgSchema::write_where_clause(
 					WriteContext::AcceptingAnotherWhereCondition,
-					alias_columns.label,
+					ident_columns.label,
 					&match_contact.label,
 					query,
 				),
-				alias_columns.export,
+				ident_columns.export,
 				&match_contact.export,
 				query,
 			);
@@ -234,7 +235,7 @@ where
 
 					PgSchema::write_where_clause(
 						ctx,
-						alias_columns.address_id,
+						ident_columns.address_id,
 						&location_id_query,
 						query,
 					);
@@ -242,12 +243,12 @@ where
 
 				MatchContactKind::SomeEmail(ref email_address) =>
 				{
-					PgSchema::write_where_clause(ctx, alias_columns.email, email_address, query);
+					PgSchema::write_where_clause(ctx, ident_columns.email, email_address, query);
 				},
 
 				MatchContactKind::SomePhone(ref phone_number) =>
 				{
-					PgSchema::write_where_clause(ctx, alias_columns.phone, phone_number, query);
+					PgSchema::write_where_clause(ctx, ident_columns.phone, phone_number, query);
 				},
 			};
 
@@ -501,19 +502,22 @@ impl WriteWhereClause<Postgres, &MatchSet<MatchExpense>> for PgSchema
 
 			MatchSet::Contains(match_expense) =>
 			{
+				const COLUMNS: PgExpenseColumns<&'static str> = PgExpenseColumns::new();
+
+				let ident_columns = COLUMNS.scoped(ident);
+
 				let subquery_ident = format!("{ident}_2");
+				let subquery_ident_columns = COLUMNS.scoped(&subquery_ident);
 
 				query
 					.separated(' ')
 					.push(context)
 					.push("EXISTS (SELECT FROM expenses")
 					.push(&subquery_ident)
-					.push("WHERE ");
-				query
-					.push(&subquery_ident)
-					.push(".timesheet_id = ")
-					.push(ident)
-					.push(".timesheet_id");
+					.push("WHERE")
+					.push(subquery_ident_columns.timesheet_id)
+					.push_unseparated('=')
+					.push_unseparated(ident_columns.timesheet_id);
 
 				PgSchema::write_where_clause(
 					WriteContext::AcceptingAnotherWhereCondition,
@@ -581,7 +585,7 @@ impl WriteWhereClause<Postgres, &MatchStr<String>> for PgSchema
 					.separated(' ')
 					.push(context)
 					.push(ident)
-					.push('=')
+					.push_unseparated('=')
 					.push_bind(string.clone());
 			},
 			MatchStr::Not(condition) => match condition.deref()
@@ -601,7 +605,7 @@ impl WriteWhereClause<Postgres, &MatchStr<String>> for PgSchema
 					.separated(' ')
 					.push(context)
 					.push(ident)
-					.push('~')
+					.push_unseparated('~')
 					.push_bind(regex.clone());
 			},
 		};

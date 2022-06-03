@@ -1,6 +1,6 @@
 use core::fmt::Display;
 
-use crate::schema::PgScopedColumn;
+use crate::schema::{PgScopedColumn, typecast::PgTypeCast};
 
 pub(in crate::schema) struct PgLocationColumns<D>
 where
@@ -30,6 +30,24 @@ where
 			id: PgScopedColumn(ident, self.id),
 			outer_id: PgScopedColumn(ident, self.outer_id),
 			name: PgScopedColumn(ident, self.name),
+		}
+	}
+
+	/// # Summary
+	///
+	/// Returns an alternation of [`PgLocationColumns`] which modifies its fields' [`Display`]
+	/// implementation to output `{column}::{cast}`.
+	pub(in crate::schema) fn typecast<TCast>(
+		&self,
+		cast: TCast,
+	) -> PgLocationColumns<PgTypeCast<TCast, D>>
+	where
+		TCast: Display,
+	{
+		PgLocationColumns {
+			id: PgTypeCast(self.id, cast),
+			outer_id: PgTypeCast(self.outer_id, cast),
+			name: PgTypeCast(self.name, cast),
 		}
 	}
 }

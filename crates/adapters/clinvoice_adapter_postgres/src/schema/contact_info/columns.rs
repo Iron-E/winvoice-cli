@@ -4,7 +4,7 @@ use clinvoice_schema::{Contact, ContactKind};
 use futures::TryFutureExt;
 use sqlx::{error::UnexpectedNullError, postgres::PgRow, Error, PgPool, Result, Row};
 
-use crate::schema::{PgLocation, PgScopedColumn};
+use crate::schema::{PgLocation, PgScopedColumn, typecast::PgTypeCast};
 
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub(in crate::schema) struct PgContactColumns<D>
@@ -41,6 +41,27 @@ where
 			label: PgScopedColumn(ident, self.label),
 			organization_id: PgScopedColumn(ident, self.organization_id),
 			phone: PgScopedColumn(ident, self.phone),
+		}
+	}
+
+	/// # Summary
+	///
+	/// Returns an alternation of [`PgContactColumns`] which modifies its fields' [`Display`]
+	/// implementation to output `{column}::{cast}`.
+	pub(in crate::schema) fn typecast<TCast>(
+		&self,
+		cast: TCast,
+	) -> PgContactColumns<PgTypeCast<TCast, D>>
+	where
+		TCast: Display,
+	{
+		PgContactColumns {
+			address_id: PgTypeCast(self.address_id, cast),
+			email: PgTypeCast(self.email, cast),
+			export: PgTypeCast(self.export, cast),
+			label: PgTypeCast(self.label, cast),
+			organization_id: PgTypeCast(self.organization_id, cast),
+			phone: PgTypeCast(self.phone, cast),
 		}
 	}
 }

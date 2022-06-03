@@ -2,9 +2,9 @@ use core::fmt::{Display, Formatter, Result};
 
 use super::PgTypeCast;
 
-impl<D> Display for PgTypeCast<D>
+impl<TCast, TIdent> Display for PgTypeCast<TCast, TIdent>
 where
-	D: Display,
+	TIdent: Display, TCast: Display
 {
 	fn fmt(&self, f: &mut Formatter<'_>) -> Result
 	{

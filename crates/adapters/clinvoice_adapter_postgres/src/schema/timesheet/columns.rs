@@ -3,7 +3,7 @@ use core::fmt::Display;
 use clinvoice_schema::{Employee, Expense, Job, Timesheet};
 use sqlx::{postgres::PgRow, Row};
 
-use crate::schema::PgScopedColumn;
+use crate::schema::{PgScopedColumn, typecast::PgTypeCast};
 
 pub(in crate::schema) struct PgTimesheetColumns<D>
 where
@@ -39,6 +39,27 @@ where
 			time_begin: PgScopedColumn(ident, self.time_begin),
 			time_end: PgScopedColumn(ident, self.time_end),
 			work_notes: PgScopedColumn(ident, self.work_notes),
+		}
+	}
+
+	/// # Summary
+	///
+	/// Returns an alternation of [`PgTimesheetColumns`] which modifies its fields' [`Display`]
+	/// implementation to output `{column}::{cast}`.
+	pub(in crate::schema) fn typecast<TCast>(
+		&self,
+		cast: TCast,
+	) -> PgTimesheetColumns<PgTypeCast<TCast, D>>
+	where
+		TCast: Display,
+	{
+		PgTimesheetColumns {
+			employee_id: PgTypeCast(self.employee_id, cast),
+			id: PgTypeCast(self.id, cast),
+			job_id: PgTypeCast(self.job_id, cast),
+			time_begin: PgTypeCast(self.time_begin, cast),
+			time_end: PgTypeCast(self.time_end, cast),
+			work_notes: PgTypeCast(self.work_notes, cast),
 		}
 	}
 }

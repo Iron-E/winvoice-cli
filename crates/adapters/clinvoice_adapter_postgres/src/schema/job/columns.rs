@@ -4,7 +4,7 @@ use clinvoice_finance::{Decimal, Money};
 use clinvoice_schema::{Invoice, InvoiceDate, Job, Organization};
 use sqlx::{postgres::PgRow, Result, Row};
 
-use crate::schema::{util, PgScopedColumn};
+use crate::schema::{util, PgScopedColumn, typecast::PgTypeCast};
 
 pub(in crate::schema) struct PgJobColumns<D>
 where
@@ -48,6 +48,31 @@ where
 			invoice_hourly_rate: PgScopedColumn(ident, self.invoice_hourly_rate),
 			notes: PgScopedColumn(ident, self.notes),
 			objectives: PgScopedColumn(ident, self.objectives),
+		}
+	}
+
+	/// # Summary
+	///
+	/// Returns an alternation of [`PgJobColumns`] which modifies its fields' [`Display`]
+	/// implementation to output `{column}::{cast}`.
+	pub(in crate::schema) fn typecast<TCast>(
+		&self,
+		cast: TCast,
+	) -> PgJobColumns<PgTypeCast<TCast, D>>
+	where
+		TCast: Display,
+	{
+		PgJobColumns {
+			client_id: PgTypeCast(self.client_id, cast),
+			date_open: PgTypeCast(self.date_open, cast),
+			date_close: PgTypeCast(self.date_close, cast),
+			id: PgTypeCast(self.id, cast),
+			increment: PgTypeCast(self.increment, cast),
+			invoice_date_issued: PgTypeCast(self.invoice_date_issued, cast),
+			invoice_date_paid: PgTypeCast(self.invoice_date_paid, cast),
+			invoice_hourly_rate: PgTypeCast(self.invoice_hourly_rate, cast),
+			notes: PgTypeCast(self.notes, cast),
+			objectives: PgTypeCast(self.objectives, cast),
 		}
 	}
 }

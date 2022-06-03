@@ -3,7 +3,7 @@ use core::fmt::Display;
 use clinvoice_schema::{Employee, Organization};
 use sqlx::{postgres::PgRow, Row};
 
-use crate::schema::PgScopedColumn;
+use crate::schema::{PgScopedColumn, typecast::PgTypeCast};
 
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub(in crate::schema) struct PgEmployeeColumns<D>
@@ -24,7 +24,7 @@ where
 	/// # Summary
 	///
 	/// Returns an alternation of [`PgEmployeeColumns`] which modifies its fields' [`Display`]
-	/// implementation to output `{ident}.{column}`.
+	/// implementation to output `{column}::{cast}`.
 	pub(in crate::schema) fn scoped<TIdent>(
 		&self,
 		ident: TIdent,
@@ -38,6 +38,26 @@ where
 			organization_id: PgScopedColumn(ident, self.organization_id),
 			status: PgScopedColumn(ident, self.status),
 			title: PgScopedColumn(ident, self.title),
+		}
+	}
+
+	/// # Summary
+	///
+	/// Returns an alternation of [`PgEmployeeColumns`] which modifies its fields' [`Display`]
+	/// implementation to output `{ident}.{column}`.
+	pub(in crate::schema) fn typecast<TCast>(
+		&self,
+		cast: TCast,
+	) -> PgEmployeeColumns<PgTypeCast<TCast, D>>
+	where
+		TCast: Display,
+	{
+		PgEmployeeColumns {
+			id: PgTypeCast(self.id, cast),
+			name: PgTypeCast(self.name, cast),
+			organization_id: PgTypeCast(self.organization_id, cast),
+			status: PgTypeCast(self.status, cast),
+			title: PgTypeCast(self.title, cast),
 		}
 	}
 }

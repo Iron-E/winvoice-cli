@@ -3,7 +3,7 @@ use core::fmt::Display;
 use clinvoice_schema::{Contact, Location, Organization};
 use sqlx::{postgres::PgRow, Row};
 
-use crate::schema::PgScopedColumn;
+use crate::schema::{PgScopedColumn, typecast::PgTypeCast};
 
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub(in crate::schema) struct PgOrganizationColumns<D>
@@ -36,6 +36,25 @@ where
 			name: PgScopedColumn(ident, self.name),
 		}
 	}
+
+	/// # Summary
+	///
+	/// Returns an alternation of [`PgOrganizationColumns`] which modifies its fields' [`Display`]
+	/// implementation to output `{column}::{cast}`.
+	pub(in crate::schema) fn typecast<TCast>(
+		&self,
+		cast: TCast,
+	) -> PgOrganizationColumns<PgTypeCast<TCast, D>>
+	where
+		TCast: Display,
+	{
+		PgOrganizationColumns {
+			id: PgTypeCast(self.id, cast),
+			location_id: PgTypeCast(self.location_id, cast),
+			name: PgTypeCast(self.name, cast),
+		}
+	}
+
 }
 
 impl PgOrganizationColumns<&str>

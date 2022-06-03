@@ -4,7 +4,7 @@ use clinvoice_finance::{Decimal, Money};
 use clinvoice_schema::Expense;
 use sqlx::{error::UnexpectedNullError, postgres::PgRow, Error, Result, Row};
 
-use crate::schema::{util, PgScopedColumn};
+use crate::schema::{util, PgScopedColumn, typecast::PgTypeCast};
 
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub(in crate::schema) struct PgExpenseColumns<D>
@@ -39,6 +39,26 @@ where
 			category: PgScopedColumn(ident, self.category),
 			cost: PgScopedColumn(ident, self.cost),
 			description: PgScopedColumn(ident, self.description),
+		}
+	}
+
+	/// # Summary
+	///
+	/// Returns an alternation of [`PgExpenseColumns`] which modifies its fields' [`Display`]
+	/// implementation to output `{column}::{cast}`.
+	pub(in crate::schema) fn typecast<TCast>(
+		&self,
+		cast: TCast,
+	) -> PgExpenseColumns<PgTypeCast<TCast, D>>
+	where
+		TCast: Display,
+	{
+		PgExpenseColumns {
+			id: PgTypeCast(self.id, cast),
+			timesheet_id: PgTypeCast(self.timesheet_id, cast),
+			category: PgTypeCast(self.category, cast),
+			cost: PgTypeCast(self.cost, cast),
+			description: PgTypeCast(self.description, cast),
 		}
 	}
 }

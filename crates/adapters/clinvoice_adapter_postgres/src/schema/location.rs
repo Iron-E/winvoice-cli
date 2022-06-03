@@ -46,7 +46,6 @@ impl PgLocation
 			// NOTE: this scope exists because we want to get rid of the mutable borrow after we're
 			//       done with it.
 			{
-
 				let mut separated = query.separated(' ');
 
 				separated

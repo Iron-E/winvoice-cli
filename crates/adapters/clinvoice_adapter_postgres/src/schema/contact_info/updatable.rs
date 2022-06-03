@@ -10,7 +10,12 @@ impl Updatable for PgContactInfo
 	type Db = Postgres;
 	type Entity = Contact;
 
-	async fn update(connection: &mut Transaction<Self::Db>, entity: Self::Entity) -> Result<()>
+	async fn update<'e>(
+		connection: &mut Transaction<Self::Db>,
+		entities: impl 'async_trait + Clone + Iterator<Item = &'e Self::Entity> + Send,
+	) -> Result<()>
+	where
+		Self::Entity: 'e,
 	{
 		todo!()
 	}

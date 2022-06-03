@@ -423,6 +423,47 @@ impl WriteWhereClause<Postgres, &Match<Id>> for PgSchema
 	}
 }
 
+impl WriteWhereClause<Postgres, &Match<PgInterval>> for PgSchema
+{
+	fn write_where_clause(
+		context: WriteContext,
+		ident: impl Copy + Display,
+		match_condition: &Match<PgInterval>,
+		query: &mut QueryBuilder<Postgres>,
+	) -> WriteContext
+	{
+		write_where_clause(context, ident, match_condition, query)
+	}
+}
+
+impl<T> WriteWhereClause<Postgres, &Match<PgOption<T>>> for PgSchema
+where
+	T: Display + PartialEq,
+{
+	fn write_where_clause(
+		context: WriteContext,
+		ident: impl Copy + Display,
+		match_condition: &Match<PgOption<T>>,
+		query: &mut QueryBuilder<Postgres>,
+	) -> WriteContext
+	{
+		write_where_clause(context, ident, match_condition, query)
+	}
+}
+
+impl WriteWhereClause<Postgres, &Match<PgTimestampTz>> for PgSchema
+{
+	fn write_where_clause(
+		context: WriteContext,
+		ident: impl Copy + Display,
+		match_condition: &Match<PgTimestampTz>,
+		query: &mut QueryBuilder<Postgres>,
+	) -> WriteContext
+	{
+		write_where_clause(context, ident, match_condition, query)
+	}
+}
+
 impl WriteWhereClause<Postgres, &MatchSet<MatchExpense>> for PgSchema
 {
 	fn write_where_clause(
@@ -503,47 +544,6 @@ impl WriteWhereClause<Postgres, &MatchSet<MatchExpense>> for PgSchema
 		};
 
 		WriteContext::AcceptingAnotherWhereCondition
-	}
-}
-
-impl WriteWhereClause<Postgres, &Match<PgInterval>> for PgSchema
-{
-	fn write_where_clause(
-		context: WriteContext,
-		ident: impl Copy + Display,
-		match_condition: &Match<PgInterval>,
-		query: &mut QueryBuilder<Postgres>,
-	) -> WriteContext
-	{
-		write_where_clause(context, ident, match_condition, query)
-	}
-}
-
-impl<T> WriteWhereClause<Postgres, &Match<PgOption<T>>> for PgSchema
-where
-	T: Display + PartialEq,
-{
-	fn write_where_clause(
-		context: WriteContext,
-		ident: impl Copy + Display,
-		match_condition: &Match<PgOption<T>>,
-		query: &mut QueryBuilder<Postgres>,
-	) -> WriteContext
-	{
-		write_where_clause(context, ident, match_condition, query)
-	}
-}
-
-impl WriteWhereClause<Postgres, &Match<PgTimestampTz>> for PgSchema
-{
-	fn write_where_clause(
-		context: WriteContext,
-		ident: impl Copy + Display,
-		match_condition: &Match<PgTimestampTz>,
-		query: &mut QueryBuilder<Postgres>,
-	) -> WriteContext
-	{
-		write_where_clause(context, ident, match_condition, query)
 	}
 }
 

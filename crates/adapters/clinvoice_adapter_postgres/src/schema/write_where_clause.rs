@@ -363,14 +363,14 @@ where
 			&mut conditions.iter().filter(|m| *m != &Match::Any),
 		),
 		Match::Any => return context,
-		Match::EqualTo(id) => write_comparison(query, context, ident, "=", id),
-		Match::GreaterThan(id) => write_comparison(query, context, ident, ">", id),
+		Match::EqualTo(value) => write_comparison(query, context, ident, "=", value),
+		Match::GreaterThan(value) => write_comparison(query, context, ident, ">", value),
 		Match::InRange(low, high) =>
 		{
 			write_comparison(query, context, ident, "BETWEEN", low);
 			write_comparison(query, WriteContext::InWhereCondition, "", "AND", high);
 		},
-		Match::LessThan(id) => write_comparison(query, context, ident, "<", id),
+		Match::LessThan(value) => write_comparison(query, context, ident, "<", value),
 		Match::Not(condition) => match condition.deref()
 		{
 			Match::Any => write_is_null(query, context, ident),

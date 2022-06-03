@@ -1,7 +1,4 @@
-use core::{
-	fmt::{Debug, Display},
-	ops::Deref,
-};
+use core::{fmt::Display, ops::Deref};
 
 use async_recursion::async_recursion;
 use clinvoice_adapter::{WriteContext, WriteWhereClause};

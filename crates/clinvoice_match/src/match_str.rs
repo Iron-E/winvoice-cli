@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 /// A value in a retrieval operation.
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
-pub enum MatchStr<S>
+pub enum MatchStr<T>
 {
 	/// # Summary
 	///
@@ -24,7 +24,7 @@ pub enum MatchStr<S>
 	/// # Summary
 	///
 	/// Match if and only if this value and some other string are exactly the same.
-	EqualTo(S),
+	EqualTo(T),
 
 	/// # Summary
 	///
@@ -32,7 +32,7 @@ pub enum MatchStr<S>
 	///
 	/// * Some string contains this value anywhere in its contents.
 	/// * A set of strings contains this value anywhere in its contents.
-	Contains(S),
+	Contains(T),
 
 	/// # Summary
 	///
@@ -56,5 +56,5 @@ pub enum MatchStr<S>
 	/// The regular expression syntax depends on the database adapter:
 	///
 	/// * [Postgres](https://www.postgresql.org/docs/current/functions-matching.html#FUNCTIONS-POSIX-TABLE)
-	Regex(S),
+	Regex(T),
 }

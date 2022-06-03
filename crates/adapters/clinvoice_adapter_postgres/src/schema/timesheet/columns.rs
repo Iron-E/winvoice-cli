@@ -3,23 +3,21 @@ use core::fmt::Display;
 use clinvoice_schema::{Employee, Expense, Job, Timesheet};
 use sqlx::{postgres::PgRow, Row};
 
-use crate::schema::{PgScopedColumn, typecast::PgTypeCast};
+use crate::schema::{typecast::PgTypeCast, PgScopedColumn};
 
-pub(in crate::schema) struct PgTimesheetColumns<D>
-where
-	D: Display,
+pub(in crate::schema) struct PgTimesheetColumns<T>
 {
-	pub employee_id: D,
-	pub id: D,
-	pub job_id: D,
-	pub time_begin: D,
-	pub time_end: D,
-	pub work_notes: D,
+	pub employee_id: T,
+	pub id: T,
+	pub job_id: T,
+	pub time_begin: T,
+	pub time_end: T,
+	pub work_notes: T,
 }
 
-impl<D> PgTimesheetColumns<D>
+impl<T> PgTimesheetColumns<T>
 where
-	D: Copy + Display,
+	T: Copy,
 {
 	/// # Summary
 	///
@@ -28,9 +26,9 @@ where
 	pub(in crate::schema) fn scoped<TIdent>(
 		&self,
 		ident: TIdent,
-	) -> PgTimesheetColumns<PgScopedColumn<D, TIdent>>
+	) -> PgTimesheetColumns<PgScopedColumn<T, TIdent>>
 	where
-		TIdent: Copy + Display,
+		TIdent: Copy,
 	{
 		PgTimesheetColumns {
 			employee_id: PgScopedColumn(ident, self.employee_id),
@@ -49,9 +47,9 @@ where
 	pub(in crate::schema) fn typecast<TCast>(
 		&self,
 		cast: TCast,
-	) -> PgTimesheetColumns<PgTypeCast<TCast, D>>
+	) -> PgTimesheetColumns<PgTypeCast<TCast, T>>
 	where
-		TCast: Display,
+		TCast: Copy,
 	{
 		PgTimesheetColumns {
 			employee_id: PgTypeCast(self.employee_id, cast),

@@ -1,25 +1,21 @@
-use core::fmt::Display;
-
 use clinvoice_schema::{Employee, Organization};
 use sqlx::{postgres::PgRow, Row};
 
-use crate::schema::{PgScopedColumn, typecast::PgTypeCast};
+use crate::schema::{typecast::PgTypeCast, PgScopedColumn};
 
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub(in crate::schema) struct PgEmployeeColumns<D>
-where
-	D: Display,
+pub(in crate::schema) struct PgEmployeeColumns<T>
 {
-	pub id: D,
-	pub name: D,
-	pub organization_id: D,
-	pub status: D,
-	pub title: D,
+	pub id: T,
+	pub name: T,
+	pub organization_id: T,
+	pub status: T,
+	pub title: T,
 }
 
-impl<D> PgEmployeeColumns<D>
+impl<T> PgEmployeeColumns<T>
 where
-	D: Copy + Display,
+	T: Copy,
 {
 	/// # Summary
 	///
@@ -28,9 +24,9 @@ where
 	pub(in crate::schema) fn scoped<TIdent>(
 		&self,
 		ident: TIdent,
-	) -> PgEmployeeColumns<PgScopedColumn<D, TIdent>>
+	) -> PgEmployeeColumns<PgScopedColumn<T, TIdent>>
 	where
-		TIdent: Copy + Display,
+		TIdent: Copy,
 	{
 		PgEmployeeColumns {
 			id: PgScopedColumn(ident, self.id),
@@ -48,9 +44,9 @@ where
 	pub(in crate::schema) fn typecast<TCast>(
 		&self,
 		cast: TCast,
-	) -> PgEmployeeColumns<PgTypeCast<TCast, D>>
+	) -> PgEmployeeColumns<PgTypeCast<TCast, T>>
 	where
-		TCast: Display,
+		TCast: Copy,
 	{
 		PgEmployeeColumns {
 			id: PgTypeCast(self.id, cast),

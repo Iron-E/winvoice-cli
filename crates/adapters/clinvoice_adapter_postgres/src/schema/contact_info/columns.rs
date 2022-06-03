@@ -1,27 +1,23 @@
-use core::fmt::Display;
-
 use clinvoice_schema::{Contact, ContactKind};
 use futures::TryFutureExt;
 use sqlx::{error::UnexpectedNullError, postgres::PgRow, Error, PgPool, Result, Row};
 
-use crate::schema::{PgLocation, PgScopedColumn, typecast::PgTypeCast};
+use crate::schema::{typecast::PgTypeCast, PgLocation, PgScopedColumn};
 
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub(in crate::schema) struct PgContactColumns<D>
-where
-	D: Display,
+pub(in crate::schema) struct PgContactColumns<T>
 {
-	pub address_id: D,
-	pub email: D,
-	pub export: D,
-	pub label: D,
-	pub organization_id: D,
-	pub phone: D,
+	pub address_id: T,
+	pub email: T,
+	pub export: T,
+	pub label: T,
+	pub organization_id: T,
+	pub phone: T,
 }
 
-impl<D> PgContactColumns<D>
+impl<T> PgContactColumns<T>
 where
-	D: Copy + Display,
+	T: Copy,
 {
 	/// # Summary
 	///
@@ -30,9 +26,9 @@ where
 	pub(in crate::schema) fn scoped<TIdent>(
 		&self,
 		ident: TIdent,
-	) -> PgContactColumns<PgScopedColumn<D, TIdent>>
+	) -> PgContactColumns<PgScopedColumn<T, TIdent>>
 	where
-		TIdent: Copy + Display,
+		TIdent: Copy,
 	{
 		PgContactColumns {
 			address_id: PgScopedColumn(ident, self.address_id),
@@ -51,9 +47,9 @@ where
 	pub(in crate::schema) fn typecast<TCast>(
 		&self,
 		cast: TCast,
-	) -> PgContactColumns<PgTypeCast<TCast, D>>
+	) -> PgContactColumns<PgTypeCast<TCast, T>>
 	where
-		TCast: Display,
+		TCast: Copy,
 	{
 		PgContactColumns {
 			address_id: PgTypeCast(self.address_id, cast),

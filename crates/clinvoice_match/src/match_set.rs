@@ -14,8 +14,6 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 pub enum MatchSet<T>
-where
-	T: Clone + Debug,
 {
 	/// # Summary
 	///
@@ -44,8 +42,6 @@ where
 }
 
 impl<T> MatchSet<T>
-where
-	T: Clone + Debug,
 {
 	/// # Summary
 	///
@@ -55,8 +51,6 @@ where
 	///
 	/// * [`Iterator::map`]
 	pub fn map<U>(self, f: &impl Fn(T) -> U) -> MatchSet<U>
-	where
-		U: Clone + Debug,
 	{
 		match self
 		{

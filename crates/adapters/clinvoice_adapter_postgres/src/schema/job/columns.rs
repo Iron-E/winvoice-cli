@@ -4,27 +4,25 @@ use clinvoice_finance::{Decimal, Money};
 use clinvoice_schema::{Invoice, InvoiceDate, Job, Organization};
 use sqlx::{postgres::PgRow, Result, Row};
 
-use crate::schema::{util, PgScopedColumn, typecast::PgTypeCast};
+use crate::schema::{typecast::PgTypeCast, util, PgScopedColumn};
 
-pub(in crate::schema) struct PgJobColumns<D>
-where
-	D: Display,
+pub(in crate::schema) struct PgJobColumns<T>
 {
-	pub client_id: D,
-	pub date_open: D,
-	pub date_close: D,
-	pub id: D,
-	pub increment: D,
-	pub invoice_date_issued: D,
-	pub invoice_date_paid: D,
-	pub invoice_hourly_rate: D,
-	pub notes: D,
-	pub objectives: D,
+	pub client_id: T,
+	pub date_open: T,
+	pub date_close: T,
+	pub id: T,
+	pub increment: T,
+	pub invoice_date_issued: T,
+	pub invoice_date_paid: T,
+	pub invoice_hourly_rate: T,
+	pub notes: T,
+	pub objectives: T,
 }
 
-impl<D> PgJobColumns<D>
+impl<T> PgJobColumns<T>
 where
-	D: Copy + Display,
+	T: Copy,
 {
 	/// # Summary
 	///
@@ -33,9 +31,9 @@ where
 	pub(in crate::schema) fn scoped<TIdent>(
 		&self,
 		ident: TIdent,
-	) -> PgJobColumns<PgScopedColumn<D, TIdent>>
+	) -> PgJobColumns<PgScopedColumn<T, TIdent>>
 	where
-		TIdent: Copy + Display,
+		TIdent: Copy,
 	{
 		PgJobColumns {
 			client_id: PgScopedColumn(ident, self.client_id),
@@ -58,9 +56,9 @@ where
 	pub(in crate::schema) fn typecast<TCast>(
 		&self,
 		cast: TCast,
-	) -> PgJobColumns<PgTypeCast<TCast, D>>
+	) -> PgJobColumns<PgTypeCast<TCast, T>>
 	where
-		TCast: Display,
+		TCast: Copy,
 	{
 		PgJobColumns {
 			client_id: PgTypeCast(self.client_id, cast),

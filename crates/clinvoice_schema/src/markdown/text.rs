@@ -1,43 +1,23 @@
-use core::fmt::{Display, Formatter, Result};
+mod display;
 
 /// # Summary
 ///
 /// Types of text within a Markdown document.
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub enum Text<D>
-where
-	D: Display,
+pub enum Text<T>
 {
 	/// # Summary
 	///
 	/// Bold text.
-	Bold(D),
+	Bold(T),
 
 	/// # Summary
 	///
 	/// Italic text.
-	Italic(D),
+	Italic(T),
 
 	/// # Summary
 	///
 	/// LaTeX formatted text.
-	Math(D),
-}
-
-impl<D> Display for Text<D>
-where
-	D: Display,
-{
-	/// # Summary
-	///
-	/// Turn this enumeration representation of Markdown into actual Markdown.
-	fn fmt(&self, formatter: &mut Formatter<'_>) -> Result
-	{
-		match self
-		{
-			Self::Bold(text) => write!(formatter, "**{text}**"),
-			Self::Italic(text) => write!(formatter, "*{text}*"),
-			Self::Math(text) => write!(formatter, "${text}$"),
-		}
-	}
+	Math(T),
 }

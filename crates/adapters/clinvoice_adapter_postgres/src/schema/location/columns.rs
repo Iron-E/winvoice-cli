@@ -1,19 +1,17 @@
 use core::fmt::Display;
 
-use crate::schema::{PgScopedColumn, typecast::PgTypeCast};
+use crate::schema::{typecast::PgTypeCast, PgScopedColumn};
 
-pub(in crate::schema) struct PgLocationColumns<D>
-where
-	D: Display,
+pub(in crate::schema) struct PgLocationColumns<T>
 {
-	pub id: D,
-	pub outer_id: D,
-	pub name: D,
+	pub id: T,
+	pub outer_id: T,
+	pub name: T,
 }
 
-impl<D> PgLocationColumns<D>
+impl<T> PgLocationColumns<T>
 where
-	D: Copy + Display,
+	T: Copy,
 {
 	/// # Summary
 	///
@@ -22,9 +20,9 @@ where
 	pub(in crate::schema) fn scoped<TIdent>(
 		&self,
 		ident: TIdent,
-	) -> PgLocationColumns<PgScopedColumn<D, TIdent>>
+	) -> PgLocationColumns<PgScopedColumn<T, TIdent>>
 	where
-		TIdent: Copy + Display,
+		TIdent: Copy,
 	{
 		PgLocationColumns {
 			id: PgScopedColumn(ident, self.id),
@@ -40,9 +38,9 @@ where
 	pub(in crate::schema) fn typecast<TCast>(
 		&self,
 		cast: TCast,
-	) -> PgLocationColumns<PgTypeCast<TCast, D>>
+	) -> PgLocationColumns<PgTypeCast<TCast, T>>
 	where
-		TCast: Display,
+		TCast: Copy,
 	{
 		PgLocationColumns {
 			id: PgTypeCast(self.id, cast),

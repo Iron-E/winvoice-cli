@@ -25,26 +25,26 @@ impl OrganizationAdapter for PgOrganization
 		name: String,
 	) -> Result<Organization>
 	{
-		let mut transaction = connection.begin().await?;
+		connection.begin().and_then(|mut transaction| async {
+			let row = sqlx::query!(
+				"INSERT INTO organizations (location_id, name) VALUES ($1, $2) RETURNING id;",
+				location.id,
+				name
+			)
+			.fetch_one(connection)
+			.await?;
 
-		let row = sqlx::query!(
-			"INSERT INTO organizations (location_id, name) VALUES ($1, $2) RETURNING id;",
-			location.id,
-			name
-		)
-		.fetch_one(connection)
-		.await?;
+			let contact_info_db = PgContactInfo::create(&mut transaction, contact_info, row.id).await?;
 
-		let contact_info_db = PgContactInfo::create(&mut transaction, contact_info, row.id).await?;
+			transaction.commit().await?;
 
-		transaction.commit().await?;
-
-		Ok(Organization {
-			contact_info: contact_info_db,
-			id: row.id,
-			location,
-			name,
-		})
+			Ok(Organization {
+				contact_info: contact_info_db,
+				id: row.id,
+				location,
+				name,
+			})
+		}).await
 	}
 
 	async fn retrieve(

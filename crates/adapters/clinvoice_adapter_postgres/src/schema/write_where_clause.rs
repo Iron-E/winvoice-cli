@@ -1,12 +1,11 @@
 use core::{
 	fmt::{Debug, Display},
 	ops::Deref,
-	time::Duration,
 };
 
 use async_recursion::async_recursion;
 use clinvoice_adapter::{WriteContext, WriteWhereClause};
-use clinvoice_finance::Money;
+use clinvoice_finance::Decimal;
 use clinvoice_match::{
 	Match,
 	MatchContact,
@@ -18,7 +17,6 @@ use clinvoice_match::{
 	MatchSet,
 	MatchStr,
 	MatchTimesheet,
-	Serde,
 };
 use clinvoice_schema::{chrono::NaiveDateTime, Id};
 use sqlx::{Database, PgPool, Postgres, QueryBuilder, Result};
@@ -399,6 +397,19 @@ impl WriteWhereClause<Postgres, &Match<bool>> for PgSchema
 	}
 }
 
+impl WriteWhereClause<Postgres, &Match<Decimal>> for PgSchema
+{
+	fn write_where_clause(
+		context: WriteContext,
+		ident: impl Copy + Display,
+		match_condition: &Match<Decimal>,
+		query: &mut QueryBuilder<Postgres>,
+	) -> WriteContext
+	{
+		write_where_clause(context, ident, match_condition, query)
+	}
+}
+
 impl WriteWhereClause<Postgres, &Match<Id>> for PgSchema
 {
 	fn write_where_clause(
@@ -409,25 +420,6 @@ impl WriteWhereClause<Postgres, &Match<Id>> for PgSchema
 	) -> WriteContext
 	{
 		write_where_clause(context, ident, match_condition, query)
-	}
-}
-
-impl WriteWhereClause<Postgres, &Match<Money>> for PgSchema
-{
-	fn write_where_clause(
-		context: WriteContext,
-		ident: impl Copy + Display,
-		match_condition: &Match<Money>,
-		query: &mut QueryBuilder<Postgres>,
-	) -> WriteContext
-	{
-		// TODO: use `PgTypeCast::numeric(ident)` after rust-lang/rust#39959
-		write_where_clause(
-			context,
-			&format!("{ident}::numeric"),
-			match_condition,
-			query,
-		)
 	}
 }
 
@@ -557,78 +549,6 @@ impl WriteWhereClause<Postgres, &Match<Option<NaiveDateTime>>> for PgSchema
 	}
 }
 
-impl WriteWhereClause<Postgres, &Match<Serde<Duration>>> for PgSchema
-{
-	fn write_where_clause(
-		context: WriteContext,
-		ident: impl Copy + Display,
-		match_condition: &Match<Serde<Duration>>,
-		query: &mut QueryBuilder<Postgres>,
-	) -> WriteContext
-	{
-		match match_condition
-		{
-			Match::And(conditions) => write_boolean_group::<_, _, _, _, true>(
-				query,
-				context,
-				ident,
-				&mut conditions.iter().filter(|m| *m != &Match::Any),
-			),
-			Match::Any => return context,
-			Match::EqualTo(duration) => write_comparison(
-				query,
-				context,
-				ident,
-				"=",
-				PgInterval(duration.into_inner()),
-			),
-			Match::GreaterThan(duration) => write_comparison(
-				query,
-				context,
-				ident,
-				">",
-				PgInterval(duration.into_inner()),
-			),
-			Match::InRange(low, high) =>
-			{
-				write_comparison(
-					query,
-					context,
-					ident,
-					"BETWEEN",
-					PgInterval(low.into_inner()),
-				);
-				write_comparison(
-					query,
-					WriteContext::InWhereCondition,
-					"",
-					"AND",
-					PgInterval(high.into_inner()),
-				);
-			},
-			Match::LessThan(duration) => write_comparison(
-				query,
-				context,
-				ident,
-				"<",
-				PgInterval(duration.into_inner()),
-			),
-			Match::Not(condition) => match condition.deref()
-			{
-				Match::Any => write_is_null(query, context, ident),
-				m => write_negated(query, context, ident, m),
-			},
-			Match::Or(conditions) => write_boolean_group::<_, _, _, _, false>(
-				query,
-				context,
-				ident,
-				&mut conditions.iter().filter(|m| *m != &Match::Any),
-			),
-		};
-		WriteContext::AcceptingAnotherWhereCondition
-	}
-}
-
 impl WriteWhereClause<Postgres, &MatchSet<MatchExpense>> for PgSchema
 {
 	fn write_where_clause(
@@ -709,6 +629,19 @@ impl WriteWhereClause<Postgres, &MatchSet<MatchExpense>> for PgSchema
 		};
 
 		WriteContext::AcceptingAnotherWhereCondition
+	}
+}
+
+impl WriteWhereClause<Postgres, &Match<PgInterval>> for PgSchema
+{
+	fn write_where_clause(
+		context: WriteContext,
+		ident: impl Copy + Display,
+		match_condition: &Match<PgInterval>,
+		query: &mut QueryBuilder<Postgres>,
+	) -> WriteContext
+	{
+		write_where_clause(context, ident, match_condition, query)
 	}
 }
 
@@ -844,8 +777,9 @@ impl WriteWhereClause<Postgres, &MatchExpense> for PgSchema
 					&match_condition.category,
 					query,
 				),
-				columns.cost,
-				&match_condition.cost,
+				// NOTE: `cost` is stored as text on the DB
+				columns.typecast("numeric").cost,
+				&match_condition.cost.clone().map(&|c| c.amount),
 				query,
 			),
 			columns.description,
@@ -898,7 +832,10 @@ impl WriteWhereClause<Postgres, &MatchJob> for PgSchema
 									query,
 								),
 								columns.increment,
-								&match_condition.increment,
+								&match_condition
+									.increment
+									.clone()
+									.map(&|i| PgInterval(i.into_inner())),
 								query,
 							),
 							columns.invoice_date_issued,
@@ -909,8 +846,13 @@ impl WriteWhereClause<Postgres, &MatchJob> for PgSchema
 						&match_condition.invoice.date_paid,
 						query,
 					),
-					columns.invoice_hourly_rate,
-					&match_condition.invoice.hourly_rate,
+					// NOTE: `hourly_rate` is stored as text on the DB
+					columns.typecast("numeric").invoice_hourly_rate,
+					&match_condition
+						.invoice
+						.hourly_rate
+						.clone()
+						.map(&|r| r.amount),
 					query,
 				),
 				columns.notes,

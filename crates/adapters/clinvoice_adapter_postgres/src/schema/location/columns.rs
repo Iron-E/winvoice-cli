@@ -1,5 +1,3 @@
-use core::fmt::Display;
-
 use crate::schema::{typecast::PgTypeCast, PgScopedColumn};
 
 pub(in crate::schema) struct PgLocationColumns<T>

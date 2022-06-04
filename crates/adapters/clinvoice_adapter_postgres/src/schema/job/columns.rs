@@ -1,5 +1,3 @@
-use core::fmt::Display;
-
 use clinvoice_finance::{Decimal, Money};
 use clinvoice_schema::{Invoice, InvoiceDate, Job, Organization};
 use sqlx::{postgres::PgRow, Result, Row};

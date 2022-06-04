@@ -3,11 +3,11 @@ use super::{TypeCast, WithIdentifier};
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct ExpenseColumns<T>
 {
-	pub id: T,
-	pub timesheet_id: T,
 	pub category: T,
 	pub cost: T,
 	pub description: T,
+	pub id: T,
+	pub timesheet_id: T,
 }
 
 impl<T> ExpenseColumns<T>

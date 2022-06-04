@@ -3,8 +3,8 @@ use super::{TypeCast, WithIdentifier};
 pub struct JobColumns<T>
 {
 	pub client_id: T,
-	pub date_open: T,
 	pub date_close: T,
+	pub date_open: T,
 	pub id: T,
 	pub increment: T,
 	pub invoice_date_issued: T,

@@ -3,8 +3,8 @@ use super::{TypeCast, WithIdentifier};
 pub struct LocationColumns<T>
 {
 	pub id: T,
-	pub outer_id: T,
 	pub name: T,
+	pub outer_id: T,
 }
 
 impl<T> LocationColumns<T>

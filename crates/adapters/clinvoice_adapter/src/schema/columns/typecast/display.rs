@@ -9,6 +9,6 @@ where
 {
 	fn fmt(&self, f: &mut Formatter<'_>) -> Result
 	{
-		write!(f, "CAST ({} AS {})", self.0, self.1)
+		write!(f, "CAST({} AS {})", self.0, self.1)
 	}
 }

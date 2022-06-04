@@ -58,3 +58,64 @@ pub enum MatchStr<T>
 	/// * [Postgres](https://www.postgresql.org/docs/current/functions-matching.html#FUNCTIONS-POSIX-TABLE)
 	Regex(T),
 }
+
+impl<T> MatchStr<T>
+{
+	/// # Summary
+	///
+	/// Transform some `Match` of type `T` into another type `U` by providing a mapping function.
+	///
+	/// TODO: remove leading borrow from `f` once recursion limit calculation improves
+	///
+	/// # See also
+	///
+	/// * [`Iterator::map`]
+	pub fn map<U>(self, f: &impl Fn(T) -> U) -> MatchStr<U>
+	{
+		match self
+		{
+			Self::And(match_conditions) =>
+			{
+				MatchStr::And(match_conditions.into_iter().map(|m| m.map(f)).collect())
+			},
+			Self::Any => MatchStr::Any,
+			Self::Contains(x) => MatchStr::Contains(f(x)),
+			Self::EqualTo(x) => MatchStr::EqualTo(f(x)),
+			Self::Not(match_condition) => MatchStr::Not(match_condition.map(f).into()),
+			Self::Or(match_conditions) =>
+			{
+				MatchStr::Or(match_conditions.into_iter().map(|m| m.map(f)).collect())
+			},
+			Self::Regex(x) => MatchStr::Regex(f(x)),
+		}
+	}
+
+	/// # Summary
+	///
+	/// Transform some `Match` of type `T` into another type `U` by providing a mapping function.
+	///
+	/// TODO: remove leading borrow from `f` once recursion limit calculation improves
+	///
+	/// # See also
+	///
+	/// * [`Iterator::map`]
+	pub fn map_ref<U>(&self, f: &impl Fn(&T) -> U) -> MatchStr<U>
+	{
+		match self
+		{
+			Self::And(match_conditions) =>
+			{
+				MatchStr::And(match_conditions.into_iter().map(|m| m.map_ref(f)).collect())
+			},
+			Self::Any => MatchStr::Any,
+			Self::Contains(x) => MatchStr::Contains(f(x)),
+			Self::EqualTo(x) => MatchStr::EqualTo(f(x)),
+			Self::Not(match_condition) => MatchStr::Not(match_condition.map_ref(f).into()),
+			Self::Or(match_conditions) =>
+			{
+				MatchStr::Or(match_conditions.into_iter().map(|m| m.map_ref(f)).collect())
+			},
+			Self::Regex(x) => MatchStr::Regex(f(x)),
+		}
+	}
+}

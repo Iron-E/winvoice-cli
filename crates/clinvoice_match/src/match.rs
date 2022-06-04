@@ -62,6 +62,8 @@ impl<T> Match<T>
 	///
 	/// Transform some `Match` of type `T` into another type `U` by providing a mapping function.
 	///
+	/// TODO: remove leading borrow from `f` once recursion limit calculation improves
+	///
 	/// # See also
 	///
 	/// * [`Iterator::map`]
@@ -85,6 +87,36 @@ impl<T> Match<T>
 			},
 		}
 	}
+
+	/// # Summary
+	///
+	/// Transform some `Match` of type `T` into another type `U` by providing a mapping function.
+	///
+	/// TODO: remove leading borrow from `f` once recursion limit calculation improves
+	///
+	/// # See also
+	///
+	/// * [`Iterator::map`]
+	pub fn map_ref<U>(&self, f: &impl Fn(&T) -> U) -> Match<U>
+	{
+		match self
+		{
+			Self::And(match_conditions) =>
+			{
+				Match::And(match_conditions.into_iter().map(|m| m.map_ref(f)).collect())
+			},
+			Self::Any => Match::Any,
+			Self::EqualTo(x) => Match::EqualTo(f(x)),
+			Self::GreaterThan(x) => Match::GreaterThan(f(x)),
+			Self::InRange(low, high) => Match::InRange(f(low), f(high)),
+			Self::LessThan(x) => Match::LessThan(f(x)),
+			Self::Not(match_condition) => Match::Not(match_condition.map_ref(f).into()),
+			Self::Or(match_conditions) =>
+			{
+				Match::Or(match_conditions.into_iter().map(|m| m.map_ref(f)).collect())
+			},
+		}
+	}
 }
 
 impl Match<Money>
@@ -92,8 +124,8 @@ impl Match<Money>
 	/// # Summary
 	///
 	/// Exchange a `Match` for an amount of `Money` to another `currency`.
-	pub fn exchange(self, currency: Currency, rates: &ExchangeRates) -> Match<Money>
+	pub fn exchange(&self, currency: Currency, rates: &ExchangeRates) -> Match<Money>
 	{
-		self.map(&|money| money.exchange(currency, rates))
+		self.map_ref(&|money| money.exchange(currency, rates))
 	}
 }

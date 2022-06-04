@@ -8,6 +8,7 @@
 //! [`clinvoice` data](clinvoice_schema) types may implement it with the same signature. This is in
 //! contrast to [`JobAdapter`], which may only be implemented by [`Job`](clinvoice_schema::Job)s.
 
+pub mod columns;
 mod contact_info_adapter;
 mod employee_adapter;
 mod expenses_adapter;

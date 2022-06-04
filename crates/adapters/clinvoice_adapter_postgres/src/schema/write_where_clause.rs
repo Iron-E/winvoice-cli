@@ -1,7 +1,18 @@
 use core::{fmt::Display, ops::Deref};
 
 use async_recursion::async_recursion;
-use clinvoice_adapter::{WriteContext, WriteWhereClause};
+use clinvoice_adapter::{
+	schema::columns::{
+		ContactColumns,
+		EmployeeColumns,
+		ExpenseColumns,
+		JobColumns,
+		OrganizationColumns,
+		TimesheetColumns,
+	},
+	WriteContext,
+	WriteWhereClause,
+};
 use clinvoice_finance::Decimal;
 use clinvoice_match::{
 	Match,
@@ -18,21 +29,7 @@ use clinvoice_match::{
 use clinvoice_schema::Id;
 use sqlx::{Database, PgPool, Postgres, QueryBuilder, Result};
 
-use super::{
-	organization::columns::PgOrganizationColumns,
-	PgInterval,
-	PgLocation,
-	PgOption,
-	PgSchema,
-	PgTimestampTz,
-};
-use crate::schema::{
-	contact_info::columns::PgContactColumns,
-	employee::columns::PgEmployeeColumns,
-	expenses::columns::PgExpenseColumns,
-	job::columns::PgJobColumns,
-	timesheet::columns::PgTimesheetColumns,
-};
+use super::{PgInterval, PgLocation, PgOption, PgSchema, PgTimestampTz};
 
 /// # Summary
 ///
@@ -195,7 +192,7 @@ where
 
 		MatchSet::Contains(match_contact) =>
 		{
-			const COLUMNS: PgContactColumns<&'static str> = PgContactColumns::new();
+			const COLUMNS: ContactColumns<&'static str> = ContactColumns::default();
 
 			let ident_columns = COLUMNS.scoped(ident);
 
@@ -502,7 +499,7 @@ impl WriteWhereClause<Postgres, &MatchSet<MatchExpense>> for PgSchema
 
 			MatchSet::Contains(match_expense) =>
 			{
-				const COLUMNS: PgExpenseColumns<&'static str> = PgExpenseColumns::new();
+				const COLUMNS: ExpenseColumns<&'static str> = ExpenseColumns::default();
 
 				let ident_columns = COLUMNS.scoped(ident);
 
@@ -631,7 +628,7 @@ impl WriteWhereClause<Postgres, &MatchEmployee> for PgSchema
 		query: &mut QueryBuilder<Postgres>,
 	) -> WriteContext
 	{
-		let columns = PgEmployeeColumns::new().scoped(ident);
+		let columns = EmployeeColumns::default().scoped(ident);
 
 		PgSchema::write_where_clause(
 			PgSchema::write_where_clause(
@@ -670,7 +667,7 @@ impl WriteWhereClause<Postgres, &MatchExpense> for PgSchema
 		query: &mut QueryBuilder<Postgres>,
 	) -> WriteContext
 	{
-		let columns = PgExpenseColumns::new().scoped(ident);
+		let columns = ExpenseColumns::default().scoped(ident);
 
 		PgSchema::write_where_clause(
 			PgSchema::write_where_clause(
@@ -710,7 +707,7 @@ impl WriteWhereClause<Postgres, &MatchJob> for PgSchema
 		query: &mut QueryBuilder<Postgres>,
 	) -> WriteContext
 	{
-		let columns = PgJobColumns::new().scoped(ident);
+		let columns = JobColumns::default().scoped(ident);
 
 		PgSchema::write_where_clause(
 			PgSchema::write_where_clause(
@@ -758,10 +755,7 @@ impl WriteWhereClause<Postgres, &MatchJob> for PgSchema
 					),
 					// NOTE: `hourly_rate` is stored as text on the DB
 					columns.typecast("numeric").invoice_hourly_rate,
-					&match_condition
-						.invoice
-						.hourly_rate
-						.map_ref(&|r| r.amount),
+					&match_condition.invoice.hourly_rate.map_ref(&|r| r.amount),
 					query,
 				),
 				columns.notes,
@@ -793,7 +787,7 @@ impl WriteWhereClause<Postgres, &MatchOrganization> for PgSchema
 		query: &mut QueryBuilder<Postgres>,
 	) -> WriteContext
 	{
-		let columns = PgOrganizationColumns::new().scoped(ident);
+		let columns = OrganizationColumns::default().scoped(ident);
 
 		PgSchema::write_where_clause(
 			PgSchema::write_where_clause(context, columns.id, &match_condition.id, query),
@@ -822,16 +816,14 @@ impl WriteWhereClause<Postgres, &MatchTimesheet> for PgSchema
 		query: &mut QueryBuilder<Postgres>,
 	) -> WriteContext
 	{
-		let columns = PgTimesheetColumns::new().scoped(ident);
+		let columns = TimesheetColumns::default().scoped(ident);
 
 		PgSchema::write_where_clause(
 			PgSchema::write_where_clause(
 				PgSchema::write_where_clause(
 					PgSchema::write_where_clause(context, columns.id, &match_condition.id, query),
 					columns.time_begin,
-					&match_condition
-						.time_begin
-						.map_ref(&|d| PgTimestampTz(*d)),
+					&match_condition.time_begin.map_ref(&|d| PgTimestampTz(*d)),
 					query,
 				),
 				columns.time_end,

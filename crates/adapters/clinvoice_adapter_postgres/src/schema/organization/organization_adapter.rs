@@ -1,7 +1,12 @@
 use std::collections::HashMap;
 
 use clinvoice_adapter::{
-	schema::{ContactInfoAdapter, LocationAdapter, OrganizationAdapter},
+	schema::{
+		columns::OrganizationColumns,
+		ContactInfoAdapter,
+		LocationAdapter,
+		OrganizationAdapter,
+	},
 	WriteWhereClause,
 };
 use clinvoice_match::MatchOrganization;
@@ -9,7 +14,7 @@ use clinvoice_schema::{ContactKind, Location, Organization};
 use futures::{future, TryFutureExt, TryStreamExt};
 use sqlx::{PgPool, QueryBuilder, Result, Row};
 
-use super::{columns::PgOrganizationColumns, PgOrganization};
+use super::PgOrganization;
 use crate::{
 	schema::{PgContactInfo, PgLocation},
 	PgSchema,
@@ -65,7 +70,7 @@ impl OrganizationAdapter for PgOrganization
 					.collect::<HashMap<_, _>>()
 			});
 
-		const COLUMNS: PgOrganizationColumns<&'static str> = PgOrganizationColumns::new();
+		const COLUMNS: OrganizationColumns<&'static str> = OrganizationColumns::default();
 
 		let mut query = QueryBuilder::new(
 			"SELECT
@@ -87,7 +92,12 @@ impl OrganizationAdapter for PgOrganization
 				{
 					if let Some(l) = locations.get(&row.get(COLUMNS.location_id))
 					{
-						return future::ok(Some(COLUMNS.row_to_view(c.clone(), l.clone(), &row)));
+						return future::ok(Some(PgOrganization::row_to_view(
+							COLUMNS,
+							&row,
+							c.clone(),
+							l.clone(),
+						)));
 					}
 				}
 

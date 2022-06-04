@@ -1,12 +1,11 @@
-use clinvoice_adapter::WriteWhereClause;
+use clinvoice_adapter::{schema::columns::LocationColumns, WriteWhereClause};
 use clinvoice_match::{Match, MatchLocation, MatchOuterLocation};
 use clinvoice_schema::{Id, Location};
 use futures::{future, TryFutureExt, TryStreamExt};
 use sqlx::{Executor, Postgres, QueryBuilder, Result, Row};
 
-use crate::{schema::location::columns::PgLocationColumns, PgSchema};
+use crate::PgSchema;
 
-pub(super) mod columns;
 mod deletable;
 mod location_adapter;
 mod updatable;
@@ -26,7 +25,7 @@ impl PgLocation
 			previous: &'a str,
 		}
 
-		const COLUMNS: PgLocationColumns<&'static str> = PgLocationColumns::new();
+		const COLUMNS: LocationColumns<&'static str> = LocationColumns::default();
 		const INNER_IDENT: &'static str = "L";
 		const OUTER_IDENT: &'static str = "LO";
 

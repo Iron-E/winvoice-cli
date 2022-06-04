@@ -1,7 +1,13 @@
 use std::collections::HashMap;
 
 use clinvoice_adapter::{
-	schema::{EmployeeAdapter, ExpensesAdapter, JobAdapter, TimesheetAdapter},
+	schema::{
+		columns::TimesheetColumns,
+		EmployeeAdapter,
+		ExpensesAdapter,
+		JobAdapter,
+		TimesheetAdapter,
+	},
 	WriteWhereClause,
 };
 use clinvoice_match::MatchTimesheet;
@@ -14,7 +20,7 @@ use clinvoice_schema::{
 use futures::{future, TryFutureExt, TryStreamExt};
 use sqlx::{PgPool, QueryBuilder, Result, Row};
 
-use super::{columns::PgTimesheetColumns, PgTimesheet};
+use super::PgTimesheet;
 use crate::{
 	schema::{PgEmployee, PgExpenses, PgJob},
 	PgSchema,
@@ -70,7 +76,7 @@ impl TimesheetAdapter for PgTimesheet
 				.collect::<HashMap<_, _>>()
 		});
 
-		const COLUMNS: PgTimesheetColumns<&'static str> = PgTimesheetColumns::new();
+		const COLUMNS: TimesheetColumns<&'static str> = TimesheetColumns::default();
 
 		let mut query = QueryBuilder::new(
 			"SELECT
@@ -98,11 +104,12 @@ impl TimesheetAdapter for PgTimesheet
 					{
 						if let Some(j) = jobs.get(&row.get(COLUMNS.job_id))
 						{
-							return future::ok(Some(COLUMNS.row_to_view(
+							return future::ok(Some(PgTimesheet::row_to_view(
+								COLUMNS,
+								&row,
 								e.clone(),
 								x.clone(),
 								j.clone(),
-								&row,
 							)));
 						}
 					}

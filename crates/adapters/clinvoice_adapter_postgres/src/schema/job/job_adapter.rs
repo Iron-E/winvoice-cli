@@ -2,7 +2,7 @@ use core::time::Duration;
 use std::{collections::HashMap, convert::TryFrom};
 
 use clinvoice_adapter::{
-	schema::{JobAdapter, OrganizationAdapter},
+	schema::{columns::JobColumns, JobAdapter, OrganizationAdapter},
 	WriteWhereClause,
 };
 use clinvoice_finance::ExchangeRates;
@@ -20,7 +20,7 @@ use sqlx::{postgres::types::PgInterval, Error, PgPool, QueryBuilder, Result, Row
 
 use super::PgJob;
 use crate::{
-	schema::{job::columns::PgJobColumns, util, PgOrganization},
+	schema::{util, PgOrganization},
 	PgSchema,
 };
 
@@ -85,7 +85,7 @@ impl JobAdapter for PgJob
 
 		let exchange_rates = ExchangeRates::new().map_err(util::finance_err_to_sqlx);
 
-		const COLUMNS: PgJobColumns<&'static str> = PgJobColumns::new();
+		const COLUMNS: JobColumns<&'static str> = JobColumns::default();
 
 		let mut query = QueryBuilder::new(
 			"SELECT
@@ -132,7 +132,7 @@ impl JobAdapter for PgJob
 			.try_filter_map(|row| {
 				if let Some(o) = organizations.get(&row.get::<Id, _>(COLUMNS.client_id))
 				{
-					return match COLUMNS.row_to_view(o.clone(), &row)
+					return match PgJob::row_to_view(COLUMNS, &row, o.clone())
 					{
 						Ok(e) => future::ok(Some(e)),
 						Err(e) => future::err(e),

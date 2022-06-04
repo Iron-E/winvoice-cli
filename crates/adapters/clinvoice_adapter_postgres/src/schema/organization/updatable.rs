@@ -1,9 +1,9 @@
-use clinvoice_adapter::Updatable;
+use clinvoice_adapter::{schema::columns::OrganizationColumns, Updatable};
 use clinvoice_schema::Organization;
 use sqlx::{Postgres, QueryBuilder, Result, Transaction};
 
 use super::PgOrganization;
-use crate::schema::{organization::columns::PgOrganizationColumns, PgLocation};
+use crate::schema::PgLocation;
 
 #[async_trait::async_trait]
 impl Updatable for PgOrganization
@@ -19,7 +19,7 @@ impl Updatable for PgOrganization
 		'e: 'i,
 		Self::Entity: 'e,
 	{
-		const COLUMNS: PgOrganizationColumns<&'static str> = PgOrganizationColumns::new();
+		const COLUMNS: OrganizationColumns<&'static str> = OrganizationColumns::default();
 		const TABLE_IDENT: &'static str = "O";
 		const VALUES_IDENT: &'static str = "V";
 

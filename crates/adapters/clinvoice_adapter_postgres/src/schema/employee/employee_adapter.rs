@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use clinvoice_adapter::{
-	schema::{EmployeeAdapter, OrganizationAdapter},
+	schema::{columns::EmployeeColumns, EmployeeAdapter, OrganizationAdapter},
 	WriteWhereClause,
 };
 use clinvoice_match::MatchEmployee;
@@ -9,7 +9,7 @@ use clinvoice_schema::{Employee, Id, Organization};
 use futures::{future, TryFutureExt, TryStreamExt};
 use sqlx::{PgPool, QueryBuilder, Result, Row};
 
-use super::{columns::PgEmployeeColumns, PgEmployee};
+use super::PgEmployee;
 use crate::{schema::PgOrganization, PgSchema};
 
 #[async_trait::async_trait]
@@ -57,7 +57,7 @@ impl EmployeeAdapter for PgEmployee
 					.collect::<HashMap<_, _>>()
 			});
 
-		const COLUMNS: PgEmployeeColumns<&'static str> = PgEmployeeColumns::new();
+		const COLUMNS: EmployeeColumns<&'static str> = EmployeeColumns::default();
 
 		let mut query = QueryBuilder::new(
 			"SELECT
@@ -78,7 +78,7 @@ impl EmployeeAdapter for PgEmployee
 			.try_filter_map(|row| {
 				if let Some(o) = organizations.get(&row.get::<Id, _>(COLUMNS.organization_id))
 				{
-					return future::ok(Some(COLUMNS.row_to_view(o.clone(), &row)));
+					return future::ok(Some(PgEmployee::row_to_view(COLUMNS, &row, o.clone())));
 				}
 
 				future::ok(None)

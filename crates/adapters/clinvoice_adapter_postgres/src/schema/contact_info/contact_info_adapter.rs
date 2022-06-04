@@ -1,12 +1,12 @@
 use std::collections::HashMap;
 
-use clinvoice_adapter::schema::ContactInfoAdapter;
+use clinvoice_adapter::schema::{columns::ContactColumns, ContactInfoAdapter};
 use clinvoice_match::{MatchContact, MatchSet};
 use clinvoice_schema::{Contact, ContactKind, Id};
 use futures::TryStreamExt;
 use sqlx::{Executor, PgPool, Postgres, QueryBuilder, Result, Row};
 
-use super::{columns::PgContactColumns, PgContactInfo};
+use super::PgContactInfo;
 use crate::schema::write_where_clause;
 
 #[async_trait::async_trait]
@@ -69,7 +69,7 @@ impl ContactInfoAdapter for PgContactInfo
 		match_condition: MatchSet<MatchContact>,
 	) -> Result<HashMap<Id, Vec<Contact>>>
 	{
-		const COLUMNS: PgContactColumns<&'static str> = PgContactColumns::new();
+		const COLUMNS: ContactColumns<&'static str> = ContactColumns::default();
 
 		let mut query = QueryBuilder::new(
 			"SELECT
@@ -99,7 +99,7 @@ impl ContactInfoAdapter for PgContactInfo
 				let entry = map
 					.entry(row.get::<Id, _>(COLUMNS.organization_id))
 					.or_insert_with(|| Vec::with_capacity(1));
-				if let Some(contact) = COLUMNS.row_to_view(connection, &row).await?
+				if let Some(contact) = PgContactInfo::row_to_view(connection, COLUMNS, &row).await?
 				{
 					entry.push(contact);
 				}

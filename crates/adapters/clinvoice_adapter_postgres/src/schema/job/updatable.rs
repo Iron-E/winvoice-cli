@@ -1,4 +1,4 @@
-use clinvoice_adapter::Updatable;
+use clinvoice_adapter::{schema::columns::JobColumns, Updatable};
 use clinvoice_finance::ExchangeRates;
 use clinvoice_schema::{
 	chrono::{DateTime, Utc},
@@ -8,7 +8,7 @@ use futures::TryFutureExt;
 use sqlx::{Postgres, QueryBuilder, Result, Transaction};
 
 use super::PgJob;
-use crate::schema::{job::columns::PgJobColumns, util, PgOrganization};
+use crate::schema::{util, PgOrganization};
 
 #[async_trait::async_trait]
 impl Updatable for PgJob
@@ -24,7 +24,7 @@ impl Updatable for PgJob
 		'e: 'i,
 		Self::Entity: 'e,
 	{
-		const COLUMNS: PgJobColumns<&'static str> = PgJobColumns::new();
+		const COLUMNS: JobColumns<&'static str> = JobColumns::default();
 		const TABLE_IDENT: &'static str = "J";
 		const VALUES_IDENT: &'static str = "V";
 

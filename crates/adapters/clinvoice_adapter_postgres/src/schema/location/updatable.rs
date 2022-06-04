@@ -1,9 +1,8 @@
-use clinvoice_adapter::Updatable;
+use clinvoice_adapter::{schema::columns::LocationColumns, Updatable};
 use clinvoice_schema::Location;
 use sqlx::{Postgres, QueryBuilder, Result, Transaction};
 
 use super::PgLocation;
-use crate::schema::location::columns::PgLocationColumns;
 
 #[async_trait::async_trait]
 impl Updatable for PgLocation
@@ -19,7 +18,7 @@ impl Updatable for PgLocation
 		'e: 'i,
 		Self::Entity: 'e,
 	{
-		const COLUMNS: PgLocationColumns<&'static str> = PgLocationColumns::new();
+		const COLUMNS: LocationColumns<&'static str> = LocationColumns::default();
 		const TABLE_IDENT: &'static str = "L";
 		const VALUES_IDENT: &'static str = "V";
 

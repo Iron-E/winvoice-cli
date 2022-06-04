@@ -1,8 +1,8 @@
 use core::fmt::{Display, Formatter, Result};
 
-use super::PgScopedColumn;
+use super::WithIdentifier;
 
-impl<TColumn, TIdent> Display for PgScopedColumn<TColumn, TIdent>
+impl<TColumn, TIdent> Display for WithIdentifier<TColumn, TIdent>
 where
 	TColumn: Display,
 	TIdent: Display,

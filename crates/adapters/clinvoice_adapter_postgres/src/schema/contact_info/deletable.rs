@@ -1,11 +1,10 @@
 use core::fmt::Display;
 
-use clinvoice_adapter::Deletable;
+use clinvoice_adapter::{schema::columns::ContactColumns, Deletable};
 use clinvoice_schema::Contact;
 use sqlx::{query_builder::Separated, Executor, Postgres, QueryBuilder, Result};
 
 use super::PgContactInfo;
-use crate::schema::contact_info::columns::PgContactColumns;
 
 #[async_trait::async_trait]
 impl Deletable for PgContactInfo
@@ -22,7 +21,7 @@ impl Deletable for PgContactInfo
 		where
 			T: Display,
 		{
-			const COLUMNS: PgContactColumns<&'static str> = PgContactColumns::new();
+			const COLUMNS: ContactColumns<&'static str> = ContactColumns::default();
 
 			s.push('(')
 				.push(COLUMNS.organization_id)

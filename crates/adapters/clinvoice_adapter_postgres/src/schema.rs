@@ -12,10 +12,8 @@ mod job;
 mod location;
 mod option;
 mod organization;
-mod scoped_column;
 mod timesheet;
 mod timestamptz;
-mod typecast;
 mod util;
 mod write_where_clause;
 
@@ -32,7 +30,6 @@ pub use job::PgJob;
 pub use location::PgLocation;
 pub(crate) use option::PgOption;
 pub use organization::PgOrganization;
-pub(crate) use scoped_column::PgScopedColumn;
 use sqlx::{Executor, Postgres, QueryBuilder, Result};
 pub use timesheet::PgTimesheet;
 pub(crate) use timestamptz::PgTimestampTz;

@@ -1,9 +1,9 @@
-use clinvoice_adapter::Updatable;
+use clinvoice_adapter::{schema::columns::EmployeeColumns, Updatable};
 use clinvoice_schema::Employee;
 use sqlx::{Postgres, QueryBuilder, Result, Transaction};
 
 use super::PgEmployee;
-use crate::schema::{employee::columns::PgEmployeeColumns, PgOrganization};
+use crate::schema::PgOrganization;
 
 #[async_trait::async_trait]
 impl Updatable for PgEmployee
@@ -19,7 +19,7 @@ impl Updatable for PgEmployee
 		'e: 'i,
 		Self::Entity: 'e,
 	{
-		const COLUMNS: PgEmployeeColumns<&'static str> = PgEmployeeColumns::new();
+		const COLUMNS: EmployeeColumns<&'static str> = EmployeeColumns::default();
 		const TABLE_IDENT: &'static str = "E";
 		const VALUES_IDENT: &'static str = "V";
 

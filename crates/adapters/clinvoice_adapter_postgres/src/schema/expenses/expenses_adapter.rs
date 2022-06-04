@@ -1,13 +1,16 @@
 use std::collections::HashMap;
 
-use clinvoice_adapter::{schema::ExpensesAdapter, WriteWhereClause};
+use clinvoice_adapter::{
+	schema::{columns::ExpenseColumns, ExpensesAdapter},
+	WriteWhereClause,
+};
 use clinvoice_finance::{ExchangeRates, Money};
 use clinvoice_match::{MatchExpense, MatchSet};
 use clinvoice_schema::{Expense, Id};
 use futures::{future, stream, StreamExt, TryFutureExt, TryStreamExt};
 use sqlx::{Executor, PgPool, Postgres, QueryBuilder, Result, Row};
 
-use super::{columns::PgExpenseColumns, PgExpenses};
+use super::PgExpenses;
 use crate::{schema::util, PgSchema};
 
 #[async_trait::async_trait]
@@ -28,7 +31,7 @@ impl ExpensesAdapter for PgExpenses
 			.map_err(util::finance_err_to_sqlx)
 			.await?;
 
-		const COLUMNS: PgExpenseColumns<&'static str> = PgExpenseColumns::new();
+		const COLUMNS: ExpenseColumns<&'static str> = ExpenseColumns::default();
 
 		QueryBuilder::new(
 			"INSERT INTO contact_information
@@ -69,7 +72,7 @@ impl ExpensesAdapter for PgExpenses
 	{
 		let exchange_rates_fut = ExchangeRates::new().map_err(util::finance_err_to_sqlx);
 
-		const COLUMNS: PgExpenseColumns<&'static str> = PgExpenseColumns::new();
+		const COLUMNS: ExpenseColumns<&'static str> = ExpenseColumns::default();
 
 		let mut query = QueryBuilder::new(
 			"SELECT
@@ -103,7 +106,7 @@ impl ExpensesAdapter for PgExpenses
 				let entry = map
 					.entry(row.get::<Id, _>(COLUMNS.timesheet_id))
 					.or_insert_with(|| Vec::with_capacity(1));
-				match COLUMNS.row_to_view(&row)
+				match PgExpenses::row_to_view(COLUMNS, &row)
 				{
 					Ok(Some(expense)) => entry.push(expense),
 					Err(e) => return future::err(e),

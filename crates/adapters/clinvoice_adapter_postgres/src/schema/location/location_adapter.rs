@@ -1,11 +1,14 @@
-use clinvoice_adapter::{schema::LocationAdapter, WriteWhereClause};
+use clinvoice_adapter::{
+	schema::{columns::LocationColumns, LocationAdapter},
+	WriteWhereClause,
+};
 use clinvoice_match::MatchLocation;
 use clinvoice_schema::Location;
 use futures::TryStreamExt;
 use sqlx::{PgPool, QueryBuilder, Result, Row};
 
 use super::PgLocation;
-use crate::{schema::location::columns::PgLocationColumns, PgSchema};
+use crate::PgSchema;
 
 #[async_trait::async_trait]
 impl LocationAdapter for PgLocation
@@ -47,7 +50,7 @@ impl LocationAdapter for PgLocation
 	{
 		let id_match = Self::retrieve_matching_ids(connection, &match_condition);
 
-		const COLUMNS: PgLocationColumns<&'static str> = PgLocationColumns::new();
+		const COLUMNS: LocationColumns<&'static str> = LocationColumns::default();
 
 		let mut query = QueryBuilder::new("SELECT name, outer_id, id FROM locations");
 		PgSchema::write_where_clause(Default::default(), COLUMNS.id, &id_match.await?, &mut query);

@@ -682,7 +682,7 @@ impl WriteWhereClause<Postgres, &MatchExpense> for PgSchema
 				),
 				// NOTE: `cost` is stored as text on the DB
 				columns.typecast("numeric").cost,
-				&match_condition.cost.clone().map(&|c| c.amount),
+				&match_condition.cost.map_ref(&|c| c.amount),
 				query,
 			),
 			columns.description,
@@ -729,35 +729,31 @@ impl WriteWhereClause<Postgres, &MatchJob> for PgSchema
 										columns.date_close,
 										&match_condition
 											.date_close
-											.clone()
-											.map(&|d| PgOption(d.map(PgTimestampTz))),
+											.map_ref(&|d| PgOption(d.map(PgTimestampTz))),
 										query,
 									),
 									columns.date_open,
-									&match_condition.date_open.clone().map(&|d| PgTimestampTz(d)),
+									&match_condition.date_open.map_ref(&|d| PgTimestampTz(*d)),
 									query,
 								),
 								columns.increment,
 								&match_condition
 									.increment
-									.clone()
-									.map(&|i| PgInterval(i.into_inner())),
+									.map_ref(&|i| PgInterval(i.into_inner())),
 								query,
 							),
 							columns.invoice_date_issued,
 							&match_condition
 								.invoice
 								.date_issued
-								.clone()
-								.map(&|d| PgOption(d.map(PgTimestampTz))),
+								.map_ref(&|d| PgOption(d.map(PgTimestampTz))),
 							query,
 						),
 						columns.invoice_date_paid,
 						&match_condition
 							.invoice
 							.date_paid
-							.clone()
-							.map(&|d| PgOption(d.map(PgTimestampTz))),
+							.map_ref(&|d| PgOption(d.map(PgTimestampTz))),
 						query,
 					),
 					// NOTE: `hourly_rate` is stored as text on the DB
@@ -765,8 +761,7 @@ impl WriteWhereClause<Postgres, &MatchJob> for PgSchema
 					&match_condition
 						.invoice
 						.hourly_rate
-						.clone()
-						.map(&|r| r.amount),
+						.map_ref(&|r| r.amount),
 					query,
 				),
 				columns.notes,
@@ -836,15 +831,13 @@ impl WriteWhereClause<Postgres, &MatchTimesheet> for PgSchema
 					columns.time_begin,
 					&match_condition
 						.time_begin
-						.clone()
-						.map(&|d| PgTimestampTz(d)),
+						.map_ref(&|d| PgTimestampTz(*d)),
 					query,
 				),
 				columns.time_end,
 				&match_condition
 					.time_end
-					.clone()
-					.map(&|d| PgOption(d.map(PgTimestampTz))),
+					.map_ref(&|d| PgOption(d.map(PgTimestampTz))),
 				query,
 			),
 			columns.work_notes,

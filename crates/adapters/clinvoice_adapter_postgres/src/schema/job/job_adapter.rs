@@ -1,5 +1,5 @@
 use core::time::Duration;
-use std::{collections::HashMap, convert::TryFrom};
+use std::collections::HashMap;
 
 use clinvoice_adapter::{
 	schema::{columns::JobColumns, JobAdapter, OrganizationAdapter},
@@ -16,7 +16,7 @@ use clinvoice_schema::{
 	Organization,
 };
 use futures::{future, TryFutureExt, TryStreamExt};
-use sqlx::{postgres::types::PgInterval, Error, PgPool, QueryBuilder, Result, Row};
+use sqlx::{PgPool, QueryBuilder, Result, Row};
 
 use super::PgJob;
 use crate::{
@@ -39,7 +39,6 @@ impl JobAdapter for PgJob
 		let standardized_rate_fut = ExchangeRates::new()
 			.map_ok(|r| hourly_rate.exchange(Default::default(), &r))
 			.map_err(util::finance_err_to_sqlx);
-		let pg_increment = PgInterval::try_from(increment).map_err(Error::Decode)?;
 		let standardized_rate = standardized_rate_fut.await?;
 
 		let row = sqlx::query!(
@@ -50,7 +49,7 @@ impl JobAdapter for PgJob
 			RETURNING id;",
 			client.id,
 			date_open,
-			pg_increment,
+			increment as _,
 			standardized_rate.amount.to_string() as _,
 			objectives,
 		)

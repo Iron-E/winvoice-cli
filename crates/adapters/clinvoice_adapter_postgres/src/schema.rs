@@ -7,13 +7,10 @@ mod contact_info;
 mod employee;
 mod expenses;
 mod initializable;
-mod interval;
 mod job;
 mod location;
-mod option;
 mod organization;
 mod timesheet;
-mod timestamptz;
 mod util;
 mod write_where_clause;
 
@@ -25,14 +22,11 @@ use clinvoice_schema::Id;
 pub use contact_info::PgContactInfo;
 pub use employee::PgEmployee;
 pub use expenses::PgExpenses;
-pub(crate) use interval::PgInterval;
 pub use job::PgJob;
 pub use location::PgLocation;
-pub(crate) use option::PgOption;
 pub use organization::PgOrganization;
 use sqlx::{Executor, Postgres, QueryBuilder, Result};
 pub use timesheet::PgTimesheet;
-pub(crate) use timestamptz::PgTimestampTz;
 
 /// # Summary
 ///

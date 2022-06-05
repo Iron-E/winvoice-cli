@@ -26,8 +26,8 @@ impl PgLocation
 		}
 
 		const COLUMNS: LocationColumns<&'static str> = LocationColumns::default();
-		const INNER_IDENT: &'static str = "L";
-		const OUTER_IDENT: &'static str = "LO";
+		const INNER_IDENT: &str = "L";
+		const OUTER_IDENT: &str = "LO";
 
 		/// # Summary
 		///

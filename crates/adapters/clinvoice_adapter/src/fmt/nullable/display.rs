@@ -1,8 +1,8 @@
 use core::fmt::{Display, Formatter, Result};
 
-use super::PgOption;
+use super::Nullable;
 
-impl<D> Display for PgOption<D>
+impl<D> Display for Nullable<D>
 where
 	D: Display,
 {

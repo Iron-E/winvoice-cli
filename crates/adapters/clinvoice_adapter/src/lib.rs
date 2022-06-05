@@ -16,10 +16,10 @@
 
 #![allow(clippy::unit_arg)]
 
-pub mod fmt;
 mod adapters;
 mod deletable;
 mod feature_not_found;
+pub mod fmt;
 mod initializable;
 pub mod schema;
 mod store;

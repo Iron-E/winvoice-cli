@@ -2,6 +2,7 @@ use core::{fmt::Display, ops::Deref};
 
 use async_recursion::async_recursion;
 use clinvoice_adapter::{
+	fmt::Nullable,
 	schema::columns::{
 		ContactColumns,
 		EmployeeColumns,
@@ -29,7 +30,8 @@ use clinvoice_match::{
 use clinvoice_schema::Id;
 use sqlx::{Database, PgPool, Postgres, QueryBuilder, Result};
 
-use super::{PgInterval, PgLocation, PgOption, PgSchema, PgTimestampTz};
+use super::{PgLocation, PgSchema};
+use crate::fmt::{PgInterval, PgTimestampTz};
 
 /// # Summary
 ///
@@ -431,14 +433,14 @@ impl WriteWhereClause<Postgres, &Match<PgInterval>> for PgSchema
 	}
 }
 
-impl<T> WriteWhereClause<Postgres, &Match<PgOption<T>>> for PgSchema
+impl<T> WriteWhereClause<Postgres, &Match<Nullable<T>>> for PgSchema
 where
 	T: Display + PartialEq,
 {
 	fn write_where_clause(
 		context: WriteContext,
 		ident: impl Copy + Display,
-		match_condition: &Match<PgOption<T>>,
+		match_condition: &Match<Nullable<T>>,
 		query: &mut QueryBuilder<Postgres>,
 	) -> WriteContext
 	{
@@ -726,7 +728,7 @@ impl WriteWhereClause<Postgres, &MatchJob> for PgSchema
 										columns.date_close,
 										&match_condition
 											.date_close
-											.map_ref(&|d| PgOption(d.map(PgTimestampTz))),
+											.map_ref(&|d| Nullable(d.map(PgTimestampTz))),
 										query,
 									),
 									columns.date_open,
@@ -743,14 +745,14 @@ impl WriteWhereClause<Postgres, &MatchJob> for PgSchema
 							&match_condition
 								.invoice
 								.date_issued
-								.map_ref(&|d| PgOption(d.map(PgTimestampTz))),
+								.map_ref(&|d| Nullable(d.map(PgTimestampTz))),
 							query,
 						),
 						columns.invoice_date_paid,
 						&match_condition
 							.invoice
 							.date_paid
-							.map_ref(&|d| PgOption(d.map(PgTimestampTz))),
+							.map_ref(&|d| Nullable(d.map(PgTimestampTz))),
 						query,
 					),
 					// NOTE: `hourly_rate` is stored as text on the DB
@@ -829,7 +831,7 @@ impl WriteWhereClause<Postgres, &MatchTimesheet> for PgSchema
 				columns.time_end,
 				&match_condition
 					.time_end
-					.map_ref(&|d| PgOption(d.map(PgTimestampTz))),
+					.map_ref(&|d| Nullable(d.map(PgTimestampTz))),
 				query,
 			),
 			columns.work_notes,

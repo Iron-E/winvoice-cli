@@ -1,4 +1,4 @@
-use super::{TypeCast, WithIdentifier};
+use crate::fmt::{TypeCast, WithIdentifier};
 
 pub struct LocationColumns<T>
 {

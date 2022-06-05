@@ -1,4 +1,4 @@
-use super::{TypeCast, WithIdentifier};
+use crate::fmt::{TypeCast, WithIdentifier};
 
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct ExpenseColumns<T>

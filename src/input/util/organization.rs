@@ -37,7 +37,7 @@ where
 		let match_condition: MatchOrganization =
 			input::edit_default(format!("{prompt}\n{MATCH_PROMPT}organizations"))?;
 
-		let results = OAdapter::retrieve(connection, match_condition).await?;
+		let results = OAdapter::retrieve(connection, &match_condition).await?;
 
 		if retry_on_empty && results.is_empty() && menu::ask_to_retry()?
 		{

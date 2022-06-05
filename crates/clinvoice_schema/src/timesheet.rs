@@ -6,7 +6,7 @@ use core::fmt::Write;
 use std::collections::HashSet;
 
 use chrono::{DateTime, Utc};
-use clinvoice_finance::{Decimal, ExchangeRates, Money};
+use clinvoice_finance::{Decimal, ExchangeRates, Money, Exchangeable};
 use lazy_static::lazy_static;
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};

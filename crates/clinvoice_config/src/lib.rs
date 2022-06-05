@@ -3,7 +3,6 @@
 //! This crate provides definitions of what a user's `clinvoice` configuration should look like.
 
 #[allow(clippy::tabs_in_doc_comments)]
-
 mod config;
 mod employees;
 mod invoices;

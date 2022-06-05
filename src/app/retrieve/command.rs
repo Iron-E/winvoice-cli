@@ -314,7 +314,7 @@ impl Command
 					// WARN: this `let` seems redundant, but the "type needs to be known at this point"
 					let export_result: DynResult<'_, _> = stream::iter(to_export.into_iter().map(Ok))
 						.try_for_each_concurrent(None, |job| async move {
-							let timesheets = TAdapter::retrieve(conn, MatchTimesheet {
+							let timesheets = TAdapter::retrieve(conn, &MatchTimesheet {
 								job: MatchJob {
 									id: job.id.into(),
 									..Default::default()

@@ -55,7 +55,7 @@ impl Command
 		for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 	{
 		let mut timesheet = {
-			let timesheets = TAdapter::retrieve(connection, MatchTimesheet {
+			let timesheets = TAdapter::retrieve(connection, &MatchTimesheet {
 				employee: MatchEmployee {
 					id: if let Some(default) = default_employee_id
 					{

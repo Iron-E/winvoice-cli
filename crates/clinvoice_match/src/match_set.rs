@@ -3,8 +3,8 @@ mod from;
 
 use core::{cmp::Eq, fmt::Debug};
 
-use clinvoice_finance::ExchangeRates;
-use clinvoice_schema::{Currency, Money};
+use clinvoice_finance::{ExchangeRates, Exchangeable};
+use clinvoice_schema::Currency;
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 
@@ -98,13 +98,13 @@ impl<T> MatchSet<T>
 	}
 }
 
-impl MatchSet<Money>
+impl<T> MatchSet<T> where T: Exchangeable
 {
 	/// # Summary
 	///
-	/// Exchange a `Match` for an amount of `Money` to another `currency`.
-	pub fn exchange(&self, currency: Currency, rates: &ExchangeRates) -> MatchSet<Money>
+	/// Exchange a the [`MatchExpense`]'s `cost` to another `currency`.
+	pub fn exchange(&self, currency: Currency, rates: &ExchangeRates) -> Self
 	{
-		self.map_ref(&|money| money.exchange(currency, rates))
+		self.map_ref(&|e| e.exchange(currency, rates))
 	}
 }

@@ -1,3 +1,4 @@
+mod exchangeable;
 use core::time::Duration;
 
 use clinvoice_schema::{chrono::NaiveDateTime, Id};

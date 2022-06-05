@@ -1,3 +1,5 @@
+mod exchangeable;
+
 use clinvoice_schema::{Id, Money};
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};

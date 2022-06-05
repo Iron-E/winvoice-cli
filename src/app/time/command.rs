@@ -36,7 +36,7 @@ impl Command
 	) -> Result<()>
 	where
 		Db: Database,
-		TAdapter: Deletable<Db = Db> + TimesheetAdapter + Send,
+		TAdapter: Deletable<Db = Db> + TimesheetAdapter,
 		for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 	{
 		TAdapter::create(connection, employee, job).await?;
@@ -50,8 +50,8 @@ impl Command
 	) -> DynResult<'err, ()>
 	where
 		Db: Database,
-		TAdapter: Deletable<Db = Db> + TimesheetAdapter + Send,
-		XAdapter: Deletable<Db = Db> + ExpensesAdapter + Send,
+		TAdapter: Deletable<Db = Db> + TimesheetAdapter,
+		XAdapter: Deletable<Db = Db> + ExpensesAdapter,
 		for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 	{
 		let mut timesheet = {
@@ -109,10 +109,10 @@ impl Command
 	) -> DynResult<'err, ()>
 	where
 		Db: Database,
-		EAdapter: Deletable<Db = Db> + EmployeeAdapter + Send,
-		JAdapter: Deletable<Db = Db> + JobAdapter + Send,
-		TAdapter: Deletable<Db = Db> + TimesheetAdapter + Send,
-		XAdapter: Deletable<Db = Db> + ExpensesAdapter + Send,
+		EAdapter: Deletable<Db = Db> + EmployeeAdapter,
+		JAdapter: Deletable<Db = Db> + JobAdapter,
+		TAdapter: Deletable<Db = Db> + TimesheetAdapter,
+		XAdapter: Deletable<Db = Db> + ExpensesAdapter,
 		for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 	{
 		let job_results_view: Vec<_> = input::util::job::retrieve::<&str, _, JAdapter>(

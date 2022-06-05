@@ -21,7 +21,7 @@ async fn add_menu<'err, Db, LAdapter>(
 ) -> DynResult<'err, ()>
 where
 	Db: Database,
-	LAdapter: Deletable<Db = Db> + LocationAdapter + Send,
+	LAdapter: Deletable<Db = Db> + LocationAdapter,
 	for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 {
 	const ADDRESS: &str = "Address";
@@ -134,7 +134,7 @@ async fn edit_menu<'err, Db, LAdapter>(
 ) -> DynResult<'err, ()>
 where
 	Db: Database,
-	LAdapter: Deletable<Db = Db> + LocationAdapter + Send,
+	LAdapter: Deletable<Db = Db> + LocationAdapter,
 	for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 {
 	if contact_info.is_empty()
@@ -236,7 +236,7 @@ pub async fn menu<'err, Db, LAdapter>(
 ) -> DynResult<'err, Vec<(bool, ContactKind, String)>>
 where
 	Db: Database,
-	LAdapter: Deletable<Db = Db> + LocationAdapter + Send,
+	LAdapter: Deletable<Db = Db> + LocationAdapter,
 	for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 {
 	let mut contact_info = Vec::new();

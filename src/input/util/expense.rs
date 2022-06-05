@@ -21,7 +21,7 @@ async fn add_menu<'err, Db, XAdapter>(
 ) -> DynResult<'err, ()>
 where
 	Db: Database,
-	XAdapter: Deletable<Db = Db> + ExpensesAdapter + Send,
+	XAdapter: Deletable<Db = Db> + ExpensesAdapter,
 	for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 {
 	let category = input::text(None, "What type of `Expense` is this?")?;
@@ -71,7 +71,7 @@ pub async fn menu<'err, Db, XAdapter>(
 ) -> DynResult<'err, ()>
 where
 	Db: Database,
-	XAdapter: Deletable<Db = Db> + ExpensesAdapter + Send,
+	XAdapter: Deletable<Db = Db> + ExpensesAdapter,
 	for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 {
 	loop
@@ -105,16 +105,24 @@ async fn delete_menu<'err, Db, XAdapter>(
 ) -> DynResult<'err, ()>
 where
 	Db: Database,
-	XAdapter: Deletable<Db = Db> + ExpensesAdapter + Send,
+	XAdapter: Deletable<Db = Db> + ExpensesAdapter,
 	for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 {
 	if !expenses.is_empty()
 	{
-		let to_remove = input::select_as_indices(expenses, "Select expenses to remove")?;
+		let to_remove_indices = input::select_as_indices(expenses, "Select expenses to remove")?;
+		let to_remove_count = to_remove_indices.len();
 
 		XAdapter::delete(
 			connection,
-			to_remove.into_iter().map(|i| expenses.remove(i)),
+			to_remove_indices
+				.into_iter()
+				.rev() // PERF: we use `rev` to prevent `expenses` from having to shift so many indexes after each removal
+				.fold(Vec::with_capacity(to_remove_count), |mut v, i| {
+					v.push(expenses.remove(i));
+					v
+				})
+				.iter(),
 		)
 		.await?;
 	}
@@ -136,7 +144,7 @@ async fn edit_menu<'err, Db, XAdapter>(
 ) -> DynResult<'err, ()>
 where
 	Db: Database,
-	XAdapter: Deletable<Db = Db> + ExpensesAdapter + Send,
+	XAdapter: Deletable<Db = Db> + ExpensesAdapter,
 	for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 {
 	if !expenses.is_empty()

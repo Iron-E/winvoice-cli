@@ -29,7 +29,7 @@ pub async fn retrieve<'err, D, Db, OAdapter>(
 where
 	D: Display,
 	Db: Database,
-	OAdapter: Deletable<Db = Db> + OrganizationAdapter + Send,
+	OAdapter: Deletable<Db = Db> + OrganizationAdapter,
 	for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 {
 	loop

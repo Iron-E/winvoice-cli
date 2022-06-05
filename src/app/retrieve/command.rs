@@ -88,11 +88,11 @@ impl Command
 	where
 		D: Deletable<Db = Db, Entity = Entity>,
 		Db: Database,
-		Entity: Clone + Display + Send,
+		Entity: Clone + Display + Sync,
 		for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 	{
 		let selection = input::select(entities, "Select the entities you want to delete")?;
-		D::delete(connection, selection.into_iter()).await?;
+		D::delete(connection, selection.iter()).await?;
 		Ok(())
 	}
 
@@ -107,31 +107,26 @@ impl Command
 	) -> DynResult<'err, ()>
 	where
 		Db: Database,
-		Entity: Clone
-			+ DeserializeOwned
-			+ Display
-			+ Into<Entity>
-			+ RestorableSerde
-			+ Serialize
-			+ Send
-			+ Sync,
+		Entity: Clone + DeserializeOwned + Display + RestorableSerde + Serialize + Sync,
 		U: Updatable<Db = Db, Entity = Entity>,
 		for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 	{
 		let selection = input::select(entities, "Select the entities you want to update")?;
+		let selection_len = selection.len();
 
-		let edits = selection
-			.into_iter()
-			.try_fold(Vec::new(), |mut v, entity| {
-				match input::edit_and_restore(&entity, "Make any desired edits")
-				{
-					Ok(e) => v.push(e),
-					Err(input::Error::NotEdited) => (),
-					Err(e) => return Err(e),
-				};
+		let edits =
+			selection
+				.into_iter()
+				.try_fold(Vec::with_capacity(selection_len), |mut v, entity| {
+					match input::edit_and_restore(&entity, "Make any desired edits")
+					{
+						Ok(e) => v.push(e),
+						Err(input::Error::NotEdited) => (),
+						Err(e) => return Err(e),
+					};
 
-				Ok(v)
-			})?;
+					Ok(v)
+				})?;
 
 		connection
 			.begin()
@@ -153,11 +148,11 @@ impl Command
 	) -> DynResult<'err, ()>
 	where
 		Db: Database,
-		EAdapter: Deletable<Db = Db> + EmployeeAdapter + Send,
-		JAdapter: Deletable<Db = Db> + JobAdapter + Send,
-		LAdapter: Deletable<Db = Db> + LocationAdapter + Send,
-		OAdapter: Deletable<Db = Db> + OrganizationAdapter + Send,
-		TAdapter: Deletable<Db = Db> + TimesheetAdapter + Send,
+		EAdapter: Deletable<Db = Db> + EmployeeAdapter,
+		JAdapter: Deletable<Db = Db> + JobAdapter,
+		LAdapter: Deletable<Db = Db> + LocationAdapter,
+		OAdapter: Deletable<Db = Db> + OrganizationAdapter,
+		TAdapter: Deletable<Db = Db> + TimesheetAdapter,
 		for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 	{
 		match self
@@ -184,12 +179,12 @@ impl Command
 
 				if delete
 				{
-					Self::delete::<EAdapter, _, _>(&connection, &results_view).await?;
+					Self::delete::<EAdapter, _, _>(&connection, results_view.as_slice()).await?;
 				}
 
 				if update
 				{
-					Self::update::<_, _, EAdapter>(&connection, &results_view).await?
+					Self::update::<_, _, EAdapter>(&connection, results_view.as_slice()).await?
 				}
 
 				if set_default
@@ -232,12 +227,12 @@ impl Command
 
 				if delete
 				{
-					Self::delete::<JAdapter, _, _>(&connection, &results_view).await?;
+					Self::delete::<JAdapter, _, _>(&connection, results_view.as_slice()).await?;
 				}
 
 				if update
 				{
-					Self::update::<_, _, JAdapter>(&connection, &results_view).await?
+					Self::update::<_, _, JAdapter>(&connection, results_view.as_slice()).await?
 				}
 
 				if close
@@ -351,12 +346,12 @@ impl Command
 
 				if delete
 				{
-					Self::delete::<LAdapter, _, _>(&connection, &results_view).await?;
+					Self::delete::<LAdapter, _, _>(&connection, results_view.as_slice()).await?;
 				}
 
 				if update
 				{
-					Self::update::<_, _, LAdapter>(&connection, &results_view).await?
+					Self::update::<_, _, LAdapter>(&connection, results_view.as_slice()).await?
 				}
 
 				if let Some(name) = create_inner.last()
@@ -390,12 +385,12 @@ impl Command
 
 				if delete
 				{
-					Self::delete::<OAdapter, _, _>(&connection, &results_view).await?;
+					Self::delete::<OAdapter, _, _>(&connection, results_view.as_slice()).await?;
 				}
 
 				if update
 				{
-					Self::update::<_, _, OAdapter>(&connection, &results_view).await?
+					Self::update::<_, _, OAdapter>(&connection, results_view.as_slice()).await?
 				}
 				else if !delete
 				{

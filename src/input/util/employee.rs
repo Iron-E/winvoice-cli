@@ -30,7 +30,7 @@ pub async fn retrieve<'err, D, Db, EAdapter>(
 where
 	D: Display,
 	Db: Database,
-	EAdapter: Deletable<Db = Db> + EmployeeAdapter + Send,
+	EAdapter: Deletable<Db = Db> + EmployeeAdapter,
 	for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 {
 	loop

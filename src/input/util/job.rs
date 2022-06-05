@@ -29,7 +29,7 @@ pub async fn retrieve<'err, D, Db, JAdapter>(
 where
 	D: Display,
 	Db: Database,
-	JAdapter: Deletable<Db = Db> + JobAdapter + Send,
+	JAdapter: Deletable<Db = Db> + JobAdapter,
 	for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 {
 	loop

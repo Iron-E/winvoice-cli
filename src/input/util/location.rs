@@ -29,7 +29,7 @@ pub async fn retrieve<'err, D, Db, LAdapter>(
 where
 	D: Display,
 	Db: Database,
-	LAdapter: Deletable<Db = Db> + LocationAdapter + Send,
+	LAdapter: Deletable<Db = Db> + LocationAdapter,
 	for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 {
 	loop
@@ -69,7 +69,7 @@ pub async fn select_one<'err, D, Db, LAdapter>(
 where
 	D: Display,
 	Db: Database,
-	LAdapter: Deletable<Db = Db> + LocationAdapter + Send,
+	LAdapter: Deletable<Db = Db> + LocationAdapter,
 	for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 {
 	let locations = retrieve::<D, Db, LAdapter>(connection, prompt, retry_on_empty).await?;

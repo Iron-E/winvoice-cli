@@ -179,12 +179,12 @@ impl Command
 
 				if delete
 				{
-					Self::delete::<EAdapter, _, _>(&connection, results_view.as_slice()).await?;
+					Self::delete::<EAdapter, _, _>(&connection, &results_view).await?;
 				}
 
 				if update
 				{
-					Self::update::<_, _, EAdapter>(&connection, results_view.as_slice()).await?
+					Self::update::<_, _, EAdapter>(&connection, &results_view).await?
 				}
 
 				if set_default
@@ -227,12 +227,12 @@ impl Command
 
 				if delete
 				{
-					Self::delete::<JAdapter, _, _>(&connection, results_view.as_slice()).await?;
+					Self::delete::<JAdapter, _, _>(&connection, &results_view).await?;
 				}
 
 				if update
 				{
-					Self::update::<_, _, JAdapter>(&connection, results_view.as_slice()).await?
+					Self::update::<_, _, JAdapter>(&connection, &results_view).await?
 				}
 
 				if close
@@ -346,12 +346,12 @@ impl Command
 
 				if delete
 				{
-					Self::delete::<LAdapter, _, _>(&connection, results_view.as_slice()).await?;
+					Self::delete::<LAdapter, _, _>(&connection, &results_view).await?;
 				}
 
 				if update
 				{
-					Self::update::<_, _, LAdapter>(&connection, results_view.as_slice()).await?
+					Self::update::<_, _, LAdapter>(&connection, &results_view).await?
 				}
 
 				if let Some(name) = create_inner.last()
@@ -385,12 +385,12 @@ impl Command
 
 				if delete
 				{
-					Self::delete::<OAdapter, _, _>(&connection, results_view.as_slice()).await?;
+					Self::delete::<OAdapter, _, _>(&connection, &results_view).await?;
 				}
 
 				if update
 				{
-					Self::update::<_, _, OAdapter>(&connection, results_view.as_slice()).await?
+					Self::update::<_, _, OAdapter>(&connection, &results_view).await?
 				}
 				else if !delete
 				{

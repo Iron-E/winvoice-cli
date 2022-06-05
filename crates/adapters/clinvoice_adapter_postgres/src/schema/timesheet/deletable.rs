@@ -1,5 +1,5 @@
 use clinvoice_adapter::Deletable;
-use clinvoice_schema::Timesheet;
+use clinvoice_schema::{Id, Timesheet};
 use sqlx::{Executor, Postgres, Result};
 
 use super::PgTimesheet;
@@ -11,12 +11,21 @@ impl Deletable for PgTimesheet
 	type Db = Postgres;
 	type Entity = Timesheet;
 
-	async fn delete(
+	async fn delete<'e, 'i>(
 		connection: impl 'async_trait + Executor<'_, Database = Self::Db>,
-		entities: impl 'async_trait + Iterator<Item = Self::Entity> + Send,
+		entities: impl 'async_trait + Iterator<Item = &'i Self::Entity> + Send,
 	) -> Result<()>
+	where
+		'e: 'i,
+		Self::Entity: 'e,
 	{
-		PgSchema::delete(connection, "timesheets", entities.map(|e| e.id)).await
+		// TODO: use `for<'a> |t: &'a Timesheet| t.id`
+		fn mapper(t: &Timesheet) -> Id
+		{
+			t.id
+		}
+
+		PgSchema::delete(connection, "timesheets", entities.map(mapper)).await
 	}
 }
 

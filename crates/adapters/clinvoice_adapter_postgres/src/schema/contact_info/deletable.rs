@@ -12,12 +12,15 @@ impl Deletable for PgContactInfo
 	type Db = Postgres;
 	type Entity = Contact;
 
-	async fn delete(
+	async fn delete<'e, 'i>(
 		connection: impl 'async_trait + Executor<'_, Database = Self::Db>,
-		entities: impl 'async_trait + Iterator<Item = Self::Entity> + Send,
+		entities: impl 'async_trait + Iterator<Item = &'i Self::Entity> + Send,
 	) -> Result<()>
+	where
+		'e: 'i,
+		Self::Entity: 'e,
 	{
-		fn write<T>(s: &mut Separated<Postgres, T>, c: Contact)
+		fn write<'query, 'args, T>(s: &mut Separated<'query, 'args, Postgres, T>, c: &'args Contact)
 		where
 			T: Display,
 		{
@@ -30,7 +33,7 @@ impl Deletable for PgContactInfo
 				.push("AND")
 				.push(COLUMNS.label)
 				.push_unseparated('=')
-				.push_bind(c.label)
+				.push_bind(&c.label)
 				.push(')');
 		}
 

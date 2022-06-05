@@ -1,5 +1,5 @@
 use clinvoice_adapter::Deletable;
-use clinvoice_schema::Location;
+use clinvoice_schema::{Id, Location};
 use sqlx::{Executor, Postgres, Result};
 
 use super::PgLocation;
@@ -11,12 +11,21 @@ impl Deletable for PgLocation
 	type Db = Postgres;
 	type Entity = Location;
 
-	async fn delete(
+	async fn delete<'e, 'i>(
 		connection: impl 'async_trait + Executor<'_, Database = Self::Db>,
-		entities: impl 'async_trait + Iterator<Item = Self::Entity> + Send,
+		entities: impl 'async_trait + Iterator<Item = &'i Self::Entity> + Send,
 	) -> Result<()>
+	where
+		'e: 'i,
+		Self::Entity: 'e,
 	{
-		PgSchema::delete(connection, "locations", entities.map(|e| e.id)).await
+		// TODO: use `for<'a> |l: &'a Location| l.id`
+		fn mapper(l: &Location) -> Id
+		{
+			l.id
+		}
+
+		PgSchema::delete(connection, "locations", entities.map(mapper)).await
 	}
 }
 

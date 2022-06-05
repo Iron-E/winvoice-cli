@@ -1,5 +1,5 @@
 use clinvoice_adapter::Deletable;
-use clinvoice_schema::Organization;
+use clinvoice_schema::{Id, Organization};
 use sqlx::{Executor, Postgres, Result};
 
 use super::PgOrganization;
@@ -11,12 +11,21 @@ impl Deletable for PgOrganization
 	type Db = Postgres;
 	type Entity = Organization;
 
-	async fn delete(
+	async fn delete<'e, 'i>(
 		connection: impl 'async_trait + Executor<'_, Database = Self::Db>,
-		entities: impl 'async_trait + Iterator<Item = Self::Entity> + Send,
+		entities: impl 'async_trait + Iterator<Item = &'i Self::Entity> + Send,
 	) -> Result<()>
+	where
+		'e: 'i,
+		Self::Entity: 'e,
 	{
-		PgSchema::delete(connection, "organization", entities.map(|e| e.id)).await
+		// TODO: use `for<'a> |o: &'a Organization| o.id`
+		fn mapper(o: &Organization) -> Id
+		{
+			o.id
+		}
+
+		PgSchema::delete(connection, "organization", entities.map(mapper)).await
 	}
 }
 

@@ -29,8 +29,11 @@ pub trait Deletable
 	/// * An [`Error`] when:
 	///   * `self.id` had not already been `create`d.
 	///   * Something goes wrong.
-	async fn delete(
+	async fn delete<'e, 'i>(
 		connection: impl 'async_trait + Executor<'_, Database = Self::Db>,
-		entities: impl 'async_trait + Iterator<Item = Self::Entity> + Send,
-	) -> Result<()>;
+		entities: impl 'async_trait + Iterator<Item = &'i Self::Entity> + Send,
+	) -> Result<()>
+	where
+		'e: 'i,
+		Self::Entity: 'e;
 }

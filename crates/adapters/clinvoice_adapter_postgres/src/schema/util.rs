@@ -26,14 +26,14 @@ pub(super) fn duration_from(interval: PgInterval) -> Result<Duration>
 		));
 	}
 
-	let (microseconds_into_secs, microseconds_into_nanos) = if interval.microseconds > 0
+	let (seconds, nanoseconds) = if interval.microseconds > 0
 	{
 		const MICROSECONDS_IN_SECOND: u64 = 1000000;
 		const NANOSECONDS_IN_MICROSECOND: u32 = 1000;
 		let microseconds = interval.microseconds as u64;
 
 		(
-			microseconds.div_euclid(MICROSECONDS_IN_SECOND),
+			microseconds / MICROSECONDS_IN_SECOND,
 			(microseconds % MICROSECONDS_IN_SECOND) as u32 * NANOSECONDS_IN_MICROSECOND,
 		)
 	}
@@ -51,8 +51,8 @@ pub(super) fn duration_from(interval: PgInterval) -> Result<Duration>
 		else
 		{
 			0
-		} + microseconds_into_secs,
-		microseconds_into_nanos,
+		} + seconds,
+		nanoseconds,
 	))
 }
 

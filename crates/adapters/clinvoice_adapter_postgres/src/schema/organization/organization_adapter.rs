@@ -81,8 +81,7 @@ impl OrganizationAdapter for PgOrganization
 		);
 		PgSchema::write_where_clause(Default::default(), "O", &match_condition, &mut query);
 
-		let contact_info = contact_info_fut.await?;
-		let locations = locations_fut.await?;
+		let (contact_info, locations) = futures::try_join!(contact_info_fut, locations_fut)?;
 		query
 			.push(';')
 			.build()

@@ -90,9 +90,7 @@ impl TimesheetAdapter for PgTimesheet
 		);
 		PgSchema::write_where_clause(Default::default(), "T", &match_condition, &mut query);
 
-		let expenses = expenses_fut.await?;
-		let employees = employees_fut.await?;
-		let jobs = jobs_fut.await?;
+		let (expenses, employees, jobs) = futures::try_join!(expenses_fut, employees_fut, jobs_fut)?;
 		query
 			.push(';')
 			.build()

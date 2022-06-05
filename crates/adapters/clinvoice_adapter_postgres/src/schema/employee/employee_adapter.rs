@@ -46,12 +46,12 @@ impl EmployeeAdapter for PgEmployee
 		})
 	}
 
-	async fn retrieve(connection: &PgPool, match_condition: MatchEmployee) -> Result<Vec<Employee>>
+	async fn retrieve(connection: &PgPool, match_condition: &MatchEmployee) -> Result<Vec<Employee>>
 	{
 		// TODO: separate into `retrieve_all() -> Vec` and `retrieve -> Stream` to skip `Vec`
 		//       collection?
 		let organizations_fut =
-			PgOrganization::retrieve(connection, match_condition.organization.clone()).map_ok(|vec| {
+			PgOrganization::retrieve(connection, &match_condition.organization).map_ok(|vec| {
 				vec.into_iter()
 					.map(|o| (o.id, o))
 					.collect::<HashMap<_, _>>()
@@ -68,7 +68,7 @@ impl EmployeeAdapter for PgEmployee
 				E.title
 			FROM employees E",
 		);
-		PgSchema::write_where_clause(Default::default(), "E", &match_condition, &mut query);
+		PgSchema::write_where_clause(Default::default(), "E", match_condition, &mut query);
 
 		let organizations = organizations_fut.await?;
 		query
@@ -223,7 +223,7 @@ mod tests
 		.unwrap();
 
 		assert_eq!(
-			PgEmployee::retrieve(&connection, MatchEmployee {
+			PgEmployee::retrieve(&connection, &MatchEmployee {
 				organization: MatchOrganization {
 					name: employee.organization.name.clone().into(),
 					location: MatchLocation {
@@ -244,7 +244,7 @@ mod tests
 		);
 
 		assert_eq!(
-			PgEmployee::retrieve(&connection, MatchEmployee {
+			PgEmployee::retrieve(&connection, &MatchEmployee {
 				organization: MatchOrganization {
 					contact_info: MatchSet::Contains(Default::default()),
 					id: Match::Or(vec![
@@ -262,7 +262,7 @@ mod tests
 		);
 
 		assert_eq!(
-			PgEmployee::retrieve(&connection, MatchEmployee {
+			PgEmployee::retrieve(&connection, &MatchEmployee {
 				organization: MatchOrganization {
 					contact_info: MatchSet::Not(MatchSet::Contains(Default::default()).into()),
 					id: Match::Or(vec![

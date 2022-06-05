@@ -1,5 +1,5 @@
 use clinvoice_adapter::{schema::columns::JobColumns, Updatable};
-use clinvoice_finance::ExchangeRates;
+use clinvoice_finance::{ExchangeRates, Exchangeable};
 use clinvoice_schema::{
 	chrono::{DateTime, Utc},
 	Job,

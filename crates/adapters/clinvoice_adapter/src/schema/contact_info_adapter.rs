@@ -39,6 +39,6 @@ pub trait ContactInfoAdapter:
 	/// * A list of matching [`Contact`]s.
 	async fn retrieve(
 		connection: &Pool<<Self as Deletable>::Db>,
-		match_condition: MatchSet<MatchContact>,
+		match_condition: &MatchSet<MatchContact>,
 	) -> Result<HashMap<Id, Vec<<Self as Deletable>::Entity>>>;
 }

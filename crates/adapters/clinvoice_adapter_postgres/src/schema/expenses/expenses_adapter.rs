@@ -4,7 +4,7 @@ use clinvoice_adapter::{
 	schema::{columns::ExpenseColumns, ExpensesAdapter},
 	WriteWhereClause,
 };
-use clinvoice_finance::{ExchangeRates, Money};
+use clinvoice_finance::{ExchangeRates, Money, Exchangeable};
 use clinvoice_match::{MatchExpense, MatchSet};
 use clinvoice_schema::{Expense, Id};
 use futures::{future, stream, StreamExt, TryFutureExt, TryStreamExt};
@@ -67,7 +67,7 @@ impl ExpensesAdapter for PgExpenses
 
 	async fn retrieve(
 		connection: &PgPool,
-		match_condition: MatchSet<MatchExpense>,
+		match_condition: &MatchSet<MatchExpense>,
 	) -> Result<HashMap<Id, Vec<Expense>>>
 	{
 		let exchange_rates_fut = ExchangeRates::new().map_err(util::finance_err_to_sqlx);
@@ -89,12 +89,7 @@ impl ExpensesAdapter for PgExpenses
 		PgSchema::write_where_clause(
 			Default::default(),
 			"X",
-			&match_condition.map(&|e| MatchExpense {
-				id: e.id,
-				category: e.category,
-				cost: e.cost.exchange(Default::default(), &exchange_rates),
-				description: e.description,
-			}),
+			&match_condition.exchange(Default::default(), &exchange_rates),
 			&mut query,
 		);
 

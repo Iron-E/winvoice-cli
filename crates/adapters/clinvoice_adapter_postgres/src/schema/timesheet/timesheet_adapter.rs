@@ -60,17 +60,17 @@ impl TimesheetAdapter for PgTimesheet
 		})
 	}
 
-	async fn retrieve(connection: &PgPool, match_condition: MatchTimesheet)
+	async fn retrieve(connection: &PgPool, match_condition: &MatchTimesheet)
 		-> Result<Vec<Timesheet>>
 	{
-		let expenses_fut = PgExpenses::retrieve(connection, match_condition.expenses.clone());
-		let employees_fut = PgEmployee::retrieve(connection, match_condition.employee.clone())
+		let expenses_fut = PgExpenses::retrieve(connection, &match_condition.expenses);
+		let employees_fut = PgEmployee::retrieve(connection, &match_condition.employee)
 			.map_ok(|vec| {
 				vec.into_iter()
 					.map(|e| (e.id, e))
 					.collect::<HashMap<_, _>>()
 			});
-		let jobs_fut = PgJob::retrieve(connection, match_condition.job.clone()).map_ok(|vec| {
+		let jobs_fut = PgJob::retrieve(connection, &match_condition.job).map_ok(|vec| {
 			vec.into_iter()
 				.map(|j| (j.id, j))
 				.collect::<HashMap<_, _>>()
@@ -88,7 +88,7 @@ impl TimesheetAdapter for PgTimesheet
 				T.work_notes
 			FROM timesheets T",
 		);
-		PgSchema::write_where_clause(Default::default(), "T", &match_condition, &mut query);
+		PgSchema::write_where_clause(Default::default(), "T", match_condition, &mut query);
 
 		let (expenses, employees, jobs) = futures::try_join!(expenses_fut, employees_fut, jobs_fut)?;
 		query
@@ -331,7 +331,7 @@ mod tests
 		.unwrap();
 
 		assert_eq!(
-			PgTimesheet::retrieve(&connection, MatchTimesheet {
+			PgTimesheet::retrieve(&connection, &MatchTimesheet {
 				expenses: MatchSet::Not(MatchSet::Contains(Default::default()).into()),
 				employee: MatchEmployee {
 					organization: MatchOrganization {

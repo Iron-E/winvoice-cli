@@ -5,8 +5,8 @@ use clinvoice_adapter::{
 	schema::{columns::JobColumns, JobAdapter, OrganizationAdapter},
 	WriteWhereClause,
 };
-use clinvoice_finance::ExchangeRates;
-use clinvoice_match::{MatchInvoice, MatchJob};
+use clinvoice_finance::{ExchangeRates, Exchangeable};
+use clinvoice_match::MatchJob;
 use clinvoice_schema::{
 	chrono::{DateTime, SubsecRound, Utc},
 	Id,
@@ -71,11 +71,11 @@ impl JobAdapter for PgJob
 		})
 	}
 
-	async fn retrieve(connection: &PgPool, match_condition: MatchJob) -> Result<Vec<Job>>
+	async fn retrieve(connection: &PgPool, match_condition: &MatchJob) -> Result<Vec<Job>>
 	{
 		// TODO: separate into `retrieve_all() -> Vec` and `retrieve -> Stream` to skip `Vec`
 		//       collection?
-		let organizations_fut = PgOrganization::retrieve(connection, match_condition.client.clone())
+		let organizations_fut = PgOrganization::retrieve(connection, &match_condition.client)
 			.map_ok(|vec| {
 				vec.into_iter()
 					.map(|o| (o.id, o))
@@ -103,23 +103,7 @@ impl JobAdapter for PgJob
 		PgSchema::write_where_clause(
 			Default::default(),
 			"J",
-			&MatchJob {
-				client: match_condition.client,
-				date_close: match_condition.date_close,
-				date_open: match_condition.date_open,
-				id: match_condition.id,
-				increment: match_condition.increment,
-				invoice: MatchInvoice {
-					date_issued: match_condition.invoice.date_issued,
-					date_paid: match_condition.invoice.date_paid,
-					hourly_rate: match_condition
-						.invoice
-						.hourly_rate
-						.exchange(Default::default(), &exchange_rates.await?),
-				},
-				notes: match_condition.notes,
-				objectives: match_condition.objectives,
-			},
+			&match_condition.exchange(Default::default(), &exchange_rates.await?),
 			&mut query,
 		);
 
@@ -152,7 +136,7 @@ mod tests
 	use std::collections::HashSet;
 
 	use clinvoice_adapter::schema::{LocationAdapter, OrganizationAdapter};
-	use clinvoice_finance::ExchangeRates;
+	use clinvoice_finance::{ExchangeRates, Exchangeable};
 	use clinvoice_match::{Match, MatchJob, MatchLocation, MatchOrganization};
 	use clinvoice_schema::{
 		chrono::{TimeZone, Utc},
@@ -302,7 +286,7 @@ mod tests
 		.unwrap();
 
 		assert_eq!(
-			PgJob::retrieve(&connection, MatchJob {
+			PgJob::retrieve(&connection, &MatchJob {
 				id: job.id.into(),
 				..Default::default()
 			})
@@ -313,7 +297,7 @@ mod tests
 		);
 
 		assert_eq!(
-			PgJob::retrieve(&connection, MatchJob {
+			PgJob::retrieve(&connection, &MatchJob {
 				client: MatchOrganization {
 					location: MatchLocation {
 						id: Match::Or(vec![

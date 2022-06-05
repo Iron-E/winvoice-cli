@@ -36,6 +36,6 @@ pub trait TimesheetAdapter:
 	/// * A list of matching [`Timesheet`]s.
 	async fn retrieve(
 		connection: &Pool<<Self as Deletable>::Db>,
-		match_condition: MatchTimesheet,
+		match_condition: &MatchTimesheet,
 	) -> Result<Vec<<Self as Deletable>::Entity>>;
 }

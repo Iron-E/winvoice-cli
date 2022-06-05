@@ -40,6 +40,6 @@ pub trait ExpensesAdapter:
 	///   respective [`Expense`]s.
 	async fn retrieve(
 		connection: &Pool<<Self as Deletable>::Db>,
-		match_condition: MatchSet<MatchExpense>,
+		match_condition: &MatchSet<MatchExpense>,
 	) -> Result<HashMap<Id, Vec<<Self as Deletable>::Entity>>>;
 }

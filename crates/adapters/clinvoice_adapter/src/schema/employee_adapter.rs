@@ -43,6 +43,6 @@ pub trait EmployeeAdapter:
 	/// * An [`Error`], should something go wrong.
 	async fn retrieve(
 		connection: &Pool<<Self as Deletable>::Db>,
-		match_condition: MatchEmployee,
+		match_condition: &MatchEmployee,
 	) -> Result<Vec<<Self as Deletable>::Entity>>;
 }

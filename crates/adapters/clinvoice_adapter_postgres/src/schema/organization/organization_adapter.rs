@@ -58,12 +58,12 @@ impl OrganizationAdapter for PgOrganization
 
 	async fn retrieve(
 		connection: &PgPool,
-		match_condition: MatchOrganization,
+		match_condition: &MatchOrganization,
 	) -> Result<Vec<Organization>>
 	{
 		let contact_info_fut =
-			PgContactInfo::retrieve(connection, match_condition.contact_info.clone());
-		let locations_fut = PgLocation::retrieve(connection, match_condition.location.clone())
+			PgContactInfo::retrieve(connection, &match_condition.contact_info);
+		let locations_fut = PgLocation::retrieve(connection, &match_condition.location)
 			.map_ok(|vec| {
 				vec.into_iter()
 					.map(|l| (l.id, l))
@@ -79,7 +79,7 @@ impl OrganizationAdapter for PgOrganization
 				O.name
 			FROM organizations O",
 		);
-		PgSchema::write_where_clause(Default::default(), "O", &match_condition, &mut query);
+		PgSchema::write_where_clause(Default::default(), "O", match_condition, &mut query);
 
 		let (contact_info, locations) = futures::try_join!(contact_info_fut, locations_fut)?;
 		query
@@ -255,7 +255,7 @@ mod tests
 
 		// Assert ::retrieve gets the right data from the DB
 		assert_eq!(
-			PgOrganization::retrieve(&connection, MatchOrganization {
+			PgOrganization::retrieve(&connection, &MatchOrganization {
 				id: organization.id.into(),
 				..Default::default()
 			})
@@ -266,7 +266,7 @@ mod tests
 		);
 
 		assert_eq!(
-			PgOrganization::retrieve(&connection, MatchOrganization {
+			PgOrganization::retrieve(&connection, &MatchOrganization {
 				location: MatchLocation {
 					outer: MatchOuterLocation::Some(
 						MatchLocation {

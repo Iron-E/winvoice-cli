@@ -46,9 +46,9 @@ impl LocationAdapter for PgLocation
 		})
 	}
 
-	async fn retrieve(connection: &PgPool, match_condition: MatchLocation) -> Result<Vec<Location>>
+	async fn retrieve(connection: &PgPool, match_condition: &MatchLocation) -> Result<Vec<Location>>
 	{
-		let id_match = Self::retrieve_matching_ids(connection, &match_condition);
+		let id_match = Self::retrieve_matching_ids(connection, match_condition);
 
 		const COLUMNS: LocationColumns<&'static str> = LocationColumns::default();
 
@@ -157,7 +157,7 @@ mod tests
 			.unwrap();
 
 		// Assert ::retrieve retrieves accurately from the DB
-		assert!(PgLocation::retrieve(&connection, MatchLocation {
+		assert!(PgLocation::retrieve(&connection, &MatchLocation {
 			outer: MatchOuterLocation::None,
 			..Default::default()
 		})
@@ -168,7 +168,7 @@ mod tests
 
 		assert_eq!(
 			[utah, arizona].into_iter().collect::<HashSet<_>>(),
-			PgLocation::retrieve(&connection, MatchLocation {
+			PgLocation::retrieve(&connection, &MatchLocation {
 				outer: MatchOuterLocation::Some(Box::new(MatchLocation {
 					id: usa.id.into(),
 					..Default::default()

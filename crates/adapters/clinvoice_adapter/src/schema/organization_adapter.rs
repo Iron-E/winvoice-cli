@@ -37,6 +37,6 @@ pub trait OrganizationAdapter:
 	/// * A list of matching [`Organization`]s.
 	async fn retrieve(
 		connection: &Pool<<Self as Deletable>::Db>,
-		match_condition: MatchOrganization,
+		match_condition: &MatchOrganization,
 	) -> Result<Vec<<Self as Deletable>::Entity>>;
 }

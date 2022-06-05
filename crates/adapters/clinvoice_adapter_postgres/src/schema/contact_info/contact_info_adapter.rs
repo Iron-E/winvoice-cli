@@ -66,7 +66,7 @@ impl ContactInfoAdapter for PgContactInfo
 
 	async fn retrieve(
 		connection: &PgPool,
-		match_condition: MatchSet<MatchContact>,
+		match_condition: &MatchSet<MatchContact>,
 	) -> Result<HashMap<Id, Vec<Contact>>>
 	{
 		const COLUMNS: ContactColumns<&'static str> = ContactColumns::default();
@@ -86,7 +86,7 @@ impl ContactInfoAdapter for PgContactInfo
 			connection,
 			Default::default(),
 			"C",
-			&match_condition,
+			match_condition,
 			&mut query,
 		)
 		.await?;

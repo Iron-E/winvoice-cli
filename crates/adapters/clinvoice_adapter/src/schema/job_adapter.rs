@@ -46,6 +46,6 @@ pub trait JobAdapter:
 	/// * A list of matching [`Job`]s.
 	async fn retrieve(
 		connection: &Pool<<Self as Deletable>::Db>,
-		match_condition: MatchJob,
+		match_condition: &MatchJob,
 	) -> Result<Vec<<Self as Deletable>::Entity>>;
 }

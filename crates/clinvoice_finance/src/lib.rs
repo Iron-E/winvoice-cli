@@ -11,16 +11,16 @@
 //! [ecb]: https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/
 //! [iso]: https://www.iso.org/iso-4217-currency-codes.html
 
-mod exchangeable;
 mod currency;
 mod error;
 mod exchange_rates;
+mod exchangeable;
 mod money;
 
-pub use exchangeable::Exchangeable;
 pub use currency::Currency;
 pub use error::{Error, Result};
 pub use exchange_rates::ExchangeRates;
+pub use exchangeable::Exchangeable;
 pub use money::Money;
 pub use rust_decimal::Decimal;
 

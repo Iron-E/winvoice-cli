@@ -1,5 +1,5 @@
 use super::Money;
-use crate::{ExchangeRates, Currency, Exchangeable};
+use crate::{Currency, ExchangeRates, Exchangeable};
 
 impl Exchangeable for Money
 {
@@ -31,7 +31,7 @@ mod tests
 	use std::{env, fs};
 
 	use super::{Currency, ExchangeRates, Money};
-	use crate::{Error, SAMPLE_EXCHANGE_RATES_CSV, Exchangeable};
+	use crate::{Error, Exchangeable, SAMPLE_EXCHANGE_RATES_CSV};
 
 	#[test]
 	fn exchange()

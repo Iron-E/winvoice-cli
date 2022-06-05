@@ -4,7 +4,7 @@ use clinvoice_adapter::{
 	schema::{columns::ExpenseColumns, ExpensesAdapter},
 	WriteWhereClause,
 };
-use clinvoice_finance::{ExchangeRates, Money, Exchangeable};
+use clinvoice_finance::{ExchangeRates, Exchangeable, Money};
 use clinvoice_match::{MatchExpense, MatchSet};
 use clinvoice_schema::{Expense, Id};
 use futures::{future, stream, StreamExt, TryFutureExt, TryStreamExt};

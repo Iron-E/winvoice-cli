@@ -1,4 +1,4 @@
-use crate::{ExchangeRates, Currency};
+use crate::{Currency, ExchangeRates};
 
 /// # Summary
 ///

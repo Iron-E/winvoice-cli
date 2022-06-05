@@ -1,5 +1,5 @@
-mod exchangeable;
 mod display;
+mod exchangeable;
 
 use rust_decimal::Decimal;
 #[cfg(feature = "serde_support")]
@@ -27,7 +27,6 @@ pub struct Money
 
 impl Money
 {
-
 	/// # Summary
 	///
 	/// Create a new [`Money`] struct.

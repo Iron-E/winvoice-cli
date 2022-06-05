@@ -98,7 +98,9 @@ impl<T> MatchSet<T>
 	}
 }
 
-impl<T> MatchSet<T> where T: Exchangeable
+impl<T> MatchSet<T>
+where
+	T: Exchangeable,
 {
 	/// # Summary
 	///

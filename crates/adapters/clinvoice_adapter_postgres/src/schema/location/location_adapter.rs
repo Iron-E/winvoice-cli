@@ -46,7 +46,8 @@ impl LocationAdapter for PgLocation
 		})
 	}
 
-	async fn retrieve(connection: &PgPool, match_condition: &MatchLocation) -> Result<Vec<Location>>
+	async fn retrieve(connection: &PgPool, match_condition: &MatchLocation)
+		-> Result<Vec<Location>>
 	{
 		let id_match = Self::retrieve_matching_ids(connection, match_condition);
 

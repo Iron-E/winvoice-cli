@@ -75,8 +75,8 @@ impl JobAdapter for PgJob
 	{
 		// TODO: separate into `retrieve_all() -> Vec` and `retrieve -> Stream` to skip `Vec`
 		//       collection?
-		let organizations_fut = PgOrganization::retrieve(connection, &match_condition.client)
-			.map_ok(|vec| {
+		let organizations_fut =
+			PgOrganization::retrieve(connection, &match_condition.client).map_ok(|vec| {
 				vec.into_iter()
 					.map(|o| (o.id, o))
 					.collect::<HashMap<_, _>>()

@@ -61,10 +61,9 @@ impl OrganizationAdapter for PgOrganization
 		match_condition: &MatchOrganization,
 	) -> Result<Vec<Organization>>
 	{
-		let contact_info_fut =
-			PgContactInfo::retrieve(connection, &match_condition.contact_info);
-		let locations_fut = PgLocation::retrieve(connection, &match_condition.location)
-			.map_ok(|vec| {
+		let contact_info_fut = PgContactInfo::retrieve(connection, &match_condition.contact_info);
+		let locations_fut =
+			PgLocation::retrieve(connection, &match_condition.location).map_ok(|vec| {
 				vec.into_iter()
 					.map(|l| (l.id, l))
 					.collect::<HashMap<_, _>>()

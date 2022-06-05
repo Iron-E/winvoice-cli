@@ -46,12 +46,13 @@ impl EmployeeAdapter for PgEmployee
 		})
 	}
 
-	async fn retrieve(connection: &PgPool, match_condition: &MatchEmployee) -> Result<Vec<Employee>>
+	async fn retrieve(connection: &PgPool, match_condition: &MatchEmployee)
+		-> Result<Vec<Employee>>
 	{
 		// TODO: separate into `retrieve_all() -> Vec` and `retrieve -> Stream` to skip `Vec`
 		//       collection?
-		let organizations_fut =
-			PgOrganization::retrieve(connection, &match_condition.organization).map_ok(|vec| {
+		let organizations_fut = PgOrganization::retrieve(connection, &match_condition.organization)
+			.map_ok(|vec| {
 				vec.into_iter()
 					.map(|o| (o.id, o))
 					.collect::<HashMap<_, _>>()

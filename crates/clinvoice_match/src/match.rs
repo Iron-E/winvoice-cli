@@ -119,7 +119,9 @@ impl<T> Match<T>
 	}
 }
 
-impl<T> Match<T> where T: Exchangeable
+impl<T> Match<T>
+where
+	T: Exchangeable,
 {
 	/// # Summary
 	///

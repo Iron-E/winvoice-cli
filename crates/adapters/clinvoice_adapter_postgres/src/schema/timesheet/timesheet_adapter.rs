@@ -60,12 +60,14 @@ impl TimesheetAdapter for PgTimesheet
 		})
 	}
 
-	async fn retrieve(connection: &PgPool, match_condition: &MatchTimesheet)
-		-> Result<Vec<Timesheet>>
+	async fn retrieve(
+		connection: &PgPool,
+		match_condition: &MatchTimesheet,
+	) -> Result<Vec<Timesheet>>
 	{
 		let expenses_fut = PgExpenses::retrieve(connection, &match_condition.expenses);
-		let employees_fut = PgEmployee::retrieve(connection, &match_condition.employee)
-			.map_ok(|vec| {
+		let employees_fut =
+			PgEmployee::retrieve(connection, &match_condition.employee).map_ok(|vec| {
 				vec.into_iter()
 					.map(|e| (e.id, e))
 					.collect::<HashMap<_, _>>()

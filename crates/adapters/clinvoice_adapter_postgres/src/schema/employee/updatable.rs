@@ -20,8 +20,8 @@ impl Updatable for PgEmployee
 		Self::Entity: 'e,
 	{
 		const COLUMNS: EmployeeColumns<&'static str> = EmployeeColumns::default();
-		const TABLE_IDENT: &'static str = "E";
-		const VALUES_IDENT: &'static str = "V";
+		const TABLE_IDENT: &str = "E";
+		const VALUES_IDENT: &str = "V";
 
 		let mut peekable_entities = entities.clone().peekable();
 

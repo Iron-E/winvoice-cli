@@ -16,8 +16,6 @@
 //! In the base you can find the types which are intended to be stored (e.g. [`Contact`]) and in
 //! [`views`] you can find all logical views of the data.
 
-#![allow(clippy::unit_arg)]
-
 mod contact;
 mod employee;
 mod expense;

@@ -19,8 +19,8 @@ impl Updatable for PgLocation
 		Self::Entity: 'e,
 	{
 		const COLUMNS: LocationColumns<&'static str> = LocationColumns::default();
-		const TABLE_IDENT: &'static str = "L";
-		const VALUES_IDENT: &'static str = "V";
+		const TABLE_IDENT: &str = "L";
+		const VALUES_IDENT: &str = "V";
 
 		let mut peekable_entities = entities.clone().peekable();
 

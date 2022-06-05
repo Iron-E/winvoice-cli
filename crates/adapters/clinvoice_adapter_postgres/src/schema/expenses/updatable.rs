@@ -1,6 +1,6 @@
-use clinvoice_adapter::{Updatable, schema::columns::ExpenseColumns};
+use clinvoice_adapter::{schema::columns::ExpenseColumns, Updatable};
 use clinvoice_schema::Expense;
-use sqlx::{Postgres, Result, Transaction, QueryBuilder};
+use sqlx::{Postgres, QueryBuilder, Result, Transaction};
 
 use super::PgExpenses;
 
@@ -19,8 +19,8 @@ impl Updatable for PgExpenses
 		Self::Entity: 'e,
 	{
 		const COLUMNS: ExpenseColumns<&'static str> = ExpenseColumns::default();
-		const TABLE_IDENT: &'static str = "X";
-		const VALUES_IDENT: &'static str = "V";
+		const TABLE_IDENT: &str = "X";
+		const VALUES_IDENT: &str = "V";
 
 		let mut peekable_entities = entities.clone().peekable();
 

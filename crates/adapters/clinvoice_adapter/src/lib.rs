@@ -14,8 +14,6 @@
 //! 4. Write new `match` arms in `clinvoice`'s `Create` and `Retrieve` types for the adapter and
 //!    conditionally compile them based on the feature flag.
 
-#![allow(clippy::unit_arg)]
-
 mod adapters;
 mod deletable;
 mod feature_not_found;

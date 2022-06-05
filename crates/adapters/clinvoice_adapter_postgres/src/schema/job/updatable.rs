@@ -25,8 +25,8 @@ impl Updatable for PgJob
 		Self::Entity: 'e,
 	{
 		const COLUMNS: JobColumns<&'static str> = JobColumns::default();
-		const TABLE_IDENT: &'static str = "J";
-		const VALUES_IDENT: &'static str = "V";
+		const TABLE_IDENT: &str = "J";
+		const VALUES_IDENT: &str = "V";
 
 		let mut peekable_entities = entities.clone().peekable();
 

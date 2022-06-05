@@ -85,14 +85,14 @@ impl<T> MatchSet<T>
 		{
 			Self::And(match_conditions) =>
 			{
-				MatchSet::And(match_conditions.into_iter().map(|m| m.map_ref(f)).collect())
+				MatchSet::And(match_conditions.iter().map(|m| m.map_ref(f)).collect())
 			},
 			Self::Any => MatchSet::Any,
 			Self::Contains(x) => MatchSet::Contains(f(x)),
 			Self::Not(match_condition) => MatchSet::Not(match_condition.map_ref(f).into()),
 			Self::Or(match_conditions) =>
 			{
-				MatchSet::Or(match_conditions.into_iter().map(|m| m.map_ref(f)).collect())
+				MatchSet::Or(match_conditions.iter().map(|m| m.map_ref(f)).collect())
 			},
 		}
 	}

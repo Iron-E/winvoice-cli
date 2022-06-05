@@ -11,8 +11,6 @@
 //! [ecb]: https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/
 //! [iso]: https://www.iso.org/iso-4217-currency-codes.html
 
-#![allow(clippy::unit_arg)]
-
 mod currency;
 mod error;
 mod exchange_rates;
@@ -25,7 +23,7 @@ pub use money::Money;
 pub use rust_decimal::Decimal;
 
 #[cfg(test)]
-pub(crate) const SAMPLE_EXCHANGE_RATES_CSV: &'static str =
+pub(crate) const SAMPLE_EXCHANGE_RATES_CSV: &str =
 	"Date, USD, JPY, BGN, CZK, DKK, GBP, HUF, PLN, RON, SEK, CHF, ISK, NOK, HRK, RUB, TRY, AUD, \
 	 BRL, CAD, CNY, HKD, IDR, ILS, INR, KRW, MXN, MYR, NZD, PHP, SGD, THB, ZAR, \n03 June 2021, \
 	 1.2187, 133.81, 1.9558, 25.448, 7.4365, 0.85955, 345.82, 4.4520, 4.9220, 10.1145, 1.0961, \

@@ -20,8 +20,8 @@ impl Updatable for PgOrganization
 		Self::Entity: 'e,
 	{
 		const COLUMNS: OrganizationColumns<&'static str> = OrganizationColumns::default();
-		const TABLE_IDENT: &'static str = "O";
-		const VALUES_IDENT: &'static str = "V";
+		const TABLE_IDENT: &str = "O";
+		const VALUES_IDENT: &str = "V";
 
 		let mut peekable_entities = entities.clone().peekable();
 

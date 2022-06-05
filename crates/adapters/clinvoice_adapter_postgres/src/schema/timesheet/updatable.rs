@@ -1,10 +1,9 @@
-use clinvoice_adapter::{Updatable, schema::columns::TimesheetColumns};
+use clinvoice_adapter::{schema::columns::TimesheetColumns, Updatable};
 use clinvoice_schema::Timesheet;
-use sqlx::{Postgres, Result, Transaction, QueryBuilder};
-
-use crate::schema::{PgEmployee, PgJob};
+use sqlx::{Postgres, QueryBuilder, Result, Transaction};
 
 use super::PgTimesheet;
+use crate::schema::{PgEmployee, PgJob};
 
 #[async_trait::async_trait]
 impl Updatable for PgTimesheet
@@ -21,8 +20,8 @@ impl Updatable for PgTimesheet
 		Self::Entity: 'e,
 	{
 		const COLUMNS: TimesheetColumns<&'static str> = TimesheetColumns::default();
-		const TABLE_IDENT: &'static str = "O";
-		const VALUES_IDENT: &'static str = "V";
+		const TABLE_IDENT: &str = "O";
+		const VALUES_IDENT: &str = "V";
 
 		let mut peekable_entities = entities.clone().peekable();
 

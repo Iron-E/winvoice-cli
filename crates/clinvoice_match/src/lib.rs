@@ -18,8 +18,6 @@
 //! * [`Organization`](crate::schema::OrganizationAdapter)
 //! * [`Person`](crate::schema::PersonAdapter)
 
-#![allow(clippy::unit_arg)]
-
 mod r#match;
 mod match_contact;
 mod match_employee;

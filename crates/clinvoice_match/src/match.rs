@@ -103,7 +103,7 @@ impl<T> Match<T>
 		{
 			Self::And(match_conditions) =>
 			{
-				Match::And(match_conditions.into_iter().map(|m| m.map_ref(f)).collect())
+				Match::And(match_conditions.iter().map(|m| m.map_ref(f)).collect())
 			},
 			Self::Any => Match::Any,
 			Self::EqualTo(x) => Match::EqualTo(f(x)),
@@ -113,7 +113,7 @@ impl<T> Match<T>
 			Self::Not(match_condition) => Match::Not(match_condition.map_ref(f).into()),
 			Self::Or(match_conditions) =>
 			{
-				Match::Or(match_conditions.into_iter().map(|m| m.map_ref(f)).collect())
+				Match::Or(match_conditions.iter().map(|m| m.map_ref(f)).collect())
 			},
 		}
 	}

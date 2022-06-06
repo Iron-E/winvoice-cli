@@ -46,3 +46,42 @@ pub enum ContactKind
 	/// * '6035551234'
 	Phone(String),
 }
+
+impl ContactKind
+{
+	/// # Summary
+	///
+	/// If this is a [`ContactKind::Address`] this function will return as [`Some`]. Otherwise, it will return [`None`].
+	pub fn get_address(&self) -> Option<&Location>
+	{
+		match self
+		{
+			Self::Address(l) => Some(&l),
+			_ => None,
+		}
+	}
+
+	/// # Summary
+	///
+	/// If this is a [`ContactKind::Email`] this function will return as [`Some`]. Otherwise, it will return [`None`].
+	pub fn get_email(&self) -> Option<&str>
+	{
+		match self
+		{
+			Self::Email(e) => Some(&e),
+			_ => None,
+		}
+	}
+
+	/// # Summary
+	///
+	/// If this is a [`ContactKind::Phone`] this function will return as [`Some`]. Otherwise, it will return [`None`].
+	pub fn get_phone(&self) -> Option<&str>
+	{
+		match self
+		{
+			Self::Phone(p) => Some(&p),
+			_ => None,
+		}
+	}
+}

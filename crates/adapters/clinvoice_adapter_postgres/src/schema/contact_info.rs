@@ -36,9 +36,8 @@ impl PgContactInfo
 					row.get::<Option<_>, _>(columns.phone)
 						.map(ContactKind::Phone)
 				})
-				.map(Ok)
 			{
-				Some(kind) => kind,
+				Some(kind) => Ok(kind),
 				_ =>
 				{
 					let address_id = row.get::<Option<_>, _>(columns.address_id).ok_or_else(|| {

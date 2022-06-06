@@ -25,28 +25,15 @@ impl ContactInfoAdapter for PgContactInfo
 
 		QueryBuilder::new(
 			"INSERT INTO contact_information
-				(organization_id, label, export, address_id, email, phone)",
+				(address_id, email, export, label, organization_id, phone)",
 		)
 		.push_values(contact_info.iter(), |mut q, (export, kind, label)| {
-			q.push_bind(organization_id)
+			q.push_bind(kind.get_address().map(|a| a.id))
+				.push_bind(kind.get_email())
+				.push_bind(export)
 				.push_bind(label)
-				.push_bind(export);
-
-			match kind
-			{
-				ContactKind::Address(location) => q
-					.push_bind(location.id)
-					.push_bind(None::<String>)
-					.push_bind(None::<String>),
-				ContactKind::Email(email) => q
-					.push_bind(None::<Id>)
-					.push_bind(email)
-					.push_bind(None::<String>),
-				ContactKind::Phone(phone) => q
-					.push_bind(None::<Id>)
-					.push_bind(None::<String>)
-					.push_bind(phone),
-			};
+				.push_bind(organization_id)
+				.push_bind(kind.get_phone());
 		})
 		.push(';')
 		.build()

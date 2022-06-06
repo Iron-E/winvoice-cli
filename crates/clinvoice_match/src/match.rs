@@ -66,7 +66,7 @@ impl<T> Match<T>
 	/// # See also
 	///
 	/// * [`Iterator::map`]
-	pub fn map<U>(self, f: &impl Fn(T) -> U) -> Match<U>
+	pub fn map<U>(self, f: impl Copy + Fn(T) -> U) -> Match<U>
 	{
 		match self
 		{
@@ -96,7 +96,7 @@ impl<T> Match<T>
 	/// # See also
 	///
 	/// * [`Iterator::map`]
-	pub fn map_ref<U>(&self, f: &impl Fn(&T) -> U) -> Match<U>
+	pub fn map_ref<U>(&self, f: impl Copy + Fn(&T) -> U) -> Match<U>
 	{
 		match self
 		{

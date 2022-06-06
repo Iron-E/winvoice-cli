@@ -11,6 +11,6 @@ where
 	/// Exchange a the [`MatchExpense`]'s `cost` to another `currency`.
 	fn exchange(&self, currency: Currency, rates: &ExchangeRates) -> Self
 	{
-		self.map_ref(&|e| e.exchange(currency, rates))
+		self.map_ref(|e| e.exchange(currency, rates))
 	}
 }

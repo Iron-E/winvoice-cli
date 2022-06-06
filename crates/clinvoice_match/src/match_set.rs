@@ -4,8 +4,6 @@ mod from;
 
 use core::{cmp::Eq, fmt::Debug};
 
-use clinvoice_finance::{ExchangeRates, Exchangeable};
-use clinvoice_schema::Currency;
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 
@@ -53,7 +51,7 @@ impl<T> MatchSet<T>
 	/// # See also
 	///
 	/// * [`Iterator::map`]
-	pub fn map<U>(self, f: &impl Fn(T) -> U) -> MatchSet<U>
+	pub fn map<U>(self, f: impl Copy + Fn(T) -> U) -> MatchSet<U>
 	{
 		match self
 		{
@@ -80,7 +78,7 @@ impl<T> MatchSet<T>
 	/// # See also
 	///
 	/// * [`Iterator::map`]
-	pub fn map_ref<U>(&self, f: &impl Fn(&T) -> U) -> MatchSet<U>
+	pub fn map_ref<U>(&self, f: impl Copy + Fn(&T) -> U) -> MatchSet<U>
 	{
 		match self
 		{

@@ -1,9 +1,12 @@
-use clinvoice_adapter::{schema::columns::TimesheetColumns, Updatable};
+use clinvoice_adapter::{
+	schema::columns::TimesheetColumns,
+	Updatable,
+};
 use clinvoice_schema::Timesheet;
-use sqlx::{Postgres, QueryBuilder, Result, Transaction};
+use sqlx::{Postgres, Result, Transaction};
 
 use super::PgTimesheet;
-use crate::schema::{PgEmployee, PgJob};
+use crate::{schema::{PgEmployee, PgJob}, PgSchema};
 
 #[async_trait::async_trait]
 impl Updatable for PgTimesheet
@@ -19,10 +22,6 @@ impl Updatable for PgTimesheet
 		'e: 'i,
 		Self::Entity: 'e,
 	{
-		const COLUMNS: TimesheetColumns<&'static str> = TimesheetColumns::default();
-		const TABLE_IDENT: &str = "O";
-		const VALUES_IDENT: &str = "V";
-
 		let mut peekable_entities = entities.clone().peekable();
 
 		// There is nothing to do.
@@ -31,67 +30,18 @@ impl Updatable for PgTimesheet
 			return Ok(());
 		}
 
-		let values_columns = COLUMNS.scoped(VALUES_IDENT);
-
-		let mut query = QueryBuilder::new("UPDATE timesheets AS ");
-
-		query
-			.separated(' ')
-			.push(TABLE_IDENT)
-			.push("SET")
-			.push(COLUMNS.employee_id)
-			.push_unseparated('=')
-			.push_unseparated(values_columns.employee_id)
-			.push_unseparated(',')
-			.push_unseparated(COLUMNS.job_id)
-			.push_unseparated('=')
-			.push_unseparated(values_columns.job_id)
-			.push_unseparated(',')
-			.push_unseparated(COLUMNS.time_begin)
-			.push_unseparated('=')
-			.push_unseparated(values_columns.time_begin)
-			.push_unseparated(',')
-			.push_unseparated(COLUMNS.time_end)
-			.push_unseparated('=')
-			.push_unseparated(values_columns.time_end)
-			.push_unseparated(',')
-			.push_unseparated(COLUMNS.work_notes)
-			.push_unseparated('=')
-			.push_unseparated(values_columns.work_notes)
-			.push("FROM (");
-
-		query.push_values(peekable_entities, |mut q, e| {
-			q.push_bind(e.employee.id)
-				.push_bind(e.id)
-				.push_bind(e.job.id)
-				.push_bind(e.time_begin)
-				.push_bind(e.time_end)
-				.push_bind(&e.work_notes);
-		});
-
-		query
-			.separated(' ')
-			.push(") AS")
-			.push(VALUES_IDENT)
-			.push('(')
-			.push_unseparated(COLUMNS.employee_id)
-			.push_unseparated(',')
-			.push_unseparated(COLUMNS.id)
-			.push_unseparated(',')
-			.push_unseparated(COLUMNS.job_id)
-			.push_unseparated(',')
-			.push_unseparated(COLUMNS.time_begin)
-			.push_unseparated(',')
-			.push_unseparated(COLUMNS.time_end)
-			.push_unseparated(',')
-			.push_unseparated(COLUMNS.work_notes)
-			.push_unseparated(')')
-			.push("WHERE")
-			.push(COLUMNS.scoped(TABLE_IDENT).id)
-			.push_unseparated('=')
-			.push_unseparated(values_columns.id);
-
-		query.push(';').build().execute(&mut *connection).await?;
+		const COLUMNS: TimesheetColumns<&'static str> = TimesheetColumns::default();
+		PgSchema::update(&mut *connection, COLUMNS, "locations", "L", "V", |query| {
+			query.push_values(peekable_entities, |mut q, e| {
+				q.push_bind(e.employee.id)
+					.push_bind(e.id)
+					.push_bind(e.job.id)
+					.push_bind(e.time_begin)
+					.push_bind(e.time_end)
+					.push_bind(&e.work_notes);
+			});
+		})
+		.await?;
 
 		let employees = entities.clone().map(|e| &e.employee);
 		PgEmployee::update(connection, employees).await?;

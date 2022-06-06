@@ -16,7 +16,7 @@ mod write_where_clause;
 
 use core::fmt::Display;
 
-use clinvoice_adapter::WriteWhereClause;
+use clinvoice_adapter::{schema::columns::ColumnsToSql, WriteWhereClause};
 use clinvoice_match::Match;
 use clinvoice_schema::Id;
 pub use contact_info::PgContactInfo;
@@ -25,7 +25,7 @@ pub use expenses::PgExpenses;
 pub use job::PgJob;
 pub use location::PgLocation;
 pub use organization::PgOrganization;
-use sqlx::{Executor, Postgres, QueryBuilder, Result};
+use sqlx::{Executor, Postgres, QueryBuilder, Result, Transaction};
 pub use timesheet::PgTimesheet;
 
 /// # Summary
@@ -39,10 +39,8 @@ impl PgSchema
 {
 	/// # Summary
 	///
-	/// Generate `DELETE FROM {table} WHERE (id = №) OR … OR (id = №)`
+	/// Execute `DELETE FROM {table} WHERE (id = №) OR … OR (id = №)`
 	/// for each [`Id`] in `entities.
-	///
-	/// Note that a semicolon is not put at the end of the statement.
 	async fn delete(
 		connection: impl Executor<'_, Database = Postgres>,
 		table: impl Display,
@@ -66,6 +64,61 @@ impl PgSchema
 			&Match::Or(peekable_entities.map(Match::from).collect()),
 			&mut query,
 		);
+
+		query.push(';').build().execute(connection).await?;
+
+		Ok(())
+	}
+
+	/// # Summary
+	///
+	/// Execute a query over the given `connection` which updates `columns` of a `table` given
+	/// the some values specified by `push_values` (e.g.
+	/// `|query| query.push_values(my_iterator, |mut q, value| …)`).
+	///
+	/// # See
+	///
+	/// * [`ColumnsToSql::push_columns`] for how the order of columns to bind in `push_values`.
+	/// * [`ColumnsToSql::push_set`] for how the `SET` clause is generated.
+	/// * [`ColumnsToSql::push_update_where`] for how the `WHERE` condition is generated.
+	/// * [`QueryBuilder::push_values`] for what function to use for `push_values`.
+	async fn update<'args, C>(
+		connection: &mut Transaction<'_, Postgres>,
+		columns: C,
+		table: impl Display,
+		table_ident: impl Copy + Display,
+		values_ident: impl Copy + Display,
+		push_values: impl FnOnce(&mut QueryBuilder<'args, Postgres>),
+	) -> Result<()>
+	where
+		C: ColumnsToSql,
+	{
+		let mut query = QueryBuilder::new("");
+		query
+			.separated(' ')
+			.push("UPDATE")
+			.push(table)
+			.push("AS")
+			.push(table_ident)
+			.push("SET ");
+
+		columns.push_set(&mut query, values_ident);
+
+		query.push(" FROM (");
+
+		push_values(&mut query);
+
+		query
+			.separated(' ')
+			.push(") AS")
+			.push(values_ident)
+			.push('(');
+
+		columns.push_columns(&mut query);
+
+		query.push(") WHERE ");
+
+		columns.push_update_where(&mut query, table_ident, values_ident);
 
 		query.push(';').build().execute(connection).await?;
 

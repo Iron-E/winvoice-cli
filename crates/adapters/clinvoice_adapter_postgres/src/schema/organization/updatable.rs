@@ -1,9 +1,9 @@
 use clinvoice_adapter::{schema::columns::OrganizationColumns, Updatable};
 use clinvoice_schema::Organization;
-use sqlx::{Postgres, QueryBuilder, Result, Transaction};
+use sqlx::{Postgres, Result, Transaction};
 
 use super::PgOrganization;
-use crate::schema::PgLocation;
+use crate::{schema::PgLocation, PgSchema};
 
 #[async_trait::async_trait]
 impl Updatable for PgOrganization
@@ -19,10 +19,6 @@ impl Updatable for PgOrganization
 		'e: 'i,
 		Self::Entity: 'e,
 	{
-		const COLUMNS: OrganizationColumns<&'static str> = OrganizationColumns::default();
-		const TABLE_IDENT: &str = "O";
-		const VALUES_IDENT: &str = "V";
-
 		let mut peekable_entities = entities.clone().peekable();
 
 		// There is nothing to do.
@@ -31,50 +27,24 @@ impl Updatable for PgOrganization
 			return Ok(());
 		}
 
-		let values_columns = COLUMNS.scoped(VALUES_IDENT);
+		const COLUMNS: OrganizationColumns<&'static str> = OrganizationColumns::default();
+		PgSchema::update(
+			&mut *connection,
+			COLUMNS,
+			"organizations",
+			"O",
+			"V",
+			|query| {
+				query.push_values(peekable_entities, |mut q, e| {
+					q.push_bind(e.id)
+						.push_bind(e.location.id)
+						.push_bind(&e.name);
+				});
+			},
+		)
+		.await?;
 
-		let mut query = QueryBuilder::new("UPDATE organizations AS ");
-
-		query
-			.separated(' ')
-			.push(TABLE_IDENT)
-			.push("SET")
-			.push(COLUMNS.location_id)
-			.push_unseparated('=')
-			.push_unseparated(values_columns.location_id)
-			.push_unseparated(',')
-			.push_unseparated(COLUMNS.name)
-			.push_unseparated('=')
-			.push_unseparated(values_columns.name)
-			.push("FROM (");
-
-		query.push_values(peekable_entities, |mut q, e| {
-			q.push_bind(e.id)
-				.push_bind(e.location.id)
-				.push_bind(&e.name);
-		});
-
-		query
-			.separated(' ')
-			.push(") AS")
-			.push(VALUES_IDENT)
-			.push('(')
-			.push_unseparated(COLUMNS.id)
-			.push_unseparated(',')
-			.push_unseparated(COLUMNS.location_id)
-			.push_unseparated(',')
-			.push_unseparated(COLUMNS.name)
-			.push_unseparated(')')
-			.push("WHERE")
-			.push(COLUMNS.scoped(TABLE_IDENT).id)
-			.push_unseparated('=')
-			.push_unseparated(values_columns.id);
-
-		query.push(';').build().execute(&mut *connection).await?;
-
-		PgLocation::update(connection, entities.map(|e| &e.location)).await?;
-
-		Ok(())
+		PgLocation::update(connection, entities.map(|e| &e.location)).await
 	}
 }
 

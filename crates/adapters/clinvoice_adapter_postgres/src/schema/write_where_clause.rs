@@ -681,7 +681,7 @@ impl WriteWhereClause<Postgres, &MatchExpense> for PgSchema
 				),
 				// NOTE: `cost` is stored as text on the DB
 				columns.typecast("numeric").cost,
-				&match_condition.cost.map_ref(&|c| c.amount),
+				&match_condition.cost.map_ref(|c| c.amount),
 				query,
 			),
 			columns.description,
@@ -728,36 +728,36 @@ impl WriteWhereClause<Postgres, &MatchJob> for PgSchema
 										columns.date_close,
 										&match_condition
 											.date_close
-											.map_ref(&|d| Nullable(d.map(PgTimestampTz))),
+											.map_ref(|d| Nullable(d.map(PgTimestampTz))),
 										query,
 									),
 									columns.date_open,
-									&match_condition.date_open.map_ref(&|d| PgTimestampTz(*d)),
+									&match_condition.date_open.map_ref(|d| PgTimestampTz(*d)),
 									query,
 								),
 								columns.increment,
 								&match_condition
 									.increment
-									.map_ref(&|i| PgInterval(i.into_inner())),
+									.map_ref(|i| PgInterval(i.into_inner())),
 								query,
 							),
 							columns.invoice_date_issued,
 							&match_condition
 								.invoice
 								.date_issued
-								.map_ref(&|d| Nullable(d.map(PgTimestampTz))),
+								.map_ref(|d| Nullable(d.map(PgTimestampTz))),
 							query,
 						),
 						columns.invoice_date_paid,
 						&match_condition
 							.invoice
 							.date_paid
-							.map_ref(&|d| Nullable(d.map(PgTimestampTz))),
+							.map_ref(|d| Nullable(d.map(PgTimestampTz))),
 						query,
 					),
 					// NOTE: `hourly_rate` is stored as text on the DB
 					columns.typecast("numeric").invoice_hourly_rate,
-					&match_condition.invoice.hourly_rate.map_ref(&|r| r.amount),
+					&match_condition.invoice.hourly_rate.map_ref(|r| r.amount),
 					query,
 				),
 				columns.notes,
@@ -825,13 +825,13 @@ impl WriteWhereClause<Postgres, &MatchTimesheet> for PgSchema
 				PgSchema::write_where_clause(
 					PgSchema::write_where_clause(context, columns.id, &match_condition.id, query),
 					columns.time_begin,
-					&match_condition.time_begin.map_ref(&|d| PgTimestampTz(*d)),
+					&match_condition.time_begin.map_ref(|d| PgTimestampTz(*d)),
 					query,
 				),
 				columns.time_end,
 				&match_condition
 					.time_end
-					.map_ref(&|d| Nullable(d.map(PgTimestampTz))),
+					.map_ref(|d| Nullable(d.map(PgTimestampTz))),
 				query,
 			),
 			columns.work_notes,

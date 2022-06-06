@@ -1,10 +1,9 @@
 mod default;
+mod exchangeable;
 mod from;
 
 use core::{cmp::Eq, fmt::Debug};
 
-use clinvoice_finance::{ExchangeRates, Exchangeable};
-use clinvoice_schema::Currency;
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 
@@ -116,18 +115,5 @@ impl<T> Match<T>
 				Match::Or(match_conditions.iter().map(|m| m.map_ref(f)).collect())
 			},
 		}
-	}
-}
-
-impl<T> Match<T>
-where
-	T: Exchangeable,
-{
-	/// # Summary
-	///
-	/// Exchange a `Match` for an amount of `Money` to another `currency`.
-	pub fn exchange(&self, currency: Currency, rates: &ExchangeRates) -> Self
-	{
-		self.map_ref(&|e| e.exchange(currency, rates))
 	}
 }

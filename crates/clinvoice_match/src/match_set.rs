@@ -1,4 +1,5 @@
 mod default;
+mod exchangeable;
 mod from;
 
 use core::{cmp::Eq, fmt::Debug};
@@ -95,18 +96,5 @@ impl<T> MatchSet<T>
 				MatchSet::Or(match_conditions.iter().map(|m| m.map_ref(f)).collect())
 			},
 		}
-	}
-}
-
-impl<T> MatchSet<T>
-where
-	T: Exchangeable,
-{
-	/// # Summary
-	///
-	/// Exchange a the [`MatchExpense`]'s `cost` to another `currency`.
-	pub fn exchange(&self, currency: Currency, rates: &ExchangeRates) -> Self
-	{
-		self.map_ref(&|e| e.exchange(currency, rates))
 	}
 }

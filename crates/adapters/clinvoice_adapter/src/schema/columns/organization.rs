@@ -9,14 +9,12 @@ pub struct OrganizationColumns<T>
 }
 
 impl<T> OrganizationColumns<T>
-where
-	T: Copy,
 {
 	/// # Summary
 	///
 	/// Returns an alternation of [`OrganizationColumns`] which modifies its fields' [`Display`]
 	/// implementation to output `{ident}.{column}`.
-	pub fn scoped<TIdent>(&self, ident: TIdent) -> OrganizationColumns<WithIdentifier<T, TIdent>>
+	pub fn scoped<TIdent>(self, ident: TIdent) -> OrganizationColumns<WithIdentifier<T, TIdent>>
 	where
 		TIdent: Copy,
 	{
@@ -31,7 +29,7 @@ where
 	///
 	/// Returns an alternation of [`OrganizationColumns`] which modifies its fields' [`Display`]
 	/// implementation to output `{column}::{cast}`.
-	pub fn typecast<TCast>(&self, cast: TCast) -> OrganizationColumns<TypeCast<TCast, T>>
+	pub fn typecast<TCast>(self, cast: TCast) -> OrganizationColumns<TypeCast<TCast, T>>
 	where
 		TCast: Copy,
 	{

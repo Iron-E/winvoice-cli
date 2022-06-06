@@ -11,14 +11,12 @@ pub struct EmployeeColumns<T>
 }
 
 impl<T> EmployeeColumns<T>
-where
-	T: Copy,
 {
 	/// # Summary
 	///
 	/// Returns an alternation of [`EmployeeColumns`] which modifies its fields' [`Display`]
 	/// implementation to output `{column}::{cast}`.
-	pub fn scoped<TIdent>(&self, ident: TIdent) -> EmployeeColumns<WithIdentifier<T, TIdent>>
+	pub fn scoped<TIdent>(self, ident: TIdent) -> EmployeeColumns<WithIdentifier<T, TIdent>>
 	where
 		TIdent: Copy,
 	{
@@ -35,7 +33,7 @@ where
 	///
 	/// Returns an alternation of [`EmployeeColumns`] which modifies its fields' [`Display`]
 	/// implementation to output `{ident}.{column}`.
-	pub fn typecast<TCast>(&self, cast: TCast) -> EmployeeColumns<TypeCast<TCast, T>>
+	pub fn typecast<TCast>(self, cast: TCast) -> EmployeeColumns<TypeCast<TCast, T>>
 	where
 		TCast: Copy,
 	{

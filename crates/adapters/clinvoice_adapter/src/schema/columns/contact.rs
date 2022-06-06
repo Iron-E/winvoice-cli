@@ -12,14 +12,12 @@ pub struct ContactColumns<T>
 }
 
 impl<T> ContactColumns<T>
-where
-	T: Copy,
 {
 	/// # Summary
 	///
 	/// Returns an alternation of [`ContactColumns`] which modifies its fields' [`Display`]
 	/// implementation to output `{ident}.{column}`.
-	pub fn scoped<TIdent>(&self, ident: TIdent) -> ContactColumns<WithIdentifier<T, TIdent>>
+	pub fn scoped<TIdent>(self, ident: TIdent) -> ContactColumns<WithIdentifier<T, TIdent>>
 	where
 		TIdent: Copy,
 	{

@@ -11,14 +11,12 @@ pub struct ExpenseColumns<T>
 }
 
 impl<T> ExpenseColumns<T>
-where
-	T: Copy,
 {
 	/// # Summary
 	///
 	/// Returns an alternation of [`ExpenseColumns`] which modifies its fields' [`Display`]
 	/// implementation to output `{ident}.{column}`.
-	pub fn scoped<TIdent>(&self, ident: TIdent) -> ExpenseColumns<WithIdentifier<T, TIdent>>
+	pub fn scoped<TIdent>(self, ident: TIdent) -> ExpenseColumns<WithIdentifier<T, TIdent>>
 	where
 		TIdent: Copy,
 	{
@@ -35,7 +33,7 @@ where
 	///
 	/// Returns an alternation of [`ExpenseColumns`] which modifies its fields' [`Display`]
 	/// implementation to output `{column}::{cast}`.
-	pub fn typecast<TCast>(&self, cast: TCast) -> ExpenseColumns<TypeCast<TCast, T>>
+	pub fn typecast<TCast>(self, cast: TCast) -> ExpenseColumns<TypeCast<TCast, T>>
 	where
 		TCast: Copy,
 	{

@@ -1,5 +1,6 @@
 use crate::fmt::{TypeCast, WithIdentifier};
 
+#[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct JobColumns<T>
 {
 	pub client_id: T,
@@ -15,14 +16,12 @@ pub struct JobColumns<T>
 }
 
 impl<T> JobColumns<T>
-where
-	T: Copy,
 {
 	/// # Summary
 	///
 	/// Returns an alternation of [`JobColumns`] which modifies its fields' [`Display`]
 	/// implementation to output `{ident}.{column}`.
-	pub fn scoped<TIdent>(&self, ident: TIdent) -> JobColumns<WithIdentifier<T, TIdent>>
+	pub fn scoped<TIdent>(self, ident: TIdent) -> JobColumns<WithIdentifier<T, TIdent>>
 	where
 		TIdent: Copy,
 	{
@@ -44,7 +43,7 @@ where
 	///
 	/// Returns an alternation of [`JobColumns`] which modifies its fields' [`Display`]
 	/// implementation to output `{column}::{cast}`.
-	pub fn typecast<TCast>(&self, cast: TCast) -> JobColumns<TypeCast<TCast, T>>
+	pub fn typecast<TCast>(self, cast: TCast) -> JobColumns<TypeCast<TCast, T>>
 	where
 		TCast: Copy,
 	{

@@ -5,14 +5,14 @@ use rust_decimal::Decimal;
 use super::ExchangeRates;
 use crate::Currency;
 
-impl Index<Currency> for ExchangeRates
+impl Index<&Currency> for ExchangeRates
 {
 	type Output = Decimal;
 
-	fn index(&self, index: Currency) -> &Self::Output
+	fn index(&self, index: &Currency) -> &Self::Output
 	{
 		self
-			.get(&index)
+			.get(index)
 			.unwrap_or_else(|| panic!("{index} was not found in this set of exchange rates"))
 	}
 }

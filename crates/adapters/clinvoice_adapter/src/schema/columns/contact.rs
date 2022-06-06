@@ -1,3 +1,5 @@
+mod columns_to_sql;
+
 use crate::fmt::{TypeCast, WithIdentifier};
 
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -35,7 +37,7 @@ impl<T> ContactColumns<T>
 	///
 	/// Returns an alternation of [`ContactColumns`] which modifies its fields' [`Display`]
 	/// implementation to output `{column}::{cast}`.
-	pub fn typecast<TCast>(&self, cast: TCast) -> ContactColumns<TypeCast<TCast, T>>
+	pub fn typecast<TCast>(self, cast: TCast) -> ContactColumns<TypeCast<TCast, T>>
 	where
 		TCast: Copy,
 	{

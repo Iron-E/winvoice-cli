@@ -1,3 +1,5 @@
+mod columns_to_sql;
+
 use crate::fmt::{TypeCast, WithIdentifier};
 
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]

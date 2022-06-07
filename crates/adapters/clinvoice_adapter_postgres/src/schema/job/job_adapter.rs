@@ -314,7 +314,7 @@ mod tests
 			.unwrap()
 			.into_iter()
 			.collect::<HashSet<_>>(),
-			[job.clone(), job2.clone(), job3.clone(), job4.clone(),]
+			[job.clone(), job2.clone(), job3.clone(), job4.clone()]
 				.into_iter()
 				.collect::<HashSet<_>>(),
 		);

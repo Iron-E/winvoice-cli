@@ -1,12 +1,12 @@
-use clinvoice_adapter::{
-	schema::columns::TimesheetColumns,
-	Updatable,
-};
+use clinvoice_adapter::{schema::columns::TimesheetColumns, Updatable};
 use clinvoice_schema::Timesheet;
 use sqlx::{Postgres, Result, Transaction};
 
 use super::PgTimesheet;
-use crate::{schema::{PgEmployee, PgJob}, PgSchema};
+use crate::{
+	schema::{PgEmployee, PgJob},
+	PgSchema,
+};
 
 #[async_trait::async_trait]
 impl Updatable for PgTimesheet

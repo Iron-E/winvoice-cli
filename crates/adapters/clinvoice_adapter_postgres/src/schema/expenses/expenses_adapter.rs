@@ -35,7 +35,7 @@ impl ExpensesAdapter for PgExpenses
 
 		QueryBuilder::new(
 			"INSERT INTO contact_information
-				(timesheet_id, category, cost, description)",
+				(timesheet_id, category, cost, description) ",
 		)
 		.push_values(expenses.iter(), |mut q, (category, cost, description)| {
 			q.push_bind(timesheet_id)

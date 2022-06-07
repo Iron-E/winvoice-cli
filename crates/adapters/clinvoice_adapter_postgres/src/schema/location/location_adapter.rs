@@ -158,14 +158,17 @@ mod tests
 			.unwrap();
 
 		// Assert ::retrieve retrieves accurately from the DB
-		assert!(PgLocation::retrieve(&connection, &MatchLocation {
-			outer: MatchOuterLocation::None,
-			..Default::default()
-		})
-		.await
-		.unwrap()
-		.into_iter()
-		.all(|location| location.name == earth.name));
+		assert_eq!(
+			PgLocation::retrieve(&connection, &MatchLocation {
+				id: earth.id.into(),
+				outer: MatchOuterLocation::None,
+				..Default::default()
+			})
+			.await
+			.unwrap()
+			.as_slice(),
+			&[earth]
+		);
 
 		assert_eq!(
 			[utah, arizona].into_iter().collect::<HashSet<_>>(),

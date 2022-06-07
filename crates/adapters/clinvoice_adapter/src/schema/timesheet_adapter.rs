@@ -1,5 +1,5 @@
 use clinvoice_match::MatchTimesheet;
-use clinvoice_schema::{Employee, Job, Timesheet};
+use clinvoice_schema::{Employee, Job, Money, Timesheet};
 use sqlx::{Pool, Result};
 
 use crate::{Deletable, Updatable};
@@ -23,6 +23,7 @@ pub trait TimesheetAdapter:
 	async fn create(
 		connection: &Pool<<Self as Deletable>::Db>,
 		employee: Employee,
+		expenses: Vec<(String, Money, String)>,
 		job: Job,
 	) -> Result<<Self as Deletable>::Entity>;
 

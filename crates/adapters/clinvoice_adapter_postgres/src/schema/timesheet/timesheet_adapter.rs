@@ -10,6 +10,7 @@ use clinvoice_adapter::{
 	},
 	WriteWhereClause,
 };
+use clinvoice_finance::Money;
 use clinvoice_match::MatchTimesheet;
 use clinvoice_schema::{
 	chrono::{SubsecRound, Utc},
@@ -29,35 +30,49 @@ use crate::{
 #[async_trait::async_trait]
 impl TimesheetAdapter for PgTimesheet
 {
-	async fn create(connection: &PgPool, employee: Employee, job: Job) -> Result<Timesheet>
+	async fn create(
+		connection: &PgPool,
+		employee: Employee,
+		expenses: Vec<(String, Money, String)>,
+		job: Job,
+	) -> Result<Timesheet>
 	{
-		let time_begin = Utc::now();
-		let work_notes =
-			String::from("* Work which was done goes here\n* Supports markdown formatting");
+		connection
+			.begin()
+			.and_then(|mut transaction| async {
+				let time_begin = Utc::now();
+				let work_notes =
+					String::from("* Work which was done goes here\n* Supports markdown formatting");
 
-		let row = sqlx::query!(
-			"INSERT INTO timesheets
-				(employee_id, job_id, time_begin, work_notes)
-			VALUES
-				($1,          $2,     $3,         $4)
-			RETURNING id;",
-			employee.id,
-			job.id,
-			time_begin,
-			work_notes,
-		)
-		.fetch_one(connection)
-		.await?;
+				let row = sqlx::query!(
+					"INSERT INTO timesheets
+						(employee_id, job_id, time_begin, work_notes)
+					VALUES
+						($1,          $2,     $3,         $4)
+					RETURNING id;",
+					employee.id,
+					job.id,
+					time_begin,
+					work_notes,
+				)
+				.fetch_one(&mut transaction)
+				.await?;
 
-		Ok(Timesheet {
-			id: row.id,
-			employee,
-			expenses: Vec::new(),
-			job,
-			time_begin: time_begin.trunc_subsecs(6),
-			time_end: None,
-			work_notes,
-		})
+				let expenses_db = PgExpenses::create(&mut transaction, expenses, row.id).await?;
+
+				transaction.commit().await?;
+
+				Ok(Timesheet {
+					id: row.id,
+					employee,
+					expenses: expenses_db,
+					job,
+					time_begin: time_begin.trunc_subsecs(6),
+					time_end: None,
+					work_notes,
+				})
+			})
+			.await
 	}
 
 	async fn retrieve(
@@ -126,7 +141,6 @@ impl TimesheetAdapter for PgTimesheet
 mod tests
 {
 	use core::time::Duration;
-	use std::collections::HashSet;
 
 	use clinvoice_adapter::schema::{
 		EmployeeAdapter,
@@ -134,11 +148,13 @@ mod tests
 		LocationAdapter,
 		OrganizationAdapter,
 	};
+	use clinvoice_finance::{ExchangeRates, Exchangeable};
 	use clinvoice_match::{Match, MatchEmployee, MatchOrganization, MatchSet, MatchTimesheet};
 	use clinvoice_schema::{
 		chrono::{TimeZone, Utc},
 		ContactKind,
 		Currency,
+		Expense,
 		Money,
 	};
 
@@ -196,13 +212,23 @@ mod tests
 		.await
 		.unwrap();
 
-		let timesheet = PgTimesheet::create(&connection, employee, job)
-			.await
-			.unwrap();
+		let timesheet = PgTimesheet::create(
+			&connection,
+			employee,
+			vec![(
+				"Food".into(),
+				Money::new(40_50, 2, Currency::USD),
+				"Got fastfood".into(),
+			)],
+			job,
+		)
+		.await
+		.unwrap();
 
-		let row = sqlx::query!(
+		let timesheet_row = sqlx::query!(
 			r#"SELECT
 					employee_id,
+					id,
 					job_id,
 					time_begin,
 					time_end,
@@ -215,11 +241,40 @@ mod tests
 		.await
 		.unwrap();
 
-		assert_eq!(timesheet.employee.id, row.employee_id);
-		assert_eq!(timesheet.job.id, row.job_id);
-		assert_eq!(timesheet.time_begin, row.time_begin);
-		assert_eq!(timesheet.time_end, row.time_end);
-		assert_eq!(timesheet.work_notes, row.work_notes);
+		let expense_row = sqlx::query!(
+			r#"SELECT
+					category,
+					cost,
+					description,
+					id,
+					timesheet_id
+				FROM expenses
+				WHERE timesheet_id = $1;"#,
+			timesheet_row.id,
+		)
+		.fetch_one(&connection)
+		.await
+		.unwrap();
+
+		assert_eq!(timesheet.employee.id, timesheet_row.employee_id);
+		assert_eq!(timesheet.expenses, vec![Expense {
+			category: expense_row.category,
+			cost: Money {
+				amount: expense_row.cost.parse().unwrap(),
+				..Default::default()
+			}
+			.exchange(
+				timesheet.expenses[0].cost.currency,
+				&ExchangeRates::new().await.unwrap(),
+			),
+			description: expense_row.description,
+			id: expense_row.id,
+			timesheet_id: timesheet.id,
+		}]);
+		assert_eq!(timesheet.job.id, timesheet_row.job_id);
+		assert_eq!(timesheet.time_begin, timesheet_row.time_begin);
+		assert_eq!(timesheet.time_end, timesheet_row.time_end);
+		assert_eq!(timesheet.work_notes, timesheet_row.work_notes);
 	}
 
 	/// TODO: use fuzzing
@@ -327,8 +382,17 @@ mod tests
 		.unwrap();
 
 		let (timesheet, timesheet2) = futures::try_join!(
-			PgTimesheet::create(&connection, employee, job),
-			PgTimesheet::create(&connection, employee2, job2),
+			PgTimesheet::create(&connection, employee, Vec::new(), job),
+			PgTimesheet::create(
+				&connection,
+				employee2,
+				vec![(
+					"Flight".into(),
+					Money::new(300_56, 2, Currency::USD),
+					"Trip to Hawaii for research".into()
+				)],
+				job2,
+			),
 		)
 		.unwrap();
 
@@ -350,8 +414,8 @@ mod tests
 			.await
 			.unwrap()
 			.into_iter()
-			.collect::<HashSet<_>>(),
-			[timesheet, timesheet2].into_iter().collect(),
+			.as_slice(),
+			&[timesheet],
 		);
 	}
 }

@@ -34,7 +34,7 @@ impl ExpensesAdapter for PgExpenses
 		const COLUMNS: ExpenseColumns<&'static str> = ExpenseColumns::default();
 
 		QueryBuilder::new(
-			"INSERT INTO contact_information
+			"INSERT INTO expenses
 				(timesheet_id, category, cost, description) ",
 		)
 		.push_values(expenses.iter(), |mut q, (category, cost, description)| {
@@ -48,15 +48,15 @@ impl ExpensesAdapter for PgExpenses
 				)
 				.push_bind(description);
 		})
-		.push(';')
+		.push(" RETURNING id;")
 		.build()
 		.fetch(connection)
-		.zip(stream::iter(expenses.iter().cloned()))
+		.zip(stream::iter(expenses.iter()))
 		.map(|(result, (category, cost, description))| {
 			result.map(|row| Expense {
-				category,
-				cost,
-				description,
+				category: category.clone(),
+				cost: *cost,
+				description: description.clone(),
 				id: row.get(COLUMNS.id),
 				timesheet_id,
 			})

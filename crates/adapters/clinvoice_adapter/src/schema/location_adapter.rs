@@ -23,23 +23,7 @@ pub trait LocationAdapter:
 	async fn create(
 		connection: &Pool<<Self as Deletable>::Db>,
 		name: String,
-	) -> Result<<Self as Deletable>::Entity>;
-
-	/// # Summary
-	///
-	/// Create a new [`Location`] on the database which is inside of `self`.
-	///
-	/// # Parameters
-	///
-	/// See [`Location`].
-	///
-	/// # Returns
-	///
-	/// The created [`Location`].
-	async fn create_inner(
-		connection: &Pool<<Self as Deletable>::Db>,
-		outer: <Self as Deletable>::Entity,
-		name: String,
+		outer: Option<<Self as Deletable>::Entity>,
 	) -> Result<<Self as Deletable>::Entity>;
 
 	/// # Summary

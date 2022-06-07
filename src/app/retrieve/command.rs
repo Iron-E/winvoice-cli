@@ -364,7 +364,7 @@ impl Command
 					let conn = &connection;
 					stream::iter(create_inner.into_iter().map(Ok).rev())
 						.try_fold(location, |loc: Location, name: String| async move {
-							LAdapter::create_inner(conn, loc, name).await
+							LAdapter::create(conn, name, Some(loc)).await
 						})
 						.await?;
 				}

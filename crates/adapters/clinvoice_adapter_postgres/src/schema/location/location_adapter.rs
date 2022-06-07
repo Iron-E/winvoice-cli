@@ -13,28 +13,12 @@ use crate::PgSchema;
 #[async_trait::async_trait]
 impl LocationAdapter for PgLocation
 {
-	async fn create(connection: &PgPool, name: String) -> Result<Location>
-	{
-		let row = sqlx::query!(
-			"INSERT INTO locations (name) VALUES ($1) RETURNING id;",
-			name
-		)
-		.fetch_one(connection)
-		.await?;
-
-		Ok(Location {
-			id: row.id,
-			name,
-			outer: None,
-		})
-	}
-
-	async fn create_inner(connection: &PgPool, outer: Location, name: String) -> Result<Location>
+	async fn create(connection: &PgPool, name: String, outer: Option<Location>) -> Result<Location>
 	{
 		let row = sqlx::query!(
 			"INSERT INTO locations (name, outer_id) VALUES ($1, $2) RETURNING id;",
 			name,
-			outer.id
+			outer.as_ref().map(|o| o.id)
 		)
 		.fetch_one(connection)
 		.await?;
@@ -42,7 +26,7 @@ impl LocationAdapter for PgLocation
 		Ok(Location {
 			id: row.id,
 			name,
-			outer: Some(outer.into()),
+			outer: outer.map(|o| o.into()),
 		})
 	}
 
@@ -82,17 +66,17 @@ mod tests
 	{
 		let connection = util::connect().await;
 
-		let earth = PgLocation::create(&connection, "Earth".into())
+		let earth = PgLocation::create(&connection, "Earth".into(), None)
 			.await
 			.unwrap();
 
-		let usa = PgLocation::create_inner(&connection, earth.clone(), "USA".into())
+		let usa = PgLocation::create(&connection, "USA".into(), Some(earth.clone()))
 			.await
 			.unwrap();
 
 		let (arizona, utah) = futures::try_join!(
-			PgLocation::create_inner(&connection, usa.clone(), "Arizona".into()),
-			PgLocation::create_inner(&connection, usa.clone(), "Utah".into()),
+			PgLocation::create(&connection, "Arizona".into(), Some(usa.clone())),
+			PgLocation::create(&connection, "Utah".into(), Some(usa.clone())),
 		)
 		.unwrap();
 
@@ -141,21 +125,19 @@ mod tests
 	{
 		let connection = util::connect().await;
 
-		let earth = PgLocation::create(&connection, "Earth".into())
+		let earth = PgLocation::create(&connection, "Earth".into(), None)
 			.await
 			.unwrap();
 
-		let usa = PgLocation::create_inner(&connection, earth.clone(), "USA".into())
+		let usa = PgLocation::create(&connection, "USA".into(), Some(earth.clone()))
 			.await
 			.unwrap();
 
-		let arizona = PgLocation::create_inner(&connection, usa.clone(), "Arizona".into())
-			.await
-			.unwrap();
-
-		let utah = PgLocation::create_inner(&connection, usa.clone(), "Utah".into())
-			.await
-			.unwrap();
+		let (arizona, utah) = futures::try_join!(
+			PgLocation::create(&connection, "Arizona".into(), Some(usa.clone())),
+			PgLocation::create(&connection, "Utah".into(), Some(usa.clone())),
+		)
+		.unwrap();
 
 		// Assert ::retrieve retrieves accurately from the DB
 		assert_eq!(

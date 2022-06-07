@@ -166,7 +166,7 @@ mod tests
 	{
 		let connection = util::connect().await;
 
-		let earth = PgLocation::create(&connection, "Earth".into())
+		let earth = PgLocation::create(&connection, "Earth".into(), None)
 			.await
 			.unwrap();
 
@@ -283,15 +283,17 @@ mod tests
 	{
 		let connection = util::connect().await;
 
-		let earth = PgLocation::create(&connection, "Earth".into())
+		let earth = PgLocation::create(&connection, "Earth".into(), None)
 			.await
 			.unwrap();
-		let usa = PgLocation::create_inner(&connection, earth, "USA".into())
+
+		let usa = PgLocation::create(&connection, "USA".into(), Some(earth))
 			.await
 			.unwrap();
+
 		let (arizona, utah) = futures::try_join!(
-			PgLocation::create_inner(&connection, usa.clone(), "Arizona".into()),
-			PgLocation::create_inner(&connection, usa.clone(), "Utah".into()),
+			PgLocation::create(&connection, "Arizona".into(), Some(usa.clone())),
+			PgLocation::create(&connection, "Utah".into(), Some(usa.clone())),
 		)
 		.unwrap();
 

@@ -262,10 +262,10 @@ impl Create
 	{
 		if let Some(name) = names.last()
 		{
-			let outer = LAdapter::create(connection, name.clone()).await?;
+			let outer = LAdapter::create(connection, name.clone(), None).await?;
 			stream::iter(names.into_iter().rev().skip(1).map(Ok))
 				.try_fold(outer, |outer, name| async move {
-					LAdapter::create_inner(connection, outer, name).await
+					LAdapter::create(connection, name, Some(outer)).await
 				})
 				.await?;
 		}

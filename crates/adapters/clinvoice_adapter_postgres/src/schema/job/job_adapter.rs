@@ -135,11 +135,11 @@ impl JobAdapter for PgJob
 mod tests
 {
 	use core::time::Duration;
-	use std::collections::HashSet;
+use std::collections::HashSet;
 
 	use clinvoice_adapter::schema::{LocationAdapter, OrganizationAdapter};
 	use clinvoice_finance::{ExchangeRates, Exchangeable};
-	use clinvoice_match::{Match, MatchJob, MatchLocation, MatchOrganization};
+	use clinvoice_match::{Match, MatchJob, MatchInvoice};
 	use clinvoice_schema::{
 		chrono::{TimeZone, Utc},
 		Currency,
@@ -335,14 +335,28 @@ mod tests
 
 		assert_eq!(
 			PgJob::retrieve(&connection, &MatchJob {
-				client: MatchOrganization {
-					location: MatchLocation {
-						id: Match::Or(vec![
-							organization.location.id.into(),
-							organization2.location.id.into()
-						]),
-						..Default::default()
-					},
+				id: Match::Or(vec![job2.id.into(), job3.id.into()]),
+				invoice: MatchInvoice {
+					date_issued: Match::Not(Match::Not(Match::Any.into()).into()),
+					..Default::default()
+				},
+				..Default::default()
+			})
+			.await
+			.unwrap()
+			.into_iter()
+			.collect::<HashSet<_>>(),
+			[
+				job2.exchange(Default::default(), &exchange_rates),
+				job3.exchange(Default::default(), &exchange_rates),
+			].into_iter().collect::<HashSet<_>>(),
+		);
+
+		assert_eq!(
+			PgJob::retrieve(&connection, &MatchJob {
+				id: Match::Or(vec![job.id.into(), job4.id.into()]),
+				invoice: MatchInvoice {
+					date_issued: Match::Not(Match::Any.into()),
 					..Default::default()
 				},
 				..Default::default()
@@ -353,12 +367,8 @@ mod tests
 			.collect::<HashSet<_>>(),
 			[
 				job.exchange(Default::default(), &exchange_rates),
-				job2.exchange(Default::default(), &exchange_rates),
-				job3.exchange(Default::default(), &exchange_rates),
 				job4.exchange(Default::default(), &exchange_rates),
-			]
-			.into_iter()
-			.collect::<HashSet<_>>(),
+			].into_iter().collect::<HashSet<_>>(),
 		);
 	}
 }

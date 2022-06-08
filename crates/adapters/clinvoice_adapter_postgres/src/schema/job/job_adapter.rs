@@ -135,11 +135,11 @@ impl JobAdapter for PgJob
 mod tests
 {
 	use core::time::Duration;
-use std::collections::HashSet;
+	use std::collections::HashSet;
 
 	use clinvoice_adapter::schema::{LocationAdapter, OrganizationAdapter};
 	use clinvoice_finance::{ExchangeRates, Exchangeable};
-	use clinvoice_match::{Match, MatchJob, MatchInvoice};
+	use clinvoice_match::{Match, MatchInvoice, MatchJob};
 	use clinvoice_schema::{
 		chrono::{TimeZone, Utc},
 		Currency,
@@ -349,7 +349,9 @@ use std::collections::HashSet;
 			[
 				job2.exchange(Default::default(), &exchange_rates),
 				job3.exchange(Default::default(), &exchange_rates),
-			].into_iter().collect::<HashSet<_>>(),
+			]
+			.into_iter()
+			.collect::<HashSet<_>>(),
 		);
 
 		assert_eq!(
@@ -368,7 +370,9 @@ use std::collections::HashSet;
 			[
 				job.exchange(Default::default(), &exchange_rates),
 				job4.exchange(Default::default(), &exchange_rates),
-			].into_iter().collect::<HashSet<_>>(),
+			]
+			.into_iter()
+			.collect::<HashSet<_>>(),
 		);
 	}
 }

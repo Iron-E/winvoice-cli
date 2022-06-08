@@ -254,20 +254,24 @@ where
 			query.push(')');
 		},
 
-		MatchSet::Not(condition) =>
+		MatchSet::Not(condition) => match condition.deref()
 		{
-			write_context_scope_start::<_, true>(query, context);
+			m if m.deref() == &Default::default() => write_is_null(query, context, ident),
+			m =>
+			{
+				write_context_scope_start::<_, true>(query, context);
 
-			write_contact_set_where_clause(
-				connection,
-				WriteContext::InWhereCondition,
-				ident,
-				condition,
-				query,
-			)
-			.await?;
+				write_contact_set_where_clause(
+					connection,
+					WriteContext::InWhereCondition,
+					ident,
+					m,
+					query,
+				)
+				.await?;
 
-			write_context_scope_end(query);
+				write_context_scope_end(query);
+			},
 		},
 	};
 
@@ -490,11 +494,10 @@ impl WriteWhereClause<Postgres, &MatchSet<MatchExpense>> for PgSchema
 					_ => " OR",
 				};
 
-				for c in conditions
-				{
+				conditions.iter().for_each(|c| {
 					query.push(separator);
 					PgSchema::write_where_clause(WriteContext::InWhereCondition, ident, c, query);
-				}
+				});
 
 				write_context_scope_end(query);
 			},
@@ -528,18 +531,10 @@ impl WriteWhereClause<Postgres, &MatchSet<MatchExpense>> for PgSchema
 				query.push(')');
 			},
 
-			MatchSet::Not(condition) =>
+			MatchSet::Not(condition) => match condition.deref()
 			{
-				write_context_scope_start::<_, true>(query, context);
-
-				PgSchema::write_where_clause(
-					WriteContext::InWhereCondition,
-					ident,
-					condition.deref(),
-					query,
-				);
-
-				write_context_scope_end(query);
+				m if m == &Default::default() => write_is_null(query, context, ident),
+				m => write_negated(query, context, ident, m),
 			},
 		};
 

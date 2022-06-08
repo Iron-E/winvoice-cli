@@ -46,9 +46,62 @@ impl Updatable for PgLocation
 #[cfg(test)]
 mod tests
 {
+	use clinvoice_adapter::{schema::LocationAdapter, Updatable};
+	use clinvoice_match::MatchLocation;
+
+	use crate::schema::{util, PgLocation};
+
+	// TODO: use fuzzing
 	#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 	async fn update()
 	{
-		// TODO: write test
+		let connection = util::connect().await;
+
+		let earth = PgLocation::create(&connection, "Earth".into(), None)
+			.await
+			.unwrap();
+
+		let usa = PgLocation::create(&connection, "USA".into(), Some(earth.clone()))
+			.await
+			.unwrap();
+
+		let (mut arizona, mut utah) = futures::try_join!(
+			PgLocation::create(&connection, "Arizona".into(), Some(usa.clone())),
+			PgLocation::create(&connection, "Utah".into(), Some(usa.clone())),
+		)
+		.unwrap();
+
+		arizona.name = "Not Arizona".into();
+		utah.outer = utah.outer.map(|mut o| {
+			o.name = "Not USA".into();
+			o
+		});
+
+		{
+			let mut transaction = connection.begin().await.unwrap();
+			PgLocation::update(&mut transaction, [arizona.clone(), utah.clone()].iter())
+				.await
+				.unwrap();
+			transaction.commit().await.unwrap();
+		}
+
+		let arizona_db = PgLocation::retrieve(&connection, &MatchLocation {
+			id: arizona.id.into(),
+			..Default::default()
+		})
+		.await
+		.unwrap()
+		.remove(0);
+
+		let utah_db = PgLocation::retrieve(&connection, &MatchLocation {
+			id: utah.id.into(),
+			..Default::default()
+		})
+		.await
+		.unwrap()
+		.remove(0);
+
+		assert_eq!(arizona, arizona_db);
+		assert_eq!(utah, utah_db);
 	}
 }

@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 /// # Summary
 ///
 /// An `InvoiceDate` represents the dates which an invoice was sent to or paid by a client.
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 pub struct InvoiceDate
 {

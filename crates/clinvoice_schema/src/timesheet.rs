@@ -1,5 +1,6 @@
 mod default;
 mod display;
+mod exchangeable;
 mod restorable_serde;
 
 use core::fmt::Write;

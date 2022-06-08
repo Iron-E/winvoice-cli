@@ -1,8 +1,8 @@
 use clinvoice_finance::{Currency, ExchangeRates, Exchangeable};
 
-use super::MatchInvoice;
+use super::Invoice;
 
-impl Exchangeable for MatchInvoice
+impl Exchangeable for Invoice
 {
 	fn exchange(self, currency: Currency, rates: &ExchangeRates) -> Self
 	{
@@ -15,8 +15,7 @@ impl Exchangeable for MatchInvoice
 	fn exchange_ref(&self, currency: Currency, rates: &ExchangeRates) -> Self
 	{
 		Self {
-			date_issued: self.date_issued.clone(),
-			date_paid: self.date_paid.clone(),
+			date: self.date,
 			hourly_rate: self.hourly_rate.exchange_ref(currency, rates),
 		}
 	}

@@ -1,8 +1,8 @@
 use clinvoice_finance::{Currency, ExchangeRates, Exchangeable};
 
-use super::MatchExpense;
+use super::Expense;
 
-impl Exchangeable for MatchExpense
+impl Exchangeable for Expense
 {
 	fn exchange(self, currency: Currency, rates: &ExchangeRates) -> Self
 	{
@@ -18,7 +18,8 @@ impl Exchangeable for MatchExpense
 			category: self.category.clone(),
 			cost: self.cost.exchange_ref(currency, rates),
 			description: self.description.clone(),
-			id: self.id.clone(),
+			id: self.id,
+			timesheet_id: self.timesheet_id,
 		}
 	}
 }

@@ -3,15 +3,12 @@ use crate::{Currency, ExchangeRates, Exchangeable};
 
 impl Exchangeable for Money
 {
-	/// # Summary
-	///
-	/// Exchange some [`Money`] into another `currency`.
-	fn exchange(&self, currency: Currency, rates: &ExchangeRates) -> Self
+	fn exchange(self, currency: Currency, rates: &ExchangeRates) -> Self
 	{
 		// noop for same currency
 		if self.currency == currency
 		{
-			return *self;
+			return self;
 		}
 
 		let eur = self.amount / rates[&self.currency];
@@ -22,6 +19,11 @@ impl Exchangeable for Money
 			amount: exchanged,
 			currency,
 		}
+	}
+
+	fn exchange_ref(&self, currency: Currency, rates: &ExchangeRates) -> Self
+	{
+		Self::exchange(*self, currency, rates)
 	}
 }
 

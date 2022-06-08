@@ -10,5 +10,31 @@ pub trait Exchangeable
 	/// # Summary
 	///
 	/// Exchange some quantity into another `currency` using `rates`.
-	fn exchange(&self, currency: Currency, rates: &ExchangeRates) -> Self;
+	fn exchange(self, currency: Currency, rates: &ExchangeRates) -> Self;
+
+	/// # Summary
+	///
+	/// Exchange some quantity into another `currency` using `rates`.
+	fn exchange_ref(&self, currency: Currency, rates: &ExchangeRates) -> Self;
+}
+
+impl<T> Exchangeable for Vec<T>
+where
+	T: Exchangeable,
+{
+	fn exchange(self, currency: Currency, rates: &ExchangeRates) -> Self
+	{
+		self
+			.into_iter()
+			.map(|exchangeable| exchangeable.exchange(currency, rates))
+			.collect()
+	}
+
+	fn exchange_ref(&self, currency: Currency, rates: &ExchangeRates) -> Self
+	{
+		self
+			.iter()
+			.map(|exchangeable| exchangeable.exchange_ref(currency, rates))
+			.collect()
+	}
 }

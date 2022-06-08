@@ -103,7 +103,7 @@ impl JobAdapter for PgJob
 		PgSchema::write_where_clause(
 			Default::default(),
 			"J",
-			&match_condition.exchange(Default::default(), &exchange_rates.await?),
+			&match_condition.exchange_ref(Default::default(), &exchange_rates.await?),
 			&mut query,
 		);
 

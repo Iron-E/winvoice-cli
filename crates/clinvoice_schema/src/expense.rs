@@ -1,4 +1,5 @@
 mod display;
+mod exchangeable;
 mod restorable_serde;
 
 use clinvoice_finance::Money;

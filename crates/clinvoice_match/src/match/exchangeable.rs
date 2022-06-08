@@ -6,8 +6,13 @@ impl<T> Exchangeable for Match<T>
 where
 	T: Exchangeable,
 {
-	fn exchange(&self, currency: Currency, rates: &ExchangeRates) -> Self
+	fn exchange(self, currency: Currency, rates: &ExchangeRates) -> Self
 	{
-		self.map_ref(|e| e.exchange(currency, rates))
+		self.map(|e| e.exchange(currency, rates))
+	}
+
+	fn exchange_ref(&self, currency: Currency, rates: &ExchangeRates) -> Self
+	{
+		self.map_ref(|e| e.exchange_ref(currency, rates))
 	}
 }

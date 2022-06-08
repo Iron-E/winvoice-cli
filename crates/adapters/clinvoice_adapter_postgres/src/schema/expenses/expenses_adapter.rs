@@ -89,7 +89,7 @@ impl ExpensesAdapter for PgExpenses
 		PgSchema::write_where_clause(
 			Default::default(),
 			"X",
-			&match_condition.exchange(Default::default(), &exchange_rates),
+			&match_condition.exchange_ref(Default::default(), &exchange_rates),
 			&mut query,
 		);
 

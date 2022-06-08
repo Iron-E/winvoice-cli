@@ -1,8 +1,8 @@
 use clinvoice_finance::{Currency, ExchangeRates, Exchangeable};
 
-use super::MatchJob;
+use super::Job;
 
-impl Exchangeable for MatchJob
+impl Exchangeable for Job
 {
 	fn exchange(self, currency: Currency, rates: &ExchangeRates) -> Self
 	{
@@ -16,10 +16,10 @@ impl Exchangeable for MatchJob
 	{
 		Self {
 			client: self.client.clone(),
-			date_close: self.date_close.clone(),
-			date_open: self.date_open.clone(),
-			id: self.id.clone(),
-			increment: self.increment.clone(),
+			date_close: self.date_close,
+			date_open: self.date_open,
+			id: self.id,
+			increment: self.increment,
 			invoice: self.invoice.exchange_ref(currency, rates),
 			notes: self.notes.clone(),
 			objectives: self.objectives.clone(),

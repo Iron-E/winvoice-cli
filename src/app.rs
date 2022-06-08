@@ -39,14 +39,6 @@ impl App
 	/// Run the application and parse its provided arguments / flags.
 	pub async fn run<'err>(self, config: Config<'_, '_>) -> DynResult<'err, ()>
 	{
-		self
-			.command
-			.run(
-				&config,
-				config
-					.get_store(&self.store)
-					.expect("Storage name not known"),
-			)
-			.await
+		self.command.run(&config, &self.store).await
 	}
 }

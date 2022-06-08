@@ -243,7 +243,7 @@ impl Timesheet
 				total.amount += (Decimal::from(
 					timesheet
 						.time_end
-						.expect("Filters should assure that `Timesheet`s have an end time")
+						.expect("Filters should have assured that `Timesheet`s have an end time")
 						.signed_duration_since(timesheet.time_begin)
 						.num_seconds(),
 				) / *SECONDS_PER_HOUR) *

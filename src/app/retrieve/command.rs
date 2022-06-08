@@ -286,7 +286,7 @@ impl Command
 
 				if let Some(e) = export
 				{
-					let exchange_rates = if e == Default::default()
+					let exchange_rates_fut = if e == Default::default()
 					{
 						None
 					}
@@ -298,7 +298,7 @@ impl Command
 					let to_export =
 						input::select(&results_view, "Select which Jobs you want to export")?;
 
-					let exchange_rates = match exchange_rates
+					let exchange_rates = match exchange_rates_fut
 					{
 						Some(fut) => Some(fut.await?),
 						_ => None,

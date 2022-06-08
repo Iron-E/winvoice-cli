@@ -1,4 +1,3 @@
-use clinvoice_adapter::Store;
 use clinvoice_config::{Config, Result as ConfigResult};
 use dialoguer::Editor;
 use futures::future;
@@ -46,8 +45,12 @@ impl Command
 	/// # Summary
 	///
 	/// Run the application and parse its provided arguments / flags.
-	pub async fn run<'err>(self, config: &Config<'_, '_>, store: &Store) -> DynResult<'err, ()>
+	pub async fn run<'err>(self, config: &Config<'_, '_>, store_name: &str) -> DynResult<'err, ()>
 	{
+		let store = config
+			.get_store(store_name)
+			.ok_or_else(|| format!(r#""{store_name}" is not a valid store name."#))?;
+
 		match self
 		{
 			Self::Config =>

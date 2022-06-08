@@ -2,7 +2,7 @@ use clinvoice_adapter::{schema::columns::LocationColumns, WriteWhereClause};
 use clinvoice_match::{Match, MatchLocation, MatchOuterLocation};
 use clinvoice_schema::{Id, Location};
 use futures::{future, TryFutureExt, TryStreamExt};
-use sqlx::{Executor, Postgres, QueryBuilder, Result, Row};
+use sqlx::{Error, Executor, Postgres, QueryBuilder, Result, Row};
 
 use crate::PgSchema;
 
@@ -191,6 +191,13 @@ impl PgLocation
 			.await
 	}
 
+	/// # Summary
+	///
+	/// Recursively constructs a [`Location`] which matches the `id` in the database over the `connection`.
+	///
+	/// # Panics
+	///
+	/// If `id` does not match any row in the database.
 	pub(super) async fn retrieve_by_id(
 		connection: impl Executor<'_, Database = Postgres>,
 		id: Id,
@@ -207,15 +214,37 @@ impl PgLocation
 		)
 		.fetch(connection)
 		.try_fold(None, |previous: Option<Location>, view| {
+			let id = match view.id
+			{
+				Some(id) => id,
+				_ =>
+				{
+					return future::err(Error::ColumnDecode {
+						index: "id".into(),
+						source: "this column in `locations` must be non-null".into(),
+					})
+				},
+			};
+
+			let name = match view.name
+			{
+				Some(n) => n,
+				_ =>
+				{
+					return future::err(Error::ColumnDecode {
+						index: "name".into(),
+						source: "this column in `locations` must be non-null".into(),
+					})
+				},
+			};
+
 			future::ok(Some(Location {
-				id: view.id.expect("`locations` table should have non-null ID"),
-				name: view
-					.name
-					.expect("`locations` table should have non-null name"),
+				id,
+				name,
 				outer: previous.map(Box::new),
 			}))
 		})
-		.map_ok(|v| v.expect("A database object failed to be returned by recursive query"))
+		.map_ok(|v| v.expect("`id` did not match any row in the database"))
 		.await
 	}
 }

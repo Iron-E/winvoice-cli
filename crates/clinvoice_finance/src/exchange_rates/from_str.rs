@@ -12,14 +12,14 @@ impl FromStr for ExchangeRates
 	fn from_str(csv: &str) -> Result<Self>
 	{
 		let (currencies, rates) = {
-			let mut grid = csv.split('\n').map(|line| line.split(", "));
+			let mut columns_by_values = csv.split('\n').map(|line| line.split(", "));
 			(
-				grid
+				columns_by_values
 					.next()
-					.expect("There should be a currency column in this CSV"),
-				grid
+					.ok_or_else(|| Error::EcbCsvDecode("there was no currency column".into()))?,
+				columns_by_values
 					.next()
-					.expect("There should be an exchange rate column in this CSV"),
+					.ok_or_else(|| Error::EcbCsvDecode("there was no exchange rate column".into()))?,
 			)
 		};
 

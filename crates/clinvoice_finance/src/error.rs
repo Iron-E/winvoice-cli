@@ -12,6 +12,9 @@ pub enum Error
 	#[error(transparent)]
 	Decimal(#[from] rust_decimal::Error),
 
+	#[error("There was an error decoding the exchange rates CSV from the ECB: {0}")]
+	EcbCsvDecode(String),
+
 	#[error(transparent)]
 	Io(#[from] io::Error),
 

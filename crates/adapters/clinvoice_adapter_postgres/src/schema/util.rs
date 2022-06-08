@@ -1,6 +1,7 @@
 use core::time::Duration;
 
 use clinvoice_finance::Error as FinanceError;
+use clinvoice_schema::chrono::{DateTime, SubsecRound, TimeZone};
 use sqlx::{postgres::types::PgInterval, Error, Result};
 #[cfg(test)]
 use {lazy_static::lazy_static, sqlx::PgPool};
@@ -68,6 +69,16 @@ pub(super) fn finance_err_to_sqlx(e: FinanceError) -> Error
 		FinanceError::Reqwest(e2) => Error::Protocol(e2.to_string()),
 		FinanceError::UnsupportedCurrency(_) => Error::Decode(e.into()),
 	}
+}
+
+/// # Summary
+///
+/// Ensure that a date time has the correct precision for the postgres database.
+pub(super) fn sanitize_datetime<T>(date: DateTime<T>) -> DateTime<T>
+where
+	T: TimeZone,
+{
+	date.trunc_subsecs(6)
 }
 
 #[cfg(test)]

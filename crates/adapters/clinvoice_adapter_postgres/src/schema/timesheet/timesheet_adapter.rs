@@ -12,18 +12,13 @@ use clinvoice_adapter::{
 };
 use clinvoice_finance::Money;
 use clinvoice_match::MatchTimesheet;
-use clinvoice_schema::{
-	chrono::{SubsecRound, Utc},
-	Employee,
-	Job,
-	Timesheet,
-};
+use clinvoice_schema::{chrono::Utc, Employee, Job, Timesheet};
 use futures::{future, TryFutureExt, TryStreamExt};
 use sqlx::{PgPool, QueryBuilder, Result, Row};
 
 use super::PgTimesheet;
 use crate::{
-	schema::{PgEmployee, PgExpenses, PgJob},
+	schema::{util, PgEmployee, PgExpenses, PgJob},
 	PgSchema,
 };
 
@@ -67,7 +62,7 @@ impl TimesheetAdapter for PgTimesheet
 					employee,
 					expenses: expenses_db,
 					job,
-					time_begin: time_begin.trunc_subsecs(6),
+					time_begin: util::sanitize_datetime(time_begin),
 					time_end: None,
 					work_notes,
 				})

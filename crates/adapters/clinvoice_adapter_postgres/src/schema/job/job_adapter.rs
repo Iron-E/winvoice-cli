@@ -8,7 +8,7 @@ use clinvoice_adapter::{
 use clinvoice_finance::{ExchangeRates, Exchangeable};
 use clinvoice_match::MatchJob;
 use clinvoice_schema::{
-	chrono::{DateTime, SubsecRound, Utc},
+	chrono::{DateTime, Utc},
 	Id,
 	Invoice,
 	Job,
@@ -63,8 +63,8 @@ impl JobAdapter for PgJob
 
 		Ok(Job {
 			client,
-			date_close: date_close.map(|d| d.trunc_subsecs(6)),
-			date_open: date_open.trunc_subsecs(6),
+			date_close: date_close.map(util::sanitize_datetime),
+			date_open: util::sanitize_datetime(date_open),
 			id: row.id,
 			increment,
 			invoice,

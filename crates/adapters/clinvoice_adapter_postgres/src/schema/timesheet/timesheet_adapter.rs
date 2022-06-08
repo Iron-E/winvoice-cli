@@ -155,6 +155,8 @@ mod tests
 		ContactKind,
 		Currency,
 		Expense,
+		Invoice,
+		InvoiceDate,
 		Money,
 	};
 
@@ -194,9 +196,14 @@ mod tests
 		let job = PgJob::create(
 			&connection,
 			organization.clone(),
+			None,
 			Utc::now(),
-			Money::new(13_27, 2, Currency::USD),
 			Duration::new(7640, 0),
+			Invoice {
+				date: None,
+				hourly_rate: Money::new(13_27, 2, Currency::USD),
+			},
+			String::new(),
 			"Write the test".into(),
 		)
 		.await
@@ -256,21 +263,23 @@ mod tests
 		.await
 		.unwrap();
 
+		let exchange_rates = ExchangeRates::new().await.unwrap();
 		assert_eq!(timesheet.employee.id, timesheet_row.employee_id);
-		assert_eq!(timesheet.expenses, vec![Expense {
-			category: expense_row.category,
-			cost: Money {
-				amount: expense_row.cost.parse().unwrap(),
-				..Default::default()
-			}
-			.exchange(
-				timesheet.expenses[0].cost.currency,
-				&ExchangeRates::new().await.unwrap(),
-			),
-			description: expense_row.description,
-			id: expense_row.id,
-			timesheet_id: timesheet.id,
-		}]);
+		assert_eq!(
+			timesheet
+				.expenses
+				.exchange(Default::default(), &exchange_rates),
+			vec![Expense {
+				category: expense_row.category,
+				cost: Money {
+					amount: expense_row.cost.parse().unwrap(),
+					..Default::default()
+				},
+				description: expense_row.description,
+				id: expense_row.id,
+				timesheet_id: timesheet.id,
+			}]
+		);
 		assert_eq!(timesheet.job.id, timesheet_row.job_id);
 		assert_eq!(timesheet.time_begin, timesheet_row.time_begin);
 		assert_eq!(timesheet.time_end, timesheet_row.time_end);
@@ -367,17 +376,30 @@ mod tests
 			PgJob::create(
 				&connection,
 				organization.clone(),
+				None,
 				Utc.ymd(1990, 07, 12).and_hms(14, 10, 00),
-				Money::new(20_00, 2, Currency::USD),
 				Duration::from_secs(900),
+				Invoice {
+					date: None,
+					hourly_rate: Money::new(20_00, 2, Currency::USD),
+				},
+				String::new(),
 				"Do something".into()
 			),
 			PgJob::create(
 				&connection,
 				organization2.clone(),
+				Some(Utc.ymd(3000, 01, 13).and_hms(11, 30, 00)),
 				Utc.ymd(3000, 01, 12).and_hms(09, 15, 42),
-				Money::new(200_00, 2, Currency::JPY),
 				Duration::from_secs(900),
+				Invoice {
+					date: Some(InvoiceDate {
+						issued: Utc.ymd(3000, 01, 13).and_hms(11, 45, 00),
+						paid: Some(Utc.ymd(3000, 01, 15).and_hms(14, 27, 00)),
+					}),
+					hourly_rate: Money::new(200_00, 2, Currency::JPY),
+				},
+				String::new(),
 				"Do something".into()
 			),
 		)
@@ -398,6 +420,8 @@ mod tests
 		)
 		.unwrap();
 
+		let exchange_rates = ExchangeRates::new().await.unwrap();
+
 		assert_eq!(
 			PgTimesheet::retrieve(&connection, &MatchTimesheet {
 				expenses: MatchSet::Not(MatchSet::Contains(Default::default()).into()),
@@ -417,7 +441,7 @@ mod tests
 			.unwrap()
 			.into_iter()
 			.as_slice(),
-			&[timesheet],
+			&[timesheet.exchange(Default::default(), &exchange_rates)],
 		);
 	}
 }

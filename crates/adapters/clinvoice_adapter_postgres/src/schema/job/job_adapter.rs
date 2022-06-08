@@ -12,7 +12,6 @@ use clinvoice_schema::{
 	Id,
 	Invoice,
 	Job,
-	Money,
 	Organization,
 };
 use futures::{future, TryFutureExt, TryStreamExt};
@@ -30,14 +29,16 @@ impl JobAdapter for PgJob
 	async fn create(
 		connection: &PgPool,
 		client: Organization,
+		date_close: Option<DateTime<Utc>>,
 		date_open: DateTime<Utc>,
-		hourly_rate: Money,
 		increment: Duration,
+		invoice: Invoice,
+		notes: String,
 		objectives: String,
 	) -> Result<Job>
 	{
 		let standardized_rate_fut = ExchangeRates::new()
-			.map_ok(|r| hourly_rate.exchange(Default::default(), &r))
+			.map_ok(|r| invoice.hourly_rate.exchange(Default::default(), &r))
 			.map_err(util::finance_err_to_sqlx);
 		let standardized_rate = standardized_rate_fut.await?;
 
@@ -45,12 +46,16 @@ impl JobAdapter for PgJob
 			"INSERT INTO jobs
 				(client_id, date_close, date_open, increment, invoice_date_issued, invoice_date_paid, invoice_hourly_rate, notes, objectives)
 			VALUES
-				($1,        NULL,       $2,        $3,        NULL,                NULL,              $4,                  '',    $5)
+				($1,        $2,         $3,        $4,        $5,                  $6,                $7,                  $8,    $9)
 			RETURNING id;",
 			client.id,
+			date_close,
 			date_open,
 			increment as _,
+			invoice.date.as_ref().map(|d| d.issued),
+			invoice.date.as_ref().and_then(|d| d.paid),
 			standardized_rate.amount.to_string() as _,
+			notes,
 			objectives,
 		)
 		.fetch_one(connection)
@@ -58,15 +63,12 @@ impl JobAdapter for PgJob
 
 		Ok(Job {
 			client,
-			date_close: None,
+			date_close: date_close.map(|d| d.trunc_subsecs(6)),
 			date_open: date_open.trunc_subsecs(6),
 			id: row.id,
 			increment,
-			invoice: Invoice {
-				date: None,
-				hourly_rate: standardized_rate,
-			},
-			notes: String::new(),
+			invoice,
+			notes,
 			objectives,
 		})
 	}
@@ -141,6 +143,8 @@ mod tests
 	use clinvoice_schema::{
 		chrono::{TimeZone, Utc},
 		Currency,
+		Invoice,
+		InvoiceDate,
 		Money,
 	};
 
@@ -164,9 +168,14 @@ mod tests
 		let job = PgJob::create(
 			&connection,
 			organization.clone(),
+			None,
 			Utc::now(),
-			Money::new(13_27, 2, Currency::USD),
 			Duration::new(7640, 0),
+			Invoice {
+				date: None,
+				hourly_rate: Money::new(13_27, 2, Currency::USD),
+			},
+			String::new(),
 			"Write the test".into(),
 		)
 		.await
@@ -202,15 +211,13 @@ mod tests
 		assert_eq!(None, row.invoice_date_issued);
 		assert_eq!(None, row.invoice_date_paid);
 		assert_eq!(
-			job.invoice.hourly_rate,
+			job.invoice
+				.hourly_rate
+				.exchange(Default::default(), &ExchangeRates::new().await.unwrap()),
 			Money {
 				amount: row.invoice_hourly_rate.parse().unwrap(),
 				..Default::default()
-			}
-			.exchange(
-				job.invoice.hourly_rate.currency,
-				&ExchangeRates::new().await.unwrap()
-			),
+			},
 		);
 		assert_eq!(job.notes, row.notes);
 		assert_eq!(job.objectives, row.objectives);
@@ -255,37 +262,65 @@ mod tests
 			PgJob::create(
 				&connection,
 				organization.clone(),
+				Some(Utc.ymd(1990, 08, 01).and_hms(09, 00, 00)),
 				Utc.ymd(1990, 07, 12).and_hms(14, 10, 00),
-				Money::new(20_00, 2, Currency::USD),
-				Duration::from_secs(900),
+				Duration::from_secs(300),
+				Invoice {
+					date: None,
+					hourly_rate: Money::new(20_00, 2, Currency::USD),
+				},
+				String::new(),
 				"Do something".into()
 			),
 			PgJob::create(
 				&connection,
 				organization2.clone(),
+				Some(Utc.ymd(3000, 01, 16).and_hms(10, 00, 00)),
 				Utc.ymd(3000, 01, 12).and_hms(09, 15, 42),
-				Money::new(200_00, 2, Currency::JPY),
 				Duration::from_secs(900),
+				Invoice {
+					date: Some(InvoiceDate {
+						issued: Utc.ymd(3000, 01, 17).and_hms(12, 30, 00),
+						paid: None,
+					}),
+					hourly_rate: Money::new(299_99, 2, Currency::JPY),
+				},
+				String::new(),
 				"Do something".into()
 			),
 			PgJob::create(
 				&connection,
 				organization.clone(),
+				Some(Utc.ymd(2011, 03, 17).and_hms(13, 07, 07)),
 				Utc.ymd(2011, 03, 17).and_hms(13, 07, 07),
-				Money::new(20_00, 2, Currency::EUR),
 				Duration::from_secs(900),
+				Invoice {
+					date: Some(InvoiceDate {
+						issued: Utc.ymd(2011, 03, 18).and_hms(08, 00, 00),
+						paid: Some(Utc.ymd(2011, 03, 19).and_hms(17, 00, 00)),
+					}),
+					hourly_rate: Money::new(20_00, 2, Currency::EUR),
+				},
+				String::new(),
 				"Do something".into()
 			),
 			PgJob::create(
 				&connection,
 				organization2.clone(),
+				None,
 				Utc.ymd(2022, 01, 02).and_hms(01, 01, 01),
-				Money::new(200_00, 2, Currency::NOK),
 				Duration::from_secs(900),
+				Invoice {
+					date: None,
+					hourly_rate: Money::new(200_00, 2, Currency::NOK),
+				},
+				String::new(),
 				"Do something".into()
 			),
 		)
 		.unwrap();
+
+		let exchange_rates = ExchangeRates::new().await.unwrap();
 
 		assert_eq!(
 			PgJob::retrieve(&connection, &MatchJob {
@@ -295,7 +330,7 @@ mod tests
 			.await
 			.unwrap()
 			.as_slice(),
-			&[job.clone()],
+			&[job.exchange_ref(Default::default(), &exchange_rates)],
 		);
 
 		assert_eq!(
@@ -316,9 +351,14 @@ mod tests
 			.unwrap()
 			.into_iter()
 			.collect::<HashSet<_>>(),
-			[job.clone(), job2.clone(), job3.clone(), job4.clone()]
-				.into_iter()
-				.collect::<HashSet<_>>(),
+			[
+				job.exchange(Default::default(), &exchange_rates),
+				job2.exchange(Default::default(), &exchange_rates),
+				job3.exchange(Default::default(), &exchange_rates),
+				job4.exchange(Default::default(), &exchange_rates),
+			]
+			.into_iter()
+			.collect::<HashSet<_>>(),
 		);
 	}
 }

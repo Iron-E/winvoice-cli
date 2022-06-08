@@ -3,8 +3,8 @@ use core::time::Duration;
 use clinvoice_match::MatchJob;
 use clinvoice_schema::{
 	chrono::{DateTime, Utc},
+	Invoice,
 	Job,
-	Money,
 	Organization,
 };
 use sqlx::{Pool, Result};
@@ -30,9 +30,11 @@ pub trait JobAdapter:
 	async fn create(
 		connection: &Pool<<Self as Deletable>::Db>,
 		client: Organization,
+		date_close: Option<DateTime<Utc>>,
 		date_open: DateTime<Utc>,
-		hourly_rate: Money,
 		increment: Duration,
+		invoice: Invoice,
+		notes: String,
 		objectives: String,
 	) -> Result<<Self as Deletable>::Entity>;
 

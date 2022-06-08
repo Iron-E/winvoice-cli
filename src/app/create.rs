@@ -11,6 +11,7 @@ use clinvoice_schema::{
 	chrono::{Local, TimeZone},
 	Currency,
 	Decimal,
+	Invoice,
 	Money,
 };
 use futures::{
@@ -244,9 +245,14 @@ impl Create
 		JAdapter::create(
 			connection,
 			client,
+			None,
 			local_date_open.into(),
-			hourly_rate,
 			increment,
+			Invoice {
+				date: None,
+				hourly_rate,
+			},
+			String::new(),
 			objectives,
 		)
 		.await?;

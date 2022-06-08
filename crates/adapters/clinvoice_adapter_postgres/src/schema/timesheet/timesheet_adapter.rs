@@ -230,8 +230,8 @@ mod tests
 				"Got fastfood".into(),
 			)],
 			job,
-			Utc::now(),
-			None,
+			Utc.ymd(2070, 01, 01).and_hms(01, 00, 00),
+			Some(Utc.ymd(2070, 01, 01).and_hms(02, 00, 00)),
 		)
 		.await
 		.unwrap();
@@ -245,8 +245,8 @@ mod tests
 					time_end,
 					work_notes
 				FROM timesheets
-				WHERE time_begin = $1;"#,
-			timesheet.time_begin,
+				WHERE id = $1;"#,
+			timesheet.id,
 		)
 		.fetch_one(&connection)
 		.await
@@ -420,8 +420,8 @@ mod tests
 					"Trip to Hawaii for research".into()
 				)],
 				job2,
-				Utc::now(),
-				None,
+				Utc.ymd(2022, 06, 08).and_hms(15, 27, 00),
+				Some(Utc.ymd(2022, 06, 09).and_hms(07, 00, 00)),
 			),
 		)
 		.unwrap();

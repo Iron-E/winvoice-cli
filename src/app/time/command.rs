@@ -39,7 +39,7 @@ impl Command
 		TAdapter: Deletable<Db = Db> + TimesheetAdapter,
 		for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 	{
-		TAdapter::create(connection, employee, Vec::new(), job).await?;
+		TAdapter::create(connection, employee, Vec::new(), job, Utc::now(), None).await?;
 		Ok(())
 	}
 

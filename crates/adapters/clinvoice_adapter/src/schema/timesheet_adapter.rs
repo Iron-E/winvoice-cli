@@ -1,5 +1,11 @@
 use clinvoice_match::MatchTimesheet;
-use clinvoice_schema::{Employee, Job, Money, Timesheet};
+use clinvoice_schema::{
+	chrono::{DateTime, Utc},
+	Employee,
+	Job,
+	Money,
+	Timesheet,
+};
 use sqlx::{Pool, Result};
 
 use crate::{Deletable, Updatable};
@@ -25,6 +31,8 @@ pub trait TimesheetAdapter:
 		employee: Employee,
 		expenses: Vec<(String, Money, String)>,
 		job: Job,
+		time_begin: DateTime<Utc>,
+		time_end: Option<DateTime<Utc>>,
 	) -> Result<<Self as Deletable>::Entity>;
 
 	/// # Summary

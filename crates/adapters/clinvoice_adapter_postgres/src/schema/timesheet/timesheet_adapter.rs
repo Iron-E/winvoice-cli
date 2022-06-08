@@ -12,7 +12,12 @@ use clinvoice_adapter::{
 };
 use clinvoice_finance::Money;
 use clinvoice_match::MatchTimesheet;
-use clinvoice_schema::{chrono::Utc, Employee, Job, Timesheet};
+use clinvoice_schema::{
+	chrono::{DateTime, Utc},
+	Employee,
+	Job,
+	Timesheet,
+};
 use futures::{future, TryFutureExt, TryStreamExt};
 use sqlx::{PgPool, QueryBuilder, Result, Row};
 
@@ -30,24 +35,26 @@ impl TimesheetAdapter for PgTimesheet
 		employee: Employee,
 		expenses: Vec<(String, Money, String)>,
 		job: Job,
+		time_begin: DateTime<Utc>,
+		time_end: Option<DateTime<Utc>>,
 	) -> Result<Timesheet>
 	{
 		connection
 			.begin()
 			.and_then(|mut transaction| async {
-				let time_begin = Utc::now();
 				let work_notes =
 					String::from("* Work which was done goes here\n* Supports markdown formatting");
 
 				let row = sqlx::query!(
 					"INSERT INTO timesheets
-						(employee_id, job_id, time_begin, work_notes)
+						(employee_id, job_id, time_begin, time_end, work_notes)
 					VALUES
-						($1,          $2,     $3,         $4)
+						($1,          $2,     $3,         $4,       $5)
 					RETURNING id;",
 					employee.id,
 					job.id,
 					time_begin,
+					time_end,
 					work_notes,
 				)
 				.fetch_one(&mut transaction)
@@ -63,7 +70,7 @@ impl TimesheetAdapter for PgTimesheet
 					expenses: expenses_db,
 					job,
 					time_begin: util::sanitize_datetime(time_begin),
-					time_end: None,
+					time_end: time_end.map(util::sanitize_datetime),
 					work_notes,
 				})
 			})
@@ -223,6 +230,8 @@ mod tests
 				"Got fastfood".into(),
 			)],
 			job,
+			Utc::now(),
+			None,
 		)
 		.await
 		.unwrap();
@@ -401,7 +410,7 @@ mod tests
 		.unwrap();
 
 		let (timesheet, timesheet2) = futures::try_join!(
-			PgTimesheet::create(&connection, employee, Vec::new(), job),
+			PgTimesheet::create(&connection, employee, Vec::new(), job, Utc::now(), None),
 			PgTimesheet::create(
 				&connection,
 				employee2,
@@ -411,6 +420,8 @@ mod tests
 					"Trip to Hawaii for research".into()
 				)],
 				job2,
+				Utc::now(),
+				None,
 			),
 		)
 		.unwrap();

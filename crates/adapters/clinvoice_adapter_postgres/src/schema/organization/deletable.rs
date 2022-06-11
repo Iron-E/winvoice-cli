@@ -25,16 +25,74 @@ impl Deletable for PgOrganization
 			o.id
 		}
 
-		PgSchema::delete(connection, "organization", entities.map(mapper)).await
+		PgSchema::delete(connection, "organizations", entities.map(mapper)).await
 	}
 }
 
 #[cfg(test)]
 mod tests
 {
+	use clinvoice_adapter::{
+		schema::{LocationAdapter, OrganizationAdapter},
+		Deletable,
+	};
+	use clinvoice_match::{Match, MatchOrganization};
+
+	use crate::schema::{util, PgLocation, PgOrganization};
+
+	/// TODO: use fuzzing
 	#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 	async fn delete()
 	{
-		// TODO: write test
+		let connection = util::connect().await;
+
+		let earth = PgLocation::create(&connection, "Earth".into(), None)
+			.await
+			.unwrap();
+
+		let (organization, organization2, organization3) = futures::try_join!(
+			PgOrganization::create(
+				&connection,
+				Vec::new(),
+				earth.clone(),
+				"Some Organization".into(),
+			),
+			PgOrganization::create(
+				&connection,
+				Vec::new(),
+				earth.clone(),
+				"Some Other Organization".into(),
+			),
+			PgOrganization::create(
+				&connection,
+				Vec::new(),
+				earth.clone(),
+				"Another Other Organization".into(),
+			),
+		)
+		.unwrap();
+
+		// The `organization`s still depend on `earth`
+		assert!(PgLocation::delete(&connection, [&earth].into_iter())
+			.await
+			.is_err());
+		PgOrganization::delete(&connection, [&organization, &organization2].into_iter())
+			.await
+			.unwrap();
+
+		assert_eq!(
+			PgOrganization::retrieve(&connection, &MatchOrganization {
+				id: Match::Or(vec![
+					organization.id.into(),
+					organization2.id.into(),
+					organization3.id.into()
+				]),
+				..Default::default()
+			})
+			.await
+			.unwrap()
+			.as_slice(),
+			&[organization3]
+		);
 	}
 }

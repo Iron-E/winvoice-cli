@@ -675,18 +675,23 @@ impl WriteWhereClause<Postgres, &MatchExpense> for PgSchema
 		PgSchema::write_where_clause(
 			PgSchema::write_where_clause(
 				PgSchema::write_where_clause(
-					PgSchema::write_where_clause(context, columns.id, &match_condition.id, query),
-					columns.category,
-					&match_condition.category,
+					PgSchema::write_where_clause(
+						PgSchema::write_where_clause(context, columns.id, &match_condition.id, query),
+						columns.category,
+						&match_condition.category,
+						query,
+					),
+					// NOTE: `cost` is stored as text on the DB
+					columns.typecast("numeric").cost,
+					&match_condition.cost.map_ref(|c| c.amount),
 					query,
 				),
-				// NOTE: `cost` is stored as text on the DB
-				columns.typecast("numeric").cost,
-				&match_condition.cost.map_ref(|c| c.amount),
+				columns.description,
+				&match_condition.description,
 				query,
 			),
-			columns.description,
-			&match_condition.description,
+			columns.timesheet_id,
+			&match_condition.timesheet_id,
 			query,
 		)
 	}

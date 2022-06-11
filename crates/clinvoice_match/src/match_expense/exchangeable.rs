@@ -19,6 +19,7 @@ impl Exchangeable for MatchExpense
 			cost: self.cost.exchange_ref(currency, rates),
 			description: self.description.clone(),
 			id: self.id.clone(),
+			timesheet_id: self.id.clone(),
 		}
 	}
 }

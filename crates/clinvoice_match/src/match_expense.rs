@@ -14,9 +14,6 @@ use super::{Match, MatchStr};
 pub struct MatchExpense
 {
 	#[cfg_attr(feature = "serde_support", serde(default))]
-	pub id: Match<Id>,
-
-	#[cfg_attr(feature = "serde_support", serde(default))]
 	pub category: MatchStr<String>,
 
 	#[cfg_attr(feature = "serde_support", serde(default))]
@@ -24,4 +21,10 @@ pub struct MatchExpense
 
 	#[cfg_attr(feature = "serde_support", serde(default))]
 	pub description: MatchStr<String>,
+
+	#[cfg_attr(feature = "serde_support", serde(default))]
+	pub id: Match<Id>,
+
+	#[cfg_attr(feature = "serde_support", serde(default))]
+	pub timesheet_id: Match<Id>,
 }

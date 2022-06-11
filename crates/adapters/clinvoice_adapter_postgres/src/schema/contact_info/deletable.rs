@@ -70,9 +70,83 @@ impl Deletable for PgContactInfo
 #[cfg(test)]
 mod tests
 {
+	use clinvoice_adapter::{
+		schema::{ContactInfoAdapter, LocationAdapter, OrganizationAdapter},
+		Deletable,
+	};
+	use clinvoice_match::{MatchContact, MatchSet};
+	use clinvoice_schema::ContactKind;
+
+	use crate::schema::{util, PgContactInfo, PgLocation, PgOrganization};
+
+	// TODO: use fuzzing
 	#[tokio::test]
 	async fn delete()
 	{
-		// TODO: write test
+		let connection = util::connect().await;
+
+		let earth = PgLocation::create(&connection, "Earth".into(), None)
+			.await
+			.unwrap();
+
+		let organization = PgOrganization::create(
+			&connection,
+			vec![
+				(
+					true,
+					ContactKind::Phone("555-555-5555".into()),
+					"Office Number".into(),
+				),
+				(
+					true,
+					ContactKind::Email("somethingsomething@invalid.com".into()),
+					"Primary Email".into(),
+				),
+				(
+					true,
+					ContactKind::Email("foo@bar.io".into()),
+					"Secondary Email".into(),
+				),
+			],
+			earth.clone(),
+			"Some Organization".into(),
+		)
+		.await
+		.unwrap();
+
+		let contact_info = PgContactInfo::retrieve(
+			&connection,
+			&MatchSet::Contains(MatchContact {
+				organization_id: organization.id.into(),
+				..Default::default()
+			}),
+		)
+		.await
+		.unwrap()
+		.remove(&organization.id)
+		.unwrap();
+
+		assert_eq!(contact_info.len(), 3);
+
+		PgContactInfo::delete(
+			&connection,
+			[&contact_info[0], &contact_info[1]].into_iter(),
+		)
+		.await
+		.unwrap();
+
+		assert_eq!(
+			PgContactInfo::retrieve(
+				&connection,
+				&MatchSet::Contains(MatchContact {
+					organization_id: organization.id.into(),
+					..Default::default()
+				})
+			)
+			.await
+			.unwrap()[&organization.id]
+				.as_slice(),
+			&[contact_info[2].clone()],
+		);
 	}
 }

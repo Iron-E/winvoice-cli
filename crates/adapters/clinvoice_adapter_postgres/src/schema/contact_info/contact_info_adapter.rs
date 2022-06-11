@@ -85,7 +85,7 @@ impl ContactInfoAdapter for PgContactInfo
 			.try_fold(HashMap::new(), |mut map, row| async move {
 				let entry = map
 					.entry(row.get::<Id, _>(COLUMNS.organization_id))
-					.or_insert_with(|| Vec::with_capacity(1));
+					.or_insert_with(Vec::new);
 				if let Some(contact) = PgContactInfo::row_to_view(connection, COLUMNS, &row).await?
 				{
 					entry.push(contact);

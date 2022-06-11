@@ -1,5 +1,6 @@
 mod match_contact_kind;
 
+use clinvoice_schema::Id;
 pub use match_contact_kind::MatchContactKind;
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
@@ -14,11 +15,14 @@ use super::{Match, MatchStr};
 pub struct MatchContact
 {
 	#[cfg_attr(feature = "serde_support", serde(default))]
-	pub label: MatchStr<String>,
-
-	#[cfg_attr(feature = "serde_support", serde(default))]
 	pub export: Match<bool>,
 
 	#[cfg_attr(feature = "serde_support", serde(default))]
 	pub kind: MatchContactKind,
+
+	#[cfg_attr(feature = "serde_support", serde(default))]
+	pub label: MatchStr<String>,
+
+	#[cfg_attr(feature = "serde_support", serde(default))]
+	pub organization_id: Match<Id>,
 }

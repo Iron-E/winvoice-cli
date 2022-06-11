@@ -32,7 +32,7 @@ impl Deletable for PgJob
 #[cfg(test)]
 mod tests
 {
-	use std::time::Duration;
+	use core::time::Duration;
 
 	use clinvoice_adapter::{
 		schema::{JobAdapter, LocationAdapter, OrganizationAdapter},

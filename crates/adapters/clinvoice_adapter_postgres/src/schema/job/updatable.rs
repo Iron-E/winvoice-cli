@@ -79,7 +79,7 @@ impl Updatable for PgJob
 #[cfg(test)]
 mod tests
 {
-	#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+	#[tokio::test]
 	async fn update()
 	{
 		// TODO: write test

@@ -70,7 +70,7 @@ impl Deletable for PgContactInfo
 #[cfg(test)]
 mod tests
 {
-	#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+	#[tokio::test]
 	async fn delete()
 	{
 		// TODO: write test

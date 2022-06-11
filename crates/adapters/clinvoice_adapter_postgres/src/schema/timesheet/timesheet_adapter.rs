@@ -165,7 +165,7 @@ mod tests
 	use super::{PgTimesheet, TimesheetAdapter};
 	use crate::schema::{util, PgEmployee, PgJob, PgLocation, PgOrganization};
 
-	#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+	#[tokio::test]
 	async fn create()
 	{
 		let connection = util::connect().await;
@@ -291,7 +291,7 @@ mod tests
 	}
 
 	/// TODO: use fuzzing
-	#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+	#[tokio::test]
 	async fn retrieve()
 	{
 		let connection = util::connect().await;

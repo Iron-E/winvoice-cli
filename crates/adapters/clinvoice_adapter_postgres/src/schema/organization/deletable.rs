@@ -41,7 +41,7 @@ mod tests
 	use crate::schema::{util, PgLocation, PgOrganization};
 
 	/// TODO: use fuzzing
-	#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+	#[tokio::test]
 	async fn delete()
 	{
 		let connection = util::connect().await;

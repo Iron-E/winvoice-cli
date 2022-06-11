@@ -116,7 +116,7 @@ mod tests
 	use super::{env, fs, ExchangeRates};
 	use crate::{Currency, Error, SAMPLE_EXCHANGE_RATES_CSV};
 
-	#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+	#[tokio::test]
 	async fn download()
 	{
 		let filepath = env::temp_dir()
@@ -146,7 +146,7 @@ mod tests
 			.is_ok());
 	}
 
-	#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+	#[tokio::test]
 	async fn new()
 	{
 		// WARN: if it becomes a new day while this test is running, there is a chance that

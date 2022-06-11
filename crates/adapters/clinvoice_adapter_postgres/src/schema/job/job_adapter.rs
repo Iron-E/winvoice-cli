@@ -151,7 +151,7 @@ mod tests
 	use super::{JobAdapter, PgJob};
 	use crate::schema::{util, PgLocation, PgOrganization};
 
-	#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+	#[tokio::test]
 	async fn create()
 	{
 		let connection = util::connect().await;
@@ -223,7 +223,7 @@ mod tests
 		assert_eq!(job.objectives, row.objectives);
 	}
 
-	#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+	#[tokio::test]
 	async fn retrieve()
 	{
 		let connection = util::connect().await;

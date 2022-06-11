@@ -61,7 +61,7 @@ mod tests
 	use crate::schema::util;
 
 	/// TODO: use fuzzing
-	#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+	#[tokio::test]
 	async fn create()
 	{
 		let connection = util::connect().await;
@@ -120,7 +120,7 @@ mod tests
 		assert_eq!(utah_outer_id, database_utah.outer_id);
 	}
 
-	#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+	#[tokio::test]
 	async fn retrieve()
 	{
 		let connection = util::connect().await;

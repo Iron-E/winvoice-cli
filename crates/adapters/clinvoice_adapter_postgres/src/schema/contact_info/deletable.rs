@@ -114,23 +114,9 @@ mod tests
 		.await
 		.unwrap();
 
-		let contact_info = PgContactInfo::retrieve(
-			&connection,
-			&MatchSet::Contains(MatchContact {
-				organization_id: organization.id.into(),
-				..Default::default()
-			}),
-		)
-		.await
-		.unwrap()
-		.remove(&organization.id)
-		.unwrap();
-
-		assert_eq!(contact_info.len(), 3);
-
 		PgContactInfo::delete(
 			&connection,
-			[&contact_info[0], &contact_info[1]].into_iter(),
+			[&organization.contact_info[0], &organization.contact_info[1]].into_iter(),
 		)
 		.await
 		.unwrap();
@@ -146,7 +132,7 @@ mod tests
 			.await
 			.unwrap()[&organization.id]
 				.as_slice(),
-			&[contact_info[2].clone()],
+			&[organization.contact_info[2].clone()],
 		);
 	}
 }

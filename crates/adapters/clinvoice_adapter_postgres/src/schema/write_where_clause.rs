@@ -196,8 +196,6 @@ where
 		{
 			const COLUMNS: ContactColumns<&'static str> = ContactColumns::default();
 
-			let ident_columns = COLUMNS.scoped(ident);
-
 			let subquery_ident = format!("{ident}_2");
 			let subquery_ident_columns = COLUMNS.scoped(&subquery_ident);
 
@@ -209,17 +207,22 @@ where
 				.push("WHERE")
 				.push(subquery_ident_columns.organization_id)
 				.push_unseparated('=')
-				.push_unseparated(ident_columns.organization_id);
+				.push_unseparated(COLUMNS.scoped(ident).organization_id);
 
 			let ctx = PgSchema::write_where_clause(
 				PgSchema::write_where_clause(
-					WriteContext::AcceptingAnotherWhereCondition,
-					ident_columns.label,
+					PgSchema::write_where_clause(
+						WriteContext::AcceptingAnotherWhereCondition,
+						subquery_ident_columns.export,
+						&match_contact.export,
+						query,
+					),
+					subquery_ident_columns.label,
 					&match_contact.label,
 					query,
 				),
-				ident_columns.export,
-				&match_contact.export,
+				subquery_ident_columns.organization_id,
+				&match_contact.organization_id,
 				query,
 			);
 
@@ -234,7 +237,7 @@ where
 
 					PgSchema::write_where_clause(
 						ctx,
-						ident_columns.address_id,
+						subquery_ident_columns.address_id,
 						&location_id_query,
 						query,
 					);
@@ -242,12 +245,17 @@ where
 
 				MatchContactKind::SomeEmail(ref email_address) =>
 				{
-					PgSchema::write_where_clause(ctx, ident_columns.email, email_address, query);
+					PgSchema::write_where_clause(
+						ctx,
+						subquery_ident_columns.email,
+						email_address,
+						query,
+					);
 				},
 
 				MatchContactKind::SomePhone(ref phone_number) =>
 				{
-					PgSchema::write_where_clause(ctx, ident_columns.phone, phone_number, query);
+					PgSchema::write_where_clause(ctx, subquery_ident_columns.phone, phone_number, query);
 				},
 			};
 
@@ -506,8 +514,6 @@ impl WriteWhereClause<Postgres, &MatchSet<MatchExpense>> for PgSchema
 			{
 				const COLUMNS: ExpenseColumns<&'static str> = ExpenseColumns::default();
 
-				let ident_columns = COLUMNS.scoped(ident);
-
 				let subquery_ident = format!("{ident}_2");
 				let subquery_ident_columns = COLUMNS.scoped(&subquery_ident);
 
@@ -519,7 +525,7 @@ impl WriteWhereClause<Postgres, &MatchSet<MatchExpense>> for PgSchema
 					.push("WHERE")
 					.push(subquery_ident_columns.timesheet_id)
 					.push_unseparated('=')
-					.push_unseparated(ident_columns.timesheet_id);
+					.push_unseparated(COLUMNS.scoped(ident).timesheet_id);
 
 				PgSchema::write_where_clause(
 					WriteContext::AcceptingAnotherWhereCondition,

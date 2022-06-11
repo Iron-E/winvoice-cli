@@ -68,7 +68,7 @@ impl Updatable for PgLocation
 		}
 
 		const COLUMNS: LocationColumns<&'static str> = LocationColumns::default();
-		PgSchema::update(&mut *connection, COLUMNS, "locations", "L", "V", |query| {
+		PgSchema::update(connection, COLUMNS, "locations", "L", "V", |query| {
 			query.push_values(entities_collected.iter(), |mut q, e| {
 				q.push_bind(e.id)
 					.push_bind(&e.name)
@@ -100,51 +100,46 @@ mod tests
 	{
 		let connection = util::connect().await;
 
-		let earth = PgLocation::create(&connection, "Earth".into(), None)
-			.await
-			.unwrap();
-
-		let mut usa = PgLocation::create(&connection, "USA".into(), Some(earth.clone()))
-			.await
-			.unwrap();
-
-		let (mut arizona, mut utah) = futures::try_join!(
-			PgLocation::create(&connection, "Arizona".into(), Some(usa.clone())),
-			PgLocation::create(&connection, "Utah".into(), Some(usa.clone())),
+		let (earth, mars) = futures::try_join!(
+			PgLocation::create(&connection, "Earth".into(), None),
+			PgLocation::create(&connection, "Mars".into(), None),
 		)
 		.unwrap();
 
-		usa.name = "Not USA".into();
-		arizona.name = "Not Arizona".into();
+		let (mut chile, mut usa) = futures::try_join!(
+			PgLocation::create(&connection, "Chile".into(), Some(earth.clone())),
+			PgLocation::create(&connection, "USA".into(), Some(earth.clone())),
+		)
+		.unwrap();
 
-		arizona.outer = Some(usa.clone().into());
-		utah.outer = Some(usa.into());
+		chile.name = "Chilé".into();
+		usa.outer = Some(mars.into());
 
 		{
 			let mut transaction = connection.begin().await.unwrap();
-			PgLocation::update(&mut transaction, [arizona.clone(), utah.clone()].iter())
+			PgLocation::update(&mut transaction, [chile.clone(), usa.clone()].iter())
 				.await
 				.unwrap();
 			transaction.commit().await.unwrap();
 		}
 
-		let arizona_db = PgLocation::retrieve(&connection, &MatchLocation {
-			id: arizona.id.into(),
+		let chile_db = PgLocation::retrieve(&connection, &MatchLocation {
+			id: chile.id.into(),
 			..Default::default()
 		})
 		.await
 		.unwrap()
 		.remove(0);
 
-		let utah_db = PgLocation::retrieve(&connection, &MatchLocation {
-			id: utah.id.into(),
+		let usa_db = PgLocation::retrieve(&connection, &MatchLocation {
+			id: usa.id.into(),
 			..Default::default()
 		})
 		.await
 		.unwrap()
 		.remove(0);
 
-		assert_eq!(arizona, arizona_db);
-		assert_eq!(utah, utah_db);
+		assert_eq!(chile, chile_db);
+		assert_eq!(usa, usa_db);
 	}
 }

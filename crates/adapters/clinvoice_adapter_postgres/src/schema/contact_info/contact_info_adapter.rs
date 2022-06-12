@@ -69,7 +69,7 @@ impl ContactInfoAdapter for PgContactInfo
 			FROM organizations O
 			LEFT JOIN contact_information C ON (C.organization_id = O.id)",
 		);
-		write_where_clause::write_contact_set_where_clause(
+		write_where_clause::write_match_contact_set(
 			connection,
 			Default::default(),
 			"C",

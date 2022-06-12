@@ -99,7 +99,6 @@ mod tests
 	use super::{EmployeeAdapter, PgEmployee};
 	use crate::schema::{util, PgLocation, PgOrganization};
 
-	/// TODO: use fuzzing
 	#[tokio::test]
 	async fn create()
 	{

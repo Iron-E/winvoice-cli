@@ -94,7 +94,6 @@ mod tests
 
 	use crate::schema::{util, PgLocation};
 
-	// TODO: use fuzzing
 	#[tokio::test]
 	async fn update()
 	{

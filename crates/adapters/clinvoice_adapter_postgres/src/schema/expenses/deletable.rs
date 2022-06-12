@@ -62,7 +62,6 @@ mod tests
 		PgTimesheet,
 	};
 
-	// TODO: use fuzzing
 	#[tokio::test]
 	async fn delete()
 	{

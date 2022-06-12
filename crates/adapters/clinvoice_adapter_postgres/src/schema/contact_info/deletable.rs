@@ -79,7 +79,6 @@ mod tests
 
 	use crate::schema::{util, PgContactInfo, PgLocation, PgOrganization};
 
-	// TODO: use fuzzing
 	#[tokio::test]
 	async fn delete()
 	{

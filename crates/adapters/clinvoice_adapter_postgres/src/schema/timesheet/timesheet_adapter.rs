@@ -290,7 +290,6 @@ mod tests
 		assert_eq!(timesheet.work_notes, timesheet_row.work_notes);
 	}
 
-	/// TODO: use fuzzing
 	#[tokio::test]
 	async fn retrieve()
 	{

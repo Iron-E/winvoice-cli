@@ -60,7 +60,6 @@ mod tests
 	use super::{LocationAdapter, PgLocation};
 	use crate::schema::util;
 
-	/// TODO: use fuzzing
 	#[tokio::test]
 	async fn create()
 	{

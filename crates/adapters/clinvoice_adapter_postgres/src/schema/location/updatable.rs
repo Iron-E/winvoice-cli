@@ -112,6 +112,9 @@ mod tests
 		.unwrap();
 
 		chile.name = "Chilé".into();
+		earth.name = "Urth".into();
+
+		chile.outer = Some(earth.into());
 		usa.outer = Some(mars.into());
 
 		{

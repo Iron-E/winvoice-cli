@@ -99,7 +99,7 @@ mod tests
 	{
 		let connection = util::connect().await;
 
-		let (earth, mars) = futures::try_join!(
+		let (mut earth, mars) = futures::try_join!(
 			PgLocation::create(&connection, "Earth".into(), None),
 			PgLocation::create(&connection, "Mars".into(), None),
 		)

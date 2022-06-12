@@ -29,7 +29,7 @@ impl Updatable for PgContactInfo
 
 		const COLUMNS: ContactColumns<&'static str> = ContactColumns::default();
 		PgSchema::update(
-			&mut *connection,
+			connection,
 			COLUMNS,
 			"contact_information",
 			"C",

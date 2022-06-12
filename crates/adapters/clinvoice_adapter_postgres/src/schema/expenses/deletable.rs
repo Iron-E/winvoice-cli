@@ -19,12 +19,12 @@ impl Deletable for PgExpenses
 		'e: 'i,
 		Self::Entity: 'e,
 	{
-		// TODO: use `for<'a> |x: &'a Expense| x.id`
 		fn mapper(x: &Expense) -> Id
 		{
 			x.id
 		}
 
+		// TODO: use `for<'a> |e: &'a Expense| e.id`
 		PgSchema::delete(connection, "expenses", entities.map(mapper)).await
 	}
 }

@@ -19,12 +19,12 @@ impl Deletable for PgJob
 		'e: 'i,
 		Self::Entity: 'e,
 	{
-		// TODO: use `for<'a> |j: &'a Job| j.id`
 		fn mapper(j: &Job) -> Id
 		{
 			j.id
 		}
 
+		// TODO: use `for<'a> |e: &'a Job| e.id`
 		PgSchema::delete(connection, "jobs", entities.map(mapper)).await
 	}
 }

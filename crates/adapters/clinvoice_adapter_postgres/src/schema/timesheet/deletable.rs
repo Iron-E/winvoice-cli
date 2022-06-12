@@ -19,12 +19,12 @@ impl Deletable for PgTimesheet
 		'e: 'i,
 		Self::Entity: 'e,
 	{
-		// TODO: use `for<'a> |t: &'a Timesheet| t.id`
 		fn mapper(t: &Timesheet) -> Id
 		{
 			t.id
 		}
 
+		// TODO: use `for<'a> |e: &'a Timesheet| e.id`
 		PgSchema::delete(connection, "timesheets", entities.map(mapper)).await
 	}
 }

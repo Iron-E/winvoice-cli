@@ -19,12 +19,12 @@ impl Deletable for PgOrganization
 		'e: 'i,
 		Self::Entity: 'e,
 	{
-		// TODO: use `for<'a> |o: &'a Organization| o.id`
 		fn mapper(o: &Organization) -> Id
 		{
 			o.id
 		}
 
+		// TODO: use `for<'a> |e: &'a Organization| e.id`
 		PgSchema::delete(connection, "organizations", entities.map(mapper)).await
 	}
 }

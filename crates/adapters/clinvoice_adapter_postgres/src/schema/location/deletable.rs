@@ -19,12 +19,12 @@ impl Deletable for PgLocation
 		'e: 'i,
 		Self::Entity: 'e,
 	{
-		// TODO: use `for<'a> |l: &'a Location| l.id`
 		fn mapper(l: &Location) -> Id
 		{
 			l.id
 		}
 
+		// TODO: use `for<'a> |e: &'a Location| e.id`
 		PgSchema::delete(connection, "locations", entities.map(mapper)).await
 	}
 }

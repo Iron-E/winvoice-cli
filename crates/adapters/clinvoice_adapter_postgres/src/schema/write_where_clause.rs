@@ -23,9 +23,10 @@ use clinvoice_match::{
 	MatchExpense,
 	MatchJob,
 	MatchOrganization,
+	MatchRow,
 	MatchSet,
 	MatchStr,
-	MatchTimesheet, MatchRow,
+	MatchTimesheet,
 };
 use clinvoice_schema::Id;
 use sqlx::{Database, PgPool, Postgres, QueryBuilder, Result};
@@ -183,14 +184,8 @@ where
 			let iter = &mut conditions.iter().filter(|m| *m != &MatchSet::Any);
 			if let Some(c) = iter.next()
 			{
-				write_match_contact_set(
-					connection,
-					WriteContext::InWhereCondition,
-					ident,
-					c,
-					query,
-				)
-				.await?;
+				write_match_contact_set(connection, WriteContext::InWhereCondition, ident, c, query)
+					.await?;
 			}
 
 			let separator = match match_condition
@@ -202,14 +197,8 @@ where
 			for c in conditions
 			{
 				query.push(separator);
-				write_match_contact_set(
-					connection,
-					WriteContext::InWhereCondition,
-					ident,
-					c,
-					query,
-				)
-				.await?;
+				write_match_contact_set(connection, WriteContext::InWhereCondition, ident, c, query)
+					.await?;
 			}
 
 			write_context_scope_end(query);
@@ -292,14 +281,8 @@ where
 			{
 				write_context_scope_start::<_, true>(query, context);
 
-				write_match_contact_set(
-					connection,
-					WriteContext::InWhereCondition,
-					ident,
-					m,
-					query,
-				)
-				.await?;
+				write_match_contact_set(connection, WriteContext::InWhereCondition, ident, m, query)
+					.await?;
 
 				write_context_scope_end(query);
 			},

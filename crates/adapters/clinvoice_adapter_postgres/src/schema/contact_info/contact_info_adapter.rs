@@ -28,12 +28,12 @@ impl ContactInfoAdapter for PgContactInfo
 				(address_id, email, export, label, organization_id, phone) ",
 		)
 		.push_values(contact_info.iter(), |mut q, (export, kind, label)| {
-			q.push_bind(kind.get_address().map(|a| a.id))
-				.push_bind(kind.get_email())
+			q.push_bind(kind.address().map(|a| a.id))
+				.push_bind(kind.email())
 				.push_bind(export)
 				.push_bind(label)
 				.push_bind(organization_id)
-				.push_bind(kind.get_phone());
+				.push_bind(kind.phone());
 		})
 		.push(';')
 		.build()

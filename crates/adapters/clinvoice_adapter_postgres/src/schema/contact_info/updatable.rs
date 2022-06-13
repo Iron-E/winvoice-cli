@@ -36,12 +36,12 @@ impl Updatable for PgContactInfo
 			"V",
 			|query| {
 				query.push_values(peekable_entities, |mut q, e| {
-					q.push_bind(e.kind.get_address().map(|a| a.id))
-						.push_bind(e.kind.get_email())
+					q.push_bind(e.kind.address().map(|a| a.id))
+						.push_bind(e.kind.email())
 						.push_bind(e.export)
 						.push_bind(&e.label)
 						.push_bind(e.organization_id)
-						.push_bind(e.kind.get_phone());
+						.push_bind(e.kind.phone());
 				});
 			},
 		)

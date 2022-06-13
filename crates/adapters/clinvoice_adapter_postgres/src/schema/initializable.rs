@@ -80,12 +80,12 @@ async fn init_contact_info(connection: impl Executor<'_, Database = Postgres>) -
 			PRIMARY KEY(organization_id, label),
 			CONSTRAINT contact_information__is_variant CHECK
 			(
-				address_id IS NULL AND
+				address_id IS null AND
 				(
-					(email IS NOT NULL AND phone IS NULL) OR -- ContactKind::Email
-					(email IS NULL AND phone IS NOT NULL) -- ContactKind::Phone
+					(email IS NOT null AND phone IS null) OR -- ContactKind::Email
+					(email IS null AND phone IS NOT null) -- ContactKind::Phone
 				)
-				OR email IS NULL AND phone IS NULL -- ContactKind::Address
+				OR email IS null AND phone IS null -- ContactKind::Address
 			)
 		);"#
 	)
@@ -124,7 +124,7 @@ async fn init_jobs(connection: impl Executor<'_, Database = Postgres>) -> Result
 			notes text NOT NULL,
 			objectives text NOT NULL,
 
-			CONSTRAINT jobs__invoice_date CHECK (invoice_date_paid IS NULL OR invoice_date_issued IS NOT NULL)
+			CONSTRAINT jobs__invoice_date CHECK (invoice_date_paid IS null OR invoice_date_issued IS NOT null)
 		);"
 	)
 	.execute(connection)

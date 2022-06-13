@@ -11,7 +11,7 @@ where
 		match self.0
 		{
 			Some(ref s) => write!(f, "{s}"),
-			_ => write!(f, "NULL"),
+			_ => write!(f, "null"),
 		}
 	}
 }

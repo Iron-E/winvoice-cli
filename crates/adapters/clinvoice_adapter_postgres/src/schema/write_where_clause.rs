@@ -145,7 +145,7 @@ fn write_is_null<Db>(
 		.separated(' ')
 		.push(context)
 		.push(ident)
-		.push("IS NULL");
+		.push("IS null");
 }
 
 /// # Warnings

@@ -4,7 +4,6 @@ mod restorable_serde;
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 
-use super::Organization;
 use crate::Id;
 
 /// # Summary
@@ -24,12 +23,6 @@ pub struct Employee
 	///
 	/// The name of the [`Employee`].
 	pub name: String,
-
-	/// # Summary
-	///
-	/// The reference number of the [`Organization`](crate::Organization) which this
-	/// [`Employee`] is in reference to.
-	pub organization: Organization,
 
 	/// # Summary
 	///

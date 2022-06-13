@@ -4,7 +4,6 @@ mod exchangeable;
 mod restorable_serde;
 
 use core::fmt::Write;
-use std::collections::HashSet;
 
 use chrono::{DateTime, Utc};
 use clinvoice_finance::{Decimal, ExchangeRates, Exchangeable, Money};
@@ -93,17 +92,13 @@ impl Timesheet
 	///
 	/// Tracks the `organizations_with_serialized_contact_info` so that their contact information is not
 	/// reiterated every time.
-	pub(super) fn export(
-		&self,
-		organizations_with_serialized_contact_info: HashSet<Id>,
-		output: &mut String,
-	) -> HashSet<Id>
+	pub(super) fn export(&self, output: &mut String)
 	{
 		writeln!(output, "{}", Element::Heading {
 			depth: 3,
 			text: self
 				.time_end
-				.map(|time_end| format!("{} – {}", self.time_begin, time_end.naive_local()))
+				.map(|time_end| format!("{} – {}", self.time_begin, time_end))
 				.unwrap_or_else(|| format!("{} – Current", self.time_begin)),
 		})
 		.unwrap();
@@ -119,59 +114,6 @@ impl Timesheet
 			self.employee.name,
 		)
 		.unwrap();
-
-		writeln!(
-			output,
-			"{}: {} @ {}",
-			Element::UnorderedList {
-				depth: 0,
-				text: Text::Bold("Employer"),
-			},
-			self.employee.organization.name,
-			self.employee.organization.location,
-		)
-		.unwrap();
-
-		if !organizations_with_serialized_contact_info.contains(&self.employee.organization.id)
-		{
-			let employee_contact_info: Vec<_> = self
-				.employee
-				.organization
-				.contact_info
-				.iter()
-				.filter(|c| c.export)
-				.collect();
-
-			if !employee_contact_info.is_empty()
-			{
-				writeln!(output, "{}:", Element::UnorderedList {
-					depth: 0,
-					text: Text::Bold("Contact Information"),
-				})
-				.unwrap();
-
-				let mut sorted_organization_contact_info = employee_contact_info;
-				sorted_organization_contact_info.sort_by_key(|c| &c.label);
-
-				sorted_organization_contact_info
-					.into_iter()
-					.try_for_each(|contact| {
-						writeln!(
-							output,
-							"{}: {}",
-							Element::UnorderedList {
-								depth: 1,
-								text: Text::Bold(&contact.label),
-							},
-							// The part we want is in `[`, `]`.
-							// The matches are in `(`, `)`.
-							// "Multiple colons(: )this is the end(: )[555-555-5555]"
-							contact.to_string().split(": ").last().unwrap_or_default(),
-						)
-					})
-					.unwrap();
-			}
-		}
 
 		writeln!(output, "{}", Element::<&str>::Break).unwrap();
 
@@ -192,7 +134,7 @@ impl Timesheet
 						"{}\n{}",
 						Element::Heading {
 							depth: 5,
-							text: format!("#{} – {} ({})", e.id, e.category, e.cost),
+							text: format!("№{} – {} ({})", e.id, e.category, e.cost),
 						},
 						Element::BlockText(&e.description),
 					)
@@ -209,10 +151,6 @@ impl Timesheet
 			.unwrap();
 			writeln!(output, "{}", Element::BlockText(&self.work_notes)).unwrap();
 		}
-
-		let mut set = organizations_with_serialized_contact_info;
-		set.insert(self.employee.organization.id);
-		set
 	}
 
 	/// # Summary

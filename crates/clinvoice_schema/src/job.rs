@@ -4,10 +4,9 @@ mod exchangeable;
 mod restorable_serde;
 
 use core::{fmt::Write, time::Duration};
-use std::collections::HashSet;
 
 use chrono::{DateTime, Local, Utc};
-use clinvoice_finance::{ExchangeRates, Result};
+use clinvoice_finance::ExchangeRates;
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 
@@ -18,6 +17,7 @@ use super::{
 	Organization,
 	Timesheet,
 };
+use crate::Contact;
 
 /// # Summary
 ///
@@ -111,31 +111,30 @@ impl Job
 	/// Export some `job` to the [`Target`] specified.
 	pub fn export(
 		&self,
+		contact_info: &mut [Contact],
 		exchange_rates: Option<&ExchangeRates>,
+		organization: &Organization,
 		timesheets: &[Timesheet],
-	) -> Result<String>
+	) -> String
 	{
 		let mut output = String::new();
 
 		writeln!(output, "{}", Element::Heading {
 			depth: 1,
-			text: format!("Job №{}", self.id),
+			text: format!("{} – Job №{}", organization.name, self.id),
 		})
 		.unwrap();
 
 		writeln!(
 			output,
-			"{}: {} @ {}",
+			"{}: {}",
 			Element::UnorderedList {
 				depth: 0,
 				text: Text::Bold("Client"),
 			},
-			self.client.name,
-			self.client.location,
+			self.client,
 		)
 		.unwrap();
-
-		// TODO: write contact info; borrow from `Timesheet`
 
 		writeln!(
 			output,
@@ -157,18 +156,68 @@ impl Job
 					depth: 0,
 					text: Text::Bold("Date Closed"),
 				},
-				DateTime::<Local>::from(date).naive_local(),
+				DateTime::<Local>::from(date),
 			)
 			.unwrap();
 		}
 
 		writeln!(output, "{}", Element::<&str>::Break).unwrap();
 
+		if !self.objectives.is_empty()
+		{
+			writeln!(output, "{}", Element::Heading {
+				depth: 2,
+				text: "Objectives",
+			})
+			.unwrap();
+
+			writeln!(output, "{}", Element::BlockText(&self.objectives)).unwrap();
+		}
+
+		if !self.notes.is_empty()
+		{
+			writeln!(output, "{}", Element::Heading {
+				depth: 2,
+				text: "Notes",
+			})
+			.unwrap();
+
+			writeln!(output, "{}", Element::BlockText(&self.notes)).unwrap();
+		}
+
 		writeln!(output, "{}", Element::Heading {
 			depth: 2,
 			text: "Invoice",
 		})
 		.unwrap();
+
+		if !contact_info.is_empty()
+		{
+			writeln!(output, "{}:", Element::UnorderedList {
+				depth: 0,
+				text: Text::Bold("Contact Information"),
+			})
+			.unwrap();
+
+			let sorted_contact_info = contact_info;
+			sorted_contact_info.sort_by(|c1, c2| c1.label.cmp(&c2.label));
+
+			sorted_contact_info
+				.iter()
+				.try_for_each(|contact| {
+					writeln!(
+						output,
+						"{}: {}",
+						Element::UnorderedList {
+							depth: 1,
+							text: Text::Bold(&contact.label),
+						},
+						contact.kind,
+					)
+				})
+				.unwrap();
+		}
+
 		writeln!(
 			output,
 			"{} {}",
@@ -204,24 +253,8 @@ impl Job
 			Timesheet::total(exchange_rates, self.invoice.hourly_rate, timesheets),
 		)
 		.unwrap();
+
 		writeln!(output, "{}", Element::<&str>::Break).unwrap();
-
-		writeln!(output, "{}", Element::Heading {
-			depth: 2,
-			text: "Objectives",
-		})
-		.unwrap();
-		writeln!(output, "{}", Element::BlockText(&self.objectives)).unwrap();
-
-		if !self.notes.is_empty()
-		{
-			writeln!(output, "{}", Element::Heading {
-				depth: 2,
-				text: "Notes",
-			})
-			.unwrap();
-			writeln!(output, "{}", Element::BlockText(&self.notes)).unwrap();
-		}
 
 		if !timesheets.is_empty()
 		{
@@ -230,14 +263,13 @@ impl Job
 				text: "Timesheets",
 			})
 			.unwrap();
+
 			timesheets
 				.iter()
-				.fold(HashSet::new(), |organizations, timesheet| {
-					timesheet.export(organizations, &mut output)
-				});
+				.for_each(|timesheet| timesheet.export(&mut output));
 		}
 
-		Ok(output)
+		output
 	}
 }
 
@@ -255,21 +287,7 @@ mod tests
 	#[test]
 	fn export()
 	{
-		let organization = Organization {
-			contact_info: vec![
-				Contact {
-					export: false,
-					kind: ContactKind::Email("foo@bar.io".into()),
-					label: "primary email".into(),
-					organization_id: Default::default(),
-				},
-				Contact {
-					export: true,
-					kind: ContactKind::Phone("687 5309".into()),
-					label: "primary phone".into(),
-					organization_id: Default::default(),
-				},
-			],
+		let client = Organization {
 			id: 0,
 			location: Location {
 				id: 0,
@@ -307,23 +325,29 @@ mod tests
 			name: "Big Old Test".into(),
 		};
 
+		let testy_organization = Organization {
+			id: 1,
+			name: "TestyCo".into(),
+			location: client.location.clone(),
+		};
+
+		let mut contact_info = [
+			Contact {
+				kind: ContactKind::Email("foo@bar.io".into()),
+				label: "primary email".into(),
+			},
+			Contact {
+				kind: ContactKind::Phone("687 5309".into()),
+				label: "primary phone".into(),
+			},
+			Contact {
+				kind: ContactKind::Username("TestyCo".into()),
+				label: "twitter".into(),
+			},
+		];
+
 		let testy_mctesterson = Employee {
 			id: Default::default(),
-			organization: Organization {
-				contact_info: vec![Contact {
-					export: true,
-					kind: ContactKind::Address(Location {
-						id: Default::default(),
-						name: "TestyCo P.O.".into(),
-						outer: None,
-					}),
-					label: "mailbox".into(),
-					organization_id: Default::default(),
-				}],
-				id: 1,
-				name: "TestyCo".into(),
-				location: organization.location.clone(),
-			},
 			name: "Testy McTesterson".into(),
 			status: "Representative".into(),
 			title: "CEO of Tests".into(),
@@ -331,14 +355,13 @@ mod tests
 
 		let bob = Employee {
 			id: Default::default(),
-			organization: organization.clone(),
 			name: "Bob".into(),
 			status: "Employed".into(),
 			title: "Janitor".into(),
 		};
 
 		let mut job = Job {
-			client: organization,
+			client,
 			date_close: None,
 			date_open: Utc::today().and_hms(0, 0, 0),
 			id: Default::default(),
@@ -352,17 +375,12 @@ mod tests
 		};
 
 		assert_eq!(
-			job.export(None, &[]).unwrap(),
+			job.export(&mut contact_info, None, &testy_organization, &[]),
 			format!(
-				"# Job №{}
+				"# TestyCo – Job №{}
 
 - **Client**: Big Old Test @ 1337 Some Street, Phoenix, Arizona, USA, Earth
 - **Date Opened**: {}
-
-## Invoice
-
-- **Hourly Rate** 20.00 USD
-- **Total Amount Owed**: 0.00 USD
 
 ## Objectives
 
@@ -370,7 +388,16 @@ mod tests
 
 ## Notes
 
-- I tested the function.\n\n",
+- I tested the function.
+
+## Invoice
+
+- **Contact Information**:
+	- **primary email**: foo@bar.io
+	- **primary phone**: 687 5309
+	- **twitter**: TestyCo
+- **Hourly Rate** 20.00 USD
+- **Total Amount Owed**: 0.00 USD\n\n",
 				job.id,
 				DateTime::<Local>::from(job.date_open),
 			),
@@ -378,7 +405,7 @@ mod tests
 
 		job.date_close = Some(Utc::today().and_hms(4, 30, 0));
 
-		let timesheets = vec![
+		let timesheets = [
 			Timesheet {
 				employee: testy_mctesterson,
 				job: job.clone(),
@@ -405,18 +432,13 @@ mod tests
 		];
 
 		assert_eq!(
-			job.export(None, &timesheets).unwrap(),
+			job.export(&mut contact_info, None, &testy_organization, &timesheets),
 			format!(
-				"# Job №{}
+				"# TestyCo – Job №{}
 
 - **Client**: Big Old Test @ 1337 Some Street, Phoenix, Arizona, USA, Earth
 - **Date Opened**: {}
 - **Date Closed**: {}
-
-## Invoice
-
-- **Hourly Rate** 20.00 USD
-- **Total Amount Owed**: 40.00 USD
 
 ## Objectives
 
@@ -426,14 +448,20 @@ mod tests
 
 - I tested the function.
 
+## Invoice
+
+- **Contact Information**:
+	- **primary email**: foo@bar.io
+	- **primary phone**: 687 5309
+	- **twitter**: TestyCo
+- **Hourly Rate** 20.00 USD
+- **Total Amount Owed**: 40.00 USD
+
 ## Timesheets
 
 ### {} – {}
 
 - **Employee**: CEO of Tests Testy McTesterson
-- **Employer**: TestyCo @ 1337 Some Street, Phoenix, Arizona, USA, Earth
-- **Contact Information**:
-	- **mailbox**: TestyCo P.O.
 
 #### Work Notes
 
@@ -442,13 +470,10 @@ mod tests
 ### {} – {}
 
 - **Employee**: Janitor Bob
-- **Employer**: Big Old Test @ 1337 Some Street, Phoenix, Arizona, USA, Earth
-- **Contact Information**:
-	- **primary phone**: 687 5309
 
 #### Expenses
 
-##### #120 – Service (20.00 USD)
+##### №{} – Service (20.00 USD)
 
 Paid for someone else to clean
 
@@ -457,11 +482,12 @@ Paid for someone else to clean
 - Clean the deck.\n\n",
 				job.id,
 				DateTime::<Local>::from(job.date_open),
-				DateTime::<Local>::from(job.date_close.unwrap()).naive_local(),
+				DateTime::<Local>::from(job.date_close.unwrap()),
 				timesheets[0].time_begin,
-				timesheets[0].time_end.unwrap().naive_local(),
+				timesheets[0].time_end.unwrap(),
 				timesheets[1].time_begin,
-				timesheets[1].time_end.unwrap().naive_local(),
+				timesheets[1].time_end.unwrap(),
+				timesheets[1].expenses[0].id,
 			),
 		);
 	}

@@ -6,6 +6,6 @@ impl RestorableSerde for Employee
 	fn try_restore(&mut self, original: &Self) -> RestoreResult<()>
 	{
 		self.id = original.id;
-		self.organization.try_restore(&original.organization)
+		Ok(())
 	}
 }

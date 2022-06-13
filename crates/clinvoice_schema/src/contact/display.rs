@@ -54,28 +54,22 @@ mod tests
 
 		assert_eq!(
 			format!("{}", Contact {
-				export: false,
 				kind: ContactKind::Address(street_view),
 				label: "Office".into(),
-				organization_id: Default::default(),
 			}),
 			"Office: 1337 Some Street, Phoenix, Arizona, USA, Earth"
 		);
 		assert_eq!(
 			format!("{}", Contact {
-				export: false,
 				kind: ContactKind::Email("foo@bar.io".into()),
 				label: "Email".into(),
-				organization_id: Default::default(),
 			}),
 			"Email: foo@bar.io"
 		);
 		assert_eq!(
 			format!("{}", Contact {
-				export: false,
 				kind: ContactKind::Phone("1-603-555-5555".into()),
 				label: "Cellphone".into(),
-				organization_id: Default::default(),
 			}),
 			"Cellphone: 1-603-555-5555"
 		);

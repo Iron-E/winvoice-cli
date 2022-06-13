@@ -8,10 +8,10 @@ impl Display for ContactKind
 	{
 		match self
 		{
-			ContactKind::Address(ref location) => write!(formatter, "{location}"),
-			ContactKind::Email(ref s) | ContactKind::Phone(ref s) =>
+			Self::Address(ref location) => location.fmt(formatter),
+			Self::Email(ref s) | Self::Phone(ref s) | Self::Username(ref s) | Self::Wallet(ref s) =>
 			{
-				write!(formatter, "{s}")
+				s.fmt(formatter)
 			},
 		}
 	}

@@ -20,8 +20,8 @@ impl Display for Timesheet
 
 		write!(
 			formatter,
-			"\t- Employee: {} {} from {}",
-			self.employee.title, self.employee.name, self.employee.organization,
+			"\t- Employee: {} {}",
+			self.employee.title, self.employee.name
 		)?;
 
 		const DEPTH_1: &str = "\n\t";
@@ -61,7 +61,7 @@ mod tests
 	use clinvoice_finance::{Currency, Money};
 
 	use super::{DateTime, Local, Timesheet};
-	use crate::{Contact, ContactKind, Employee, Expense, Invoice, Job, Location, Organization};
+	use crate::{Employee, Expense, Invoice, Job, Location, Organization};
 
 	#[test]
 	fn display()
@@ -99,31 +99,6 @@ mod tests
 		let timesheet = Timesheet {
 			employee: Employee {
 				id: 0,
-				organization: Organization {
-					contact_info: vec![
-						Contact {
-							export: false,
-							kind: ContactKind::Address(street_view.clone()),
-							label: "Street Address".into(),
-							organization_id: 0,
-						},
-						Contact {
-							export: false,
-							kind: ContactKind::Email("foo@bar.io".into()),
-							label: "Email".into(),
-							organization_id: 0,
-						},
-						Contact {
-							export: false,
-							kind: ContactKind::Phone("1-800-555-5555".into()),
-							label: "Phone".into(),
-							organization_id: 0,
-						},
-					],
-					location: street_view.clone(),
-					name: "Big Test Organization".into(),
-					..Default::default()
-				},
 				name: "Testy McTesterson".into(),
 				status: "Representative".into(),
 				title: "CEO of Tests".into(),
@@ -167,12 +142,7 @@ mod tests
 			format!("{timesheet}"),
 			format!(
 				"{} – {}
-	- Employee: CEO of Tests Testy McTesterson from Big Test Organization @ 1337 Some Street, Phoenix, \
-				 Arizona, USA, Earth
-	- Contact Info:
-		- Email: foo@bar.io
-		- Phone: 1-800-555-5555
-		- Street Address: 1337 Some Street, Phoenix, Arizona, USA, Earth
+	- Employee: CEO of Tests Testy McTesterson
 	- Expenses:
 		№405 – Food (20.50 USD)
 			Fast Food™

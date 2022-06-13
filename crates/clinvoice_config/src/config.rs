@@ -1,20 +1,17 @@
-mod error;
-
 use std::{collections::BTreeMap, fs, path::PathBuf};
 
-use clinvoice_adapter::{Adapters, Store};
-pub use error::{Error, Result};
+use crate::{Adapters, Store};
 use serde::{Deserialize, Serialize};
 
-use crate::{Employees, Invoices, StoreValue, Timesheets};
+use crate::{Employees, Invoices, StoreValue, Timesheets, Result, Error};
 
 /// # Summary
 ///
 /// The `Config` contains settings that affect all areas of the application.
 ///
 /// TODO: see if the number of lifetime params can be reduced
-#[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
-pub struct Config<'alias, 'name>
+#[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+pub struct Config
 {
 	/// # Summary
 	///
@@ -34,8 +31,8 @@ pub struct Config<'alias, 'name>
 	///
 	/// NOTE: this is a [`BTreeMap`] because it is desirable for configuration files to be
 	///       serialized in a consistent order.
-	#[serde(borrow)]
-	stores: BTreeMap<&'name str, StoreValue<'alias>>,
+	#[serde(default)]
+	stores: BTreeMap<String, StoreValue>,
 
 	/// # Summary
 	///
@@ -44,7 +41,7 @@ pub struct Config<'alias, 'name>
 	pub timesheets: Timesheets,
 }
 
-impl Config<'_, '_>
+impl Config
 {
 	/// # Summary
 	///
@@ -63,12 +60,10 @@ impl Config<'_, '_>
 			}
 
 			let config = Self {
-				employees: Default::default(),
-				invoices: Default::default(),
-				stores: vec![
-					("default", StoreValue::Alias("foo")),
+				stores: [
+					("default".into(), StoreValue::Alias("foo".into())),
 					(
-						"foo",
+						"foo".into(),
 						StoreValue::Storage(Store {
 							adapter: Adapters::Postgres,
 							url: "See https://github.com/Iron-E/clinvoice/wiki/Usage#adapters".into(),
@@ -77,7 +72,7 @@ impl Config<'_, '_>
 				]
 				.into_iter()
 				.collect(),
-				timesheets: Default::default(),
+				..Default::default()
 			};
 
 			config.update()?;
@@ -126,37 +121,38 @@ mod tests
 {
 	use core::time::Duration;
 
-	use clinvoice_adapter::Adapters;
+	use crate::{Adapters, Store};
 	use clinvoice_schema::{Currency, Id};
 
-	use super::{BTreeMap, Config, Employees, Invoices, Store, StoreValue, Timesheets};
+	use super::{BTreeMap, Config, Employees, Invoices, StoreValue, Timesheets};
 
 	#[test]
 	fn get_store()
 	{
 		let mut stores = BTreeMap::new();
 
-		stores.insert("a", StoreValue::Alias("b"));
-		stores.insert("b", StoreValue::Alias("c"));
+		stores.insert("a".into(), StoreValue::Alias("b".into()));
+		stores.insert("b".into(), StoreValue::Alias("c".into()));
 		stores.insert(
-			"c",
+			"c".into(),
 			StoreValue::Storage(Store {
 				adapter: Adapters::Postgres,
 				url: "c/path".into(),
 			}),
 		);
 		stores.insert(
-			"d",
+			"d".into(),
 			StoreValue::Storage(Store {
 				adapter: Adapters::Postgres,
 				url: "d/path".into(),
 			}),
 		);
-		stores.insert("e", StoreValue::Alias("d"));
+		stores.insert("e".into(), StoreValue::Alias("d".into()));
 
 		let conf = Config {
 			employees: Employees {
-				default_id: Some(Id::default()),
+				id: Some(Id::default()),
+				organization_id: Some(Id::default()),
 			},
 			invoices: Invoices {
 				default_currency: Currency::USD,

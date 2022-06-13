@@ -1,15 +1,15 @@
-use core::fmt::{Display, Formatter, Result as FmtResult};
+use core::fmt::{Display, Formatter, Result};
 
 use super::Adapters;
 
 impl Display for Adapters
 {
-	fn fmt(&self, formatter: &mut Formatter) -> FmtResult
+	fn fmt(&self, formatter: &mut Formatter) -> Result
 	{
-		write!(formatter, "{}", match self
+		match self
 		{
-			Adapters::Postgres => "Postgres",
-		})
+			Adapters::Postgres => "Postgres".fmt(formatter),
+		}
 	}
 }
 

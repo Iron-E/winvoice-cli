@@ -11,6 +11,12 @@ pub struct Employees
 {
 	/// # Summary
 	///
-	/// The [`Id`] of the employee which should be defaulted to when attaching to a timesheet.
-	pub default_id: Option<Id>,
+	/// The [`Id`] of the [`Employee`](clinvoice_schema::Employee) which uses this CLInvoice client.
+	pub id: Option<Id>,
+
+	/// # Summary
+	///
+	/// The [`Id`] of the [`Organization`](clinvoice_schema::Organization) which the [`Employee`](clinvoice_schema::Employee) which uses this CLInvoice client
+	/// works for.
+	pub organization_id: Option<Id>,
 }

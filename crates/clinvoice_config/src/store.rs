@@ -1,4 +1,3 @@
-#[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 
 use crate::Adapters;
@@ -11,8 +10,7 @@ use crate::Adapters;
 ///
 /// If this application is being used by an organization, this configuration should be setup by an
 /// administrator.
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-#[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
+#[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Store
 {
 	/// # Summary

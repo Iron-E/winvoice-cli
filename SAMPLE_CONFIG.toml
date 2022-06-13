@@ -1,5 +1,6 @@
 [employees]
-default_id = "95d053c5-4be5-45bf-90f6-5e63cb43fb9c"
+id = 1
+organization_id = 223
 
 [invoices]
 default_currency = "USD"

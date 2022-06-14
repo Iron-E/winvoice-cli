@@ -1,5 +1,5 @@
-use clinvoice_match::MatchOrganization;
-use clinvoice_schema::{ContactKind, Location, Organization};
+use clinvoice_match::{MatchOrganization, MatchRow};
+use clinvoice_schema::{Location, Organization};
 use sqlx::{Pool, Result};
 
 use crate::{Deletable, Updatable};
@@ -22,7 +22,6 @@ pub trait OrganizationAdapter:
 	/// The newly created [`Organization`].
 	async fn create(
 		connection: &Pool<<Self as Deletable>::Db>,
-		contact_info: Vec<(bool, ContactKind, String)>,
 		location: Location,
 		name: String,
 	) -> Result<<Self as Deletable>::Entity>;
@@ -37,6 +36,6 @@ pub trait OrganizationAdapter:
 	/// * A list of matching [`Organization`]s.
 	async fn retrieve(
 		connection: &Pool<<Self as Deletable>::Db>,
-		match_condition: &MatchOrganization,
+		match_condition: &MatchRow<MatchOrganization>,
 	) -> Result<Vec<<Self as Deletable>::Entity>>;
 }

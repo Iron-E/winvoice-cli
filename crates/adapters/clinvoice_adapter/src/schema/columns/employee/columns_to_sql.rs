@@ -17,7 +17,6 @@ where
 			.separated(',')
 			.push(self.id)
 			.push(self.name)
-			.push(self.organization_id)
 			.push(self.status)
 			.push(self.title);
 	}
@@ -34,9 +33,6 @@ where
 			.push_unseparated(',')
 			.push_unseparated(self.status)
 			.push(values_columns.status)
-			.push_unseparated(',')
-			.push_unseparated(self.organization_id)
-			.push(values_columns.organization_id)
 			.push_unseparated(',')
 			.push_unseparated(self.title)
 			.push(values_columns.title);

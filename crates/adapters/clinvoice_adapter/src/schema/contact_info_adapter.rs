@@ -1,7 +1,5 @@
-use std::collections::HashMap;
-
-use clinvoice_match::{MatchContact, MatchSet};
-use clinvoice_schema::{Contact, ContactKind, Id};
+use clinvoice_match::{MatchContact, MatchRow};
+use clinvoice_schema::Contact;
 use sqlx::{Executor, Pool, Result};
 
 use crate::{Deletable, Updatable};
@@ -25,9 +23,8 @@ pub trait ContactInfoAdapter:
 	/// The newly created [`Contact`].
 	async fn create(
 		connection: impl 'async_trait + Executor<'_, Database = <Self as Deletable>::Db> + Send,
-		contact_info: Vec<(bool, ContactKind, String)>,
-		employee_id: Id,
-	) -> Result<Vec<Contact>>;
+		contact_info: &[Contact],
+	) -> Result<()>;
 
 	/// # Summary
 	///
@@ -39,6 +36,6 @@ pub trait ContactInfoAdapter:
 	/// * A list of matching [`Contact`]s.
 	async fn retrieve(
 		connection: &Pool<<Self as Deletable>::Db>,
-		match_condition: &MatchSet<MatchContact>,
-	) -> Result<HashMap<Id, Vec<<Self as Deletable>::Entity>>>;
+		match_condition: &MatchRow<MatchContact>,
+	) -> Result<Vec<<Self as Deletable>::Entity>>;
 }

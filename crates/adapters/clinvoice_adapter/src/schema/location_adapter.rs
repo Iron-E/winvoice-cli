@@ -1,4 +1,4 @@
-use clinvoice_match::MatchLocation;
+use clinvoice_match::{MatchLocation, MatchRow};
 use clinvoice_schema::Location;
 use sqlx::{Pool, Result};
 
@@ -36,6 +36,6 @@ pub trait LocationAdapter:
 	/// * A list of matching [`Location`]s.
 	async fn retrieve(
 		connection: &Pool<<Self as Deletable>::Db>,
-		match_condition: &MatchLocation,
+		match_condition: &MatchRow<MatchLocation>,
 	) -> Result<Vec<<Self as Deletable>::Entity>>;
 }

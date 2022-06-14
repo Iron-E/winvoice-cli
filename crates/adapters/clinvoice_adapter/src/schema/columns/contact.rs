@@ -7,10 +7,10 @@ pub struct ContactColumns<T>
 {
 	pub address_id: T,
 	pub email: T,
-	pub export: T,
 	pub label: T,
-	pub organization_id: T,
 	pub phone: T,
+	pub username: T,
+	pub wallet: T,
 }
 
 impl<T> ContactColumns<T>
@@ -26,10 +26,10 @@ impl<T> ContactColumns<T>
 		ContactColumns {
 			address_id: WithIdentifier(ident, self.address_id),
 			email: WithIdentifier(ident, self.email),
-			export: WithIdentifier(ident, self.export),
 			label: WithIdentifier(ident, self.label),
-			organization_id: WithIdentifier(ident, self.organization_id),
 			phone: WithIdentifier(ident, self.phone),
+			username: WithIdentifier(ident, self.username),
+			wallet: WithIdentifier(ident, self.wallet),
 		}
 	}
 
@@ -44,10 +44,10 @@ impl<T> ContactColumns<T>
 		ContactColumns {
 			address_id: TypeCast(self.address_id, cast),
 			email: TypeCast(self.email, cast),
-			export: TypeCast(self.export, cast),
 			label: TypeCast(self.label, cast),
-			organization_id: TypeCast(self.organization_id, cast),
 			phone: TypeCast(self.phone, cast),
+			username: TypeCast(self.username, cast),
+			wallet: TypeCast(self.wallet, cast),
 		}
 	}
 }
@@ -59,10 +59,10 @@ impl ContactColumns<&'static str>
 		Self {
 			address_id: "address_id",
 			email: "email",
-			export: "export",
 			label: "label",
-			organization_id: "organization_id",
 			phone: "phone",
+			username: "username",
+			wallet: "wallet",
 		}
 	}
 }

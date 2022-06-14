@@ -7,7 +7,6 @@ pub struct EmployeeColumns<T>
 {
 	pub id: T,
 	pub name: T,
-	pub organization_id: T,
 	pub status: T,
 	pub title: T,
 }
@@ -25,7 +24,6 @@ impl<T> EmployeeColumns<T>
 		EmployeeColumns {
 			id: WithIdentifier(ident, self.id),
 			name: WithIdentifier(ident, self.name),
-			organization_id: WithIdentifier(ident, self.organization_id),
 			status: WithIdentifier(ident, self.status),
 			title: WithIdentifier(ident, self.title),
 		}
@@ -42,7 +40,6 @@ impl<T> EmployeeColumns<T>
 		EmployeeColumns {
 			id: TypeCast(self.id, cast),
 			name: TypeCast(self.name, cast),
-			organization_id: TypeCast(self.organization_id, cast),
 			status: TypeCast(self.status, cast),
 			title: TypeCast(self.title, cast),
 		}
@@ -56,7 +53,6 @@ impl EmployeeColumns<&'static str>
 		Self {
 			id: "id",
 			name: "name",
-			organization_id: "organization_id",
 			status: "status",
 			title: "title",
 		}

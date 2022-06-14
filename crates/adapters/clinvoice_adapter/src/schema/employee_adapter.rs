@@ -1,5 +1,5 @@
-use clinvoice_match::MatchEmployee;
-use clinvoice_schema::{Employee, Organization};
+use clinvoice_match::{MatchEmployee, MatchRow};
+use clinvoice_schema::Employee;
 use sqlx::{Pool, Result};
 
 use crate::{Deletable, Updatable};
@@ -24,7 +24,6 @@ pub trait EmployeeAdapter:
 	async fn create(
 		connection: &Pool<<Self as Deletable>::Db>,
 		name: String,
-		organization: Organization,
 		status: String,
 		title: String,
 	) -> Result<<Self as Deletable>::Entity>;
@@ -43,6 +42,6 @@ pub trait EmployeeAdapter:
 	/// * An [`Error`], should something go wrong.
 	async fn retrieve(
 		connection: &Pool<<Self as Deletable>::Db>,
-		match_condition: &MatchEmployee,
+		match_condition: &MatchRow<MatchEmployee>,
 	) -> Result<Vec<<Self as Deletable>::Entity>>;
 }

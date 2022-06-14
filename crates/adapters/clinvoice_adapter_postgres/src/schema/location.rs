@@ -1,5 +1,5 @@
 use clinvoice_adapter::{schema::columns::LocationColumns, WriteWhereClause};
-use clinvoice_match::{Match, MatchLocation, MatchOuterLocation};
+use clinvoice_match::{Match, MatchLocation, MatchOuterLocation, MatchRow};
 use clinvoice_schema::{Id, Location};
 use futures::{future, TryFutureExt, TryStreamExt};
 use sqlx::{Error, Executor, Postgres, QueryBuilder, Result, Row};
@@ -16,7 +16,7 @@ impl PgLocation
 {
 	pub(super) async fn retrieve_matching_ids<'a>(
 		connection: impl Executor<'_, Database = Postgres>,
-		match_condition: &MatchLocation,
+		match_condition: &MatchRow<MatchLocation>,
 	) -> Result<Match<Id>>
 	{
 		struct Aliases<'a>
@@ -35,7 +35,7 @@ impl PgLocation
 		fn generate_cte(
 			aliases: Aliases,
 			first: bool,
-			match_condition: &MatchLocation,
+			match_condition: &MatchRow<MatchLocation>,
 			query: &mut QueryBuilder<Postgres>,
 		)
 		{
@@ -100,7 +100,7 @@ impl PgLocation
 
 			match match_condition.outer
 			{
-				MatchOuterLocation::Always | MatchOuterLocation::None =>
+				MatchOuterLocation::Any | MatchOuterLocation::None =>
 				{
 					if !first
 					{
@@ -152,8 +152,7 @@ impl PgLocation
 							{
 								"location_report"
 							},
-						)
-						.push_unseparated(';');
+						);
 				},
 				MatchOuterLocation::Some(ref outer) =>
 				{
@@ -183,6 +182,7 @@ impl PgLocation
 		);
 
 		query
+			.push(';')
 			.build()
 			.fetch(connection)
 			.map_ok(|row| row.get::<Id, _>(COLUMNS.id).into())

@@ -4,6 +4,6 @@ impl Default for MatchOuterLocation
 {
 	fn default() -> Self
 	{
-		Self::Always
+		Self::Any
 	}
 }

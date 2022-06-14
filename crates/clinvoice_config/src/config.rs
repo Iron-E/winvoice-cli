@@ -1,9 +1,8 @@
 use std::{collections::BTreeMap, fs, path::PathBuf};
 
-use crate::{Adapters, Store};
 use serde::{Deserialize, Serialize};
 
-use crate::{Employees, Invoices, StoreValue, Timesheets, Result, Error};
+use crate::{Adapters, Employees, Error, Invoices, Result, Store, StoreValue, Timesheets};
 
 /// # Summary
 ///
@@ -121,10 +120,10 @@ mod tests
 {
 	use core::time::Duration;
 
-	use crate::{Adapters, Store};
 	use clinvoice_schema::{Currency, Id};
 
 	use super::{BTreeMap, Config, Employees, Invoices, StoreValue, Timesheets};
+	use crate::{Adapters, Store};
 
 	#[test]
 	fn get_store()

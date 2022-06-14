@@ -4,6 +4,7 @@ mod default;
 use serde::{Deserialize, Serialize};
 
 use super::MatchLocation;
+use crate::MatchRow;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
@@ -12,7 +13,7 @@ pub enum MatchOuterLocation
 	/// # Summary
 	///
 	/// Always match.
-	Always,
+	Any,
 
 	/// # Summary
 	///
@@ -23,5 +24,5 @@ pub enum MatchOuterLocation
 	///
 	/// Match only when a specific [`outer_id`](clinvoice_schema::Location) resolves to a
 	/// matching [`Location`].
-	Some(Box<MatchLocation>),
+	Some(Box<MatchRow<MatchLocation>>),
 }

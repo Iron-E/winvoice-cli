@@ -5,6 +5,7 @@ use clinvoice_schema::{chrono::NaiveDateTime, Id};
 use serde::{Deserialize, Serialize};
 
 use super::{Match, MatchEmployee, MatchExpense, MatchJob, MatchSet, MatchStr};
+use crate::MatchRow;
 
 /// # Summary
 ///
@@ -17,13 +18,13 @@ pub struct MatchTimesheet
 	pub id: Match<Id>,
 
 	#[cfg_attr(feature = "serde_support", serde(default))]
-	pub employee: MatchEmployee,
+	pub employee: MatchRow<MatchEmployee>,
 
 	#[cfg_attr(feature = "serde_support", serde(default))]
-	pub expenses: MatchSet<MatchExpense>,
+	pub expenses: MatchSet<MatchRow<MatchExpense>>,
 
 	#[cfg_attr(feature = "serde_support", serde(default))]
-	pub job: MatchJob,
+	pub job: MatchRow<MatchJob>,
 
 	#[cfg_attr(feature = "serde_support", serde(default))]
 	pub time_begin: Match<NaiveDateTime>,

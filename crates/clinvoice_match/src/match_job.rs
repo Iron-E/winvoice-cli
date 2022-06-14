@@ -7,6 +7,7 @@ use humantime_serde::Serde;
 use serde::{Deserialize, Serialize};
 
 use super::{Match, MatchInvoice, MatchOrganization, MatchStr};
+use crate::MatchRow;
 
 /// # Summary
 ///
@@ -16,7 +17,7 @@ use super::{Match, MatchInvoice, MatchOrganization, MatchStr};
 pub struct MatchJob
 {
 	#[cfg_attr(feature = "serde_support", serde(default))]
-	pub client: MatchOrganization,
+	pub client: MatchRow<MatchOrganization>,
 
 	#[cfg_attr(feature = "serde_support", serde(default))]
 	pub date_close: Match<Option<NaiveDateTime>>,

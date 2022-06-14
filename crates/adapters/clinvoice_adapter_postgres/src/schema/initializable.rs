@@ -52,7 +52,6 @@ async fn init_employees(connection: impl Executor<'_, Database = Postgres> + Sen
 		(
 			id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
 			name text NOT NULL,
-			organization_id bigint NOT NULL REFERENCES organizations(id),
 			status text NOT NULL,
 			title text NOT NULL
 		);"

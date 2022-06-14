@@ -29,7 +29,7 @@ impl Updatable for PgOrganization
 
 		const COLUMNS: OrganizationColumns<&'static str> = OrganizationColumns::default();
 		PgSchema::update(
-			&mut *connection,
+			connection,
 			COLUMNS,
 			"organizations",
 			"O",
@@ -44,16 +44,52 @@ impl Updatable for PgOrganization
 		)
 		.await?;
 
-		PgLocation::update(connection, entities.map(|e| &e.location)).await
+		PgLocation::update(connection, entities.map(|e| &e.location)).await?;
+
+		Ok(())
 	}
 }
 
 #[cfg(test)]
 mod tests
 {
+	use clinvoice_adapter::schema::{LocationAdapter, OrganizationAdapter};
+	use clinvoice_schema::ContactKind;
+
+	use crate::schema::{util, PgLocation, PgOrganization};
+
 	#[tokio::test]
 	async fn update()
 	{
-		// TODO: write test
+		let connection = util::connect().await;
+
+		let (mut earth, mut mars) = futures::try_join!(
+			PgLocation::create(&connection, "Earth".into(), None),
+			PgLocation::create(&connection, "Mars".into(), None),
+		)
+		.unwrap();
+
+		let (mut organization, mut organization2) = futures::try_join!(
+			PgOrganization::create(
+				&connection,
+				vec![(
+					true,
+					ContactKind::Phone("555-555-5555".into()),
+					"Office Number".into()
+				)],
+				earth.clone(),
+				"Some Organization".into(),
+			),
+			PgOrganization::create(
+				&connection,
+				Vec::new(),
+				earth.clone(),
+				"Some Other Organization".into(),
+			),
+		)
+		.unwrap();
+
+		assert_eq!(organization, organization_db);
+		assert_eq!(organization2, organization2_db);
 	}
 }

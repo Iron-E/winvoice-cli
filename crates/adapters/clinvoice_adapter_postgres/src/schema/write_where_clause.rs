@@ -14,7 +14,6 @@ use clinvoice_adapter::{
 	WriteContext,
 	WriteWhereClause,
 };
-use clinvoice_finance::Decimal;
 use clinvoice_match::{
 	Match,
 	MatchContact,
@@ -23,13 +22,13 @@ use clinvoice_match::{
 	MatchExpense,
 	MatchJob,
 	MatchOrganization,
+	MatchRow,
 	MatchSet,
 	MatchStr,
-	MatchRow,
 	MatchTimesheet,
 };
-use clinvoice_schema::Id;
-use sqlx::{Database, PgPool, Postgres, QueryBuilder, Result};
+use futures::future;
+use sqlx::{Database, Executor, Postgres, QueryBuilder, Result};
 
 use super::{PgLocation, PgSchema};
 use crate::fmt::{PgInterval, PgTimestampTz};
@@ -73,6 +72,12 @@ where
 ///   `[Match::EqualTo(3), Match::LessThan(4)]` is interpreted as `(foo = 3 OR foo < 4)`.
 ///
 /// The rest of the args are the same as [`WriteSql::write_where`].
+///
+/// # Errors
+///
+/// If any the following:
+///
+/// * `ident` is empty.
 fn write_boolean_group<D, Db, I, M, const UNION: bool>(
 	query: &mut QueryBuilder<Db>,
 	context: WriteContext,
@@ -106,9 +111,15 @@ fn write_boolean_group<D, Db, I, M, const UNION: bool>(
 ///
 /// The rest of the args are the same as [`WriteSql::write_where`].
 ///
+/// # Errors
+///
+/// If any the following:
+///
+/// * `ident` is empty.
+///
 /// # Warnings
 ///
-/// Does not guard against SQL injection.
+/// * Does not guard against SQL injection.
 fn write_comparison<Db>(
 	query: &mut QueryBuilder<Db>,
 	context: WriteContext,
@@ -132,9 +143,11 @@ fn write_comparison<Db>(
 ///
 /// The rest of the args are the same as [`WriteSql::write_where`].
 ///
-/// # Warnings
+/// # Errors
 ///
-/// Does not guard against SQL injection.
+/// If any the following:
+///
+/// * `ident` is empty.
 fn write_is_null<Db>(
 	query: &mut QueryBuilder<Db>,
 	context: WriteContext,
@@ -149,11 +162,11 @@ fn write_is_null<Db>(
 		.push("IS null");
 }
 
-/// # Warnings
+/// # Summary
 ///
-/// Does not guard against SQL injection.
+/// An implementation of [`WriteWhereClause`] for [`MatchRow<T>`]
 ///
-/// # Panics
+/// # Errors
 ///
 /// If any the following:
 ///
@@ -162,127 +175,81 @@ fn write_is_null<Db>(
 /// # See
 ///
 /// * [`WriteWhereClause::write_where_clause`]
+///       possible.
 #[async_recursion]
-pub(super) async fn write_match_contact_set<A>(
-	connection: &PgPool,
+pub(super) async fn write_match_contact_row<'a, D, E>(
+	connection: E,
 	context: WriteContext,
-	ident: A,
-	match_condition: &MatchSet<MatchContact>,
-	query: &mut QueryBuilder<Postgres>,
+	ident: D,
+	match_condition: &MatchRow<MatchContact>,
+	query: &mut QueryBuilder<'_, Postgres>,
 ) -> Result<WriteContext>
 where
-	A: Copy + Display + Send,
+	D: Copy + Display + Send + Sync,
+	E: Executor<'a, Database = Postgres>,
 {
 	match match_condition
 	{
-		MatchSet::Any => return Ok(context),
-
-		MatchSet::And(conditions) | MatchSet::Or(conditions) =>
+		MatchRow::And(conditions) | MatchRow::Or(conditions) =>
 		{
 			write_context_scope_start::<_, false>(query, context);
 
-			let iter = &mut conditions.iter().filter(|m| *m != &MatchSet::Any);
-			if let Some(c) = iter.next()
+			if let Some(c) = conditions.first()
 			{
-				write_match_contact_set(connection, WriteContext::InWhereCondition, ident, c, query)
+				write_match_contact_row(connection, WriteContext::InWhereCondition, ident, c, query)
 					.await?;
 			}
 
 			let separator = match match_condition
 			{
-				MatchSet::And(_) => " AND",
+				MatchRow::And(_) => " AND",
 				_ => " OR",
 			};
 
-			for c in conditions
-			{
+			future::try_join_all(conditions.iter().skip(1).map(|c| {
 				query.push(separator);
-				write_match_contact_set(connection, WriteContext::InWhereCondition, ident, c, query)
-					.await?;
-			}
+				write_match_contact_row(connection, WriteContext::InWhereCondition, ident, c, query)
+			}))
+			.await?;
 
 			write_context_scope_end(query);
 		},
 
-		MatchSet::Contains(match_contact) =>
+		MatchRow::EqualTo(condition) =>
 		{
-			const COLUMNS: ContactColumns<&'static str> = ContactColumns::default();
-
-			let subquery_ident = format!("{ident}_2");
-			let subquery_ident_columns = COLUMNS.scoped(&subquery_ident);
-
-			query
-				.separated(' ')
-				.push(context)
-				.push("EXISTS (SELECT FROM contact_information")
-				.push(&subquery_ident)
-				.push("WHERE")
-				.push(subquery_ident_columns.organization_id)
-				.push_unseparated('=')
-				.push_unseparated(COLUMNS.scoped(ident).organization_id);
-
-			let ctx = PgSchema::write_where_clause(
-				PgSchema::write_where_clause(
-					PgSchema::write_where_clause(
-						WriteContext::AcceptingAnotherWhereCondition,
-						subquery_ident_columns.export,
-						&match_contact.export,
-						query,
-					),
-					subquery_ident_columns.label,
-					&match_contact.label,
-					query,
-				),
-				subquery_ident_columns.organization_id,
-				&match_contact.organization_id,
-				query,
-			);
-
-			match match_contact.kind
+			if condition.ne(&Default::default())
 			{
-				MatchContactKind::Always => (),
+				write_context_scope_start::<_, false>(query, context);
 
-				MatchContactKind::SomeAddress(ref location) =>
-				{
-					let location_id_query =
-						PgLocation::retrieve_matching_ids(connection, location).await?;
+				let columns = ContactColumns::default().scoped(ident);
+				write_match_contact_kind_row(
+					connection,
+					PgSchema::write_where_clause(context, columns.label, &condition.label, &mut query),
+					columns,
+					&condition.kind,
+					&mut query,
+				)
+				.await?;
 
-					PgSchema::write_where_clause(
-						ctx,
-						subquery_ident_columns.address_id,
-						&location_id_query,
-						query,
-					);
-				},
-
-				MatchContactKind::SomeEmail(ref email_address) =>
-				{
-					PgSchema::write_where_clause(
-						ctx,
-						subquery_ident_columns.email,
-						email_address,
-						query,
-					);
-				},
-
-				MatchContactKind::SomePhone(ref phone_number) =>
-				{
-					PgSchema::write_where_clause(ctx, subquery_ident_columns.phone, phone_number, query);
-				},
-			};
-
-			query.push(')');
+				write_context_scope_end(query);
+			}
 		},
 
-		MatchSet::Not(condition) => match condition.deref()
+		MatchRow::Not(condition) => match condition.deref()
 		{
-			m if m.deref() == &Default::default() => write_is_null(query, context, ident),
+			m if m.eq(&Default::default()) => (),
 			m =>
 			{
 				write_context_scope_start::<_, true>(query, context);
 
-				write_match_contact_set(connection, WriteContext::InWhereCondition, ident, m, query)
-					.await?;
+				write_match_contact_row(
+					connection,
+					WriteContext::InWhereCondition,
+					ident,
+					condition,
+					query,
+				)
+				.await?;
 
 				write_context_scope_end(query);
 			},
@@ -294,62 +261,148 @@ where
 
 /// # Summary
 ///
-/// A blanket implementation of [`WriteWhereClause`] for [`Match`].
+/// An implementation of [`WriteWhereClause`] for [`MatchRow<T>`]
 ///
-/// Requires access to something else that has already implemented [`WriteWhereClause`] for
-/// [`PgSchema`], so that methods like [`write_boolean_group`] can be abstracted away from _this_
-/// implementation.
+/// # Errors
 ///
-/// # Warnings
+/// If any the following:
 ///
-/// Does not guard against SQL injection.
-fn write_match<Db, T>(
+/// * `ident` is empty.
+///
+/// # See
+///
+/// * [`WriteWhereClause::write_where_clause`]
+///       possible.
+#[async_recursion]
+pub(super) async fn write_match_contact_kind_row<'a, D, E>(
+	connection: E,
 	context: WriteContext,
-	ident: impl Copy + Display,
-	match_condition: &Match<T>,
-	query: &mut QueryBuilder<Db>,
-) -> WriteContext
+	columns: ContactColumns<D>,
+	match_condition: &MatchRow<MatchContactKind>,
+	query: &mut QueryBuilder<'_, Postgres>,
+) -> Result<WriteContext>
 where
-	Db: Database,
-	T: Display + PartialEq,
-	for<'a> PgSchema: WriteWhereClause<Db, &'a Match<T>>,
+	D: Copy + Display + Send + Sync,
+	E: Executor<'a, Database = Postgres>,
 {
 	match match_condition
 	{
-		Match::And(conditions) => write_boolean_group::<_, _, _, _, true>(
-			query,
-			context,
-			ident,
-			&mut conditions.iter().filter(|m| *m != &Match::Any),
-		),
-		Match::Any => return context,
-		Match::EqualTo(value) => write_comparison(query, context, ident, "=", value),
-		Match::GreaterThan(value) => write_comparison(query, context, ident, ">", value),
-		Match::InRange(low, high) =>
+		MatchRow::And(conditions) | MatchRow::Or(conditions) =>
 		{
-			write_comparison(query, context, ident, "BETWEEN", low);
-			write_comparison(query, WriteContext::InWhereCondition, "", "AND", high);
+			write_context_scope_start::<_, false>(query, context);
+
+			if let Some(c) = conditions.first()
+			{
+				write_match_contact_kind_row(
+					connection,
+					WriteContext::InWhereCondition,
+					columns,
+					c,
+					query,
+				)
+				.await?;
+			}
+
+			let separator = match match_condition
+			{
+				MatchRow::And(_) => " AND",
+				_ => " OR",
+			};
+
+			future::try_join_all(conditions.iter().skip(1).map(|c| {
+				query.push(separator);
+				write_match_contact_kind_row(
+					connection,
+					WriteContext::InWhereCondition,
+					columns,
+					c,
+					query,
+				)
+			}))
+			.await?;
+
+			write_context_scope_end(query);
 		},
-		Match::LessThan(value) => write_comparison(query, context, ident, "<", value),
-		Match::Not(condition) => match condition.deref()
+
+		MatchRow::EqualTo(condition) =>
 		{
-			Match::Any => write_is_null(query, context, ident),
-			m => write_negated(query, context, ident, m),
+			if condition.ne(&Default::default())
+			{
+				write_context_scope_start::<_, false>(query, context);
+
+				match condition
+				{
+					MatchContactKind::Any => unreachable!(
+						"The program should have already made sure that if the condition was `Any` it \
+						 would not make it to this stage of SQL generation."
+					),
+					MatchContactKind::SomeAddress(condition) =>
+					{
+						PgSchema::write_where_clause(
+							context,
+							columns.address_id,
+							&PgLocation::retrieve_matching_ids(connection, condition).await?,
+							&mut query,
+						);
+					},
+					MatchContactKind::SomeEmail(condition) =>
+					{
+						PgSchema::write_where_clause(context, columns.email, condition, &mut query);
+					},
+					MatchContactKind::SomePhone(condition) =>
+					{
+						PgSchema::write_where_clause(context, columns.phone, condition, &mut query);
+					},
+					MatchContactKind::SomeUsername(condition) =>
+					{
+						PgSchema::write_where_clause(context, columns.username, condition, &mut query);
+					},
+					MatchContactKind::SomeWallet(condition) =>
+					{
+						PgSchema::write_where_clause(context, columns.wallet, condition, &mut query);
+					},
+				};
+
+				write_context_scope_end(query);
+			}
 		},
-		Match::Or(conditions) => write_boolean_group::<_, _, _, _, false>(
-			query,
-			context,
-			ident,
-			&mut conditions.iter().filter(|m| *m != &Match::Any),
-		),
+
+		MatchRow::Not(condition) => match condition.deref()
+		{
+			m if m.eq(&Default::default()) => (),
+			m =>
+			{
+				write_context_scope_start::<_, true>(query, context);
+				write_match_contact_kind_row(
+					connection,
+					WriteContext::InWhereCondition,
+					columns,
+					condition,
+					query,
+				)
+				.await?;
+				write_context_scope_end(query);
+			},
+		},
 	};
-	WriteContext::AcceptingAnotherWhereCondition
+
+	Ok(WriteContext::AcceptingAnotherWhereCondition)
 }
 
 /// # Summary
 ///
-/// A blanket implementation of [`WriteWhereClause`] for a [`MatchRow`] of another match
-/// structure (e.g. [`MatchRow<MatchJob>`]).
+/// A generic implementation of [`WriteWhereClause`] for [`MatchRow<T>`]
+///
+/// # Errors
+///
+/// If any the following:
+///
+/// * `ident` is empty.
+///
+/// # See
+///
+/// * [`WriteWhereClause::write_where_clause`]
+///       possible.
 fn write_match_row<Db, M>(
 	context: WriteContext,
 	ident: impl Copy + Display,
@@ -398,15 +451,15 @@ where
 			}
 		},
 
-		MatchRow::Not(condition) =>
+		MatchRow::Not(condition) => match condition.deref()
 		{
-			let m = condition.deref();
-			if m.ne(&Default::default())
+			m if m.eq(&Default::default()) => (),
+			m =>
 			{
 				write_context_scope_start::<_, true>(query, context);
 				PgSchema::write_where_clause(context, ident, m, query);
 				write_context_scope_end(query);
-			}
+			},
 		},
 	};
 
@@ -443,83 +496,61 @@ fn write_negated<Db, M>(
 	write_context_scope_end(query);
 }
 
-impl WriteWhereClause<Postgres, &Match<bool>> for PgSchema
-{
-	fn write_where_clause(
-		context: WriteContext,
-		ident: impl Copy + Display,
-		match_condition: &Match<bool>,
-		query: &mut QueryBuilder<Postgres>,
-	) -> WriteContext
-	{
-		write_match(context, ident, match_condition, query)
-	}
-}
-
-impl WriteWhereClause<Postgres, &Match<Decimal>> for PgSchema
-{
-	fn write_where_clause(
-		context: WriteContext,
-		ident: impl Copy + Display,
-		match_condition: &Match<Decimal>,
-		query: &mut QueryBuilder<Postgres>,
-	) -> WriteContext
-	{
-		write_match(context, ident, match_condition, query)
-	}
-}
-
-impl WriteWhereClause<Postgres, &Match<Id>> for PgSchema
-{
-	fn write_where_clause(
-		context: WriteContext,
-		ident: impl Copy + Display,
-		match_condition: &Match<Id>,
-		query: &mut QueryBuilder<Postgres>,
-	) -> WriteContext
-	{
-		write_match(context, ident, match_condition, query)
-	}
-}
-
-impl WriteWhereClause<Postgres, &Match<PgInterval>> for PgSchema
-{
-	fn write_where_clause(
-		context: WriteContext,
-		ident: impl Copy + Display,
-		match_condition: &Match<PgInterval>,
-		query: &mut QueryBuilder<Postgres>,
-	) -> WriteContext
-	{
-		write_match(context, ident, match_condition, query)
-	}
-}
-
-impl<T> WriteWhereClause<Postgres, &Match<Nullable<T>>> for PgSchema
+impl<T> WriteWhereClause<Postgres, &Match<T>> for PgSchema
 where
 	T: Display + PartialEq,
 {
+	/// # Errors
+	///
+	/// If any the following:
+	///
+	/// * [`ident.to_string()`](ToString::to_string) returns an [empty string](String::is_empty).
+	///
+	/// # See
+	///
+	/// * [`WriteWhereClause::write_where_clause`]
+	///
+	/// # Warnings
+	///
+	/// * Does not guard against SQL injection.
 	fn write_where_clause(
 		context: WriteContext,
 		ident: impl Copy + Display,
-		match_condition: &Match<Nullable<T>>,
+		match_condition: &Match<T>,
 		query: &mut QueryBuilder<Postgres>,
 	) -> WriteContext
 	{
-		write_match(context, ident, match_condition, query)
-	}
-}
+		match match_condition
+		{
+			Match::And(conditions) => write_boolean_group::<_, _, _, _, true>(
+				query,
+				context,
+				ident,
+				&mut conditions.iter().filter(|m| *m != &Match::Any),
+			),
+			Match::Any => return context,
+			Match::EqualTo(value) => write_comparison(query, context, ident, "=", value),
+			Match::GreaterThan(value) => write_comparison(query, context, ident, ">", value),
+			Match::InRange(low, high) =>
+			{
+				write_comparison(query, context, ident, "BETWEEN", low);
+				write_comparison(query, WriteContext::InWhereCondition, "", "AND", high);
+			},
+			Match::LessThan(value) => write_comparison(query, context, ident, "<", value),
+			Match::Not(condition) => match condition.deref()
+			{
+				Match::Any => write_is_null(query, context, ident),
+				m => write_negated(query, context, ident, m),
+			},
+			Match::Or(conditions) => write_boolean_group::<_, _, _, _, false>(
+				query,
+				context,
+				ident,
+				&mut conditions.iter().filter(|m| *m != &Match::Any),
+			),
+		};
 
-impl WriteWhereClause<Postgres, &Match<PgTimestampTz>> for PgSchema
-{
-	fn write_where_clause(
-		context: WriteContext,
-		ident: impl Copy + Display,
-		match_condition: &Match<PgTimestampTz>,
-		query: &mut QueryBuilder<Postgres>,
-	) -> WriteContext
-	{
-		write_match(context, ident, match_condition, query)
+		WriteContext::AcceptingAnotherWhereCondition
 	}
 }
 
@@ -529,6 +560,19 @@ impl WriteWhereClause<Postgres, &MatchRow<MatchEmployee>> for PgSchema
 		context: WriteContext,
 		ident: impl Copy + Display,
 		match_condition: &MatchRow<MatchEmployee>,
+		query: &mut QueryBuilder<Postgres>,
+	) -> WriteContext
+	{
+		write_match_row(context, ident, match_condition, query)
+	}
+}
+
+impl WriteWhereClause<Postgres, &MatchRow<MatchExpense>> for PgSchema
+{
+	fn write_where_clause(
+		context: WriteContext,
+		ident: impl Copy + Display,
+		match_condition: &MatchRow<MatchExpense>,
 		query: &mut QueryBuilder<Postgres>,
 	) -> WriteContext
 	{
@@ -575,12 +619,12 @@ impl WriteWhereClause<Postgres, &MatchRow<MatchTimesheet>> for PgSchema
 	}
 }
 
-impl WriteWhereClause<Postgres, &MatchSet<MatchExpense>> for PgSchema
+impl WriteWhereClause<Postgres, &MatchSet<MatchRow<MatchExpense>>> for PgSchema
 {
 	fn write_where_clause(
 		context: WriteContext,
 		ident: impl Copy + Display,
-		match_condition: &MatchSet<MatchExpense>,
+		match_condition: &MatchSet<MatchRow<MatchExpense>>,
 		query: &mut QueryBuilder<Postgres>,
 	) -> WriteContext
 	{

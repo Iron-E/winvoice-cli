@@ -23,9 +23,9 @@ use clinvoice_match::{
 	MatchExpense,
 	MatchJob,
 	MatchOrganization,
-	MatchRow,
 	MatchSet,
 	MatchStr,
+	MatchRow,
 	MatchTimesheet,
 };
 use clinvoice_schema::Id;

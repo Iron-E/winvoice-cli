@@ -3,7 +3,6 @@ use clinvoice_schema::Id;
 use serde::{Deserialize, Serialize};
 
 use super::{Match, MatchLocation, MatchStr};
-use crate::MatchRow;
 
 /// # Summary
 ///
@@ -16,7 +15,7 @@ pub struct MatchOrganization
 	pub id: Match<Id>,
 
 	#[cfg_attr(feature = "serde_support", serde(default))]
-	pub location: MatchRow<MatchLocation>,
+	pub location: MatchLocation,
 
 	#[cfg_attr(feature = "serde_support", serde(default))]
 	pub name: MatchStr<String>,

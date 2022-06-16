@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use clinvoice_match::{MatchExpense, MatchRow, MatchSet};
+use clinvoice_match::{MatchExpense, MatchSet};
 use clinvoice_schema::{Expense, Id, Money};
 use sqlx::{Executor, Pool, Result};
 
@@ -40,6 +40,6 @@ pub trait ExpensesAdapter:
 	///   respective [`Expense`]s.
 	async fn retrieve(
 		connection: &Pool<<Self as Deletable>::Db>,
-		match_condition: &MatchSet<MatchRow<MatchExpense>>,
+		match_condition: &MatchSet<MatchExpense>,
 	) -> Result<HashMap<Id, Vec<<Self as Deletable>::Entity>>>;
 }

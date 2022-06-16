@@ -1,4 +1,4 @@
-use clinvoice_match::{MatchContact, MatchRow};
+use clinvoice_match::MatchContact;
 use clinvoice_schema::Contact;
 use sqlx::{Executor, Pool, Result};
 
@@ -36,6 +36,6 @@ pub trait ContactInfoAdapter:
 	/// * A list of matching [`Contact`]s.
 	async fn retrieve(
 		connection: &Pool<<Self as Deletable>::Db>,
-		match_condition: &MatchRow<MatchContact>,
+		match_condition: &MatchContact,
 	) -> Result<Vec<<Self as Deletable>::Entity>>;
 }

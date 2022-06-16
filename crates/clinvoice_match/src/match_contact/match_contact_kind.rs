@@ -4,7 +4,7 @@ mod default;
 use serde::{Deserialize, Serialize};
 
 use super::MatchStr;
-use crate::{MatchLocation, MatchRow};
+use crate::MatchLocation;
 
 /// # Summary
 ///
@@ -17,7 +17,7 @@ pub enum MatchContactKind
 	Any,
 
 	/// Same as [`ContactKind::Address`](clinvoice_schema::ContactKind::Address).
-	SomeAddress(#[cfg_attr(feature = "serde_support", serde(default))] MatchRow<MatchLocation>),
+	SomeAddress(#[cfg_attr(feature = "serde_support", serde(default))] MatchLocation),
 
 	/// Same as [`ContactKind::Email`](clinvoice_schema::ContactKind::Email).
 	SomeEmail(#[cfg_attr(feature = "serde_support", serde(default))] MatchStr<String>),

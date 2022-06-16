@@ -4,7 +4,7 @@ pub use match_contact_kind::MatchContactKind;
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 
-use super::{MatchRow, MatchStr};
+use super::MatchStr;
 
 /// # Summary
 ///
@@ -14,7 +14,7 @@ use super::{MatchRow, MatchStr};
 pub struct MatchContact
 {
 	#[cfg_attr(feature = "serde_support", serde(default))]
-	pub kind: MatchRow<MatchContactKind>,
+	pub kind: MatchContactKind,
 
 	#[cfg_attr(feature = "serde_support", serde(default))]
 	pub label: MatchStr<String>,

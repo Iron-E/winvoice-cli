@@ -1,4 +1,4 @@
-use clinvoice_match::{MatchOrganization, MatchRow};
+use clinvoice_match::MatchOrganization;
 use clinvoice_schema::{Location, Organization};
 use sqlx::{Pool, Result};
 
@@ -36,6 +36,6 @@ pub trait OrganizationAdapter:
 	/// * A list of matching [`Organization`]s.
 	async fn retrieve(
 		connection: &Pool<<Self as Deletable>::Db>,
-		match_condition: &MatchRow<MatchOrganization>,
+		match_condition: &MatchOrganization,
 	) -> Result<Vec<<Self as Deletable>::Entity>>;
 }

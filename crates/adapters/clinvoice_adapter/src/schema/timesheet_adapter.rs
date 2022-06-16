@@ -1,4 +1,4 @@
-use clinvoice_match::{MatchRow, MatchTimesheet};
+use clinvoice_match::MatchTimesheet;
 use clinvoice_schema::{
 	chrono::{DateTime, Utc},
 	Employee,
@@ -45,6 +45,6 @@ pub trait TimesheetAdapter:
 	/// * A list of matching [`Timesheet`]s.
 	async fn retrieve(
 		connection: &Pool<<Self as Deletable>::Db>,
-		match_condition: &MatchRow<MatchTimesheet>,
+		match_condition: &MatchTimesheet,
 	) -> Result<Vec<<Self as Deletable>::Entity>>;
 }

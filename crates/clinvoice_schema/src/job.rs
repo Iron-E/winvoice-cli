@@ -294,28 +294,31 @@ mod tests
 				outer: Some(
 					Location {
 						id: 1,
-						outer: Some(
-							Location {
-								id: 2,
-								outer: Some(
-									Location {
-										id: 3,
-										outer: Some(
+						outer:
+							Some(
+								Location {
+									id: 2,
+									outer:
+										Some(
 											Location {
-												id: 4,
-												outer: None,
-												name: "Earth".into(),
+												id: 3,
+												outer:
+													Some(
+														Location {
+															id: 4,
+															outer: None,
+															name: "Earth".into(),
+														}
+														.into(),
+													),
+												name: "USA".into(),
 											}
 											.into(),
 										),
-										name: "USA".into(),
-									}
-									.into(),
-								),
-								name: "Arizona".into(),
-							}
-							.into(),
-						),
+									name: "Arizona".into(),
+								}
+								.into(),
+							),
 						name: "Phoenix".into(),
 					}
 					.into(),

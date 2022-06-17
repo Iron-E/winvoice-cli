@@ -344,7 +344,7 @@ mod tests
 				label: "primary phone".into(),
 			},
 			Contact {
-				kind: ContactKind::Username("TestyCo".into()),
+				kind: ContactKind::Other("TestyCo".into()),
 				label: "twitter".into(),
 			},
 		];

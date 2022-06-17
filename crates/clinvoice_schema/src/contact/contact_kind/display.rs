@@ -9,7 +9,7 @@ impl Display for ContactKind
 		match self
 		{
 			Self::Address(ref location) => location.fmt(formatter),
-			Self::Email(ref s) | Self::Phone(ref s) | Self::Username(ref s) | Self::Wallet(ref s) =>
+			Self::Email(ref s) | Self::Other(ref s) | Self::Phone(ref s) =>
 			{
 				s.fmt(formatter)
 			},

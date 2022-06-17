@@ -72,22 +72,38 @@ async fn init_contact_info(connection: impl Executor<'_, Database = Postgres>) -
 
 			address_id bigint REFERENCES locations(id),
 			email text CHECK (email ~ '^.*@.*\..*$'),
+			other text,
 			phone text CHECK (phone ~ '^[0-9\- ]+$'),
-			username text,
-			wallet text,
 
 			CONSTRAINT contact_information__is_variant CHECK
 			(
-				-- ContactKind::Address
-				(address_id IS NOT null AND email IS null AND phone IS null AND username IS null AND wallet IS null) OR
-				-- ContactKind::Email
-				(address_id IS null AND email IS NOT null AND phone IS null AND username IS null AND wallet IS null) OR
-				-- ContactKind::Phone
-				(address_id IS null AND email IS null AND phone IS NOT null AND username IS null AND wallet IS null) OR
-				-- ContactKind::Username
-				(address_id IS null AND email IS null AND phone IS null AND username IS NOT null AND wallet IS null) OR
-				-- ContactKind::Wallet
-				(address_id IS null AND email IS null AND phone IS null AND username IS null AND wallet IS NOT null)
+				( -- ContactKind::Address
+					address_id IS NOT null AND
+					email IS null AND
+					other IS null AND
+					phone IS null
+				)
+				OR
+				( -- ContactKind::Email
+					address_id IS null AND
+					email IS NOT null AND
+					other IS null AND
+					phone IS null
+				)
+				OR
+				( -- ContactKind::Other
+					address_id IS null AND
+					email IS null AND
+					other IS NOT null AND
+					phone IS null
+				)
+				OR
+				( -- ContactKind::Phone
+					address_id IS null AND
+					email IS null AND
+					other IS null AND
+					phone IS NOT null
+				)
 			)
 		);"#
 	)

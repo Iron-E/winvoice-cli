@@ -29,6 +29,18 @@ pub enum ContactKind
 
 	/// # Summary
 	///
+	/// Any other kind of contact information.
+	///
+	/// # Examples
+	///
+	/// * A username for a social media platform (e.g. [Twitter](https://www.twitter.com)) or
+	///   monetary transfer service (e.g. [PayPal](https://www.paypal.com)).
+	/// * A bank account number.
+	/// * A crypto wallet.
+	Other(String),
+
+	/// # Summary
+	///
 	/// A phone number.
 	///
 	/// # Example
@@ -45,17 +57,6 @@ pub enum ContactKind
 	/// * '603-555-1234'
 	/// * '6035551234'
 	Phone(String),
-
-	/// # Summary
-	///
-	/// A username for a social media platform (e.g. [Twitter](https://www.twitter.com)) or
-	/// monetary transfer service (e.g. [PayPal](https://www.paypal.com)).
-	Username(String),
-
-	/// # Summary
-	///
-	/// A bank account or crypto wallet number.
-	Wallet(String),
 }
 
 impl ContactKind
@@ -98,24 +99,12 @@ impl ContactKind
 
 	/// # Summary
 	///
-	/// If this is a [`ContactKind::Username`] this function will return as [`Some`]. Otherwise, it will return [`None`].
-	pub fn username(&self) -> Option<&str>
+	/// If this is a [`ContactKind::Other`] this function will return as [`Some`]. Otherwise, it will return [`None`].
+	pub fn other(&self) -> Option<&str>
 	{
 		match self
 		{
-			Self::Username(u) => Some(&u),
-			_ => None,
-		}
-	}
-
-	/// # Summary
-	///
-	/// If this is a [`ContactKind::Wallet`] this function will return as [`Some`]. Otherwise, it will return [`None`].
-	pub fn wallet(&self) -> Option<&str>
-	{
-		match self
-		{
-			Self::Wallet(w) => Some(&w),
+			Self::Other(o) => Some(&o),
 			_ => None,
 		}
 	}

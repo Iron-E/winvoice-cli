@@ -8,9 +8,8 @@ pub struct ContactColumns<T>
 	pub address_id: T,
 	pub email: T,
 	pub label: T,
+	pub other: T,
 	pub phone: T,
-	pub username: T,
-	pub wallet: T,
 }
 
 impl<T> ContactColumns<T>
@@ -27,9 +26,8 @@ impl<T> ContactColumns<T>
 			address_id: WithIdentifier(ident, self.address_id),
 			email: WithIdentifier(ident, self.email),
 			label: WithIdentifier(ident, self.label),
+			other: WithIdentifier(ident, self.other),
 			phone: WithIdentifier(ident, self.phone),
-			username: WithIdentifier(ident, self.username),
-			wallet: WithIdentifier(ident, self.wallet),
 		}
 	}
 
@@ -45,9 +43,8 @@ impl<T> ContactColumns<T>
 			address_id: TypeCast(self.address_id, cast),
 			email: TypeCast(self.email, cast),
 			label: TypeCast(self.label, cast),
+			other: TypeCast(self.other, cast),
 			phone: TypeCast(self.phone, cast),
-			username: TypeCast(self.username, cast),
-			wallet: TypeCast(self.wallet, cast),
 		}
 	}
 }
@@ -60,9 +57,8 @@ impl ContactColumns<&'static str>
 			address_id: "address_id",
 			email: "email",
 			label: "label",
+			other: "other",
 			phone: "phone",
-			username: "username",
-			wallet: "wallet",
 		}
 	}
 }

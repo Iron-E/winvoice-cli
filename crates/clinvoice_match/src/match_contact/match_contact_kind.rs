@@ -17,17 +17,14 @@ pub enum MatchContactKind
 	Any,
 
 	/// Same as [`ContactKind::Address`](clinvoice_schema::ContactKind::Address).
-	SomeAddress(#[cfg_attr(feature = "serde_support", serde(default))] MatchLocation),
+	Address(#[cfg_attr(feature = "serde_support", serde(default))] MatchLocation),
 
 	/// Same as [`ContactKind::Email`](clinvoice_schema::ContactKind::Email).
-	SomeEmail(#[cfg_attr(feature = "serde_support", serde(default))] MatchStr<String>),
+	Email(#[cfg_attr(feature = "serde_support", serde(default))] MatchStr<String>),
+
+	/// Same as [`ContactKind::Other`](clinvoice_schema::ContactKind::Other).
+	Other(#[cfg_attr(feature = "serde_support", serde(default))] MatchStr<String>),
 
 	/// Same as [`ContactKind::Phone`](clinvoice_schema::ContactKind::Phone).
-	SomePhone(#[cfg_attr(feature = "serde_support", serde(default))] MatchStr<String>),
-
-	/// Same as [`ContactKind::Username`](clinvoice_schema::ContactKind::Username).
-	SomeUsername(#[cfg_attr(feature = "serde_support", serde(default))] MatchStr<String>),
-
-	/// Same as [`ContactKind::Wallet`](clinvoice_schema::ContactKind::Wallet).
-	SomeWallet(#[cfg_attr(feature = "serde_support", serde(default))] MatchStr<String>),
+	Phone(#[cfg_attr(feature = "serde_support", serde(default))] MatchStr<String>),
 }

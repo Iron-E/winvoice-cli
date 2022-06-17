@@ -26,8 +26,8 @@ use clinvoice_match::{
 	MatchStr,
 	MatchTimesheet,
 };
-use futures::future;
-use sqlx::{Database, Executor, Postgres, QueryBuilder, Result};
+use futures::{stream, TryStreamExt, TryFutureExt};
+use sqlx::{Database, Postgres, QueryBuilder, Result, PgPool};
 
 use super::{PgLocation, PgSchema};
 use crate::fmt::{PgInterval, PgTimestampTz};
@@ -183,7 +183,7 @@ pub(super) async fn write_match_contact_set<A>(
 	query: &mut QueryBuilder<Postgres>,
 ) -> Result<WriteContext>
 where
-	A: Copy + Display + Send,
+	A: Copy + Display + Send + Sync,
 {
 	match match_condition
 	{
@@ -196,7 +196,7 @@ where
 			let iter = &mut conditions.iter().filter(|m| *m != &MatchSet::Any);
 			if let Some(c) = iter.next()
 			{
-				write_contact_set_where_clause(
+				write_match_contact_set(
 					connection,
 					WriteContext::InWhereCondition,
 					ident,
@@ -212,17 +212,16 @@ where
 				_ => " OR",
 			};
 
-			future::join_all(conditions.iter().for_each(|c| {
+			stream::iter(conditions.iter().map(Ok)).try_for_each(|c| {
 				query.push(separator);
-				write_contact_set_where_clause(
+				write_match_contact_set(
 					connection,
 					WriteContext::InWhereCondition,
 					ident,
 					c,
 					query,
-				)
-			}))
-			.await?;
+				).map_ok(|_| ())
+			}).await?;
 
 			write_context_scope_end(query);
 		},
@@ -240,32 +239,22 @@ where
 				.push("EXISTS (SELECT FROM contact_information")
 				.push(&subquery_ident)
 				.push("WHERE")
-				.push(subquery_ident_columns.organization_id)
+				.push(subquery_ident_columns.label)
 				.push_unseparated('=')
-				.push_unseparated(COLUMNS.scoped(ident).organization_id);
+				.push_unseparated(COLUMNS.scoped(ident).label);
 
 			let ctx = PgSchema::write_where_clause(
-				PgSchema::write_where_clause(
-					PgSchema::write_where_clause(
-						WriteContext::AcceptingAnotherWhereCondition,
-						subquery_ident_columns.export,
-						&match_contact.export,
-						query,
-					),
-					subquery_ident_columns.label,
-					&match_contact.label,
-					query,
-				),
-				subquery_ident_columns.organization_id,
-				&match_contact.organization_id,
+				WriteContext::AcceptingAnotherWhereCondition,
+				subquery_ident_columns.label,
+				&match_contact.label,
 				query,
 			);
 
 			match match_contact.kind
 			{
-				MatchContactKind::Always => (),
+				MatchContactKind::Any => (),
 
-				MatchContactKind::SomeAddress(ref location) =>
+				MatchContactKind::Address(ref location) =>
 				{
 					let location_id_query =
 						PgLocation::retrieve_matching_ids(connection, location).await?;
@@ -278,7 +267,7 @@ where
 					);
 				},
 
-				MatchContactKind::SomeEmail(ref email_address) =>
+				MatchContactKind::Email(ref email_address) =>
 				{
 					PgSchema::write_where_clause(
 						ctx,
@@ -288,7 +277,12 @@ where
 					);
 				},
 
-				MatchContactKind::SomePhone(ref phone_number) =>
+				MatchContactKind::Other(ref other) =>
+				{
+					PgSchema::write_where_clause(ctx, subquery_ident_columns.other, other, query);
+				},
+
+				MatchContactKind::Phone(ref phone_number) =>
 				{
 					PgSchema::write_where_clause(ctx, subquery_ident_columns.phone, phone_number, query);
 				},
@@ -304,7 +298,7 @@ where
 			{
 				write_context_scope_start::<_, true>(query, context);
 
-				write_contact_set_where_clause(
+				write_match_contact_set(
 					connection,
 					WriteContext::InWhereCondition,
 					ident,

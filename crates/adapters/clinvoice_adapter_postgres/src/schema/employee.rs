@@ -1,5 +1,5 @@
 use clinvoice_adapter::schema::columns::EmployeeColumns;
-use clinvoice_schema::{Employee, Organization};
+use clinvoice_schema::Employee;
 use sqlx::{postgres::PgRow, Row};
 
 mod deletable;
@@ -12,16 +12,11 @@ pub struct PgEmployee;
 
 impl PgEmployee
 {
-	pub(in crate::schema) fn row_to_view(
-		columns: EmployeeColumns<&str>,
-		row: &PgRow,
-		organization: Organization,
-	) -> Employee
+	pub(super) fn row_to_view(columns: EmployeeColumns<&str>, row: &PgRow) -> Employee
 	{
 		Employee {
 			id: row.get(columns.id),
 			name: row.get(columns.name),
-			organization,
 			status: row.get(columns.status),
 			title: row.get(columns.title),
 		}

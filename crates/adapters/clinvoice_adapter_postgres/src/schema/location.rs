@@ -20,96 +20,6 @@ pub struct PgLocation;
 
 impl PgLocation
 {
-	pub(super) async fn retrieve_matching_ids(
-		connection: impl Executor<'_, Database = Postgres>,
-		match_condition: &MatchLocation,
-	) -> Result<Match<Id>>
-	{
-		let mut query = Self::query_with_recursive(match_condition);
-
-		query
-			.separated(' ')
-			.push("SELECT")
-			.push(COLUMNS.id)
-			.push("FROM")
-			.push(
-				if match_condition.outer == MatchOuterLocation::None
-				{
-					PgLocationRecursiveCte::innermost()
-				}
-				else
-				{
-					PgLocationRecursiveCte::report()
-				},
-			);
-
-		query
-			.push(';')
-			.build()
-			.fetch(connection)
-			.map_ok(|row| row.get::<Id, _>(COLUMNS.id).into())
-			.try_collect()
-			.map_ok(Match::Or)
-			.await
-	}
-
-	/// # Summary
-	///
-	/// Recursively constructs a [`Location`] which matches the `id` in the database over the `connection`.
-	///
-	/// # Panics
-	///
-	/// If `id` does not match any row in the database.
-	pub(super) async fn retrieve_by_id(
-		connection: impl Executor<'_, Database = Postgres>,
-		id: Id,
-	) -> Result<Location>
-	{
-		sqlx::query!(
-			"WITH RECURSIVE location_view AS
-			(
-				SELECT id, name, outer_id FROM locations WHERE id = $1
-				UNION
-				SELECT L.id, L.name, L.outer_id FROM locations L JOIN location_view V ON (L.id = V.outer_id)
-			) SELECT * FROM location_view ORDER BY id;",
-			id,
-		)
-		.fetch(connection)
-		.try_fold(None, |previous: Option<Location>, view| {
-			let id = match view.id
-			{
-				Some(id) => id,
-				_ =>
-				{
-					return future::err(Error::ColumnDecode {
-						index: "id".into(),
-						source: "this column in `locations` must be non-null".into(),
-					})
-				},
-			};
-
-			let name = match view.name
-			{
-				Some(n) => n,
-				_ =>
-				{
-					return future::err(Error::ColumnDecode {
-						index: "name".into(),
-						source: "this column in `locations` must be non-null".into(),
-					})
-				},
-			};
-
-			future::ok(Some(Location {
-				id,
-				name,
-				outer: previous.map(Box::new),
-			}))
-		})
-		.map_ok(|v| v.expect("`id` did not match any row in the database"))
-		.await
-	}
-
 	/// # Summary
 	///
 	/// Generate a `WITH RECURSIVE` statement which contains a `location` for `match_condition`, and
@@ -155,7 +65,7 @@ impl PgLocation
 						.push(inner)
 						.push(ALIAS_INNER)
 						.push("ON (")
-						.push(outer_columns.id)
+						.push_unseparated(outer_columns.id)
 						.push_unseparated('=')
 						.push_unseparated(inner_columns.outer_id)
 						.push_unseparated(')');
@@ -243,5 +153,95 @@ impl PgLocation
 
 		query.push(' ');
 		query
+	}
+
+	/// # Summary
+	///
+	/// Recursively constructs a [`Location`] which matches the `id` in the database over the `connection`.
+	///
+	/// # Panics
+	///
+	/// If `id` does not match any row in the database.
+	pub(super) async fn retrieve_by_id(
+		connection: impl Executor<'_, Database = Postgres>,
+		id: Id,
+	) -> Result<Location>
+	{
+		sqlx::query!(
+			"WITH RECURSIVE location_view AS
+			(
+				SELECT id, name, outer_id FROM locations WHERE id = $1
+				UNION
+				SELECT L.id, L.name, L.outer_id FROM locations L JOIN location_view V ON (L.id = V.outer_id)
+			) SELECT * FROM location_view ORDER BY id;",
+			id,
+		)
+		.fetch(connection)
+		.try_fold(None, |previous: Option<Location>, view| {
+			let id = match view.id
+			{
+				Some(id) => id,
+				_ =>
+				{
+					return future::err(Error::ColumnDecode {
+						index: "id".into(),
+						source: "this column in `locations` must be non-null".into(),
+					})
+				},
+			};
+
+			let name = match view.name
+			{
+				Some(n) => n,
+				_ =>
+				{
+					return future::err(Error::ColumnDecode {
+						index: "name".into(),
+						source: "this column in `locations` must be non-null".into(),
+					})
+				},
+			};
+
+			future::ok(Some(Location {
+				id,
+				name,
+				outer: previous.map(Box::new),
+			}))
+		})
+		.map_ok(|v| v.expect("`id` did not match any row in the database"))
+		.await
+	}
+
+	pub(super) async fn retrieve_matching_ids(
+		connection: impl Executor<'_, Database = Postgres>,
+		match_condition: &MatchLocation,
+	) -> Result<Match<Id>>
+	{
+		let mut query = Self::query_with_recursive(match_condition);
+
+		query
+			.separated(' ')
+			.push("SELECT")
+			.push(COLUMNS.id)
+			.push("FROM")
+			.push(
+				if match_condition.outer == MatchOuterLocation::None
+				{
+					PgLocationRecursiveCte::innermost()
+				}
+				else
+				{
+					PgLocationRecursiveCte::report()
+				},
+			);
+
+		query
+			.push(';')
+			.build()
+			.fetch(connection)
+			.map_ok(|row| row.get::<Id, _>(COLUMNS.id).into())
+			.try_collect()
+			.map_ok(Match::Or)
+			.await
 	}
 }

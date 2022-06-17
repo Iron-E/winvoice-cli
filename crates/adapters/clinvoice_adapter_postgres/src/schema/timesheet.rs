@@ -10,7 +10,7 @@ pub struct PgTimesheet;
 
 impl PgTimesheet
 {
-	pub(in crate::schema) fn row_to_view(
+	pub(super) fn row_to_view(
 		columns: TimesheetColumns<&str>,
 		row: &PgRow,
 		employee: Employee,

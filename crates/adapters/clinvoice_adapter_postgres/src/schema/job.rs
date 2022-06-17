@@ -13,7 +13,7 @@ pub struct PgJob;
 
 impl PgJob
 {
-	pub(in crate::schema) fn row_to_view(
+	pub(super) fn row_to_view(
 		columns: JobColumns<&str>,
 		row: &PgRow,
 		client: Organization,

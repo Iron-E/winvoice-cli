@@ -13,10 +13,8 @@ pub struct PgExpenses;
 
 impl PgExpenses
 {
-	pub(in crate::schema) fn row_to_view(
-		columns: ExpenseColumns<&str>,
-		row: &PgRow,
-	) -> Result<Option<Expense>>
+	pub(super) fn row_to_view(columns: ExpenseColumns<&str>, row: &PgRow)
+		-> Result<Option<Expense>>
 	{
 		let id = match row.try_get(columns.id)
 		{

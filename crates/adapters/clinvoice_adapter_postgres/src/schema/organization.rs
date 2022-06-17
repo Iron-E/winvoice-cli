@@ -1,5 +1,5 @@
 use clinvoice_adapter::schema::columns::OrganizationColumns;
-use clinvoice_schema::{Contact, Location, Organization};
+use clinvoice_schema::{Location, Organization};
 use sqlx::{postgres::PgRow, Row};
 
 mod deletable;
@@ -10,15 +10,13 @@ pub struct PgOrganization;
 
 impl PgOrganization
 {
-	pub(in crate::schema) fn row_to_view(
+	pub(super) fn row_to_view(
 		columns: OrganizationColumns<&str>,
 		row: &PgRow,
-		contact_info: Vec<Contact>,
 		location: Location,
 	) -> Organization
 	{
 		Organization {
-			contact_info,
 			id: row.get(columns.id),
 			location,
 			name: row.get(columns.name),

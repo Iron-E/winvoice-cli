@@ -20,14 +20,16 @@ use clinvoice_match::{
 	MatchContactKind,
 	MatchEmployee,
 	MatchExpense,
+	MatchInvoice,
 	MatchJob,
 	MatchOrganization,
 	MatchSet,
 	MatchStr,
 	MatchTimesheet,
 };
-use futures::{stream, TryStreamExt, TryFutureExt};
-use sqlx::{Database, Postgres, QueryBuilder, Result, PgPool};
+use clinvoice_schema::chrono::NaiveDateTime;
+use futures::{stream, TryFutureExt, TryStreamExt};
+use sqlx::{Database, PgPool, Postgres, QueryBuilder, Result};
 
 use super::{PgLocation, PgSchema};
 use crate::fmt::{PgInterval, PgTimestampTz};
@@ -196,14 +198,8 @@ where
 			let iter = &mut conditions.iter().filter(|m| *m != &MatchSet::Any);
 			if let Some(c) = iter.next()
 			{
-				write_match_contact_set(
-					connection,
-					WriteContext::InWhereCondition,
-					ident,
-					c,
-					query,
-				)
-				.await?;
+				write_match_contact_set(connection, WriteContext::InWhereCondition, ident, c, query)
+					.await?;
 			}
 
 			let separator = match match_condition
@@ -212,16 +208,13 @@ where
 				_ => " OR",
 			};
 
-			stream::iter(conditions.iter().map(Ok)).try_for_each(|c| {
-				query.push(separator);
-				write_match_contact_set(
-					connection,
-					WriteContext::InWhereCondition,
-					ident,
-					c,
-					query,
-				).map_ok(|_| ())
-			}).await?;
+			stream::iter(conditions.iter().map(Ok))
+				.try_for_each(|c| {
+					query.push(separator);
+					write_match_contact_set(connection, WriteContext::InWhereCondition, ident, c, query)
+						.map_ok(|_| ())
+				})
+				.await?;
 
 			write_context_scope_end(query);
 		},
@@ -298,14 +291,8 @@ where
 			{
 				write_context_scope_start::<_, true>(query, context);
 
-				write_match_contact_set(
-					connection,
-					WriteContext::InWhereCondition,
-					ident,
-					m,
-					query,
-				)
-				.await?;
+				write_match_contact_set(connection, WriteContext::InWhereCondition, ident, m, query)
+					.await?;
 
 				write_context_scope_end(query);
 			},
@@ -627,6 +614,51 @@ impl WriteWhereClause<Postgres, &MatchExpense> for PgSchema
 	}
 }
 
+impl WriteWhereClause<Postgres, &MatchInvoice> for PgSchema
+{
+	/// # Panics
+	///
+	/// If any the following:
+	///
+	/// * `ident` is an empty string.
+	///
+	/// # See
+	///
+	/// * [`WriteWhereClause::write_where_clause`]
+	fn write_where_clause(
+		context: WriteContext,
+		ident: impl Copy + Display,
+		match_condition: &MatchInvoice,
+		query: &mut QueryBuilder<Postgres>,
+	) -> WriteContext
+	{
+		let columns = JobColumns::default().scoped(ident);
+
+		fn map_nullable(date: &Option<NaiveDateTime>) -> impl Display + PartialEq
+		{
+			Nullable(date.map(PgTimestampTz))
+		}
+
+		PgSchema::write_where_clause(
+			PgSchema::write_where_clause(
+				PgSchema::write_where_clause(
+					context,
+					columns.invoice_date_issued,
+					&match_condition.date_issued.map_ref(map_nullable),
+					query,
+				),
+				columns.invoice_date_paid,
+				&match_condition.date_paid.map_ref(map_nullable),
+				query,
+			),
+			// NOTE: `hourly_rate` is stored as text on the DB
+			columns.typecast("numeric").invoice_hourly_rate,
+			&match_condition.hourly_rate.map_ref(|r| r.amount),
+			query,
+		)
+	}
+}
+
 impl WriteWhereClause<Postgres, &MatchJob> for PgSchema
 {
 	/// # Panics
@@ -654,46 +686,29 @@ impl WriteWhereClause<Postgres, &MatchJob> for PgSchema
 						PgSchema::write_where_clause(
 							PgSchema::write_where_clause(
 								PgSchema::write_where_clause(
-									PgSchema::write_where_clause(
-										PgSchema::write_where_clause(
-											context,
-											columns.id,
-											&match_condition.id,
-											query,
-										),
-										columns.date_close,
-										&match_condition
-											.date_close
-											.map_ref(|d| Nullable(d.map(PgTimestampTz))),
-										query,
-									),
-									columns.date_open,
-									&match_condition.date_open.map_ref(|d| PgTimestampTz(*d)),
+									context,
+									columns.date_close,
+									&match_condition
+										.date_close
+										.map_ref(|d| Nullable(d.map(PgTimestampTz))),
 									query,
 								),
-								columns.increment,
-								&match_condition
-									.increment
-									.map_ref(|i| PgInterval(i.into_inner())),
+								columns.date_open,
+								&match_condition.date_open.map_ref(|d| PgTimestampTz(*d)),
 								query,
 							),
-							columns.invoice_date_issued,
-							&match_condition
-								.invoice
-								.date_issued
-								.map_ref(|d| Nullable(d.map(PgTimestampTz))),
+							columns.id,
+							&match_condition.id,
 							query,
 						),
-						columns.invoice_date_paid,
+						columns.increment,
 						&match_condition
-							.invoice
-							.date_paid
-							.map_ref(|d| Nullable(d.map(PgTimestampTz))),
+							.increment
+							.map_ref(|i| PgInterval(i.into_inner())),
 						query,
 					),
-					// NOTE: `hourly_rate` is stored as text on the DB
-					columns.typecast("numeric").invoice_hourly_rate,
-					&match_condition.invoice.hourly_rate.map_ref(|r| r.amount),
+					ident,
+					&match_condition.invoice,
 					query,
 				),
 				columns.notes,

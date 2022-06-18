@@ -2,6 +2,8 @@ mod display;
 
 use core::fmt::Display;
 
+use clinvoice_adapter::fmt::SnakeCase;
+
 /// # Summary
 ///
 /// Wraps [`Display`] impls  to provide the necessary [`Display`] impl for a recursive Common Table
@@ -10,89 +12,59 @@ use core::fmt::Display;
 /// Created to avoid using `format!` every time this pattern was required, thus eagerly allocating
 /// a [`String`] even if it was only needed for pushing to another [`String`].
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub(crate) struct PgLocationRecursiveCte<TCurrent, TInner>
+pub(crate) struct PgLocationRecursiveCte<TCurrent, TPrev>(SnakeCase<TPrev, TCurrent>)
 where
 	TCurrent: Display,
-	TInner: Display,
+	TPrev: Display;
+
+impl<TCurrent, TPrev> PgLocationRecursiveCte<TCurrent, TPrev>
+where
+	TCurrent: Display,
+	TPrev: Display,
 {
 	/// # Summary
 	///
-	/// The name of the current location ident. When combined with `inner` (separated by an
-	/// underscore) it should produce the full ident for the current location.
-	///
-	/// # Example
-	///
-	/// ```ignore
-	/// // prints as "location";
-	/// let innermost = PgOuterLocation { inner: "", outer: "location" };
-	///
-	/// // prints as "location_outer";
-	/// let outer = PgOuterLocation { inner: innermost, outer: "outer" };
-	///
-	/// // prints as "location_outer_outer";
-	/// let outer_outer = PgOuterLocation { inner: outer, outer: "outer" };
-	/// ```
-	///
-	/// # See
-	///
-	/// [`PgOuterLocation::outer`]
-	current: TCurrent,
-
-	/// # Summary
-	///
-	/// The previous [`PgOuterLocation`], or [`None`] if this is the innermost.
-	///
-	/// # See
-	///
-	/// [`PgOuterLocation::innermost`]
-	inner: Option<TInner>,
-}
-
-impl<TCurrent, TInner> PgLocationRecursiveCte<TCurrent, TInner>
-where
-	TCurrent: Display,
-	TInner: Display,
-{
-	/// # Summary
-	///
-	/// Get `self.inner`.
-	pub(crate) const fn inner(&self) -> Option<&TInner>
+	/// Return the previous occurance of the [`PgLocationRecursiveCte`], if there is one.
+	pub(crate) const fn prev(&self) -> Option<&TPrev>
 	{
-		self.inner.as_ref()
+		if let Some((left, _)) = self.0.slice_end()
+		{
+			return Some(left);
+		}
+
+		None
 	}
 
 	/// # Summary
 	///
-	/// Get the [`PgOuterLocation`] representing the [`Location`](clinvoice_schema::Location) outer
-	/// this one.
-	pub(crate) const fn outer(self) -> PgLocationRecursiveCte<&'static str, Self>
+	/// Get the [`PgLocationRecursiveCte`] representing the [`Location`](clinvoice_schema::Location) this one.
+	pub(crate) fn outer(
+		self,
+	) -> PgLocationRecursiveCte<&'static str, SnakeCase<TPrev, TCurrent>>
 	{
-		PgLocationRecursiveCte {
-			current: "outer",
-			inner: Some(self),
-		}
+		PgLocationRecursiveCte(self.0.push("outer"))
 	}
 }
 
 impl PgLocationRecursiveCte<&'static str, &'static str>
 {
-	pub(crate) const fn innermost() -> Self
+	/// # Summary
+	///
+	/// Create a new recursive CTE identifier for a [`PgLocation`].
+	pub(crate) const fn new() -> Self
 	{
-		Self {
-			inner: None,
-			current: "location",
-		}
+		Self(SnakeCase::new("location"))
 	}
+}
 
+impl PgLocationRecursiveCte<&'static str, SnakeCase<&'static str, &'static str>>
+{
 	/// # Summary
 	///
 	/// The ident used to refer to the rows matching some [`MatchLocation`] at the end of a `WITH
 	/// RECURSIVE`.
 	pub(crate) const fn report() -> Self
 	{
-		Self {
-			inner: None,
-			current: "location_report",
-		}
+		Self(PgLocationRecursiveCte::new().0.push("report"))
 	}
 }

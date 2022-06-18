@@ -10,11 +10,6 @@ where
 {
 	fn fmt(&self, f: &mut Formatter<'_>) -> Result
 	{
-		if let Some(inner) = self.inner
-		{
-			return write!(f, "{}_{}", inner, self.current);
-		}
-
-		self.current.fmt(f)
+		self.0.fmt(f)
 	}
 }

@@ -48,7 +48,7 @@ impl PgLocation
 				let mut separated = query.separated(' ');
 
 				separated
-					.push(ident)
+					.push(&ident)
 					.push("AS (SELECT")
 					.push(outer_columns.id)
 					.push_unseparated(',')
@@ -58,11 +58,11 @@ impl PgLocation
 					.push("FROM locations")
 					.push(ALIAS_OUTER);
 
-				if let Some(inner) = ident.inner()
+				if let Some(prev) = ident.prev()
 				{
 					separated
 						.push("JOIN")
-						.push(inner)
+						.push(prev)
 						.push(ALIAS_INNER)
 						.push("ON (")
 						.push_unseparated(outer_columns.id)
@@ -105,51 +105,50 @@ impl PgLocation
 					query.push(',');
 					generate_cte::<_, _, false>(query, ident.outer(), outer)
 				},
-				MatchOuterLocation::Any | MatchOuterLocation::None if !FIRST =>
+				MatchOuterLocation::Any | MatchOuterLocation::None =>
 				{
-					query
-						.separated(' ')
-						.push(", location_report AS (SELECT")
-						.push(inner_columns.id)
-						.push_unseparated(',')
-						.push_unseparated(inner_columns.name)
-						.push_unseparated(',')
-						.push_unseparated(inner_columns.outer_id)
-						.push("FROM locations")
-						.push(ALIAS_INNER)
-						.push("JOIN")
-						.push(ident)
-						.push(ALIAS_OUTER)
-						.push("ON (")
-						.push_unseparated(inner_columns.outer_id)
-						.push_unseparated('=')
-						.push_unseparated(outer_columns.id)
-						.push_unseparated(") UNION SELECT")
-						.push(inner_columns.id)
-						.push_unseparated(',')
-						.push_unseparated(inner_columns.name)
-						.push_unseparated(',')
-						.push_unseparated(inner_columns.outer_id)
-						.push("FROM locations")
-						.push(ALIAS_INNER)
-						.push("JOIN location_report")
-						.push(ALIAS_OUTER)
-						.push("ON (")
-						.push_unseparated(inner_columns.outer_id)
-						.push_unseparated('=')
-						.push_unseparated(outer_columns.id)
-						.push_unseparated("))");
+					if !FIRST
+					{
+						query
+							.separated(' ')
+							.push(", location_report AS (SELECT")
+							.push(inner_columns.id)
+							.push_unseparated(',')
+							.push_unseparated(inner_columns.name)
+							.push_unseparated(',')
+							.push_unseparated(inner_columns.outer_id)
+							.push("FROM locations")
+							.push(ALIAS_INNER)
+							.push("JOIN")
+							.push(ident)
+							.push(ALIAS_OUTER)
+							.push("ON (")
+							.push_unseparated(inner_columns.outer_id)
+							.push_unseparated('=')
+							.push_unseparated(outer_columns.id)
+							.push_unseparated(") UNION SELECT")
+							.push(inner_columns.id)
+							.push_unseparated(',')
+							.push_unseparated(inner_columns.name)
+							.push_unseparated(',')
+							.push_unseparated(inner_columns.outer_id)
+							.push("FROM locations")
+							.push(ALIAS_INNER)
+							.push("JOIN location_report")
+							.push(ALIAS_OUTER)
+							.push("ON (")
+							.push_unseparated(inner_columns.outer_id)
+							.push_unseparated('=')
+							.push_unseparated(outer_columns.id)
+							.push_unseparated("))");
+					}
 				},
 			}
 		}
 
 		let mut query = QueryBuilder::new("WITH RECURSIVE ");
 
-		generate_cte::<_, _, true>(
-			&mut query,
-			PgLocationRecursiveCte::innermost(),
-			match_condition,
-		);
+		generate_cte::<_, _, true>(&mut query, PgLocationRecursiveCte::new(), match_condition);
 
 		query.push(' ');
 		query
@@ -223,25 +222,22 @@ impl PgLocation
 			.separated(' ')
 			.push("SELECT")
 			.push(COLUMNS.id)
-			.push("FROM")
-			.push(
-				if match_condition.outer == MatchOuterLocation::None
-				{
-					PgLocationRecursiveCte::innermost()
-				}
-				else
-				{
-					PgLocationRecursiveCte::report()
-				},
-			);
+			.push("FROM");
 
-		query
-			.push(';')
-			.build()
-			.fetch(connection)
-			.map_ok(|row| row.get::<Id, _>(COLUMNS.id).into())
-			.try_collect()
-			.map_ok(Match::Or)
-			.await
+		if match_condition.outer == MatchOuterLocation::None
+		{
+			query.push(PgLocationRecursiveCte::new())
+		}
+		else
+		{
+			query.push(PgLocationRecursiveCte::report())
+		}
+		.push(';')
+		.build()
+		.fetch(connection)
+		.map_ok(|row| row.get::<Id, _>(COLUMNS.id).into())
+		.try_collect()
+		.map_ok(Match::Or)
+		.await
 	}
 }

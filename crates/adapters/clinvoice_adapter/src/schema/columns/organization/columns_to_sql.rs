@@ -3,7 +3,7 @@ use core::fmt::Display;
 use sqlx::{Database, QueryBuilder};
 
 use super::OrganizationColumns;
-use crate::schema::columns::ColumnsToSql;
+use crate::fmt::ColumnsToSql;
 
 impl<T> ColumnsToSql for OrganizationColumns<T>
 where

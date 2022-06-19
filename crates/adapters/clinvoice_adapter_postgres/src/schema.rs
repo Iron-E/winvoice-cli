@@ -16,7 +16,7 @@ mod write_where_clause;
 
 use core::fmt::Display;
 
-use clinvoice_adapter::{schema::columns::ColumnsToSql, WriteWhereClause};
+use clinvoice_adapter::{fmt::ColumnsToSql, WriteWhereClause};
 use clinvoice_match::Match;
 use clinvoice_schema::Id;
 pub use contact_info::PgContactInfo;

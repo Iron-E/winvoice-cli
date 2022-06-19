@@ -57,14 +57,10 @@ mod tests
 			.await
 			.unwrap();
 
-		let organization = PgOrganization::create(
-			&connection,
-			Vec::new(),
-			earth.clone(),
-			"Some Organization".into(),
-		)
-		.await
-		.unwrap();
+		let organization =
+			PgOrganization::create(&connection, earth.clone(), "Some Organization".into())
+				.await
+				.unwrap();
 
 		let (job, job2, job3) = futures::try_join!(
 			PgJob::create(

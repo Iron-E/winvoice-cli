@@ -32,61 +32,38 @@ impl Deletable for PgEmployee
 #[cfg(test)]
 mod tests
 {
-	use clinvoice_adapter::{
-		schema::{EmployeeAdapter, LocationAdapter, OrganizationAdapter},
-		Deletable,
-	};
+	use clinvoice_adapter::{schema::EmployeeAdapter, Deletable};
 	use clinvoice_match::{Match, MatchEmployee};
 
-	use crate::schema::{util, PgEmployee, PgLocation, PgOrganization};
+	use crate::schema::{util, PgEmployee};
 
 	#[tokio::test]
 	async fn delete()
 	{
 		let connection = util::connect().await;
 
-		let earth = PgLocation::create(&connection, "Earth".into(), None)
-			.await
-			.unwrap();
-
-		let organization = PgOrganization::create(
-			&connection,
-			Vec::new(),
-			earth.clone(),
-			"Some Organization".into(),
-		)
-		.await
-		.unwrap();
-
 		let (employee, employee2, employee3) = futures::try_join!(
 			PgEmployee::create(
 				&connection,
 				"My Name".into(),
-				organization.clone(),
 				"Employed".into(),
 				"Janitor".into(),
 			),
 			PgEmployee::create(
 				&connection,
 				"Another Gúy".into(),
-				organization.clone(),
 				"Management".into(),
 				"Assistant to Regional Manager".into(),
 			),
 			PgEmployee::create(
 				&connection,
 				"Another Another Gúy".into(),
-				organization.clone(),
 				"Management".into(),
 				"Assistant to the Assistant to the Regional Manager".into(),
 			),
 		)
 		.unwrap();
 
-		// the `employee`s should be dependent on `organization` right now.
-		assert!(PgOrganization::delete(&connection, [organization].iter())
-			.await
-			.is_err());
 		PgEmployee::delete(&connection, [&employee, &employee2].into_iter())
 			.await
 			.unwrap();

@@ -43,7 +43,7 @@ impl TimesheetAdapter for PgTimesheet
 			.begin()
 			.and_then(|mut transaction| async {
 				let work_notes =
-					String::from("* Work which was done goes here\n* Supports markdown formatting");
+					"* Work which was done goes here\n* Supports markdown formatting".to_string();
 
 				let row = sqlx::query!(
 					"INSERT INTO timesheets
@@ -151,10 +151,9 @@ mod tests
 		OrganizationAdapter,
 	};
 	use clinvoice_finance::{ExchangeRates, Exchangeable};
-	use clinvoice_match::{Match, MatchEmployee, MatchOrganization, MatchSet, MatchTimesheet};
+	use clinvoice_match::{Match, MatchEmployee, MatchSet, MatchTimesheet};
 	use clinvoice_schema::{
 		chrono::{TimeZone, Utc},
-		ContactKind,
 		Currency,
 		Expense,
 		Invoice,
@@ -174,26 +173,9 @@ mod tests
 			.await
 			.unwrap();
 
-		let organization = PgOrganization::create(
-			&connection,
-			vec![
-				(false, ContactKind::Address(earth.clone()), "Office".into()),
-				(
-					true,
-					ContactKind::Email("foo@bar.io".into()),
-					"Work Email".into(),
-				),
-				(
-					true,
-					ContactKind::Phone("555 223 5039".into()),
-					"Office Phone".into(),
-				),
-			],
-			earth,
-			"Some Organization".into(),
-		)
-		.await
-		.unwrap();
+		let organization = PgOrganization::create(&connection, earth, "Some Organization".into())
+			.await
+			.unwrap();
 
 		let job = PgJob::create(
 			&connection,
@@ -214,7 +196,6 @@ mod tests
 		let employee = PgEmployee::create(
 			&connection,
 			"My Name".into(),
-			organization,
 			"Employed".into(),
 			"Janitor".into(),
 		)
@@ -310,50 +291,8 @@ mod tests
 		.unwrap();
 
 		let (organization, organization2) = futures::try_join!(
-			PgOrganization::create(
-				&connection,
-				vec![
-					(
-						false,
-						ContactKind::Address(utah.clone()),
-						"Remote Office".into()
-					),
-					(
-						true,
-						ContactKind::Email("foo@bar.io".into()),
-						"Work Email".into(),
-					),
-					(
-						true,
-						ContactKind::Phone("555 223 5039".into()),
-						"Office's Phone".into(),
-					),
-				],
-				arizona.clone(),
-				"Some Organization".into()
-			),
-			PgOrganization::create(
-				&connection,
-				vec![
-					(
-						false,
-						ContactKind::Address(arizona),
-						"Favorite Pizza Place".into()
-					),
-					(
-						true,
-						ContactKind::Email("some_kind_of_email@f.com".into()),
-						"Work Email".into(),
-					),
-					(
-						true,
-						ContactKind::Phone("555-555-8008".into()),
-						"Office's Phone".into(),
-					),
-				],
-				utah,
-				"Some Other Organizatión".into()
-			),
+			PgOrganization::create(&connection, arizona.clone(), "Some Organization".into()),
+			PgOrganization::create(&connection, utah, "Some Other Organizatión".into()),
 		)
 		.unwrap();
 
@@ -361,14 +300,12 @@ mod tests
 			PgEmployee::create(
 				&connection,
 				"My Name".into(),
-				organization.clone(),
 				"Employed".into(),
-				"Janitor".into(),
+				"Janitor".into()
 			),
 			PgEmployee::create(
 				&connection,
 				"Another Gúy".into(),
-				organization2.clone(),
 				"Management".into(),
 				"Assistant to Regional Manager".into(),
 			),
@@ -431,13 +368,10 @@ mod tests
 			PgTimesheet::retrieve(&connection, &MatchTimesheet {
 				expenses: MatchSet::Not(MatchSet::Contains(Default::default()).into()),
 				employee: MatchEmployee {
-					organization: MatchOrganization {
-						id: Match::Or(vec![
-							timesheet.employee.organization.id.into(),
-							timesheet2.employee.organization.id.into(),
-						]),
-						..Default::default()
-					},
+					id: Match::Or(vec![
+						timesheet.employee.id.into(),
+						timesheet2.employee.id.into(),
+					]),
 					..Default::default()
 				},
 				..Default::default()

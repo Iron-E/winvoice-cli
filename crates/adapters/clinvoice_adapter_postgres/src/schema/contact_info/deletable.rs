@@ -108,13 +108,18 @@ mod tests
 
 		assert_eq!(
 			PgContactInfo::retrieve(&connection, &MatchContact {
-				label: MatchStr::Or(contact_info.iter().map(|c| c.label.into()).collect()),
+				label: MatchStr::Or(
+					contact_info
+						.iter()
+						.map(|c| c.label.clone().into())
+						.collect()
+				),
 				..Default::default()
 			})
 			.await
 			.unwrap()
 			.as_slice(),
-			&[contact_info[2]],
+			&[contact_info[2].clone()],
 		);
 	}
 }

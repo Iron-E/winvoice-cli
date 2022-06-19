@@ -39,7 +39,7 @@ impl Updatable for PgContactInfo
 					q.push_bind(e.kind.address().map(|a| a.id))
 						.push_bind(e.kind.email())
 						.push_bind(&e.label)
-						.push_bind(&e.kind.other())
+						.push_bind(e.kind.other())
 						.push_bind(e.kind.phone());
 				});
 			},

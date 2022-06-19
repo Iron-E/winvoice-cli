@@ -71,15 +71,13 @@ mod tests
 			.await
 			.unwrap();
 
-		let organization =
-			PgOrganization::create(&connection, Vec::new(), earth, "Some Organization".into())
-				.await
-				.unwrap();
+		let organization = PgOrganization::create(&connection, earth, "Some Organization".into())
+			.await
+			.unwrap();
 
 		let employee = PgEmployee::create(
 			&connection,
 			"My Name".into(),
-			organization.clone(),
 			"Employed".into(),
 			"Janitor".into(),
 		)

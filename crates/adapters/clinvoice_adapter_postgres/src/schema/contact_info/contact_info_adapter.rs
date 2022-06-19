@@ -25,7 +25,7 @@ impl ContactInfoAdapter for PgContactInfo
 			.push_values(peekable, |mut q, contact| {
 				q.push_bind(contact.kind.address().map(|a| a.id))
 					.push_bind(contact.kind.email())
-					.push_bind(contact.label)
+					.push_bind(&contact.label)
 					.push_bind(contact.kind.other())
 					.push_bind(contact.kind.phone());
 			})

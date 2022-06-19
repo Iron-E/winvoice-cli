@@ -3,7 +3,7 @@ use clinvoice_schema::Employee;
 use sqlx::{Postgres, Result, Transaction};
 
 use super::PgEmployee;
-use crate::{schema::PgOrganization, PgSchema};
+use crate::PgSchema;
 
 #[async_trait::async_trait]
 impl Updatable for PgEmployee
@@ -32,14 +32,11 @@ impl Updatable for PgEmployee
 			query.push_values(peekable_entities, |mut q, e| {
 				q.push_bind(e.id)
 					.push_bind(&e.name)
-					.push_bind(e.organization.id)
 					.push_bind(&e.status)
 					.push_bind(&e.title);
 			});
 		})
 		.await?;
-
-		PgOrganization::update(connection, entities.map(|e| &e.organization)).await?;
 
 		Ok(())
 	}

@@ -160,10 +160,9 @@ mod tests
 			.await
 			.unwrap();
 
-		let organization =
-			PgOrganization::create(&connection, Vec::new(), earth, "Some Organization".into())
-				.await
-				.unwrap();
+		let organization = PgOrganization::create(&connection, earth, "Some Organization".into())
+			.await
+			.unwrap();
 
 		let job = PgJob::create(
 			&connection,
@@ -243,18 +242,8 @@ mod tests
 		.unwrap();
 
 		let (organization, organization2) = futures::try_join!(
-			PgOrganization::create(
-				&connection,
-				Vec::new(),
-				arizona.clone(),
-				"Some Organization".into()
-			),
-			PgOrganization::create(
-				&connection,
-				Vec::new(),
-				utah.clone(),
-				"Some Other Organizatión".into()
-			),
+			PgOrganization::create(&connection, arizona.clone(), "Some Organization".into()),
+			PgOrganization::create(&connection, utah.clone(), "Some Other Organizatión".into()),
 		)
 		.unwrap();
 

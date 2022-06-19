@@ -1,16 +1,14 @@
-use std::collections::HashMap;
-
 use clinvoice_adapter::{
-	schema::{columns::EmployeeColumns, EmployeeAdapter, OrganizationAdapter},
+	schema::{columns::EmployeeColumns, EmployeeAdapter},
 	WriteWhereClause,
 };
 use clinvoice_match::MatchEmployee;
-use clinvoice_schema::{Employee, Id, Organization};
-use futures::{future, TryFutureExt, TryStreamExt};
-use sqlx::{PgPool, QueryBuilder, Result, Row};
+use clinvoice_schema::Employee;
+use futures::TryStreamExt;
+use sqlx::{PgPool, QueryBuilder, Result};
 
 use super::PgEmployee;
-use crate::{schema::PgOrganization, PgSchema};
+use crate::PgSchema;
 
 #[async_trait::async_trait]
 impl EmployeeAdapter for PgEmployee
@@ -18,19 +16,13 @@ impl EmployeeAdapter for PgEmployee
 	async fn create(
 		connection: &PgPool,
 		name: String,
-		organization: Organization,
 		status: String,
 		title: String,
 	) -> Result<Employee>
 	{
 		let row = sqlx::query!(
-			"INSERT INTO employees
-				(name, organization_id, status, title)
-			VALUES
-				($1, $2, $3, $4)
-			RETURNING id;",
+			"INSERT INTO employees (name, status, title) VALUES ($1, $2, $3) RETURNING id;",
 			name,
-			organization.id,
 			status,
 			title,
 		)
@@ -40,7 +32,6 @@ impl EmployeeAdapter for PgEmployee
 		Ok(Employee {
 			id: row.id,
 			name,
-			organization,
 			status,
 			title,
 		})
@@ -49,15 +40,6 @@ impl EmployeeAdapter for PgEmployee
 	async fn retrieve(connection: &PgPool, match_condition: &MatchEmployee)
 		-> Result<Vec<Employee>>
 	{
-		// TODO: separate into `retrieve_all() -> Vec` and `retrieve -> Stream` to skip `Vec`
-		//       collection?
-		let organizations_fut = PgOrganization::retrieve(connection, &match_condition.organization)
-			.map_ok(|vec| {
-				vec.into_iter()
-					.map(|o| (o.id, o))
-					.collect::<HashMap<_, _>>()
-			});
-
 		const COLUMNS: EmployeeColumns<&'static str> = EmployeeColumns::default();
 
 		let mut query = QueryBuilder::new(
@@ -71,19 +53,11 @@ impl EmployeeAdapter for PgEmployee
 		);
 		PgSchema::write_where_clause(Default::default(), "E", match_condition, &mut query);
 
-		let organizations = organizations_fut.await?;
 		query
 			.push(';')
 			.build()
 			.fetch(connection)
-			.try_filter_map(|row| {
-				if let Some(o) = organizations.get(&row.get::<Id, _>(COLUMNS.organization_id))
-				{
-					return future::ok(Some(PgEmployee::row_to_view(COLUMNS, &row, o.clone())));
-				}
-
-				future::ok(None)
-			})
+			.map_ok(|row| PgEmployee::row_to_view(COLUMNS, &row))
 			.try_collect()
 			.await
 	}
@@ -92,47 +66,19 @@ impl EmployeeAdapter for PgEmployee
 #[cfg(test)]
 mod tests
 {
-	use clinvoice_adapter::schema::{LocationAdapter, OrganizationAdapter};
-	use clinvoice_match::{Match, MatchEmployee, MatchLocation, MatchOrganization, MatchSet};
-	use clinvoice_schema::ContactKind;
+	use clinvoice_match::{Match, MatchEmployee, MatchStr};
 
 	use super::{EmployeeAdapter, PgEmployee};
-	use crate::schema::{util, PgLocation, PgOrganization};
+	use crate::schema::util;
 
 	#[tokio::test]
 	async fn create()
 	{
 		let connection = util::connect().await;
 
-		let earth = PgLocation::create(&connection, "Earth".into(), None)
-			.await
-			.unwrap();
-
-		let organization = PgOrganization::create(
-			&connection,
-			vec![
-				(true, ContactKind::Address(earth.clone()), "Office".into()),
-				(
-					true,
-					ContactKind::Email("foo@bar.io".into()),
-					"Work Email".into(),
-				),
-				(
-					true,
-					ContactKind::Phone("555 223 5039".into()),
-					"Office's Email".into(),
-				),
-			],
-			earth,
-			"Some Organization".into(),
-		)
-		.await
-		.unwrap();
-
 		let employee = PgEmployee::create(
 			&connection,
 			"My Name".into(),
-			organization.clone(),
 			"Employed".into(),
 			"Janitor".into(),
 		)
@@ -147,8 +93,6 @@ mod tests
 		// Assert ::create writes accurately to the DB
 		assert_eq!(employee.id, row.id);
 		assert_eq!(employee.name, row.name);
-		assert_eq!(employee.organization.id, row.organization_id);
-		assert_eq!(organization.id, row.organization_id);
 		assert_eq!(employee.status, row.status);
 		assert_eq!(employee.title, row.title);
 	}
@@ -158,64 +102,16 @@ mod tests
 	{
 		let connection = util::connect().await;
 
-		let earth = PgLocation::create(&connection, "Earth".into(), None)
-			.await
-			.unwrap();
-
-		let usa = PgLocation::create(&connection, "USA".into(), Some(earth))
-			.await
-			.unwrap();
-
-		let (arizona, utah) = futures::try_join!(
-			PgLocation::create(&connection, "Arizona".into(), Some(usa.clone())),
-			PgLocation::create(&connection, "Utah".into(), Some(usa.clone())),
-		)
-		.unwrap();
-
-		let (organization, organization2) = futures::try_join!(
-			PgOrganization::create(
-				&connection,
-				vec![
-					(
-						false,
-						ContactKind::Address(utah.clone()),
-						"Remote Office".into()
-					),
-					(
-						true,
-						ContactKind::Email("foo@bar.io".into()),
-						"Work Email".into(),
-					),
-					(
-						true,
-						ContactKind::Phone("555 223 5039".into()),
-						"Office's Phone".into(),
-					),
-				],
-				arizona.clone(),
-				"Some Organization".into(),
-			),
-			PgOrganization::create(
-				&connection,
-				Default::default(),
-				utah,
-				"Some Other Organizatión".into(),
-			),
-		)
-		.unwrap();
-
 		let (employee, employee2) = futures::try_join!(
 			PgEmployee::create(
 				&connection,
 				"My Name".into(),
-				organization,
 				"Employed".into(),
 				"Janitor".into(),
 			),
 			PgEmployee::create(
 				&connection,
 				"Another Gúy".into(),
-				organization2,
 				"Management".into(),
 				"Assistant to Regional Manager".into(),
 			),
@@ -224,17 +120,8 @@ mod tests
 
 		assert_eq!(
 			PgEmployee::retrieve(&connection, &MatchEmployee {
-				organization: MatchOrganization {
-					name: employee.organization.name.clone().into(),
-					location: MatchLocation {
-						id: Match::Or(vec![
-							employee.organization.location.id.into(),
-							employee2.organization.location.id.into(),
-						]),
-						..Default::default()
-					},
-					..Default::default()
-				},
+				id: Match::Or(vec![employee.id.into(), employee2.id.into()]),
+				name: employee.name.clone().into(),
 				..Default::default()
 			})
 			.await
@@ -245,38 +132,14 @@ mod tests
 
 		assert_eq!(
 			PgEmployee::retrieve(&connection, &MatchEmployee {
-				organization: MatchOrganization {
-					contact_info: MatchSet::Contains(Default::default()),
-					id: Match::Or(vec![
-						employee.organization.id.into(),
-						employee2.organization.id.into(),
-					]),
-					..Default::default()
-				},
+				id: Match::Or(vec![employee.id.into(), employee2.id.into()]),
+				name: MatchStr::Not(MatchStr::from("Fired".to_string()).into()),
 				..Default::default()
 			})
 			.await
 			.unwrap()
 			.as_slice(),
-			&[employee.clone()]
-		);
-
-		assert_eq!(
-			PgEmployee::retrieve(&connection, &MatchEmployee {
-				organization: MatchOrganization {
-					contact_info: MatchSet::Not(MatchSet::Contains(Default::default()).into()),
-					id: Match::Or(vec![
-						employee.organization.id.into(),
-						employee2.organization.id.into(),
-					]),
-					..Default::default()
-				},
-				..Default::default()
-			})
-			.await
-			.unwrap()
-			.as_slice(),
-			&[employee2]
+			&[employee, employee2]
 		);
 	}
 }

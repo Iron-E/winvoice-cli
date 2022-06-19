@@ -31,13 +31,13 @@ impl PgLocation
 		/// # Summary
 		///
 		/// Generate multiple Common Table Expressions for a recursive query.
-		fn generate_cte<TCurrent, TInner, const FIRST: bool>(
+		fn generate_cte<TCurrent, TPrev, const FIRST: bool>(
 			query: &mut QueryBuilder<Postgres>,
-			ident: PgLocationRecursiveCte<TCurrent, TInner>,
+			ident: PgLocationRecursiveCte<TCurrent, TPrev>,
 			match_condition: &MatchLocation,
 		) where
 			TCurrent: Display,
-			TInner: Display,
+			TPrev: Display,
 		{
 			let inner_columns = COLUMNS.scoped(ALIAS_INNER);
 			let outer_columns = COLUMNS.scoped(ALIAS_OUTER);

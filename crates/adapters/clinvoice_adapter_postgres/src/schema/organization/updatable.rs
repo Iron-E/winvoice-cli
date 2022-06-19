@@ -62,16 +62,8 @@ mod tests
 		.unwrap();
 
 		let (mut organization, mut organization2) = futures::try_join!(
-			PgOrganization::create(
-				&connection,
-				earth.clone(),
-				"Some Organization".into(),
-			),
-			PgOrganization::create(
-				&connection,
-				earth.clone(),
-				"Some Other Organization".into(),
-			),
+			PgOrganization::create(&connection, earth.clone(), "Some Organization".into(),),
+			PgOrganization::create(&connection, earth.clone(), "Some Other Organization".into(),),
 		)
 		.unwrap();
 

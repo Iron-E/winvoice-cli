@@ -38,9 +38,7 @@ where
 	/// # Summary
 	///
 	/// Get the [`PgLocationRecursiveCte`] representing the [`Location`](clinvoice_schema::Location) this one.
-	pub(crate) fn outer(
-		self,
-	) -> PgLocationRecursiveCte<&'static str, SnakeCase<TPrev, TCurrent>>
+	pub(crate) fn outer(self) -> PgLocationRecursiveCte<&'static str, SnakeCase<TPrev, TCurrent>>
 	{
 		PgLocationRecursiveCte(self.0.push("outer"))
 	}
@@ -55,16 +53,13 @@ impl PgLocationRecursiveCte<&'static str, &'static str>
 	{
 		Self(SnakeCase::new("location"))
 	}
-}
 
-impl PgLocationRecursiveCte<&'static str, SnakeCase<&'static str, &'static str>>
-{
 	/// # Summary
 	///
 	/// The ident used to refer to the rows matching some [`MatchLocation`] at the end of a `WITH
 	/// RECURSIVE`.
 	pub(crate) const fn report() -> Self
 	{
-		Self(PgLocationRecursiveCte::new().0.push("report"))
+		Self(SnakeCase::new("location_report"))
 	}
 }

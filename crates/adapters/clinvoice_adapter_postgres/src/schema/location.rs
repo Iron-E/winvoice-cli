@@ -222,22 +222,25 @@ impl PgLocation
 			.separated(' ')
 			.push("SELECT")
 			.push(COLUMNS.id)
-			.push("FROM");
+			.push("FROM")
+			.push(
+				if match_condition.outer == MatchOuterLocation::None
+				{
+					PgLocationRecursiveCte::new()
+				}
+				else
+				{
+					PgLocationRecursiveCte::report()
+				},
+			);
 
-		if match_condition.outer == MatchOuterLocation::None
-		{
-			query.push(PgLocationRecursiveCte::new())
-		}
-		else
-		{
-			query.push(PgLocationRecursiveCte::report())
-		}
-		.push(';')
-		.build()
-		.fetch(connection)
-		.map_ok(|row| row.get::<Id, _>(COLUMNS.id).into())
-		.try_collect()
-		.map_ok(Match::Or)
-		.await
+		query
+			.push(';')
+			.build()
+			.fetch(connection)
+			.map_ok(|row| row.get::<Id, _>(COLUMNS.id).into())
+			.try_collect()
+			.map_ok(Match::Or)
+			.await
 	}
 }

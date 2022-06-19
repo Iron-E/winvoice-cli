@@ -32,16 +32,13 @@ impl Deletable for PgOrganization
 #[cfg(test)]
 mod tests
 {
-	use std::collections::HashMap;
-
 	use clinvoice_adapter::{
-		schema::{ContactInfoAdapter, LocationAdapter, OrganizationAdapter},
+		schema::{LocationAdapter, OrganizationAdapter},
 		Deletable,
 	};
-	use clinvoice_match::{Match, MatchContact, MatchOrganization, MatchSet};
-	use clinvoice_schema::ContactKind;
+	use clinvoice_match::{Match, MatchOrganization};
 
-	use crate::schema::{util, PgContactInfo, PgLocation, PgOrganization};
+	use crate::schema::{util, PgLocation, PgOrganization};
 
 	#[tokio::test]
 	async fn delete()
@@ -55,23 +52,16 @@ mod tests
 		let (organization, organization2, organization3) = futures::try_join!(
 			PgOrganization::create(
 				&connection,
-				vec![(
-					true,
-					ContactKind::Phone("555-555-5555".into()),
-					"Office Number".into()
-				)],
 				earth.clone(),
 				"Some Organization".into(),
 			),
 			PgOrganization::create(
 				&connection,
-				Vec::new(),
 				earth.clone(),
 				"Some Other Organization".into(),
 			),
 			PgOrganization::create(
 				&connection,
-				Vec::new(),
 				earth.clone(),
 				"Another Other Organization".into(),
 			),
@@ -99,19 +89,6 @@ mod tests
 			.unwrap()
 			.as_slice(),
 			&[organization3]
-		);
-
-		assert_eq!(
-			PgContactInfo::retrieve(
-				&connection,
-				&MatchSet::Contains(MatchContact {
-					organization_id: Match::Or(vec![organization.id.into()]),
-					..Default::default()
-				})
-			)
-			.await
-			.unwrap(),
-			HashMap::new(),
 		);
 	}
 }

@@ -1,59 +1,35 @@
 use std::collections::HashMap;
 
 use clinvoice_adapter::{
-	schema::{
-		columns::OrganizationColumns,
-		ContactInfoAdapter,
-		LocationAdapter,
-		OrganizationAdapter,
-	},
+	schema::{columns::OrganizationColumns, LocationAdapter, OrganizationAdapter},
 	WriteWhereClause,
 };
 use clinvoice_match::MatchOrganization;
-use clinvoice_schema::{ContactKind, Location, Organization};
+use clinvoice_schema::{Location, Organization};
 use futures::{future, TryFutureExt, TryStreamExt};
 use sqlx::{PgPool, QueryBuilder, Result, Row};
 
 use super::PgOrganization;
-use crate::{
-	schema::{PgContactInfo, PgLocation},
-	PgSchema,
-};
+use crate::{schema::PgLocation, PgSchema};
 
 #[async_trait::async_trait]
 impl OrganizationAdapter for PgOrganization
 {
-	async fn create(
-		connection: &PgPool,
-		contact_info: Vec<(bool, ContactKind, String)>,
-		location: Location,
-		name: String,
-	) -> Result<Organization>
+	async fn create(connection: &PgPool, location: Location, name: String) -> Result<Organization>
 	{
-		connection
-			.begin()
-			.and_then(|mut transaction| async {
-				let row = sqlx::query!(
-					"INSERT INTO organizations (location_id, name) VALUES ($1, $2) RETURNING id;",
-					location.id,
-					name
-				)
-				.fetch_one(connection)
-				.await?;
+		let row = sqlx::query!(
+			"INSERT INTO organizations (location_id, name) VALUES ($1, $2) RETURNING id;",
+			location.id,
+			name
+		)
+		.fetch_one(connection)
+		.await?;
 
-				let contact_info_db =
-					PgContactInfo::create(&mut transaction, contact_info, row.id).await?;
-
-				transaction.commit().await?;
-
-				Ok(Organization {
-					contact_info: contact_info_db,
-					id: row.id,
-					location,
-					name,
-				})
-			})
-			.await
+		Ok(Organization {
+			id: row.id,
+			location,
+			name,
+		})
 	}
 
 	async fn retrieve(
@@ -61,7 +37,6 @@ impl OrganizationAdapter for PgOrganization
 		match_condition: &MatchOrganization,
 	) -> Result<Vec<Organization>>
 	{
-		let contact_info_fut = PgContactInfo::retrieve(connection, &match_condition.contact_info);
 		let locations_fut =
 			PgLocation::retrieve(connection, &match_condition.location).map_ok(|vec| {
 				vec.into_iter()
@@ -80,26 +55,17 @@ impl OrganizationAdapter for PgOrganization
 		);
 		PgSchema::write_where_clause(Default::default(), "O", match_condition, &mut query);
 
-		let (contact_info, locations) = futures::try_join!(contact_info_fut, locations_fut)?;
+		let locations = locations_fut.await?;
 		query
 			.push(';')
 			.build()
 			.fetch(connection)
 			.try_filter_map(|row| {
-				if let Some(c) = contact_info.get(&row.get(COLUMNS.id))
+				future::ok(match locations.get(&row.get(COLUMNS.location_id))
 				{
-					if let Some(l) = locations.get(&row.get(COLUMNS.location_id))
-					{
-						return future::ok(Some(PgOrganization::row_to_view(
-							COLUMNS,
-							&row,
-							c.clone(),
-							l.clone(),
-						)));
-					}
-				}
-
-				future::ok(None)
+					Some(l) => Some(PgOrganization::row_to_view(COLUMNS, &row, l.clone())),
+					_ => None,
+				})
 			})
 			.try_collect()
 			.await
@@ -113,8 +79,6 @@ mod tests
 
 	use clinvoice_adapter::schema::LocationAdapter;
 	use clinvoice_match::{Match, MatchLocation, MatchOrganization, MatchOuterLocation};
-	use clinvoice_schema::{Contact, ContactKind};
-	use futures::TryStreamExt;
 
 	use super::{OrganizationAdapter, PgOrganization};
 	use crate::schema::{util, PgLocation};
@@ -128,26 +92,10 @@ mod tests
 			.await
 			.unwrap();
 
-		let organization = PgOrganization::create(
-			&connection,
-			vec![
-				(true, ContactKind::Address(earth.clone()), "Office".into()),
-				(
-					true,
-					ContactKind::Email("foo@bar.io".into()),
-					"Work Email".into(),
-				),
-				(
-					true,
-					ContactKind::Phone("555 223 5039".into()),
-					"Office's Email".into(),
-				),
-			],
-			earth.clone(),
-			"Some Organization".into(),
-		)
-		.await
-		.unwrap();
+		let organization =
+			PgOrganization::create(&connection, earth.clone(), "Some Organization".into())
+				.await
+				.unwrap();
 
 		let row = sqlx::query!(
 			"SELECT * FROM organizations WHERE id = $1;",
@@ -157,47 +105,11 @@ mod tests
 		.await
 		.unwrap();
 
-		let contact_info_row = async {
-			let connection_borrow = &connection;
-			sqlx::query!(
-				"SELECT * FROM contact_information WHERE organization_id = $1;",
-				organization.id
-			)
-			.fetch(connection_borrow)
-			.and_then(|row| async move {
-				Ok(Contact {
-					organization_id: row.organization_id,
-					export: row.export,
-					label: row.label,
-					kind: match row
-						.email
-						.map(ContactKind::Email)
-						.or_else(|| row.phone.map(ContactKind::Phone))
-					{
-						Some(k) => k,
-						_ => ContactKind::Address(
-							PgLocation::retrieve_by_id(connection_borrow, row.address_id.unwrap()).await?,
-						),
-					},
-				})
-			})
-			.try_collect::<HashSet<_>>()
-			.await
-			.unwrap()
-		};
-
 		// Assert ::create writes accurately to the DB
 		assert_eq!(organization.id, row.id);
 		assert_eq!(organization.location.id, earth.id);
 		assert_eq!(organization.location.id, row.location_id);
 		assert_eq!(organization.name, row.name);
-		assert_eq!(
-			organization
-				.contact_info
-				.into_iter()
-				.collect::<HashSet<_>>(),
-			contact_info_row.await
-		);
 	}
 
 	#[tokio::test]
@@ -220,34 +132,8 @@ mod tests
 		.unwrap();
 
 		let (organization, organization2) = futures::try_join!(
-			PgOrganization::create(
-				&connection,
-				vec![
-					(
-						false,
-						ContactKind::Address(utah.clone()),
-						"Remote Office".into()
-					),
-					(
-						true,
-						ContactKind::Email("foo@bar.io".into()),
-						"Work Email".into(),
-					),
-					(
-						true,
-						ContactKind::Phone("555 223 5039".into()),
-						"Office's Phone".into(),
-					),
-				],
-				arizona.clone(),
-				"Some Organization".into(),
-			),
-			PgOrganization::create(
-				&connection,
-				Default::default(),
-				utah,
-				"Some Other Organizatión".into(),
-			),
+			PgOrganization::create(&connection, arizona.clone(), "Some Organization".into(),),
+			PgOrganization::create(&connection, utah, "Some Other Organizatión".into(),),
 		)
 		.unwrap();
 

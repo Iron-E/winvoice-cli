@@ -47,7 +47,6 @@ impl Updatable for PgOrganization
 mod tests
 {
 	use clinvoice_adapter::schema::{LocationAdapter, OrganizationAdapter};
-	use clinvoice_schema::ContactKind;
 
 	use crate::schema::{util, PgLocation, PgOrganization};
 
@@ -65,24 +64,19 @@ mod tests
 		let (mut organization, mut organization2) = futures::try_join!(
 			PgOrganization::create(
 				&connection,
-				vec![(
-					true,
-					ContactKind::Phone("555-555-5555".into()),
-					"Office Number".into()
-				)],
 				earth.clone(),
 				"Some Organization".into(),
 			),
 			PgOrganization::create(
 				&connection,
-				Vec::new(),
 				earth.clone(),
 				"Some Other Organization".into(),
 			),
 		)
 		.unwrap();
 
-		assert_eq!(organization, organization_db);
-		assert_eq!(organization2, organization2_db);
+		todo!("finish test");
+		// assert_eq!(organization, organization_db);
+		// assert_eq!(organization2, organization2_db);
 	}
 }

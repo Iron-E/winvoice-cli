@@ -27,14 +27,10 @@ impl Deletable for PgContactInfo
 			const COLUMNS: ContactColumns<&'static str> = ContactColumns::default();
 
 			s.push('(')
-				.push(COLUMNS.organization_id)
-				.push_unseparated('=')
-				.push_unseparated(c.organization_id)
-				.push("AND")
-				.push(COLUMNS.label)
+				.push_unseparated(COLUMNS.label)
 				.push_unseparated('=')
 				.push_bind(&c.label)
-				.push(')');
+				.push_unseparated(')');
 		}
 
 		let mut peekable_entities = entities.peekable();
@@ -71,13 +67,13 @@ impl Deletable for PgContactInfo
 mod tests
 {
 	use clinvoice_adapter::{
-		schema::{ContactInfoAdapter, LocationAdapter, OrganizationAdapter},
+		schema::{ContactInfoAdapter, LocationAdapter},
 		Deletable,
 	};
-	use clinvoice_match::{MatchContact, MatchSet};
-	use clinvoice_schema::ContactKind;
+	use clinvoice_match::{MatchContact, MatchStr};
+	use clinvoice_schema::{Contact, ContactKind};
 
-	use crate::schema::{util, PgContactInfo, PgLocation, PgOrganization};
+	use crate::schema::{util, PgContactInfo, PgLocation};
 
 	#[tokio::test]
 	async fn delete()
@@ -88,50 +84,37 @@ mod tests
 			.await
 			.unwrap();
 
-		let organization = PgOrganization::create(
-			&connection,
-			vec![
-				(
-					true,
-					ContactKind::Phone("555-555-5555".into()),
-					"Office Number".into(),
-				),
-				(
-					true,
-					ContactKind::Email("somethingsomething@invalid.com".into()),
-					"Primary Email".into(),
-				),
-				(
-					true,
-					ContactKind::Email("foo@bar.io".into()),
-					"Secondary Email".into(),
-				),
-			],
-			earth.clone(),
-			"Some Organization".into(),
-		)
-		.await
-		.unwrap();
+		let contact_info = [
+			Contact {
+				label: "Office Number".into(),
+				kind: ContactKind::Phone("555-555-5555".into()),
+			},
+			Contact {
+				label: "Primary Email".into(),
+				kind: ContactKind::Email("somethingsomething@invalid.com".into()),
+			},
+			Contact {
+				label: "Mailing Address".into(),
+				kind: ContactKind::Address(earth),
+			},
+		];
 
-		PgContactInfo::delete(
-			&connection,
-			[&organization.contact_info[0], &organization.contact_info[1]].into_iter(),
-		)
-		.await
-		.unwrap();
+		PgContactInfo::create(&connection, contact_info.iter())
+			.await
+			.unwrap();
+		PgContactInfo::delete(&connection, contact_info.iter())
+			.await
+			.unwrap();
 
 		assert_eq!(
-			PgContactInfo::retrieve(
-				&connection,
-				&MatchSet::Contains(MatchContact {
-					organization_id: organization.id.into(),
-					..Default::default()
-				})
-			)
+			PgContactInfo::retrieve(&connection, &MatchContact {
+				label: MatchStr::Or(contact_info.iter().map(|c| c.label.into()).collect()),
+				..Default::default()
+			})
 			.await
-			.unwrap()[&organization.id]
-				.as_slice(),
-			&[organization.contact_info[2].clone()],
+			.unwrap()
+			.as_slice(),
+			&[contact_info[2]],
 		);
 	}
 }

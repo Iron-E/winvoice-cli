@@ -1,7 +1,7 @@
 use clinvoice_adapter::schema::columns::ContactColumns;
 use clinvoice_schema::{Contact, ContactKind};
 use futures::TryFutureExt;
-use sqlx::{error::UnexpectedNullError, postgres::PgRow, Error, PgPool, Result, Row};
+use sqlx::{postgres::PgRow, Error, PgPool, Result, Row};
 
 use super::PgLocation;
 
@@ -17,20 +17,10 @@ impl PgContactInfo
 		connection: &PgPool,
 		columns: ContactColumns<&str>,
 		row: &PgRow,
-	) -> Result<Option<Contact>>
+	) -> Result<Contact>
 	{
-		let label = match row.try_get(columns.label)
-		{
-			Ok(l) => l,
-			Err(Error::ColumnDecode {
-				index: _,
-				source: s,
-			}) if s.is::<UnexpectedNullError>() => return Ok(None),
-			Err(e) => return Err(e),
-		};
-
-		Ok(Some(Contact {
-			label,
+		Ok(Contact {
+			label: row.get(columns.label),
 			kind: match row.get::<Option<_>, _>(columns.address_id)
 			{
 				Some(id) =>
@@ -56,6 +46,6 @@ impl PgContactInfo
 						)
 					})?,
 			},
-		}))
+		})
 	}
 }

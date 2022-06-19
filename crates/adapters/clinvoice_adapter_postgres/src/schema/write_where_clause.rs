@@ -28,7 +28,6 @@ use clinvoice_match::{
 	MatchTimesheet,
 };
 use clinvoice_schema::chrono::NaiveDateTime;
-use futures::{stream, TryFutureExt, TryStreamExt};
 use sqlx::{Database, PgPool, Postgres, QueryBuilder, Result};
 
 use super::{PgLocation, PgSchema};
@@ -165,7 +164,7 @@ fn write_is_null<Db>(
 
 /// # Summary
 ///
-/// An implementation of [`WriteWhereClause`] for [`MatchSet<MatchContact>`]
+/// An implementation of [`WriteWhereClause`] for [`MatchContact`]
 ///
 /// # Errors
 ///
@@ -177,127 +176,48 @@ fn write_is_null<Db>(
 ///
 /// * [`WriteWhereClause::write_where_clause`].
 #[async_recursion]
-pub(super) async fn write_match_contact_set<A>(
+pub(super) async fn write_match_contact<A>(
 	connection: &PgPool,
 	context: WriteContext,
 	ident: A,
-	match_condition: &MatchSet<MatchContact>,
+	match_condition: &MatchContact,
 	query: &mut QueryBuilder<Postgres>,
 ) -> Result<WriteContext>
 where
 	A: Copy + Display + Send + Sync,
 {
-	match match_condition
+	let columns = ContactColumns::default().scoped(ident);
+
+	let ctx = PgSchema::write_where_clause(context, columns.label, &match_condition.label, query);
+
+	match match_condition.kind
 	{
-		MatchSet::Any => return Ok(context),
+		MatchContactKind::Any => (),
 
-		MatchSet::And(conditions) | MatchSet::Or(conditions) =>
+		MatchContactKind::Address(ref location) =>
 		{
-			write_context_scope_start::<_, false>(query, context);
+			let location_id_query = PgLocation::retrieve_matching_ids(connection, location).await?;
 
-			let iter = &mut conditions.iter().filter(|m| *m != &MatchSet::Any);
-			if let Some(c) = iter.next()
-			{
-				write_match_contact_set(connection, WriteContext::InWhereCondition, ident, c, query)
-					.await?;
-			}
-
-			let separator = match match_condition
-			{
-				MatchSet::And(_) => " AND",
-				_ => " OR",
-			};
-
-			stream::iter(conditions.iter().map(Ok))
-				.try_for_each(|c| {
-					query.push(separator);
-					write_match_contact_set(connection, WriteContext::InWhereCondition, ident, c, query)
-						.map_ok(|_| ())
-				})
-				.await?;
-
-			write_context_scope_end(query);
+			PgSchema::write_where_clause(ctx, columns.address_id, &location_id_query, query);
 		},
 
-		MatchSet::Contains(match_contact) =>
+		MatchContactKind::Email(ref email_address) =>
 		{
-			const COLUMNS: ContactColumns<&'static str> = ContactColumns::default();
-
-			let subquery_ident = format!("{ident}_2");
-			let subquery_ident_columns = COLUMNS.scoped(&subquery_ident);
-
-			query
-				.separated(' ')
-				.push(context)
-				.push("EXISTS (SELECT FROM contact_information")
-				.push(&subquery_ident)
-				.push("WHERE")
-				.push(subquery_ident_columns.label)
-				.push_unseparated('=')
-				.push_unseparated(COLUMNS.scoped(ident).label);
-
-			let ctx = PgSchema::write_where_clause(
-				WriteContext::AcceptingAnotherWhereCondition,
-				subquery_ident_columns.label,
-				&match_contact.label,
-				query,
-			);
-
-			match match_contact.kind
-			{
-				MatchContactKind::Any => (),
-
-				MatchContactKind::Address(ref location) =>
-				{
-					let location_id_query =
-						PgLocation::retrieve_matching_ids(connection, location).await?;
-
-					PgSchema::write_where_clause(
-						ctx,
-						subquery_ident_columns.address_id,
-						&location_id_query,
-						query,
-					);
-				},
-
-				MatchContactKind::Email(ref email_address) =>
-				{
-					PgSchema::write_where_clause(
-						ctx,
-						subquery_ident_columns.email,
-						email_address,
-						query,
-					);
-				},
-
-				MatchContactKind::Other(ref other) =>
-				{
-					PgSchema::write_where_clause(ctx, subquery_ident_columns.other, other, query);
-				},
-
-				MatchContactKind::Phone(ref phone_number) =>
-				{
-					PgSchema::write_where_clause(ctx, subquery_ident_columns.phone, phone_number, query);
-				},
-			};
-
-			query.push(')');
+			PgSchema::write_where_clause(ctx, columns.email, email_address, query);
 		},
 
-		MatchSet::Not(condition) => match condition.deref()
+		MatchContactKind::Other(ref other) =>
 		{
-			m if m.deref() == &Default::default() => write_is_null(query, context, ident),
-			m =>
-			{
-				write_context_scope_start::<_, true>(query, context);
+			PgSchema::write_where_clause(ctx, columns.other, other, query);
+		},
 
-				write_match_contact_set(connection, WriteContext::InWhereCondition, ident, m, query)
-					.await?;
-
-				write_context_scope_end(query);
-			},
+		MatchContactKind::Phone(ref phone_number) =>
+		{
+			PgSchema::write_where_clause(ctx, columns.phone, phone_number, query);
 		},
 	};
+
+	query.push(')');
 
 	Ok(WriteContext::AcceptingAnotherWhereCondition)
 }

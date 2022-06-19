@@ -38,9 +38,8 @@ impl Updatable for PgContactInfo
 				query.push_values(peekable_entities, |mut q, e| {
 					q.push_bind(e.kind.address().map(|a| a.id))
 						.push_bind(e.kind.email())
-						.push_bind(e.export)
 						.push_bind(&e.label)
-						.push_bind(e.organization_id)
+						.push_bind(&e.kind.other())
 						.push_bind(e.kind.phone());
 				});
 			},

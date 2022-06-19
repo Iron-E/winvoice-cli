@@ -1,10 +1,8 @@
-use std::collections::HashMap;
-
 use clinvoice_adapter::schema::{columns::ContactColumns, ContactInfoAdapter};
-use clinvoice_match::{MatchContact, MatchSet};
-use clinvoice_schema::{Contact, ContactKind, Id};
+use clinvoice_match::MatchContact;
+use clinvoice_schema::Contact;
 use futures::TryStreamExt;
-use sqlx::{Executor, PgPool, Postgres, QueryBuilder, Result, Row};
+use sqlx::{Executor, PgPool, Postgres, QueryBuilder, Result};
 
 use super::PgContactInfo;
 use crate::schema::write_where_clause;
@@ -14,47 +12,33 @@ impl ContactInfoAdapter for PgContactInfo
 {
 	async fn create(
 		connection: impl 'async_trait + Executor<'_, Database = Postgres> + Send,
-		contact_info: Vec<(bool, ContactKind, String)>,
-		organization_id: Id,
-	) -> Result<Vec<Contact>>
+		contact_info: impl 'async_trait + Iterator<Item = &Contact> + Send,
+	) -> Result<()>
 	{
-		if contact_info.is_empty()
+		let mut peekable = contact_info.peekable();
+		if peekable.peek().is_some()
 		{
-			return Ok(Vec::new());
+			QueryBuilder::new(
+				"INSERT INTO contact_information
+					(address_id, email, label, other, phone) ",
+			)
+			.push_values(peekable, |mut q, contact| {
+				q.push_bind(contact.kind.address().map(|a| a.id))
+					.push_bind(contact.kind.email())
+					.push_bind(contact.label)
+					.push_bind(contact.kind.other())
+					.push_bind(contact.kind.phone());
+			})
+			.push(';')
+			.build()
+			.execute(connection)
+			.await?;
 		}
 
-		QueryBuilder::new(
-			"INSERT INTO contact_information
-				(address_id, email, export, label, organization_id, phone) ",
-		)
-		.push_values(contact_info.iter(), |mut q, (export, kind, label)| {
-			q.push_bind(kind.address().map(|a| a.id))
-				.push_bind(kind.email())
-				.push_bind(export)
-				.push_bind(label)
-				.push_bind(organization_id)
-				.push_bind(kind.phone());
-		})
-		.push(';')
-		.build()
-		.execute(connection)
-		.await?;
-
-		Ok(contact_info
-			.into_iter()
-			.map(|(export, kind, label)| Contact {
-				organization_id,
-				export,
-				kind,
-				label,
-			})
-			.collect())
+		Ok(())
 	}
 
-	async fn retrieve(
-		connection: &PgPool,
-		match_condition: &MatchSet<MatchContact>,
-	) -> Result<HashMap<Id, Vec<Contact>>>
+	async fn retrieve(connection: &PgPool, match_condition: &MatchContact) -> Result<Vec<Contact>>
 	{
 		const COLUMNS: ContactColumns<&'static str> = ContactColumns::default();
 
@@ -69,7 +53,7 @@ impl ContactInfoAdapter for PgContactInfo
 			FROM organizations O
 			LEFT JOIN contact_information C ON (C.organization_id = O.id)",
 		);
-		write_where_clause::write_match_contact_set(
+		write_where_clause::write_match_contact(
 			connection,
 			Default::default(),
 			"C",
@@ -82,16 +66,9 @@ impl ContactInfoAdapter for PgContactInfo
 			.push(';')
 			.build()
 			.fetch(connection)
-			.try_fold(HashMap::new(), |mut map, row| async move {
-				let entry = map
-					.entry(row.get::<Id, _>(COLUMNS.organization_id))
-					.or_insert_with(Vec::new);
-				if let Some(contact) = PgContactInfo::row_to_view(connection, COLUMNS, &row).await?
-				{
-					entry.push(contact);
-				}
-
-				Ok(map)
+			.try_fold(Vec::new(), |mut vec, row| async move {
+				vec.push(PgContactInfo::row_to_view(connection, COLUMNS, &row).await?);
+				Ok(vec)
 			})
 			.await
 	}

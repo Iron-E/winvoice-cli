@@ -18,6 +18,7 @@ where
 			.push(&self.address_id)
 			.push(&self.email)
 			.push(&self.label)
+			.push(&self.other)
 			.push(&self.phone);
 	}
 
@@ -36,6 +37,9 @@ where
 			.push_unseparated(',')
 			.push_unseparated(self.label)
 			.push(values_columns.label)
+			.push_unseparated(',')
+			.push_unseparated(self.other)
+			.push(values_columns.other)
 			.push_unseparated(',')
 			.push_unseparated(self.phone)
 			.push(values_columns.phone);

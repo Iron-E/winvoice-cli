@@ -23,7 +23,7 @@ pub trait ContactInfoAdapter:
 	/// The newly created [`Contact`].
 	async fn create(
 		connection: impl 'async_trait + Executor<'_, Database = <Self as Deletable>::Db> + Send,
-		contact_info: &[Contact],
+		contact_info: impl 'async_trait + Iterator<Item = &Contact> + Send,
 	) -> Result<()>;
 
 	/// # Summary

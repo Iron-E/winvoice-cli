@@ -176,6 +176,7 @@ impl PgLocation
 		id: Id,
 	) -> Result<Location>
 	{
+		const SOURCE: &str = "this column in `locations` must be non-null";
 		sqlx::query!(
 			"WITH RECURSIVE location_view AS
 			(
@@ -187,33 +188,29 @@ impl PgLocation
 		)
 		.fetch(connection)
 		.try_fold(None, |previous: Option<Location>, view| {
-			let id = match view.id
-			{
-				Some(id) => id,
-				_ =>
-				{
-					return future::err(Error::ColumnDecode {
-						index: "id".into(),
-						source: "this column in `locations` must be non-null".into(),
-					})
-				},
-			};
-
-			let name = match view.name
-			{
-				Some(n) => n,
-				_ =>
-				{
-					return future::err(Error::ColumnDecode {
-						index: "name".into(),
-						source: "this column in `locations` must be non-null".into(),
-					})
-				},
-			};
-
 			future::ok(Some(Location {
-				id,
-				name,
+				id: match view.id
+				{
+					Some(id) => id,
+					_ =>
+					{
+						return future::err(Error::ColumnDecode {
+							index: "name".into(),
+							source: SOURCE.into(),
+						})
+					},
+				},
+				name: match view.name
+				{
+					Some(n) => n,
+					_ =>
+					{
+						return future::err(Error::ColumnDecode {
+							index: "name".into(),
+							source: SOURCE.into(),
+						})
+					},
+				},
 				outer: previous.map(Box::new),
 			}))
 		})

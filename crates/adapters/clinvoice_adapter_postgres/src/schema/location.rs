@@ -1,6 +1,6 @@
 use core::fmt::Display;
 
-use clinvoice_adapter::{schema::columns::LocationColumns, WriteWhereClause, fmt::SnakeCase};
+use clinvoice_adapter::{fmt::SnakeCase, schema::columns::LocationColumns, WriteWhereClause};
 use clinvoice_match::{Match, MatchLocation, MatchOuterLocation};
 use clinvoice_schema::{Id, Location};
 use futures::{future, TryFutureExt, TryStreamExt};

@@ -1,16 +1,18 @@
-use std::collections::HashMap;
-
 use clinvoice_adapter::{
-	schema::{columns::OrganizationColumns, LocationAdapter, OrganizationAdapter},
+	fmt::SnakeCase,
+	schema::{
+		columns::{LocationColumns, OrganizationColumns},
+		OrganizationAdapter,
+	},
 	WriteWhereClause,
 };
 use clinvoice_match::MatchOrganization;
 use clinvoice_schema::{Location, Organization};
-use futures::{future, TryFutureExt, TryStreamExt};
-use sqlx::{PgPool, QueryBuilder, Result, Row};
+use futures::TryStreamExt;
+use sqlx::{PgPool, Result};
 
 use super::PgOrganization;
-use crate::{schema::PgLocation, PgSchema};
+use crate::{fmt::PgLocationRecursiveCte, schema::PgLocation, PgSchema};
 
 #[async_trait::async_trait]
 impl OrganizationAdapter for PgOrganization
@@ -37,36 +39,47 @@ impl OrganizationAdapter for PgOrganization
 		match_condition: &MatchOrganization,
 	) -> Result<Vec<Organization>>
 	{
-		let locations_fut =
-			PgLocation::retrieve(connection, &match_condition.location).map_ok(|vec| {
-				vec.into_iter()
-					.map(|l| (l.id, l))
-					.collect::<HashMap<_, _>>()
-			});
-
+		const ALIAS: &str = "O";
 		const COLUMNS: OrganizationColumns<&'static str> = OrganizationColumns::default();
+		const LOCATION_ALIAS: SnakeCase<&str, &str> = SnakeCase::Body(ALIAS, "L");
+		const LOCATION_COLUMNS: LocationColumns<&'static str> = LocationColumns::default();
 
-		let mut query = QueryBuilder::new(
-			"SELECT
-				O.id,
-				O.location_id,
-				O.name
-			FROM organizations O",
-		);
+		let location_columns = LOCATION_COLUMNS.scoped(LOCATION_ALIAS);
+		let organization_columns = COLUMNS.scoped(ALIAS);
+		let mut query = PgLocation::query_with_recursive(&match_condition.location);
+
+		query
+			.separated(' ')
+			.push("SELECT")
+			.push(organization_columns.id)
+			.push_unseparated(',')
+			.push_unseparated(organization_columns.location_id)
+			.push_unseparated(',')
+			.push_unseparated(organization_columns.name)
+			.push("FROM organizations")
+			.push(ALIAS)
+			.push("JOIN")
+			.push(PgLocationRecursiveCte::from(
+				&match_condition.location.outer,
+			))
+			.push(LOCATION_ALIAS)
+			.push("ON (");
+
+		query
+			.separated('=')
+			.push(location_columns.id)
+			.push(organization_columns.location_id)
+			.push_unseparated(')');
+
 		PgSchema::write_where_clause(Default::default(), "O", match_condition, &mut query);
 
-		let locations = locations_fut.await?;
 		query
 			.push(';')
 			.build()
 			.fetch(connection)
-			.try_filter_map(|row| {
-				future::ok(match locations.get(&row.get(COLUMNS.location_id))
-				{
-					Some(l) => Some(PgOrganization::row_to_view(COLUMNS, &row, l.clone())),
-					_ => None,
-				})
-			})
+			.and_then(
+				|row| async move { PgOrganization::row_to_view(connection, COLUMNS, &row).await },
+			)
 			.try_collect()
 			.await
 	}

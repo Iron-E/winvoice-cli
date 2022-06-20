@@ -110,7 +110,7 @@ impl PgLocation
 						outer,
 					)
 				},
-				MatchOuterLocation::Any | MatchOuterLocation::None =>
+				_ =>
 				{
 					if !FIRST
 					{
@@ -228,16 +228,11 @@ impl PgLocation
 			.push("SELECT")
 			.push(COLUMNS.id)
 			.push("FROM")
-			.push(
-				if match_condition.outer == MatchOuterLocation::None
-				{
-					PgLocationRecursiveCte::new()
-				}
-				else
-				{
-					PgLocationRecursiveCte::report()
-				},
-			);
+			.push(match match_condition.outer
+			{
+				MatchOuterLocation::Some(_) => PgLocationRecursiveCte::report(),
+				_ => PgLocationRecursiveCte::new(),
+			});
 
 		query
 			.push(';')

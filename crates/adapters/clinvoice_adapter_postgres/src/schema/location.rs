@@ -15,8 +15,6 @@ mod updatable;
 const ALIAS_INNER: &str = "L";
 const ALIAS_OUTER: &str = "LO";
 const COLUMNS: LocationColumns<&str> = LocationColumns::default();
-const IDENT_INNERMOST: SnakeCase<&str, &str> = PgLocationRecursiveCte::new();
-const IDENT_REPORT: SnakeCase<&str, &str> = PgLocationRecursiveCte::report();
 
 pub struct PgLocation;
 
@@ -116,6 +114,7 @@ impl PgLocation
 				{
 					if let Some(_) = ident.slice_end()
 					{
+						const IDENT_REPORT: SnakeCase<&str, &str> = PgLocationRecursiveCte::report();
 						query
 							.push(',')
 							.separated(' ')
@@ -158,7 +157,7 @@ impl PgLocation
 
 		let mut query = QueryBuilder::new("WITH RECURSIVE ");
 
-		generate_cte(&mut query, IDENT_INNERMOST, match_condition);
+		generate_cte(&mut query, PgLocationRecursiveCte::new(), match_condition);
 
 		query.push(' ');
 		query
@@ -230,11 +229,7 @@ impl PgLocation
 			.push("SELECT")
 			.push(COLUMNS.id)
 			.push("FROM")
-			.push(match match_condition.outer
-			{
-				MatchOuterLocation::Some(_) => IDENT_REPORT,
-				_ => IDENT_INNERMOST,
-			});
+			.push(PgLocationRecursiveCte::from(&match_condition.outer));
 
 		query
 			.push(';')

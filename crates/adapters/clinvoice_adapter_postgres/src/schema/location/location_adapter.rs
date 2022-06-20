@@ -1,14 +1,11 @@
-use clinvoice_adapter::{
-	schema::{columns::LocationColumns, LocationAdapter},
-	WriteWhereClause,
-};
+use clinvoice_adapter::schema::{columns::LocationColumns, LocationAdapter};
 use clinvoice_match::MatchLocation;
 use clinvoice_schema::Location;
 use futures::TryStreamExt;
-use sqlx::{PgPool, QueryBuilder, Result, Row};
+use sqlx::{PgPool, Result, Row};
 
 use super::PgLocation;
-use crate::PgSchema;
+use crate::fmt::PgLocationRecursiveCte;
 
 #[async_trait::async_trait]
 impl LocationAdapter for PgLocation
@@ -33,12 +30,15 @@ impl LocationAdapter for PgLocation
 	async fn retrieve(connection: &PgPool, match_condition: &MatchLocation)
 		-> Result<Vec<Location>>
 	{
-		let id_match = Self::retrieve_matching_ids(connection, match_condition);
-
 		const COLUMNS: LocationColumns<&'static str> = LocationColumns::default();
 
-		let mut query = QueryBuilder::new("SELECT name, outer_id, id FROM locations");
-		PgSchema::write_where_clause(Default::default(), COLUMNS.id, &id_match.await?, &mut query);
+		let mut query = Self::query_with_recursive(match_condition);
+		query
+			.separated(' ')
+			.push("SELECT")
+			.push(COLUMNS.id)
+			.push("FROM")
+			.push(PgLocationRecursiveCte::from(&match_condition.outer));
 
 		query
 			.push(';')

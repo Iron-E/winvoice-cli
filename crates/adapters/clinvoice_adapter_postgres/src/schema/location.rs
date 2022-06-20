@@ -33,8 +33,9 @@ impl PgLocation
 		/// Generate multiple Common Table Expressions for a recursive query.
 		fn generate_cte<TCurrent, TPrev, const FIRST: bool>(
 			query: &mut QueryBuilder<Postgres>,
-			ident: PgLocationRecursiveCte<TCurrent, TPrev>,
+			ident: TCurrent, /* HACK: this parameter should be `ident: SnakeCase<TPrev, TCurrent>` after rust-lang/rust#39959 */
 			match_condition: &MatchLocation,
+			prev: Option<TPrev>, /* HACK: this parameter is necessary because we can't use `ident: SnakeCase` because of rust-lang/rust#39959 */
 		) where
 			TCurrent: Display,
 			TPrev: Display,
@@ -58,11 +59,11 @@ impl PgLocation
 					.push("FROM locations")
 					.push(ALIAS_OUTER);
 
-				if let Some(prev) = ident.prev()
+				if let Some(p) = prev
 				{
 					separated
 						.push("JOIN")
-						.push(prev)
+						.push(p)
 						.push(ALIAS_INNER)
 						.push("ON (")
 						.push_unseparated(outer_columns.id)
@@ -103,7 +104,13 @@ impl PgLocation
 				MatchOuterLocation::Some(ref outer) =>
 				{
 					query.push(',');
-					generate_cte::<_, _, false>(query, ident.outer(), outer)
+					generate_cte::<_, _, false>(
+						query,
+						// HACK: remove `.to_string()` after rust-lang/rust#39959
+						PgLocationRecursiveCte::outer(&ident).to_string(),
+						outer,
+						Some(&ident),
+					)
 				},
 				MatchOuterLocation::Any | MatchOuterLocation::None =>
 				{
@@ -148,7 +155,12 @@ impl PgLocation
 
 		let mut query = QueryBuilder::new("WITH RECURSIVE ");
 
-		generate_cte::<_, _, true>(&mut query, PgLocationRecursiveCte::new(), match_condition);
+		generate_cte::<_, _, true>(
+			&mut query,
+			PgLocationRecursiveCte::new(),
+			match_condition,
+			None::<&str>,
+		);
 
 		query.push(' ');
 		query

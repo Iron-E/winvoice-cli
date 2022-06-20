@@ -13,6 +13,8 @@ use sqlx::{Executor, PgPool, Postgres, QueryBuilder, Result, Row};
 use super::PgExpenses;
 use crate::{schema::util, PgSchema};
 
+const COLUMNS: ExpenseColumns<&'static str> = ExpenseColumns::default();
+
 #[async_trait::async_trait]
 impl ExpensesAdapter for PgExpenses
 {
@@ -30,8 +32,6 @@ impl ExpensesAdapter for PgExpenses
 		let exchange_rates = ExchangeRates::new()
 			.map_err(util::finance_err_to_sqlx)
 			.await?;
-
-		const COLUMNS: ExpenseColumns<&'static str> = ExpenseColumns::default();
 
 		QueryBuilder::new(
 			"INSERT INTO expenses
@@ -71,8 +71,6 @@ impl ExpensesAdapter for PgExpenses
 	) -> Result<HashMap<Id, Vec<Expense>>>
 	{
 		let exchange_rates_fut = ExchangeRates::new().map_err(util::finance_err_to_sqlx);
-
-		const COLUMNS: ExpenseColumns<&'static str> = ExpenseColumns::default();
 
 		let mut query = QueryBuilder::new(
 			"SELECT

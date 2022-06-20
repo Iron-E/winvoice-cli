@@ -217,8 +217,6 @@ where
 		},
 	};
 
-	query.push(')');
-
 	Ok(WriteContext::AcceptingAnotherWhereCondition)
 }
 

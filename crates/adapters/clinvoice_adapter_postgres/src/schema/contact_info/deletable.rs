@@ -124,5 +124,10 @@ mod tests
 			.as_slice(),
 			&[contact_info[2].clone()],
 		);
+
+		// cleanup for the test; since labels are the primary key
+		PgContactInfo::delete(&connection, [&contact_info[2]].into_iter())
+			.await
+			.unwrap();
 	}
 }

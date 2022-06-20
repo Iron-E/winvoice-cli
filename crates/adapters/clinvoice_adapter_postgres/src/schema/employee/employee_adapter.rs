@@ -65,6 +65,8 @@ impl EmployeeAdapter for PgEmployee
 #[cfg(test)]
 mod tests
 {
+	use std::collections::HashSet;
+
 	use clinvoice_match::{Match, MatchEmployee, MatchStr};
 
 	use super::{EmployeeAdapter, PgEmployee};
@@ -137,8 +139,9 @@ mod tests
 			})
 			.await
 			.unwrap()
-			.as_slice(),
-			&[employee, employee2]
+			.into_iter()
+			.collect::<HashSet<_>>(),
+			[employee, employee2].into_iter().collect()
 		);
 	}
 }

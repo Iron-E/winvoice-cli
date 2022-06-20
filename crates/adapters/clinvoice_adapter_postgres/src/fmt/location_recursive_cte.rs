@@ -19,7 +19,7 @@ impl PgLocationRecursiveCte
 	/// Create a new recursive CTE identifier for a [`PgLocation`].
 	pub(crate) const fn new() -> SnakeCase<&'static str, &'static str>
 	{
-		SnakeCase::new("location")
+		SnakeCase::Head("location")
 	}
 
 	/// # Summary
@@ -38,6 +38,6 @@ impl PgLocationRecursiveCte
 	/// RECURSIVE`.
 	pub(crate) const fn report() -> SnakeCase<&'static str, &'static str>
 	{
-		SnakeCase::new("location_report")
+		SnakeCase::Body("location", "report")
 	}
 }

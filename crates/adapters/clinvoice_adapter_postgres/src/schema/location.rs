@@ -1,6 +1,6 @@
 use core::fmt::Display;
 
-use clinvoice_adapter::{schema::columns::LocationColumns, WriteWhereClause};
+use clinvoice_adapter::{schema::columns::LocationColumns, WriteWhereClause, fmt::SnakeCase};
 use clinvoice_match::{Match, MatchLocation, MatchOuterLocation};
 use clinvoice_schema::{Id, Location};
 use futures::{future, TryFutureExt, TryStreamExt};
@@ -33,9 +33,8 @@ impl PgLocation
 		/// Generate multiple Common Table Expressions for a recursive query.
 		fn generate_cte<TCurrent, TPrev, const FIRST: bool>(
 			query: &mut QueryBuilder<Postgres>,
-			ident: TCurrent, /* HACK: this parameter should be `ident: SnakeCase<TPrev, TCurrent>` after rust-lang/rust#39959 */
+			ident: SnakeCase<TPrev, TCurrent>,
 			match_condition: &MatchLocation,
-			prev: Option<TPrev>, /* HACK: this parameter is necessary because we can't use `ident: SnakeCase` because of rust-lang/rust#39959 */
 		) where
 			TCurrent: Display,
 			TPrev: Display,
@@ -59,11 +58,11 @@ impl PgLocation
 					.push("FROM locations")
 					.push(ALIAS_OUTER);
 
-				if let Some(p) = prev
+				if let Some((prev, _)) = ident.slice_end()
 				{
 					separated
 						.push("JOIN")
-						.push(p)
+						.push(prev)
 						.push(ALIAS_INNER)
 						.push("ON (")
 						.push_unseparated(outer_columns.id)
@@ -107,9 +106,8 @@ impl PgLocation
 					generate_cte::<_, _, false>(
 						query,
 						// HACK: remove `.to_string()` after rust-lang/rust#39959
-						PgLocationRecursiveCte::outer(&ident).to_string(),
+						PgLocationRecursiveCte::outer(ident.to_string()),
 						outer,
-						Some(&ident),
 					)
 				},
 				MatchOuterLocation::Any | MatchOuterLocation::None =>
@@ -155,12 +153,7 @@ impl PgLocation
 
 		let mut query = QueryBuilder::new("WITH RECURSIVE ");
 
-		generate_cte::<_, _, true>(
-			&mut query,
-			PgLocationRecursiveCte::new(),
-			match_condition,
-			None::<&str>,
-		);
+		generate_cte::<_, _, true>(&mut query, PgLocationRecursiveCte::new(), match_condition);
 
 		query.push(' ');
 		query

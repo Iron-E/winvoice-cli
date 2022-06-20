@@ -9,7 +9,7 @@ impl<T> ColumnsToSql for ContactColumns<T>
 where
 	T: Copy + Display,
 {
-	fn push_columns<Db>(&self, query: &mut QueryBuilder<Db>)
+	fn push<Db>(&self, query: &mut QueryBuilder<Db>)
 	where
 		Db: Database,
 	{

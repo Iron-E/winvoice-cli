@@ -114,7 +114,7 @@ impl PgSchema
 			.push(values_ident)
 			.push('(');
 
-		columns.push_columns(&mut query);
+		columns.push(&mut query);
 
 		query.push(") WHERE ");
 

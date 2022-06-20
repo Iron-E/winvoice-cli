@@ -11,7 +11,7 @@ pub trait ColumnsToSql
 	/// # Summary
 	///
 	/// Push a comma-separated list of column names to the `query`, e.g.: `column_1,column_2,`…`column_n`.
-	fn push_columns<Db>(&self, query: &mut QueryBuilder<Db>)
+	fn push<Db>(&self, query: &mut QueryBuilder<Db>)
 	where
 		Db: Database;
 

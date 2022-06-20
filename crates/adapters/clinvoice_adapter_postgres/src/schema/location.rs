@@ -12,9 +12,11 @@ mod deletable;
 mod location_adapter;
 mod updatable;
 
-const COLUMNS: LocationColumns<&'static str> = LocationColumns::default();
 const ALIAS_INNER: &str = "L";
 const ALIAS_OUTER: &str = "LO";
+const COLUMNS: LocationColumns<&str> = LocationColumns::default();
+const IDENT_INNERMOST: SnakeCase<&str, &str> = PgLocationRecursiveCte::new();
+const IDENT_REPORT: SnakeCase<&str, &str> = PgLocationRecursiveCte::report();
 
 pub struct PgLocation;
 
@@ -31,7 +33,7 @@ impl PgLocation
 		/// # Summary
 		///
 		/// Generate multiple Common Table Expressions for a recursive query.
-		fn generate_cte<TCurrent, TPrev, const FIRST: bool>(
+		fn generate_cte<TCurrent, TPrev>(
 			query: &mut QueryBuilder<Postgres>,
 			ident: SnakeCase<TPrev, TCurrent>,
 			match_condition: &MatchLocation,
@@ -103,7 +105,7 @@ impl PgLocation
 				MatchOuterLocation::Some(ref outer) =>
 				{
 					query.push(',');
-					generate_cte::<_, _, false>(
+					generate_cte(
 						query,
 						// HACK: remove `.to_string()` after rust-lang/rust#39959
 						PgLocationRecursiveCte::outer(ident.to_string()),
@@ -112,11 +114,13 @@ impl PgLocation
 				},
 				_ =>
 				{
-					if !FIRST
+					if let Some(_) = ident.slice_end()
 					{
 						query
+							.push(',')
 							.separated(' ')
-							.push(", location_report AS (SELECT")
+							.push(IDENT_REPORT)
+							.push("AS (SELECT")
 							.push(inner_columns.id)
 							.push_unseparated(',')
 							.push_unseparated(inner_columns.name)
@@ -139,7 +143,8 @@ impl PgLocation
 							.push_unseparated(inner_columns.outer_id)
 							.push("FROM locations")
 							.push(ALIAS_INNER)
-							.push("JOIN location_report")
+							.push("JOIN")
+							.push(IDENT_REPORT)
 							.push(ALIAS_OUTER)
 							.push("ON (")
 							.push_unseparated(inner_columns.outer_id)
@@ -153,7 +158,7 @@ impl PgLocation
 
 		let mut query = QueryBuilder::new("WITH RECURSIVE ");
 
-		generate_cte::<_, _, true>(&mut query, PgLocationRecursiveCte::new(), match_condition);
+		generate_cte(&mut query, IDENT_INNERMOST, match_condition);
 
 		query.push(' ');
 		query
@@ -230,8 +235,8 @@ impl PgLocation
 			.push("FROM")
 			.push(match match_condition.outer
 			{
-				MatchOuterLocation::Some(_) => PgLocationRecursiveCte::report(),
-				_ => PgLocationRecursiveCte::new(),
+				MatchOuterLocation::Some(_) => IDENT_REPORT,
+				_ => IDENT_INNERMOST,
 			});
 
 		query

@@ -102,9 +102,12 @@ mod tests
 		PgContactInfo::create(&connection, contact_info.iter())
 			.await
 			.unwrap();
-		PgContactInfo::delete(&connection, contact_info.iter())
-			.await
-			.unwrap();
+		PgContactInfo::delete(
+			&connection,
+			[&contact_info[0], &contact_info[1]].into_iter(),
+		)
+		.await
+		.unwrap();
 
 		assert_eq!(
 			PgContactInfo::retrieve(&connection, &MatchContact {

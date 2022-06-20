@@ -1,7 +1,7 @@
 use core::fmt::Display;
 
 use clinvoice_adapter::fmt::SnakeCase;
-use clinvoice_match::MatchOuterLocation;
+use clinvoice_match::{MatchLocation, MatchOuterLocation};
 
 /// # Summary
 ///
@@ -16,10 +16,10 @@ pub(crate) struct PgLocationRecursiveCte;
 impl PgLocationRecursiveCte
 {
 	pub(crate) const fn from(
-		match_condition: &MatchOuterLocation,
+		match_condition: &MatchLocation,
 	) -> SnakeCase<&'static str, &'static str>
 	{
-		match match_condition
+		match match_condition.outer
 		{
 			MatchOuterLocation::Some(_) => Self::report(),
 			_ => Self::new(),

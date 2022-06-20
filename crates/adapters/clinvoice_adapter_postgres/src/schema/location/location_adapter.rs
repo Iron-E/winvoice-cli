@@ -33,12 +33,13 @@ impl LocationAdapter for PgLocation
 		const COLUMNS: LocationColumns<&'static str> = LocationColumns::default();
 
 		let mut query = Self::query_with_recursive(match_condition);
+
 		query
 			.separated(' ')
 			.push("SELECT")
 			.push(COLUMNS.id)
 			.push("FROM")
-			.push(PgLocationRecursiveCte::from(&match_condition.outer));
+			.push(PgLocationRecursiveCte::from(match_condition));
 
 		query
 			.push(';')

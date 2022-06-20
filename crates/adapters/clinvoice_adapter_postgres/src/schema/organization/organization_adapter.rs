@@ -59,9 +59,7 @@ impl OrganizationAdapter for PgOrganization
 			.push("FROM organizations")
 			.push(ALIAS)
 			.push("JOIN")
-			.push(PgLocationRecursiveCte::from(
-				&match_condition.location.outer,
-			))
+			.push(PgLocationRecursiveCte::from(&match_condition.location))
 			.push(LOCATION_ALIAS)
 			.push("ON (");
 

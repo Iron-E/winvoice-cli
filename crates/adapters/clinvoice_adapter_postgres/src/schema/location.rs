@@ -229,7 +229,7 @@ impl PgLocation
 			.push("SELECT")
 			.push(COLUMNS.id)
 			.push("FROM")
-			.push(PgLocationRecursiveCte::from(&match_condition.outer));
+			.push(PgLocationRecursiveCte::from(match_condition));
 
 		query
 			.push(';')

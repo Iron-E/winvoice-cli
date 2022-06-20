@@ -46,7 +46,6 @@ impl EmployeeAdapter for PgEmployee
 			"SELECT
 				E.id,
 				E.name,
-				E.organization_id,
 				E.status,
 				E.title
 			FROM employees E",

@@ -46,12 +46,10 @@ impl ContactInfoAdapter for PgContactInfo
 			"SELECT
 				C.address_id,
 				C.email,
-				C.export,
 				C.label,
-				C.phone,
-				O.id as organization_id
-			FROM organizations O
-			LEFT JOIN contact_information C ON (C.organization_id = O.id)",
+				C.other,
+				C.phone
+			FROM contact_information C",
 		);
 		write_where_clause::write_match_contact(
 			connection,

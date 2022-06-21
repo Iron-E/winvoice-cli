@@ -15,16 +15,16 @@ where
 	{
 		query
 			.separated(',')
-			.push_unseparated(self.client_id)
-			.push_unseparated(self.date_open)
-			.push_unseparated(self.date_close)
-			.push_unseparated(self.id)
-			.push_unseparated(self.increment)
-			.push_unseparated(self.invoice_date_issued)
-			.push_unseparated(self.invoice_date_paid)
-			.push_unseparated(self.invoice_hourly_rate)
-			.push_unseparated(self.notes)
-			.push_unseparated(self.objectives);
+			.push(self.client_id)
+			.push(self.date_open)
+			.push(self.date_close)
+			.push(self.id)
+			.push(self.increment)
+			.push(self.invoice_date_issued)
+			.push(self.invoice_date_paid)
+			.push(self.invoice_hourly_rate)
+			.push(self.notes)
+			.push(self.objectives);
 	}
 
 	fn push_set<Db>(&self, query: &mut QueryBuilder<Db>, values_ident: impl Copy + Display)

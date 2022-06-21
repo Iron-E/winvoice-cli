@@ -1,6 +1,6 @@
 use clinvoice_adapter::schema::columns::OrganizationColumns;
 use clinvoice_schema::Organization;
-use sqlx::{postgres::PgRow, Executor, Postgres, Result, Row};
+use sqlx::{postgres::PgRow, ColumnIndex, Executor, Postgres, Result, Row};
 
 use super::PgLocation;
 
@@ -12,11 +12,13 @@ pub struct PgOrganization;
 
 impl PgOrganization
 {
-	pub(super) async fn row_to_view(
+	pub(super) async fn row_to_view<T>(
 		connection: impl Executor<'_, Database = Postgres>,
-		columns: OrganizationColumns<&str>,
+		columns: OrganizationColumns<T>,
 		row: &PgRow,
 	) -> Result<Organization>
+	where
+		T: ColumnIndex<PgRow>,
 	{
 		let location_id = row.try_get(columns.location_id)?;
 		Ok(Organization {

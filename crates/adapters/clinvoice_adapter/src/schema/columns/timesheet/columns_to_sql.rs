@@ -3,7 +3,7 @@ use core::fmt::Display;
 use sqlx::{Database, QueryBuilder};
 
 use super::TimesheetColumns;
-use crate::fmt::ColumnsToSql;
+use crate::fmt::{ColumnsToSql, QueryBuilderExt};
 
 impl<T> ColumnsToSql for TimesheetColumns<T>
 where
@@ -29,21 +29,15 @@ where
 	{
 		let values_columns = self.scope(values_alias);
 		query
-			.separated('=')
-			.push(self.employee_id)
-			.push(values_columns.employee_id)
-			.push_unseparated(',')
-			.push_unseparated(self.job_id)
-			.push(values_columns.job_id)
-			.push_unseparated(',')
-			.push_unseparated(self.time_begin)
-			.push(values_columns.time_begin)
-			.push_unseparated(',')
-			.push_unseparated(self.time_end)
-			.push(values_columns.time_end)
-			.push_unseparated(',')
-			.push_unseparated(self.work_notes)
-			.push(values_columns.work_notes);
+			.push_equal(self.employee_id, values_columns.employee_id)
+			.push(',')
+			.push_equal(self.job_id, values_columns.job_id)
+			.push(',')
+			.push_equal(self.time_begin, values_columns.time_begin)
+			.push(',')
+			.push_equal(self.time_end, values_columns.time_end)
+			.push(',')
+			.push_equal(self.work_notes, values_columns.work_notes);
 	}
 
 	fn push_update_where<Db>(
@@ -54,9 +48,6 @@ where
 	) where
 		Db: Database,
 	{
-		query
-			.separated('=')
-			.push(self.scope(table_alias).id)
-			.push(self.scope(values_alias).id);
+		query.push_equal(self.scope(table_alias).id, self.scope(values_alias).id);
 	}
 }

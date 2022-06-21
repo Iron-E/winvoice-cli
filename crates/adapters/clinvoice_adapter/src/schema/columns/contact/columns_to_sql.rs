@@ -3,7 +3,7 @@ use core::fmt::Display;
 use sqlx::{Database, QueryBuilder};
 
 use super::ContactColumns;
-use crate::fmt::ColumnsToSql;
+use crate::fmt::{ColumnsToSql, QueryBuilderExt};
 
 impl<T> ColumnsToSql for ContactColumns<T>
 where
@@ -15,11 +15,11 @@ where
 	{
 		query
 			.separated(',')
-			.push(&self.address_id)
-			.push(&self.email)
-			.push(&self.label)
-			.push(&self.other)
-			.push(&self.phone);
+			.push(self.address_id)
+			.push(self.email)
+			.push(self.label)
+			.push(self.other)
+			.push(self.phone);
 	}
 
 	fn push_set<Db>(&self, query: &mut QueryBuilder<Db>, values_alias: impl Copy + Display)
@@ -28,21 +28,15 @@ where
 	{
 		let values_columns = self.scope(values_alias);
 		query
-			.separated('=')
-			.push(self.address_id)
-			.push(values_columns.address_id)
-			.push_unseparated(',')
-			.push_unseparated(self.email)
-			.push(values_columns.email)
-			.push_unseparated(',')
-			.push_unseparated(self.label)
-			.push(values_columns.label)
-			.push_unseparated(',')
-			.push_unseparated(self.other)
-			.push(values_columns.other)
-			.push_unseparated(',')
-			.push_unseparated(self.phone)
-			.push(values_columns.phone);
+			.push_equal(self.address_id, values_columns.address_id)
+			.push(',')
+			.push_equal(self.email, values_columns.email)
+			.push(',')
+			.push_equal(self.label, values_columns.label)
+			.push(',')
+			.push_equal(self.other, values_columns.other)
+			.push(',')
+			.push_equal(self.phone, values_columns.phone);
 	}
 
 	fn push_update_where<Db>(
@@ -53,9 +47,9 @@ where
 	) where
 		Db: Database,
 	{
-		query
-			.separated('=')
-			.push(self.scope(table_alias).label)
-			.push(self.scope(values_alias).label);
+		query.push_equal(
+			self.scope(table_alias).label,
+			self.scope(values_alias).label,
+		);
 	}
 }

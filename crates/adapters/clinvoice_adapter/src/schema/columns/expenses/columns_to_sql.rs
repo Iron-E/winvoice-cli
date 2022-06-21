@@ -3,7 +3,7 @@ use core::fmt::Display;
 use sqlx::{Database, QueryBuilder};
 
 use super::ExpenseColumns;
-use crate::fmt::ColumnsToSql;
+use crate::fmt::{ColumnsToSql, QueryBuilderExt};
 
 impl<T> ColumnsToSql for ExpenseColumns<T>
 where
@@ -28,18 +28,13 @@ where
 	{
 		let values_columns = self.scope(values_alias);
 		query
-			.separated('=')
-			.push(self.category)
-			.push(values_columns.category)
-			.push_unseparated(',')
-			.push_unseparated(self.cost)
-			.push(values_columns.cost)
-			.push_unseparated(',')
-			.push_unseparated(self.description)
-			.push(values_columns.description)
-			.push_unseparated(',')
-			.push_unseparated(self.timesheet_id)
-			.push(values_columns.timesheet_id);
+			.push_equal(self.category, values_columns.category)
+			.push(',')
+			.push_equal(self.cost, values_columns.cost)
+			.push(',')
+			.push_equal(self.description, values_columns.description)
+			.push(',')
+			.push_equal(self.timesheet_id, values_columns.timesheet_id);
 	}
 
 	fn push_update_where<Db>(
@@ -50,9 +45,6 @@ where
 	) where
 		Db: Database,
 	{
-		query
-			.separated('=')
-			.push(self.scope(table_alias).id)
-			.push(self.scope(values_alias).id);
+		query.push_equal(self.scope(table_alias).id, self.scope(values_alias).id);
 	}
 }

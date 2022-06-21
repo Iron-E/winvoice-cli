@@ -1,4 +1,5 @@
 use clinvoice_adapter::{
+	fmt::ColumnsToSql,
 	schema::{columns::EmployeeColumns, EmployeeAdapter},
 	WriteWhereClause,
 };
@@ -40,17 +41,14 @@ impl EmployeeAdapter for PgEmployee
 	async fn retrieve(connection: &PgPool, match_condition: &MatchEmployee)
 		-> Result<Vec<Employee>>
 	{
+		const ALIAS: &str = "E";
 		const COLUMNS: EmployeeColumns<&'static str> = EmployeeColumns::default();
 
-		let mut query = QueryBuilder::new(
-			"SELECT
-				E.id,
-				E.name,
-				E.status,
-				E.title
-			FROM employees E",
-		);
-		PgSchema::write_where_clause(Default::default(), "E", match_condition, &mut query);
+		let mut query = QueryBuilder::new("SELECT ");
+
+		COLUMNS.scoped(ALIAS).push(&mut query);
+		query.separated(' ').push(" FROM employees").push(ALIAS);
+		PgSchema::write_where_clause(Default::default(), ALIAS, match_condition, &mut query);
 
 		query
 			.push(';')

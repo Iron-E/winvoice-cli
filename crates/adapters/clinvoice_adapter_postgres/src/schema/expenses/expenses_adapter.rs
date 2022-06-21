@@ -99,6 +99,7 @@ impl ExpensesAdapter for PgExpenses
 				let entry = map
 					.entry(row.get::<Id, _>(COLUMNS.timesheet_id))
 					.or_insert_with(Vec::new);
+
 				match PgExpenses::row_to_view(COLUMNS, &row)
 				{
 					Ok(Some(expense)) => entry.push(expense),

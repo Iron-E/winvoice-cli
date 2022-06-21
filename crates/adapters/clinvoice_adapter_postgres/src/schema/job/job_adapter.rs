@@ -1,7 +1,7 @@
 use core::time::Duration;
 
 use clinvoice_adapter::{
-	fmt::{ColumnsToSql, SnakeCase},
+	fmt::{ColumnsToSql, QueryBuilderExt, SnakeCase},
 	schema::{
 		columns::{JobColumns, LocationColumns, OrganizationColumns},
 		JobAdapter,
@@ -100,31 +100,19 @@ impl JobAdapter for PgJob
 			.push_to(&mut query);
 
 		query
-			.separated(' ')
-			.push(" FROM jobs")
-			.push(ALIAS)
-			.push("JOIN organizations")
-			.push(ORGANIZATION_ALIAS)
-			.push("ON (");
-		query
-			.separated('=')
-			.push(organization_columns.id)
-			.push(columns.client_id)
-			.push_unseparated(')');
-
-		query
-			.separated(' ')
-			.push(" JOIN")
-			.push(PgLocationRecursiveCte::from(
-				&match_condition.client.location,
-			))
-			.push(LOCATION_ALIAS)
-			.push("ON (");
-		query
-			.separated('=')
-			.push(LOCATION_COLUMNS.scope(LOCATION_ALIAS).id)
-			.push(organization_columns.location_id)
-			.push_unseparated(')');
+			.push_from("jobs", ALIAS)
+			.push_equijoin(
+				"organizations",
+				ORGANIZATION_ALIAS,
+				organization_columns.id,
+				columns.client_id,
+			)
+			.push_equijoin(
+				PgLocationRecursiveCte::from(&match_condition.client.location),
+				LOCATION_ALIAS,
+				LOCATION_COLUMNS.scope(LOCATION_ALIAS).id,
+				organization_columns.location_id,
+			);
 
 		PgSchema::write_where_clause(
 			PgSchema::write_where_clause(

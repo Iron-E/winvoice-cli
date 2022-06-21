@@ -1,6 +1,10 @@
 use core::fmt::Display;
 
-use clinvoice_adapter::{fmt::SnakeCase, schema::columns::LocationColumns, WriteWhereClause};
+use clinvoice_adapter::{
+	fmt::{ColumnsToSql, QueryBuilderExt, SnakeCase},
+	schema::columns::LocationColumns,
+	WriteWhereClause,
+};
 use clinvoice_match::{Match, MatchLocation, MatchOuterLocation};
 use clinvoice_schema::{Id, Location};
 use futures::{future, TryFutureExt, TryStreamExt};
@@ -57,19 +61,11 @@ impl PgLocation
 					.push_unseparated(outer_columns.outer_id)
 					.push("FROM locations")
 					.push(ALIAS_OUTER);
+			}
 
-				if let Some((prev, _)) = ident.slice_end()
-				{
-					separated
-						.push("JOIN")
-						.push(prev)
-						.push(ALIAS_INNER)
-						.push("ON (")
-						.push_unseparated(outer_columns.id)
-						.push_unseparated('=')
-						.push_unseparated(inner_columns.outer_id)
-						.push_unseparated(')');
-				}
+			if let Some((prev, _)) = ident.slice_end()
+			{
+				query.push_equijoin(prev, ALIAS_INNER, outer_columns.id, inner_columns.outer_id);
 			}
 
 			PgSchema::write_where_clause(
@@ -115,41 +111,27 @@ impl PgLocation
 					if let Some(_) = ident.slice_end()
 					{
 						const IDENT_REPORT: SnakeCase<&str, &str> = PgLocationRecursiveCte::report();
+
+						query.push(',').push(IDENT_REPORT).push(" AS (SELECT ");
+						inner_columns.push_to(query);
+						query.push_from("locations", ALIAS_INNER).push_equijoin(
+							ident,
+							ALIAS_OUTER,
+							inner_columns.outer_id,
+							outer_columns.id,
+						);
+
+						query.push(" UNION SELECT ");
+						inner_columns.push_to(query);
 						query
-							.push(',')
-							.separated(' ')
-							.push(IDENT_REPORT)
-							.push("AS (SELECT")
-							.push(inner_columns.id)
-							.push_unseparated(',')
-							.push_unseparated(inner_columns.name)
-							.push_unseparated(',')
-							.push_unseparated(inner_columns.outer_id)
-							.push("FROM locations")
-							.push(ALIAS_INNER)
-							.push("JOIN")
-							.push(ident)
-							.push(ALIAS_OUTER)
-							.push("ON (")
-							.push_unseparated(inner_columns.outer_id)
-							.push_unseparated('=')
-							.push_unseparated(outer_columns.id)
-							.push_unseparated(") UNION SELECT")
-							.push(inner_columns.id)
-							.push_unseparated(',')
-							.push_unseparated(inner_columns.name)
-							.push_unseparated(',')
-							.push_unseparated(inner_columns.outer_id)
-							.push("FROM locations")
-							.push(ALIAS_INNER)
-							.push("JOIN")
-							.push(IDENT_REPORT)
-							.push(ALIAS_OUTER)
-							.push("ON (")
-							.push_unseparated(inner_columns.outer_id)
-							.push_unseparated('=')
-							.push_unseparated(outer_columns.id)
-							.push_unseparated("))");
+							.push_from("locations", ALIAS_INNER)
+							.push_equijoin(
+								IDENT_REPORT,
+								ALIAS_OUTER,
+								inner_columns.outer_id,
+								outer_columns.id,
+							)
+							.push(')');
 					}
 				},
 			}

@@ -1,7 +1,11 @@
 use std::collections::HashMap;
 
 use clinvoice_adapter::{
-	schema::{columns::ExpenseColumns, ExpensesAdapter},
+	fmt::{As, QueryBuilderExt, SnakeCase},
+	schema::{
+		columns::{ExpenseColumns, TimesheetColumns},
+		ExpensesAdapter,
+	},
 	WriteWhereClause,
 };
 use clinvoice_finance::{ExchangeRates, Exchangeable, Money};
@@ -70,23 +74,39 @@ impl ExpensesAdapter for PgExpenses
 		match_condition: &MatchSet<MatchExpense>,
 	) -> Result<HashMap<Id, Vec<Expense>>>
 	{
-		let exchange_rates_fut = ExchangeRates::new().map_err(util::finance_err_to_sqlx);
+		const ALIAS: &str = "X";
+		const COLUMNS: ExpenseColumns<&str> = ExpenseColumns::default();
 
-		let mut query = QueryBuilder::new(
-			"SELECT
-				T.id as timesheet_id,
-				X.category,
-				X.cost,
-				X.description,
-				X.id
-			FROM timesheets T
-			LEFT JOIN expenses X ON (X.timesheet_id = T.id)",
-		);
+		const TIMESHEET_ALIAS: SnakeCase<&str, &str> = SnakeCase::Body(ALIAS, "T");
+		const TIMESHEET_COLUMNS: TimesheetColumns<&str> = TimesheetColumns::default();
+
+		let columns = COLUMNS.scope(ALIAS);
+		let timesheet_columns = TIMESHEET_COLUMNS.scope(TIMESHEET_ALIAS);
+		let exchange_rates_fut = ExchangeRates::new().map_err(util::finance_err_to_sqlx);
+		let mut query = QueryBuilder::new("SELECT ");
+
+		query
+			.separated(',')
+			.push(As(timesheet_columns.id, COLUMNS.timesheet_id))
+			.push(columns.category)
+			.push(columns.cost)
+			.push(columns.description)
+			.push(columns.id);
+
+		query
+			.push_from("timesheets", TIMESHEET_ALIAS)
+			.push(" LEFT")
+			.push_equijoin(
+				"expenses",
+				ALIAS,
+				columns.timesheet_id,
+				timesheet_columns.id,
+			);
 
 		let exchange_rates = exchange_rates_fut.await?;
 		PgSchema::write_where_clause(
 			Default::default(),
-			"X",
+			ALIAS,
 			&match_condition.exchange_ref(Default::default(), &exchange_rates),
 			&mut query,
 		);

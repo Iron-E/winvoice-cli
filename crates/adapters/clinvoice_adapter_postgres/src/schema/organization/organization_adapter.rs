@@ -1,5 +1,5 @@
 use clinvoice_adapter::{
-	fmt::{ColumnsToSql, SnakeCase},
+	fmt::{ColumnsToSql, QueryBuilderExt, SnakeCase},
 	schema::{
 		columns::{LocationColumns, OrganizationColumns},
 		OrganizationAdapter,
@@ -50,22 +50,14 @@ impl OrganizationAdapter for PgOrganization
 
 		query.push("SELECT ");
 		columns.push_to(&mut query);
-		query
-			.separated(' ')
-			.push(" FROM organizations")
-			.push(ALIAS)
-			.push("JOIN")
-			.push(PgLocationRecursiveCte::from(&match_condition.location))
-			.push(LOCATION_ALIAS)
-			.push("ON (");
+		query.push_from("organizations", ALIAS).push_equijoin(
+			PgLocationRecursiveCte::from(&match_condition.location),
+			LOCATION_ALIAS,
+			location_columns.id,
+			columns.location_id,
+		);
 
-		query
-			.separated('=')
-			.push(location_columns.id)
-			.push(columns.location_id)
-			.push_unseparated(')');
-
-		PgSchema::write_where_clause(Default::default(), "O", match_condition, &mut query);
+		PgSchema::write_where_clause(Default::default(), ALIAS, match_condition, &mut query);
 
 		query
 			.push(';')

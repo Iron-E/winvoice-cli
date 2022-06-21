@@ -1,9 +1,9 @@
-use clinvoice_adapter::schema::columns::JobColumns;
+use clinvoice_adapter::schema::columns::{JobColumns, OrganizationColumns};
 use clinvoice_finance::{Decimal, Money};
-use clinvoice_schema::{Invoice, InvoiceDate, Job, Organization};
-use sqlx::{postgres::PgRow, Result, Row};
+use clinvoice_schema::{Invoice, InvoiceDate, Job};
+use sqlx::{postgres::PgRow, Executor, Postgres, Result, Row};
 
-use super::util;
+use super::{util, PgOrganization};
 
 mod deletable;
 mod job_adapter;
@@ -13,38 +13,43 @@ pub struct PgJob;
 
 impl PgJob
 {
-	pub(super) fn row_to_view(
-		columns: JobColumns<&str>,
+	pub(super) async fn row_to_view<TJobColumns, TOrgColumns>(
+		connection: impl Executor<'_, Database = Postgres>,
+		columns: JobColumns<TJobColumns>,
+		organization_columns: OrganizationColumns<TOrgColumns>,
 		row: &PgRow,
-		client: Organization,
 	) -> Result<Job>
+	where
+		TJobColumns: AsRef<str>,
+		TOrgColumns: AsRef<str>,
 	{
-		let increment = util::duration_from(row.get(columns.increment))?;
+		let client_fut = PgOrganization::row_to_view(connection, organization_columns, row);
+		let increment = util::duration_from(row.get(columns.increment.as_ref()))?;
 		let amount = row
-			.get::<String, _>(columns.invoice_hourly_rate)
+			.get::<String, _>(columns.invoice_hourly_rate.as_ref())
 			.parse::<Decimal>()
 			.map_err(|e| util::finance_err_to_sqlx(e.into()))?;
 
 		Ok(Job {
-			client,
-			date_close: row.get(columns.date_close),
-			date_open: row.get(columns.date_open),
-			id: row.get(columns.id),
+			client: client_fut.await?,
+			date_close: row.get(columns.date_close.as_ref()),
+			date_open: row.get(columns.date_open.as_ref()),
+			id: row.get(columns.id.as_ref()),
 			increment,
 			invoice: Invoice {
 				date: row
-					.get::<Option<_>, _>(columns.invoice_date_issued)
+					.get::<Option<_>, _>(columns.invoice_date_issued.as_ref())
 					.map(|d| InvoiceDate {
 						issued: d,
-						paid: row.get(columns.invoice_date_paid),
+						paid: row.get(columns.invoice_date_paid.as_ref()),
 					}),
 				hourly_rate: Money {
 					amount,
 					..Default::default()
 				},
 			},
-			notes: row.get(columns.notes),
-			objectives: row.get(columns.objectives),
+			notes: row.get(columns.notes.as_ref()),
+			objectives: row.get(columns.objectives.as_ref()),
 		})
 	}
 }

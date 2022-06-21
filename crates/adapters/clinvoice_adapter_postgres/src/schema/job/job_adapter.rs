@@ -1,25 +1,28 @@
 use core::time::Duration;
-use std::collections::HashMap;
 
 use clinvoice_adapter::{
-	schema::{columns::JobColumns, JobAdapter, OrganizationAdapter},
+	fmt::{ColumnsToSql, SnakeCase},
+	schema::{
+		columns::{JobColumns, LocationColumns, OrganizationColumns},
+		JobAdapter,
+	},
 	WriteWhereClause,
 };
 use clinvoice_finance::{ExchangeRates, Exchangeable};
 use clinvoice_match::MatchJob;
 use clinvoice_schema::{
 	chrono::{DateTime, Utc},
-	Id,
 	Invoice,
 	Job,
 	Organization,
 };
-use futures::{future, TryFutureExt, TryStreamExt};
-use sqlx::{PgPool, QueryBuilder, Result, Row};
+use futures::{TryFutureExt, TryStreamExt};
+use sqlx::{PgPool, Result};
 
 use super::PgJob;
 use crate::{
-	schema::{util, PgOrganization},
+	fmt::PgLocationRecursiveCte,
+	schema::{util, PgLocation},
 	PgSchema,
 };
 
@@ -75,56 +78,70 @@ impl JobAdapter for PgJob
 
 	async fn retrieve(connection: &PgPool, match_condition: &MatchJob) -> Result<Vec<Job>>
 	{
-		// TODO: separate into `retrieve_all() -> Vec` and `retrieve -> Stream` to skip `Vec`
-		//       collection?
-		let organizations_fut =
-			PgOrganization::retrieve(connection, &match_condition.client).map_ok(|vec| {
-				vec.into_iter()
-					.map(|o| (o.id, o))
-					.collect::<HashMap<_, _>>()
-			});
-
-		let exchange_rates = ExchangeRates::new().map_err(util::finance_err_to_sqlx);
-
+		const ALIAS: &str = "J";
 		const COLUMNS: JobColumns<&'static str> = JobColumns::default();
+		const LOCATION_ALIAS: SnakeCase<SnakeCase<&str, &str>, &str> =
+			SnakeCase::Body(ORGANIZATION_ALIAS, "L");
+		const LOCATION_COLUMNS: LocationColumns<&str> = LocationColumns::default();
+		const ORGANIZATION_ALIAS: SnakeCase<&str, &str> = SnakeCase::Body(ALIAS, "O");
+		const ORGANIZATION_COLUMNS: OrganizationColumns<&str> = OrganizationColumns::default();
+		const ORGANIZATION_COLUMNS_UNIQUE: OrganizationColumns<&str> = OrganizationColumns::unique();
 
-		let mut query = QueryBuilder::new(
-			"SELECT
-				J.client_id,
-				J.date_close,
-				J.date_open,
-				J.id,
-				J.increment,
-				J.invoice_date_issued,
-				J.invoice_date_paid,
-				J.invoice_hourly_rate,
-				J.notes,
-				J.objectives
-			FROM jobs J",
-		);
+		let columns = COLUMNS.scoped(ALIAS);
+		let exchange_rates_fut = ExchangeRates::new().map_err(util::finance_err_to_sqlx);
+		let organization_columns = ORGANIZATION_COLUMNS.scoped(ORGANIZATION_ALIAS);
+		let mut query = PgLocation::query_with_recursive(&match_condition.client.location);
+
+		query.push("SELECT ");
+		columns.push(&mut query);
+		query.push(',');
+		organization_columns.push_unique(&mut query);
+
+		query
+			.separated(' ')
+			.push(" FROM jobs")
+			.push(ALIAS)
+			.push("JOIN organizations")
+			.push(ORGANIZATION_ALIAS)
+			.push("ON (");
+		query
+			.separated('=')
+			.push(organization_columns.id)
+			.push(columns.client_id)
+			.push_unseparated(')');
+
+		query
+			.separated(' ')
+			.push(" JOIN")
+			.push(PgLocationRecursiveCte::from(
+				&match_condition.client.location,
+			))
+			.push(LOCATION_ALIAS)
+			.push("ON (");
+		query
+			.separated('=')
+			.push(LOCATION_COLUMNS.scoped(LOCATION_ALIAS).id)
+			.push(organization_columns.location_id)
+			.push_unseparated(')');
+
 		PgSchema::write_where_clause(
-			Default::default(),
-			"J",
-			&match_condition.exchange_ref(Default::default(), &exchange_rates.await?),
+			PgSchema::write_where_clause(
+				Default::default(),
+				ALIAS,
+				&match_condition.exchange_ref(Default::default(), &exchange_rates_fut.await?),
+				&mut query,
+			),
+			ORGANIZATION_ALIAS,
+			&match_condition.client,
 			&mut query,
 		);
 
-		let organizations = organizations_fut.await?;
 		query
 			.push(';')
 			.build()
 			.fetch(connection)
-			.try_filter_map(|row| {
-				if let Some(o) = organizations.get(&row.get::<Id, _>(COLUMNS.client_id))
-				{
-					return match PgJob::row_to_view(COLUMNS, &row, o.clone())
-					{
-						Ok(e) => future::ok(Some(e)),
-						Err(e) => future::err(e),
-					};
-				}
-
-				future::ok(None)
+			.and_then(|row| async move {
+				PgJob::row_to_view(connection, COLUMNS, ORGANIZATION_COLUMNS_UNIQUE, &row).await
 			})
 			.try_collect()
 			.await

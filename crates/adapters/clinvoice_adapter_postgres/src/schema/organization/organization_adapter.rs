@@ -49,7 +49,7 @@ impl OrganizationAdapter for PgOrganization
 		let mut query = PgLocation::query_with_recursive(&match_condition.location);
 
 		query.push("SELECT ");
-		columns.push(&mut query);
+		columns.push_to(&mut query);
 		query
 			.separated(' ')
 			.push(" FROM organizations")

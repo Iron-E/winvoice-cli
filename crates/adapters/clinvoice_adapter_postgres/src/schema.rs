@@ -103,7 +103,7 @@ impl PgSchema
 			.push("SET ");
 
 		let values_alias = SnakeCase::from((table_alias, "V"));
-		columns.push_set(&mut query, values_alias);
+		columns.push_set_to(&mut query, values_alias);
 
 		query.push(" FROM (");
 
@@ -115,11 +115,11 @@ impl PgSchema
 			.push(values_alias)
 			.push('(');
 
-		columns.push(&mut query);
+		columns.push_to(&mut query);
 
 		query.push(") WHERE ");
 
-		columns.push_update_where(&mut query, table_alias, values_alias);
+		columns.push_update_where_to(&mut query, table_alias, values_alias);
 
 		query.push(';').build().execute(connection).await?;
 

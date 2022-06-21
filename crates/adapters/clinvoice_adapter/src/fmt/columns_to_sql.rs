@@ -11,7 +11,7 @@ pub trait ColumnsToSql
 	/// # Summary
 	///
 	/// Push a comma-separated list of column names to the `query`, e.g.: `column_1,column_2,`…`column_n`.
-	fn push<Db>(&self, query: &mut QueryBuilder<Db>)
+	fn push_to<Db>(&self, query: &mut QueryBuilder<Db>)
 	where
 		Db: Database;
 
@@ -24,7 +24,7 @@ pub trait ColumnsToSql
 	/// column_2 = {values_alias}.column_2,
 	/// …column_n = {values_alias}.column_n
 	/// ```
-	fn push_set<Db>(&self, query: &mut QueryBuilder<Db>, values_alias: impl Copy + Display)
+	fn push_set_to<Db>(&self, query: &mut QueryBuilder<Db>, values_alias: impl Copy + Display)
 	where
 		Db: Database;
 
@@ -35,7 +35,7 @@ pub trait ColumnsToSql
 	/// ```sql
 	/// {table_alias}.id = {values_alias}.id
 	/// ```
-	fn push_update_where<Db>(
+	fn push_update_where_to<Db>(
 		&self,
 		query: &mut QueryBuilder<Db>,
 		table_alias: impl Copy + Display,

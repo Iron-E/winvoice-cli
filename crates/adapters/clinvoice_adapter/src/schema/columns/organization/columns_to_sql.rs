@@ -9,7 +9,7 @@ impl<T> ColumnsToSql for OrganizationColumns<T>
 where
 	T: Copy + Display,
 {
-	fn push<Db>(&self, query: &mut QueryBuilder<Db>)
+	fn push_to<Db>(&self, query: &mut QueryBuilder<Db>)
 	where
 		Db: Database,
 	{
@@ -20,7 +20,7 @@ where
 			.push(self.name);
 	}
 
-	fn push_set<Db>(&self, query: &mut QueryBuilder<Db>, values_alias: impl Copy + Display)
+	fn push_set_to<Db>(&self, query: &mut QueryBuilder<Db>, values_alias: impl Copy + Display)
 	where
 		Db: Database,
 	{
@@ -31,7 +31,7 @@ where
 			.push_equal(self.name, values_columns.name);
 	}
 
-	fn push_update_where<Db>(
+	fn push_update_where_to<Db>(
 		&self,
 		query: &mut QueryBuilder<Db>,
 		table_alias: impl Copy + Display,

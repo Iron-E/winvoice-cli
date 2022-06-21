@@ -93,11 +93,11 @@ impl JobAdapter for PgJob
 		let mut query = PgLocation::query_with_recursive(&match_condition.client.location);
 
 		query.push("SELECT ");
-		columns.push(&mut query);
+		columns.push_to(&mut query);
 		query.push(',');
 		organization_columns
 			.r#as(ORGANIZATION_COLUMNS_UNIQUE)
-			.push(&mut query);
+			.push_to(&mut query);
 
 		query
 			.separated(' ')

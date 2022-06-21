@@ -1,6 +1,14 @@
-use clinvoice_adapter::schema::columns::TimesheetColumns;
-use clinvoice_schema::{Employee, Expense, Job, Timesheet};
-use sqlx::{postgres::PgRow, Row};
+use clinvoice_adapter::schema::columns::{
+	EmployeeColumns,
+	JobColumns,
+	OrganizationColumns,
+	TimesheetColumns,
+};
+use clinvoice_finance::{Decimal, Money};
+use clinvoice_schema::{Expense, Timesheet};
+use sqlx::{postgres::PgRow, Executor, Postgres, Result, Row};
+
+use super::{util, PgEmployee, PgJob};
 
 mod deletable;
 mod timesheet_adapter;
@@ -10,22 +18,58 @@ pub struct PgTimesheet;
 
 impl PgTimesheet
 {
-	pub(super) fn row_to_view(
-		columns: TimesheetColumns<&str>,
+	pub(super) async fn row_to_view<TEmpColumns, TJobColumns, TOrgColumns, TTimeColumns, TXpnIdent>(
+		connection: impl Executor<'_, Database = Postgres>,
+		columns: TimesheetColumns<TTimeColumns>,
+		employee_columns: EmployeeColumns<TEmpColumns>,
+		expenses_ident: TXpnIdent,
+		job_columns: JobColumns<TJobColumns>,
+		organization_columns: OrganizationColumns<TOrgColumns>,
 		row: &PgRow,
-		employee: Employee,
-		expenses: Vec<Expense>,
-		job: Job,
-	) -> Timesheet
+	) -> Result<Timesheet>
+	where
+		TEmpColumns: AsRef<str>,
+		TJobColumns: AsRef<str>,
+		TOrgColumns: AsRef<str>,
+		TTimeColumns: AsRef<str>,
+		TXpnIdent: AsRef<str>,
 	{
-		Timesheet {
-			employee,
-			expenses,
-			id: row.get(columns.id),
-			job,
-			time_begin: row.get(columns.time_begin),
-			time_end: row.get(columns.time_end),
-			work_notes: row.get(columns.work_notes),
-		}
+		let job_fut = PgJob::row_to_view(connection, job_columns, organization_columns, row);
+
+		Ok(Timesheet {
+			employee: PgEmployee::row_to_view(employee_columns, row),
+			expenses: row.try_get(expenses_ident.as_ref()).and_then(
+				|raw_expenses: Vec<(_, String, _, _, _)>| {
+					let expenses_len = raw_expenses.len();
+					raw_expenses.into_iter().try_fold(
+						Vec::with_capacity(expenses_len),
+						|mut expenses, (category, cost, description, id, timesheet_id)| {
+							expenses.push(
+								cost
+									.parse::<Decimal>()
+									.map_err(|e| util::finance_err_to_sqlx(e.into()))
+									.map(|amount| Expense {
+										category,
+										description,
+										id,
+										timesheet_id,
+										cost: Money {
+											amount,
+											..Default::default()
+										},
+									})?,
+							);
+
+							Ok(expenses)
+						},
+					)
+				},
+			)?,
+			id: row.try_get(columns.id.as_ref())?,
+			time_begin: row.try_get(columns.time_begin.as_ref())?,
+			time_end: row.try_get(columns.time_end.as_ref())?,
+			work_notes: row.try_get(columns.work_notes.as_ref())?,
+			job: job_fut.await?,
+		})
 	}
 }

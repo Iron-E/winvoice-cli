@@ -1,6 +1,6 @@
 use clinvoice_adapter::schema::columns::OrganizationColumns;
 use clinvoice_schema::Organization;
-use sqlx::{postgres::PgRow, ColumnIndex, Executor, Postgres, Result, Row};
+use sqlx::{postgres::PgRow, Executor, Postgres, Result, Row};
 
 use super::PgLocation;
 
@@ -18,13 +18,13 @@ impl PgOrganization
 		row: &PgRow,
 	) -> Result<Organization>
 	where
-		T: ColumnIndex<PgRow>,
+		T: AsRef<str>,
 	{
-		let location_id = row.try_get(columns.location_id)?;
+		let location_id = row.try_get(columns.location_id.as_ref())?;
 		Ok(Organization {
-			id: row.try_get(columns.id)?,
+			id: row.try_get(columns.id.as_ref())?,
 			location: PgLocation::retrieve_by_id(connection, location_id).await?,
-			name: row.try_get(columns.name)?,
+			name: row.try_get(columns.name.as_ref())?,
 		})
 	}
 }

@@ -65,4 +65,16 @@ impl TimesheetColumns<&'static str>
 			work_notes: "work_notes",
 		}
 	}
+
+	pub const fn unique() -> Self
+	{
+		Self {
+			id: "unique_7_timesheet_id",
+			employee_id: "unique_7_timesheet_employee_id",
+			job_id: "unique_7_timesheet_job_id",
+			time_begin: "unique_7_timesheet_time_begin",
+			time_end: "unique_7_timesheet_time_end",
+			work_notes: "unique_7_timesheet_work_notes",
+		}
+	}
 }

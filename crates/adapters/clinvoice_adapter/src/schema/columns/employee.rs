@@ -57,4 +57,14 @@ impl EmployeeColumns<&'static str>
 			title: "title",
 		}
 	}
+
+	pub const fn unique() -> Self
+	{
+		Self {
+			id: "unique_2_employee_id",
+			name: "unique_2_employee_name",
+			status: "unique_2_employee_status",
+			title: "unique_2_employee_title",
+		}
+	}
 }

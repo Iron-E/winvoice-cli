@@ -53,4 +53,13 @@ impl OrganizationColumns<&'static str>
 			name: "name",
 		}
 	}
+
+	pub const fn unique() -> Self
+	{
+		Self {
+			id: "unique_6_organization_id",
+			location_id: "unique_6_organization_location_id",
+			name: "unique_6_organization_name",
+		}
+	}
 }

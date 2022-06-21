@@ -30,6 +30,13 @@ pub trait ColumnsToSql
 
 	/// # Summary
 	///
+	/// [Push](ColumnsToSql::push) to the `query` but using unique column identifiers.
+	fn push_unique<Db>(&self, query: &mut QueryBuilder<Db>)
+	where
+		Db: Database;
+
+	/// # Summary
+	///
 	/// Push the `WHERE` clause of an `UPDATE` statement (`WHERE` keyword not included) to the `query`, e.g.:
 	///
 	/// ```sql

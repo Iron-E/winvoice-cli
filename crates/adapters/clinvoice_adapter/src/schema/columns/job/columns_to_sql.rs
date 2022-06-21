@@ -62,6 +62,54 @@ where
 			.push(values_columns.objectives);
 	}
 
+	fn push_unique<Db>(&self, query: &mut QueryBuilder<Db>)
+	where
+		Db: Database,
+	{
+		const UNIQUE: JobColumns<&str> = JobColumns::unique();
+		query
+			.separated(' ')
+			.push(self.client_id)
+			.push("AS")
+			.push(UNIQUE.client_id)
+			.push_unseparated(',')
+			.push_unseparated(self.date_close)
+			.push("AS")
+			.push(UNIQUE.date_close)
+			.push_unseparated(',')
+			.push_unseparated(self.date_open)
+			.push("AS")
+			.push(UNIQUE.date_open)
+			.push_unseparated(',')
+			.push_unseparated(self.id)
+			.push("AS")
+			.push(UNIQUE.id)
+			.push_unseparated(',')
+			.push_unseparated(self.increment)
+			.push("AS")
+			.push(UNIQUE.increment)
+			.push_unseparated(',')
+			.push_unseparated(self.invoice_date_issued)
+			.push("AS")
+			.push(UNIQUE.invoice_date_issued)
+			.push_unseparated(',')
+			.push_unseparated(self.invoice_date_paid)
+			.push("AS")
+			.push(UNIQUE.invoice_date_paid)
+			.push_unseparated(',')
+			.push_unseparated(self.invoice_hourly_rate)
+			.push("AS")
+			.push(UNIQUE.invoice_hourly_rate)
+			.push_unseparated(',')
+			.push_unseparated(self.notes)
+			.push("AS")
+			.push(UNIQUE.notes)
+			.push_unseparated(',')
+			.push_unseparated(self.objectives)
+			.push("AS")
+			.push(UNIQUE.objectives);
+	}
+
 	fn push_update_where<Db>(
 		&self,
 		query: &mut QueryBuilder<Db>,

@@ -61,4 +61,15 @@ impl ContactColumns<&'static str>
 			phone: "phone",
 		}
 	}
+
+	pub const fn unique() -> Self
+	{
+		Self {
+			address_id: "unique_1_contact_address_id",
+			email: "unique_1_contact_email",
+			label: "unique_1_contact_label",
+			other: "unique_1_contact_other",
+			phone: "unique_1_contact_phone",
+		}
+	}
 }

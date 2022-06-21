@@ -61,4 +61,15 @@ impl ExpenseColumns<&'static str>
 			timesheet_id: "timesheet_id",
 		}
 	}
+
+	pub const fn unique() -> Self
+	{
+		Self {
+			category: "unique_3_expense_category",
+			cost: "unique_3_expense_cost",
+			description: "unique_3_expense_description",
+			id: "unique_3_expense_id",
+			timesheet_id: "unique_3_expense_timesheet_id",
+		}
+	}
 }

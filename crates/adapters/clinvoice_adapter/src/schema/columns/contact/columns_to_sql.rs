@@ -45,6 +45,34 @@ where
 			.push(values_columns.phone);
 	}
 
+	fn push_unique<Db>(&self, query: &mut QueryBuilder<Db>)
+	where
+		Db: Database,
+	{
+		const UNIQUE: ContactColumns<&str> = ContactColumns::unique();
+		query
+			.separated(' ')
+			.push(self.address_id)
+			.push("AS")
+			.push(UNIQUE.address_id)
+			.push_unseparated(',')
+			.push_unseparated(self.email)
+			.push("AS")
+			.push(UNIQUE.email)
+			.push_unseparated(',')
+			.push_unseparated(self.label)
+			.push("AS")
+			.push(UNIQUE.label)
+			.push_unseparated(',')
+			.push_unseparated(self.other)
+			.push("AS")
+			.push(UNIQUE.other)
+			.push_unseparated(',')
+			.push_unseparated(self.phone)
+			.push("AS")
+			.push(UNIQUE.phone);
+	}
+
 	fn push_update_where<Db>(
 		&self,
 		query: &mut QueryBuilder<Db>,

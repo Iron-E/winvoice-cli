@@ -42,6 +42,34 @@ where
 			.push(values_columns.timesheet_id);
 	}
 
+	fn push_unique<Db>(&self, query: &mut QueryBuilder<Db>)
+	where
+		Db: Database,
+	{
+		const UNIQUE: ExpenseColumns<&str> = ExpenseColumns::unique();
+		query
+			.separated(' ')
+			.push(self.category)
+			.push("AS")
+			.push(UNIQUE.category)
+			.push_unseparated(',')
+			.push_unseparated(self.cost)
+			.push("AS")
+			.push(UNIQUE.cost)
+			.push_unseparated(',')
+			.push_unseparated(self.description)
+			.push("AS")
+			.push(UNIQUE.description)
+			.push_unseparated(',')
+			.push_unseparated(self.id)
+			.push("AS")
+			.push(UNIQUE.id)
+			.push_unseparated(',')
+			.push_unseparated(self.timesheet_id)
+			.push("AS")
+			.push(UNIQUE.timesheet_id);
+	}
+
 	fn push_update_where<Db>(
 		&self,
 		query: &mut QueryBuilder<Db>,

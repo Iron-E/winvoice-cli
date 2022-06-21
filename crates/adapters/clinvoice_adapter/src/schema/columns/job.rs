@@ -81,4 +81,20 @@ impl JobColumns<&'static str>
 			objectives: "objectives",
 		}
 	}
+
+	pub const fn unique() -> Self
+	{
+		Self {
+			client_id: "unique_4_job_client_id",
+			date_close: "unique_4_job_date_close",
+			date_open: "unique_4_job_date_open",
+			id: "unique_4_job_id",
+			increment: "unique_4_job_increment",
+			invoice_date_issued: "unique_4_job_invoice_date_issued",
+			invoice_date_paid: "unique_4_job_invoice_date_paid",
+			invoice_hourly_rate: "unique_4_job_invoice_hourly_rate",
+			notes: "unique_4_job_notes",
+			objectives: "unique_4_job_objectives",
+		}
+	}
 }

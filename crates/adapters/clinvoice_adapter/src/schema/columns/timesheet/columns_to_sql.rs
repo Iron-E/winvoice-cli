@@ -46,6 +46,38 @@ where
 			.push(values_columns.work_notes);
 	}
 
+	fn push_unique<Db>(&self, query: &mut QueryBuilder<Db>)
+	where
+		Db: Database,
+	{
+		const UNIQUE: TimesheetColumns<&str> = TimesheetColumns::unique();
+		query
+			.separated(' ')
+			.push(self.employee_id)
+			.push("AS")
+			.push(UNIQUE.employee_id)
+			.push_unseparated(',')
+			.push_unseparated(self.id)
+			.push("AS")
+			.push(UNIQUE.id)
+			.push_unseparated(',')
+			.push_unseparated(self.job_id)
+			.push("AS")
+			.push(UNIQUE.job_id)
+			.push_unseparated(',')
+			.push_unseparated(self.time_begin)
+			.push("AS")
+			.push(UNIQUE.time_begin)
+			.push_unseparated(',')
+			.push_unseparated(self.time_end)
+			.push("AS")
+			.push(UNIQUE.time_end)
+			.push_unseparated(',')
+			.push_unseparated(self.work_notes)
+			.push("AS")
+			.push(UNIQUE.work_notes);
+	}
+
 	fn push_update_where<Db>(
 		&self,
 		query: &mut QueryBuilder<Db>,

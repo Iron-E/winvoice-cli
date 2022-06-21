@@ -38,6 +38,30 @@ where
 			.push(values_columns.title);
 	}
 
+	fn push_unique<Db>(&self, query: &mut QueryBuilder<Db>)
+	where
+		Db: Database,
+	{
+		const UNIQUE: EmployeeColumns<&str> = EmployeeColumns::unique();
+		query
+			.separated(' ')
+			.push(self.id)
+			.push("AS")
+			.push(UNIQUE.id)
+			.push_unseparated(',')
+			.push_unseparated(self.name)
+			.push("AS")
+			.push(UNIQUE.name)
+			.push_unseparated(',')
+			.push_unseparated(self.status)
+			.push("AS")
+			.push(UNIQUE.status)
+			.push_unseparated(',')
+			.push_unseparated(self.title)
+			.push("AS")
+			.push(UNIQUE.title);
+	}
+
 	fn push_update_where<Db>(
 		&self,
 		query: &mut QueryBuilder<Db>,

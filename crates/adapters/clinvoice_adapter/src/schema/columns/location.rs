@@ -53,4 +53,13 @@ impl LocationColumns<&'static str>
 			name: "name",
 		}
 	}
+
+	pub const fn unique() -> Self
+	{
+		Self {
+			id: "unique_5_location_id",
+			outer_id: "unique_5_location_outer_id",
+			name: "unique_5_location_name",
+		}
+	}
 }

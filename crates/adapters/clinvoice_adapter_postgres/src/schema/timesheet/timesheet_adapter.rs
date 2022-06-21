@@ -1,16 +1,20 @@
-use std::collections::HashMap;
-
 use clinvoice_adapter::{
+	fmt::{As, ColumnsToSql, QueryBuilderExt, SnakeCase},
 	schema::{
-		columns::TimesheetColumns,
-		EmployeeAdapter,
+		columns::{
+			EmployeeColumns,
+			ExpenseColumns,
+			JobColumns,
+			LocationColumns,
+			OrganizationColumns,
+			TimesheetColumns,
+		},
 		ExpensesAdapter,
-		JobAdapter,
 		TimesheetAdapter,
 	},
 	WriteWhereClause,
 };
-use clinvoice_finance::Money;
+use clinvoice_finance::{ExchangeRates, Exchangeable, Money};
 use clinvoice_match::MatchTimesheet;
 use clinvoice_schema::{
 	chrono::{DateTime, Utc},
@@ -18,12 +22,13 @@ use clinvoice_schema::{
 	Job,
 	Timesheet,
 };
-use futures::{future, TryFutureExt, TryStreamExt};
-use sqlx::{PgPool, QueryBuilder, Result, Row};
+use futures::{TryFutureExt, TryStreamExt};
+use sqlx::{PgPool, Result};
 
 use super::PgTimesheet;
 use crate::{
-	schema::{util, PgEmployee, PgExpenses, PgJob},
+	fmt::PgLocationRecursiveCte,
+	schema::{util, PgExpenses, PgLocation},
 	PgSchema,
 };
 
@@ -82,57 +87,122 @@ impl TimesheetAdapter for PgTimesheet
 		match_condition: &MatchTimesheet,
 	) -> Result<Vec<Timesheet>>
 	{
-		let expenses_fut = PgExpenses::retrieve(connection, &match_condition.expenses);
-		let employees_fut =
-			PgEmployee::retrieve(connection, &match_condition.employee).map_ok(|vec| {
-				vec.into_iter()
-					.map(|e| (e.id, e))
-					.collect::<HashMap<_, _>>()
-			});
-		let jobs_fut = PgJob::retrieve(connection, &match_condition.job).map_ok(|vec| {
-			vec.into_iter()
-				.map(|j| (j.id, j))
-				.collect::<HashMap<_, _>>()
-		});
+		const ALIAS: &str = "T";
+		const COLUMNS: TimesheetColumns<&str> = TimesheetColumns::default();
 
-		const COLUMNS: TimesheetColumns<&'static str> = TimesheetColumns::default();
+		const EMPLOYEE_ALIAS: SnakeCase<&str, &str> = SnakeCase::Body(ALIAS, "E");
+		const EMPLOYEE_COLUMNS: EmployeeColumns<&str> = EmployeeColumns::default();
+		const EMPLOYEE_COLUMNS_UNIQUE: EmployeeColumns<&str> = EmployeeColumns::unique();
 
-		let mut query = QueryBuilder::new(
-			"SELECT
-				T.id,
-				T.employee_id,
-				T.job_id,
-				T.time_begin,
-				T.time_end,
-				T.work_notes
-			FROM timesheets T",
+		const EXPENSE_ALIAS: SnakeCase<&str, &str> = SnakeCase::Body(ALIAS, "X");
+		const EXPENSES_AGGREGATED_IDENT: &str = "expenses_aggregated";
+		const EXPENSE_COLUMNS: ExpenseColumns<&str> = ExpenseColumns::default();
+
+		const JOB_ALIAS: SnakeCase<&str, &str> = SnakeCase::Body(ALIAS, "J");
+		const JOB_COLUMNS: JobColumns<&str> = JobColumns::default();
+		const JOB_COLUMNS_UNIQUE: JobColumns<&str> = JobColumns::unique();
+
+		const LOCATION_ALIAS: SnakeCase<SnakeCase<SnakeCase<&str, &str>, &str>, &str> =
+			SnakeCase::Body(ORGANIZATION_ALIAS, "L");
+		const LOCATION_COLUMNS: LocationColumns<&str> = LocationColumns::default();
+
+		const ORGANIZATION_ALIAS: SnakeCase<SnakeCase<&str, &str>, &str> =
+			SnakeCase::Body(JOB_ALIAS, "O");
+		const ORGANIZATION_COLUMNS: OrganizationColumns<&str> = OrganizationColumns::default();
+		const ORGANIZATION_COLUMNS_UNIQUE: OrganizationColumns<&str> = OrganizationColumns::unique();
+
+		let columns = COLUMNS.scope(ALIAS);
+		let employee_columns = EMPLOYEE_COLUMNS.scope(EMPLOYEE_ALIAS);
+		let exchange_rates_fut = ExchangeRates::new().map_err(util::finance_err_to_sqlx);
+		let expense_columns = EXPENSE_COLUMNS.scope(EXPENSE_ALIAS);
+		let job_columns = JOB_COLUMNS.scope(JOB_ALIAS);
+		let location_columns = LOCATION_COLUMNS.scope(LOCATION_ALIAS);
+		let mut query = PgLocation::query_with_recursive(&match_condition.job.client.location);
+		let organization_columns = ORGANIZATION_COLUMNS.scope(ORGANIZATION_ALIAS);
+
+		query.push("SELECT ");
+		columns.push_to(&mut query);
+
+		query.push(',');
+		employee_columns
+			.r#as(EMPLOYEE_COLUMNS_UNIQUE)
+			.push_to(&mut query);
+
+		// NOTE: might need `",array_agg( DISTINCT ("`
+		query.push(",array_agg((");
+		expense_columns.push_to(&mut query);
+		query.push(As("))", EXPENSES_AGGREGATED_IDENT));
+
+		query.push(',');
+		job_columns.r#as(JOB_COLUMNS_UNIQUE).push_to(&mut query);
+
+		query.push(',');
+		organization_columns
+			.r#as(ORGANIZATION_COLUMNS_UNIQUE)
+			.push_to(&mut query);
+
+		query
+			.push_from("timesheets", ALIAS)
+			.push_equijoin(
+				"employees",
+				EMPLOYEE_ALIAS,
+				employee_columns.id,
+				columns.employee_id,
+			)
+			.push(" LEFT")
+			.push_equijoin(
+				"expenses",
+				EXPENSE_ALIAS,
+				expense_columns.timesheet_id,
+				columns.id,
+			)
+			.push_equijoin("jobs", JOB_ALIAS, job_columns.id, columns.job_id)
+			.push_equijoin(
+				"organizations",
+				ORGANIZATION_ALIAS,
+				organization_columns.id,
+				job_columns.client_id,
+			)
+			.push_equijoin(
+				PgLocationRecursiveCte::from(&match_condition.job.client.location),
+				LOCATION_ALIAS,
+				location_columns.id,
+				organization_columns.location_id,
+			);
+
+		let exchange_rates = exchange_rates_fut.await?;
+		PgSchema::write_where_clause(
+			PgSchema::write_where_clause(Default::default(), ALIAS, match_condition, &mut query),
+			EXPENSE_ALIAS,
+			&match_condition
+				.expenses
+				.exchange_ref(Default::default(), &exchange_rates),
+			&mut query,
 		);
-		PgSchema::write_where_clause(Default::default(), "T", match_condition, &mut query);
 
-		let (expenses, employees, jobs) = futures::try_join!(expenses_fut, employees_fut, jobs_fut)?;
+		query
+			.push(" GROUP BY ")
+			.separated(',')
+			.push(columns.id)
+			.push(employee_columns.id)
+			.push(job_columns.id)
+			.push(organization_columns.id);
+
 		query
 			.push(';')
 			.build()
 			.fetch(connection)
-			.try_filter_map(|row| {
-				if let Some(e) = employees.get(&row.get(COLUMNS.employee_id))
-				{
-					if let Some(x) = expenses.get(&row.get(COLUMNS.id))
-					{
-						if let Some(j) = jobs.get(&row.get(COLUMNS.job_id))
-						{
-							return future::ok(Some(PgTimesheet::row_to_view(
-								COLUMNS,
-								&row,
-								e.clone(),
-								x.clone(),
-								j.clone(),
-							)));
-						}
-					}
-				}
-
-				future::ok(None)
+			.and_then(|row| async move {
+				PgTimesheet::row_to_view(
+					connection,
+					COLUMNS,
+					EMPLOYEE_COLUMNS_UNIQUE,
+					EXPENSES_AGGREGATED_IDENT,
+					JOB_COLUMNS_UNIQUE,
+					ORGANIZATION_COLUMNS_UNIQUE,
+					&row,
+				)
+				.await
 			})
 			.try_collect()
 			.await

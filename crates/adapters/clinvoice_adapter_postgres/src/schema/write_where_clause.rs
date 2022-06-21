@@ -1,6 +1,5 @@
 use core::{fmt::Display, ops::Deref};
 
-use async_recursion::async_recursion;
 use clinvoice_adapter::{
 	fmt::{Nullable, SnakeCase},
 	schema::columns::{
@@ -175,13 +174,12 @@ fn write_is_null<Db>(
 /// # See
 ///
 /// * [`WriteWhereClause::write_where_clause`].
-#[async_recursion]
 pub(super) async fn write_match_contact<A>(
 	connection: &PgPool,
 	context: WriteContext,
 	ident: A,
 	match_condition: &MatchContact,
-	query: &mut QueryBuilder<Postgres>,
+	query: &mut QueryBuilder<'_, Postgres>,
 ) -> Result<WriteContext>
 where
 	A: Copy + Display + Send + Sync,
@@ -189,7 +187,6 @@ where
 	let columns = ContactColumns::default().scope(ident);
 
 	let ctx = PgSchema::write_where_clause(context, columns.label, &match_condition.label, query);
-
 	match match_condition.kind
 	{
 		MatchContactKind::Any => (),
@@ -197,7 +194,6 @@ where
 		MatchContactKind::Address(ref location) =>
 		{
 			let location_id_query = PgLocation::retrieve_matching_ids(connection, location).await?;
-
 			PgSchema::write_where_clause(ctx, columns.address_id, &location_id_query, query);
 		},
 

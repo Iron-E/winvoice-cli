@@ -1,6 +1,6 @@
 mod columns_to_sql;
 
-use crate::fmt::{TypeCast, WithIdentifier};
+use crate::fmt::{As, TypeCast, WithIdentifier};
 
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct OrganizationColumns<T>
@@ -14,7 +14,23 @@ impl<T> OrganizationColumns<T>
 {
 	/// # Summary
 	///
-	/// Returns an alternation of [`OrganizationColumns`] which modifies its fields' [`Display`]
+	/// Returns a [`OrganizationColumns`] which outputs all of its columns as
+	/// `column_1 AS aliased_column_1`.
+	pub fn r#as<TAlias>(
+		self,
+		aliased: OrganizationColumns<TAlias>,
+	) -> OrganizationColumns<As<TAlias, T>>
+	{
+		OrganizationColumns {
+			id: As(self.id, aliased.id),
+			location_id: As(self.location_id, aliased.location_id),
+			name: As(self.name, aliased.name),
+		}
+	}
+
+	/// # Summary
+	///
+	/// Returns a [`OrganizationColumns`] which modifies its fields' [`Display`]
 	/// implementation to output `{ident}.{column}`.
 	pub fn scope<TAlias>(self, alias: TAlias) -> OrganizationColumns<WithIdentifier<T, TAlias>>
 	where
@@ -29,7 +45,7 @@ impl<T> OrganizationColumns<T>
 
 	/// # Summary
 	///
-	/// Returns an alternation of [`OrganizationColumns`] which modifies its fields' [`Display`]
+	/// Returns a [`OrganizationColumns`] which modifies its fields' [`Display`]
 	/// implementation to output `{column}::{cast}`.
 	pub fn typecast<TCast>(self, cast: TCast) -> OrganizationColumns<TypeCast<TCast, T>>
 	where

@@ -34,26 +34,6 @@ where
 			.push(values_columns.name);
 	}
 
-	fn push_unique<Db>(&self, query: &mut QueryBuilder<Db>)
-	where
-		Db: Database,
-	{
-		const UNIQUE: OrganizationColumns<&str> = OrganizationColumns::unique();
-		query
-			.separated(' ')
-			.push(self.id)
-			.push("AS")
-			.push(UNIQUE.id)
-			.push_unseparated(',')
-			.push_unseparated(self.location_id)
-			.push("AS")
-			.push(UNIQUE.location_id)
-			.push_unseparated(',')
-			.push_unseparated(self.name)
-			.push("AS")
-			.push(UNIQUE.name);
-	}
-
 	fn push_update_where<Db>(
 		&self,
 		query: &mut QueryBuilder<Db>,

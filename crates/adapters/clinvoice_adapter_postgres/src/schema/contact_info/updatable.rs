@@ -28,21 +28,15 @@ impl Updatable for PgContactInfo
 		}
 
 		const COLUMNS: ContactColumns<&'static str> = ContactColumns::default();
-		PgSchema::update(
-			connection,
-			COLUMNS,
-			"contact_information",
-			"C",
-			|query| {
-				query.push_values(peekable_entities, |mut q, e| {
-					q.push_bind(e.kind.address().map(|a| a.id))
-						.push_bind(e.kind.email())
-						.push_bind(&e.label)
-						.push_bind(e.kind.other())
-						.push_bind(e.kind.phone());
-				});
-			},
-		)
+		PgSchema::update(connection, COLUMNS, "contact_information", "C", |query| {
+			query.push_values(peekable_entities, |mut q, e| {
+				q.push_bind(e.kind.address().map(|a| a.id))
+					.push_bind(e.kind.email())
+					.push_bind(&e.label)
+					.push_bind(e.kind.other())
+					.push_bind(e.kind.phone());
+			});
+		})
 		.await?;
 
 		Ok(())

@@ -1,6 +1,6 @@
 mod columns_to_sql;
 
-use crate::fmt::{TypeCast, WithIdentifier};
+use crate::fmt::{As, TypeCast, WithIdentifier};
 
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct LocationColumns<T>
@@ -14,7 +14,20 @@ impl<T> LocationColumns<T>
 {
 	/// # Summary
 	///
-	/// Returns an alternation of [`LocationColumns`] which modifies its fields' [`Display`]
+	/// Returns a [`LocationColumns`] which outputs all of its columns as
+	/// `column_1 AS aliased_column_1`.
+	pub fn r#as<TAlias>(self, aliased: LocationColumns<TAlias>) -> LocationColumns<As<TAlias, T>>
+	{
+		LocationColumns {
+			id: As(self.id, aliased.id),
+			name: As(self.name, aliased.name),
+			outer_id: As(self.outer_id, aliased.outer_id),
+		}
+	}
+
+	/// # Summary
+	///
+	/// Returns a [`LocationColumns`] which modifies its fields' [`Display`]
 	/// implementation to output `{ident}.{column}`.
 	pub fn scope<TAlias>(self, alias: TAlias) -> LocationColumns<WithIdentifier<T, TAlias>>
 	where
@@ -29,7 +42,7 @@ impl<T> LocationColumns<T>
 
 	/// # Summary
 	///
-	/// Returns an alternation of [`LocationColumns`] which modifies its fields' [`Display`]
+	/// Returns a [`LocationColumns`] which modifies its fields' [`Display`]
 	/// implementation to output `{column}::{cast}`.
 	pub fn typecast<TCast>(self, cast: TCast) -> LocationColumns<TypeCast<TCast, T>>
 	where

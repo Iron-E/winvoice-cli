@@ -16,7 +16,10 @@ mod write_where_clause;
 
 use core::fmt::Display;
 
-use clinvoice_adapter::{fmt::{ColumnsToSql, SnakeCase}, WriteWhereClause};
+use clinvoice_adapter::{
+	fmt::{As, ColumnsToSql, SnakeCase},
+	WriteWhereClause,
+};
 use clinvoice_match::Match;
 use clinvoice_schema::Id;
 pub use contact_info::PgContactInfo;
@@ -96,9 +99,7 @@ impl PgSchema
 		query
 			.separated(' ')
 			.push("UPDATE")
-			.push(table)
-			.push("AS")
-			.push(table_alias)
+			.push(As(table, table_alias))
 			.push("SET ");
 
 		let values_alias = SnakeCase::from((table_alias, "V"));

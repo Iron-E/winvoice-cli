@@ -1,6 +1,6 @@
 mod columns_to_sql;
 
-use crate::fmt::{TypeCast, WithIdentifier};
+use crate::fmt::{As, TypeCast, WithIdentifier};
 
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct ContactColumns<T>
@@ -16,8 +16,23 @@ impl<T> ContactColumns<T>
 {
 	/// # Summary
 	///
-	/// Returns an alternation of [`ContactColumns`] which modifies its fields' [`Display`]
-	/// implementation to output `{ident}.{column}`.
+	/// Returns a [`ContactColumns`] which outputs all of its columns as
+	/// `column_1 AS aliased_column_1`.
+	pub fn r#as<TAlias>(self, aliased: ContactColumns<TAlias>) -> ContactColumns<As<TAlias, T>>
+	{
+		ContactColumns {
+			address_id: As(self.address_id, aliased.address_id),
+			email: As(self.email, aliased.email),
+			label: As(self.label, aliased.label),
+			other: As(self.other, aliased.other),
+			phone: As(self.phone, aliased.phone),
+		}
+	}
+
+	/// # Summary
+	///
+	/// Returns a [`ContactColumns`] which modifies its fields' [`Display`]
+	/// implementation to output `{alias}.{column}`.
 	pub fn scope<TAlias>(self, alias: TAlias) -> ContactColumns<WithIdentifier<T, TAlias>>
 	where
 		TAlias: Copy,
@@ -33,7 +48,7 @@ impl<T> ContactColumns<T>
 
 	/// # Summary
 	///
-	/// Returns an alternation of [`ContactColumns`] which modifies its fields' [`Display`]
+	/// Returns a [`ContactColumns`] which modifies its fields' [`Display`]
 	/// implementation to output `{column}::{cast}`.
 	pub fn typecast<TCast>(self, cast: TCast) -> ContactColumns<TypeCast<TCast, T>>
 	where

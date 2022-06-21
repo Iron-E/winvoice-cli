@@ -1,6 +1,6 @@
 mod columns_to_sql;
 
-use crate::fmt::{TypeCast, WithIdentifier};
+use crate::fmt::{As, TypeCast, WithIdentifier};
 
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct ExpenseColumns<T>
@@ -16,7 +16,22 @@ impl<T> ExpenseColumns<T>
 {
 	/// # Summary
 	///
-	/// Returns an alternation of [`ExpenseColumns`] which modifies its fields' [`Display`]
+	/// Returns a [`ExpenseColumns`] which outputs all of its columns as
+	/// `column_1 AS aliased_column_1`.
+	pub fn r#as<TAlias>(self, aliased: ExpenseColumns<TAlias>) -> ExpenseColumns<As<TAlias, T>>
+	{
+		ExpenseColumns {
+			category: As(self.category, aliased.category),
+			cost: As(self.cost, aliased.cost),
+			description: As(self.description, aliased.description),
+			id: As(self.id, aliased.id),
+			timesheet_id: As(self.timesheet_id, aliased.timesheet_id),
+		}
+	}
+
+	/// # Summary
+	///
+	/// Returns a [`ExpenseColumns`] which modifies its fields' [`Display`]
 	/// implementation to output `{ident}.{column}`.
 	pub fn scope<TAlias>(self, alias: TAlias) -> ExpenseColumns<WithIdentifier<T, TAlias>>
 	where
@@ -33,7 +48,7 @@ impl<T> ExpenseColumns<T>
 
 	/// # Summary
 	///
-	/// Returns an alternation of [`ExpenseColumns`] which modifies its fields' [`Display`]
+	/// Returns a [`ExpenseColumns`] which modifies its fields' [`Display`]
 	/// implementation to output `{column}::{cast}`.
 	pub fn typecast<TCast>(self, cast: TCast) -> ExpenseColumns<TypeCast<TCast, T>>
 	where

@@ -1,6 +1,6 @@
 mod columns_to_sql;
 
-use crate::fmt::{TypeCast, WithIdentifier};
+use crate::fmt::{As, TypeCast, WithIdentifier};
 
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct EmployeeColumns<T>
@@ -15,7 +15,21 @@ impl<T> EmployeeColumns<T>
 {
 	/// # Summary
 	///
-	/// Returns an alternation of [`EmployeeColumns`] which modifies its fields' [`Display`]
+	/// Returns a [`EmployeeColumns`] which outputs all of its columns as
+	/// `column_1 AS aliased_column_1`.
+	pub fn r#as<TAlias>(self, aliased: EmployeeColumns<TAlias>) -> EmployeeColumns<As<TAlias, T>>
+	{
+		EmployeeColumns {
+			id: As(self.id, aliased.id),
+			name: As(self.name, aliased.name),
+			status: As(self.status, aliased.status),
+			title: As(self.title, aliased.title),
+		}
+	}
+
+	/// # Summary
+	///
+	/// Returns a [`EmployeeColumns`] which modifies its fields' [`Display`]
 	/// implementation to output `{column}::{cast}`.
 	pub fn scope<TAlias>(self, alias: TAlias) -> EmployeeColumns<WithIdentifier<T, TAlias>>
 	where
@@ -31,7 +45,7 @@ impl<T> EmployeeColumns<T>
 
 	/// # Summary
 	///
-	/// Returns an alternation of [`EmployeeColumns`] which modifies its fields' [`Display`]
+	/// Returns a [`EmployeeColumns`] which modifies its fields' [`Display`]
 	/// implementation to output `{ident}.{column}`.
 	pub fn typecast<TCast>(self, cast: TCast) -> EmployeeColumns<TypeCast<TCast, T>>
 	where

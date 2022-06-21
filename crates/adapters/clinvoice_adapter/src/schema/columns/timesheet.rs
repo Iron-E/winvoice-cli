@@ -1,6 +1,6 @@
 mod columns_to_sql;
 
-use crate::fmt::{TypeCast, WithIdentifier};
+use crate::fmt::{As, TypeCast, WithIdentifier};
 
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct TimesheetColumns<T>
@@ -17,7 +17,23 @@ impl<T> TimesheetColumns<T>
 {
 	/// # Summary
 	///
-	/// Returns an alternation of [`TimesheetColumns`] which modifies its fields' [`Display`]
+	/// Returns a [`TimesheetColumns`] which outputs all of its columns as
+	/// `column_1 AS aliased_column_1`.
+	pub fn r#as<TAlias>(self, aliased: TimesheetColumns<TAlias>) -> TimesheetColumns<As<TAlias, T>>
+	{
+		TimesheetColumns {
+			employee_id: As(self.employee_id, aliased.employee_id),
+			id: As(self.id, aliased.id),
+			job_id: As(self.job_id, aliased.job_id),
+			time_begin: As(self.time_begin, aliased.time_begin),
+			time_end: As(self.time_end, aliased.time_end),
+			work_notes: As(self.work_notes, aliased.work_notes),
+		}
+	}
+
+	/// # Summary
+	///
+	/// Returns a [`TimesheetColumns`] which modifies its fields' [`Display`]
 	/// implementation to output `{ident}.{column}`.
 	pub fn scope<TAlias>(self, alias: TAlias) -> TimesheetColumns<WithIdentifier<T, TAlias>>
 	where
@@ -35,7 +51,7 @@ impl<T> TimesheetColumns<T>
 
 	/// # Summary
 	///
-	/// Returns an alternation of [`TimesheetColumns`] which modifies its fields' [`Display`]
+	/// Returns a [`TimesheetColumns`] which modifies its fields' [`Display`]
 	/// implementation to output `{column}::{cast}`.
 	pub fn typecast<TCast>(self, cast: TCast) -> TimesheetColumns<TypeCast<TCast, T>>
 	where

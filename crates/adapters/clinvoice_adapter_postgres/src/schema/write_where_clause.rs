@@ -2,7 +2,7 @@ use core::{fmt::Display, ops::Deref};
 
 use async_recursion::async_recursion;
 use clinvoice_adapter::{
-	fmt::Nullable,
+	fmt::{Nullable, SnakeCase},
 	schema::columns::{
 		ContactColumns,
 		EmployeeColumns,
@@ -349,7 +349,7 @@ impl WriteWhereClause<Postgres, &MatchSet<MatchExpense>> for PgSchema
 			{
 				const COLUMNS: ExpenseColumns<&'static str> = ExpenseColumns::default();
 
-				let subquery_ident = format!("{ident}_2");
+				let subquery_ident = SnakeCase::from((ident, "2"));
 				let subquery_ident_columns = COLUMNS.scope(&subquery_ident);
 
 				query
@@ -444,6 +444,7 @@ impl WriteWhereClause<Postgres, &MatchStr<String>> for PgSchema
 					.push_bind(regex.clone());
 			},
 		};
+
 		WriteContext::AcceptingAnotherWhereCondition
 	}
 }

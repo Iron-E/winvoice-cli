@@ -1,4 +1,7 @@
-use clinvoice_adapter::schema::{columns::ContactColumns, ContactInfoAdapter};
+use clinvoice_adapter::{
+	fmt::ColumnsToSql,
+	schema::{columns::ContactColumns, ContactInfoAdapter},
+};
 use clinvoice_match::MatchContact;
 use clinvoice_schema::Contact;
 use futures::TryStreamExt;
@@ -40,21 +43,20 @@ impl ContactInfoAdapter for PgContactInfo
 
 	async fn retrieve(connection: &PgPool, match_condition: &MatchContact) -> Result<Vec<Contact>>
 	{
+		const ALIAS: &str = "C";
 		const COLUMNS: ContactColumns<&'static str> = ContactColumns::default();
 
-		let mut query = QueryBuilder::new(
-			"SELECT
-				C.address_id,
-				C.email,
-				C.label,
-				C.other,
-				C.phone
-			FROM contact_information C",
-		);
+		let mut query = QueryBuilder::new("SELECT ");
+		COLUMNS.scoped(ALIAS).push(&mut query);
+		query
+			.separated(' ')
+			.push(" FROM contact_information")
+			.push(ALIAS);
+
 		write_where_clause::write_match_contact(
 			connection,
 			Default::default(),
-			"C",
+			ALIAS,
 			match_condition,
 			&mut query,
 		)
@@ -64,10 +66,8 @@ impl ContactInfoAdapter for PgContactInfo
 			.push(';')
 			.build()
 			.fetch(connection)
-			.try_fold(Vec::new(), |mut vec, row| async move {
-				vec.push(PgContactInfo::row_to_view(connection, COLUMNS, &row).await?);
-				Ok(vec)
-			})
+			.and_then(|row| async move { PgContactInfo::row_to_view(connection, COLUMNS, &row).await })
+			.try_collect()
 			.await
 	}
 }

@@ -79,7 +79,7 @@ impl JobAdapter for PgJob
 	async fn retrieve(connection: &PgPool, match_condition: &MatchJob) -> Result<Vec<Job>>
 	{
 		const ALIAS: &str = "J";
-		const COLUMNS: JobColumns<&'static str> = JobColumns::default();
+		const COLUMNS: JobColumns<&str> = JobColumns::default();
 		const LOCATION_ALIAS: SnakeCase<SnakeCase<&str, &str>, &str> =
 			SnakeCase::Body(ORGANIZATION_ALIAS, "L");
 		const LOCATION_COLUMNS: LocationColumns<&str> = LocationColumns::default();

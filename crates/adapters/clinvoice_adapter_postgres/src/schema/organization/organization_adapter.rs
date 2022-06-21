@@ -1,5 +1,5 @@
 use clinvoice_adapter::{
-	fmt::SnakeCase,
+	fmt::{ColumnsToSql, SnakeCase},
 	schema::{
 		columns::{LocationColumns, OrganizationColumns},
 		OrganizationAdapter,
@@ -44,19 +44,15 @@ impl OrganizationAdapter for PgOrganization
 		const LOCATION_ALIAS: SnakeCase<&str, &str> = SnakeCase::Body(ALIAS, "L");
 		const LOCATION_COLUMNS: LocationColumns<&'static str> = LocationColumns::default();
 
+		let columns = COLUMNS.scoped(ALIAS);
 		let location_columns = LOCATION_COLUMNS.scoped(LOCATION_ALIAS);
-		let organization_columns = COLUMNS.scoped(ALIAS);
 		let mut query = PgLocation::query_with_recursive(&match_condition.location);
 
+		query.push("SELECT ");
+		columns.push(&mut query);
 		query
 			.separated(' ')
-			.push("SELECT")
-			.push(organization_columns.id)
-			.push_unseparated(',')
-			.push_unseparated(organization_columns.location_id)
-			.push_unseparated(',')
-			.push_unseparated(organization_columns.name)
-			.push("FROM organizations")
+			.push(" FROM organizations")
 			.push(ALIAS)
 			.push("JOIN")
 			.push(PgLocationRecursiveCte::from(&match_condition.location))
@@ -66,7 +62,7 @@ impl OrganizationAdapter for PgOrganization
 		query
 			.separated('=')
 			.push(location_columns.id)
-			.push(organization_columns.location_id)
+			.push(columns.location_id)
 			.push_unseparated(')');
 
 		PgSchema::write_where_clause(Default::default(), "O", match_condition, &mut query);

@@ -12,13 +12,15 @@ pub struct PgEmployee;
 
 impl PgEmployee
 {
-	pub(super) fn row_to_view(columns: EmployeeColumns<&str>, row: &PgRow) -> Employee
+	pub(super) fn row_to_view<T>(columns: EmployeeColumns<T>, row: &PgRow) -> Employee
+	where
+		T: AsRef<str>,
 	{
 		Employee {
-			id: row.get(columns.id),
-			name: row.get(columns.name),
-			status: row.get(columns.status),
-			title: row.get(columns.title),
+			id: row.get(columns.id.as_ref()),
+			name: row.get(columns.name.as_ref()),
+			status: row.get(columns.status.as_ref()),
+			title: row.get(columns.title.as_ref()),
 		}
 	}
 }

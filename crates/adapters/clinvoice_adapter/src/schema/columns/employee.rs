@@ -17,15 +17,15 @@ impl<T> EmployeeColumns<T>
 	///
 	/// Returns an alternation of [`EmployeeColumns`] which modifies its fields' [`Display`]
 	/// implementation to output `{column}::{cast}`.
-	pub fn scoped<TIdent>(self, ident: TIdent) -> EmployeeColumns<WithIdentifier<T, TIdent>>
+	pub fn scope<TAlias>(self, alias: TAlias) -> EmployeeColumns<WithIdentifier<T, TAlias>>
 	where
-		TIdent: Copy,
+		TAlias: Copy,
 	{
 		EmployeeColumns {
-			id: WithIdentifier(ident, self.id),
-			name: WithIdentifier(ident, self.name),
-			status: WithIdentifier(ident, self.status),
-			title: WithIdentifier(ident, self.title),
+			id: WithIdentifier(alias, self.id),
+			name: WithIdentifier(alias, self.name),
+			status: WithIdentifier(alias, self.status),
+			title: WithIdentifier(alias, self.title),
 		}
 	}
 

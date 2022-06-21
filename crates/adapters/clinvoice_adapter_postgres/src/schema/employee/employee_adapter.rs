@@ -46,7 +46,7 @@ impl EmployeeAdapter for PgEmployee
 
 		let mut query = QueryBuilder::new("SELECT ");
 
-		COLUMNS.scoped(ALIAS).push(&mut query);
+		COLUMNS.scope(ALIAS).push(&mut query);
 		query.separated(' ').push(" FROM employees").push(ALIAS);
 		PgSchema::write_where_clause(Default::default(), ALIAS, match_condition, &mut query);
 

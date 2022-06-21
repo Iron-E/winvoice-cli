@@ -31,7 +31,7 @@ impl Updatable for PgTimesheet
 		}
 
 		const COLUMNS: TimesheetColumns<&'static str> = TimesheetColumns::default();
-		PgSchema::update(&mut *connection, COLUMNS, "locations", "L", "V", |query| {
+		PgSchema::update(connection, COLUMNS, "locations", "L", |query| {
 			query.push_values(peekable_entities, |mut q, e| {
 				q.push_bind(e.employee.id)
 					.push_bind(e.id)

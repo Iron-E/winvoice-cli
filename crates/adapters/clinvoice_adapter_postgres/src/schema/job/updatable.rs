@@ -39,7 +39,7 @@ impl Updatable for PgJob
 		let exchange_rates = ExchangeRates::new()
 			.map_err(util::finance_err_to_sqlx)
 			.await?;
-		PgSchema::update(&mut *connection, COLUMNS, "jobs", "J", "V", |query| {
+		PgSchema::update(&mut *connection, COLUMNS, "jobs", "J", |query| {
 			query.push_values(peekable_entities, |mut q, e| {
 				q.push_bind(e.client.id)
 					.push_bind(e.date_open)

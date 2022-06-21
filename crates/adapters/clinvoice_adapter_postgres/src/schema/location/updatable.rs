@@ -68,7 +68,7 @@ impl Updatable for PgLocation
 		}
 
 		const COLUMNS: LocationColumns<&'static str> = LocationColumns::default();
-		PgSchema::update(connection, COLUMNS, "locations", "L", "V", |query| {
+		PgSchema::update(connection, COLUMNS, "locations", "L", |query| {
 			query.push_values(entities_collected.iter(), |mut q, e| {
 				q.push_bind(e.id)
 					.push_bind(&e.name)

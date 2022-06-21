@@ -47,7 +47,7 @@ impl ContactInfoAdapter for PgContactInfo
 		const COLUMNS: ContactColumns<&'static str> = ContactColumns::default();
 
 		let mut query = QueryBuilder::new("SELECT ");
-		COLUMNS.scoped(ALIAS).push(&mut query);
+		COLUMNS.scope(ALIAS).push(&mut query);
 		query
 			.separated(' ')
 			.push(" FROM contact_information")

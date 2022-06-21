@@ -18,16 +18,16 @@ impl<T> ContactColumns<T>
 	///
 	/// Returns an alternation of [`ContactColumns`] which modifies its fields' [`Display`]
 	/// implementation to output `{ident}.{column}`.
-	pub fn scoped<TIdent>(self, ident: TIdent) -> ContactColumns<WithIdentifier<T, TIdent>>
+	pub fn scope<TAlias>(self, alias: TAlias) -> ContactColumns<WithIdentifier<T, TAlias>>
 	where
-		TIdent: Copy,
+		TAlias: Copy,
 	{
 		ContactColumns {
-			address_id: WithIdentifier(ident, self.address_id),
-			email: WithIdentifier(ident, self.email),
-			label: WithIdentifier(ident, self.label),
-			other: WithIdentifier(ident, self.other),
-			phone: WithIdentifier(ident, self.phone),
+			address_id: WithIdentifier(alias, self.address_id),
+			email: WithIdentifier(alias, self.email),
+			label: WithIdentifier(alias, self.label),
+			other: WithIdentifier(alias, self.other),
+			phone: WithIdentifier(alias, self.phone),
 		}
 	}
 

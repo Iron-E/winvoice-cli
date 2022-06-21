@@ -39,8 +39,8 @@ impl PgLocation
 			TCurrent: Display,
 			TPrev: Display,
 		{
-			let inner_columns = COLUMNS.scoped(ALIAS_INNER);
-			let outer_columns = COLUMNS.scoped(ALIAS_OUTER);
+			let inner_columns = COLUMNS.scope(ALIAS_INNER);
+			let outer_columns = COLUMNS.scope(ALIAS_OUTER);
 
 			// NOTE: this scope exists because we want to get rid of the mutable borrow after we're
 			//       done with it.

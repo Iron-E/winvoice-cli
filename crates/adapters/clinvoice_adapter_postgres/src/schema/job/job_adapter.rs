@@ -87,9 +87,9 @@ impl JobAdapter for PgJob
 		const ORGANIZATION_COLUMNS: OrganizationColumns<&str> = OrganizationColumns::default();
 		const ORGANIZATION_COLUMNS_UNIQUE: OrganizationColumns<&str> = OrganizationColumns::unique();
 
-		let columns = COLUMNS.scoped(ALIAS);
+		let columns = COLUMNS.scope(ALIAS);
 		let exchange_rates_fut = ExchangeRates::new().map_err(util::finance_err_to_sqlx);
-		let organization_columns = ORGANIZATION_COLUMNS.scoped(ORGANIZATION_ALIAS);
+		let organization_columns = ORGANIZATION_COLUMNS.scope(ORGANIZATION_ALIAS);
 		let mut query = PgLocation::query_with_recursive(&match_condition.client.location);
 
 		query.push("SELECT ");
@@ -120,7 +120,7 @@ impl JobAdapter for PgJob
 			.push("ON (");
 		query
 			.separated('=')
-			.push(LOCATION_COLUMNS.scoped(LOCATION_ALIAS).id)
+			.push(LOCATION_COLUMNS.scope(LOCATION_ALIAS).id)
 			.push(organization_columns.location_id)
 			.push_unseparated(')');
 

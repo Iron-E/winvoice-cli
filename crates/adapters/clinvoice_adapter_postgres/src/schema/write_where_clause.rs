@@ -186,7 +186,7 @@ pub(super) async fn write_match_contact<A>(
 where
 	A: Copy + Display + Send + Sync,
 {
-	let columns = ContactColumns::default().scoped(ident);
+	let columns = ContactColumns::default().scope(ident);
 
 	let ctx = PgSchema::write_where_clause(context, columns.label, &match_condition.label, query);
 
@@ -350,7 +350,7 @@ impl WriteWhereClause<Postgres, &MatchSet<MatchExpense>> for PgSchema
 				const COLUMNS: ExpenseColumns<&'static str> = ExpenseColumns::default();
 
 				let subquery_ident = format!("{ident}_2");
-				let subquery_ident_columns = COLUMNS.scoped(&subquery_ident);
+				let subquery_ident_columns = COLUMNS.scope(&subquery_ident);
 
 				query
 					.separated(' ')
@@ -360,7 +360,7 @@ impl WriteWhereClause<Postgres, &MatchSet<MatchExpense>> for PgSchema
 					.push("WHERE")
 					.push(subquery_ident_columns.timesheet_id)
 					.push_unseparated('=')
-					.push_unseparated(COLUMNS.scoped(ident).timesheet_id);
+					.push_unseparated(COLUMNS.scope(ident).timesheet_id);
 
 				PgSchema::write_where_clause(
 					WriteContext::AcceptingAnotherWhereCondition,
@@ -466,7 +466,7 @@ impl WriteWhereClause<Postgres, &MatchEmployee> for PgSchema
 		query: &mut QueryBuilder<Postgres>,
 	) -> WriteContext
 	{
-		let columns = EmployeeColumns::default().scoped(ident);
+		let columns = EmployeeColumns::default().scope(ident);
 
 		PgSchema::write_where_clause(
 			PgSchema::write_where_clause(
@@ -505,7 +505,7 @@ impl WriteWhereClause<Postgres, &MatchExpense> for PgSchema
 		query: &mut QueryBuilder<Postgres>,
 	) -> WriteContext
 	{
-		let columns = ExpenseColumns::default().scoped(ident);
+		let columns = ExpenseColumns::default().scope(ident);
 
 		PgSchema::write_where_clause(
 			PgSchema::write_where_clause(
@@ -550,7 +550,7 @@ impl WriteWhereClause<Postgres, &MatchInvoice> for PgSchema
 		query: &mut QueryBuilder<Postgres>,
 	) -> WriteContext
 	{
-		let columns = JobColumns::default().scoped(ident);
+		let columns = JobColumns::default().scope(ident);
 
 		fn map_nullable(date: &Option<NaiveDateTime>) -> impl Display + PartialEq
 		{
@@ -595,7 +595,7 @@ impl WriteWhereClause<Postgres, &MatchJob> for PgSchema
 		query: &mut QueryBuilder<Postgres>,
 	) -> WriteContext
 	{
-		let columns = JobColumns::default().scoped(ident);
+		let columns = JobColumns::default().scope(ident);
 
 		PgSchema::write_where_clause(
 			PgSchema::write_where_clause(
@@ -658,7 +658,7 @@ impl WriteWhereClause<Postgres, &MatchOrganization> for PgSchema
 		query: &mut QueryBuilder<Postgres>,
 	) -> WriteContext
 	{
-		let columns = OrganizationColumns::default().scoped(ident);
+		let columns = OrganizationColumns::default().scope(ident);
 
 		PgSchema::write_where_clause(
 			PgSchema::write_where_clause(context, columns.id, &match_condition.id, query),
@@ -687,7 +687,7 @@ impl WriteWhereClause<Postgres, &MatchTimesheet> for PgSchema
 		query: &mut QueryBuilder<Postgres>,
 	) -> WriteContext
 	{
-		let columns = TimesheetColumns::default().scoped(ident);
+		let columns = TimesheetColumns::default().scope(ident);
 
 		PgSchema::write_where_clause(
 			PgSchema::write_where_clause(

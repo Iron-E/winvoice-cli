@@ -33,7 +33,6 @@ impl Updatable for PgContactInfo
 			COLUMNS,
 			"contact_information",
 			"C",
-			"V",
 			|query| {
 				query.push_values(peekable_entities, |mut q, e| {
 					q.push_bind(e.kind.address().map(|a| a.id))

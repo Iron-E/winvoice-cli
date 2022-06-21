@@ -16,7 +16,7 @@ mod write_where_clause;
 
 use core::fmt::Display;
 
-use clinvoice_adapter::{fmt::ColumnsToSql, WriteWhereClause};
+use clinvoice_adapter::{fmt::{ColumnsToSql, SnakeCase}, WriteWhereClause};
 use clinvoice_match::Match;
 use clinvoice_schema::Id;
 pub use contact_info::PgContactInfo;
@@ -86,8 +86,7 @@ impl PgSchema
 		connection: &mut Transaction<'_, Postgres>,
 		columns: C,
 		table: impl Display,
-		table_ident: impl Copy + Display,
-		values_ident: impl Copy + Display,
+		table_alias: impl Copy + Display,
 		push_values: impl FnOnce(&mut QueryBuilder<'args, Postgres>),
 	) -> Result<()>
 	where
@@ -99,10 +98,11 @@ impl PgSchema
 			.push("UPDATE")
 			.push(table)
 			.push("AS")
-			.push(table_ident)
+			.push(table_alias)
 			.push("SET ");
 
-		columns.push_set(&mut query, values_ident);
+		let values_alias = SnakeCase::from((table_alias, "V"));
+		columns.push_set(&mut query, values_alias);
 
 		query.push(" FROM (");
 
@@ -111,14 +111,14 @@ impl PgSchema
 		query
 			.separated(' ')
 			.push(") AS")
-			.push(values_ident)
+			.push(values_alias)
 			.push('(');
 
 		columns.push(&mut query);
 
 		query.push(") WHERE ");
 
-		columns.push_update_where(&mut query, table_ident, values_ident);
+		columns.push_update_where(&mut query, table_alias, values_alias);
 
 		query.push(';').build().execute(connection).await?;
 

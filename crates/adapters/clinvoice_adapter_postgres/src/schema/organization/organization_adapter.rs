@@ -44,8 +44,8 @@ impl OrganizationAdapter for PgOrganization
 		const LOCATION_ALIAS: SnakeCase<&str, &str> = SnakeCase::Body(ALIAS, "L");
 		const LOCATION_COLUMNS: LocationColumns<&'static str> = LocationColumns::default();
 
-		let columns = COLUMNS.scoped(ALIAS);
-		let location_columns = LOCATION_COLUMNS.scoped(LOCATION_ALIAS);
+		let columns = COLUMNS.scope(ALIAS);
+		let location_columns = LOCATION_COLUMNS.scope(LOCATION_ALIAS);
 		let mut query = PgLocation::query_with_recursive(&match_condition.location);
 
 		query.push("SELECT ");

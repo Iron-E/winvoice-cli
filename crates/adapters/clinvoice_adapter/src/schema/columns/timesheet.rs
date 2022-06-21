@@ -19,17 +19,17 @@ impl<T> TimesheetColumns<T>
 	///
 	/// Returns an alternation of [`TimesheetColumns`] which modifies its fields' [`Display`]
 	/// implementation to output `{ident}.{column}`.
-	pub fn scoped<TIdent>(self, ident: TIdent) -> TimesheetColumns<WithIdentifier<T, TIdent>>
+	pub fn scope<TAlias>(self, alias: TAlias) -> TimesheetColumns<WithIdentifier<T, TAlias>>
 	where
-		TIdent: Copy,
+		TAlias: Copy,
 	{
 		TimesheetColumns {
-			employee_id: WithIdentifier(ident, self.employee_id),
-			id: WithIdentifier(ident, self.id),
-			job_id: WithIdentifier(ident, self.job_id),
-			time_begin: WithIdentifier(ident, self.time_begin),
-			time_end: WithIdentifier(ident, self.time_end),
-			work_notes: WithIdentifier(ident, self.work_notes),
+			employee_id: WithIdentifier(alias, self.employee_id),
+			id: WithIdentifier(alias, self.id),
+			job_id: WithIdentifier(alias, self.job_id),
+			time_begin: WithIdentifier(alias, self.time_begin),
+			time_end: WithIdentifier(alias, self.time_end),
+			work_notes: WithIdentifier(alias, self.work_notes),
 		}
 	}
 

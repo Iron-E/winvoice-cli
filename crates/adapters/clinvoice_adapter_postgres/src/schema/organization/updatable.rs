@@ -28,7 +28,7 @@ impl Updatable for PgOrganization
 		}
 
 		const COLUMNS: OrganizationColumns<&'static str> = OrganizationColumns::default();
-		PgSchema::update(connection, COLUMNS, "organizations", "O", "V", |query| {
+		PgSchema::update(connection, COLUMNS, "organizations", "O", |query| {
 			query.push_values(peekable_entities, |mut q, e| {
 				q.push_bind(e.id)
 					.push_bind(e.location.id)

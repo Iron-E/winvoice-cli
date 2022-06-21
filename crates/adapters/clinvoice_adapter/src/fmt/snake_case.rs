@@ -75,11 +75,11 @@ where
 	///
 	/// assert_eq!(&SnakeCase::from(("foo", "bar")).to_string(), "foo_bar");
 	/// ```
-	pub const fn push<D>(self, ident: D) -> SnakeCase<Self, D>
+	pub const fn push<T>(self, token: T) -> SnakeCase<Self, T>
 	where
-		D: Display,
+		T: Display,
 	{
-		SnakeCase::Body(self, ident)
+		SnakeCase::Body(self, token)
 	}
 
 	/// # Summary

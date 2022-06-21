@@ -23,21 +23,21 @@ impl<T> JobColumns<T>
 	///
 	/// Returns an alternation of [`JobColumns`] which modifies its fields' [`Display`]
 	/// implementation to output `{ident}.{column}`.
-	pub fn scoped<TIdent>(self, ident: TIdent) -> JobColumns<WithIdentifier<T, TIdent>>
+	pub fn scope<TAlias>(self, alias: TAlias) -> JobColumns<WithIdentifier<T, TAlias>>
 	where
-		TIdent: Copy,
+		TAlias: Copy,
 	{
 		JobColumns {
-			client_id: WithIdentifier(ident, self.client_id),
-			date_open: WithIdentifier(ident, self.date_open),
-			date_close: WithIdentifier(ident, self.date_close),
-			id: WithIdentifier(ident, self.id),
-			increment: WithIdentifier(ident, self.increment),
-			invoice_date_issued: WithIdentifier(ident, self.invoice_date_issued),
-			invoice_date_paid: WithIdentifier(ident, self.invoice_date_paid),
-			invoice_hourly_rate: WithIdentifier(ident, self.invoice_hourly_rate),
-			notes: WithIdentifier(ident, self.notes),
-			objectives: WithIdentifier(ident, self.objectives),
+			client_id: WithIdentifier(alias, self.client_id),
+			date_open: WithIdentifier(alias, self.date_open),
+			date_close: WithIdentifier(alias, self.date_close),
+			id: WithIdentifier(alias, self.id),
+			increment: WithIdentifier(alias, self.increment),
+			invoice_date_issued: WithIdentifier(alias, self.invoice_date_issued),
+			invoice_date_paid: WithIdentifier(alias, self.invoice_date_paid),
+			invoice_hourly_rate: WithIdentifier(alias, self.invoice_hourly_rate),
+			notes: WithIdentifier(alias, self.notes),
+			objectives: WithIdentifier(alias, self.objectives),
 		}
 	}
 

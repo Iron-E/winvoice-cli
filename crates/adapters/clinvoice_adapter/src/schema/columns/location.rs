@@ -16,14 +16,14 @@ impl<T> LocationColumns<T>
 	///
 	/// Returns an alternation of [`LocationColumns`] which modifies its fields' [`Display`]
 	/// implementation to output `{ident}.{column}`.
-	pub fn scoped<TIdent>(self, ident: TIdent) -> LocationColumns<WithIdentifier<T, TIdent>>
+	pub fn scope<TAlias>(self, alias: TAlias) -> LocationColumns<WithIdentifier<T, TAlias>>
 	where
-		TIdent: Copy,
+		TAlias: Copy,
 	{
 		LocationColumns {
-			id: WithIdentifier(ident, self.id),
-			outer_id: WithIdentifier(ident, self.outer_id),
-			name: WithIdentifier(ident, self.name),
+			id: WithIdentifier(alias, self.id),
+			outer_id: WithIdentifier(alias, self.outer_id),
+			name: WithIdentifier(alias, self.name),
 		}
 	}
 

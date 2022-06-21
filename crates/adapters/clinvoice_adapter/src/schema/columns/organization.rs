@@ -16,14 +16,14 @@ impl<T> OrganizationColumns<T>
 	///
 	/// Returns an alternation of [`OrganizationColumns`] which modifies its fields' [`Display`]
 	/// implementation to output `{ident}.{column}`.
-	pub fn scoped<TIdent>(self, ident: TIdent) -> OrganizationColumns<WithIdentifier<T, TIdent>>
+	pub fn scope<TAlias>(self, alias: TAlias) -> OrganizationColumns<WithIdentifier<T, TAlias>>
 	where
-		TIdent: Copy,
+		TAlias: Copy,
 	{
 		OrganizationColumns {
-			id: WithIdentifier(ident, self.id),
-			location_id: WithIdentifier(ident, self.location_id),
-			name: WithIdentifier(ident, self.name),
+			id: WithIdentifier(alias, self.id),
+			location_id: WithIdentifier(alias, self.location_id),
+			name: WithIdentifier(alias, self.name),
 		}
 	}
 

@@ -18,16 +18,16 @@ impl<T> ExpenseColumns<T>
 	///
 	/// Returns an alternation of [`ExpenseColumns`] which modifies its fields' [`Display`]
 	/// implementation to output `{ident}.{column}`.
-	pub fn scoped<TIdent>(self, ident: TIdent) -> ExpenseColumns<WithIdentifier<T, TIdent>>
+	pub fn scope<TAlias>(self, alias: TAlias) -> ExpenseColumns<WithIdentifier<T, TAlias>>
 	where
-		TIdent: Copy,
+		TAlias: Copy,
 	{
 		ExpenseColumns {
-			id: WithIdentifier(ident, self.id),
-			timesheet_id: WithIdentifier(ident, self.timesheet_id),
-			category: WithIdentifier(ident, self.category),
-			cost: WithIdentifier(ident, self.cost),
-			description: WithIdentifier(ident, self.description),
+			id: WithIdentifier(alias, self.id),
+			timesheet_id: WithIdentifier(alias, self.timesheet_id),
+			category: WithIdentifier(alias, self.category),
+			cost: WithIdentifier(alias, self.cost),
+			description: WithIdentifier(alias, self.description),
 		}
 	}
 

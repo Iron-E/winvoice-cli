@@ -23,8 +23,8 @@ impl PgOrganization
 		let location_id = row.try_get(columns.location_id.as_ref())?;
 		Ok(Organization {
 			id: row.try_get(columns.id.as_ref())?,
-			location: PgLocation::retrieve_by_id(connection, location_id).await?,
 			name: row.try_get(columns.name.as_ref())?,
+			location: PgLocation::retrieve_by_id(connection, location_id).await?,
 		})
 	}
 }

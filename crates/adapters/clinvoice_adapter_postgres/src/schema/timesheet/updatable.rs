@@ -57,6 +57,6 @@ mod tests
 	#[tokio::test]
 	async fn update()
 	{
-		// TODO: write test
+		todo!("write test")
 	}
 }

@@ -1,5 +1,5 @@
 use clinvoice_adapter::{
-	fmt::{ColumnsToSql, QueryBuilderExt, SnakeCase},
+	fmt::{ColumnsToSql, QueryBuilderExt},
 	schema::{
 		columns::{LocationColumns, OrganizationColumns},
 		OrganizationAdapter,
@@ -41,7 +41,8 @@ impl OrganizationAdapter for PgOrganization
 	{
 		const ALIAS: &str = "O";
 		const COLUMNS: OrganizationColumns<&'static str> = OrganizationColumns::default();
-		const LOCATION_ALIAS: SnakeCase<&str, &str> = SnakeCase::Body(ALIAS, "L");
+
+		const LOCATION_ALIAS: &str = "L";
 		const LOCATION_COLUMNS: LocationColumns<&'static str> = LocationColumns::default();
 
 		let columns = COLUMNS.scope(ALIAS);

@@ -1,5 +1,5 @@
 use clinvoice_adapter::{
-	fmt::{As, ColumnsToSql, QueryBuilderExt, SnakeCase},
+	fmt::{As, ColumnsToSql, QueryBuilderExt},
 	schema::{
 		columns::{
 			EmployeeColumns,
@@ -90,24 +90,22 @@ impl TimesheetAdapter for PgTimesheet
 		const ALIAS: &str = "T";
 		const COLUMNS: TimesheetColumns<&str> = TimesheetColumns::default();
 
-		const EMPLOYEE_ALIAS: SnakeCase<&str, &str> = SnakeCase::Body(ALIAS, "E");
+		const EMPLOYEE_ALIAS: &str = "E";
 		const EMPLOYEE_COLUMNS: EmployeeColumns<&str> = EmployeeColumns::default();
 		const EMPLOYEE_COLUMNS_UNIQUE: EmployeeColumns<&str> = EmployeeColumns::unique();
 
-		const EXPENSE_ALIAS: SnakeCase<&str, &str> = SnakeCase::Body(ALIAS, "X");
+		const EXPENSE_ALIAS: &str = "X";
 		const EXPENSES_AGGREGATED_IDENT: &str = "expenses_aggregated";
 		const EXPENSE_COLUMNS: ExpenseColumns<&str> = ExpenseColumns::default();
 
-		const JOB_ALIAS: SnakeCase<&str, &str> = SnakeCase::Body(ALIAS, "J");
+		const JOB_ALIAS: &str = "J";
 		const JOB_COLUMNS: JobColumns<&str> = JobColumns::default();
 		const JOB_COLUMNS_UNIQUE: JobColumns<&str> = JobColumns::unique();
 
-		const LOCATION_ALIAS: SnakeCase<SnakeCase<SnakeCase<&str, &str>, &str>, &str> =
-			SnakeCase::Body(ORGANIZATION_ALIAS, "L");
+		const LOCATION_ALIAS: &str = "L";
 		const LOCATION_COLUMNS: LocationColumns<&str> = LocationColumns::default();
 
-		const ORGANIZATION_ALIAS: SnakeCase<SnakeCase<&str, &str>, &str> =
-			SnakeCase::Body(JOB_ALIAS, "O");
+		const ORGANIZATION_ALIAS: &str = "O";
 		const ORGANIZATION_COLUMNS: OrganizationColumns<&str> = OrganizationColumns::default();
 		const ORGANIZATION_COLUMNS_UNIQUE: OrganizationColumns<&str> = OrganizationColumns::unique();
 

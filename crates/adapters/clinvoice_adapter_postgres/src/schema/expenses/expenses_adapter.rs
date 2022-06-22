@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use clinvoice_adapter::{
-	fmt::{As, QueryBuilderExt, SnakeCase},
+	fmt::{As, QueryBuilderExt},
 	schema::{
 		columns::{ExpenseColumns, TimesheetColumns},
 		ExpensesAdapter,
@@ -77,7 +77,7 @@ impl ExpensesAdapter for PgExpenses
 		const ALIAS: &str = "X";
 		const COLUMNS: ExpenseColumns<&str> = ExpenseColumns::default();
 
-		const TIMESHEET_ALIAS: SnakeCase<&str, &str> = SnakeCase::Body(ALIAS, "T");
+		const TIMESHEET_ALIAS: &str = "T";
 		const TIMESHEET_COLUMNS: TimesheetColumns<&str> = TimesheetColumns::default();
 
 		let columns = COLUMNS.scope(ALIAS);

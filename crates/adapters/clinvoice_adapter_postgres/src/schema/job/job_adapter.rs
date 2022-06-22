@@ -1,7 +1,7 @@
 use core::time::Duration;
 
 use clinvoice_adapter::{
-	fmt::{ColumnsToSql, QueryBuilderExt, SnakeCase},
+	fmt::{ColumnsToSql, QueryBuilderExt},
 	schema::{
 		columns::{JobColumns, LocationColumns, OrganizationColumns},
 		JobAdapter,
@@ -80,10 +80,11 @@ impl JobAdapter for PgJob
 	{
 		const ALIAS: &str = "J";
 		const COLUMNS: JobColumns<&str> = JobColumns::default();
-		const LOCATION_ALIAS: SnakeCase<SnakeCase<&str, &str>, &str> =
-			SnakeCase::Body(ORGANIZATION_ALIAS, "L");
+
+		const LOCATION_ALIAS: &str = "L";
 		const LOCATION_COLUMNS: LocationColumns<&str> = LocationColumns::default();
-		const ORGANIZATION_ALIAS: SnakeCase<&str, &str> = SnakeCase::Body(ALIAS, "O");
+
+		const ORGANIZATION_ALIAS: &str = "O";
 		const ORGANIZATION_COLUMNS: OrganizationColumns<&str> = OrganizationColumns::default();
 		const ORGANIZATION_COLUMNS_UNIQUE: OrganizationColumns<&str> = OrganizationColumns::unique();
 

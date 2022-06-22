@@ -1,4 +1,4 @@
-use std::collections::LinkedList;
+use std::{cmp::Ordering, collections::LinkedList};
 
 use clinvoice_adapter::{schema::columns::LocationColumns, Updatable};
 use clinvoice_schema::Location;
@@ -29,7 +29,7 @@ impl Updatable for PgLocation
 			return Ok(());
 		}
 
-		let mut entities_by_outer: LinkedList<Vec<_>> = Default::default();
+		let mut entities_by_outer = LinkedList::<Vec<_>>::default();
 		entities_by_outer.push_back(entities_peekable.collect());
 
 		loop
@@ -61,10 +61,18 @@ impl Updatable for PgLocation
 			//       unsorted unless there are at least three elements.
 			if entities_collected.len() > 2
 			{
-				entities_collected.sort();
+				entities_collected.sort_by(|lhs, rhs| match rhs.id.cmp(&lhs.id)
+				{
+					// NOTE: this allows `dedup_by_key` prune edits to `Location`s which would overwrite
+					//       the `Location`s which were initially passed to the function (e.g. if Earth
+					//       and Sweden are both passed in to this function, Earth will take precedence
+					//       over Sweden's copy of Earth).
+					Ordering::Equal => Ordering::Greater,
+					o => o,
+				});
 			}
 
-			entities_collected.dedup();
+			entities_collected.dedup_by_key(|e| e.id);
 		}
 
 		const COLUMNS: LocationColumns<&'static str> = LocationColumns::default();
@@ -77,11 +85,6 @@ impl Updatable for PgLocation
 		})
 		.await?;
 
-		// TODO: make this function recursive once `async` traits are stable.
-		//       at that point, it will be possible to remove `entities_collected` and instead use
-		//       `entities.clone().peekable()` in its place.
-		// Self::update(connection, entities.filter_map(|e| e.outer.as_deref())).await?;
-
 		Ok(())
 	}
 }
@@ -91,6 +94,7 @@ mod tests
 {
 	use clinvoice_adapter::{schema::LocationAdapter, Updatable};
 	use clinvoice_match::MatchLocation;
+	use clinvoice_schema::Location;
 
 	use crate::schema::{util, PgLocation};
 
@@ -112,16 +116,26 @@ mod tests
 		.unwrap();
 
 		chile.name = "Chilé".into();
+		chile.outer = Some(
+			Location {
+				id: earth.id,
+				name: format!("Not {}", &earth.name),
+				outer: None,
+			}
+			.into(),
+		);
 		earth.name = "Urth".into();
 
-		chile.outer = Some(earth.into());
 		usa.outer = Some(mars.into());
 
 		{
 			let mut transaction = connection.begin().await.unwrap();
-			PgLocation::update(&mut transaction, [chile.clone(), usa.clone()].iter())
-				.await
-				.unwrap();
+			PgLocation::update(
+				&mut transaction,
+				[chile.clone(), usa.clone(), earth.clone()].iter(),
+			)
+			.await
+			.unwrap();
 			transaction.commit().await.unwrap();
 		}
 
@@ -141,7 +155,11 @@ mod tests
 		.unwrap()
 		.remove(0);
 
-		assert_eq!(chile, chile_db);
+		assert_eq!(chile.id, chile_db.id);
+		assert_eq!(chile.name, chile_db.name);
+		assert_ne!(chile.outer, chile_db.outer);
+		assert_eq!(earth, *chile_db.outer.unwrap());
+
 		assert_eq!(usa, usa_db);
 	}
 }

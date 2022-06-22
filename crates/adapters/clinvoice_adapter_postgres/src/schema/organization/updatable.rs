@@ -46,7 +46,11 @@ impl Updatable for PgOrganization
 #[cfg(test)]
 mod tests
 {
-	use clinvoice_adapter::schema::{LocationAdapter, OrganizationAdapter};
+	use clinvoice_adapter::{
+		schema::{LocationAdapter, OrganizationAdapter},
+		Updatable,
+	};
+	use clinvoice_match::MatchOrganization;
 
 	use crate::schema::{util, PgLocation, PgOrganization};
 
@@ -55,7 +59,7 @@ mod tests
 	{
 		let connection = util::connect().await;
 
-		let (mut earth, mut mars) = futures::try_join!(
+		let (earth, mars) = futures::try_join!(
 			PgLocation::create(&connection, "Earth".into(), None),
 			PgLocation::create(&connection, "Mars".into(), None),
 		)
@@ -67,8 +71,39 @@ mod tests
 		)
 		.unwrap();
 
-		todo!("finish test");
-		// assert_eq!(organization, organization_db);
-		// assert_eq!(organization2, organization2_db);
+		organization.location.name = format!("Not {}", earth.name);
+		organization.name = format!("Not {}", organization.name);
+
+		organization2.location = mars;
+
+		{
+			let mut transaction = connection.begin().await.unwrap();
+			PgOrganization::update(
+				&mut transaction,
+				[&organization, &organization2].into_iter(),
+			)
+			.await
+			.unwrap();
+			transaction.commit().await.unwrap();
+		}
+
+		let organization_db = PgOrganization::retrieve(&connection, &MatchOrganization {
+			id: organization.id.into(),
+			..Default::default()
+		})
+		.await
+		.unwrap()
+		.remove(0);
+
+		let organization2_db = PgOrganization::retrieve(&connection, &MatchOrganization {
+			id: organization2.id.into(),
+			..Default::default()
+		})
+		.await
+		.unwrap()
+		.remove(0);
+
+		assert_eq!(organization, organization_db);
+		assert_eq!(organization2, organization2_db);
 	}
 }

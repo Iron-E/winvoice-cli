@@ -37,9 +37,13 @@ impl PgTimesheet
 		let job_fut = PgJob::row_to_view(connection, job_columns, organization_columns, row);
 		Ok(Timesheet {
 			employee: PgEmployee::row_to_view(employee_columns, row),
+			id: row.try_get(columns.id.as_ref())?,
+			time_begin: row.try_get(columns.time_begin.as_ref())?,
+			time_end: row.try_get(columns.time_end.as_ref())?,
+			work_notes: row.try_get(columns.work_notes.as_ref())?,
 			expenses: row
-				.try_get::<Vec<(_, String, _, _, _)>, _>(expenses_ident.as_ref())
-				.and_then(|raw_expenses| {
+				.try_get(expenses_ident.as_ref())
+				.and_then(|raw_expenses: Vec<(_, String, _, _, _)>| {
 					let expenses_len = raw_expenses.len();
 					raw_expenses.into_iter().try_fold(
 						Vec::with_capacity(expenses_len),
@@ -69,10 +73,6 @@ impl PgTimesheet
 					},
 					_ => Err(e),
 				})?,
-			id: row.try_get(columns.id.as_ref())?,
-			time_begin: row.try_get(columns.time_begin.as_ref())?,
-			time_end: row.try_get(columns.time_end.as_ref())?,
-			work_notes: row.try_get(columns.work_notes.as_ref())?,
 			job: job_fut.await?,
 		})
 	}

@@ -164,7 +164,7 @@ where
 		// TODO: `if let` chain
 		if let Some((_, kind, _)) = contact_info
 			.iter()
-			.find(|(_, _, label)| label == &edited_contact_label)
+			.find(|(_, _, label)| label.eq(&edited_contact_label))
 		{
 			eprintln!("The label \"{edited_contact_label}\" is already being used by \"{kind}\"");
 			return Ok(());

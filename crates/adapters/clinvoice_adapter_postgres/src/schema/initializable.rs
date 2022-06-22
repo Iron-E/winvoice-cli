@@ -1,6 +1,6 @@
 use clinvoice_adapter::Initializable;
 use futures::TryFutureExt;
-use sqlx::{Acquire, Error, Executor, Postgres, Result};
+use sqlx::{Acquire, Executor, Postgres, Result};
 
 use super::PgSchema;
 
@@ -197,7 +197,6 @@ async fn init_expenses(connection: impl Executor<'_, Database = Postgres>) -> Re
 impl Initializable for PgSchema
 {
 	type Db = Postgres;
-	type Error = Error;
 
 	/// # Summary
 	///

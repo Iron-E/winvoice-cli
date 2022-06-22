@@ -1,5 +1,5 @@
 use clinvoice_adapter::{
-	fmt::{As, ColumnsToSql, QueryBuilderExt},
+	fmt::{ColumnsToSql, QueryBuilderExt},
 	schema::{
 		columns::{
 			EmployeeColumns,
@@ -129,7 +129,10 @@ impl TimesheetAdapter for PgTimesheet
 		// NOTE: might need `",array_agg( DISTINCT ("`
 		query.push(",array_agg((");
 		expense_columns.push_to(&mut query);
-		query.push(As("))", EXPENSES_AGGREGATED_IDENT));
+		query
+			.separated(' ')
+			.push(")) AS")
+			.push(EXPENSES_AGGREGATED_IDENT);
 
 		query.push(',');
 		job_columns.r#as(JOB_COLUMNS_UNIQUE).push_to(&mut query);

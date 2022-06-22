@@ -16,7 +16,7 @@ mod deletable;
 mod location_adapter;
 mod updatable;
 
-const ALIAS_INNER: &str = "L";
+const ALIAS: &str = "L";
 const ALIAS_OUTER: &str = "LO";
 const COLUMNS: LocationColumns<&str> = LocationColumns::default();
 
@@ -43,29 +43,16 @@ impl PgLocation
 			TCurrent: Display,
 			TPrev: Display,
 		{
-			let inner_columns = COLUMNS.scope(ALIAS_INNER);
+			let inner_columns = COLUMNS.scope(ALIAS);
 			let outer_columns = COLUMNS.scope(ALIAS_OUTER);
 
-			// NOTE: this scope exists because we want to get rid of the mutable borrow after we're
-			//       done with it.
-			{
-				let mut separated = query.separated(' ');
-
-				separated
-					.push(&ident)
-					.push("AS (SELECT")
-					.push(outer_columns.id)
-					.push_unseparated(',')
-					.push_unseparated(outer_columns.name)
-					.push_unseparated(',')
-					.push_unseparated(outer_columns.outer_id)
-					.push("FROM locations")
-					.push(ALIAS_OUTER);
-			}
+			query.separated(' ').push(&ident).push("AS (SELECT ");
+			outer_columns.push_to(query);
+			query.push_from("locations", ALIAS_OUTER);
 
 			if let Some((prev, _)) = ident.slice_end()
 			{
-				query.push_equijoin(prev, ALIAS_INNER, outer_columns.id, inner_columns.outer_id);
+				query.push_equijoin(prev, ALIAS, outer_columns.id, inner_columns.outer_id);
 			}
 
 			PgSchema::write_where_clause(
@@ -114,7 +101,7 @@ impl PgLocation
 
 						query.push(',').push(IDENT_REPORT).push(" AS (SELECT ");
 						inner_columns.push_to(query);
-						query.push_from("locations", ALIAS_INNER).push_equijoin(
+						query.push_from("locations", ALIAS).push_equijoin(
 							ident,
 							ALIAS_OUTER,
 							inner_columns.outer_id,
@@ -124,7 +111,7 @@ impl PgLocation
 						query.push(" UNION SELECT ");
 						inner_columns.push_to(query);
 						query
-							.push_from("locations", ALIAS_INNER)
+							.push_from("locations", ALIAS)
 							.push_equijoin(
 								IDENT_REPORT,
 								ALIAS_OUTER,
@@ -209,11 +196,10 @@ impl PgLocation
 		query
 			.separated(' ')
 			.push("SELECT")
-			.push(COLUMNS.id)
-			.push("FROM")
-			.push(PgLocationRecursiveCte::from(match_condition));
+			.push(COLUMNS.scope(ALIAS).id);
 
 		query
+			.push_from(PgLocationRecursiveCte::from(match_condition), ALIAS)
 			.push(';')
 			.build()
 			.fetch(connection)

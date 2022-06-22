@@ -95,6 +95,7 @@ impl JobAdapter for PgJob
 
 		query.push("SELECT ");
 		columns.push_to(&mut query);
+
 		query.push(',');
 		organization_columns
 			.r#as(ORGANIZATION_COLUMNS_UNIQUE)

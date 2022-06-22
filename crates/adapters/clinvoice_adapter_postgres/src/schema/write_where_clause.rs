@@ -1,7 +1,7 @@
 use core::{fmt::Display, ops::Deref};
 
 use clinvoice_adapter::{
-	fmt::{Nullable, SnakeCase},
+	fmt::{Nullable, QueryBuilderExt, SnakeCase},
 	schema::columns::{
 		ContactColumns,
 		EmployeeColumns,
@@ -344,23 +344,21 @@ impl WriteWhereClause<Postgres, &MatchSet<MatchExpense>> for PgSchema
 			MatchSet::Contains(match_expense) =>
 			{
 				const COLUMNS: ExpenseColumns<&'static str> = ExpenseColumns::default();
-
 				let subquery_ident = SnakeCase::from((ident, "2"));
-				let subquery_ident_columns = COLUMNS.scope(&subquery_ident);
+
+				query.separated(' ').push(context).push("EXISTS (SELECT");
 
 				query
-					.separated(' ')
-					.push(context)
-					.push("EXISTS (SELECT FROM expenses")
-					.push(&subquery_ident)
-					.push("WHERE")
-					.push(subquery_ident_columns.timesheet_id)
-					.push_unseparated('=')
-					.push_unseparated(COLUMNS.scope(ident).timesheet_id);
+					.push_from("expenses", subquery_ident)
+					.push(" WHERE ")
+					.push_equal(
+						COLUMNS.scope(subquery_ident).timesheet_id,
+						COLUMNS.scope(ident).timesheet_id,
+					);
 
 				PgSchema::write_where_clause(
 					WriteContext::AcceptingAnotherWhereCondition,
-					&subquery_ident,
+					subquery_ident,
 					match_expense,
 					query,
 				);
@@ -370,7 +368,7 @@ impl WriteWhereClause<Postgres, &MatchSet<MatchExpense>> for PgSchema
 
 			MatchSet::Not(condition) => match condition.deref()
 			{
-				m if m == &Default::default() => write_is_null(query, context, ident),
+				m if m.eq(&Default::default()) => write_is_null(query, context, ident),
 				m => write_negated(query, context, ident, m),
 			},
 		};

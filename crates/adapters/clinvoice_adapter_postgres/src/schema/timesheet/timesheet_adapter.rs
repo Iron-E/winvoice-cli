@@ -172,11 +172,33 @@ impl TimesheetAdapter for PgTimesheet
 
 		let exchange_rates = exchange_rates_fut.await?;
 		PgSchema::write_where_clause(
-			PgSchema::write_where_clause(Default::default(), ALIAS, match_condition, &mut query),
-			EXPENSE_ALIAS,
-			&match_condition
-				.expenses
-				.exchange_ref(Default::default(), &exchange_rates),
+			PgSchema::write_where_clause(
+				PgSchema::write_where_clause(
+					PgSchema::write_where_clause(
+						PgSchema::write_where_clause(
+							Default::default(),
+							ALIAS,
+							match_condition,
+							&mut query,
+						),
+						EMPLOYEE_ALIAS,
+						&match_condition.employee,
+						&mut query,
+					),
+					EXPENSE_ALIAS,
+					&match_condition
+						.expenses
+						.exchange_ref(Default::default(), &exchange_rates),
+					&mut query,
+				),
+				JOB_ALIAS,
+				&match_condition
+					.job
+					.exchange_ref(Default::default(), &exchange_rates),
+				&mut query,
+			),
+			ORGANIZATION_ALIAS,
+			&match_condition.job.client,
 			&mut query,
 		);
 

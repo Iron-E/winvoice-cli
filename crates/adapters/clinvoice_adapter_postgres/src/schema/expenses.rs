@@ -18,13 +18,12 @@ impl PgExpenses
 	{
 		let id = match row.try_get(columns.id)
 		{
-			Ok(id) => id,
-			Err(Error::ColumnDecode {
-				index: _,
-				source: s,
-			}) if s.is::<UnexpectedNullError>() => return Ok(None),
-			Err(e) => return Err(e),
-		};
+			Err(Error::ColumnDecode { source: s, .. }) if s.is::<UnexpectedNullError>() =>
+			{
+				return Ok(None)
+			},
+			result => result,
+		}?;
 
 		let amount = row
 			.get::<String, _>(columns.cost)

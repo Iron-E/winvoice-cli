@@ -35,44 +35,40 @@ impl PgTimesheet
 		TXpnIdent: AsRef<str>,
 	{
 		let job_fut = PgJob::row_to_view(connection, job_columns, organization_columns, row);
-		let expenses = match row.try_get::<Vec<(_, String, _, _, _)>, _>(expenses_ident.as_ref())
-		{
-			Err(Error::ColumnDecode { source: s, .. }) if s.is::<UnexpectedNullError>() =>
-			{
-				Default::default()
-			},
-			Err(e) => return Err(e),
-			Ok(raw_expenses) =>
-			{
-				let expenses_len = raw_expenses.len();
-				raw_expenses.into_iter().try_fold(
-					Vec::with_capacity(expenses_len),
-					|mut expenses, (category, cost, description, id, timesheet_id)| -> Result<_> {
-						expenses.push(
-							cost
-								.parse::<Decimal>()
-								.map_err(|e| util::finance_err_to_sqlx(e.into()))
-								.map(|amount| Expense {
-									category,
-									description,
-									id,
-									timesheet_id,
-									cost: Money {
-										amount,
-										..Default::default()
-									},
-								})?,
-						);
-
-						Ok(expenses)
-					},
-				)?
-			},
-		};
-
 		Ok(Timesheet {
 			employee: PgEmployee::row_to_view(employee_columns, row),
-			expenses,
+			expenses: row
+				.try_get::<Vec<(_, String, _, _, _)>, _>(expenses_ident.as_ref())
+				.and_then(|raw_expenses| {
+					let expenses_len = raw_expenses.len();
+					raw_expenses.into_iter().try_fold(
+						Vec::with_capacity(expenses_len),
+						|mut expenses, (category, cost, description, id, timesheet_id)| {
+							expenses.push(Expense {
+								category,
+								description,
+								id,
+								timesheet_id,
+								cost: Money {
+									amount: cost
+										.parse::<Decimal>()
+										.map_err(|e| util::finance_err_to_sqlx(e.into()))?,
+									..Default::default()
+								},
+							});
+
+							Ok(expenses)
+						},
+					)
+				})
+				.or_else(|e| match e
+				{
+					Error::ColumnDecode { source: s, .. } if s.is::<UnexpectedNullError>() =>
+					{
+						Ok(Vec::new())
+					},
+					_ => Err(e),
+				})?,
 			id: row.try_get(columns.id.as_ref())?,
 			time_begin: row.try_get(columns.time_begin.as_ref())?,
 			time_end: row.try_get(columns.time_end.as_ref())?,

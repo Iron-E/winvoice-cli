@@ -37,9 +37,7 @@ impl Updatable for PgContactInfo
 					.push_bind(e.kind.phone());
 			});
 		})
-		.await?;
-
-		Ok(())
+		.await
 	}
 }
 

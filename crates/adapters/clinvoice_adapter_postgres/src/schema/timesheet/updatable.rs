@@ -1,10 +1,10 @@
 use clinvoice_adapter::{schema::columns::TimesheetColumns, Updatable};
-use clinvoice_schema::{Timesheet, Expense};
+use clinvoice_schema::{Expense, Timesheet};
 use sqlx::{Postgres, Result, Transaction};
 
 use super::PgTimesheet;
 use crate::{
-	schema::{PgEmployee, PgJob, PgExpenses},
+	schema::{PgEmployee, PgExpenses, PgJob},
 	PgSchema,
 };
 
@@ -54,9 +54,7 @@ impl Updatable for PgTimesheet
 
 		PgEmployee::update(connection, employees).await?;
 		PgExpenses::update(connection, expenses).await?;
-		PgJob::update(connection, entities.map(|e| &e.job)).await?;
-
-		Ok(())
+		PgJob::update(connection, entities.map(|e| &e.job)).await
 	}
 }
 

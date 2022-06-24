@@ -83,9 +83,7 @@ impl Updatable for PgLocation
 					.push_bind(e.outer.as_ref().map(|o| o.id));
 			});
 		})
-		.await?;
-
-		Ok(())
+		.await
 	}
 }
 

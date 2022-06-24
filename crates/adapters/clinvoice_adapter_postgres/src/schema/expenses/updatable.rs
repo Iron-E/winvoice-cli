@@ -37,9 +37,7 @@ impl Updatable for PgExpenses
 					.push_bind(e.timesheet_id);
 			});
 		})
-		.await?;
-
-		Ok(())
+		.await
 	}
 }
 

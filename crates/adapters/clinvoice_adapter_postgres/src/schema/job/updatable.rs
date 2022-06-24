@@ -71,9 +71,7 @@ impl Updatable for PgJob
 		})
 		.await?;
 
-		PgOrganization::update(connection, entities.map(|e| &e.client)).await?;
-
-		Ok(())
+		PgOrganization::update(connection, entities.map(|e| &e.client)).await
 	}
 }
 

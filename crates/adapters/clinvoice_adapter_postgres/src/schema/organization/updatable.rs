@@ -37,9 +37,7 @@ impl Updatable for PgOrganization
 		})
 		.await?;
 
-		PgLocation::update(connection, entities.map(|e| &e.location)).await?;
-
-		Ok(())
+		PgLocation::update(connection, entities.map(|e| &e.location)).await
 	}
 }
 

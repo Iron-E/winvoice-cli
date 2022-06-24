@@ -36,9 +36,7 @@ impl Updatable for PgEmployee
 					.push_bind(&e.title);
 			});
 		})
-		.await?;
-
-		Ok(())
+		.await
 	}
 }
 

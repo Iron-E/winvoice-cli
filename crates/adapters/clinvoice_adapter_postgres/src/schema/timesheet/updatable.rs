@@ -1,10 +1,10 @@
 use clinvoice_adapter::{schema::columns::TimesheetColumns, Updatable};
-use clinvoice_schema::Timesheet;
+use clinvoice_schema::{Timesheet, Expense};
 use sqlx::{Postgres, Result, Transaction};
 
 use super::PgTimesheet;
 use crate::{
-	schema::{PgEmployee, PgJob},
+	schema::{PgEmployee, PgJob, PgExpenses},
 	PgSchema,
 };
 
@@ -44,7 +44,16 @@ impl Updatable for PgTimesheet
 		.await?;
 
 		let employees = entities.clone().map(|e| &e.employee);
+
+		// TODO: use `for<'a> |e: &'a Timesheet| &t.expenses`
+		let expenses = entities.clone().map(mapper).flatten();
+		fn mapper(t: &Timesheet) -> &[Expense]
+		{
+			&t.expenses
+		}
+
 		PgEmployee::update(connection, employees).await?;
+		PgExpenses::update(connection, expenses).await?;
 		PgJob::update(connection, entities.map(|e| &e.job)).await?;
 
 		Ok(())

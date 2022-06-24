@@ -35,7 +35,9 @@ pub(super) fn duration_from(interval: PgInterval) -> Result<Duration>
 
 		(
 			microseconds / MICROSECONDS_IN_SECOND,
-			(microseconds % MICROSECONDS_IN_SECOND) as u32 * NANOSECONDS_IN_MICROSECOND,
+			u32::try_from(microseconds % MICROSECONDS_IN_SECOND)
+				.expect("u64 % 1000000 should fit into u32") *
+				NANOSECONDS_IN_MICROSECOND,
 		)
 	}
 	else

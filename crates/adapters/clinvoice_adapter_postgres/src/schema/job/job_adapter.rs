@@ -13,7 +13,6 @@ use clinvoice_match::MatchJob;
 use clinvoice_schema::{
 	chrono::{DateTime, Utc},
 	Invoice,
-	InvoiceDate,
 	Job,
 	Organization,
 };
@@ -22,7 +21,7 @@ use sqlx::{PgPool, Result};
 
 use super::PgJob;
 use crate::{
-	fmt::PgLocationRecursiveCte,
+	fmt::{DateTimeExt, PgLocationRecursiveCte},
 	schema::{util, PgLocation},
 	PgSchema,
 };
@@ -67,20 +66,15 @@ impl JobAdapter for PgJob
 
 		Ok(Job {
 			client,
-			date_close: date_close.map(util::sanitize_datetime),
-			date_open: util::sanitize_datetime(date_open),
+			date_close,
+			date_open,
 			id: row.id,
 			increment,
-			invoice: Invoice {
-				date: invoice.date.map(|d| InvoiceDate {
-					issued: util::sanitize_datetime(d.issued),
-					paid: d.paid.map(util::sanitize_datetime),
-				}),
-				..invoice
-			},
+			invoice,
 			notes,
 			objectives,
-		})
+		}
+		.pg_sanitize())
 	}
 
 	async fn retrieve(connection: &PgPool, match_condition: &MatchJob) -> Result<Vec<Job>>

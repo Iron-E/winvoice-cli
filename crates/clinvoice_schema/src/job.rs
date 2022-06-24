@@ -79,7 +79,7 @@ pub struct Job
 	///
 	/// # Example
 	///
-	/// > __Note:__ the `str` may contain any valid markdown.
+	/// __Note:__ this field may contain any valid markdown.
 	///
 	/// ```markdown
 	/// * Images on the website now point to the correct location.

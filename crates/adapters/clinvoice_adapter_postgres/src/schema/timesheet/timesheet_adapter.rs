@@ -27,7 +27,7 @@ use sqlx::{PgPool, Result};
 
 use super::PgTimesheet;
 use crate::{
-	fmt::PgLocationRecursiveCte,
+	fmt::{DateTimeExt, PgLocationRecursiveCte},
 	schema::{util, PgExpenses, PgLocation},
 	PgSchema,
 };
@@ -74,10 +74,11 @@ impl TimesheetAdapter for PgTimesheet
 					employee,
 					expenses: expenses_db,
 					job,
-					time_begin: util::sanitize_datetime(time_begin),
-					time_end: time_end.map(util::sanitize_datetime),
+					time_begin,
+					time_end,
 					work_notes,
-				})
+				}
+				.pg_sanitize())
 			})
 			.await
 	}

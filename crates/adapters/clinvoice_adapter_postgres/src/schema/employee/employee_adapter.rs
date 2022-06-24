@@ -1,5 +1,5 @@
 use clinvoice_adapter::{
-	fmt::{ColumnsToSql, QueryBuilderExt},
+	fmt::{sql, ColumnsToSql, QueryBuilderExt},
 	schema::{columns::EmployeeColumns, EmployeeAdapter},
 	WriteWhereClause,
 };
@@ -44,7 +44,7 @@ impl EmployeeAdapter for PgEmployee
 		const ALIAS: &str = "E";
 		const COLUMNS: EmployeeColumns<&'static str> = EmployeeColumns::default();
 
-		let mut query = QueryBuilder::new("SELECT ");
+		let mut query = QueryBuilder::new(sql::SELECT);
 		COLUMNS.scope(ALIAS).push_to(&mut query);
 		query.push_from("employees", ALIAS);
 		PgSchema::write_where_clause(Default::default(), ALIAS, match_condition, &mut query);

@@ -1,6 +1,10 @@
 use core::fmt::Display;
 
-use clinvoice_adapter::{fmt::QueryBuilderExt, schema::columns::ContactColumns, Deletable};
+use clinvoice_adapter::{
+	fmt::{sql, QueryBuilderExt},
+	schema::columns::ContactColumns,
+	Deletable,
+};
 use clinvoice_schema::Contact;
 use sqlx::{query_builder::Separated, Executor, Postgres, QueryBuilder, Result};
 
@@ -41,7 +45,8 @@ impl Deletable for PgContactInfo
 			return Ok(());
 		}
 
-		let mut query = QueryBuilder::new("DELETE FROM contact_information WHERE ");
+		let mut query = QueryBuilder::new(sql::DELETE_FROM);
+		query.push("contact_information").push(sql::WHERE);
 
 		{
 			let mut separated = query.separated(' ');

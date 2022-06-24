@@ -1,7 +1,7 @@
 use core::fmt::Display;
 
 use clinvoice_adapter::{
-	fmt::{ColumnsToSql, QueryBuilderExt, SnakeCase},
+	fmt::{sql, ColumnsToSql, QueryBuilderExt, SnakeCase},
 	schema::columns::LocationColumns,
 	WriteWhereClause,
 };
@@ -46,7 +46,7 @@ impl PgLocation
 			let inner_columns = COLUMNS.scope(ALIAS);
 			let outer_columns = COLUMNS.scope(ALIAS_OUTER);
 
-			query.separated(' ').push(&ident).push("AS (SELECT ");
+			query.push(&ident).push(" AS (").push(sql::SELECT);
 			outer_columns.push_to(query);
 			query.push_from("locations", ALIAS_OUTER);
 
@@ -99,7 +99,11 @@ impl PgLocation
 					{
 						const IDENT_REPORT: SnakeCase<&str, &str> = PgLocationRecursiveCte::report();
 
-						query.push(',').push(IDENT_REPORT).push(" AS (SELECT ");
+						query
+							.push(',')
+							.push(IDENT_REPORT)
+							.push(" AS (")
+							.push(sql::SELECT);
 						inner_columns.push_to(query);
 						query.push_from("locations", ALIAS).push_equijoin(
 							ident,
@@ -108,7 +112,7 @@ impl PgLocation
 							outer_columns.id,
 						);
 
-						query.push(" UNION SELECT ");
+						query.push(sql::UNION).push(sql::SELECT);
 						inner_columns.push_to(query);
 						query
 							.push_from("locations", ALIAS)
@@ -194,11 +198,8 @@ impl PgLocation
 		let mut query = Self::query_with_recursive(match_condition);
 
 		query
-			.separated(' ')
-			.push("SELECT")
-			.push(COLUMNS.scope(ALIAS).id);
-
-		query
+			.push(sql::SELECT)
+			.push(COLUMNS.scope(ALIAS).id)
 			.push_from(PgLocationRecursiveCte::from(match_condition), ALIAS)
 			.prepare()
 			.fetch(connection)

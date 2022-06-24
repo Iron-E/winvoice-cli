@@ -1,6 +1,6 @@
 use core::fmt::Display;
 
-use sqlx::{Database, QueryBuilder, query::Query, database::HasArguments};
+use sqlx::{database::HasArguments, query::Query, Database, QueryBuilder};
 
 pub trait QueryBuilderExt<'args>
 {
@@ -45,10 +45,19 @@ pub trait QueryBuilderExt<'args>
 
 	/// # Summary
 	///
-	/// Push `" RETURNING {t}"`.
-	fn push_returning<T>(&mut self, t: T) -> &mut Self
+	/// Push `" LEFT JOIN {table_ident} {table_alias} ON ({left} = {right})"`.
+	fn push_left_equijoin<TAlias, TIdent, TLeft, TRight>(
+		&mut self,
+		table_ident: TIdent,
+		table_alias: TAlias,
+		left: TLeft,
+		right: TRight,
+	) -> &mut Self
 	where
-		T: Display;
+		TAlias: Display,
+		TIdent: Display,
+		TLeft: Display,
+		TRight: Display;
 }
 
 impl<'args, Db> QueryBuilderExt<'args> for QueryBuilder<'args, Db>
@@ -108,10 +117,21 @@ where
 		self.push_equal(left, right).push(')')
 	}
 
-	fn push_returning<T>(&mut self, t: T) -> &mut Self
+	fn push_left_equijoin<TAlias, TIdent, TLeft, TRight>(
+		&mut self,
+		table_ident: TIdent,
+		table_alias: TAlias,
+		left: TLeft,
+		right: TRight,
+	) -> &mut Self
 	where
-		T: Display
+		TAlias: Display,
+		TIdent: Display,
+		TLeft: Display,
+		TRight: Display,
 	{
-		self.push(" RETURNING ").push(t)
+		self
+			.push(" LEFT")
+			.push_equijoin(table_ident, table_alias, left, right)
 	}
 }

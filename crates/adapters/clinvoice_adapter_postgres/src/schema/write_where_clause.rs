@@ -1,7 +1,7 @@
 use core::{fmt::Display, ops::Deref};
 
 use clinvoice_adapter::{
-	fmt::{Nullable, QueryBuilderExt, SnakeCase},
+	fmt::{sql, Nullable, QueryBuilderExt, SnakeCase},
 	schema::columns::{
 		ContactColumns,
 		EmployeeColumns,
@@ -346,11 +346,11 @@ impl WriteWhereClause<Postgres, &MatchSet<MatchExpense>> for PgSchema
 				const COLUMNS: ExpenseColumns<&'static str> = ExpenseColumns::default();
 				let subquery_ident = SnakeCase::from((ident, "2"));
 
-				query.separated(' ').push(context).push("EXISTS (SELECT");
+				query.push(context).push(" EXISTS (").push(sql::SELECT);
 
 				query
 					.push_from("expenses", subquery_ident)
-					.push(" WHERE ")
+					.push(sql::WHERE)
 					.push_equal(
 						COLUMNS.scope(subquery_ident).timesheet_id,
 						COLUMNS.scope(ident).timesheet_id,

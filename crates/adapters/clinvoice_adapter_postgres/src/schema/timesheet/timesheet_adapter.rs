@@ -1,5 +1,5 @@
 use clinvoice_adapter::{
-	fmt::{ColumnsToSql, QueryBuilderExt},
+	fmt::{sql, ColumnsToSql, QueryBuilderExt},
 	schema::{
 		columns::{
 			EmployeeColumns,
@@ -119,7 +119,7 @@ impl TimesheetAdapter for PgTimesheet
 		let mut query = PgLocation::query_with_recursive(&match_condition.job.client.location);
 		let organization_columns = ORGANIZATION_COLUMNS.scope(ORGANIZATION_ALIAS);
 
-		query.push("SELECT ");
+		query.push(sql::SELECT);
 		columns.push_to(&mut query);
 
 		query.push(',');
@@ -151,8 +151,7 @@ impl TimesheetAdapter for PgTimesheet
 				employee_columns.id,
 				columns.employee_id,
 			)
-			.push(" LEFT")
-			.push_equijoin(
+			.push_left_equijoin(
 				"expenses",
 				EXPENSE_ALIAS,
 				expense_columns.timesheet_id,
@@ -205,7 +204,7 @@ impl TimesheetAdapter for PgTimesheet
 		);
 
 		query
-			.push(" GROUP BY ")
+			.push(sql::GROUP_BY)
 			.separated(',')
 			.push(columns.id)
 			.push(employee_columns.id)

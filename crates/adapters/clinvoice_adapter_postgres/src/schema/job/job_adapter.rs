@@ -1,7 +1,7 @@
 use core::time::Duration;
 
 use clinvoice_adapter::{
-	fmt::{ColumnsToSql, QueryBuilderExt},
+	fmt::{sql, ColumnsToSql, QueryBuilderExt},
 	schema::{
 		columns::{JobColumns, LocationColumns, OrganizationColumns},
 		JobAdapter,
@@ -94,7 +94,7 @@ impl JobAdapter for PgJob
 		let organization_columns = ORGANIZATION_COLUMNS.scope(ORGANIZATION_ALIAS);
 		let mut query = PgLocation::query_with_recursive(&match_condition.client.location);
 
-		query.push("SELECT ");
+		query.push(sql::SELECT);
 		columns.push_to(&mut query);
 
 		query.push(',');

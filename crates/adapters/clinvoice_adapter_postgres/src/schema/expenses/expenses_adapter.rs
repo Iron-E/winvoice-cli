@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use clinvoice_adapter::{
-	fmt::{As, QueryBuilderExt},
+	fmt::{sql, As, QueryBuilderExt},
 	schema::{
 		columns::{ExpenseColumns, TimesheetColumns},
 		ExpensesAdapter,
@@ -52,8 +52,9 @@ impl ExpensesAdapter for PgExpenses
 				)
 				.push_bind(description);
 		})
-		.push_returning(COLUMNS.id)
-		.build()
+		.push(sql::RETURNING)
+		.push(COLUMNS.id)
+		.prepare()
 		.fetch(connection)
 		.zip(stream::iter(expenses.iter()))
 		.map(|(result, (category, cost, description))| {
@@ -83,7 +84,7 @@ impl ExpensesAdapter for PgExpenses
 		let columns = COLUMNS.scope(ALIAS);
 		let timesheet_columns = TIMESHEET_COLUMNS.scope(TIMESHEET_ALIAS);
 		let exchange_rates_fut = ExchangeRates::new().map_err(util::finance_err_to_sqlx);
-		let mut query = QueryBuilder::new("SELECT ");
+		let mut query = QueryBuilder::new(sql::SELECT);
 
 		query
 			.separated(',')
@@ -95,8 +96,7 @@ impl ExpensesAdapter for PgExpenses
 
 		query
 			.push_from("timesheets", TIMESHEET_ALIAS)
-			.push(" LEFT")
-			.push_equijoin(
+			.push_left_equijoin(
 				"expenses",
 				ALIAS,
 				columns.timesheet_id,

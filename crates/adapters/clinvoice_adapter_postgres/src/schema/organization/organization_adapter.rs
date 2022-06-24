@@ -1,5 +1,5 @@
 use clinvoice_adapter::{
-	fmt::{ColumnsToSql, QueryBuilderExt},
+	fmt::{sql, ColumnsToSql, QueryBuilderExt},
 	schema::{
 		columns::{LocationColumns, OrganizationColumns},
 		OrganizationAdapter,
@@ -49,7 +49,7 @@ impl OrganizationAdapter for PgOrganization
 		let location_columns = LOCATION_COLUMNS.scope(LOCATION_ALIAS);
 		let mut query = PgLocation::query_with_recursive(&match_condition.location);
 
-		query.push("SELECT ");
+		query.push(sql::SELECT);
 		columns.push_to(&mut query);
 		query.push_from("organizations", ALIAS).push_equijoin(
 			PgLocationRecursiveCte::from(&match_condition.location),

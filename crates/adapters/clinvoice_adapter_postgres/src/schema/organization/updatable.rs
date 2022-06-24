@@ -65,45 +65,30 @@ mod tests
 		)
 		.unwrap();
 
-		let (mut organization, mut organization2) = futures::try_join!(
-			PgOrganization::create(&connection, earth.clone(), "Some Organization".into(),),
-			PgOrganization::create(&connection, earth.clone(), "Some Other Organization".into(),),
-		)
-		.unwrap();
+		let mut organization = PgOrganization::create(&connection, earth, "Some Organization".into())
+			.await
+			.unwrap();
 
-		organization.location.name = format!("Not {}", earth.name);
+		organization.location = mars;
 		organization.name = format!("Not {}", organization.name);
-
-		organization2.location = mars;
 
 		{
 			let mut transaction = connection.begin().await.unwrap();
-			PgOrganization::update(
-				&mut transaction,
-				[&organization, &organization2].into_iter(),
-			)
-			.await
-			.unwrap();
+			PgOrganization::update(&mut transaction, [&organization].into_iter())
+				.await
+				.unwrap();
 			transaction.commit().await.unwrap();
 		}
 
-		let organization_db = PgOrganization::retrieve(&connection, &MatchOrganization {
-			id: organization.id.into(),
-			..Default::default()
-		})
-		.await
-		.unwrap()
-		.remove(0);
-
-		let organization2_db = PgOrganization::retrieve(&connection, &MatchOrganization {
-			id: organization2.id.into(),
-			..Default::default()
-		})
-		.await
-		.unwrap()
-		.remove(0);
-
-		assert_eq!(organization, organization_db);
-		assert_eq!(organization2, organization2_db);
+		assert_eq!(
+			PgOrganization::retrieve(&connection, &MatchOrganization {
+				id: organization.id.into(),
+				..Default::default()
+			})
+			.await
+			.unwrap()
+			.as_slice(),
+			&[organization]
+		);
 	}
 }

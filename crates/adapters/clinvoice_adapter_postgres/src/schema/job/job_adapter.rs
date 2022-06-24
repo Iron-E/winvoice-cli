@@ -13,6 +13,7 @@ use clinvoice_match::MatchJob;
 use clinvoice_schema::{
 	chrono::{DateTime, Utc},
 	Invoice,
+	InvoiceDate,
 	Job,
 	Organization,
 };
@@ -70,7 +71,13 @@ impl JobAdapter for PgJob
 			date_open: util::sanitize_datetime(date_open),
 			id: row.id,
 			increment,
-			invoice,
+			invoice: Invoice {
+				date: invoice.date.map(|d| InvoiceDate {
+					issued: util::sanitize_datetime(d.issued),
+					paid: d.paid.map(util::sanitize_datetime),
+				}),
+				..invoice
+			},
 			notes,
 			objectives,
 		})

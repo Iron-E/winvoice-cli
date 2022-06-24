@@ -45,9 +45,45 @@ impl Updatable for PgEmployee
 #[cfg(test)]
 mod tests
 {
+	use clinvoice_adapter::{schema::EmployeeAdapter, Updatable};
+	use clinvoice_match::MatchEmployee;
+
+	use crate::schema::{util, PgEmployee};
+
 	#[tokio::test]
 	async fn update()
 	{
-		todo!("write test")
+		let connection = util::connect().await;
+
+		let mut employee = PgEmployee::create(
+			&connection,
+			"My Name".into(),
+			"Employed".into(),
+			"Janitor".into(),
+		)
+		.await
+		.unwrap();
+
+		employee.name = format!("Not {}", employee.name);
+		employee.status = format!("Not {}", employee.status);
+		employee.title = format!("Not {}", employee.title);
+
+		{
+			let mut transaction = connection.begin().await.unwrap();
+			PgEmployee::update(&mut transaction, [&employee].into_iter())
+				.await
+				.unwrap();
+			transaction.commit().await.unwrap();
+		}
+
+		let db_employee = PgEmployee::retrieve(&connection, &MatchEmployee {
+			id: employee.id.into(),
+			..Default::default()
+		})
+		.await
+		.unwrap()
+		.remove(0);
+
+		assert_eq!(employee, db_employee);
 	}
 }

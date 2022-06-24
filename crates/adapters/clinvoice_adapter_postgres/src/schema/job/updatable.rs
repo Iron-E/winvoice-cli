@@ -9,6 +9,7 @@ use sqlx::{Postgres, Result, Transaction};
 
 use super::PgJob;
 use crate::{
+	fmt::DateTimeExt,
 	schema::{util, PgOrganization},
 	PgSchema,
 };
@@ -42,12 +43,12 @@ impl Updatable for PgJob
 		PgSchema::update(&mut *connection, COLUMNS, "jobs", "J", |query| {
 			query.push_values(peekable_entities, |mut q, e| {
 				q.push_bind(e.client.id)
-					.push_bind(e.date_open)
-					.push_bind(e.date_close)
+					.push_bind(e.date_open.pg_sanitize())
+					.push_bind(e.date_close.pg_sanitize())
 					.push_bind(e.id)
 					.push_bind(e.increment);
 
-				if let Some(ref date) = e.invoice.date
+				if let Some(ref date) = e.invoice.date.pg_sanitize()
 				{
 					q.push_bind(date.issued).push_bind(date.paid);
 				}
@@ -79,9 +80,87 @@ impl Updatable for PgJob
 #[cfg(test)]
 mod tests
 {
+	use std::time::Duration;
+
+	use clinvoice_adapter::{
+		schema::{JobAdapter, LocationAdapter, OrganizationAdapter},
+		Updatable,
+	};
+	use clinvoice_finance::Money;
+	use clinvoice_match::MatchJob;
+	use clinvoice_schema::{chrono::Utc, Invoice, InvoiceDate};
+
+	use crate::{
+		fmt::DateTimeExt,
+		schema::{util, PgJob, PgLocation, PgOrganization},
+	};
+
 	#[tokio::test]
 	async fn update()
 	{
-		todo!("write test")
+		let connection = util::connect().await;
+
+		let (earth, mars) = futures::try_join!(
+			PgLocation::create(&connection, "Earth".into(), None),
+			PgLocation::create(&connection, "Mars".into(), None),
+		)
+		.unwrap();
+
+		let organization =
+			PgOrganization::create(&connection, earth.clone(), "Some Organization".into())
+				.await
+				.unwrap();
+
+		let mut job = PgJob::create(
+			&connection,
+			organization,
+			None,
+			Utc::now(),
+			Duration::from_secs(900),
+			Default::default(),
+			Default::default(),
+			Default::default(),
+		)
+		.await
+		.unwrap();
+
+		job.client.location = mars;
+		job.client.name = format!("Not {}", job.client.name);
+		job.date_close = Some(Utc::now());
+		job.increment = Duration::from_secs(300);
+		job.invoice = Invoice {
+			date: Some(InvoiceDate {
+				issued: Utc::now(),
+				paid: Some(Utc::now()),
+			}),
+			hourly_rate: Money::new(200_00, 2, Default::default()),
+		};
+		job.notes = format!("Finished {}", job.notes);
+		job.objectives = format!("Test {}", job.notes);
+
+		{
+			let mut transaction = connection.begin().await.unwrap();
+			PgJob::update(&mut transaction, [&job].into_iter())
+				.await
+				.unwrap();
+			transaction.commit().await.unwrap();
+		}
+
+		let db_job = PgJob::retrieve(&connection, &MatchJob {
+			id: job.id.into(),
+			..Default::default()
+		})
+		.await
+		.unwrap()
+		.remove(0);
+
+		assert_eq!(job.client, db_job.client);
+		assert_eq!(job.date_close.pg_sanitize(), db_job.date_close);
+		assert_eq!(job.date_open.pg_sanitize(), db_job.date_open);
+		assert_eq!(job.id, db_job.id);
+		assert_eq!(job.increment, db_job.increment);
+		assert_eq!(job.invoice.pg_sanitize(), db_job.invoice);
+		assert_eq!(job.notes, db_job.notes);
+		assert_eq!(job.objectives, db_job.objectives);
 	}
 }

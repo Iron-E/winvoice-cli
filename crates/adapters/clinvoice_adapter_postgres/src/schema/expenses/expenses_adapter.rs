@@ -52,7 +52,7 @@ impl ExpensesAdapter for PgExpenses
 				)
 				.push_bind(description);
 		})
-		.push(" RETURNING id;")
+		.push_returning(COLUMNS.id)
 		.build()
 		.fetch(connection)
 		.zip(stream::iter(expenses.iter()))
@@ -112,8 +112,7 @@ impl ExpensesAdapter for PgExpenses
 		);
 
 		query
-			.push(';')
-			.build()
+			.prepare()
 			.fetch(connection)
 			.try_fold(HashMap::new(), |mut map, row| {
 				let entry = map

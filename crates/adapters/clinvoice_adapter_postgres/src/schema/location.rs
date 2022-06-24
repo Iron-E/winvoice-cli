@@ -200,8 +200,7 @@ impl PgLocation
 
 		query
 			.push_from(PgLocationRecursiveCte::from(match_condition), ALIAS)
-			.push(';')
-			.build()
+			.prepare()
 			.fetch(connection)
 			.map_ok(|row| row.get::<Id, _>(COLUMNS.id).into())
 			.try_collect()

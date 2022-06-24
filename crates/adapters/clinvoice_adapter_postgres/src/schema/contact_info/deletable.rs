@@ -1,6 +1,6 @@
 use core::fmt::Display;
 
-use clinvoice_adapter::{schema::columns::ContactColumns, Deletable};
+use clinvoice_adapter::{fmt::QueryBuilderExt, schema::columns::ContactColumns, Deletable};
 use clinvoice_schema::Contact;
 use sqlx::{query_builder::Separated, Executor, Postgres, QueryBuilder, Result};
 
@@ -57,7 +57,7 @@ impl Deletable for PgContactInfo
 			});
 		}
 
-		query.push(';').build().execute(connection).await?;
+		query.prepare().execute(connection).await?;
 
 		Ok(())
 	}

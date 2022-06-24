@@ -130,8 +130,7 @@ impl JobAdapter for PgJob
 		);
 
 		query
-			.push(';')
-			.build()
+			.prepare()
 			.fetch(connection)
 			.and_then(|row| async move {
 				PgJob::row_to_view(connection, COLUMNS, ORGANIZATION_COLUMNS_UNIQUE, &row).await

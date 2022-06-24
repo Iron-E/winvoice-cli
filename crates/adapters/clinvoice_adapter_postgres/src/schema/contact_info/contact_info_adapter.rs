@@ -32,8 +32,7 @@ impl ContactInfoAdapter for PgContactInfo
 					.push_bind(contact.kind.other())
 					.push_bind(contact.kind.phone());
 			})
-			.push(';')
-			.build()
+			.prepare()
 			.execute(connection)
 			.await?;
 		}
@@ -59,8 +58,7 @@ impl ContactInfoAdapter for PgContactInfo
 		.await?;
 
 		query
-			.push(';')
-			.build()
+			.prepare()
 			.fetch(connection)
 			.and_then(|row| async move { PgContactInfo::row_to_view(connection, COLUMNS, &row).await })
 			.try_collect()

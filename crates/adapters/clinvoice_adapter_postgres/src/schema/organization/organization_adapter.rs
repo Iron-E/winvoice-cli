@@ -61,8 +61,7 @@ impl OrganizationAdapter for PgOrganization
 		PgSchema::write_where_clause(Default::default(), ALIAS, match_condition, &mut query);
 
 		query
-			.push(';')
-			.build()
+			.prepare()
 			.fetch(connection)
 			.and_then(
 				|row| async move { PgOrganization::row_to_view(connection, COLUMNS, &row).await },

@@ -213,8 +213,7 @@ impl TimesheetAdapter for PgTimesheet
 			.push(organization_columns.id);
 
 		query
-			.push(';')
-			.build()
+			.prepare()
 			.fetch(connection)
 			.and_then(|row| async move {
 				PgTimesheet::row_to_view(

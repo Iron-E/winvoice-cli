@@ -17,7 +17,7 @@ mod write_where_clause;
 use core::fmt::Display;
 
 use clinvoice_adapter::{
-	fmt::{As, ColumnsToSql, SnakeCase},
+	fmt::{As, ColumnsToSql, QueryBuilderExt, SnakeCase},
 	WriteWhereClause,
 };
 use clinvoice_match::Match;
@@ -68,7 +68,7 @@ impl PgSchema
 			&mut query,
 		);
 
-		query.push(';').build().execute(connection).await?;
+		query.prepare().execute(connection).await?;
 
 		Ok(())
 	}
@@ -121,7 +121,7 @@ impl PgSchema
 
 		columns.push_update_where_to(&mut query, table_alias, values_alias);
 
-		query.push(';').build().execute(connection).await?;
+		query.prepare().execute(connection).await?;
 
 		Ok(())
 	}

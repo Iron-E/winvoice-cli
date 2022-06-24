@@ -44,8 +44,7 @@ impl LocationAdapter for PgLocation
 
 		query
 			.push_from(PgLocationRecursiveCte::from(match_condition), ALIAS)
-			.push(';')
-			.build()
+			.prepare()
 			.fetch(connection)
 			.and_then(|row| PgLocation::retrieve_by_id(connection, row.get(COLUMNS.id)))
 			.try_collect()

@@ -50,8 +50,7 @@ impl EmployeeAdapter for PgEmployee
 		PgSchema::write_where_clause(Default::default(), ALIAS, match_condition, &mut query);
 
 		query
-			.push(';')
-			.build()
+			.prepare()
 			.fetch(connection)
 			.map_ok(|row| PgEmployee::row_to_view(COLUMNS, &row))
 			.try_collect()

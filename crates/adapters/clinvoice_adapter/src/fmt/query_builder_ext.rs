@@ -1,9 +1,16 @@
 use core::fmt::Display;
 
-use sqlx::{Database, QueryBuilder};
+use sqlx::{Database, QueryBuilder, query::Query, database::HasArguments};
 
-pub trait QueryBuilderExt
+pub trait QueryBuilderExt<'args>
 {
+	type Db: Database;
+
+	/// # Summary
+	///
+	/// Add a semicolon to the end of the current query and then [build](QueryBuilder::build) it.
+	fn prepare(&mut self) -> Query<Self::Db, <Self::Db as HasArguments<'args>>::Arguments>;
+
 	/// # Summary
 	///
 	/// Push `" FROM {table_ident} {table_alias}"`.
@@ -35,12 +42,26 @@ pub trait QueryBuilderExt
 		TIdent: Display,
 		TLeft: Display,
 		TRight: Display;
+
+	/// # Summary
+	///
+	/// Push `" RETURNING {t}"`.
+	fn push_returning<T>(&mut self, t: T) -> &mut Self
+	where
+		T: Display;
 }
 
-impl<Db> QueryBuilderExt for QueryBuilder<'_, Db>
+impl<'args, Db> QueryBuilderExt<'args> for QueryBuilder<'args, Db>
 where
 	Db: Database,
 {
+	type Db = Db;
+
+	fn prepare(&mut self) -> Query<Db, <Db as HasArguments<'args>>::Arguments>
+	{
+		self.push(';').build()
+	}
+
 	fn push_equal<TLeft, TRight>(&mut self, left: TLeft, right: TRight) -> &mut Self
 	where
 		TLeft: Display,
@@ -85,5 +106,12 @@ where
 			.push("ON (");
 
 		self.push_equal(left, right).push(')')
+	}
+
+	fn push_returning<T>(&mut self, t: T) -> &mut Self
+	where
+		T: Display
+	{
+		self.push(" RETURNING ").push(t)
 	}
 }

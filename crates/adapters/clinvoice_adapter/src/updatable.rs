@@ -21,10 +21,17 @@ pub trait Updatable
 	///
 	/// Rather, it is better to retrieve an entity or create one and then update it.
 	///
+	/// # Warnings
+	///
+	/// Beware when trying to change the primary key of a row in the database, because:
+	///
+	/// 1. This function will not remove the row with the previous primary key.
+	/// 2. You may clobber an existing row which has that primary key.
+	///
 	/// # Returns
 	///
 	/// * `()`, on a success.
-	/// * An `Error`, when something goes wrong.
+	/// * An [`Error`](sqlx::Error), when something goes wrong.
 	///
 	/// [store]: crate::Store
 	async fn update<'e, 'i>(

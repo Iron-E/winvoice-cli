@@ -57,7 +57,7 @@ impl Deletable for PgContactInfo
 			}
 
 			peekable_entities.for_each(|e| {
-				separated.push("OR");
+				separated.push_unseparated(sql::OR);
 				write(&mut separated, e);
 			});
 		}

@@ -1,5 +1,7 @@
 use core::fmt::{Display, Formatter, Result};
 
+use crate::fmt::sql;
+
 use super::WriteContext;
 
 impl Display for WriteContext
@@ -8,8 +10,8 @@ impl Display for WriteContext
 	{
 		match self
 		{
-			WriteContext::AcceptingAnotherWhereCondition => write!(f, " AND"),
-			WriteContext::BeforeWhereClause => write!(f, " WHERE"),
+			WriteContext::AcceptingAnotherWhereCondition => sql::AND.fmt(f),
+			WriteContext::BeforeWhereClause => sql::WHERE.fmt(f),
 			WriteContext::InWhereCondition => Ok(()),
 		}
 	}

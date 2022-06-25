@@ -1,7 +1,7 @@
 use core::fmt::Display;
 
 use clinvoice_adapter::{
-	fmt::{sql, ColumnsToSql, QueryBuilderExt, SnakeCase},
+	fmt::{sql, QueryBuilderExt, SnakeCase},
 	schema::columns::LocationColumns,
 	WriteWhereClause,
 };
@@ -46,9 +46,13 @@ impl PgLocation
 			let inner_columns = COLUMNS.scope(ALIAS);
 			let outer_columns = COLUMNS.scope(ALIAS_OUTER);
 
-			query.push(&ident).push(" AS (").push(sql::SELECT);
-			outer_columns.push_to(query);
-			query.push_from("locations", ALIAS_OUTER);
+			query
+				.push(&ident)
+				.push(sql::AS)
+				.push('(')
+				.push(sql::SELECT)
+				.push_columns(&outer_columns)
+				.push_from("locations", ALIAS_OUTER);
 
 			if let Some((prev, _)) = ident.slice_end()
 			{
@@ -102,19 +106,15 @@ impl PgLocation
 						query
 							.push(',')
 							.push(IDENT_REPORT)
-							.push(" AS (")
-							.push(sql::SELECT);
-						inner_columns.push_to(query);
-						query.push_from("locations", ALIAS).push_equijoin(
-							ident,
-							ALIAS_OUTER,
-							inner_columns.outer_id,
-							outer_columns.id,
-						);
-
-						query.push(sql::UNION).push(sql::SELECT);
-						inner_columns.push_to(query);
-						query
+							.push(sql::AS)
+							.push('(')
+							.push(sql::SELECT)
+							.push_columns(&inner_columns)
+							.push_from("locations", ALIAS)
+							.push_equijoin(ident, ALIAS_OUTER, inner_columns.outer_id, outer_columns.id)
+							.push(sql::UNION)
+							.push(sql::SELECT)
+							.push_columns(&inner_columns)
 							.push_from("locations", ALIAS)
 							.push_equijoin(
 								IDENT_REPORT,
@@ -128,7 +128,7 @@ impl PgLocation
 			}
 		}
 
-		let mut query = QueryBuilder::new("WITH RECURSIVE ");
+		let mut query = QueryBuilder::new(sql::WITH_RECURSIVE);
 
 		generate_cte(&mut query, PgLocationRecursiveCte::new(), match_condition);
 

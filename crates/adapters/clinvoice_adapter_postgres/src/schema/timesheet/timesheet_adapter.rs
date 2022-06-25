@@ -1,5 +1,5 @@
 use clinvoice_adapter::{
-	fmt::{sql, ColumnsToSql, QueryBuilderExt},
+	fmt::{sql, QueryBuilderExt},
 	schema::{
 		columns::{
 			EmployeeColumns,
@@ -119,31 +119,17 @@ impl TimesheetAdapter for PgTimesheet
 		let mut query = PgLocation::query_with_recursive(&match_condition.job.client.location);
 		let organization_columns = ORGANIZATION_COLUMNS.scope(ORGANIZATION_ALIAS);
 
-		query.push(sql::SELECT);
-		columns.push_to(&mut query);
-
-		query.push(',');
-		employee_columns
-			.r#as(EMPLOYEE_COLUMNS_UNIQUE)
-			.push_to(&mut query);
-
-		// NOTE: might need `",array_agg( DISTINCT ("`
-		query.push(",array_agg((");
-		expense_columns.push_to(&mut query);
 		query
-			.separated(' ')
-			.push(")) AS")
-			.push(EXPENSES_AGGREGATED_IDENT);
-
-		query.push(',');
-		job_columns.r#as(JOB_COLUMNS_UNIQUE).push_to(&mut query);
-
-		query.push(',');
-		organization_columns
-			.r#as(ORGANIZATION_COLUMNS_UNIQUE)
-			.push_to(&mut query);
-
-		query
+			.push(sql::SELECT)
+			.push_columns(&columns)
+			.push_more_columns(&employee_columns.r#as(EMPLOYEE_COLUMNS_UNIQUE))
+			.push(",array_agg((") // NOTE: might need `",array_agg( DISTINCT ("`
+			.push_columns(&expense_columns)
+			.push("))")
+			.push(sql::AS)
+			.push(EXPENSES_AGGREGATED_IDENT)
+			.push_more_columns(&job_columns.r#as(JOB_COLUMNS_UNIQUE))
+			.push_more_columns(&organization_columns.r#as(ORGANIZATION_COLUMNS_UNIQUE))
 			.push_from("timesheets", ALIAS)
 			.push_equijoin(
 				"employees",

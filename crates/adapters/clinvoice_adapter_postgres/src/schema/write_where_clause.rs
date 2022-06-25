@@ -46,7 +46,7 @@ fn write_context_scope_start<Db, const NEGATE: bool>(
 	separated.push(context);
 	if NEGATE
 	{
-		separated.push("NOT");
+		separated.push(sql::NOT);
 	}
 	separated.push('(');
 }
@@ -95,7 +95,7 @@ fn write_boolean_group<D, Db, I, M, const UNION: bool>(
 		PgSchema::write_where_clause(WriteContext::InWhereCondition, ident, m, query);
 	}
 
-	let separator = if UNION { " AND" } else { " OR" };
+	let separator = if UNION { sql::AND } else { sql::OR };
 	conditions.for_each(|c| {
 		query.push(separator);
 		PgSchema::write_where_clause(WriteContext::InWhereCondition, ident, c, query);
@@ -158,7 +158,8 @@ fn write_is_null<Db>(
 		.separated(' ')
 		.push(context)
 		.push(ident)
-		.push("IS null");
+		.push_unseparated(sql::IS)
+		.push_unseparated(sql::NULL);
 }
 
 /// # Summary
@@ -283,8 +284,8 @@ where
 			Match::GreaterThan(value) => write_comparison(query, context, ident, ">", value),
 			Match::InRange(low, high) =>
 			{
-				write_comparison(query, context, ident, "BETWEEN", low);
-				write_comparison(query, WriteContext::InWhereCondition, "", "AND", high);
+				write_comparison(query, context, ident, sql::BETWEEN, low);
+				write_comparison(query, WriteContext::InWhereCondition, "", sql::AND, high);
 			},
 			Match::LessThan(value) => write_comparison(query, context, ident, "<", value),
 			Match::Not(condition) => match condition.deref()
@@ -329,8 +330,8 @@ impl WriteWhereClause<Postgres, &MatchSet<MatchExpense>> for PgSchema
 
 				let separator = match match_condition
 				{
-					MatchSet::And(_) => " AND",
-					_ => " OR",
+					MatchSet::And(_) => sql::AND,
+					_ => sql::OR,
 				};
 
 				conditions.iter().for_each(|c| {
@@ -346,9 +347,11 @@ impl WriteWhereClause<Postgres, &MatchSet<MatchExpense>> for PgSchema
 				const COLUMNS: ExpenseColumns<&'static str> = ExpenseColumns::default();
 				let subquery_ident = SnakeCase::from((ident, "2"));
 
-				query.push(context).push(" EXISTS (").push(sql::SELECT);
-
 				query
+					.push(context)
+					.push(sql::EXISTS)
+					.push('(')
+					.push(sql::SELECT)
 					.push_from("expenses", subquery_ident)
 					.push(sql::WHERE)
 					.push_equal(
@@ -403,7 +406,7 @@ impl WriteWhereClause<Postgres, &MatchStr<String>> for PgSchema
 					.separated(' ')
 					.push(context)
 					.push(ident)
-					.push("LIKE")
+					.push(sql::LIKE)
 					// HACK: this is the only way I could think to surround `string` with the syntax
 					//       needed (e.g. `foo LIKE '%o%'`) and still sanitize it.
 					.push_bind(format!("%{string}%"));

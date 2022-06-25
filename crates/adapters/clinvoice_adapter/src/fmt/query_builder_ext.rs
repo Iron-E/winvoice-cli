@@ -2,6 +2,8 @@ use core::fmt::Display;
 
 use sqlx::{database::HasArguments, query::Query, Database, QueryBuilder};
 
+use super::{ColumnsToSql, sql};
+
 pub trait QueryBuilderExt<'args>
 {
 	type Db: Database;
@@ -13,11 +15,10 @@ pub trait QueryBuilderExt<'args>
 
 	/// # Summary
 	///
-	/// Push `" FROM {table_ident} {table_alias}"`.
-	fn push_from<TAlias, TIdent>(&mut self, table_ident: TIdent, table_alias: TAlias) -> &mut Self
+	/// Use [`ColumnsToSql::push_to`] on this query.
+	fn push_columns<T>(&mut self, columns: &T) -> &mut Self
 	where
-		TAlias: Display,
-		TIdent: Display;
+		T: ColumnsToSql;
 
 	/// # Summary
 	///
@@ -26,6 +27,14 @@ pub trait QueryBuilderExt<'args>
 	where
 		TLeft: Display,
 		TRight: Display;
+
+	/// # Summary
+	///
+	/// Push `" FROM {table_ident} {table_alias}"`.
+	fn push_from<TAlias, TIdent>(&mut self, table_ident: TIdent, table_alias: TAlias) -> &mut Self
+	where
+		TAlias: Display,
+		TIdent: Display;
 
 	/// # Summary
 	///
@@ -58,6 +67,13 @@ pub trait QueryBuilderExt<'args>
 		TIdent: Display,
 		TLeft: Display,
 		TRight: Display;
+
+	/// # Summary
+	///
+	/// Push a comma and then [`push_columns`](QueryBuilderExt::push_columns).
+	fn push_more_columns<T>(&mut self, columns: &T) -> &mut Self
+	where
+		T: ColumnsToSql;
 }
 
 impl<'args, Db> QueryBuilderExt<'args> for QueryBuilder<'args, Db>
@@ -69,6 +85,17 @@ where
 	fn prepare(&mut self) -> Query<Db, <Db as HasArguments<'args>>::Arguments>
 	{
 		self.push(';').build()
+	}
+
+	/// # Summary
+	///
+	/// Use [`ColumnsToSql::push_to`] on this query.
+	fn push_columns<T>(&mut self, columns: &T) -> &mut Self
+	where
+		T: ColumnsToSql,
+	{
+		columns.push_to(self);
+		self
 	}
 
 	fn push_equal<TLeft, TRight>(&mut self, left: TLeft, right: TRight) -> &mut Self
@@ -86,8 +113,8 @@ where
 		TIdent: Display,
 	{
 		self
+			.push(sql::FROM)
 			.separated(' ')
-			.push(" FROM")
 			.push(table_ident)
 			.push(table_alias);
 
@@ -108,8 +135,8 @@ where
 		TRight: Display,
 	{
 		self
+			.push(sql::JOIN)
 			.separated(' ')
-			.push(" JOIN")
 			.push(table_ident)
 			.push(table_alias)
 			.push("ON (");
@@ -131,7 +158,17 @@ where
 		TRight: Display,
 	{
 		self
-			.push(" LEFT")
+			.push(sql::LEFT)
 			.push_equijoin(table_ident, table_alias, left, right)
+	}
+
+	/// # Summary
+	///
+	/// Push a comma and then [`push_columns`](QueryBuilderExt::push_columns).
+	fn push_more_columns<T>(&mut self, columns: &T) -> &mut Self
+	where
+		T: ColumnsToSql
+	{
+		self.push(',').push_columns(columns)
 	}
 }

@@ -58,7 +58,7 @@ impl PgSchema
 			return Ok(());
 		}
 
-		let mut query = QueryBuilder::new("DELETE FROM ");
+		let mut query = QueryBuilder::new(sql::DELETE_FROM);
 		query.push(table);
 
 		PgSchema::write_where_clause(
@@ -101,19 +101,18 @@ impl PgSchema
 		let values_alias = SnakeCase::from((table_alias, "V"));
 		columns.push_set_to(&mut query, values_alias);
 
-		query.push(" FROM (");
+		query.push(sql::FROM).push('(');
 
 		push_values(&mut query);
 
 		query
-			.separated(' ')
-			.push(") AS")
+			.push(')')
+			.push(sql::AS)
 			.push(values_alias)
-			.push('(');
-
-		columns.push_to(&mut query);
-
-		query.push(')').push(sql::WHERE);
+			.push(" (")
+			.push_columns(&columns)
+			.push(')')
+			.push(sql::WHERE);
 
 		columns.push_update_where_to(&mut query, table_alias, values_alias);
 

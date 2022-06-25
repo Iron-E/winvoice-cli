@@ -61,9 +61,135 @@ impl Updatable for PgTimesheet
 #[cfg(test)]
 mod tests
 {
+	use std::time::Duration;
+
+	use clinvoice_adapter::{
+		schema::{
+			EmployeeAdapter,
+			ExpensesAdapter,
+			JobAdapter,
+			LocationAdapter,
+			OrganizationAdapter,
+			TimesheetAdapter,
+		},
+		Updatable,
+	};
+	use clinvoice_finance::{Currency, Money};
+	use clinvoice_match::MatchTimesheet;
+	use clinvoice_schema::{chrono::Utc, Invoice, InvoiceDate};
+	use futures::TryFutureExt;
+
+	use crate::{
+		fmt::DateTimeExt,
+		schema::{util, PgEmployee, PgExpenses, PgJob, PgLocation, PgOrganization, PgTimesheet},
+	};
+
 	#[tokio::test]
 	async fn update()
 	{
-		todo!("write test")
+		let connection = util::connect().await;
+
+		let (earth, mars) = futures::try_join!(
+			PgLocation::create(&connection, "Earth".into(), None),
+			PgLocation::create(&connection, "Mars".into(), None),
+		)
+		.unwrap();
+
+		let job = PgOrganization::create(&connection, earth, "Some Organization".into())
+			.and_then(|organization| {
+				PgJob::create(
+					&connection,
+					organization,
+					None,
+					Utc::now(),
+					Duration::from_secs(900),
+					Default::default(),
+					Default::default(),
+					Default::default(),
+				)
+			})
+			.await
+			.unwrap();
+
+		let (employee, employee2) = futures::try_join!(
+				PgEmployee::create(
+					&connection,
+					"My Name".into(),
+					"Employed".into(),
+					"Janitor".into(),
+				),
+				PgEmployee::create(
+					&connection,
+					"Not My Name".into(),
+					"Not Employed".into(),
+					"Not Janitor".into(),
+				),
+			).unwrap();
+
+		let mut timesheet = PgTimesheet::create(
+			&connection,
+			employee,
+			vec![(
+				"Travel".into(),
+				Money::new(500_00, 2, Currency::Usd),
+				"Flight".into(),
+			)],
+			job,
+			Utc::now(),
+			None,
+		)
+		.await
+		.unwrap();
+
+		let new_expense = PgExpenses::create(
+			&connection,
+			vec![("category".into(), Money::default(), "description".into())],
+			timesheet.id,
+		)
+		.await
+		.unwrap()
+		.remove(0);
+
+		timesheet.employee = employee2;
+		timesheet.job.client.location = mars;
+		timesheet.job.client.name = format!("Not {}", timesheet.job.client.name);
+		timesheet.job.date_close = Some(Utc::now());
+		timesheet.job.increment = Duration::from_secs(300);
+		timesheet.job.invoice = Invoice {
+			date: Some(InvoiceDate {
+				issued: Utc::now(),
+				paid: Some(Utc::now()),
+			}),
+			hourly_rate: Money::new(200_00, 2, Default::default()),
+		};
+		timesheet.job.notes = format!("Finished {}", timesheet.job.notes);
+		timesheet.job.objectives = format!("Test {}", timesheet.job.notes);
+		timesheet.time_end = Some(Utc::now());
+
+		timesheet.expenses.push(new_expense);
+
+		{
+			let mut transaction = connection.begin().await.unwrap();
+			PgTimesheet::update(&mut transaction, [&timesheet].into_iter())
+				.await
+				.unwrap();
+			transaction.commit().await.unwrap();
+		}
+
+		let db_timesheet = PgTimesheet::retrieve(&connection, &MatchTimesheet {
+			id: timesheet.id.into(),
+			..Default::default()
+		})
+		.await
+		.unwrap()
+		.remove(0);
+
+		assert_eq!(timesheet.id, db_timesheet.id);
+		assert_eq!(timesheet.employee, db_timesheet.employee);
+		assert_eq!(timesheet.expenses, db_timesheet.expenses);
+		assert_eq!(timesheet.job.pg_sanitize(), db_timesheet.job);
+		assert_eq!(timesheet.time_begin.pg_sanitize(), db_timesheet.time_begin);
+		assert_eq!(timesheet.time_end.pg_sanitize(), db_timesheet.time_end);
+		assert_eq!(timesheet.work_notes, db_timesheet.work_notes);
 	}
 }

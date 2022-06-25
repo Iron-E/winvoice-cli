@@ -1,6 +1,7 @@
 pub const AND: &str = " AND ";
 pub const AS: &str = " AS ";
 pub const BETWEEN: &str = " BETWEEN ";
+pub const CAST: &str = " CAST";
 pub const DELETE_FROM: &str = "DELETE FROM ";
 pub const EXISTS: &str = " EXISTS ";
 pub const FROM: &str = " FROM ";

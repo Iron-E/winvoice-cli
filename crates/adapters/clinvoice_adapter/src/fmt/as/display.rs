@@ -1,6 +1,7 @@
 use core::fmt::{Display, Formatter, Result};
 
 use super::As;
+use crate::fmt::sql;
 
 impl<TAlias, TColumn> Display for As<TAlias, TColumn>
 where
@@ -9,6 +10,6 @@ where
 {
 	fn fmt(&self, f: &mut Formatter<'_>) -> Result
 	{
-		write!(f, "{} as {}", self.0, self.1)
+		write!(f, "{}{}{}", self.0, sql::AS, self.1)
 	}
 }

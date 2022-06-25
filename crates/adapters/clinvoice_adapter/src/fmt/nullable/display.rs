@@ -1,6 +1,7 @@
 use core::fmt::{Display, Formatter, Result};
 
 use super::Nullable;
+use crate::fmt::sql;
 
 impl<D> Display for Nullable<D>
 where
@@ -11,7 +12,7 @@ where
 		match self.0
 		{
 			Some(ref s) => write!(f, "{s}"),
-			_ => write!(f, "null"),
+			_ => sql::NULL.fmt(f),
 		}
 	}
 }

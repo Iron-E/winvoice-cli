@@ -94,7 +94,7 @@ mod tests
 			increment: Duration::from_secs(900),
 			invoice: Invoice {
 				date: None,
-				hourly_rate: Money::new(20_00, 2, Currency::USD),
+				hourly_rate: Money::new(20_00, 2, Currency::Usd),
 			},
 			notes: "Remember not to work with these guys again!".into(),
 			objectives: "Get into the mainframe, or something like that.\nClean the drawer.".into(),

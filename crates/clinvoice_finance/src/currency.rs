@@ -19,167 +19,167 @@ pub enum Currency
 	/// # Summary
 	///
 	/// The Australian dollar.
-	AUD,
+	Aud,
 
 	/// # Summary
 	///
 	/// The Bulgarian lev.
-	BGN,
+	Bgn,
 
 	/// # Summary
 	///
 	/// The Brazilian real
-	BRL,
+	Brl,
 
 	/// # Summary
 	///
 	/// The Canadian dollar.
-	CAD,
+	Cad,
 
 	/// # Summary
 	///
 	/// The Swiss franc.
-	CHF,
+	Chf,
 
 	/// # Summary
 	///
 	/// The Chinese yuan.
-	CNY,
+	Cny,
 
 	/// # Summary
 	///
 	/// The Czech koruna.
-	CZK,
+	Czk,
 
 	/// # Summary
 	///
 	/// The Danish krone.
-	DKK,
+	Dkk,
 
 	/// # Summary
 	///
 	/// The Euro.
-	EUR,
+	Eur,
 
 	/// # Summary
 	///
 	/// The British pound.
-	GBP,
+	Gbp,
 
 	/// # Summary
 	///
 	/// The Hong Kong dollar.
-	HKD,
+	Hkd,
 
 	/// # Summary
 	///
 	/// The Croatian kuna.
-	HRK,
+	Hrk,
 
 	/// # Summary
 	///
 	/// The Hungarian forint.
-	HUF,
+	Huf,
 
 	/// # Summary
 	///
 	/// The Indonesian rupiah.
-	IDR,
+	Idr,
 
 	/// # Summary
 	///
 	/// The Israeli shekel.
-	ILS,
+	Ils,
 
 	/// # Summary
 	///
 	/// The Indian rupee.
-	INR,
+	Inr,
 
 	/// # Summary
 	///
 	/// The Icelandic krona.
-	ISK,
+	Isk,
 
 	/// # Summary
 	///
 	/// The Japanese yen.
-	JPY,
+	Jpy,
 
 	/// # Summary
 	///
 	/// The South Korean won.
-	KRW,
+	Krw,
 
 	/// # Summary
 	///
 	/// The Mexican peso.
-	MXN,
+	Mxn,
 
 	/// # Summary
 	///
 	/// The Malaysian ringgit.
-	MYR,
+	Myr,
 
 	/// # Summary
 	///
 	/// The Norwegian krone.
-	NOK,
+	Nok,
 
 	/// # Summary
 	///
 	/// The New Zeland dollar.
-	NZD,
+	Nzd,
 
 	/// # Summary
 	///
 	/// The Philippine peso.
-	PHP,
+	Php,
 
 	/// # Summary
 	///
 	/// The Polish zloty.
-	PLN,
+	Pln,
 
 	/// # Summary
 	///
 	/// The Romanian leu.
-	RON,
+	Ron,
 
 	/// # Summary
 	///
 	/// The Russian rouble.
-	RUB,
+	Rub,
 
 	/// # Summary
 	///
 	/// The Swedish krona.
-	SEK,
+	Sek,
 
 	/// # Summary
 	///
 	/// The Singapore dollar.
-	SGD,
+	Sgd,
 
 	/// # Summary
 	///
 	/// The Thai baht.
-	THB,
+	Thb,
 
 	/// # Summary
 	///
 	/// The Turkish lira.
-	TRY,
+	Try,
 
 	/// # Summary
 	///
 	/// The US dollar.
-	USD,
+	Usd,
 
 	/// # Summary
 	///
 	/// The South African rand.
-	ZAR,
+	Zar,
 }
 
 impl Currency
@@ -189,39 +189,39 @@ impl Currency
 	{
 		match self
 		{
-			Self::AUD => "AUD",
-			Self::BGN => "BGN",
-			Self::BRL => "BRL",
-			Self::CAD => "CAD",
-			Self::CHF => "CHF",
-			Self::CNY => "CNY",
-			Self::CZK => "CZK",
-			Self::DKK => "DKK",
-			Self::EUR => "EUR",
-			Self::GBP => "GBP",
-			Self::HKD => "HKD",
-			Self::HRK => "HRK",
-			Self::HUF => "HUF",
-			Self::IDR => "IDR",
-			Self::ILS => "ILS",
-			Self::INR => "INR",
-			Self::ISK => "ISK",
-			Self::JPY => "JPY",
-			Self::KRW => "KRW",
-			Self::MXN => "MXN",
-			Self::MYR => "MYR",
-			Self::NOK => "NOK",
-			Self::NZD => "NZD",
-			Self::PHP => "PHP",
-			Self::PLN => "PLN",
-			Self::RON => "RON",
-			Self::RUB => "RUB",
-			Self::SEK => "SEK",
-			Self::SGD => "SGD",
-			Self::THB => "THB",
-			Self::TRY => "TRY",
-			Self::USD => "USD",
-			Self::ZAR => "ZAR",
+			Self::Aud => "AUD",
+			Self::Bgn => "BGN",
+			Self::Brl => "BRL",
+			Self::Cad => "CAD",
+			Self::Chf => "CHF",
+			Self::Cny => "CNY",
+			Self::Czk => "CZK",
+			Self::Dkk => "DKK",
+			Self::Eur => "EUR",
+			Self::Gbp => "GBP",
+			Self::Hkd => "HKD",
+			Self::Hrk => "HRK",
+			Self::Huf => "HUF",
+			Self::Idr => "IDR",
+			Self::Ils => "ILS",
+			Self::Inr => "INR",
+			Self::Isk => "ISK",
+			Self::Jpy => "JPY",
+			Self::Krw => "KRW",
+			Self::Mxn => "MXN",
+			Self::Myr => "MYR",
+			Self::Nok => "NOK",
+			Self::Nzd => "NZD",
+			Self::Php => "PHP",
+			Self::Pln => "PLN",
+			Self::Ron => "RON",
+			Self::Rub => "RUB",
+			Self::Sek => "SEK",
+			Self::Sgd => "SGD",
+			Self::Thb => "THB",
+			Self::Try => "TRY",
+			Self::Usd => "USD",
+			Self::Zar => "ZAR",
 		}
 	}
 

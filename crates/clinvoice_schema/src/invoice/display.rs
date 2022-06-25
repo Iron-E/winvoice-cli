@@ -37,7 +37,7 @@ mod tests
 				issued: Utc::now(),
 				paid: None,
 			}),
-			hourly_rate: Money::new(10_00, 2, Currency::USD),
+			hourly_rate: Money::new(10_00, 2, Currency::Usd),
 		};
 
 		assert_eq!(

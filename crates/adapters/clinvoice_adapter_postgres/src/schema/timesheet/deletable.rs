@@ -92,7 +92,7 @@ mod tests
 			Duration::from_secs(900),
 			Invoice {
 				date: None,
-				hourly_rate: Money::new(20_00, 2, Currency::USD),
+				hourly_rate: Money::new(20_00, 2, Currency::Usd),
 			},
 			String::new(),
 			"Do something".into(),
@@ -114,7 +114,7 @@ mod tests
 				employee.clone(),
 				vec![(
 					"Flight".into(),
-					Money::new(300_56, 2, Currency::USD),
+					Money::new(300_56, 2, Currency::Usd),
 					"Trip to Hawaii for research".into()
 				)],
 				job.clone(),
@@ -126,7 +126,7 @@ mod tests
 				employee,
 				vec![(
 					"Food".into(),
-					Money::new(10_17, 2, Currency::USD),
+					Money::new(10_17, 2, Currency::Usd),
 					"Takeout".into()
 				)],
 				job.clone(),

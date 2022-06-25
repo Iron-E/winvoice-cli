@@ -154,7 +154,7 @@ mod tests
 				organization_id: Some(Id::default()),
 			},
 			invoices: Invoices {
-				default_currency: Currency::USD,
+				default_currency: Currency::Usd,
 			},
 			stores,
 			timesheets: Timesheets {

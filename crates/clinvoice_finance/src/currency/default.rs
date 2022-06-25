@@ -4,6 +4,6 @@ impl Default for Currency
 {
 	fn default() -> Self
 	{
-		Currency::EUR
+		Currency::Eur
 	}
 }

@@ -108,14 +108,14 @@ mod tests
 				Expense {
 					id: 405,
 					category: "Food".into(),
-					cost: Money::new(20_50, 2, Currency::USD),
+					cost: Money::new(20_50, 2, Currency::Usd),
 					description: "Fast Food™".into(),
 					..Default::default()
 				},
 				Expense {
 					id: 901,
 					category: "Travel".into(),
-					cost: Money::new(10_00, 2, Currency::USD),
+					cost: Money::new(10_00, 2, Currency::Usd),
 					description: "Gas".into(),
 					..Default::default()
 				},
@@ -128,7 +128,7 @@ mod tests
 				},
 				increment: Duration::new(900, 0),
 				invoice: Invoice {
-					hourly_rate: Money::new(13_00, 2, Currency::USD),
+					hourly_rate: Money::new(13_00, 2, Currency::Usd),
 					..Default::default()
 				},
 				..Default::default()

@@ -371,7 +371,7 @@ mod tests
 			increment: Duration::from_secs(900),
 			invoice: Invoice {
 				date: None,
-				hourly_rate: Money::new(20_00, 2, Currency::USD),
+				hourly_rate: Money::new(20_00, 2, Currency::Usd),
 			},
 			notes: "- I tested the function.".into(),
 			objectives: "- I want to test this function.".into(),
@@ -422,7 +422,7 @@ mod tests
 				expenses: vec![Expense {
 					id: 120,
 					category: "Service".into(),
-					cost: Money::new(20_00, 2, Currency::USD),
+					cost: Money::new(20_00, 2, Currency::Usd),
 					description: "Paid for someone else to clean".into(),
 					..Default::default()
 				}],

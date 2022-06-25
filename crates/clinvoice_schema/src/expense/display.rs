@@ -28,7 +28,7 @@ mod tests
 		let expense = Expense {
 			id: 10,
 			category: "Food".into(),
-			cost: Money::new(20_00, 2, Currency::USD),
+			cost: Money::new(20_00, 2, Currency::Usd),
 			description: "Take-out for 2".into(),
 			..Default::default()
 		};

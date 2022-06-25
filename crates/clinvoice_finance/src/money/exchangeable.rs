@@ -68,13 +68,13 @@ mod tests
 			.and_then(|s| s.parse::<ExchangeRates>())
 			.unwrap();
 
-		let usd = Money::new(20_00, 2, Currency::USD);
+		let usd = Money::new(20_00, 2, Currency::Usd);
 
-		let usd_to_jpy = usd.exchange(Currency::JPY, &exchange_rates);
-		assert_eq!(usd_to_jpy, Money::new(2195_95, 2, Currency::JPY));
+		let usd_to_jpy = usd.exchange(Currency::Jpy, &exchange_rates);
+		assert_eq!(usd_to_jpy, Money::new(2195_95, 2, Currency::Jpy));
 
 		// Assert round-trip works
-		let usd_to_jpy_to_usd = usd_to_jpy.exchange(Currency::USD, &exchange_rates);
+		let usd_to_jpy_to_usd = usd_to_jpy.exchange(Currency::Usd, &exchange_rates);
 		assert_eq!(usd, usd_to_jpy_to_usd);
 	}
 }

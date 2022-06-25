@@ -241,7 +241,7 @@ mod tests
 			expenses: vec![Expense {
 				id: 102,
 				category: "Item".into(),
-				cost: Money::new(20_00, 2, Currency::USD),
+				cost: Money::new(20_00, 2, Currency::Usd),
 				description: "Paid for someone else to clean".into(),
 				..Default::default()
 			}],
@@ -252,8 +252,8 @@ mod tests
 		});
 
 		assert_eq!(
-			Timesheet::total(None, Money::new(20_00, 2, Currency::USD), &timesheets),
-			Money::new(4000, 2, Currency::USD),
+			Timesheet::total(None, Money::new(20_00, 2, Currency::Usd), &timesheets),
+			Money::new(4000, 2, Currency::Usd),
 		);
 	}
 }

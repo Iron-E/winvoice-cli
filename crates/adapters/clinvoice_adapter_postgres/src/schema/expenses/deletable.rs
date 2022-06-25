@@ -92,7 +92,7 @@ mod tests
 			Duration::from_secs(900),
 			Invoice {
 				date: None,
-				hourly_rate: Money::new(20_00, 2, Currency::USD),
+				hourly_rate: Money::new(20_00, 2, Currency::Usd),
 			},
 			String::new(),
 			"Do something".into(),
@@ -106,17 +106,17 @@ mod tests
 			vec![
 				(
 					"Flight".into(),
-					Money::new(300_56, 2, Currency::JPY),
+					Money::new(300_56, 2, Currency::Jpy),
 					"Trip to Hawaii for research".into(),
 				),
 				(
 					"Food".into(),
-					Money::new(10_17, 2, Currency::USD),
+					Money::new(10_17, 2, Currency::Usd),
 					"Takeout".into(),
 				),
 				(
 					"Taxi".into(),
-					Money::new(563_30, 2, Currency::NOK),
+					Money::new(563_30, 2, Currency::Nok),
 					"Took a taxi cab".into(),
 				),
 			],

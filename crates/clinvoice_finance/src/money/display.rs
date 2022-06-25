@@ -20,15 +20,15 @@ mod tests
 	fn display()
 	{
 		assert_eq!(
-			format!("{}", Money::new(50_00, 2, Currency::USD)),
+			format!("{}", Money::new(50_00, 2, Currency::Usd)),
 			"50.00 USD"
 		);
 		assert_eq!(
-			format!("{}", Money::new(90_00, 2, Currency::EUR)),
+			format!("{}", Money::new(90_00, 2, Currency::Eur)),
 			"90.00 EUR"
 		);
 		assert_eq!(
-			format!("{}", Money::new(20000, 0, Currency::JPY)),
+			format!("{}", Money::new(20000, 0, Currency::Jpy)),
 			"20000 JPY"
 		);
 	}

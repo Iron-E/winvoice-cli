@@ -263,7 +263,7 @@ mod tests
 			Duration::new(7640, 0),
 			Invoice {
 				date: None,
-				hourly_rate: Money::new(13_27, 2, Currency::USD),
+				hourly_rate: Money::new(13_27, 2, Currency::Usd),
 			},
 			String::new(),
 			"Write the test".into(),
@@ -285,7 +285,7 @@ mod tests
 			employee,
 			vec![(
 				"Food".into(),
-				Money::new(40_50, 2, Currency::USD),
+				Money::new(40_50, 2, Currency::Usd),
 				"Got fastfood".into(),
 			)],
 			job,
@@ -399,7 +399,7 @@ mod tests
 				Duration::from_secs(900),
 				Invoice {
 					date: None,
-					hourly_rate: Money::new(20_00, 2, Currency::USD),
+					hourly_rate: Money::new(20_00, 2, Currency::Usd),
 				},
 				String::new(),
 				"Do something".into()
@@ -415,7 +415,7 @@ mod tests
 						issued: Utc.ymd(3000, 01, 13).and_hms(11, 45, 00),
 						paid: Some(Utc.ymd(3000, 01, 15).and_hms(14, 27, 00)),
 					}),
-					hourly_rate: Money::new(200_00, 2, Currency::JPY),
+					hourly_rate: Money::new(200_00, 2, Currency::Jpy),
 				},
 				String::new(),
 				"Do something".into()
@@ -430,7 +430,7 @@ mod tests
 				employee2,
 				vec![(
 					"Flight".into(),
-					Money::new(300_56, 2, Currency::USD),
+					Money::new(300_56, 2, Currency::Usd),
 					"Trip to Hawaii for research".into()
 				)],
 				job2,

@@ -71,7 +71,7 @@ mod tests
 				Duration::from_secs(300),
 				Invoice {
 					date: None,
-					hourly_rate: Money::new(20_00, 2, Currency::USD),
+					hourly_rate: Money::new(20_00, 2, Currency::Usd),
 				},
 				String::new(),
 				"Do something".into()
@@ -87,7 +87,7 @@ mod tests
 						issued: Utc.ymd(3000, 01, 17).and_hms(12, 30, 00),
 						paid: None,
 					}),
-					hourly_rate: Money::new(299_99, 2, Currency::JPY),
+					hourly_rate: Money::new(299_99, 2, Currency::Jpy),
 				},
 				String::new(),
 				"Do something".into()
@@ -103,7 +103,7 @@ mod tests
 						issued: Utc.ymd(2011, 03, 18).and_hms(08, 00, 00),
 						paid: Some(Utc.ymd(2011, 03, 19).and_hms(17, 00, 00)),
 					}),
-					hourly_rate: Money::new(20_00, 2, Currency::EUR),
+					hourly_rate: Money::new(20_00, 2, Currency::Eur),
 				},
 				String::new(),
 				"Do something".into()

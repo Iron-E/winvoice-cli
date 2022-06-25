@@ -40,13 +40,3 @@ impl Updatable for PgExpenses
 		.await
 	}
 }
-
-#[cfg(test)]
-mod tests
-{
-	#[tokio::test]
-	async fn update()
-	{
-		todo!("write test")
-	}
-}

@@ -61,7 +61,7 @@ impl Updatable for PgTimesheet
 #[cfg(test)]
 mod tests
 {
-	use std::time::Duration;
+	use std::{collections::HashSet, time::Duration};
 
 	use clinvoice_adapter::{
 		schema::{
@@ -112,26 +112,27 @@ mod tests
 			.unwrap();
 
 		let (employee, employee2) = futures::try_join!(
-				PgEmployee::create(
-					&connection,
-					"My Name".into(),
-					"Employed".into(),
-					"Janitor".into(),
-				),
-				PgEmployee::create(
-					&connection,
-					"Not My Name".into(),
-					"Not Employed".into(),
-					"Not Janitor".into(),
-				),
-			).unwrap();
+			PgEmployee::create(
+				&connection,
+				"My Name".into(),
+				"Employed".into(),
+				"Janitor".into(),
+			),
+			PgEmployee::create(
+				&connection,
+				"Not My Name".into(),
+				"Not Employed".into(),
+				"Not Janitor".into(),
+			),
+		)
+		.unwrap();
 
 		let mut timesheet = PgTimesheet::create(
 			&connection,
 			employee,
 			vec![(
 				"Travel".into(),
-				Money::new(500_00, 2, Currency::Usd),
+				Money::new(500_00, 2, Currency::default()),
 				"Flight".into(),
 			)],
 			job,
@@ -186,7 +187,10 @@ mod tests
 
 		assert_eq!(timesheet.id, db_timesheet.id);
 		assert_eq!(timesheet.employee, db_timesheet.employee);
-		assert_eq!(timesheet.expenses, db_timesheet.expenses);
+		assert_eq!(
+			timesheet.expenses.into_iter().collect::<HashSet<_>>(),
+			db_timesheet.expenses.into_iter().collect::<HashSet<_>>()
+		);
 		assert_eq!(timesheet.job.pg_sanitize(), db_timesheet.job);
 		assert_eq!(timesheet.time_begin.pg_sanitize(), db_timesheet.time_begin);
 		assert_eq!(timesheet.time_end.pg_sanitize(), db_timesheet.time_end);

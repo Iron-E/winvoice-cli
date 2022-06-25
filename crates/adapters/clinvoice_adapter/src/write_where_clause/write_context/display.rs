@@ -1,8 +1,7 @@
 use core::fmt::{Display, Formatter, Result};
 
-use crate::fmt::sql;
-
 use super::WriteContext;
+use crate::fmt::sql;
 
 impl Display for WriteContext
 {

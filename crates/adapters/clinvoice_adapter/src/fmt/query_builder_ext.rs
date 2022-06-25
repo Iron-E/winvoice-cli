@@ -2,7 +2,7 @@ use core::fmt::Display;
 
 use sqlx::{database::HasArguments, query::Query, Database, QueryBuilder};
 
-use super::{ColumnsToSql, sql};
+use super::{sql, ColumnsToSql};
 
 pub trait QueryBuilderExt<'args>
 {
@@ -167,7 +167,7 @@ where
 	/// Push a comma and then [`push_columns`](QueryBuilderExt::push_columns).
 	fn push_more_columns<T>(&mut self, columns: &T) -> &mut Self
 	where
-		T: ColumnsToSql
+		T: ColumnsToSql,
 	{
 		self.push(',').push_columns(columns)
 	}

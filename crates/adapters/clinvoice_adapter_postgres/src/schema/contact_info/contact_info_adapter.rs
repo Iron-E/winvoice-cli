@@ -50,6 +50,7 @@ impl ContactInfoAdapter for PgContactInfo
 		query
 			.push_columns(&COLUMNS.scope(ALIAS))
 			.push_from("contact_information", ALIAS);
+
 		write_where_clause::write_match_contact(
 			connection,
 			Default::default(),

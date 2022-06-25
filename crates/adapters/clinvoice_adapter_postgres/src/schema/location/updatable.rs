@@ -75,8 +75,7 @@ impl Updatable for PgLocation
 			entities_collected.dedup_by_key(|e| e.id);
 		}
 
-		const COLUMNS: LocationColumns<&'static str> = LocationColumns::default();
-		PgSchema::update(connection, COLUMNS, "locations", "L", |query| {
+		PgSchema::update(connection, LocationColumns::default(), |query| {
 			query.push_values(entities_collected.iter(), |mut q, e| {
 				q.push_bind(e.id)
 					.push_bind(&e.name)

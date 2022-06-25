@@ -1,4 +1,4 @@
-use clinvoice_adapter::Deletable;
+use clinvoice_adapter::{schema::columns::LocationColumns, Deletable};
 use clinvoice_schema::{Id, Location};
 use sqlx::{Executor, Postgres, Result};
 
@@ -25,7 +25,7 @@ impl Deletable for PgLocation
 		}
 
 		// TODO: use `for<'a> |e: &'a Location| e.id`
-		PgSchema::delete(connection, "locations", entities.map(mapper)).await
+		PgSchema::delete::<_, _, LocationColumns<char>>(connection, entities.map(mapper)).await
 	}
 }
 

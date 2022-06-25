@@ -1,5 +1,5 @@
 use clinvoice_adapter::{
-	fmt::{sql, QueryBuilderExt},
+	fmt::{sql, QueryBuilderExt, TableToSql},
 	schema::{
 		columns::{LocationColumns, OrganizationColumns},
 		OrganizationAdapter,
@@ -39,28 +39,29 @@ impl OrganizationAdapter for PgOrganization
 		match_condition: &MatchOrganization,
 	) -> Result<Vec<Organization>>
 	{
-		const ALIAS: &str = "O";
 		const COLUMNS: OrganizationColumns<&'static str> = OrganizationColumns::default();
 
-		const LOCATION_ALIAS: &str = "L";
-		const LOCATION_COLUMNS: LocationColumns<&'static str> = LocationColumns::default();
-
-		let columns = COLUMNS.scope(ALIAS);
-		let location_columns = LOCATION_COLUMNS.scope(LOCATION_ALIAS);
+		let columns = COLUMNS.default_scope();
+		let location_columns = LocationColumns::default().default_scope();
 		let mut query = PgLocation::query_with_recursive(&match_condition.location);
 
 		query
 			.push(sql::SELECT)
 			.push_columns(&columns)
-			.push_from("organizations", ALIAS)
+			.push_default_from::<OrganizationColumns<char>>()
 			.push_equijoin(
 				PgLocationRecursiveCte::from(&match_condition.location),
-				LOCATION_ALIAS,
+				LocationColumns::<char>::default_alias(),
 				location_columns.id,
 				columns.location_id,
 			);
 
-		PgSchema::write_where_clause(Default::default(), ALIAS, match_condition, &mut query);
+		PgSchema::write_where_clause(
+			Default::default(),
+			OrganizationColumns::<char>::default_alias(),
+			match_condition,
+			&mut query,
+		);
 
 		query
 			.prepare()

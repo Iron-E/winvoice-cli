@@ -14,10 +14,8 @@ mod timesheet;
 mod util;
 mod write_where_clause;
 
-use core::fmt::Display;
-
 use clinvoice_adapter::{
-	fmt::{sql, As, ColumnsToSql, QueryBuilderExt, SnakeCase},
+	fmt::{sql, As, ColumnsToSql, QueryBuilderExt, SnakeCase, TableToSql},
 	WriteWhereClause,
 };
 use clinvoice_match::Match;
@@ -44,11 +42,11 @@ impl PgSchema
 	///
 	/// Execute `DELETE FROM {table} WHERE (id = №) OR … OR (id = №)`
 	/// for each [`Id`] in `entities.
-	async fn delete(
-		connection: impl Executor<'_, Database = Postgres>,
-		table: impl Display,
-		entities: impl Iterator<Item = Id>,
-	) -> Result<()>
+	async fn delete<'args, TConn, TIter, TTable>(connection: TConn, entities: TIter) -> Result<()>
+	where
+		TConn: Executor<'args, Database = Postgres>,
+		TIter: Iterator<Item = Id>,
+		TTable: TableToSql,
 	{
 		let mut peekable_entities = entities.peekable();
 
@@ -59,7 +57,7 @@ impl PgSchema
 		}
 
 		let mut query = QueryBuilder::new(sql::DELETE_FROM);
-		query.push(table);
+		query.push(TTable::table_name());
 
 		PgSchema::write_where_clause(
 			Default::default(),
@@ -88,17 +86,17 @@ impl PgSchema
 	async fn update<'args, C>(
 		connection: &mut Transaction<'_, Postgres>,
 		columns: C,
-		table: impl Display,
-		table_alias: impl Copy + Display,
 		push_values: impl FnOnce(&mut QueryBuilder<'args, Postgres>),
 	) -> Result<()>
 	where
 		C: ColumnsToSql,
 	{
+		let alias = C::table_alias();
 		let mut query = QueryBuilder::new(sql::UPDATE);
-		query.push(As(table, table_alias)).push(sql::SET);
 
-		let values_alias = SnakeCase::from((table_alias, "V"));
+		query.push(As(C::table_name(), alias)).push(sql::SET);
+
+		let values_alias = SnakeCase::from((alias, "V"));
 		columns.push_set_to(&mut query, values_alias);
 
 		query.push(sql::FROM).push('(');
@@ -114,7 +112,7 @@ impl PgSchema
 			.push(')')
 			.push(sql::WHERE);
 
-		columns.push_update_where_to(&mut query, table_alias, values_alias);
+		columns.push_update_where_to(&mut query, alias, values_alias);
 
 		query.prepare().execute(connection).await?;
 

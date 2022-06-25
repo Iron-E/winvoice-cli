@@ -36,11 +36,10 @@ impl Updatable for PgJob
 			return Ok(());
 		}
 
-		const COLUMNS: JobColumns<&'static str> = JobColumns::default();
 		let exchange_rates = ExchangeRates::new()
 			.map_err(util::finance_err_to_sqlx)
 			.await?;
-		PgSchema::update(connection, COLUMNS, "jobs", "J", |query| {
+		PgSchema::update(connection, JobColumns::default(), |query| {
 			query.push_values(peekable_entities, |mut q, e| {
 				q.push_bind(e.client.id)
 					.push_bind(e.date_open.pg_sanitize())

@@ -1,4 +1,4 @@
-use clinvoice_adapter::Deletable;
+use clinvoice_adapter::{schema::columns::OrganizationColumns, Deletable};
 use clinvoice_schema::{Id, Organization};
 use sqlx::{Executor, Postgres, Result};
 
@@ -25,7 +25,7 @@ impl Deletable for PgOrganization
 		}
 
 		// TODO: use `for<'a> |e: &'a Organization| e.id`
-		PgSchema::delete(connection, "organizations", entities.map(mapper)).await
+		PgSchema::delete::<_, _, OrganizationColumns<char>>(connection, entities.map(mapper)).await
 	}
 }
 

@@ -1,4 +1,5 @@
 mod columns_to_sql;
+mod table_to_sql;
 
 use crate::fmt::{As, TypeCast, WithIdentifier};
 

@@ -1,7 +1,7 @@
 use core::{fmt::Display, ops::Deref};
 
 use clinvoice_adapter::{
-	fmt::{sql, Nullable, QueryBuilderExt, SnakeCase},
+	fmt::{sql, Nullable, QueryBuilderExt, SnakeCase, TableToSql},
 	schema::columns::{
 		ContactColumns,
 		EmployeeColumns,
@@ -352,7 +352,7 @@ impl WriteWhereClause<Postgres, &MatchSet<MatchExpense>> for PgSchema
 					.push(sql::EXISTS)
 					.push('(')
 					.push(sql::SELECT)
-					.push_from("expenses", subquery_ident)
+					.push_from(ExpenseColumns::<char>::table_name(), subquery_ident)
 					.push(sql::WHERE)
 					.push_equal(
 						COLUMNS.scope(subquery_ident).timesheet_id,

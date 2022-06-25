@@ -1,7 +1,7 @@
 use core::fmt::Display;
 
 use clinvoice_adapter::{
-	fmt::{sql, QueryBuilderExt},
+	fmt::{sql, QueryBuilderExt, TableToSql},
 	schema::columns::ContactColumns,
 	Deletable,
 };
@@ -28,10 +28,8 @@ impl Deletable for PgContactInfo
 		where
 			T: Display,
 		{
-			const COLUMNS: ContactColumns<&'static str> = ContactColumns::default();
-
 			s.push('(')
-				.push_unseparated(COLUMNS.label)
+				.push_unseparated(ContactColumns::default().label)
 				.push_unseparated('=')
 				.push_bind(&c.label)
 				.push_unseparated(')');
@@ -46,7 +44,9 @@ impl Deletable for PgContactInfo
 		}
 
 		let mut query = QueryBuilder::new(sql::DELETE_FROM);
-		query.push("contact_information").push(sql::WHERE);
+		query
+			.push(ContactColumns::<char>::table_name())
+			.push(sql::WHERE);
 
 		{
 			let mut separated = query.separated(' ');

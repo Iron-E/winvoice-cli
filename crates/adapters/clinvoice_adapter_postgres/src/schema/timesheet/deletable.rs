@@ -1,4 +1,4 @@
-use clinvoice_adapter::Deletable;
+use clinvoice_adapter::{schema::columns::TimesheetColumns, Deletable};
 use clinvoice_schema::{Id, Timesheet};
 use sqlx::{Executor, Postgres, Result};
 
@@ -25,7 +25,7 @@ impl Deletable for PgTimesheet
 		}
 
 		// TODO: use `for<'a> |e: &'a Timesheet| e.id`
-		PgSchema::delete(connection, "timesheets", entities.map(mapper)).await
+		PgSchema::delete::<_, _, TimesheetColumns<char>>(connection, entities.map(mapper)).await
 	}
 }
 

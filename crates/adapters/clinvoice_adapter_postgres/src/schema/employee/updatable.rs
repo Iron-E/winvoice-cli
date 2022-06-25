@@ -27,8 +27,7 @@ impl Updatable for PgEmployee
 			return Ok(());
 		}
 
-		const COLUMNS: EmployeeColumns<&'static str> = EmployeeColumns::default();
-		PgSchema::update(connection, COLUMNS, "employees", "E", |query| {
+		PgSchema::update(connection, EmployeeColumns::default(), |query| {
 			query.push_values(peekable_entities, |mut q, e| {
 				q.push_bind(e.id)
 					.push_bind(&e.name)

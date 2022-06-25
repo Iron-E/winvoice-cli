@@ -1,5 +1,5 @@
 use clinvoice_adapter::{
-	fmt::{sql, QueryBuilderExt},
+	fmt::{sql, QueryBuilderExt, TableToSql},
 	schema::{columns::LocationColumns, LocationAdapter},
 };
 use clinvoice_match::MatchLocation;
@@ -33,15 +33,17 @@ impl LocationAdapter for PgLocation
 	async fn retrieve(connection: &PgPool, match_condition: &MatchLocation)
 		-> Result<Vec<Location>>
 	{
-		const ALIAS: &str = "L";
 		const COLUMNS: LocationColumns<&'static str> = LocationColumns::default();
 
 		let mut query = Self::query_with_recursive(match_condition);
 
 		query
 			.push(sql::SELECT)
-			.push(COLUMNS.scope(ALIAS).id)
-			.push_from(PgLocationRecursiveCte::from(match_condition), ALIAS)
+			.push(COLUMNS.default_scope().id)
+			.push_from(
+				PgLocationRecursiveCte::from(match_condition),
+				LocationColumns::<char>::default_alias(),
+			)
 			.prepare()
 			.fetch(connection)
 			.and_then(|row| PgLocation::retrieve_by_id(connection, row.get(COLUMNS.id)))

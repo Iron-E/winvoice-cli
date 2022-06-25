@@ -2,11 +2,13 @@ use core::fmt::Display;
 
 use sqlx::{Database, QueryBuilder};
 
+use super::TableToSql;
+
 /// # Summary
 ///
 /// This trait defines methods which are commonly used when generating SQL that references all of
 /// the columns for a given table.
-pub trait ColumnsToSql
+pub trait ColumnsToSql: TableToSql
 {
 	/// # Summary
 	///

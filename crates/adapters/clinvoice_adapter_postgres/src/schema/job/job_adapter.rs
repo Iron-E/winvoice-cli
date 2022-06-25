@@ -1,7 +1,7 @@
 use core::time::Duration;
 
 use clinvoice_adapter::{
-	fmt::{sql, QueryBuilderExt},
+	fmt::{sql, QueryBuilderExt, TableToSql},
 	schema::{
 		columns::{JobColumns, LocationColumns, OrganizationColumns},
 		JobAdapter,
@@ -79,47 +79,39 @@ impl JobAdapter for PgJob
 
 	async fn retrieve(connection: &PgPool, match_condition: &MatchJob) -> Result<Vec<Job>>
 	{
-		const ALIAS: &str = "J";
 		const COLUMNS: JobColumns<&str> = JobColumns::default();
 
-		const LOCATION_ALIAS: &str = "L";
-		const LOCATION_COLUMNS: LocationColumns<&str> = LocationColumns::default();
-
-		const ORGANIZATION_ALIAS: &str = "O";
-		const ORGANIZATION_COLUMNS: OrganizationColumns<&str> = OrganizationColumns::default();
 		const ORGANIZATION_COLUMNS_UNIQUE: OrganizationColumns<&str> = OrganizationColumns::unique();
 
-		let columns = COLUMNS.scope(ALIAS);
+		let columns = COLUMNS.default_scope();
 		let exchange_rates_fut = ExchangeRates::new().map_err(util::finance_err_to_sqlx);
-		let organization_columns = ORGANIZATION_COLUMNS.scope(ORGANIZATION_ALIAS);
 		let mut query = PgLocation::query_with_recursive(&match_condition.client.location);
+		let organization_columns = OrganizationColumns::default().default_scope();
 
 		query
 			.push(sql::SELECT)
 			.push_columns(&columns)
 			.push_more_columns(&organization_columns.r#as(ORGANIZATION_COLUMNS_UNIQUE))
-			.push_from("jobs", ALIAS)
-			.push_equijoin(
-				"organizations",
-				ORGANIZATION_ALIAS,
+			.push_default_from::<JobColumns<char>>()
+			.push_default_equijoin::<_, _, OrganizationColumns<char>>(
 				organization_columns.id,
 				columns.client_id,
 			)
 			.push_equijoin(
 				PgLocationRecursiveCte::from(&match_condition.client.location),
-				LOCATION_ALIAS,
-				LOCATION_COLUMNS.scope(LOCATION_ALIAS).id,
+				LocationColumns::<char>::default_alias(),
+				LocationColumns::default().default_scope().id,
 				organization_columns.location_id,
 			);
 
 		PgSchema::write_where_clause(
 			PgSchema::write_where_clause(
 				Default::default(),
-				ALIAS,
+				JobColumns::<char>::default_alias(),
 				&match_condition.exchange_ref(Default::default(), &exchange_rates_fut.await?),
 				&mut query,
 			),
-			ORGANIZATION_ALIAS,
+			OrganizationColumns::<char>::default_alias(),
 			&match_condition.client,
 			&mut query,
 		);

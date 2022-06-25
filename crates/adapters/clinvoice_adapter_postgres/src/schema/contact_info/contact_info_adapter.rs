@@ -1,5 +1,5 @@
 use clinvoice_adapter::{
-	fmt::{sql, QueryBuilderExt},
+	fmt::{sql, QueryBuilderExt, TableToSql},
 	schema::{columns::ContactColumns, ContactInfoAdapter},
 };
 use clinvoice_match::MatchContact;
@@ -42,19 +42,18 @@ impl ContactInfoAdapter for PgContactInfo
 
 	async fn retrieve(connection: &PgPool, match_condition: &MatchContact) -> Result<Vec<Contact>>
 	{
-		const ALIAS: &str = "C";
 		const COLUMNS: ContactColumns<&'static str> = ContactColumns::default();
 
 		let mut query = QueryBuilder::new(sql::SELECT);
 
 		query
-			.push_columns(&COLUMNS.scope(ALIAS))
-			.push_from("contact_information", ALIAS);
+			.push_columns(&COLUMNS.default_scope())
+			.push_default_from::<ContactColumns<char>>();
 
 		write_where_clause::write_match_contact(
 			connection,
 			Default::default(),
-			ALIAS,
+			ContactColumns::<char>::default_alias(),
 			match_condition,
 			&mut query,
 		)

@@ -2,7 +2,7 @@ use core::fmt::Display;
 
 use sqlx::{database::HasArguments, query::Query, Database, QueryBuilder};
 
-use super::{sql, ColumnsToSql};
+use super::{sql, ColumnsToSql, TableToSql};
 
 pub trait QueryBuilderExt<'args>
 {
@@ -22,19 +22,37 @@ pub trait QueryBuilderExt<'args>
 
 	/// # Summary
 	///
+	/// Push `" JOIN {TTable::table_name()} {TTable::table_alias()} ON ({left} = {right})"`.
+	fn push_default_equijoin<TLeft, TRight, TTable>(
+		&mut self,
+		left: TLeft,
+		right: TRight,
+	) -> &mut Self
+	where
+		TLeft: Display,
+		TRight: Display,
+		TTable: TableToSql,
+	{
+		self.push_equijoin(TTable::table_name(), TTable::table_alias(), left, right)
+	}
+
+	/// # Summary
+	///
+	/// Push `" FROM {T::table_name()} {T::table_alias()}"`.
+	fn push_default_from<T>(&mut self) -> &mut Self
+	where
+		T: TableToSql,
+	{
+		self.push_from(T::table_name(), T::table_alias())
+	}
+
+	/// # Summary
+	///
 	/// Push `"left = right"`.
 	fn push_equal<TLeft, TRight>(&mut self, left: TLeft, right: TRight) -> &mut Self
 	where
 		TLeft: Display,
 		TRight: Display;
-
-	/// # Summary
-	///
-	/// Push `" FROM {table_ident} {table_alias}"`.
-	fn push_from<TAlias, TIdent>(&mut self, table_ident: TIdent, table_alias: TAlias) -> &mut Self
-	where
-		TAlias: Display,
-		TIdent: Display;
 
 	/// # Summary
 	///
@@ -54,19 +72,11 @@ pub trait QueryBuilderExt<'args>
 
 	/// # Summary
 	///
-	/// Push `" LEFT JOIN {table_ident} {table_alias} ON ({left} = {right})"`.
-	fn push_left_equijoin<TAlias, TIdent, TLeft, TRight>(
-		&mut self,
-		table_ident: TIdent,
-		table_alias: TAlias,
-		left: TLeft,
-		right: TRight,
-	) -> &mut Self
+	/// Push `" FROM {table_ident} {table_alias}"`.
+	fn push_from<TAlias, TIdent>(&mut self, table_ident: TIdent, table_alias: TAlias) -> &mut Self
 	where
 		TAlias: Display,
-		TIdent: Display,
-		TLeft: Display,
-		TRight: Display;
+		TIdent: Display;
 
 	/// # Summary
 	///
@@ -104,20 +114,6 @@ where
 		self
 	}
 
-	fn push_from<TAlias, TIdent>(&mut self, table_ident: TIdent, table_alias: TAlias) -> &mut Self
-	where
-		TAlias: Display,
-		TIdent: Display,
-	{
-		self
-			.push(sql::FROM)
-			.separated(' ')
-			.push(table_ident)
-			.push(table_alias);
-
-		self
-	}
-
 	fn push_equijoin<TAlias, TIdent, TLeft, TRight>(
 		&mut self,
 		table_ident: TIdent,
@@ -141,22 +137,18 @@ where
 		self.push_equal(left, right).push(')')
 	}
 
-	fn push_left_equijoin<TAlias, TIdent, TLeft, TRight>(
-		&mut self,
-		table_ident: TIdent,
-		table_alias: TAlias,
-		left: TLeft,
-		right: TRight,
-	) -> &mut Self
+	fn push_from<TAlias, TIdent>(&mut self, table_ident: TIdent, table_alias: TAlias) -> &mut Self
 	where
 		TAlias: Display,
 		TIdent: Display,
-		TLeft: Display,
-		TRight: Display,
 	{
 		self
-			.push(sql::LEFT)
-			.push_equijoin(table_ident, table_alias, left, right)
+			.push(sql::FROM)
+			.separated(' ')
+			.push(table_ident)
+			.push(table_alias);
+
+		self
 	}
 
 	fn push_more_columns<T>(&mut self, columns: &T) -> &mut Self

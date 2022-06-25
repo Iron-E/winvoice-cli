@@ -1,5 +1,5 @@
 use clinvoice_adapter::{
-	fmt::{sql, QueryBuilderExt},
+	fmt::{sql, QueryBuilderExt, TableToSql},
 	schema::{
 		columns::{
 			EmployeeColumns,
@@ -88,36 +88,22 @@ impl TimesheetAdapter for PgTimesheet
 		match_condition: &MatchTimesheet,
 	) -> Result<Vec<Timesheet>>
 	{
-		const ALIAS: &str = "T";
 		const COLUMNS: TimesheetColumns<&str> = TimesheetColumns::default();
 
-		const EMPLOYEE_ALIAS: &str = "E";
-		const EMPLOYEE_COLUMNS: EmployeeColumns<&str> = EmployeeColumns::default();
-		const EMPLOYEE_COLUMNS_UNIQUE: EmployeeColumns<&str> = EmployeeColumns::unique();
-
-		const EXPENSE_ALIAS: &str = "X";
 		const EXPENSES_AGGREGATED_IDENT: &str = "expenses_aggregated";
-		const EXPENSE_COLUMNS: ExpenseColumns<&str> = ExpenseColumns::default();
 
-		const JOB_ALIAS: &str = "J";
-		const JOB_COLUMNS: JobColumns<&str> = JobColumns::default();
+		const EMPLOYEE_COLUMNS_UNIQUE: EmployeeColumns<&str> = EmployeeColumns::unique();
 		const JOB_COLUMNS_UNIQUE: JobColumns<&str> = JobColumns::unique();
-
-		const LOCATION_ALIAS: &str = "L";
-		const LOCATION_COLUMNS: LocationColumns<&str> = LocationColumns::default();
-
-		const ORGANIZATION_ALIAS: &str = "O";
-		const ORGANIZATION_COLUMNS: OrganizationColumns<&str> = OrganizationColumns::default();
 		const ORGANIZATION_COLUMNS_UNIQUE: OrganizationColumns<&str> = OrganizationColumns::unique();
 
-		let columns = COLUMNS.scope(ALIAS);
-		let employee_columns = EMPLOYEE_COLUMNS.scope(EMPLOYEE_ALIAS);
+		let columns = COLUMNS.default_scope();
+		let employee_columns = EmployeeColumns::default().default_scope();
 		let exchange_rates_fut = ExchangeRates::new().map_err(util::finance_err_to_sqlx);
-		let expense_columns = EXPENSE_COLUMNS.scope(EXPENSE_ALIAS);
-		let job_columns = JOB_COLUMNS.scope(JOB_ALIAS);
-		let location_columns = LOCATION_COLUMNS.scope(LOCATION_ALIAS);
+		let expense_columns = ExpenseColumns::default().default_scope();
+		let job_columns = JobColumns::default().default_scope();
+		let location_columns = LocationColumns::default().default_scope();
 		let mut query = PgLocation::query_with_recursive(&match_condition.job.client.location);
-		let organization_columns = ORGANIZATION_COLUMNS.scope(ORGANIZATION_ALIAS);
+		let organization_columns = OrganizationColumns::default().default_scope();
 
 		query
 			.push(sql::SELECT)
@@ -130,29 +116,24 @@ impl TimesheetAdapter for PgTimesheet
 			.push(EXPENSES_AGGREGATED_IDENT)
 			.push_more_columns(&job_columns.r#as(JOB_COLUMNS_UNIQUE))
 			.push_more_columns(&organization_columns.r#as(ORGANIZATION_COLUMNS_UNIQUE))
-			.push_from("timesheets", ALIAS)
-			.push_equijoin(
-				"employees",
-				EMPLOYEE_ALIAS,
+			.push_default_from::<TimesheetColumns<char>>()
+			.push_default_equijoin::<_, _, EmployeeColumns<char>>(
 				employee_columns.id,
 				columns.employee_id,
 			)
-			.push_left_equijoin(
-				"expenses",
-				EXPENSE_ALIAS,
+			.push(sql::LEFT)
+			.push_default_equijoin::<_, _, ExpenseColumns<char>>(
 				expense_columns.timesheet_id,
 				columns.id,
 			)
-			.push_equijoin("jobs", JOB_ALIAS, job_columns.id, columns.job_id)
-			.push_equijoin(
-				"organizations",
-				ORGANIZATION_ALIAS,
+			.push_default_equijoin::<_, _, JobColumns<char>>(job_columns.id, columns.job_id)
+			.push_default_equijoin::<_, _, OrganizationColumns<char>>(
 				organization_columns.id,
 				job_columns.client_id,
 			)
 			.push_equijoin(
 				PgLocationRecursiveCte::from(&match_condition.job.client.location),
-				LOCATION_ALIAS,
+				LocationColumns::<char>::default_alias(),
 				location_columns.id,
 				organization_columns.location_id,
 			);
@@ -164,27 +145,27 @@ impl TimesheetAdapter for PgTimesheet
 					PgSchema::write_where_clause(
 						PgSchema::write_where_clause(
 							Default::default(),
-							ALIAS,
+							TimesheetColumns::<char>::default_alias(),
 							match_condition,
 							&mut query,
 						),
-						EMPLOYEE_ALIAS,
+						EmployeeColumns::<char>::default_alias(),
 						&match_condition.employee,
 						&mut query,
 					),
-					EXPENSE_ALIAS,
+					ExpenseColumns::<char>::default_alias(),
 					&match_condition
 						.expenses
 						.exchange_ref(Default::default(), &exchange_rates),
 					&mut query,
 				),
-				JOB_ALIAS,
+				JobColumns::<char>::default_alias(),
 				&match_condition
 					.job
 					.exchange_ref(Default::default(), &exchange_rates),
 				&mut query,
 			),
-			ORGANIZATION_ALIAS,
+			OrganizationColumns::<char>::default_alias(),
 			&match_condition.job.client,
 			&mut query,
 		);

@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use clinvoice_adapter::{
-	fmt::{sql, As, QueryBuilderExt},
+	fmt::{sql, As, QueryBuilderExt, TableToSql},
 	schema::{
 		columns::{ExpenseColumns, TimesheetColumns},
 		ExpensesAdapter,
@@ -75,14 +75,10 @@ impl ExpensesAdapter for PgExpenses
 		match_condition: &MatchSet<MatchExpense>,
 	) -> Result<HashMap<Id, Vec<Expense>>>
 	{
-		const ALIAS: &str = "X";
 		const COLUMNS: ExpenseColumns<&str> = ExpenseColumns::default();
 
-		const TIMESHEET_ALIAS: &str = "T";
-		const TIMESHEET_COLUMNS: TimesheetColumns<&str> = TimesheetColumns::default();
-
-		let columns = COLUMNS.scope(ALIAS);
-		let timesheet_columns = TIMESHEET_COLUMNS.scope(TIMESHEET_ALIAS);
+		let columns = COLUMNS.default_scope();
+		let timesheet_columns = TimesheetColumns::default().default_scope();
 		let exchange_rates_fut = ExchangeRates::new().map_err(util::finance_err_to_sqlx);
 		let mut query = QueryBuilder::new(sql::SELECT);
 
@@ -95,10 +91,9 @@ impl ExpensesAdapter for PgExpenses
 			.push(columns.id);
 
 		query
-			.push_from("timesheets", TIMESHEET_ALIAS)
-			.push_left_equijoin(
-				"expenses",
-				ALIAS,
+			.push_default_from::<TimesheetColumns<char>>()
+			.push(sql::LEFT)
+			.push_default_equijoin::<_, _, ExpenseColumns<char>>(
 				columns.timesheet_id,
 				timesheet_columns.id,
 			);
@@ -106,7 +101,7 @@ impl ExpensesAdapter for PgExpenses
 		let exchange_rates = exchange_rates_fut.await?;
 		PgSchema::write_where_clause(
 			Default::default(),
-			ALIAS,
+			ExpenseColumns::<char>::default_alias(),
 			&match_condition.exchange_ref(Default::default(), &exchange_rates),
 			&mut query,
 		);

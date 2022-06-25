@@ -1,7 +1,7 @@
 use core::fmt::Display;
 
 use clinvoice_adapter::{
-	fmt::{sql, QueryBuilderExt, SnakeCase},
+	fmt::{sql, QueryBuilderExt, SnakeCase, TableToSql},
 	schema::columns::LocationColumns,
 	WriteWhereClause,
 };
@@ -16,8 +16,6 @@ mod deletable;
 mod location_adapter;
 mod updatable;
 
-const ALIAS: &str = "L";
-const ALIAS_OUTER: &str = "LO";
 const COLUMNS: LocationColumns<&str> = LocationColumns::default();
 
 pub struct PgLocation;
@@ -43,8 +41,11 @@ impl PgLocation
 			TCurrent: Display,
 			TPrev: Display,
 		{
-			let inner_columns = COLUMNS.scope(ALIAS);
-			let outer_columns = COLUMNS.scope(ALIAS_OUTER);
+			let alias = LocationColumns::<char>::default_alias();
+			let columns = COLUMNS.scope(alias);
+
+			let alias_outer = SnakeCase::from((alias, 'O'));
+			let outer_columns = COLUMNS.scope(alias_outer);
 
 			query
 				.push(&ident)
@@ -52,11 +53,11 @@ impl PgLocation
 				.push('(')
 				.push(sql::SELECT)
 				.push_columns(&outer_columns)
-				.push_from("locations", ALIAS_OUTER);
+				.push_from(LocationColumns::<&str>::table_name(), alias_outer);
 
 			if let Some((prev, _)) = ident.slice_end()
 			{
-				query.push_equijoin(prev, ALIAS, outer_columns.id, inner_columns.outer_id);
+				query.push_equijoin(prev, alias, outer_columns.id, columns.outer_id);
 			}
 
 			PgSchema::write_where_clause(
@@ -109,17 +110,17 @@ impl PgLocation
 							.push(sql::AS)
 							.push('(')
 							.push(sql::SELECT)
-							.push_columns(&inner_columns)
-							.push_from("locations", ALIAS)
-							.push_equijoin(ident, ALIAS_OUTER, inner_columns.outer_id, outer_columns.id)
+							.push_columns(&columns)
+							.push_default_from::<LocationColumns<char>>()
+							.push_equijoin(ident, alias_outer, columns.outer_id, outer_columns.id)
 							.push(sql::UNION)
 							.push(sql::SELECT)
-							.push_columns(&inner_columns)
-							.push_from("locations", ALIAS)
+							.push_columns(&columns)
+							.push_default_from::<LocationColumns<char>>()
 							.push_equijoin(
 								IDENT_REPORT,
-								ALIAS_OUTER,
-								inner_columns.outer_id,
+								alias_outer,
+								columns.outer_id,
 								outer_columns.id,
 							)
 							.push(')');
@@ -199,8 +200,11 @@ impl PgLocation
 
 		query
 			.push(sql::SELECT)
-			.push(COLUMNS.scope(ALIAS).id)
-			.push_from(PgLocationRecursiveCte::from(match_condition), ALIAS)
+			.push(COLUMNS.default_scope().id)
+			.push_from(
+				PgLocationRecursiveCte::from(match_condition),
+				LocationColumns::<char>::default_alias(),
+			)
 			.prepare()
 			.fetch(connection)
 			.map_ok(|row| row.get::<Id, _>(COLUMNS.id).into())

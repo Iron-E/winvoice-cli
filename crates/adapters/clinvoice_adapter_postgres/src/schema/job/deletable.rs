@@ -1,4 +1,4 @@
-use clinvoice_adapter::Deletable;
+use clinvoice_adapter::{schema::columns::JobColumns, Deletable};
 use clinvoice_schema::{Id, Job};
 use sqlx::{Executor, Postgres, Result};
 
@@ -25,7 +25,7 @@ impl Deletable for PgJob
 		}
 
 		// TODO: use `for<'a> |e: &'a Job| e.id`
-		PgSchema::delete(connection, "jobs", entities.map(mapper)).await
+		PgSchema::delete::<_, _, JobColumns<char>>(connection, entities.map(mapper)).await
 	}
 }
 

@@ -87,9 +87,6 @@ where
 		self.push(';').build()
 	}
 
-	/// # Summary
-	///
-	/// Use [`ColumnsToSql::push_to`] on this query.
 	fn push_columns<T>(&mut self, columns: &T) -> &mut Self
 	where
 		T: ColumnsToSql,
@@ -162,9 +159,6 @@ where
 			.push_equijoin(table_ident, table_alias, left, right)
 	}
 
-	/// # Summary
-	///
-	/// Push a comma and then [`push_columns`](QueryBuilderExt::push_columns).
 	fn push_more_columns<T>(&mut self, columns: &T) -> &mut Self
 	where
 		T: ColumnsToSql,

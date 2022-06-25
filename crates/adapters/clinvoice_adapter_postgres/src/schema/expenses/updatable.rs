@@ -28,7 +28,7 @@ impl Updatable for PgExpenses
 		}
 
 		const COLUMNS: ExpenseColumns<&'static str> = ExpenseColumns::default();
-		PgSchema::update(&mut *connection, COLUMNS, "expenses", "X", |query| {
+		PgSchema::update(connection, COLUMNS, "expenses", "X", |query| {
 			query.push_values(peekable_entities, |mut q, e| {
 				q.push_bind(&e.category)
 					.push_bind(e.cost.amount.to_string())

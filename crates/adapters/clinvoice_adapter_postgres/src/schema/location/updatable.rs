@@ -128,12 +128,9 @@ mod tests
 
 		{
 			let mut transaction = connection.begin().await.unwrap();
-			PgLocation::update(
-				&mut transaction,
-				[chile.clone(), usa.clone(), earth.clone()].iter(),
-			)
-			.await
-			.unwrap();
+			PgLocation::update(&mut transaction, [&chile, &usa, &earth].into_iter())
+				.await
+				.unwrap();
 			transaction.commit().await.unwrap();
 		}
 

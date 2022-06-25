@@ -87,6 +87,7 @@ mod tests
 	use clinvoice_finance::Money;
 	use clinvoice_match::MatchJob;
 	use clinvoice_schema::{chrono::Utc, Invoice, InvoiceDate};
+	use futures::TryFutureExt;
 
 	use crate::{
 		fmt::DateTimeExt,
@@ -104,23 +105,21 @@ mod tests
 		)
 		.unwrap();
 
-		let organization =
-			PgOrganization::create(&connection, earth.clone(), "Some Organization".into())
-				.await
-				.unwrap();
-
-		let mut job = PgJob::create(
-			&connection,
-			organization,
-			None,
-			Utc::now(),
-			Duration::from_secs(900),
-			Default::default(),
-			Default::default(),
-			Default::default(),
-		)
-		.await
-		.unwrap();
+		let mut job = PgOrganization::create(&connection, earth, "Some Organization".into())
+			.and_then(|organization| {
+				PgJob::create(
+					&connection,
+					organization,
+					None,
+					Utc::now(),
+					Duration::from_secs(900),
+					Default::default(),
+					Default::default(),
+					Default::default(),
+				)
+			})
+			.await
+			.unwrap();
 
 		job.client.location = mars;
 		job.client.name = format!("Not {}", job.client.name);

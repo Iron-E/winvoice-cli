@@ -37,7 +37,7 @@ impl App
 	/// # Summary
 	///
 	/// Run the application and parse its provided arguments / flags.
-	pub async fn run<'err>(self, config: Config<'_, '_>) -> DynResult<'err, ()>
+	pub async fn run<'err>(self, config: Config) -> DynResult<'err, ()>
 	{
 		self.command.run(&config, &self.store).await
 	}

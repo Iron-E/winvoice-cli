@@ -142,7 +142,7 @@ impl Command
 	pub async fn run<'err, Db, EAdapter, JAdapter, LAdapter, OAdapter, TAdapter>(
 		self,
 		connection: Pool<Db>,
-		config: &Config<'_, '_>,
+		config: &Config,
 		delete: bool,
 		update: bool,
 	) -> DynResult<'err, ()>
@@ -164,14 +164,7 @@ impl Command
 			{
 				let results_view = input::util::employee::retrieve::<&str, _, EAdapter>(
 					&connection,
-					if default
-					{
-						config.employees.default_id
-					}
-					else
-					{
-						None
-					},
+					if default { config.employees.id } else { None },
 					"Query the `Employee` you are looking for",
 					false,
 				)
@@ -190,7 +183,7 @@ impl Command
 				if set_default
 				{
 					let mut new_config = config.clone();
-					new_config.employees.default_id = Some(
+					new_config.employees.id = Some(
 						if results_view.len() > 1
 						{
 							input::select_one(&results_view, "Which `Employee` should be the default?")?.id

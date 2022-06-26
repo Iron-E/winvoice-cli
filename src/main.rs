@@ -5,7 +5,7 @@ mod dyn_result;
 mod input;
 
 // PERF: we're using `std::fs` because the main function does not need asynchrony at this point.
-use std::{error::Error, fs, process};
+use std::fs;
 
 use app::App;
 use clinvoice_config::Config;
@@ -14,37 +14,17 @@ use structopt::StructOpt;
 
 /// # Summary
 ///
-/// Exit `clinvoice` with status code 1, printing some `error`.
-fn exit_with_err(error: impl Error) -> !
-{
-	if cfg!(debug_assertions)
-	{
-		panic!("{:?}", error)
-	}
-
-	eprintln!("\nERROR: {error}");
-	process::exit(1)
-}
-
-/// # Summary
-///
 /// The main method.
 #[tokio::main]
-async fn main()
+async fn main<'err>() -> DynResult<'err, ()>
 {
 	// Create a default user configuration if not already present.
-	#[allow(clippy::redundant_closure)]
-	Config::init().unwrap_or_else(|e| exit_with_err(e));
+	Config::init()?;
 
 	// Get the user configuration.
-	#[allow(clippy::redundant_closure)]
-	let config_bytes = fs::read(Config::path()).unwrap_or_else(|e| exit_with_err(e));
-	#[allow(clippy::redundant_closure)]
-	let config: Config = toml::from_slice(&config_bytes).unwrap_or_else(|e| exit_with_err(e));
+	let config_bytes = fs::read(Config::path())?;
+	let config: Config = toml::from_slice(&config_bytes)?;
 
 	// Run the CLInvoice application.
-	App::from_args()
-		.run(config)
-		.await
-		.unwrap_or_else(|e| exit_with_err(e.as_ref()));
+	App::from_args().run(config).await
 }

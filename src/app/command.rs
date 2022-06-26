@@ -1,6 +1,5 @@
 use clinvoice_config::{Config, Result as ConfigResult};
 use dialoguer::Editor;
-use futures::future;
 use structopt::StructOpt;
 
 use super::{init, Create, Retrieve, Time};
@@ -30,7 +29,7 @@ impl Command
 	/// # Summary
 	///
 	/// Edit the user's configuration file.
-	fn edit_config(config: &Config<'_, '_>) -> ConfigResult<()>
+	fn edit_config(config: &Config) -> ConfigResult<()>
 	{
 		let serialized = toml::to_string_pretty(config)?;
 		if let Some(edited) = Editor::new().extension(".toml").edit(&serialized)?
@@ -45,7 +44,7 @@ impl Command
 	/// # Summary
 	///
 	/// Run the application and parse its provided arguments / flags.
-	pub async fn run<'err>(self, config: &Config<'_, '_>, store_name: &str) -> DynResult<'err, ()>
+	pub async fn run(self, config: &Config, store_name: &str) -> DynResult<()>
 	{
 		let store = config
 			.get_store(store_name)
@@ -53,15 +52,7 @@ impl Command
 
 		match self
 		{
-			Self::Config =>
-			{
-				match Self::edit_config(config)
-				{
-					Ok(_) => future::ok(()),
-					Err(e) => future::err(e.into()),
-				}
-				.await
-			},
+			Self::Config => Self::edit_config(config).map_err(|e| e.into()),
 			Self::Create(cmd) =>
 			{
 				cmd.run(
@@ -73,7 +64,7 @@ impl Command
 			},
 			Self::Init => init::run(store).await,
 			Self::Retrieve(cmd) => cmd.run(config, store).await,
-			Self::Time(cmd) => cmd.run(config.employees.default_id, store).await,
+			Self::Time(cmd) => cmd.run(config.employees.id, store).await,
 		}
 	}
 }

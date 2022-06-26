@@ -1,8 +1,7 @@
 mod command;
 
-use clinvoice_adapter::{Adapters, Error as AdapterError, Store};
 use clinvoice_adapter_postgres::schema::PgTimesheet;
-use clinvoice_config::Config;
+use clinvoice_config::{Adapters, Config, Error, Store};
 use command::Command;
 use structopt::StructOpt;
 #[cfg(feature = "postgres")]
@@ -32,7 +31,7 @@ impl Retrieve
 	/// # Summary
 	///
 	/// Execute the constructed command.
-	pub async fn run<'err>(self, config: &Config<'_, '_>, store: &Store) -> DynResult<'err, ()>
+	pub async fn run<'err>(self, config: &Config, store: &Store) -> DynResult<'err, ()>
 	{
 		match store.adapter
 		{
@@ -54,7 +53,7 @@ impl Retrieve
 			// NOTE: this is allowed because there may be additional adapters added later, and I want
 			//       to define this behavior now.
 			#[allow(unreachable_patterns)]
-			_ => Err(AdapterError(store.adapter).into()),
+			_ => Err(Error::FeatureNotFound(store.adapter).into()),
 		}
 	}
 }

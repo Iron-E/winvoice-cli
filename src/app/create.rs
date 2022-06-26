@@ -2,11 +2,9 @@ use core::time::Duration as StdDuration;
 
 use clinvoice_adapter::{
 	schema::{EmployeeAdapter, JobAdapter, LocationAdapter, OrganizationAdapter},
-	Adapters,
 	Deletable,
-	Error as FeatureNotFoundError,
-	Store,
 };
+use clinvoice_config::{Adapters, Error, Store};
 use clinvoice_schema::{
 	chrono::{Local, TimeZone},
 	Currency,
@@ -336,7 +334,7 @@ impl Create
 			// NOTE: this is allowed because there may be additional adapters added later, and I want
 			//       to define this behavior now.
 			#[allow(unreachable_patterns)]
-			_ => Err(FeatureNotFoundError(store.adapter).into()),
+			_ => Err(Error::FeatureNotFound(store.adapter).into()),
 		}
 	}
 }

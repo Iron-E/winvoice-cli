@@ -1,4 +1,5 @@
-use clinvoice_adapter::{Adapters, Error as AdapterError, Initializable, Store};
+use clinvoice_adapter::Initializable;
+use clinvoice_config::{Adapters, Error, Store};
 #[cfg(feature = "postgres")]
 use {
 	clinvoice_adapter_postgres::PgSchema,
@@ -24,7 +25,7 @@ pub async fn run<'err>(store: &Store) -> DynResult<'err, ()>
 		// NOTE: this is allowed because there may be additional adapters added later, and I want
 		//       to define this behavior now.
 		#[allow(unreachable_patterns)]
-		_ => return Err(AdapterError(store.adapter).into()),
+		_ => return Err(Error::FeatureNotFound(store.adapter).into()),
 	};
 
 	Ok(())

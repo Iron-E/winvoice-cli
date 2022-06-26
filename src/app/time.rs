@@ -1,6 +1,6 @@
 mod command;
 
-use clinvoice_adapter::{Adapters, Error as AdapterError, Store};
+use clinvoice_config::{Adapters, Error, Store};
 use clinvoice_schema::Id;
 use command::Command;
 use structopt::StructOpt;
@@ -63,7 +63,7 @@ impl Time
 			// NOTE: this is allowed because there may be additional adapters added later, and I want
 			//       to define this behavior now.
 			#[allow(unreachable_patterns)]
-			_ => Err(AdapterError(store.adapter).into()),
+			_ => Err(Error::FeatureNotFound(store.adapter).into()),
 		}
 	}
 }

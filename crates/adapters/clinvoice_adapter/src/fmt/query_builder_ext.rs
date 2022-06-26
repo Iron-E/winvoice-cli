@@ -33,7 +33,7 @@ pub trait QueryBuilderExt<'args>
 		TRight: Display,
 		TTable: TableToSql,
 	{
-		self.push_equijoin(TTable::table_name(), TTable::table_alias(), left, right)
+		self.push_equijoin(TTable::table_name(), TTable::default_alias(), left, right)
 	}
 
 	/// # Summary
@@ -43,7 +43,7 @@ pub trait QueryBuilderExt<'args>
 	where
 		T: TableToSql,
 	{
-		self.push_from(T::table_name(), T::table_alias())
+		self.push_from(T::table_name(), T::default_alias())
 	}
 
 	/// # Summary

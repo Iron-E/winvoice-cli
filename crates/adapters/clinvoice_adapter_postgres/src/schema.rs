@@ -91,7 +91,7 @@ impl PgSchema
 	where
 		C: ColumnsToSql,
 	{
-		let alias = C::table_alias();
+		let alias = C::default_alias();
 		let mut query = QueryBuilder::new(sql::UPDATE);
 
 		query.push(As(C::table_name(), alias)).push(sql::SET);

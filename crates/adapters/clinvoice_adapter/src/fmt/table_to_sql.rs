@@ -1,3 +1,6 @@
+/// # Summary
+///
+/// Defines attributes of a table which is part of the CLInvoice schema.
 pub trait TableToSql
 {
 	/// # Summary
@@ -7,7 +10,7 @@ pub trait TableToSql
 	/// # Warnings
 	///
 	/// * Must be unique among other implementors of [`TableToSql`].
-	fn table_alias() -> char;
+	fn default_alias() -> char;
 
 	/// # Summary
 	///

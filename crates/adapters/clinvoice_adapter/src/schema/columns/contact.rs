@@ -1,7 +1,7 @@
 mod columns_to_sql;
 mod table_to_sql;
 
-use crate::fmt::{As, TypeCast, WithIdentifier};
+use crate::fmt::{As, TableToSql, TypeCast, WithIdentifier};
 
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct ContactColumns<T>
@@ -28,6 +28,14 @@ impl<T> ContactColumns<T>
 			other: As(self.other, aliased.other),
 			phone: As(self.phone, aliased.phone),
 		}
+	}
+
+	/// # Summary
+	///
+	/// Add a [scope](Self::scope) using the [default alias](TableToSql::default_alias)
+	pub fn default_scope(self) -> ContactColumns<WithIdentifier<T, char>>
+	{
+		self.scope(Self::default_alias())
 	}
 
 	/// # Summary

@@ -1,7 +1,7 @@
 mod columns_to_sql;
 mod table_to_sql;
 
-use crate::fmt::{As, TypeCast, WithIdentifier};
+use crate::fmt::{As, TableToSql, TypeCast, WithIdentifier};
 
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct TimesheetColumns<T>
@@ -30,6 +30,14 @@ impl<T> TimesheetColumns<T>
 			time_end: As(self.time_end, aliased.time_end),
 			work_notes: As(self.work_notes, aliased.work_notes),
 		}
+	}
+
+	/// # Summary
+	///
+	/// Add a [scope](Self::scope) using the [default alias](TableToSql::default_alias)
+	pub fn default_scope(self) -> TimesheetColumns<WithIdentifier<T, char>>
+	{
+		self.scope(Self::default_alias())
 	}
 
 	/// # Summary

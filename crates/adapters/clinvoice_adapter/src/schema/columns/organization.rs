@@ -1,7 +1,7 @@
 mod columns_to_sql;
 mod table_to_sql;
 
-use crate::fmt::{As, TypeCast, WithIdentifier};
+use crate::fmt::{As, TableToSql, TypeCast, WithIdentifier};
 
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct OrganizationColumns<T>
@@ -27,6 +27,14 @@ impl<T> OrganizationColumns<T>
 			location_id: As(self.location_id, aliased.location_id),
 			name: As(self.name, aliased.name),
 		}
+	}
+
+	/// # Summary
+	///
+	/// Add a [scope](Self::scope) using the [default alias](TableToSql::default_alias)
+	pub fn default_scope(self) -> OrganizationColumns<WithIdentifier<T, char>>
+	{
+		self.scope(Self::default_alias())
 	}
 
 	/// # Summary

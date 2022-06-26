@@ -3,7 +3,7 @@ use crate::fmt::TableToSql;
 
 impl<T> TableToSql for ExpenseColumns<T>
 {
-	fn table_alias() -> char
+	fn default_alias() -> char
 	{
 		'X'
 	}

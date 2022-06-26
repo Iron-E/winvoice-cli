@@ -1,7 +1,7 @@
 mod columns_to_sql;
 mod table_to_sql;
 
-use crate::fmt::{As, TypeCast, WithIdentifier};
+use crate::fmt::{As, TableToSql, TypeCast, WithIdentifier};
 
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct ExpenseColumns<T>
@@ -28,6 +28,14 @@ impl<T> ExpenseColumns<T>
 			id: As(self.id, aliased.id),
 			timesheet_id: As(self.timesheet_id, aliased.timesheet_id),
 		}
+	}
+
+	/// # Summary
+	///
+	/// Add a [scope](Self::scope) using the [default alias](TableToSql::default_alias)
+	pub fn default_scope(self) -> ExpenseColumns<WithIdentifier<T, char>>
+	{
+		self.scope(Self::default_alias())
 	}
 
 	/// # Summary

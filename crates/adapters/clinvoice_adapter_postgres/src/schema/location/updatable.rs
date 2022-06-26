@@ -139,7 +139,8 @@ mod tests
 		})
 		.await
 		.unwrap()
-		.remove(0);
+		.pop()
+		.unwrap();
 
 		let usa_db = PgLocation::retrieve(&connection, &MatchLocation {
 			id: usa.id.into(),
@@ -147,7 +148,8 @@ mod tests
 		})
 		.await
 		.unwrap()
-		.remove(0);
+		.pop()
+		.unwrap();
 
 		assert_eq!(chile.id, chile_db.id);
 		assert_eq!(chile.name, chile_db.name);

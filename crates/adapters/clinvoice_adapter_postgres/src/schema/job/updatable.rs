@@ -148,7 +148,8 @@ mod tests
 		})
 		.await
 		.unwrap()
-		.remove(0);
+		.pop()
+		.unwrap();
 
 		assert_eq!(job.client, db_job.client);
 		assert_eq!(job.date_close.pg_sanitize(), db_job.date_close);

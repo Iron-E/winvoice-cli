@@ -148,7 +148,8 @@ mod tests
 		)
 		.await
 		.unwrap()
-		.remove(0);
+		.pop()
+		.unwrap();
 
 		timesheet.employee = employee2;
 		timesheet.job.client.location = mars;
@@ -182,7 +183,8 @@ mod tests
 		})
 		.await
 		.unwrap()
-		.remove(0);
+		.pop()
+		.unwrap();
 
 		assert_eq!(timesheet.id, db_timesheet.id);
 		assert_eq!(timesheet.employee, db_timesheet.employee);

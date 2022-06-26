@@ -79,7 +79,8 @@ mod tests
 		})
 		.await
 		.unwrap()
-		.remove(0);
+		.pop()
+		.unwrap();
 
 		assert_eq!(employee, db_employee);
 	}

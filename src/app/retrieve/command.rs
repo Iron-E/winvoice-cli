@@ -81,10 +81,7 @@ impl Command
 	/// Delete some `entities`
 	///
 	/// `delete_entity` determines how the entities are deleted.
-	async fn delete<'err, D, Db, Entity>(
-		connection: &Pool<Db>,
-		entities: &[Entity],
-	) -> DynResult<'err, ()>
+	async fn delete<D, Db, Entity>(connection: &Pool<Db>, entities: &[Entity]) -> DynResult<()>
 	where
 		D: Deletable<Db = Db, Entity = Entity>,
 		Db: Database,
@@ -101,10 +98,7 @@ impl Command
 	/// Edit some `entities`, and then update them.
 	///
 	/// `update_entity` determines how the entities are updated.
-	async fn update<'err, Db, Entity, U>(
-		connection: &Pool<Db>,
-		entities: &[Entity],
-	) -> DynResult<'err, ()>
+	async fn update<Db, Entity, U>(connection: &Pool<Db>, entities: &[Entity]) -> DynResult<()>
 	where
 		Db: Database,
 		Entity: Clone + DeserializeOwned + Display + RestorableSerde + Serialize + Sync,
@@ -139,13 +133,13 @@ impl Command
 		Ok(())
 	}
 
-	pub async fn run<'err, Db, EAdapter, JAdapter, LAdapter, OAdapter, TAdapter>(
+	pub async fn run<Db, EAdapter, JAdapter, LAdapter, OAdapter, TAdapter>(
 		self,
 		connection: Pool<Db>,
 		config: &Config,
 		delete: bool,
 		update: bool,
-	) -> DynResult<'err, ()>
+	) -> DynResult<()>
 	where
 		Db: Database,
 		EAdapter: Deletable<Db = Db> + EmployeeAdapter,
@@ -300,7 +294,7 @@ impl Command
 					let conn = &connection;
 					let exchange_rates = exchange_rates.as_ref();
 					// WARN: this `let` seems redundant, but the "type needs to be known at this point"
-					let export_result: DynResult<'_, _> = stream::iter(to_export.into_iter().map(Ok))
+					let export_result: DynResult<_> = stream::iter(to_export.into_iter().map(Ok))
 						.try_for_each_concurrent(None, |job| async move {
 							let timesheets = TAdapter::retrieve(conn, &MatchTimesheet {
 								job: MatchJob {

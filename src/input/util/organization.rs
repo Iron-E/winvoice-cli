@@ -21,11 +21,11 @@ use crate::{input, DynResult};
 ///
 /// [P_retrieve]: clinvoice_adapter::schema::OrganizationAdapter::retrieve
 /// [organization]: clinvoice_schema::Organization
-pub async fn retrieve<'err, D, Db, OAdapter>(
+pub async fn retrieve<D, Db, OAdapter>(
 	connection: &Pool<Db>,
 	prompt: D,
 	retry_on_empty: bool,
-) -> DynResult<'err, Vec<Organization>>
+) -> DynResult<Vec<Organization>>
 where
 	D: Display,
 	Db: Database,

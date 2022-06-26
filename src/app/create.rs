@@ -112,12 +112,12 @@ pub enum Create
 
 impl Create
 {
-	async fn create<'err, Db, EAdapter, JAdapter, LAdapter, OAdapter>(
+	async fn create<Db, EAdapter, JAdapter, LAdapter, OAdapter>(
 		self,
 		connection: Pool<Db>,
 		default_currency: Currency,
 		default_increment: StdDuration,
-	) -> DynResult<'err, ()>
+	) -> DynResult<()>
 	where
 		Db: Database,
 		EAdapter: Deletable<Db = Db> + EmployeeAdapter,
@@ -183,11 +183,11 @@ impl Create
 		}
 	}
 
-	async fn create_employee<'err, Db, EAdapter, LAdapter, OAdapter>(
+	async fn create_employee<Db, EAdapter, LAdapter, OAdapter>(
 		connection: &Pool<Db>,
 		name: String,
 		title: String,
-	) -> DynResult<'err, ()>
+	) -> DynResult<()>
 	where
 		Db: Database,
 		EAdapter: Deletable<Db = Db> + EmployeeAdapter,
@@ -208,17 +208,17 @@ impl Create
 		)?;
 
 		let employee_status = input::text(None, "What is the status of the employee?")?;
-		EAdapter::create(connection, name, organization, employee_status, title).await?;
+		EAdapter::create(connection, name, employee_status, title).await?;
 		Ok(())
 	}
 
 	#[allow(clippy::type_complexity)]
-	async fn create_job<'err, Db, JAdapter, OAdapter>(
+	async fn create_job<Db, JAdapter, OAdapter>(
 		connection: &Pool<Db>,
 		hourly_rate: Money,
 		increment: StdDuration,
 		year_month_day_hour_minute: Option<(i32, u32, u32, Option<(u32, u32)>)>,
-	) -> DynResult<'err, ()>
+	) -> DynResult<()>
 	where
 		Db: Database,
 		JAdapter: Deletable<Db = Db> + JobAdapter,
@@ -283,10 +283,10 @@ impl Create
 		Ok(())
 	}
 
-	async fn create_organization<'err, Db, LAdapter, OAdapter>(
+	async fn create_organization<Db, LAdapter, OAdapter>(
 		connection: &Pool<Db>,
 		name: String,
-	) -> DynResult<'err, ()>
+	) -> DynResult<()>
 	where
 		Db: Database,
 		LAdapter: Deletable<Db = Db> + LocationAdapter,
@@ -304,17 +304,17 @@ impl Create
 			input::select_one(&location_views, format!("Select a location for {name}"))?;
 		let contact_info = input::util::contact::menu::<_, LAdapter>(connection).await?;
 
-		OAdapter::create(connection, contact_info, selected_view, name).await?;
+		OAdapter::create(connection, selected_view, name).await?;
 
 		Ok(())
 	}
 
-	pub async fn run<'err>(
+	pub async fn run(
 		self,
 		default_currency: Currency,
 		default_increment: StdDuration,
 		store: &Store,
-	) -> DynResult<'err, ()>
+	) -> DynResult<()>
 	{
 		match store.adapter
 		{

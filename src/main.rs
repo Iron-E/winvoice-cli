@@ -16,7 +16,7 @@ use structopt::StructOpt;
 ///
 /// The main method.
 #[tokio::main]
-async fn main<'err>() -> DynResult<'err, ()>
+async fn main() -> DynResult<()>
 {
 	// Create a default user configuration if not already present.
 	Config::init()?;

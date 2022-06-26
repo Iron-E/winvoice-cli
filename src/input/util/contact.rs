@@ -15,10 +15,10 @@ use crate::{input, DynResult};
 /// # Errors
 ///
 /// Will error whenever [`input::select_one`] or [`input::text`] does.
-async fn add_menu<'err, Db, LAdapter>(
+async fn add_menu<Db, LAdapter>(
 	connection: &Pool<Db>,
 	contact_info: &mut Vec<(bool, ContactKind, String)>,
-) -> DynResult<'err, ()>
+) -> DynResult<()>
 where
 	Db: Database,
 	LAdapter: Deletable<Db = Db> + LocationAdapter,
@@ -128,10 +128,10 @@ fn delete_menu(contact_info: &mut Vec<(bool, ContactKind, String)>) -> input::Re
 ///
 /// Will error whenever [`input::edit_and_restore`] and [`input::select_one`] does,
 /// but will ignore [`input::Error::NotEdited`].
-async fn edit_menu<'err, Db, LAdapter>(
+async fn edit_menu<Db, LAdapter>(
 	connection: &Pool<Db>,
 	contact_info: &mut Vec<(bool, ContactKind, String)>,
-) -> DynResult<'err, ()>
+) -> DynResult<()>
 where
 	Db: Database,
 	LAdapter: Deletable<Db = Db> + LocationAdapter,
@@ -231,9 +231,9 @@ where
 /// If a user manages to select an action (e.g. `ADD`, `CONTINUE`, `DELETE`) which is unaccounted
 /// for. This is __theoretically not possible__ but must be present to account for the case of an
 /// unrecoverable state of the program.
-pub async fn menu<'err, Db, LAdapter>(
+pub async fn menu<Db, LAdapter>(
 	connection: &Pool<Db>,
-) -> DynResult<'err, Vec<(bool, ContactKind, String)>>
+) -> DynResult<Vec<(bool, ContactKind, String)>>
 where
 	Db: Database,
 	LAdapter: Deletable<Db = Db> + LocationAdapter,

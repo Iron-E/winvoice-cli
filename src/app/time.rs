@@ -32,11 +32,7 @@ impl Time
 	/// # Summary
 	///
 	/// Execute the constructed command.
-	pub async fn run<'err>(
-		self,
-		default_employee_id: Option<Id>,
-		store: &Store,
-	) -> DynResult<'err, ()>
+	pub async fn run(self, default_employee_id: Option<Id>, store: &Store) -> DynResult<()>
 	{
 		match store.adapter
 		{

@@ -13,12 +13,12 @@ use crate::{input, DynResult};
 /// # Errors
 ///
 /// Will error whenever [`input::select_one`] or [`input::text`] does.
-async fn add_menu<'err, Db, XAdapter>(
+async fn add_menu<Db, XAdapter>(
 	connection: &Pool<Db>,
 	expenses: &mut Vec<Expense>,
 	default_currency: Currency,
 	timesheet_id: Id,
-) -> DynResult<'err, ()>
+) -> DynResult<()>
 where
 	Db: Database,
 	XAdapter: Deletable<Db = Db> + ExpensesAdapter,
@@ -63,12 +63,12 @@ where
 /// If a user manages to select an action (e.g. `ADD`, `CONTINUE`, `DELETE`) which is unaccounted
 /// for. This is __theoretically not possible__ but must be present to account for the case of an
 /// unrecoverable state of the program.
-pub async fn menu<'err, Db, XAdapter>(
+pub async fn menu<Db, XAdapter>(
 	connection: &Pool<Db>,
 	expenses: &mut Vec<Expense>,
 	default_currency: Currency,
 	timesheet_id: Id,
-) -> DynResult<'err, ()>
+) -> DynResult<()>
 where
 	Db: Database,
 	XAdapter: Deletable<Db = Db> + ExpensesAdapter,
@@ -99,10 +99,10 @@ where
 /// # Errors
 ///
 /// Will error whenever [`input::select_one`] does.
-async fn delete_menu<'err, Db, XAdapter>(
+async fn delete_menu<Db, XAdapter>(
 	connection: &Pool<Db>,
 	expenses: &mut Vec<Expense>,
-) -> DynResult<'err, ()>
+) -> DynResult<()>
 where
 	Db: Database,
 	XAdapter: Deletable<Db = Db> + ExpensesAdapter,
@@ -138,10 +138,7 @@ where
 ///
 /// Will error whenever [`input::edit_and_restore`] and [`input::select_one`] does,
 /// but will ignore [`input::Error::NotEdited`].
-async fn edit_menu<'err, Db, XAdapter>(
-	connection: &Pool<Db>,
-	expenses: &mut [Expense],
-) -> DynResult<'err, ()>
+async fn edit_menu<Db, XAdapter>(connection: &Pool<Db>, expenses: &mut [Expense]) -> DynResult<()>
 where
 	Db: Database,
 	XAdapter: Deletable<Db = Db> + ExpensesAdapter,

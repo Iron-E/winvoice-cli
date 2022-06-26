@@ -43,11 +43,11 @@ impl Command
 		Ok(())
 	}
 
-	async fn stop<'err, Db, TAdapter, XAdapter>(
+	async fn stop<Db, TAdapter, XAdapter>(
 		connection: &Pool<Db>,
 		default_employee_id: Option<Id>,
 		job: Job,
-	) -> DynResult<'err, ()>
+	) -> DynResult<()>
 	where
 		Db: Database,
 		TAdapter: Deletable<Db = Db> + TimesheetAdapter,
@@ -102,11 +102,11 @@ impl Command
 		Ok(())
 	}
 
-	pub async fn run<'err, Db, EAdapter, JAdapter, TAdapter, XAdapter>(
+	pub async fn run<Db, EAdapter, JAdapter, TAdapter, XAdapter>(
 		&self,
 		connection: Pool<Db>,
 		default_employee_id: Option<Id>,
-	) -> DynResult<'err, ()>
+	) -> DynResult<()>
 	where
 		Db: Database,
 		EAdapter: Deletable<Db = Db> + EmployeeAdapter,

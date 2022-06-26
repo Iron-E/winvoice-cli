@@ -21,11 +21,11 @@ use crate::{input, DynResult};
 ///
 /// [L_retrieve]: clinvoice_adapter::schema::LocationAdapter::retrieve
 /// [location]: clinvoice_schema::Location
-pub async fn retrieve<'err, D, Db, LAdapter>(
+pub async fn retrieve<D, Db, LAdapter>(
 	connection: &Pool<Db>,
 	prompt: D,
 	retry_on_empty: bool,
-) -> DynResult<'err, Vec<Location>>
+) -> DynResult<Vec<Location>>
 where
 	D: Display,
 	Db: Database,
@@ -61,11 +61,11 @@ where
 ///
 /// [L_retrieve]: clinvoice_adapter::schema::LocationAdapter::retrieve
 /// [location]: clinvoice_schema::Location
-pub async fn select_one<'err, D, Db, LAdapter>(
+pub async fn select_one<D, Db, LAdapter>(
 	connection: &Pool<Db>,
 	prompt: D,
 	retry_on_empty: bool,
-) -> DynResult<'err, Location>
+) -> DynResult<Location>
 where
 	D: Display,
 	Db: Database,

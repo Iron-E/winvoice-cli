@@ -31,7 +31,7 @@ impl Retrieve
 	/// # Summary
 	///
 	/// Execute the constructed command.
-	pub async fn run<'err>(self, config: &Config, store: &Store) -> DynResult<'err, ()>
+	pub async fn run(self, config: &Config, store: &Store) -> DynResult<()>
 	{
 		match store.adapter
 		{

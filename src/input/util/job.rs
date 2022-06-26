@@ -21,11 +21,11 @@ use crate::{input, DynResult};
 ///
 /// [L_retrieve]: clinvoice_adapter::schema::LocationAdapter::retrieve
 /// [location]: clinvoice_schema::Location
-pub async fn retrieve<'err, D, Db, JAdapter>(
+pub async fn retrieve<D, Db, JAdapter>(
 	connection: &Pool<Db>,
 	prompt: D,
 	retry_on_empty: bool,
-) -> DynResult<'err, Vec<Job>>
+) -> DynResult<Vec<Job>>
 where
 	D: Display,
 	Db: Database,

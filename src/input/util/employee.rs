@@ -21,12 +21,12 @@ use crate::{input, DynResult};
 ///
 /// [L_retrieve]: clinvoice_adapter::schema::EmployeeAdapter::retrieve
 /// [location]: clinvoice_schema::Employee
-pub async fn retrieve<'err, D, Db, EAdapter>(
+pub async fn retrieve<D, Db, EAdapter>(
 	connection: &Pool<Db>,
 	default_id: Option<Id>,
 	prompt: D,
 	retry_on_empty: bool,
-) -> DynResult<'err, Vec<Employee>>
+) -> DynResult<Vec<Employee>>
 where
 	D: Display,
 	Db: Database,

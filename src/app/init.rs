@@ -11,7 +11,7 @@ use crate::DynResult;
 /// # Summary
 ///
 /// Execute the constructed command.
-pub async fn run<'err>(store: &Store) -> DynResult<'err, ()>
+pub async fn run(store: &Store) -> DynResult<()>
 {
 	match store.adapter
 	{

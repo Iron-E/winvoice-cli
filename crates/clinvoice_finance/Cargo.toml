@@ -1,7 +1,7 @@
 # See https://doc.rust-lang.org/cargo/reference/manifest.html
 [package]
 name = "clinvoice_finance"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["Iron-E <code.iron.e@gmail.com>"]
 description = "Structures for dealing with currencies and conversions between currencies for CLInvoice"
 
@@ -18,7 +18,7 @@ futures = "0.3"
 zip = "0.5"
 
 # CLInvoice
-clinvoice_error = {path="../clinvoice_error", version="0.2"}
+clinvoice_error = {path="../clinvoice_error", version="0.3"}
 
 # Currency
 rust_decimal = "1"

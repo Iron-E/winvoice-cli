@@ -18,13 +18,13 @@ futures = "0.3"
 tokio = {features=["fs", "macros", "rt-multi-thread"], version="1"}
 
 # CLInvoice
-clinvoice_adapter = {path='crates/adapters/clinvoice_adapter', version="0.9"}
+clinvoice_adapter = {path='crates/adapters/clinvoice_adapter', version="0.10"}
 clinvoice_adapter_postgres = {path='crates/adapters/clinvoice_adapter_postgres', optional=true, version="0.1"}
-clinvoice_config = {path='crates/clinvoice_config', version="0.3"}
-clinvoice_error = {path='crates/clinvoice_error', version="0.2"}
-clinvoice_finance = {path='crates/clinvoice_finance', version="0.2"}
-clinvoice_match = {path='crates/clinvoice_match', features=["serde_support"], version="0.2"}
-clinvoice_schema = {path='crates/clinvoice_schema', version="0.6"}
+clinvoice_config = {path='crates/clinvoice_config', version="0.4"}
+clinvoice_error = {path='crates/clinvoice_error', version="0.3"}
+clinvoice_finance = {path='crates/clinvoice_finance', version="0.3"}
+clinvoice_match = {path='crates/clinvoice_match', features=["serde_support"], version="0.3"}
+clinvoice_schema = {path='crates/clinvoice_schema', version="0.7"}
 
 # Database
 sqlx = {features=["runtime-tokio-rustls", "tls"], version="0.5"}

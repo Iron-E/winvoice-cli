@@ -345,7 +345,7 @@ impl WriteWhereClause<Postgres, &MatchSet<MatchExpense>> for PgSchema
 			MatchSet::Contains(match_expense) =>
 			{
 				const COLUMNS: ExpenseColumns<&'static str> = ExpenseColumns::default();
-				let subquery_ident = SnakeCase::from((ident, "2"));
+				let subquery_ident = SnakeCase::from((ident, 2));
 
 				query
 					.push(context)

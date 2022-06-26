@@ -20,7 +20,7 @@ where
 	/// Generate an SQL `WHERE` clause for the `ident` specified, and append it to the existing
 	/// `query` after [displaying](Display) the `context`.
 	///
-	/// * Depending on implementation, `ident` must either be the `ident` of a `FROM`/`JOIN` (e.g. "P", "") or some column of a table that should be queried (e.g. "P.id", "id").
+	/// * Depending on implementation, `ident` must either be the alias of a `FROM`/`JOIN` (e.g. 'P', "") or some column of a table that should be queried (e.g. "P.id", "id").
 	///
 	/// # Return
 	///

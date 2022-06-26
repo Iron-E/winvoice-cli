@@ -96,7 +96,7 @@ impl PgSchema
 
 		query.push(As(C::table_name(), alias)).push(sql::SET);
 
-		let values_alias = SnakeCase::from((alias, "V"));
+		let values_alias = SnakeCase::from((alias, 'V'));
 		columns.push_set_to(&mut query, values_alias);
 
 		query.push(sql::FROM).push('(');

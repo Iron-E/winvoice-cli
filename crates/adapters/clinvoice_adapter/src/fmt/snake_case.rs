@@ -22,7 +22,7 @@ use core::fmt::Display;
 /// use clinvoice_adapter::fmt::SnakeCase;
 ///
 /// /* Scenario 1: Eager, very bad */
-/// let job_alias = "J";
+/// let job_alias = 'J';
 /// let job_client_alias = format!("{job_alias}_O"); // allocation
 /// let job_client_location_alias = format!("{job_client_alias}_L"); // allocation
 ///
@@ -30,9 +30,9 @@ use core::fmt::Display;
 /// // which are just getting pushed to an already allocated String.
 ///
 /// /* Scenario 2: Lazy, very good */
-/// let job_alias_2 = SnakeCase::from("J");
-/// let job_client_alias_2 = job_alias.push("O");
-/// let job_client_location_alias_2 = job_client_alias.push("L");
+/// let job_alias_2 = SnakeCase::from('J');
+/// let job_client_alias_2 = job_alias.push('O');
+/// let job_client_location_alias_2 = job_client_alias.push('L');
 ///
 /// // No allocations up until this point
 /// assert_eq!(job_alias, &job_alias_2.to_string());

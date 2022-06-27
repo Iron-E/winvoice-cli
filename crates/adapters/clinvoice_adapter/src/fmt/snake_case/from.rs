@@ -2,10 +2,9 @@ use core::fmt::Display;
 
 use super::SnakeCase;
 
-impl<T, Unused> From<T> for SnakeCase<T, Unused>
+impl<T> From<T> for SnakeCase<T, &'static str>
 where
 	T: Display,
-	Unused: Display,
 {
 	fn from(head: T) -> Self
 	{

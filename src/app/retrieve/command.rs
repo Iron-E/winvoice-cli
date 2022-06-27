@@ -294,7 +294,11 @@ impl Command
 					};
 
 					let match_all_contacts = Default::default();
-					let contact_information_fut = CAdapter::retrieve(&connection, &match_all_contacts);
+					let contact_information_fut = CAdapter::retrieve(&connection, &match_all_contacts)
+						.map_ok(|mut vec| {
+							vec.sort_by(|lhs, rhs| lhs.label.cmp(&rhs.label));
+							vec
+						});
 
 					let default_organization_id = config.employees.organization_id.ok_or_else(|| {
 						"You must specify the `Organization` you work for before exporting `Job`s."
@@ -328,10 +332,10 @@ impl Command
 							let conn = &connection;
 							let exchange_rates_ref = exchange_rates.as_ref();
 							let org = &default_organization;
-							let contacts = &mut contact_information;
+							let contacts = &contact_information;
 
 							async move {
-								let timesheets = TAdapter::retrieve(conn, &MatchTimesheet {
+								let mut timesheets = TAdapter::retrieve(conn, &MatchTimesheet {
 									job: MatchJob {
 										id: job.id.into(),
 										..Default::default()
@@ -339,6 +343,7 @@ impl Command
 									..Default::default()
 								})
 								.await?;
+								timesheets.sort_by(|lhs, rhs| lhs.time_begin.cmp(&rhs.time_begin));
 
 								fs::write(
 									format!("{}--{}.md", job.client.name.replace(' ', "-"), job.id),

@@ -31,11 +31,11 @@ use core::fmt::Display;
 ///
 /// /* Scenario 2: Lazy, very good */
 /// let job_alias_2 = SnakeCase::from('J');
-/// let job_client_alias_2 = job_alias.push('O');
-/// let job_client_location_alias_2 = job_client_alias.push('L');
+/// let job_client_alias_2 = job_alias_2.push('O');
+/// let job_client_location_alias_2 = job_client_alias_2.push('L');
 ///
 /// // No allocations up until this point
-/// assert_eq!(job_alias, &job_alias_2.to_string());
+/// assert_eq!(job_alias.to_string(), job_alias_2.to_string());
 /// assert_eq!(job_client_alias, job_client_alias_2.to_string());
 /// assert_eq!(
 /// 	job_client_location_alias,
@@ -73,7 +73,7 @@ where
 	/// ```rust
 	/// use clinvoice_adapter::fmt::SnakeCase;
 	///
-	/// assert_eq!(&SnakeCase::from(("foo", "bar")).to_string(), "foo_bar");
+	/// assert_eq!(&SnakeCase::from("foo").push("bar").to_string(), "foo_bar",);
 	/// ```
 	pub const fn push<T>(self, token: T) -> SnakeCase<Self, T>
 	where
@@ -92,19 +92,19 @@ where
 	/// use clinvoice_adapter::fmt::SnakeCase;
 	///
 	/// let foo = SnakeCase::from("foo");
-	/// assert_eq!(&foo.slice_end(), None);
+	/// assert_eq!(foo.slice_end(), None::<(_, _)>);
 	///
 	/// let foo_bar = foo.push("bar");
-	/// if let Some(foo_bar_left, foo_bar_right) = foo_bar.slice_end()
+	/// if let Some((foo_bar_left, foo_bar_right)) = foo_bar.slice_end()
 	/// {
 	/// 	assert_eq!(&foo_bar_left.to_string(), "foo");
-	/// 	assert_eq!(&foo_bar_right, "bar");
+	/// 	assert_eq!(*foo_bar_right, "bar");
 	/// }
 	///
-	/// if let Some(foo_bar_asdf_left, foo_bar_asdf_right) = foo_bar.push("asdf").slice_end()
+	/// if let Some((foo_bar_asdf_left, foo_bar_asdf_right)) = foo_bar.push("asdf").slice_end()
 	/// {
-	/// 	assert_eq!(&foo_bar_left.to_string(), "foo_bar");
-	/// 	assert_eq!(&foo_bar_right, "asdf");
+	/// 	assert_eq!(&foo_bar_asdf_left.to_string(), "foo_bar");
+	/// 	assert_eq!(*foo_bar_asdf_right, "asdf");
 	/// }
 	/// ```
 	pub const fn slice_end(&self) -> Option<(&TLeft, &TRight)>

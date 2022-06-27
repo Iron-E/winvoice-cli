@@ -1,13 +1,21 @@
 use core::fmt::Display;
+use std::error::Error;
 
 use clinvoice_adapter::{
-	schema::{EmployeeAdapter, JobAdapter, LocationAdapter, OrganizationAdapter, TimesheetAdapter},
+	schema::{
+		ContactInfoAdapter,
+		EmployeeAdapter,
+		JobAdapter,
+		LocationAdapter,
+		OrganizationAdapter,
+		TimesheetAdapter,
+	},
 	Deletable,
 	Updatable,
 };
 use clinvoice_config::Config;
 use clinvoice_finance::ExchangeRates;
-use clinvoice_match::{MatchJob, MatchTimesheet};
+use clinvoice_match::{MatchJob, MatchOrganization, MatchTimesheet};
 use clinvoice_schema::{chrono::Utc, Currency, Location, RestorableSerde};
 use futures::{
 	stream::{self, TryStreamExt},
@@ -133,7 +141,7 @@ impl Command
 		Ok(())
 	}
 
-	pub async fn run<Db, EAdapter, JAdapter, LAdapter, OAdapter, TAdapter>(
+	pub async fn run<Db, CAdapter, EAdapter, JAdapter, LAdapter, OAdapter, TAdapter>(
 		self,
 		connection: Pool<Db>,
 		config: &Config,
@@ -142,6 +150,7 @@ impl Command
 	) -> DynResult<()>
 	where
 		Db: Database,
+		CAdapter: Deletable<Db = Db> + ContactInfoAdapter,
 		EAdapter: Deletable<Db = Db> + EmployeeAdapter,
 		JAdapter: Deletable<Db = Db> + JobAdapter,
 		LAdapter: Deletable<Db = Db> + LocationAdapter,
@@ -273,48 +282,74 @@ impl Command
 
 				if let Some(e) = export
 				{
-					let exchange_rates_fut = if e == Default::default()
-					{
-						None
-					}
-					else
-					{
-						Some(ExchangeRates::new())
+					let exchange_rates_fut = async {
+						if e == Default::default()
+						{
+							Ok(None)
+						}
+						else
+						{
+							ExchangeRates::new().await.map(Some)
+						}
 					};
+
+					let match_all_contacts = Default::default();
+					let contact_information_fut = CAdapter::retrieve(&connection, &match_all_contacts);
+
+					let default_organization_id = config.employees.organization_id.ok_or_else(|| {
+						"You must specify the `Organization` you work for before exporting `Job`s."
+							.to_string()
+					})?;
+					let default_organization = OAdapter::retrieve(&connection, &MatchOrganization {
+						id: default_organization_id.into(),
+						..Default::default()
+					})
+					.err_into::<Box<dyn Error>>()
+					.await
+					.and_then(|mut vec| {
+						vec.pop().ok_or_else(|| {
+							format!(
+								"Your configuration specifies that your employer has ID \
+								 {default_organization_id}, however no `Organization` in the database has \
+								 this ID."
+							)
+							.into()
+						})
+					})?;
+
+					let contact_information = contact_information_fut.await?;
+					let exchange_rates = exchange_rates_fut.await?;
 
 					let to_export =
 						input::select(&results_view, "Select which Jobs you want to export")?;
 
-					let exchange_rates = match exchange_rates_fut
-					{
-						Some(fut) => Some(fut.await?),
-						_ => None,
-					};
+					stream::iter(to_export.into_iter().map(Ok))
+						.try_for_each_concurrent(None, |job| {
+							let conn = &connection;
+							let exchange_rates_ref = exchange_rates.as_ref();
+							let org = &default_organization;
+							let contacts = &mut contact_information;
 
-					let conn = &connection;
-					let exchange_rates = exchange_rates.as_ref();
-					// WARN: this `let` seems redundant, but the "type needs to be known at this point"
-					let export_result: DynResult<_> = stream::iter(to_export.into_iter().map(Ok))
-						.try_for_each_concurrent(None, |job| async move {
-							let timesheets = TAdapter::retrieve(conn, &MatchTimesheet {
-								job: MatchJob {
-									id: job.id.into(),
+							async move {
+								let timesheets = TAdapter::retrieve(conn, &MatchTimesheet {
+									job: MatchJob {
+										id: job.id.into(),
+										..Default::default()
+									},
 									..Default::default()
-								},
-								..Default::default()
-							})
-							.await?;
+								})
+								.await?;
 
-							let export = job.export(exchange_rates, &timesheets)?;
-							fs::write(
-								format!("{}--{}.md", job.client.name.replace(' ', "-"), job.id),
-								export,
-							)
-							.await?;
-							Ok(())
+								fs::write(
+									format!("{}--{}.md", job.client.name.replace(' ', "-"), job.id),
+									job.export(contacts, exchange_rates_ref, org, &timesheets),
+								)
+								.await?;
+
+								DynResult::Ok(())
+							}
 						})
-						.await;
-					export_result?;
+						.await?;
 				}
 				else if !(close || delete || reopen || update)
 				{
@@ -348,10 +383,9 @@ impl Command
 						format!("Select the outer Location of {name}"),
 					)?;
 
-					let conn = &connection;
 					stream::iter(create_inner.into_iter().map(Ok).rev())
-						.try_fold(location, |loc: Location, name: String| async move {
-							LAdapter::create(conn, name, Some(loc)).await
+						.try_fold(location, |loc: Location, name: String| {
+							LAdapter::create(&connection, name, Some(loc))
 						})
 						.await?;
 				}

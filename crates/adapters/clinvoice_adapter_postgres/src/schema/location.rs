@@ -33,13 +33,13 @@ impl PgLocation
 		/// # Summary
 		///
 		/// Generate multiple Common Table Expressions for a recursive query.
-		fn generate_cte<TCurrent, TPrev>(
+		fn generate_cte<T, TOuter>(
 			query: &mut QueryBuilder<Postgres>,
-			ident: SnakeCase<TPrev, TCurrent>,
+			ident: PgLocationRecursiveCte<T, TOuter>,
 			match_condition: &MatchLocation,
 		) where
-			TCurrent: Display,
-			TPrev: Display,
+			T: Display,
+			TOuter: Display,
 		{
 			let alias = LocationColumns::<char>::default_alias();
 			let columns = COLUMNS.scope(alias);
@@ -102,7 +102,8 @@ impl PgLocation
 				{
 					if ident.slice_end().is_some()
 					{
-						const IDENT_REPORT: SnakeCase<&str, &str> = PgLocationRecursiveCte::report();
+						const IDENT_REPORT: PgLocationRecursiveCte<&str, &str> =
+							PgLocationRecursiveCte::report();
 
 						query
 							.push(',')

@@ -185,6 +185,13 @@ where
 			.map(ContactKind::Email)
 			.map_err(Box::new)?,
 
+			ContactKind::Other(other) => input::text(
+				Some(other),
+				format!("Please edit the {selected_contact_label}"),
+			)
+			.map(ContactKind::Other)
+			.map_err(Box::new)?,
+
 			ContactKind::Phone(phone) => input::text(
 				Some(phone),
 				format!("Please edit the {selected_contact_label}"),

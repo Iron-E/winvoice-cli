@@ -27,6 +27,7 @@ pub trait JobAdapter:
 	/// # Returns
 	///
 	/// The newly created [`Job`].
+	#[allow(clippy::too_many_arguments)]
 	async fn create(
 		connection: &Pool<<Self as Deletable>::Db>,
 		client: Organization,

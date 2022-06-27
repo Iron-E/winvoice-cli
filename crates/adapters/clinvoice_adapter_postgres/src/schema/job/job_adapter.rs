@@ -40,10 +40,10 @@ impl JobAdapter for PgJob
 		objectives: String,
 	) -> Result<Job>
 	{
-		let standardized_rate_fut = ExchangeRates::new()
-			.map_ok(|r| invoice.hourly_rate.exchange(Default::default(), &r))
-			.map_err(util::finance_err_to_sqlx);
-		let standardized_rate = standardized_rate_fut.await?;
+		let standardized_rate = ExchangeRates::new()
+			.await
+			.map(|r| invoice.hourly_rate.exchange(Default::default(), &r))
+			.map_err(util::finance_err_to_sqlx)?;
 
 		let row = sqlx::query!(
 			"INSERT INTO jobs

@@ -3,6 +3,7 @@ mod display;
 /// # Summary
 ///
 /// Types of text within a Markdown document.
+#[allow(dead_code)]
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum Text<T>
 {

@@ -100,7 +100,7 @@ impl PgLocation
 				},
 				_ =>
 				{
-					if let Some(_) = ident.slice_end()
+					if ident.slice_end().is_some()
 					{
 						const IDENT_REPORT: SnakeCase<&str, &str> = PgLocationRecursiveCte::report();
 

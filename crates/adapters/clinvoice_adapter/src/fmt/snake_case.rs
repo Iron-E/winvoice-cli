@@ -38,8 +38,8 @@ use core::fmt::Display;
 /// assert_eq!(job_alias.to_string(), job_alias_2.to_string());
 /// assert_eq!(job_client_alias, job_client_alias_2.to_string());
 /// assert_eq!(
-/// 	job_client_location_alias,
-/// 	job_client_location_alias_2.to_string()
+///   job_client_location_alias,
+///   job_client_location_alias_2.to_string()
 /// );
 /// ```
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -97,21 +97,21 @@ where
 	/// let foo_bar = foo.push("bar");
 	/// if let Some((foo_bar_left, foo_bar_right)) = foo_bar.slice_end()
 	/// {
-	/// 	assert_eq!(&foo_bar_left.to_string(), "foo");
-	/// 	assert_eq!(*foo_bar_right, "bar");
+	///   assert_eq!(&foo_bar_left.to_string(), "foo");
+	///   assert_eq!(*foo_bar_right, "bar");
 	/// }
 	///
 	/// if let Some((foo_bar_asdf_left, foo_bar_asdf_right)) = foo_bar.push("asdf").slice_end()
 	/// {
-	/// 	assert_eq!(&foo_bar_asdf_left.to_string(), "foo_bar");
-	/// 	assert_eq!(*foo_bar_asdf_right, "asdf");
+	///   assert_eq!(&foo_bar_asdf_left.to_string(), "foo_bar");
+	///   assert_eq!(*foo_bar_asdf_right, "asdf");
 	/// }
 	/// ```
 	pub const fn slice_end(&self) -> Option<(&TLeft, &TRight)>
 	{
 		match self
 		{
-			SnakeCase::Body(left, right) => Some((&left, &right)),
+			SnakeCase::Body(left, right) => Some((left, right)),
 			_ => None,
 		}
 	}

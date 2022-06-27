@@ -68,7 +68,7 @@ impl ContactKind
 	{
 		match self
 		{
-			Self::Address(l) => Some(&l),
+			Self::Address(l) => Some(l),
 			_ => None,
 		}
 	}
@@ -80,7 +80,7 @@ impl ContactKind
 	{
 		match self
 		{
-			Self::Email(e) => Some(&e),
+			Self::Email(e) => Some(e),
 			_ => None,
 		}
 	}
@@ -92,7 +92,7 @@ impl ContactKind
 	{
 		match self
 		{
-			Self::Phone(p) => Some(&p),
+			Self::Phone(p) => Some(p),
 			_ => None,
 		}
 	}
@@ -104,7 +104,7 @@ impl ContactKind
 	{
 		match self
 		{
-			Self::Other(o) => Some(&o),
+			Self::Other(o) => Some(o),
 			_ => None,
 		}
 	}

@@ -29,6 +29,7 @@ impl PgLocationRecursiveCte
 	/// # Summary
 	///
 	/// Create a new recursive CTE identifier for a [`PgLocation`].
+	#[allow(clippy::new_ret_no_self)]
 	pub(crate) const fn new() -> SnakeCase<&'static str, &'static str>
 	{
 		SnakeCase::Head("location")

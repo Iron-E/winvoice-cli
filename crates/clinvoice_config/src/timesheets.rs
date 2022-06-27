@@ -17,13 +17,8 @@ pub struct Timesheets
 	/// # Example
 	///
 	/// ```rust
-	/// use core::time::Duration;
-	///
-	/// use clinvoice_config::Timesheets;
-	///
-	/// // 5 minute increment
-	/// Timesheets {
-	/// 	default_increment: Duration::new(300, 0),
+	/// let _five_minute_increment = clinvoice_config::Timesheets {
+	///   default_increment: core::time::Duration::new(300, 0),
 	/// };
 	/// ```
 	#[serde(with = "humantime_serde")]

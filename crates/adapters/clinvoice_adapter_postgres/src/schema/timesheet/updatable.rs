@@ -45,7 +45,7 @@ impl Updatable for PgTimesheet
 		let employees = entities.clone().map(|e| &e.employee);
 
 		// TODO: use `for<'a> |e: &'a Timesheet| &t.expenses`
-		let expenses = entities.clone().map(mapper).flatten();
+		let expenses = entities.clone().flat_map(mapper);
 		fn mapper(t: &Timesheet) -> &[Expense]
 		{
 			&t.expenses

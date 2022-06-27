@@ -19,6 +19,7 @@ mod display;
 ///
 /// 1. this is another OrderedList, below a Break.
 /// ```
+#[allow(dead_code)]
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum Element<T>
 {

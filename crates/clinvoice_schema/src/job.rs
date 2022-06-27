@@ -108,10 +108,11 @@ impl Job
 {
 	/// # Summary
 	///
-	/// Export some `job` to the [`Target`] specified.
+	/// Export some `job` to the [`Target`] specified. `contact_info` and `timesheets` are exported
+	/// in the order given.
 	pub fn export(
 		&self,
-		contact_info: &mut [Contact],
+		contact_info: &[Contact],
 		exchange_rates: Option<&ExchangeRates>,
 		organization: &Organization,
 		timesheets: &[Timesheet],
@@ -199,10 +200,7 @@ impl Job
 			})
 			.unwrap();
 
-			let sorted_contact_info = contact_info;
-			sorted_contact_info.sort_by(|c1, c2| c1.label.cmp(&c2.label));
-
-			sorted_contact_info
+			contact_info
 				.iter()
 				.try_for_each(|contact| {
 					writeln!(

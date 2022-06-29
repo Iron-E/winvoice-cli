@@ -16,9 +16,6 @@ mod tests
 	use super::Contact;
 	use crate::{ContactKind, Location};
 
-	/// # Summary
-	///
-	/// The main method.
 	#[test]
 	fn display()
 	{

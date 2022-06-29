@@ -22,13 +22,9 @@ impl Display for Job
 			_ => writeln!(formatter, "Current"),
 		}?;
 
-		/// # Summary
-		///
 		/// One indent in, with a newline.
 		const DEPTH_1: &str = "\n\t";
 
-		/// # Summary
-		///
 		/// Two indents in, with a newline.
 		const DEPTH_2: &str = "\n\t\t";
 

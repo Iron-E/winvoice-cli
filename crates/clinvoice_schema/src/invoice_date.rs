@@ -4,35 +4,43 @@ use chrono::{DateTime, Utc};
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 
-/// # Summary
+/// Represents the dates which an [`Invoice`][invoice] was sent to or paid by a client.
 ///
-/// An `InvoiceDate` represents the dates which an invoice was sent to or paid by a client.
+/// This is a separate structure so that it can be wrapped in [`Option`], which uses Rust's type
+/// system to ensure the one of the following is always true:
+///
+/// * There is no `issued` and no `paid` date.
+/// * There is an `issued` date, but no `paid` date.
+/// * There is an `issued` date and a `paid` date.
+///
+/// As having a `paid` date without an `issued` date would be invalid state for the
+/// [`Invoice`][invoice], the above use of [`Option`] is useful while the [`Invoice`] exists
+/// outside of the constraint system of a database.
+///
+/// # Examples
+///
+/// ```rust
+/// use clinovice_schema::{chrono::Utc, InvoiceDate};
+///
+/// let _unpaid = InvoiceDate {
+///   issued: Utc::now(),
+///   paid: None,
+/// };
+///
+/// let _paid = InvoiceDate {
+///   issued: Utc::now(),
+///   paid: Some(Utc::now()),
+/// };
+/// ```
+///
+/// [invoice]: super::Invoice
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 pub struct InvoiceDate
 {
-	/// # Summary
-	///
-	/// The date upon which the [`Invoice`] was sent to the client.
-	///
-	/// # Remarks
-	///
-	/// Upon running `clinvoice new`, this field is left blank. This is to signify that the
-	/// underlying [`Invoice`] has not been sent to the client.
-	///
-	/// When running `clinvoice export`, this field will be set automatically to the current date
-	/// and time.
+	/// The date that the [`Invoice`](super::Invoice) was sent to the client.
 	pub issued: DateTime<Utc>,
 
-	/// # Summary
-	///
-	/// The date upon which the client paid the [`Invoice`].
-	///
-	/// # Remarks
-	///
-	/// Upon running `clinvoice new`, this field is left blank. This is to signify that the
-	/// underlying [`Invoice`] has not paid by the client.
-	///
-	/// This field will be updated when running `clinvoice rec`/`receive`
+	/// The date that the client paid the [`Invoice`](super::Invoice).
 	pub paid: Option<DateTime<Utc>>,
 }

@@ -1,10 +1,32 @@
-/// # Summary
-///
-/// Creates a type alias for some [`Error`](std::error::Error) type.
+/// Creates a `pub type` named `Result`. See examples below.
 ///
 /// # Examples
 ///
-/// See any of the `clinvoice` custom [`Error`] types.
+/// For when you have a type named `Error`:
+///
+/// ```rust
+/// use clinvoice_error::AliasResult;
+///
+/// #[derive(Debug, PartialEq)]
+/// struct Error;
+///
+/// AliasResult!();
+///
+/// assert_eq!(Result::Ok(()), std::result::Result::<(), Error>::Ok(()));
+/// ```
+///
+/// For when you have `SomeError`:
+///
+/// ```rust
+/// use clinvoice_error::AliasResult;
+///
+/// #[derive(Debug, PartialEq)]
+/// struct SomeError;
+///
+/// AliasResult!(SomeError);
+///
+/// assert_eq!(Result::Ok(()), std::result::Result::<(), SomeError>::Ok(()));
+/// ```
 #[macro_export]
 macro_rules! AliasResult {
 	() => {

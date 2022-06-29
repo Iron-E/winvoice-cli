@@ -26,6 +26,9 @@ rust_decimal = "1"
 # Date/Time
 chrono = "0.4"
 
+# Enums
+strum = {features = ["derive"], version = "0.24"}
+
 # Errors
 thiserror = "1"
 

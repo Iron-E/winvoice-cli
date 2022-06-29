@@ -1,6 +1,7 @@
 use std::{collections::HashMap, str::FromStr};
 
 use rust_decimal::Decimal;
+use strum::EnumCount;
 
 use super::ExchangeRates;
 use crate::{Currency, Error, Result};
@@ -23,7 +24,7 @@ impl FromStr for ExchangeRates
 			)
 		};
 
-		let mut map = HashMap::with_capacity(Currency::count());
+		let mut map = HashMap::with_capacity(Currency::COUNT);
 		map.insert(Default::default(), 1.into());
 
 		currencies

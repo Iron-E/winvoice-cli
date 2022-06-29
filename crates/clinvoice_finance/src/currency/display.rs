@@ -4,8 +4,9 @@ use super::Currency;
 
 impl Display for Currency
 {
-	fn fmt(&self, formatter: &mut Formatter) -> Result
+	fn fmt(&self, f: &mut Formatter) -> Result
 	{
-		write!(formatter, "{}", self.as_str())
+		let as_str: &str = self.into();
+		as_str.fmt(f)
 	}
 }

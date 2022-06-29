@@ -3,14 +3,18 @@ mod from_str;
 
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
+use strum::{EnumCount, EnumIter, IntoStaticStr};
 
 /// [ISO-4217][iso] currency codes which are reported by the [European Central Bank][ecb] for
 /// exchange.
 ///
 /// [ecb]: https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/
 /// [iso]: https://www.iso.org/iso-4217-currency-codes.html
-#[derive(Copy, Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
+#[derive(
+	Copy, Clone, Debug, Default, EnumCount, EnumIter, Eq, Hash, IntoStaticStr, Ord, PartialEq, PartialOrd,
+)]
+#[strum(serialize_all = "UPPERCASE")]
 pub enum Currency
 {
 	/// The Australian dollar.
@@ -112,55 +116,4 @@ pub enum Currency
 
 	/// The South African rand.
 	Zar,
-}
-
-impl Currency
-{
-	/// Retrieve a [`Currency`]'s string representation.
-	pub const fn as_str(&self) -> &'static str
-	{
-		match self
-		{
-			Self::Aud => "AUD",
-			Self::Bgn => "BGN",
-			Self::Brl => "BRL",
-			Self::Cad => "CAD",
-			Self::Chf => "CHF",
-			Self::Cny => "CNY",
-			Self::Czk => "CZK",
-			Self::Dkk => "DKK",
-			Self::Eur => "EUR",
-			Self::Gbp => "GBP",
-			Self::Hkd => "HKD",
-			Self::Hrk => "HRK",
-			Self::Huf => "HUF",
-			Self::Idr => "IDR",
-			Self::Ils => "ILS",
-			Self::Inr => "INR",
-			Self::Isk => "ISK",
-			Self::Jpy => "JPY",
-			Self::Krw => "KRW",
-			Self::Mxn => "MXN",
-			Self::Myr => "MYR",
-			Self::Nok => "NOK",
-			Self::Nzd => "NZD",
-			Self::Php => "PHP",
-			Self::Pln => "PLN",
-			Self::Ron => "RON",
-			Self::Rub => "RUB",
-			Self::Sek => "SEK",
-			Self::Sgd => "SGD",
-			Self::Thb => "THB",
-			Self::Try => "TRY",
-			Self::Usd => "USD",
-			Self::Zar => "ZAR",
-		}
-	}
-
-	/// The number of currencies supported by the program. Good for use when creating [`Vec`]s or [`HashMap`](std:collections::HashMap)s.
-	pub const fn count() -> usize
-	{
-		// WARN: must be updated whenever the enum is changed.
-		33
-	}
 }

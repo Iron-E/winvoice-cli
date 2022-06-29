@@ -347,7 +347,13 @@ impl Command
 
 								fs::write(
 									format!("{}--{}.md", job.client.name.replace(' ', "-"), job.id),
-									job.export(contacts, exchange_rates_ref, org, &timesheets),
+									clinvoice_markdown::export_job(
+										&job,
+										contacts,
+										exchange_rates_ref,
+										org,
+										&timesheets,
+									),
 								)
 								.await?;
 

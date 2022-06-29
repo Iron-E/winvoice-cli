@@ -3,19 +3,13 @@ mod display;
 mod exchangeable;
 mod restorable_serde;
 
-use core::fmt::Write;
-
 use chrono::{DateTime, Utc};
 use clinvoice_finance::{Decimal, ExchangeRates, Exchangeable, Money};
 use lazy_static::lazy_static;
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 
-use super::{
-	markdown::{Element, Text},
-	Employee,
-	Job,
-};
+use super::{Employee, Job};
 use crate::{Expense, Id};
 
 /// # Summary
@@ -85,74 +79,6 @@ pub struct Timesheet
 
 impl Timesheet
 {
-	/// # Summary
-	///
-	/// Export some `job` to the [`Target`] specified. Appends to some pre-existing `output`, in
-	/// case multiple [`Timesheet`]s must be serialized sequentially.
-	///
-	/// Tracks the `organizations_with_serialized_contact_info` so that their contact information is not
-	/// reiterated every time.
-	pub(super) fn export(&self, output: &mut String)
-	{
-		writeln!(output, "{}", Element::Heading {
-			depth: 3,
-			text: self
-				.time_end
-				.map(|time_end| format!("{} – {}", self.time_begin, time_end))
-				.unwrap_or_else(|| format!("{} – Current", self.time_begin)),
-		})
-		.unwrap();
-
-		writeln!(
-			output,
-			"{}: {} {}",
-			Element::UnorderedList {
-				depth: 0,
-				text: Text::Bold("Employee"),
-			},
-			self.employee.title,
-			self.employee.name,
-		)
-		.unwrap();
-
-		writeln!(output, "{}", Element::<&str>::Break).unwrap();
-
-		if !self.expenses.is_empty()
-		{
-			writeln!(output, "{}", Element::Heading {
-				depth: 4,
-				text: "Expenses",
-			})
-			.unwrap();
-
-			self
-				.expenses
-				.iter()
-				.try_for_each(|e| {
-					writeln!(
-						output,
-						"{}\n{}",
-						Element::Heading {
-							depth: 5,
-							text: format!("№{} – {} ({})", e.id, e.category, e.cost),
-						},
-						Element::BlockText(&e.description),
-					)
-				})
-				.unwrap();
-		}
-
-		if !self.work_notes.is_empty()
-		{
-			writeln!(output, "{}", Element::Heading {
-				depth: 4,
-				text: "Work Notes",
-			})
-			.unwrap();
-			writeln!(output, "{}", Element::BlockText(&self.work_notes)).unwrap();
-		}
-	}
-
 	/// # Summary
 	///
 	/// Get the amount of [`Money`] which is owed by the client on the [`Inovice`](crate::Invoice).

@@ -25,7 +25,6 @@ mod invoice;
 mod invoice_date;
 mod job;
 mod location;
-mod markdown;
 mod organization;
 mod restorable_serde;
 mod restore_error;

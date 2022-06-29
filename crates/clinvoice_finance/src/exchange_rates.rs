@@ -8,10 +8,9 @@ use std::{
 	io::{
 		Cursor,
 		Error as IoError,
-		ErrorKind::{InvalidData, NotFound, Unsupported},
+		ErrorKind as IoErrorKind,
 		Read,
 	},
-	ops::Range,
 	path::{Path, PathBuf},
 };
 
@@ -23,14 +22,19 @@ use zip::{result::ZipError, ZipArchive};
 
 use crate::{Currency, Result};
 
+/// A collection of rates of exchange between currencies such that some `amount` of [`Money`]
+/// divided by its [`Currency`] will yield [`Currency::Eur`], and an `amount` of [`Currency::Eur`]
+/// multiplied by any [`Currency`]'s exchange rate will yield that [`Currency`].
+///
+/// # See also
+///
+/// * [`ExchangeRates::get`], to get the corresponding rate for some [`Currency`].
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ExchangeRates(HashMap<Currency, Decimal>);
 
 impl ExchangeRates
 {
-	/// # Summary
-	///
-	/// Get the latest [`ExchangeRates`] from the ECB.
+	/// Get the latest [`ExchangeRates`] from the European Central Bank.
 	async fn download(filepath: &Path) -> Result<String>
 	{
 		let cursor = reqwest::get("https://www.ecb.europa.eu/stats/eurofxref/eurofxref.zip")
@@ -43,9 +47,9 @@ impl ExchangeRates
 			match e
 			{
 				ZipError::Io(e2) => e2,
-				ZipError::FileNotFound => NotFound.into(),
-				ZipError::InvalidArchive(_) => InvalidData.into(),
-				ZipError::UnsupportedArchive(_) => Unsupported.into(),
+				ZipError::FileNotFound => IoErrorKind::NotFound.into(),
+				ZipError::InvalidArchive(_) => IoErrorKind::InvalidData.into(),
+				ZipError::UnsupportedArchive(_) => IoErrorKind::Unsupported.into(),
 			}
 		}
 
@@ -59,9 +63,7 @@ impl ExchangeRates
 		Ok(csv)
 	}
 
-	/// # Summary
-	///
-	/// Return the filepath which the latest exchange rates should be stored at.
+	/// Return the filepath which the latest [`ExchangeRates`] should be stored at.
 	fn filepath() -> PathBuf
 	{
 		let today = Local::now();
@@ -73,10 +75,7 @@ impl ExchangeRates
 		))
 	}
 
-	/// # Summary
-	///
-	/// Retrieve the corresponding exchange rate to convert from the `current` currency to the
-	/// `desired` currency.
+	/// Retrieve the exchange rate for the `currency` provided.
 	///
 	/// # Returns
 	///
@@ -90,8 +89,6 @@ impl ExchangeRates
 			.and_then(|c| self.0.get(desired).map(|d| c / d))
 	}
 
-	/// # Summary
-	///
 	/// Same as [`ExchangeRates::get`], except using range syntax (i.e. `current..desired`) and
 	/// panics with a custom error message instead of returning [`None`].
 	///
@@ -108,8 +105,6 @@ impl ExchangeRates
 		})
 	}
 
-	/// # Summary
-	///
 	/// Create a new [`ExchangeRates`] instance, which uses the [European Central Bank][ecb] to
 	/// determine how to convert between currencies.
 	///

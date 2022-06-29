@@ -2,10 +2,7 @@ use std::io;
 
 use thiserror::Error;
 
-/// # Summary
-///
-/// An [`Error`] to be used whenever a currency is specified by a user which is not supported by
-/// CLInvoice.
+/// An [`Error`](std::error::Error) type for the library.
 #[derive(Debug, Error)]
 pub enum Error
 {

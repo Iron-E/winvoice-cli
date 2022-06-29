@@ -7,39 +7,41 @@ use serde::{Deserialize, Serialize};
 
 use crate::Currency;
 
-/// # Summary
+/// An `amount` of [`Currency`].
 ///
-/// Some `amount` of `currency`.
+/// To find out how much the `amount` would be in another [`Currency`], use [`exchange`](crate::Exchangeable::exchange).
+///
+/// # See also
+///
+/// * [`Money::new`], for how to create [`Money`] when an [amount](Decimal) does not already exist.
 #[derive(Copy, Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 pub struct Money
 {
-	/// # Summary
-	///
-	/// The amount of `currency` that this [`Money`] represents.
+	/// The amount of [`Currency`] that this [`Money`] represents.
 	pub amount: Decimal,
 
-	/// # Summary
-	///
-	/// The `currency` that this [`Money`] is in.
+	/// The [`Currency`] that this [`Money`] is in.
 	pub currency: Currency,
 }
 
 impl Money
 {
-	/// # Summary
+	/// Create new [`Money`].
 	///
-	/// Create a new [`Money`] struct.
+	/// # Examples
 	///
-	/// # Paramters
+	/// ```rust
+	/// use clinvoice_finance::{Currency, Decimal, Money};
 	///
-	/// * `amount`, the amount of [`Money`] __without decimals__ (e.g. '$30.00' => 3000).
-	/// * `currency`, the ISO currency code which this `amount` is represented in.
-	/// * `scale`, the number of decimal places (e.g. '$30.00' => 2).
-	///
-	/// # Returns
-	///
-	/// A new [`Money`].
+	/// assert_eq!(
+	///   Money::new(20_00, 2, Currency::Usd),
+	///   Money {
+	///     amount: "20.00".parse().unwrap(),
+	///     currency: Currency::Usd,
+	///   }
+	/// );
+	/// ```
 	pub fn new(amount: i64, decimal_places: u32, currency: Currency) -> Self
 	{
 		Self {

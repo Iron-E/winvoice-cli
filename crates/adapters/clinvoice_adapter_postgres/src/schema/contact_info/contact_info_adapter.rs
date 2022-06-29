@@ -53,7 +53,7 @@ impl ContactInfoAdapter for PgContactInfo
 		write_where_clause::write_match_contact(
 			connection,
 			Default::default(),
-			ContactColumns::<char>::default_alias(),
+			ContactColumns::<char>::DEFAULT_ALIAS,
 			match_condition,
 			&mut query,
 		)

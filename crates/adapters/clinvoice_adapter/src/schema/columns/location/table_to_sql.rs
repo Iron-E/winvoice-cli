@@ -3,13 +3,6 @@ use crate::fmt::TableToSql;
 
 impl<T> TableToSql for LocationColumns<T>
 {
-	fn default_alias() -> char
-	{
-		'L'
-	}
-
-	fn table_name() -> &'static str
-	{
-		"locations"
-	}
+	const DEFAULT_ALIAS: char = 'L';
+	const TABLE_NAME: &'static str = "locations";
 }

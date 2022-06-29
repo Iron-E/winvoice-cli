@@ -352,7 +352,7 @@ impl WriteWhereClause<Postgres, &MatchSet<MatchExpense>> for PgSchema
 					.push(sql::EXISTS)
 					.push('(')
 					.push(sql::SELECT)
-					.push_from(ExpenseColumns::<char>::table_name(), subquery_ident)
+					.push_from(ExpenseColumns::<&str>::TABLE_NAME, subquery_ident)
 					.push(sql::WHERE)
 					.push_equal(
 						COLUMNS.scope(subquery_ident).timesheet_id,

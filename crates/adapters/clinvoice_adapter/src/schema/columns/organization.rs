@@ -34,7 +34,7 @@ impl<T> OrganizationColumns<T>
 	/// Add a [scope](Self::scope) using the [default alias](TableToSql::default_alias)
 	pub fn default_scope(self) -> OrganizationColumns<WithIdentifier<T, char>>
 	{
-		self.scope(Self::default_alias())
+		self.scope(Self::DEFAULT_ALIAS)
 	}
 
 	/// # Summary

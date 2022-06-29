@@ -57,7 +57,7 @@ impl PgSchema
 		}
 
 		let mut query = QueryBuilder::new(sql::DELETE_FROM);
-		query.push(TTable::table_name());
+		query.push(TTable::TABLE_NAME);
 
 		PgSchema::write_where_clause(
 			Default::default(),
@@ -91,12 +91,13 @@ impl PgSchema
 	where
 		C: ColumnsToSql,
 	{
-		let alias = C::default_alias();
 		let mut query = QueryBuilder::new(sql::UPDATE);
 
-		query.push(As(C::table_name(), alias)).push(sql::SET);
+		query
+			.push(As(C::TABLE_NAME, C::DEFAULT_ALIAS))
+			.push(sql::SET);
 
-		let values_alias = SnakeCase::from((alias, 'V'));
+		let values_alias = SnakeCase::from((C::DEFAULT_ALIAS, 'V'));
 		columns.push_set_to(&mut query, values_alias);
 
 		query.push(sql::FROM).push('(');
@@ -112,7 +113,7 @@ impl PgSchema
 			.push(')')
 			.push(sql::WHERE);
 
-		columns.push_update_where_to(&mut query, alias, values_alias);
+		columns.push_update_where_to(&mut query, C::DEFAULT_ALIAS, values_alias);
 
 		query.prepare().execute(connection).await?;
 

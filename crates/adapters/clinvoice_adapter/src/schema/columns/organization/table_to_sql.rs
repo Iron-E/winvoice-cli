@@ -3,13 +3,6 @@ use crate::fmt::TableToSql;
 
 impl<T> TableToSql for OrganizationColumns<T>
 {
-	fn default_alias() -> char
-	{
-		'O'
-	}
-
-	fn table_name() -> &'static str
-	{
-		"organizations"
-	}
+	const DEFAULT_ALIAS: char = 'O';
+	const TABLE_NAME: &'static str = "organizations";
 }

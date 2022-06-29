@@ -10,7 +10,7 @@ pub trait TableToSql
 	/// # Warnings
 	///
 	/// * Must be unique among other implementors of [`TableToSql`].
-	fn default_alias() -> char;
+	const DEFAULT_ALIAS: char;
 
 	/// # Summary
 	///
@@ -19,5 +19,5 @@ pub trait TableToSql
 	/// # Warnings
 	///
 	/// * Must be unique among other implementors of [`TableToSql`].
-	fn table_name() -> &'static str;
+	const TABLE_NAME: &'static str;
 }

@@ -51,14 +51,14 @@ impl OrganizationAdapter for PgOrganization
 			.push_default_from::<OrganizationColumns<char>>()
 			.push_equijoin(
 				PgLocationRecursiveCte::from(&match_condition.location),
-				LocationColumns::<char>::default_alias(),
+				LocationColumns::<char>::DEFAULT_ALIAS,
 				location_columns.id,
 				columns.location_id,
 			);
 
 		PgSchema::write_where_clause(
 			Default::default(),
-			OrganizationColumns::<char>::default_alias(),
+			OrganizationColumns::<char>::DEFAULT_ALIAS,
 			match_condition,
 			&mut query,
 		);

@@ -133,7 +133,7 @@ impl TimesheetAdapter for PgTimesheet
 			)
 			.push_equijoin(
 				PgLocationRecursiveCte::from(&match_condition.job.client.location),
-				LocationColumns::<char>::default_alias(),
+				LocationColumns::<char>::DEFAULT_ALIAS,
 				location_columns.id,
 				organization_columns.location_id,
 			);
@@ -145,27 +145,27 @@ impl TimesheetAdapter for PgTimesheet
 					PgSchema::write_where_clause(
 						PgSchema::write_where_clause(
 							Default::default(),
-							TimesheetColumns::<char>::default_alias(),
+							TimesheetColumns::<char>::DEFAULT_ALIAS,
 							match_condition,
 							&mut query,
 						),
-						EmployeeColumns::<char>::default_alias(),
+						EmployeeColumns::<char>::DEFAULT_ALIAS,
 						&match_condition.employee,
 						&mut query,
 					),
-					ExpenseColumns::<char>::default_alias(),
+					ExpenseColumns::<char>::DEFAULT_ALIAS,
 					&match_condition
 						.expenses
 						.exchange_ref(Default::default(), &exchange_rates),
 					&mut query,
 				),
-				JobColumns::<char>::default_alias(),
+				JobColumns::<char>::DEFAULT_ALIAS,
 				&match_condition
 					.job
 					.exchange_ref(Default::default(), &exchange_rates),
 				&mut query,
 			),
-			OrganizationColumns::<char>::default_alias(),
+			OrganizationColumns::<char>::DEFAULT_ALIAS,
 			&match_condition.job.client,
 			&mut query,
 		);

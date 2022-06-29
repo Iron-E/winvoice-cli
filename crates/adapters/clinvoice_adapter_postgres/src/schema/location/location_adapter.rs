@@ -42,7 +42,7 @@ impl LocationAdapter for PgLocation
 			.push(COLUMNS.default_scope().id)
 			.push_from(
 				PgLocationRecursiveCte::from(match_condition),
-				LocationColumns::<char>::default_alias(),
+				LocationColumns::<char>::DEFAULT_ALIAS,
 			)
 			.prepare()
 			.fetch(connection)

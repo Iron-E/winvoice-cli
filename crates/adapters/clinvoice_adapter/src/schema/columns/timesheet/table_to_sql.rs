@@ -3,13 +3,6 @@ use crate::fmt::TableToSql;
 
 impl<T> TableToSql for TimesheetColumns<T>
 {
-	fn default_alias() -> char
-	{
-		'T'
-	}
-
-	fn table_name() -> &'static str
-	{
-		"timesheets"
-	}
+	const DEFAULT_ALIAS: char = 'T';
+	const TABLE_NAME: &'static str = "timesheets";
 }

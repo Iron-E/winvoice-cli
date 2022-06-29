@@ -51,7 +51,7 @@ impl EmployeeAdapter for PgEmployee
 
 		PgSchema::write_where_clause(
 			Default::default(),
-			EmployeeColumns::<char>::default_alias(),
+			EmployeeColumns::<char>::DEFAULT_ALIAS,
 			match_condition,
 			&mut query,
 		);

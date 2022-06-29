@@ -101,7 +101,7 @@ impl ExpensesAdapter for PgExpenses
 		let exchange_rates = exchange_rates_fut.await?;
 		PgSchema::write_where_clause(
 			Default::default(),
-			ExpenseColumns::<char>::default_alias(),
+			ExpenseColumns::<char>::DEFAULT_ALIAS,
 			&match_condition.exchange_ref(Default::default(), &exchange_rates),
 			&mut query,
 		);

@@ -22,7 +22,7 @@ pub trait QueryBuilderExt<'args>
 
 	/// # Summary
 	///
-	/// Push `" JOIN {TTable::table_name()} {TTable::table_alias()} ON ({left} = {right})"`.
+	/// Push `" JOIN {TTable::TABLE_NAME} {TTable::table_alias()} ON ({left} = {right})"`.
 	fn push_default_equijoin<TLeft, TRight, TTable>(
 		&mut self,
 		left: TLeft,
@@ -33,17 +33,17 @@ pub trait QueryBuilderExt<'args>
 		TRight: Display,
 		TTable: TableToSql,
 	{
-		self.push_equijoin(TTable::table_name(), TTable::default_alias(), left, right)
+		self.push_equijoin(TTable::TABLE_NAME, TTable::DEFAULT_ALIAS, left, right)
 	}
 
 	/// # Summary
 	///
-	/// Push `" FROM {T::table_name()} {T::table_alias()}"`.
+	/// Push `" FROM {T::TABLE_NAME} {T::table_alias()}"`.
 	fn push_default_from<T>(&mut self) -> &mut Self
 	where
 		T: TableToSql,
 	{
-		self.push_from(T::table_name(), T::default_alias())
+		self.push_from(T::TABLE_NAME, T::DEFAULT_ALIAS)
 	}
 
 	/// # Summary

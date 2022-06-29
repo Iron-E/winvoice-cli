@@ -45,7 +45,7 @@ impl Deletable for PgContactInfo
 
 		let mut query = QueryBuilder::new(sql::DELETE_FROM);
 		query
-			.push(ContactColumns::<char>::table_name())
+			.push(ContactColumns::<&str>::TABLE_NAME)
 			.push(sql::WHERE);
 
 		{

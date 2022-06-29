@@ -99,7 +99,7 @@ impl JobAdapter for PgJob
 			)
 			.push_equijoin(
 				PgLocationRecursiveCte::from(&match_condition.client.location),
-				LocationColumns::<char>::default_alias(),
+				LocationColumns::<char>::DEFAULT_ALIAS,
 				LocationColumns::default().default_scope().id,
 				organization_columns.location_id,
 			);
@@ -107,11 +107,11 @@ impl JobAdapter for PgJob
 		PgSchema::write_where_clause(
 			PgSchema::write_where_clause(
 				Default::default(),
-				JobColumns::<char>::default_alias(),
+				JobColumns::<char>::DEFAULT_ALIAS,
 				&match_condition.exchange_ref(Default::default(), &exchange_rates_fut.await?),
 				&mut query,
 			),
-			OrganizationColumns::<char>::default_alias(),
+			OrganizationColumns::<char>::DEFAULT_ALIAS,
 			&match_condition.client,
 			&mut query,
 		);

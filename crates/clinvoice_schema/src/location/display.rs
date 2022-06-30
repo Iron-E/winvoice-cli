@@ -24,9 +24,6 @@ mod tests
 {
 	use super::Location;
 
-	/// # Summary
-	///
-	/// The main method.
 	#[test]
 	fn display()
 	{

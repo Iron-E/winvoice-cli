@@ -9,8 +9,7 @@ use lazy_static::lazy_static;
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 
-use super::{Employee, Job};
-use crate::{Expense, Id};
+use super::{Employee, Expense, Id, Job};
 
 /// # Summary
 ///

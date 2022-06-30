@@ -1,6 +1,6 @@
 use chrono::Utc;
 
-use crate::Job;
+use super::Job;
 
 impl Default for Job
 {

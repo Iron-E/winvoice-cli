@@ -5,11 +5,9 @@ use clinvoice_finance::Money;
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 
-use crate::InvoiceDate;
+use super::InvoiceDate;
 
-/// # Summary
-///
-/// An `Invoice` represents the accounts receivable for the user or their employer.
+/// Information about payment which will be due upon the completion of a [`Job`](super::Job).
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 #[derive(Copy, Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Invoice

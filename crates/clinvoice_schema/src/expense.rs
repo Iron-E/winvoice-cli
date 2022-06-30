@@ -6,12 +6,12 @@ use clinvoice_finance::Money;
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 
-use crate::Id;
+use super::Id;
 
 /// # Summary
 ///
-/// A representation of some item or service which a [client](crate::Organization)'s money was
-/// spent to acquire for a [`Job`](crate::Job) on a [`Timesheet`](crate::Timesheet).
+/// A representation of some item or service which a [client](super::Organization)'s money was
+/// spent to acquire for a [`Job`](super::Job) on a [`Timesheet`](super::Timesheet).
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Expense

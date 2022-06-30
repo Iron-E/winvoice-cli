@@ -19,7 +19,6 @@
 mod contact;
 mod employee;
 mod expense;
-mod from_str_error;
 mod id;
 mod invoice;
 mod invoice_date;
@@ -35,7 +34,6 @@ pub use clinvoice_finance::{Currency, Decimal, Money};
 pub use contact::{Contact, ContactKind};
 pub use employee::Employee;
 pub use expense::Expense;
-pub use from_str_error::{FromStrError, FromStrResult};
 pub use id::Id;
 pub use invoice::Invoice;
 pub use invoice_date::InvoiceDate;

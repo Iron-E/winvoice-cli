@@ -1,4 +1,4 @@
-use crate::RestoreResult;
+use super::RestoreResult;
 
 /// Allows implementors to preserve data which is important (e.g. a reference number), by
 /// [skipping serialization](https://serde.rs/attr-skip-serializing.html) and then using
@@ -10,7 +10,7 @@ pub trait RestorableSerde
 	/// Take some aspects of an `original` and restore them from [`Default`]s which were assigned
 	/// upon [deserialization](serde::Deserialize).
 	///
-	/// Will return a [`RestoreError`](crate::RestoreError) if the `original` cannot be merged with
+	/// Will return a [`RestoreError`](super::RestoreError) if the `original` cannot be merged with
 	/// this value.
 	///
 	/// # Example

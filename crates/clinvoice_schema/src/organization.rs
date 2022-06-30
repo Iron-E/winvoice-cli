@@ -4,8 +4,7 @@ mod restorable_serde;
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 
-use super::Location;
-use crate::Id;
+use super::{Id, Location};
 
 /// # Summary
 ///

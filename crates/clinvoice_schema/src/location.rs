@@ -4,7 +4,7 @@ mod restorable_serde;
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 
-use crate::Id;
+use super::Id;
 
 /// A place in the real world where other parts of the schema can reside.
 ///
@@ -35,7 +35,7 @@ pub struct Location
 
 	/// The [`Location`] which immediately surrounds this one, such that when `outer` is [`None`],
 	/// this [`Location`] must be at the outermost scope which is relevant to the
-	/// [`Organization`](crate::Organization) using CLInvoice.
+	/// [`Organization`](super::Organization) using CLInvoice.
 	pub outer: Option<Box<Self>>,
 
 	/// The name of the [`Location`].

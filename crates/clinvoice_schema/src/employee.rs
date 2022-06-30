@@ -4,7 +4,7 @@ mod restorable_serde;
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 
-use crate::Id;
+use super::Id;
 
 /// A person who has been employed by the [`Organization`][organization] which uses
 /// CLInvoice.
@@ -25,7 +25,7 @@ use crate::Id;
 /// };
 /// ```
 ///
-/// [organization]: crate::Organization
+/// [organization]: super::Organization
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 #[derive(Clone, Default, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Employee
@@ -44,7 +44,7 @@ pub struct Employee
 	/// Setting this field to "Not employed", or "Ex-employee" is a viable way to archive
 	/// an [`Employee`], while noting that they are no longer with the [`Organization`][organization].
 	///
-	/// [organization]: crate::Organization
+	/// [organization]: super::Organization
 	pub status: String,
 
 	/// The [`Employee`]'s title in the company, e.g. "CEO" or "Media Manager".

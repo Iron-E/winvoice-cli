@@ -1,10 +1,9 @@
 use thiserror::Error;
 
-/// # Summary
-///
-/// [`Error`](std::error::Error)s referencing [`Store`](crate::Store)s and [`Adapters`].
+/// An [`Error`](std::error::Error) for when [`try_restore`](crate::RestorableSerde::try_restore)
+/// fails, because too much information has been altered between restorations.
 #[derive(Clone, Debug, Eq, Error, Hash, Ord, PartialEq, PartialOrd)]
-#[error("An edit made before deserialization is irreconcilable with form prior to serialization")]
+#[error("An edit is irreconcilable with its original state.")]
 pub struct RestoreError;
 
 pub type RestoreResult<T> = std::result::Result<T, RestoreError>;

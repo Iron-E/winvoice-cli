@@ -10,8 +10,8 @@ use super::{Match, MatchStr};
 /// # Summary
 ///
 /// An [`Location`](clinvoice_schema::Location) with [matchable](Match) fields.
-#[derive(Clone, Default, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
+#[derive(Clone, Default, Debug, Eq, PartialEq)]
 pub struct MatchLocation
 {
 	#[cfg_attr(feature = "serde_support", serde(default))]

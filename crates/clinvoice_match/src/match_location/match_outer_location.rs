@@ -3,8 +3,8 @@ use serde::{Deserialize, Serialize};
 
 use super::MatchLocation;
 
-#[derive(Clone, Debug, Default, Eq, PartialEq)]
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub enum MatchOuterLocation
 {
 	/// # Summary

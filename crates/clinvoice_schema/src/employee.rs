@@ -26,8 +26,8 @@ use crate::Id;
 /// ```
 ///
 /// [organization]: crate::Organization
-#[derive(Clone, Default, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
+#[derive(Clone, Default, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Employee
 {
 	/// The reference number of this [`Employee`], which is unique among all [`Employee`]s.

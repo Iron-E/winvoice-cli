@@ -9,8 +9,8 @@ use serde::{Deserialize, Serialize};
 /// # Summary
 ///
 /// A piece of [`Contact`] information for an [`Employee`].
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Contact
 {
 	/// # Summary

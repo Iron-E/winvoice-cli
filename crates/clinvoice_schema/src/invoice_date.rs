@@ -34,8 +34,8 @@ use serde::{Deserialize, Serialize};
 /// ```
 ///
 /// [invoice]: super::Invoice
-#[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
+#[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct InvoiceDate
 {
 	/// The date that the [`Invoice`](super::Invoice) was sent to the client.

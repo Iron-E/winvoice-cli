@@ -9,8 +9,8 @@ use super::{Match, MatchEmployee, MatchExpense, MatchJob, MatchSet, MatchStr};
 /// # Summary
 ///
 /// An [`Timesheet`](clinvoice_schema::Timesheet) with [matchable](Match) fields.
-#[derive(Clone, Debug, Default, Eq, PartialEq)]
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct MatchTimesheet
 {
 	#[cfg_attr(feature = "serde_support", serde(default))]

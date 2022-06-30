@@ -46,8 +46,8 @@ use super::{Id, Invoice, Organization};
 ///   objectives: "- I want to test this function.".into(),
 /// };
 /// ```
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Job
 {
 	/// The [`Organization`] who the work is being performed for.

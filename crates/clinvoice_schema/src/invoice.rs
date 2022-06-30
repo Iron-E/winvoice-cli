@@ -10,8 +10,8 @@ use crate::InvoiceDate;
 /// # Summary
 ///
 /// An `Invoice` represents the accounts receivable for the user or their employer.
-#[derive(Copy, Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
+#[derive(Copy, Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Invoice
 {
 	/// # Summary

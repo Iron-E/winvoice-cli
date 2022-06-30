@@ -12,8 +12,8 @@ use crate::Id;
 ///
 /// A representation of some item or service which a [client](crate::Organization)'s money was
 /// spent to acquire for a [`Job`](crate::Job) on a [`Timesheet`](crate::Timesheet).
-#[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
+#[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Expense
 {
 	/// # Summary

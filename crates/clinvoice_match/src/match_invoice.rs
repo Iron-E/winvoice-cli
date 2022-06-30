@@ -9,8 +9,8 @@ use super::Match;
 /// # Summary
 ///
 /// An [`Invoice`](clinvoice_schema::Invoice) with [matchable](Match) fields.
-#[derive(Clone, Default, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
+#[derive(Clone, Default, Debug, Eq, PartialEq)]
 pub struct MatchInvoice
 {
 	#[cfg_attr(feature = "serde_support", serde(default))]

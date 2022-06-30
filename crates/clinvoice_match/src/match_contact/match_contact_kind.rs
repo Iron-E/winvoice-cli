@@ -7,8 +7,8 @@ use crate::MatchLocation;
 /// # Summary
 ///
 /// A [`Contact`](clinvoice_schema::Contact) with [matchable](Match) fields.
-#[derive(Clone, Debug, Default, Eq, PartialEq)]
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub enum MatchContactKind
 {
 	/// Same as [`ContactKind::Address`](clinvoice_schema::ContactKind::Address).

@@ -7,8 +7,8 @@ use super::{Match, MatchStr};
 /// # Summary
 ///
 /// An [`Employee`](clinvoice_schema::Employee) with [matchable](Match) fields.
-#[derive(Clone, Default, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
+#[derive(Clone, Default, Debug, Eq, PartialEq)]
 pub struct MatchEmployee
 {
 	#[cfg_attr(feature = "serde_support", serde(default))]

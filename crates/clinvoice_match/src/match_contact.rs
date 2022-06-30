@@ -9,8 +9,8 @@ use super::MatchStr;
 /// # Summary
 ///
 /// An [`Contact`](clinvoice_schema::Contact) with [matchable](Match) fields.
-#[derive(Clone, Default, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
+#[derive(Clone, Default, Debug, Eq, PartialEq)]
 pub struct MatchContact
 {
 	#[cfg_attr(feature = "serde_support", serde(default))]

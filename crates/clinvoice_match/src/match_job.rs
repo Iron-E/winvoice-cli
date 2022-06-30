@@ -11,8 +11,8 @@ use super::{Match, MatchInvoice, MatchOrganization, MatchStr};
 /// # Summary
 ///
 /// An [`Job`](clinvoice_schema::Job) with [matchable](Match) fields.
-#[derive(Clone, Debug, Default, Eq, PartialEq)]
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct MatchJob
 {
 	#[cfg_attr(feature = "serde_support", serde(default))]

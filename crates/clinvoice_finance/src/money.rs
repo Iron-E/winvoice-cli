@@ -14,8 +14,8 @@ use crate::Currency;
 /// # See also
 ///
 /// * [`Money::new`], for how to create [`Money`] when an [amount](Decimal) does not already exist.
-#[derive(Copy, Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
+#[derive(Copy, Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Money
 {
 	/// The amount of [`Currency`] that this [`Money`] represents.

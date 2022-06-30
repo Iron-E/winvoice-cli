@@ -6,8 +6,8 @@ use serde::{Deserialize, Serialize};
 /// # Summary
 ///
 /// Where inside of the `WHERE` clause this write is taking place.
-#[derive(Copy, Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
+#[derive(Copy, Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum WriteContext
 {
 	/// # Summary

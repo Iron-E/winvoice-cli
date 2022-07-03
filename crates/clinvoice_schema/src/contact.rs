@@ -9,6 +9,17 @@ use serde::{Deserialize, Serialize};
 /// A way that the [`Organization`](super::Organization) which uses CLInvoice can be contacted by
 /// another [`Organization`]/entity which has been given an [`Invoice`](super::Invoice)/exported
 /// [`Job`](super::Job) in order to facilitate payment or make a request for further services.
+///
+/// # Example
+///
+/// ```rust
+/// use clinvoice_schema::{Contact, ContactKind};
+///
+/// let _ = Contact {
+///   label: "Office Email".into(),
+///   kind: ContactKind::Email("foo@bar.com".into()),
+/// };
+/// ```
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Contact

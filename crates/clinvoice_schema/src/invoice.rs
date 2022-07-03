@@ -8,6 +8,20 @@ use serde::{Deserialize, Serialize};
 use super::InvoiceDate;
 
 /// Information about payment for the completion of a [`Job`](super::Job).
+///
+/// # Examples
+///
+/// ```rust
+/// use clinvoice_schema::{chrono::Utc, Currency, Invoice, InvoiceDate, Money};
+///
+/// let _ = Invoice {
+///   date: Some(InvoiceDate {
+///     issued: Utc::now(),
+///     paid: None,
+///   }),
+///   hourly_rate: Money::new(50_00, 2, Currency::Usd),
+/// };
+/// ```
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 #[derive(Copy, Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Invoice

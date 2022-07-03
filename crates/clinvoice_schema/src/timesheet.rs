@@ -11,12 +11,10 @@ use serde::{Deserialize, Serialize};
 
 use super::{Employee, Expense, Id, Job};
 
-/// A [`Timesheet`] contains information about continuous periods of work on a [`Job`][job].
+/// A [`Timesheet`] contains information about continuous periods of work on a [`Job`].
 ///
-/// A [`Job`][job] may contain multiple [`Timesheet`]s, with different and/or duplicate
+/// A [`Job`] may contain multiple [`Timesheet`]s, with different and/or duplicate
 /// `employee`s.
-///
-/// [job]: super::Job
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Timesheet
@@ -34,7 +32,7 @@ pub struct Timesheet
 	/// Business-related, non-[hourly-rate](super::Invoice)-related [`Expense`]s which were incurred during this time.
 	pub expenses: Vec<Expense>,
 
-	/// The [`Job`](crate::Job) which was worked on.
+	/// The [`Job`] which was worked on.
 	pub job: Job,
 
 	/// The time which this period of work began.
@@ -61,6 +59,32 @@ impl Timesheet
 	/// # Panics
 	///
 	/// When a [`Money`] must be exchanged, but the `exchange_rates` are not provided.
+	///
+	/// # Examples
+	///
+	/// ```rust
+	/// use clinvoice_schema::{chrono::Utc, Currency, Expense, Money, Timesheet};
+	///
+	/// assert_eq!(
+	///   Timesheet::total(None, Money::new(20_00, 2, Currency::Usd), &[
+	///     Timesheet {
+	///       time_begin: Utc::today().and_hms(2, 0, 0),
+	///       time_end: Some(Utc::today().and_hms(2, 30, 0)),
+	///       ..Default::default()
+	///     },
+	///     Timesheet {
+	///       expenses: vec![Expense {
+	///         cost: Money::new(20_00, 2, Currency::Usd),
+	///         ..Default::default()
+	///       }],
+	///       time_begin: Utc::today().and_hms(3, 0, 0),
+	///       time_end: Some(Utc::today().and_hms(3, 30, 0)),
+	///       ..Default::default()
+	///     },
+	///   ]),
+	///   Money::new(4000, 2, Currency::Usd),
+	/// );
+	/// ```
 	pub fn total(
 		exchange_rates: Option<&ExchangeRates>,
 		hourly_rate: Money,
@@ -111,47 +135,5 @@ impl Timesheet
 
 		total.amount.rescale(2);
 		total
-	}
-}
-
-#[cfg(test)]
-mod tests
-{
-	use chrono::Utc;
-	use clinvoice_finance::Currency;
-
-	use super::{Expense, Money, Timesheet};
-
-	#[test]
-	fn total()
-	{
-		let mut timesheets = Vec::new();
-
-		timesheets.push(Timesheet {
-			id: 0,
-			time_begin: Utc::today().and_hms(2, 0, 0),
-			time_end: Some(Utc::today().and_hms(2, 30, 0)),
-			work_notes: "- Wrote the test.".into(),
-			..Default::default()
-		});
-
-		timesheets.push(Timesheet {
-			expenses: vec![Expense {
-				id: 102,
-				category: "Item".into(),
-				cost: Money::new(20_00, 2, Currency::Usd),
-				description: "Paid for someone else to clean".into(),
-				..Default::default()
-			}],
-			time_begin: Utc::today().and_hms(3, 0, 0),
-			time_end: Some(Utc::today().and_hms(3, 30, 0)),
-			work_notes: "- Clean the deck.".into(),
-			..Default::default()
-		});
-
-		assert_eq!(
-			Timesheet::total(None, Money::new(20_00, 2, Currency::Usd), &timesheets),
-			Money::new(4000, 2, Currency::Usd),
-		);
 	}
 }

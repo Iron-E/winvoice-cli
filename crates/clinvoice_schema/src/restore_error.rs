@@ -6,4 +6,5 @@ use thiserror::Error;
 #[error("An edit is irreconcilable with its original state.")]
 pub struct RestoreError;
 
+/// A [`Result`] with [`Err`] equal to [`RestoreError`].
 pub type RestoreResult<T> = std::result::Result<T, RestoreError>;

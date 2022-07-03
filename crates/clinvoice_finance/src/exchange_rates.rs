@@ -5,12 +5,8 @@ use std::{
 	convert::TryInto,
 	env,
 	fs,
-	io::{
-		Cursor,
-		Error as IoError,
-		ErrorKind as IoErrorKind,
-		Read,
-	},
+	io::{Cursor, Error as IoError, ErrorKind as IoErrorKind, Read},
+	ops::Range,
 	path::{Path, PathBuf},
 };
 
@@ -29,6 +25,7 @@ use crate::{Currency, Result};
 /// # See also
 ///
 /// * [`ExchangeRates::get`], to get the corresponding rate for some [`Currency`].
+/// * [`ExchangeRates::new`], to create new [`ExchangeRate`]s.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ExchangeRates(HashMap<Currency, Decimal>);
 
@@ -63,7 +60,7 @@ impl ExchangeRates
 		Ok(csv)
 	}
 
-	/// Return the filepath which the latest [`ExchangeRates`] should be stored at.
+	/// Return the [filepath](PathBuf) which the latest [`ExchangeRates`] should be stored at.
 	fn filepath() -> PathBuf
 	{
 		let today = Local::now();

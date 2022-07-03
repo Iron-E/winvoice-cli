@@ -1,4 +1,3 @@
-mod default;
 mod display;
 
 #[cfg(feature = "serde_support")]
@@ -7,7 +6,7 @@ use serde::{Deserialize, Serialize};
 /// # Summary
 ///
 /// Where inside of the `WHERE` clause this write is taking place.
-#[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Copy, Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 pub enum WriteContext
 {
@@ -32,6 +31,7 @@ pub enum WriteContext
 	/// ```ignore
 	/// SELECT * FROM foo -- ← no `WHERE` yet
 	/// ```
+	#[default]
 	BeforeWhereClause,
 
 	/// # Summary

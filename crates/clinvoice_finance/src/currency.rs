@@ -1,4 +1,3 @@
-mod default;
 mod display;
 mod from_str;
 
@@ -12,7 +11,7 @@ use serde::{Deserialize, Serialize};
 ///
 /// [ecb]: https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/
 /// [iso]: https://www.iso.org/iso-4217-currency-codes.html
-#[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Copy, Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 pub enum Currency
 {
@@ -59,6 +58,7 @@ pub enum Currency
 	/// # Summary
 	///
 	/// The Euro.
+	#[default]
 	Eur,
 
 	/// # Summary

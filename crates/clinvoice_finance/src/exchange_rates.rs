@@ -72,7 +72,9 @@ impl ExchangeRates
 		))
 	}
 
-	/// Retrieve the exchange rate for the `currency` provided.
+	/// Retrieve the exchange rate for the `currency` provided, such that any [`Decimal`]
+	/// [multiplied by](std::ops::Mul) the return value will convert it to the `desired`
+	/// [`Currency`].
 	///
 	/// # Returns
 	///
@@ -83,7 +85,7 @@ impl ExchangeRates
 		self
 			.0
 			.get(current)
-			.and_then(|c| self.0.get(desired).map(|d| c / d))
+			.and_then(|c| self.0.get(desired).map(|d|  d / c))
 	}
 
 	/// Same as [`ExchangeRates::get`], except using range syntax (i.e. `current..desired`) and

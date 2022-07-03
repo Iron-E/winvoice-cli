@@ -11,7 +11,7 @@ impl Exchangeable for Money
 			return self;
 		}
 
-		let mut exchanged = self.amount / rates.index(&self.currency..&currency);
+		let mut exchanged = self.amount * rates.index(&self.currency..&currency);
 		exchanged.rescale(2);
 		Self {
 			amount: exchanged,

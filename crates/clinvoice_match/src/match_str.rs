@@ -65,8 +65,6 @@ impl<T> MatchStr<T>
 	///
 	/// Transform some `Match` of type `T` into another type `U` by providing a mapping function.
 	///
-	/// TODO: remove leading borrow from `f` once recursion limit calculation improves
-	///
 	/// # See also
 	///
 	/// * [`Iterator::map`]
@@ -93,8 +91,6 @@ impl<T> MatchStr<T>
 	/// # Summary
 	///
 	/// Transform some `Match` of type `T` into another type `U` by providing a mapping function.
-	///
-	/// TODO: remove leading borrow from `f` once recursion limit calculation improves
 	///
 	/// # See also
 	///

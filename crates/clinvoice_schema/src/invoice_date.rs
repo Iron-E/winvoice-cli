@@ -20,7 +20,7 @@ use serde::{Deserialize, Serialize};
 /// # Examples
 ///
 /// ```rust
-/// use clinovice_schema::{chrono::Utc, InvoiceDate};
+/// use clinvoice_schema::{chrono::Utc, InvoiceDate};
 ///
 /// let _unpaid = InvoiceDate {
 ///   issued: Utc::now(),

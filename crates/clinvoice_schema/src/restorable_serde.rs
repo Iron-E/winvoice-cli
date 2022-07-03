@@ -16,7 +16,7 @@ pub trait RestorableSerde
 	/// # Example
 	///
 	/// ```rust
-	/// use clinvoice_schema::Employee;
+	/// use clinvoice_schema::{Employee, RestorableSerde};
 	///
 	/// let original = Employee {
 	///   id: 0, // NOTE: you normally want to avoid assigning an arbitrary ID like this

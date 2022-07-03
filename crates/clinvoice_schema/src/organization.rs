@@ -28,7 +28,7 @@ use super::{Id, Location};
 ///       id: 0, // NOTE: you normally want to avoid assigning an arbitrary ID like this
 ///       outer: None,
 ///       name: "Japan".into(),
-///     }.into())
+///     }.into()),
 ///     name: "Tokyo".into(),
 ///   },
 ///   name: "My Company".into(),

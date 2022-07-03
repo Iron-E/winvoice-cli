@@ -22,14 +22,19 @@ use super::{Id, Invoice, Organization};
 /// # Examples
 ///
 /// ```rust
-/// use clinvoice_schema::{chrono::Utc, Currency, Duration, Invoice, Job, Money};
+/// use core::time::Duration;
+/// use clinvoice_schema::{
+///   chrono::Utc,
+///   Currency, Money,
+///   Invoice, Job, Location, Organization
+/// };
 ///
 /// let _ = Job {
 ///   client: Organization {
 ///     id: 0, // NOTE: you normally want to avoid assigning an arbitrary ID like this
 ///     location: Location {
 ///       id: 0, // NOTE: you normally want to avoid assigning an arbitrary ID like this
-///       outer: None
+///       outer: None,
 ///       name: "1337 Some Street".into(),
 ///     },
 ///     name: "Big Old Test".into(),

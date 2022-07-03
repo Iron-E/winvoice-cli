@@ -1,5 +1,4 @@
 mod from_str;
-mod index;
 
 use std::{
 	collections::HashMap,
@@ -12,6 +11,7 @@ use std::{
 		ErrorKind::{InvalidData, NotFound, Unsupported},
 		Read,
 	},
+	ops::Range,
 	path::{Path, PathBuf},
 };
 
@@ -75,15 +75,37 @@ impl ExchangeRates
 
 	/// # Summary
 	///
-	/// Retrieve the corresponding exchange rate for the `currency` provided.
+	/// Retrieve the corresponding exchange rate to convert from the `current` currency to the
+	/// `desired` currency.
 	///
 	/// # Returns
 	///
 	/// * [`None`] if this set of exchange rates does not account for the `currency`.
 	/// * [`Some`] if this set of exchange rates accounts for the `currency`.
-	pub fn get(&self, currency: &Currency) -> Option<&Decimal>
+	pub fn get(&self, current: &Currency, desired: &Currency) -> Option<Decimal>
 	{
-		self.0.get(currency)
+		self
+			.0
+			.get(current)
+			.and_then(|c| self.0.get(desired).map(|d| c / d))
+	}
+
+	/// # Summary
+	///
+	/// Same as [`ExchangeRates::get`], except using range syntax (i.e. `current..desired`) and
+	/// panics with a custom error message instead of returning [`None`].
+	///
+	/// # Panics
+	///
+	/// * If any `Currency` in `range` is not present in this set of [`ExchangeRates`].
+	pub fn index(&self, range: Range<&Currency>) -> Decimal
+	{
+		self.get(range.start, range.end).unwrap_or_else(|| {
+			panic!(
+				"Either {} or {} was not found in {self:?}",
+				range.start, range.end
+			)
+		})
 	}
 
 	/// # Summary

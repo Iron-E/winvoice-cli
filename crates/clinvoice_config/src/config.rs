@@ -44,44 +44,6 @@ impl Config
 {
 	/// # Summary
 	///
-	/// Create a configuration file with some defaults.
-	pub fn init() -> Result<()>
-	{
-		let path = Self::path();
-		if !path.is_file()
-		{
-			if let Some(parent) = path.parent()
-			{
-				if !parent.is_dir()
-				{
-					fs::create_dir_all(parent)?;
-				}
-			}
-
-			let config = Self {
-				stores: [
-					("default".into(), StoreValue::Alias("foo".into())),
-					(
-						"foo".into(),
-						StoreValue::Storage(Store {
-							adapter: Adapters::Postgres,
-							url: "See https://github.com/Iron-E/clinvoice/wiki/Usage#adapters".into(),
-						}),
-					),
-				]
-				.into_iter()
-				.collect(),
-				..Default::default()
-			};
-
-			config.update()?;
-		}
-
-		Ok(())
-	}
-
-	/// # Summary
-	///
 	/// Get the [`Store`] from `name`, resolving any [`StoreValue::Alias`] which `name` may point to.
 	///
 	/// # Parameters
@@ -91,6 +53,61 @@ impl Config
 	/// # Returns
 	///
 	/// The [`Store`] which corresponds to `name`.
+	///
+	/// # Examples
+	///
+	/// ```rust
+	/// use core::time::Duration;
+	/// use clinvoice_config::{Adapters, Config, Employees, Invoices, Store, StoreValue, Timesheets};
+	/// use clinvoice_schema::Currency;
+	///
+	/// let conf: Config = toml::from_str(r#"
+	///   [employees]
+	///   id = 1
+	///   organization_id = 2
+	///
+	///   [invoices]
+	///   default_currency = "USD"
+	///
+	///   [stores]
+	///   a = "b"
+	///   b = "c"
+	///   c = {adapter = "Postgres", url = "c/path"}
+	///   d = {adapter = "Postgres", url = "d/path"}
+	///   e = "d"
+	///
+	///   [timesheets]
+	///   default_increment = "100s"
+	/// "#).unwrap();
+	///
+	/// // Reflexivity
+	/// assert_eq!(
+	///   conf.get_store("a").as_deref(),
+	///   conf.get_store("b").as_deref()
+	/// );
+	/// assert_eq!(
+	///   conf.get_store("b").as_deref(),
+	///   conf.get_store("c").as_deref()
+	/// );
+	/// assert_eq!(
+	///   conf.get_store("a").as_deref(),
+	///   conf.get_store("c").as_deref()
+	/// );
+	/// assert_eq!(
+	///   conf.get_store("d").as_deref(),
+	///   conf.get_store("e").as_deref()
+	/// );
+	///
+	/// // Should never be the same
+	/// assert_ne!(
+	///   conf.get_store("c").as_deref(),
+	///   conf.get_store("d").as_deref()
+	/// );
+	/// assert_ne!(
+	///   conf.get_store("a").as_deref(),
+	///   conf.get_store("e").as_deref()
+	/// );
+	/// ```
 	pub fn get_store(&self, name: &str) -> Option<&Store>
 	{
 		self.stores.get(name).and_then(|value| match value
@@ -98,6 +115,46 @@ impl Config
 			StoreValue::Alias(alias) => self.get_store(alias),
 			StoreValue::Storage(store) => Some(store),
 		})
+	}
+
+	/// # Summary
+	///
+	/// Create a configuration file with some defaults.
+	pub fn init() -> Result<()>
+	{
+		let path = Self::path();
+
+		if path.is_file()
+		{
+			return Ok(());
+		}
+
+		// TODO: use if-let chains
+		if let Some(parent) = path.parent()
+		{
+			if !parent.is_dir()
+			{
+				fs::create_dir_all(parent)?;
+			}
+		}
+
+		let config = Self {
+			stores: [
+				("default".into(), StoreValue::Alias("foo".into())),
+				(
+					"foo".into(),
+					StoreValue::Storage(Store {
+						adapter: Adapters::Postgres,
+						url: "See https://github.com/Iron-E/clinvoice/wiki/Usage#adapters".into(),
+					}),
+				),
+			]
+			.into_iter()
+			.collect(),
+			..Default::default()
+		};
+
+		config.update()
 	}
 
 	pub fn path() -> PathBuf
@@ -112,82 +169,5 @@ impl Config
 	{
 		let serialized = toml::to_string_pretty(self)?;
 		fs::write(Self::path(), serialized).map_err(Error::from)
-	}
-}
-
-#[cfg(test)]
-mod tests
-{
-	use core::time::Duration;
-
-	use clinvoice_schema::{Currency, Id};
-
-	use super::{BTreeMap, Config, Employees, Invoices, StoreValue, Timesheets};
-	use crate::{Adapters, Store};
-
-	#[test]
-	fn get_store()
-	{
-		let mut stores = BTreeMap::new();
-
-		stores.insert("a".into(), StoreValue::Alias("b".into()));
-		stores.insert("b".into(), StoreValue::Alias("c".into()));
-		stores.insert(
-			"c".into(),
-			StoreValue::Storage(Store {
-				adapter: Adapters::Postgres,
-				url: "c/path".into(),
-			}),
-		);
-		stores.insert(
-			"d".into(),
-			StoreValue::Storage(Store {
-				adapter: Adapters::Postgres,
-				url: "d/path".into(),
-			}),
-		);
-		stores.insert("e".into(), StoreValue::Alias("d".into()));
-
-		let conf = Config {
-			employees: Employees {
-				id: Some(Id::default()),
-				organization_id: Some(Id::default()),
-			},
-			invoices: Invoices {
-				default_currency: Currency::Usd,
-			},
-			stores,
-			timesheets: Timesheets {
-				default_increment: Duration::new(100, 0),
-			},
-		};
-
-		// Reflexivity
-		assert_eq!(
-			conf.get_store("a").as_deref(),
-			conf.get_store("b").as_deref()
-		);
-		assert_eq!(
-			conf.get_store("b").as_deref(),
-			conf.get_store("c").as_deref()
-		);
-		assert_eq!(
-			conf.get_store("a").as_deref(),
-			conf.get_store("c").as_deref()
-		);
-		assert_eq!(
-			conf.get_store("d").as_deref(),
-			conf.get_store("e").as_deref()
-		);
-
-		// Should never be the same
-		assert_ne!(
-			conf.get_store("c").as_deref(),
-			conf.get_store("d").as_deref()
-		);
-		assert_ne!(
-			conf.get_store("a").as_deref(),
-			conf.get_store("e").as_deref()
-		);
 	}
 }

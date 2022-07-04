@@ -1,20 +1,19 @@
-//! # Summary
-//!
-//! This crate provides a complete resource for data items which are to be stored in a database (or
-//! other permanent storage fixture). It is only dependent on `clinvoice_finance` for currency
-//! conversions, and is otherwise independent of the CLInvoice project.
-//!
-//! Consequently, most other parts of `clinvoice` depend on this crate.
+//! This crate provides definitions for the information which is managed by CLInvoice. The data is
+//! represented as it would be after all `JOIN`s are performed on a database (e.g. an
+//! [`Organization`] in a database would likely reference [`Location`] by [`Id`], rather than
+//! aggregating it).
 //!
 //! # Features
 //!
 //! Support for [`serde`](http://serde.rs/) can be enabled with the `serde_support` feature flag.
 //! Otherwise, serialization will have to be implemented for these types by hand.
 //!
-//! # Remarks
+//! # Re-exports
 //!
-//! In the base you can find the types which are intended to be stored (e.g. [`Contact`]) and in
-//! [`views`] you can find all logical views of the data.
+//! The crate provides access to the following elements of other crates:
+//!
+//! * Elements of the [`clinvoice_finance`] which are required to instantiate data (e.g. [`Money`]).
+//! * The entire [`chrono`] crate, as almost all of it is required to instantiate certain data.
 
 mod contact;
 mod employee;

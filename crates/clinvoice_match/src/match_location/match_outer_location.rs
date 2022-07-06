@@ -3,6 +3,36 @@ use serde::{Deserialize, Serialize};
 
 use super::MatchLocation;
 
+/// An [`Option<Location>`] with [matchable](clinvoice_match) fields.
+///
+/// [`MatchOuterLocation`] matches IFF its variant matches.
+///
+/// # Examples
+///
+/// ## YAML
+///
+/// Requires the `serde_support` feature. If any field is omitted, it will be set to the
+/// [`Default`] for its type.
+///
+/// ```rust
+/// # assert!(serde_yaml::from_str::<clinvoice_match::MatchOuterLocation>("
+/// any
+/// # ").is_ok());
+/// ```
+///
+/// ```rust
+/// # assert!(serde_yaml::from_str::<clinvoice_match::MatchOuterLocation>("
+/// none
+/// # ").is_ok());
+/// ```
+///
+/// ```rust
+/// # assert!(serde_yaml::from_str::<clinvoice_match::MatchOuterLocation>(r#"
+/// some:
+///   name:
+///     equal_to: "Antarctica"
+/// # "#).is_ok());
+/// ```
 #[cfg_attr(
 	feature = "serde_support",
 	derive(Deserialize, Serialize),
@@ -11,20 +41,17 @@ use super::MatchLocation;
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub enum MatchOuterLocation
 {
-	/// # Summary
-	///
 	/// Always match.
 	#[default]
 	Any,
 
-	/// # Summary
-	///
-	/// Match only when there is no [`outer_id`](clinvoice_schema::Location).
+	/// Match IFF the [`Location`](clinvoice_schema::Location)'s `outer` field
+	/// [`is_none`](Option::is_none).
 	None,
 
-	/// # Summary
+	/// Match IFF the [`Location`](clinvoice_schema::Location)'s `outer` field
+	/// [`is_some`](Option::is_some) and matches the contained [`MatchLocation`].
 	///
-	/// Match only when a specific [`outer_id`](clinvoice_schema::Location) resolves to a
-	/// matching [`Location`].
+	/// TODO: [flatten this](https://github.com/serde-rs/serde/issues/1402)
 	Some(Box<MatchLocation>),
 }

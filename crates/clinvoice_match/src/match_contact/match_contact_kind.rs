@@ -4,9 +4,23 @@ use serde::{Deserialize, Serialize};
 use super::MatchStr;
 use crate::MatchLocation;
 
-/// # Summary
+/// A [`ContactKind`](clinvoice_schema::ContactKind) with [matchable](clinvoice_match) fields.
 ///
-/// A [`Contact`](clinvoice_schema::Contact) with [matchable](Match) fields.
+/// [`MatchContact`] matches IFF its variant matches.
+///
+/// # Examples
+///
+/// This is an example for how a [`MatchContactKind`] may look as YAML (requires the
+/// `serde_support` feature):
+///
+/// ```rust
+/// use clinvoice_match::MatchContactKind;
+/// use serde_yaml::from_str;
+///
+/// assert!(from_str::<MatchContactKind>("
+///   email:
+///     equal_to: 'foo@bar.io'
+/// ").is_ok());
 #[cfg_attr(
 	feature = "serde_support",
 	derive(Deserialize, Serialize),
@@ -18,7 +32,7 @@ pub enum MatchContactKind
 	/// Same as [`ContactKind::Address`](clinvoice_schema::ContactKind::Address).
 	Address(#[cfg_attr(feature = "serde_support", serde(default))] MatchLocation),
 
-	/// Same as [`Always`](crate::Match::Always).
+	/// Always match.
 	#[default]
 	Any,
 

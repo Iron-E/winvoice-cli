@@ -47,7 +47,7 @@ use serde::{Deserialize, Serialize};
 /// # assert!(serde_yaml::from_str::<clinvoice_match::MatchStr<String>>(r#"
 /// and:
 ///   - contains: "f"
-///   - regex: "o{2,}$"
+///   - regex: 'o{2,}$'
 /// # "#).is_ok());
 /// ```
 ///
@@ -87,7 +87,7 @@ use serde::{Deserialize, Serialize};
 ///
 /// ```rust
 /// # assert!(serde_yaml::from_str::<clinvoice_match::MatchStr<String>>(r#"
-/// regex: "fo{2,}"
+/// regex: 'fo{2,}'
 /// # "#).is_ok());
 /// ```
 #[cfg_attr(

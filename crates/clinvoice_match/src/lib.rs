@@ -30,10 +30,10 @@
 //! use clinvoice_match::{Match, MatchEmployee, MatchStr};
 //!
 //! let _ = MatchEmployee {
-//!   id: Match::Any,
 //!   name: MatchStr::Regex("^[ABC]".into()),
 //!   status: "Hired".to_string().into(),
 //!   title: MatchStr::Not(Box::new("CEO".to_string().into())),
+//!   ..Default::default()
 //! };
 //! ```
 

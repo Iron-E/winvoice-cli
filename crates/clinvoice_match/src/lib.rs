@@ -3,9 +3,14 @@
 //! [`clinvoice_schema`] is that the types in this crate can be used to describe any number of their
 //! counterpart types.
 //!
-//! This crate is built on the backbone of [`Match`], [`MatchSet`], and [`MatchStr`]. These types
-//! do not have equivalents in [`clinvoice_schema`], since they are what set this crate apart from
-//! that crate.
+//! The ability to "describe" other types comes from [`Match`], [`MatchSet`], and [`MatchStr`].
+//! As this is the distinguishing feature of the crate, none of those three types have equivalents
+//! in [`clinvoice_schema`].
+//!
+//! # Features
+//!
+//! * `serde_support` adds support for the [`serde`] crate. This crate is intended for and tested
+//!   with [`serde_yaml`](https://docs.serde.rs/serde_yaml/) in particular.
 //!
 //! # Re-exports
 //!

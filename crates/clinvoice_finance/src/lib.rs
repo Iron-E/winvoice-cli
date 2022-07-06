@@ -4,8 +4,7 @@
 //!
 //! # Features
 //!
-//! Support for [`serde`](http://serde.rs/) can be enabled with the `serde_support` feature flag.
-//! Otherwise, serialization will have to be implemented for these types by hand.
+//! * `serde_support` adds support for the [`serde`] crate.
 
 mod currency;
 mod error;

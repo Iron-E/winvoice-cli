@@ -13,7 +13,7 @@ use strum::{EnumCount, EnumIter, IntoStaticStr};
 #[cfg_attr(
 	feature = "serde_support",
 	derive(Deserialize, Serialize),
-	serde(rename_all = "UPPERCASE"),
+	serde(rename_all = "UPPERCASE")
 )]
 #[derive(
 	Copy,

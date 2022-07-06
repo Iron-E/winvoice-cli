@@ -44,18 +44,18 @@ use serde::{Deserialize, Serialize};
 /// ```rust
 /// use clinvoice_match::Match;
 ///
-/// assert!(serde_yaml::from_str::<Match<isize>>(r#"
+/// assert!(serde_yaml::from_str::<Match<isize>>("
 ///   or:
 ///     - not:
 ///         less_than: 1
 ///     - equal_to: 0
 ///     - in_range: [-4, -2]
-/// "#).is_ok());
+/// ").is_ok());
 /// ```
 #[cfg_attr(
 	feature = "serde_support",
 	derive(Deserialize, Serialize),
-	serde(rename_all = "snake_case"),
+	serde(rename_all = "snake_case")
 )]
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum Match<T>

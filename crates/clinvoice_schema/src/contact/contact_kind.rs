@@ -12,7 +12,7 @@ use crate::Location;
 #[cfg_attr(
 	feature = "serde_support",
 	derive(Deserialize, Serialize),
-	serde(untagged),
+	serde(untagged)
 )]
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum ContactKind

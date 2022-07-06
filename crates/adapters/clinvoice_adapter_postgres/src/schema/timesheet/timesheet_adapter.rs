@@ -277,7 +277,7 @@ mod tests
 		.unwrap();
 
 		let timesheet_row = sqlx::query!(
-			r#"SELECT
+			"SELECT
 					employee_id,
 					id,
 					job_id,
@@ -285,7 +285,7 @@ mod tests
 					time_end,
 					work_notes
 				FROM timesheets
-				WHERE id = $1;"#,
+				WHERE id = $1;",
 			timesheet.id,
 		)
 		.fetch_one(&connection)
@@ -293,14 +293,14 @@ mod tests
 		.unwrap();
 
 		let expense_row = sqlx::query!(
-			r#"SELECT
+			"SELECT
 					category,
 					cost,
 					description,
 					id,
 					timesheet_id
 				FROM expenses
-				WHERE timesheet_id = $1;"#,
+				WHERE timesheet_id = $1;",
 			timesheet_row.id,
 		)
 		.fetch_one(&connection)

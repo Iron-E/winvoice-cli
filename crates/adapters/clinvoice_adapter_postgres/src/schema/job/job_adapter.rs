@@ -177,7 +177,7 @@ mod tests
 		.unwrap();
 
 		let row = sqlx::query!(
-			r#"SELECT
+			"SELECT
 					id,
 					client_id,
 					date_close,
@@ -189,7 +189,7 @@ mod tests
 					notes,
 					objectives
 				FROM jobs
-				WHERE id = $1;"#,
+				WHERE id = $1;",
 			job.id,
 		)
 		.fetch_one(&connection)

@@ -10,7 +10,7 @@ use crate::MatchLocation;
 ///
 /// # Examples
 ///
-/// # YAML
+/// ## YAML
 ///
 /// Requires the `serde_support` feature. If any field is omitted, it will be set to the
 /// [`Default`] for its type.

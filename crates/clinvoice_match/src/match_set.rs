@@ -7,9 +7,84 @@ use core::{cmp::Eq, fmt::Debug};
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 
-/// # Summary
+/// A value which describes the condition which some
+/// [set](https://en.wikipedia.org/wiki/Set_(mathematics)) of type `T` must meet in order to
+/// "_match_".
 ///
-/// A value in a retrieval operation.
+/// # Examples
+///
+/// This is an example for how a [`MatchSet`] should be interpreted:
+///
+/// ```rust
+/// use std::{collections::HashSet, ops::Deref};
+/// use clinvoice_match::{Match, MatchSet};
+///
+/// fn matches(condition: &Match<isize>, x: isize) -> bool {
+///   match condition {
+///     Match::And(conditions) => conditions.into_iter().all(|c| matches(c, x)),
+///     Match::Any => true,
+///     Match::EqualTo(value) => x.eq(value),
+///     Match::GreaterThan(value) => x.gt(value),
+///     Match::InRange(lower, upper) => lower.le(&x) && x.lt(upper),
+///     Match::LessThan(value) => x.le(value),
+///     Match::Not(c) => !matches(c.deref(), x),
+///     Match::Or(conditions) => conditions.into_iter().any(|c| matches(c, x)),
+///   }
+/// }
+///
+/// fn set_matches(condition: &MatchSet<Match<isize>>, set: &HashSet<isize>) -> bool {
+///   match condition {
+///     MatchSet::And(conditions) => conditions.into_iter().all(|c| set_matches(c, set)),
+///     MatchSet::Any => true,
+///     MatchSet::Contains(condition) => set.iter().any(|value| matches(condition, *value)),
+///     MatchSet::Not(c) => !set_matches(c.deref(), set),
+///     MatchSet::Or(conditions) => conditions.into_iter().any(|c| set_matches(c, set)),
+///   }
+/// }
+///
+/// let set: HashSet<_> = [1, 3, 5, 7, 9].into_iter().collect();
+///
+/// assert!(set_matches(
+///   &MatchSet::Or(vec![
+///     MatchSet::Contains(Match::EqualTo(0)),
+///     MatchSet::Contains(Match::GreaterThan(3)),
+///   ]),
+///   &set,
+/// ));
+///
+/// assert!(set_matches(
+///   &MatchSet::Not(Box::new(MatchSet::Contains(Match::InRange(10, 100)))),
+///   &set,
+/// ));
+/// ```
+///
+/// This is an example for how a [`MatchStr`] may look as YAML (requires the `serde_support` feature):
+///
+/// ```rust
+/// use serde_yaml::from_str;
+/// type MatchSet = clinvoice_match::MatchSet<clinvoice_match::Match<isize>>;
+///
+/// assert!(from_str::<MatchSet>(
+///  "and:
+///     - contains:
+///         equal_to: 5
+///     - contains:
+///         greater_than: 7").is_ok());
+/// assert!(from_str::<MatchSet>("any").is_ok());
+/// assert!(from_str::<MatchSet>(
+///  "contains:
+///     in_range: [0, 10]").is_ok());
+/// assert!(from_str::<MatchSet>(
+///  "not:
+///     contains:
+///       equal_to: 5").is_ok());
+/// assert!(from_str::<MatchSet>(
+///  "or:
+///     - contains:
+///         equal_to: 5
+///     - contains:
+///         greater_than: 7").is_ok());
+/// ```
 #[cfg_attr(
 	feature = "serde_support",
 	derive(Deserialize, Serialize),
@@ -18,41 +93,40 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum MatchSet<T>
 {
-	/// # Summary
-	///
-	/// Match if and only if all of the contained [`Match`]es also match.
+	/// Match IFF all contained [`MatchStr`]s also match.
 	And(Vec<Self>),
 
-	/// # Summary
-	///
 	/// Always match.
 	Any,
 
-	/// # Summary
-	///
-	/// Match if and only if any of the elements of the provided set are in a given set of type `T`.
+	/// Match IFF some set contains a value described by this value.
 	Contains(T),
 
-	/// # Summary
-	///
-	/// Negate a [`Match`].
+	/// Match IFF the contained [`MatchSet`] does _not_ match.
 	Not(Box<Self>),
 
-	/// # Summary
-	///
-	/// Match if and only if any of the contained [`Match`]es also match.
+	/// Match IFF any contained [`MatchSet`] matches.
 	Or(Vec<Self>),
 }
 
 impl<T> MatchSet<T>
 {
-	/// # Summary
-	///
-	/// Transform some `Match` of type `T` into another type `U` by providing a mapping function.
+	/// Transform some [`Match`] of type `T` into another type `U` by providing a mapping `f`unction.
 	///
 	/// # See also
 	///
 	/// * [`Iterator::map`]
+	///
+	/// # Examples
+	///
+	/// ```rust
+	/// use clinvoice_match::{Match, MatchSet};
+	///
+	/// assert_eq!(
+	///   MatchSet::Contains(Match::EqualTo(7)).map(|_| Match::GreaterThan(5)),
+	///   MatchSet::Contains(Match::GreaterThan(5)),
+	/// );
+	/// ```
 	pub fn map<U>(self, f: impl Copy + Fn(T) -> U) -> MatchSet<U>
 	{
 		match self
@@ -71,13 +145,11 @@ impl<T> MatchSet<T>
 		}
 	}
 
-	/// # Summary
-	///
-	/// Transform some `Match` of type `T` into another type `U` by providing a mapping function.
+	/// Transform some [`Match`] of type `T` into another type `U` by providing a mapping `f`unction.
 	///
 	/// # See also
 	///
-	/// * [`Iterator::map`]
+	/// * [`Match::map`]
 	pub fn map_ref<U>(&self, f: impl Copy + Fn(&T) -> U) -> MatchSet<U>
 	{
 		match self

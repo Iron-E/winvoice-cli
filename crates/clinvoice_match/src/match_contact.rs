@@ -6,9 +6,27 @@ use serde::{Deserialize, Serialize};
 
 use super::MatchStr;
 
-/// # Summary
+/// A [`Contact`](clinvoice_schema::Contact) with [matchable](clinvoice_match) fields.
 ///
-/// An [`Contact`](clinvoice_schema::Contact) with [matchable](Match) fields.
+/// [`MatchContact`] matches IFF all of its fields also match.
+///
+/// # Examples
+///
+/// This is an example for how a [`MatchContact`] may look as YAML (requires the `serde_support`
+/// feature):
+///
+/// ```rust
+/// use clinvoice_match::MatchContact;
+/// use serde_yaml::from_str;
+///
+/// assert!(from_str::<MatchContact>("
+///   kind:
+///     email:
+///       equal_to: 'foo@bar.io'
+///   label:
+///     equal_to: 'Primary Email'
+/// ").is_ok());
+/// ```
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 #[derive(Clone, Default, Debug, Eq, PartialEq)]
 pub struct MatchContact

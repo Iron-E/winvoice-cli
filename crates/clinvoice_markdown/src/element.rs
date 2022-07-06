@@ -6,7 +6,7 @@ mod display;
 ///
 /// # Example
 ///
-/// ```ignore
+/// ```text
 /// # this is a Heading
 ///
 /// this is BlockText

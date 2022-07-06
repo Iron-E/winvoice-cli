@@ -17,7 +17,7 @@ pub enum WriteContext
 	///
 	/// # Example
 	///
-	/// ```ignore
+	/// ```sql
 	/// SELECT * FROM foo WHERE bar = 7 -- ← a valid SQL query, but would also be valid with another `WHERE` condition
 	/// ```
 	AcceptingAnotherWhereCondition,
@@ -28,7 +28,7 @@ pub enum WriteContext
 	///
 	/// # Example
 	///
-	/// ```ignore
+	/// ```sql
 	/// SELECT * FROM foo -- ← no `WHERE` yet
 	/// ```
 	#[default]
@@ -41,8 +41,8 @@ pub enum WriteContext
 	///
 	/// # Example
 	///
-	/// ```ignore
-	/// SELECT * FROM foo WHERE bar <= 7 AND -- ← the current `WHERE` condition is not complete.
+	/// ```sql
+	/// SELECT * FROM foo WHERE bar <= 7 AND -- ← invalid SQL; the current `WHERE` condition is not complete.
 	/// ```
 	InWhereCondition,
 }

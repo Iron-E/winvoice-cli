@@ -10,8 +10,11 @@ use strum::{EnumCount, EnumIter, IntoStaticStr};
 ///
 /// [ecb]: https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/
 /// [iso]: https://www.iso.org/iso-4217-currency-codes.html
-#[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
-#[cfg_attr(feature = "serde_support", serde(rename_all = "UPPERCASE"))]
+#[cfg_attr(
+	feature = "serde_support",
+	derive(Deserialize, Serialize),
+	serde(rename_all = "UPPERCASE"),
+)]
 #[derive(
 	Copy,
 	Clone,

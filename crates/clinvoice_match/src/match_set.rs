@@ -10,7 +10,11 @@ use serde::{Deserialize, Serialize};
 /// # Summary
 ///
 /// A value in a retrieval operation.
-#[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
+#[cfg_attr(
+	feature = "serde_support",
+	derive(Deserialize, Serialize),
+	serde(rename_all = "snake_case"),
+)]
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum MatchSet<T>
 {

@@ -9,8 +9,11 @@ use crate::Location;
 /// (i.e. the `label`), but all of the rest is variable. Further, certain types of [`String`] data
 /// (namely, [`ContactKind::Email`] and [`ContactKind::Phone`]) can be minimally verified before
 /// insertion into a database which helps prevent user error.
-#[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
-#[cfg_attr(feature = "serde_support", serde(untagged))]
+#[cfg_attr(
+	feature = "serde_support",
+	derive(Deserialize, Serialize),
+	serde(untagged),
+)]
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum ContactKind
 {

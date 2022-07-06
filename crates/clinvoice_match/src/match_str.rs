@@ -31,7 +31,10 @@ use serde::{Deserialize, Serialize};
 /// assert!(matches(MatchStr::EqualTo("foo"), "foo"));
 /// assert!(matches(MatchStr::Regex("fo{2,}"), "foo"));
 /// assert!(matches(
-///   MatchStr::Not(MatchStr::Or(vec![MatchStr::Contains("b"), MatchStr::Contains("a")]).into()),
+///   MatchStr::Not(Box::new(MatchStr::Or(vec![
+///     MatchStr::Contains("b"),
+///     MatchStr::Contains("a")
+///   ]))),
 ///   "foo",
 /// ));
 /// ```
@@ -39,15 +42,25 @@ use serde::{Deserialize, Serialize};
 /// This is an example for how a [`MatchStr`] may look as YAML (requires the `serde_support` feature):
 ///
 /// ```rust
-/// use clinvoice_match::MatchStr;
+/// use serde_yaml::from_str;
+/// type MatchStr = clinvoice_match::MatchStr<String>;
 ///
-/// assert!(serde_yaml::from_str::<MatchStr<String>>("
-///   or:
+/// assert!(from_str::<MatchStr>(
+///  "and:
+///     - contains: 'f'
+///     - regex: 'o{2,}$'").is_ok());
+/// assert!(from_str::<MatchStr>("any").is_ok());
+/// assert!(from_str::<MatchStr>("contains: 'foo'").is_ok());
+/// assert!(from_str::<MatchStr>("equal_to: 'foo'").is_ok());
+/// assert!(from_str::<MatchStr>(
+///  "not:
+///     equal_to: 'bar'").is_ok());
+/// assert!(from_str::<MatchStr>(
+///  "or:
 ///     - not:
-///         contains: 'b'
-///     - equal_to: 'foo'
-///     - regex: 'fo{2,}'
-/// ").is_ok());
+///         contains: 'bar'
+///     - equal_to: 'foobar'").is_ok());
+/// assert!(from_str::<MatchStr>("regex: 'fo{2,}'").is_ok());
 /// ```
 #[cfg_attr(
 	feature = "serde_support",

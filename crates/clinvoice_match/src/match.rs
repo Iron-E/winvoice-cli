@@ -34,7 +34,10 @@ use serde::{Deserialize, Serialize};
 /// assert!(matches(Match::InRange(5, 10), 9));
 /// assert!(matches(Match::LessThan(4), 1));
 /// assert!(matches(
-///   Match::Not(Match::Or(vec![Match::GreaterThan(1), Match::LessThan(-1)]).into()),
+///   Match::Not(Box::new(Match::Or(vec![
+///     Match::GreaterThan(1),
+///     Match::LessThan(-1),
+///   ]))),
 ///   0,
 /// ));
 /// ```
@@ -42,15 +45,26 @@ use serde::{Deserialize, Serialize};
 /// This is an example for how a [`Match`] may look as YAML (requires the `serde_support` feature):
 ///
 /// ```rust
-/// use clinvoice_match::Match;
+/// use serde_yaml::from_str;
+/// type Match = clinvoice_match::Match<isize>;
 ///
-/// assert!(serde_yaml::from_str::<Match<isize>>("
-///   or:
+/// assert!(from_str::<Match>(
+///  "and:
 ///     - not:
-///         less_than: 1
-///     - equal_to: 0
-///     - in_range: [-4, -2]
-/// ").is_ok());
+///         equal_to: 3
+///     - in_range: [0, 10]").is_ok());
+/// assert!(from_str::<Match>("any").is_ok());
+/// assert!(from_str::<Match>("equal_to: 3").is_ok());
+/// assert!(from_str::<Match>("less_than: 3").is_ok());
+/// assert!(from_str::<Match>("greater_than: 3").is_ok());
+/// assert!(from_str::<Match>("in_range: [0, 3]").is_ok());
+/// assert!(from_str::<Match>(
+///  "not:
+///     equal_to: 3").is_ok());
+/// assert!(from_str::<Match>(
+///  "or:
+///     - greater_than: 2
+///     - equal_to: 0").is_ok());
 /// ```
 #[cfg_attr(
 	feature = "serde_support",

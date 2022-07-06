@@ -42,32 +42,46 @@ use serde::{Deserialize, Serialize};
 /// This is an example for how a [`MatchStr`] may look as YAML (requires the `serde_support` feature):
 ///
 /// ```rust
-/// use serde_yaml::from_str;
-/// type MatchStr = clinvoice_match::MatchStr<String>;
+/// # assert!(serde_yaml::from_str::<clinvoice_match::MatchStr<String>>("
+/// and:
+///   - contains: 'f'
+///   - regex: 'o{2,}$'
+/// # ").is_ok());
+/// ```
 ///
-/// assert!(from_str::<MatchStr>("
-///   and:
-///     - contains: 'f'
-///     - regex: 'o{2,}$'
-/// ").is_ok());
-///
-/// assert!(from_str::<MatchStr>("any").is_ok());
+/// ```rust
+/// # assert!(serde_yaml::from_str::<clinvoice_match::MatchStr<String>>("
+/// any
+/// # ").is_ok());
 /// assert!(from_str::<MatchStr>("contains: 'foo'").is_ok());
-/// assert!(from_str::<MatchStr>("equal_to: 'foo'").is_ok());
+/// ```
 ///
-/// assert!(from_str::<MatchStr>("
-///   not:
-///     equal_to: 'bar'
-/// ").is_ok());
+/// ```rust
+/// # assert!(serde_yaml::from_str::<clinvoice_match::MatchStr<String>>("
+/// equal_to: 'foo'
+/// # ").is_ok());
+/// ```
 ///
-/// assert!(from_str::<MatchStr>("
-///   or:
-///     - not:
-///         contains: 'bar'
-///     - equal_to: 'foobar'
-/// ").is_ok());
+/// ```rust
+/// # assert!(serde_yaml::from_str::<clinvoice_match::MatchStr<String>>("
+/// not:
+///   equal_to: 'bar'
+/// # ").is_ok());
+/// ```
 ///
-/// assert!(from_str::<MatchStr>("regex: 'fo{2,}'").is_ok());
+/// ```rust
+/// # assert!(serde_yaml::from_str::<clinvoice_match::MatchStr<String>>("
+/// or:
+///   - not:
+///       contains: 'bar'
+///   - equal_to: 'foobar'
+/// # ").is_ok());
+/// ```
+///
+/// ```rust
+/// # assert!(serde_yaml::from_str::<clinvoice_match::MatchStr<String>>("
+/// regex: 'fo{2,}'
+/// # ").is_ok());
 /// ```
 #[cfg_attr(
 	feature = "serde_support",

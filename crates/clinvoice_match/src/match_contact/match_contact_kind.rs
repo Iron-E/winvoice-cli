@@ -14,13 +14,10 @@ use crate::MatchLocation;
 /// `serde_support` feature):
 ///
 /// ```rust
-/// use clinvoice_match::MatchContactKind;
-/// use serde_yaml::from_str;
-///
-/// assert!(from_str::<MatchContactKind>("
-///   email:
-///     equal_to: 'foo@bar.io'
-/// ").is_ok());
+/// # assert!(serde_yaml::from_str::<clinvoice_match::MatchContactKind>(r#"
+/// email:
+///   equal_to: "foo@bar.io"
+/// # "#).is_ok());
 #[cfg_attr(
 	feature = "serde_support",
 	derive(Deserialize, Serialize),

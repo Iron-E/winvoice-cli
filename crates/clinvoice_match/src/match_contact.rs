@@ -16,16 +16,13 @@ use super::MatchStr;
 /// feature):
 ///
 /// ```rust
-/// use clinvoice_match::MatchContact;
-/// use serde_yaml::from_str;
-///
-/// assert!(from_str::<MatchContact>("
-///   kind:
-///     email:
-///       equal_to: 'foo@bar.io'
-///   label:
-///     equal_to: 'Primary Email'
-/// ").is_ok());
+/// # assert!(serde_yaml::from_str::<clinvoice_match::MatchContact>(r#"
+/// kind:
+///   email:
+///     equal_to: "foo@bar.io"
+/// label:
+///   equal_to: "Primary Email"
+/// # "#).is_ok());
 /// ```
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 #[derive(Clone, Default, Debug, Eq, PartialEq)]

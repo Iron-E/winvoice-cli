@@ -39,49 +39,56 @@ use serde::{Deserialize, Serialize};
 /// ));
 /// ```
 ///
-/// This is an example for how a [`MatchStr`] may look as YAML (requires the `serde_support` feature):
+/// ## YAML
+///
+/// Requires the `serde_support` feature.
 ///
 /// ```rust
-/// # assert!(serde_yaml::from_str::<clinvoice_match::MatchStr<String>>("
+/// # assert!(serde_yaml::from_str::<clinvoice_match::MatchStr<String>>(r#"
 /// and:
-///   - contains: 'f'
-///   - regex: 'o{2,}$'
-/// # ").is_ok());
+///   - contains: "f"
+///   - regex: "o{2,}$"
+/// # "#).is_ok());
 /// ```
 ///
 /// ```rust
 /// # assert!(serde_yaml::from_str::<clinvoice_match::MatchStr<String>>("
 /// any
 /// # ").is_ok());
-/// assert!(from_str::<MatchStr>("contains: 'foo'").is_ok());
 /// ```
 ///
 /// ```rust
-/// # assert!(serde_yaml::from_str::<clinvoice_match::MatchStr<String>>("
-/// equal_to: 'foo'
-/// # ").is_ok());
+/// # assert!(serde_yaml::from_str::<clinvoice_match::MatchStr<String>>(r#"
+/// contains: "foo"
+/// # "#).is_ok());
 /// ```
 ///
 /// ```rust
-/// # assert!(serde_yaml::from_str::<clinvoice_match::MatchStr<String>>("
+/// # assert!(serde_yaml::from_str::<clinvoice_match::MatchStr<String>>(r#"
+/// equal_to: "foo"
+/// # "#).is_ok());
+/// ```
+///
+/// ```rust
+/// # assert!(serde_yaml::from_str::<clinvoice_match::MatchStr<String>>(r#"
 /// not:
-///   equal_to: 'bar'
-/// # ").is_ok());
+///   equal_to: "bar"
+/// # "#).is_ok());
 /// ```
 ///
 /// ```rust
-/// # assert!(serde_yaml::from_str::<clinvoice_match::MatchStr<String>>("
+/// # assert!(serde_yaml::from_str::<clinvoice_match::MatchStr<String>>(r#"
 /// or:
 ///   - not:
-///       contains: 'bar'
-///   - equal_to: 'foobar'
-/// # ").is_ok());
+///       contains: "bar"
+///   - equal_to: "foobar"
+/// # "#).is_ok());
 /// ```
 ///
 /// ```rust
-/// # assert!(serde_yaml::from_str::<clinvoice_match::MatchStr<String>>("
-/// regex: 'fo{2,}'
-/// # ").is_ok());
+/// # assert!(serde_yaml::from_str::<clinvoice_match::MatchStr<String>>(r#"
+/// regex: "fo{2,}"
+/// # "#).is_ok());
 /// ```
 #[cfg_attr(
 	feature = "serde_support",

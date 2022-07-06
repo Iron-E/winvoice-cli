@@ -42,7 +42,9 @@ use serde::{Deserialize, Serialize};
 /// ));
 /// ```
 ///
-/// This is an example for how a [`Match`] may look as YAML (requires the `serde_support` feature):
+/// ## YAML
+///
+/// Requires the `serde_support` feature.
 ///
 /// ```rust
 /// # assert!(serde_yaml::from_str::<clinvoice_match::Match<isize>>("

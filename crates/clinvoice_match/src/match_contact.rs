@@ -12,8 +12,10 @@ use super::MatchStr;
 ///
 /// # Examples
 ///
-/// This is an example for how a [`MatchContact`] may look as YAML (requires the `serde_support`
-/// feature):
+/// ## YAML
+///
+/// Requires the `serde_support` feature. If any field is omitted, it will be set to the
+/// [`Default`] for its type.
 ///
 /// ```rust
 /// # assert!(serde_yaml::from_str::<clinvoice_match::MatchContact>(r#"

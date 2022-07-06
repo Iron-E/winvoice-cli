@@ -10,14 +10,45 @@ use crate::MatchLocation;
 ///
 /// # Examples
 ///
-/// This is an example for how a [`MatchContactKind`] may look as YAML (requires the
-/// `serde_support` feature):
+/// # YAML
+///
+/// Requires the `serde_support` feature. If any field is omitted, it will be set to the
+/// [`Default`] for its type.
+///
+/// ```rust
+/// # assert!(serde_yaml::from_str::<clinvoice_match::MatchContactKind>(r#"
+/// address:
+///   name:
+///     contains: "New"
+/// # "#).is_ok());
+/// ```
+///
+/// ```rust
+/// # assert!(serde_yaml::from_str::<clinvoice_match::MatchContactKind>(r#"
+/// any
+/// # "#).is_ok());
+/// ```
 ///
 /// ```rust
 /// # assert!(serde_yaml::from_str::<clinvoice_match::MatchContactKind>(r#"
 /// email:
 ///   equal_to: "foo@bar.io"
 /// # "#).is_ok());
+/// ```
+///
+/// ```rust
+/// # assert!(serde_yaml::from_str::<clinvoice_match::MatchContactKind>(r#"
+/// phone:
+///   equal_to: "1-800-555-5555"
+/// # "#).is_ok());
+/// ```
+///
+/// ```rust
+/// # assert!(serde_yaml::from_str::<clinvoice_match::MatchContactKind>(r#"
+/// other:
+///   equal_to: "@MyUsername"
+/// # "#).is_ok());
+/// ```
 #[cfg_attr(
 	feature = "serde_support",
 	derive(Deserialize, Serialize),

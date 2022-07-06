@@ -4,60 +4,84 @@ mod from;
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 
-/// # Summary
+/// A value which describes the condition which some string of type `T` must meet in order to
+/// "_match_".
 ///
-/// A value in a retrieval operation.
+/// # Examples
+///
+/// This is an example for how a [`MatchStr`] should be interpreted:
+///
+/// ```rust
+/// use clinvoice_match::MatchStr;
+/// use regex::Regex;
+///
+/// fn matches(condition: MatchStr<&str>, x: &str) -> bool {
+///   match condition {
+///     MatchStr::And(conditions) => conditions.into_iter().all(|c| matches(c, x)),
+///     MatchStr::Any => true,
+///     MatchStr::Contains(value) => x.contains(value),
+///     MatchStr::EqualTo(value) => value == x,
+///     MatchStr::Not(c) => !matches(*c, x),
+///     MatchStr::Or(conditions) => conditions.into_iter().any(|c| matches(c, x)),
+///     MatchStr::Regex(value) => Regex::new(value).unwrap().is_match(x),
+///   }
+/// }
+///
+/// assert!(matches(MatchStr::Contains("f"), "foo"));
+/// assert!(matches(MatchStr::EqualTo("foo"), "foo"));
+/// assert!(matches(MatchStr::Regex("fo{2,}"), "foo"));
+/// assert!(matches(
+///   MatchStr::Not(MatchStr::Or(vec![MatchStr::Contains("b"), MatchStr::Contains("a")]).into()),
+///   "foo",
+/// ));
+/// ```
+///
+/// This is an example for how a [`MatchStr`] may look as YAML (requires the `serde_support` feature):
+///
+/// ```rust
+/// use clinvoice_match::MatchStr;
+///
+/// assert!(serde_yaml::from_str::<MatchStr<String>>("
+///   or:
+///     - not:
+///         contains: 'b'
+///     - equal_to: 'foo'
+///     - regex: 'fo{2,}'
+/// ").is_ok());
+/// ```
 #[cfg_attr(
 	feature = "serde_support",
 	derive(Deserialize, Serialize),
-	serde(rename_all = "snake_case"),
+	serde(rename_all = "snake_case")
 )]
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum MatchStr<T>
 {
-	/// # Summary
-	///
-	/// Match if and only if all of the contained [`Match`]es also match.
+	/// Match IFF all contained [`MatchStr`]s also match.
 	And(Vec<Self>),
 
-	/// # Summary
-	///
 	/// Always match.
 	Any,
 
-	/// # Summary
-	///
-	/// Match if and only if this value and some other string are exactly the same.
-	EqualTo(T),
-
-	/// # Summary
-	///
-	/// Match if and only if:
-	///
-	/// * Some string contains this value anywhere in its contents.
-	/// * A set of strings contains this value anywhere in its contents.
+	/// Match IFF some string `s` is partially equal to the contained value (e.g. "foo" contains
+	/// "oo").
 	Contains(T),
 
-	/// # Summary
-	///
-	/// Negate a [`Match`].
+	/// Match IFF some string `s` matches the contained value.
+	EqualTo(T),
+
+	/// Match IFF the contained [`MatchStr`] does _not_ match.
 	Not(Box<Self>),
 
-	/// # Summary
-	///
-	/// Match if and only if any of the contained [`Match`]es also match.
+	/// Match IFF any contained [`MatchStr`] matches.
 	Or(Vec<Self>),
 
-	/// # Summary
+	/// Match IFF some string `s` is described by this value when interpreted as a regular
+	/// expression.
 	///
-	/// Match if and only if:
+	/// # Warnings
 	///
-	/// * This regular expression matches some other string.
-	/// * This regular expression matches any string in a set of strings.
-	///
-	/// # Remarks
-	///
-	/// The regular expression syntax depends on the database adapter:
+	/// The syntax of a regular expression is highly dependent on the adapter which is being used:
 	///
 	/// * [Postgres](https://www.postgresql.org/docs/current/functions-matching.html#FUNCTIONS-POSIX-TABLE)
 	Regex(T),
@@ -65,13 +89,22 @@ pub enum MatchStr<T>
 
 impl<T> MatchStr<T>
 {
-	/// # Summary
-	///
-	/// Transform some `Match` of type `T` into another type `U` by providing a mapping function.
+	/// Transform some [`MatchStr`] of type `T` into another type `U` by providing a mapping `f`unction.
 	///
 	/// # See also
 	///
 	/// * [`Iterator::map`]
+	///
+	/// # Examples
+	///
+	/// ```rust
+	/// use clinvoice_match::MatchStr;
+	///
+	/// assert_eq!(
+	///   MatchStr::EqualTo("5").map(|s| s.to_string()),
+	///   MatchStr::EqualTo("5".to_string())
+	/// );
+	/// ```
 	pub fn map<U>(self, f: impl Copy + Fn(T) -> U) -> MatchStr<U>
 	{
 		match self
@@ -92,13 +125,11 @@ impl<T> MatchStr<T>
 		}
 	}
 
-	/// # Summary
-	///
-	/// Transform some `Match` of type `T` into another type `U` by providing a mapping function.
+	/// Transform some [`MatchStr`] of type `T` into another type `U` by providing a mapping function.
 	///
 	/// # See also
 	///
-	/// * [`Iterator::map`]
+	/// * [`MatchStr::map`]
 	pub fn map_ref<U>(&self, f: impl Copy + Fn(&T) -> U) -> MatchStr<U>
 	{
 		match self

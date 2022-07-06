@@ -12,10 +12,11 @@ use serde::{Deserialize, Serialize};
 ///
 /// # Examples
 ///
+/// This is an example for how a [`Match`] should be interpreted:
+///
 /// ```rust
 /// use clinvoice_match::Match;
 ///
-/// // this is an example for how a match should be interpreted
 /// fn matches(condition: Match<isize>, x: isize) -> bool {
 ///   match condition {
 ///     Match::And(conditions) => conditions.into_iter().all(|c| matches(c, x)),
@@ -37,7 +38,22 @@ use serde::{Deserialize, Serialize};
 ///   0,
 /// ));
 /// ```
+///
+/// This is an example for how a [`Match`] may look as YAML (requires the `serde_support` feature):
+///
+/// ```rust
+/// use clinvoice_match::Match;
+///
+/// assert!(serde_yaml::from_str::<Match<isize>>(r#"
+///   or:
+///     - not:
+///         less_than: 1
+///     - equal_to: 0
+///     - in_range: [-4, -2]
+/// "#).is_ok());
+/// ```
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
+#[cfg_attr(feature = "serde_support", serde(rename_all = "snake_case"))]
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum Match<T>
 {

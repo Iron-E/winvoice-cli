@@ -280,6 +280,7 @@ dependencies = [
  "const_format",
  "humantime-serde",
  "serde",
+ "serde_yaml",
  "thiserror",
 ]
 

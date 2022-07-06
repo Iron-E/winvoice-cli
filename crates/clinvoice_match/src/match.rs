@@ -96,17 +96,28 @@ pub enum Match<T>
 	/// Match IFF the contained [`Match`] does _not_ match.
 	Not(Box<Self>),
 
-	/// Match IFF any contained [`Match`]es also matches.
+	/// Match IFF any contained [`Match`] matches.
 	Or(Vec<Self>),
 }
 
 impl<T> Match<T>
 {
-	/// Transform some `Match` of type `T` into another type `U` by providing a mapping `f`unction.
+	/// Transform some [`Match`] of type `T` into another type `U` by providing a mapping `f`unction.
 	///
 	/// # See also
 	///
 	/// * [`Iterator::map`]
+	///
+	/// # Examples
+	///
+	/// ```rust
+	/// use clinvoice_match::Match;
+	///
+	/// assert_eq!(
+	///   Match::EqualTo("5").map(|s| s.parse::<isize>().unwrap()),
+	///   Match::EqualTo(5)
+	/// );
+	/// ```
 	pub fn map<U>(self, f: impl Copy + Fn(T) -> U) -> Match<U>
 	{
 		match self
@@ -128,11 +139,11 @@ impl<T> Match<T>
 		}
 	}
 
-	/// Transform some `Match` of type `T` into another type `U` by providing a mapping `f`unction.
+	/// Transform some [`Match`] of type `T` into another type `U` by providing a mapping `f`unction.
 	///
 	/// # See also
 	///
-	/// * [`Iterator::map`]
+	/// * [`Match::map`]
 	pub fn map_ref<U>(&self, f: impl Copy + Fn(&T) -> U) -> Match<U>
 	{
 		match self

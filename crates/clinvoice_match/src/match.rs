@@ -48,23 +48,29 @@ use serde::{Deserialize, Serialize};
 /// use serde_yaml::from_str;
 /// type Match = clinvoice_match::Match<isize>;
 ///
-/// assert!(from_str::<Match>(
-///  "and:
+/// assert!(from_str::<Match>("
+///   and:
 ///     - not:
 ///         equal_to: 3
-///     - in_range: [0, 10]").is_ok());
+///     - in_range: [0, 10]
+/// ").is_ok());
+///
 /// assert!(from_str::<Match>("any").is_ok());
 /// assert!(from_str::<Match>("equal_to: 3").is_ok());
 /// assert!(from_str::<Match>("less_than: 3").is_ok());
 /// assert!(from_str::<Match>("greater_than: 3").is_ok());
 /// assert!(from_str::<Match>("in_range: [0, 3]").is_ok());
-/// assert!(from_str::<Match>(
-///  "not:
-///     equal_to: 3").is_ok());
-/// assert!(from_str::<Match>(
-///  "or:
+///
+/// assert!(from_str::<Match>("
+///   not:
+///     equal_to: 3
+/// ").is_ok());
+///
+/// assert!(from_str::<Match>("
+///   or:
 ///     - greater_than: 2
-///     - equal_to: 0").is_ok());
+///     - equal_to: 0
+/// ").is_ok());
 /// ```
 #[cfg_attr(
 	feature = "serde_support",

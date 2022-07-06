@@ -64,26 +64,34 @@ use serde::{Deserialize, Serialize};
 /// use serde_yaml::from_str;
 /// type MatchSet = clinvoice_match::MatchSet<clinvoice_match::Match<isize>>;
 ///
-/// assert!(from_str::<MatchSet>(
-///  "and:
+/// assert!(from_str::<MatchSet>("
+///   and:
 ///     - contains:
 ///         equal_to: 5
 ///     - contains:
-///         greater_than: 7").is_ok());
+///         greater_than: 7
+/// ").is_ok());
+///
 /// assert!(from_str::<MatchSet>("any").is_ok());
-/// assert!(from_str::<MatchSet>(
-///  "contains:
-///     in_range: [0, 10]").is_ok());
-/// assert!(from_str::<MatchSet>(
-///  "not:
+///
+/// assert!(from_str::<MatchSet>("
+///   contains:
+///     in_range: [0, 10]
+/// ").is_ok());
+///
+/// assert!(from_str::<MatchSet>("
+///   not:
 ///     contains:
-///       equal_to: 5").is_ok());
-/// assert!(from_str::<MatchSet>(
-///  "or:
+///       equal_to: 5
+/// ").is_ok());
+///
+/// assert!(from_str::<MatchSet>("
+///   or:
 ///     - contains:
 ///         equal_to: 5
 ///     - contains:
-///         greater_than: 7").is_ok());
+///         greater_than: 7
+/// ").is_ok());
 /// ```
 #[cfg_attr(
 	feature = "serde_support",

@@ -45,21 +45,28 @@ use serde::{Deserialize, Serialize};
 /// use serde_yaml::from_str;
 /// type MatchStr = clinvoice_match::MatchStr<String>;
 ///
-/// assert!(from_str::<MatchStr>(
-///  "and:
+/// assert!(from_str::<MatchStr>("
+///   and:
 ///     - contains: 'f'
-///     - regex: 'o{2,}$'").is_ok());
+///     - regex: 'o{2,}$'
+/// ").is_ok());
+///
 /// assert!(from_str::<MatchStr>("any").is_ok());
 /// assert!(from_str::<MatchStr>("contains: 'foo'").is_ok());
 /// assert!(from_str::<MatchStr>("equal_to: 'foo'").is_ok());
-/// assert!(from_str::<MatchStr>(
-///  "not:
-///     equal_to: 'bar'").is_ok());
-/// assert!(from_str::<MatchStr>(
-///  "or:
+///
+/// assert!(from_str::<MatchStr>("
+///   not:
+///     equal_to: 'bar'
+/// ").is_ok());
+///
+/// assert!(from_str::<MatchStr>("
+///   or:
 ///     - not:
 ///         contains: 'bar'
-///     - equal_to: 'foobar'").is_ok());
+///     - equal_to: 'foobar'
+/// ").is_ok());
+///
 /// assert!(from_str::<MatchStr>("regex: 'fo{2,}'").is_ok());
 /// ```
 #[cfg_attr(

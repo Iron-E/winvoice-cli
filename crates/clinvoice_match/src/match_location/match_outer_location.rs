@@ -3,7 +3,11 @@ use serde::{Deserialize, Serialize};
 
 use super::MatchLocation;
 
-#[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
+#[cfg_attr(
+	feature = "serde_support",
+	derive(Deserialize, Serialize),
+	serde(rename_all = "snake_case")
+)]
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub enum MatchOuterLocation
 {

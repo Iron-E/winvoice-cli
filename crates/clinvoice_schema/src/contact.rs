@@ -25,6 +25,7 @@ use serde::{Deserialize, Serialize};
 pub struct Contact
 {
 	/// See [`ContactKind`].
+	#[cfg_attr(feature = "serde_support", serde(flatten))]
 	pub kind: ContactKind,
 
 	/// The reference label of this [`Contact`], which is human-readable and easily

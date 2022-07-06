@@ -12,7 +12,7 @@ use crate::Store;
 ///
 /// let values: HashMap<String, StoreValue> = toml::from_str(r#"
 ///   default = "a"
-///   a = {adapter = "Postgres", url = "a/path"}
+///   a = {adapter = "postgres", url = "a/path"}
 /// "#).unwrap();
 ///
 /// assert_eq!(values["default"], StoreValue::Alias("a".into()));

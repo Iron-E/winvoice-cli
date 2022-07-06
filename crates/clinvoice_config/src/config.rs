@@ -25,7 +25,7 @@ use crate::{Adapters, Employees, Error, Invoices, Jobs, Result, Store, StoreValu
 ///   default = "foo"
 ///
 ///   [stores.foo]
-///   adapter = "Postgres"
+///   adapter = "postgres"
 ///   url = "postgres://username:password@localhost:5432/database_name"
 /// "#).is_ok());
 /// ```
@@ -76,8 +76,8 @@ impl Config
 	///   [stores]
 	///   a = "b"
 	///   b = "c"
-	///   c = {adapter = "Postgres", url = "c/path"}
-	///   d = {adapter = "Postgres", url = "d/path"}
+	///   c = {adapter = "postgres", url = "c/path"}
+	///   d = {adapter = "postgres", url = "d/path"}
 	///   e = "d"
 	/// "#).unwrap();
 	///

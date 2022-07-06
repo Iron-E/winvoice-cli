@@ -1,22 +1,36 @@
-//! # Summary
+//! `clinvoice_match` contains types that have counterparts with identical layout in
+//! [`clinvoice_schema`]. The only difference between the structures in this crate and
+//! [`clinvoice_schema`] is that the types in this crate can be used to describe any number of their
+//! counterpart types.
 //!
-//! This module contains [view](clinvoice_schema::views)-like structures which are queries that
-//! correspond to the [data item](clinvoice_schema) of the same name.
+//! This crate is built on the backbone of [`Match`], [`MatchSet`], and [`MatchStr`]. These types
+//! do not have equivalents in [`clinvoice_schema`], since they are what set this crate apart from
+//! that crate.
 //!
-//! # Remarks
+//! # Re-exports
 //!
-//! Each field of each structure contains an identically-named, but [matchable](crate::schema::Match)
-//! field which should be used to specify the desired contents of the structure.
+//! This crate re-exports [`humantime_serde::Serde`], as it is required to deserialize the
+//! `increment` of a [`MatchJob`] via human-readable time (e.g. "15min").
 //!
-//! # Example
+//! # Examples
 //!
-//! For examples, see the `retrieve` tests for each adapter below:
+//! The following [`MatchEmployee`] represents all [`Employee`](clinvoice_schema::Employee)s who
+//! meet all of the following criteria:
 //!
-//! * [`Employee`](crate::schema::EmployeeAdapter)
-//! * [`Job`](crate::schema::JobAdapter)
-//! * [`Location`](crate::schema::LocationAdapter)
-//! * [`Organization`](crate::schema::OrganizationAdapter)
-//! * [`Person`](crate::schema::PersonAdapter)
+//! * Have a `name` starting with 'A', 'B', or 'C'.
+//! * Have a `status` equal to "Hired".
+//! * Have a `title` not equal to "CEO".
+//!
+//! ```rust
+//! use clinvoice_match::{Match, MatchEmployee, MatchStr};
+//!
+//! let _ = MatchEmployee {
+//!   id: Match::Any,
+//!   name: MatchStr::Regex("^[ABC]".into()),
+//!   status: "Hired".to_string().into(),
+//!   title: MatchStr::Not(Box::new("CEO".to_string().into())),
+//! };
+//! ```
 
 mod r#match;
 mod match_contact;

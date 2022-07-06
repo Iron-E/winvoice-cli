@@ -2,82 +2,83 @@ use std::{collections::BTreeMap, fs, path::PathBuf};
 
 use serde::{Deserialize, Serialize};
 
-use crate::{Adapters, Employees, Error, Invoices, Result, Store, StoreValue, Timesheets};
+use crate::{Adapters, Employees, Error, Invoices, Jobs, Result, Store, StoreValue};
 
-/// # Summary
+/// The data type backing a user's configuration.
 ///
-/// The `Config` contains settings that affect all areas of the application.
+/// # Examples
 ///
-/// TODO: see if the number of lifetime params can be reduced
+/// ```rust
+/// use clinvoice_config::Config;
+/// assert!(toml::from_str::<Config>(r#"
+///   [employees]
+///   id = 1
+///   organization_id = 2
+///
+///   [invoices]
+///   default_currency = "USD"
+///
+///   [jobs]
+///   default_increment = "15min"
+///
+///   [stores]
+///   default = "foo"
+///
+///   [stores.foo]
+///   adapter = "Postgres"
+///   url = "postgres://username:password@localhost:5432/database_name"
+/// "#).is_ok());
+/// ```
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Config
 {
-	/// # Summary
-	///
-	/// Configurations for [`Employee`](clinvoice_schema::employee::Employee)s.
+	/// The [`[employees]`](Employees) field.
 	#[serde(default)]
 	pub employees: Employees,
 
-	/// # Summary
-	///
-	/// Configurations for [`Invoice`](clinvoice_schema::invoice::Invoice)s.
+	/// The [`[invoices]`](Invoices) field.
 	#[serde(default)]
 	pub invoices: Invoices,
 
-	/// # Summary
+	/// The [`[jobs]`](Jobs) field.
+	#[serde(default)]
+	pub jobs: Jobs,
+
+	/// The `[stores]` field, which dictates the [`Store`]s that CLInvoice may operate on. Keyed
+	/// on the label of the [`Store`].
 	///
-	/// Configurations for data storages.
+	/// The [`Store`] used by default should be labelled "default". [`Config::init`] will generate a
+	/// label with this name.
 	///
-	/// NOTE: this is a [`BTreeMap`] because it is desirable for configuration files to be
-	///       serialized in a consistent order.
+	/// # Notes
+	///
+	/// * This is a [`BTreeMap`] because, since it is sorted, it guarantees serialization in a
+	///   consistent order.
 	#[serde(default)]
 	stores: BTreeMap<String, StoreValue>,
-
-	/// # Summary
-	///
-	/// Configurations for [`Timesheet`](clinvoice_schema::timesheet:Timesheet)s.
-	#[serde(default)]
-	pub timesheets: Timesheets,
 }
 
 impl Config
 {
-	/// # Summary
+	/// Get the [`Store`] labelled `name`, resolving any [`StoreValue::Alias`]es which `name` may
+	/// point to.
 	///
-	/// Get the [`Store`] from `name`, resolving any [`StoreValue::Alias`] which `name` may point to.
-	///
-	/// # Parameters
-	///
-	/// * `name`, the name of the [`Store`] which should be returned.
-	///
-	/// # Returns
-	///
-	/// The [`Store`] which corresponds to `name`.
+	/// Returns [`None`] if no [`Store`] labelled `name` could be found.
 	///
 	/// # Examples
 	///
 	/// ```rust
 	/// use core::time::Duration;
-	/// use clinvoice_config::{Adapters, Config, Employees, Invoices, Store, StoreValue, Timesheets};
+	/// use clinvoice_config::{Adapters, Config, Employees, Invoices, Jobs, Store, StoreValue};
 	/// use clinvoice_schema::Currency;
 	///
 	/// let conf: Config = toml::from_str(r#"
-	///   [employees]
-	///   id = 1
-	///   organization_id = 2
-	///
-	///   [invoices]
-	///   default_currency = "USD"
-	///
 	///   [stores]
 	///   a = "b"
 	///   b = "c"
 	///   c = {adapter = "Postgres", url = "c/path"}
 	///   d = {adapter = "Postgres", url = "d/path"}
 	///   e = "d"
-	///
-	///   [timesheets]
-	///   default_increment = "100s"
 	/// "#).unwrap();
 	///
 	/// // Reflexivity
@@ -117,27 +118,14 @@ impl Config
 		})
 	}
 
-	/// # Summary
+	/// [Write](Config::write) and return a configuration file with some defaults.
 	///
-	/// Create a configuration file with some defaults.
-	pub fn init() -> Result<()>
+	/// # Warnings
+	///
+	/// * This function _will_ clobber an existing configuration! Check that [`Config::path`] is not
+	///   [a file](std::path::Path::is_file) before use.
+	fn init() -> Result<Self>
 	{
-		let path = Self::path();
-
-		if path.is_file()
-		{
-			return Ok(());
-		}
-
-		// TODO: use if-let chains
-		if let Some(parent) = path.parent()
-		{
-			if !parent.is_dir()
-			{
-				fs::create_dir_all(parent)?;
-			}
-		}
-
 		let config = Self {
 			stores: [
 				("default".into(), StoreValue::Alias("foo".into())),
@@ -154,10 +142,28 @@ impl Config
 			..Default::default()
 		};
 
-		config.update()
+		config.write()?;
+
+		Ok(config)
 	}
 
-	pub fn path() -> PathBuf
+	/// Read the configuration from the [`Config::path`], or [`Config::init`] it if [`Config::path`]
+	/// does not exist.
+	pub fn read() -> Result<Self>
+	{
+		let path = Self::path();
+
+		if !path.is_file()
+		{
+			return Config::init();
+		}
+
+		let config_bytes = fs::read(path)?;
+		toml::from_slice(&config_bytes).map_err(Error::from)
+	}
+
+	/// The place where a user [`Config`] should be stored on the hard drive.
+	fn path() -> PathBuf
 	{
 		dirs::config_dir()
 			.expect("Operating System is not supported")
@@ -165,9 +171,21 @@ impl Config
 			.join("config.toml")
 	}
 
-	pub fn update(&self) -> Result<()>
+	/// Save an in-memory [`Config`] to disk at the [`Config::path`].
+	pub fn write(&self) -> Result<()>
 	{
+		let path = Self::path();
+
+		// TODO: use if-let chains
+		if let Some(parent) = path.parent()
+		{
+			if !parent.is_dir()
+			{
+				fs::create_dir_all(parent)?;
+			}
+		}
+
 		let serialized = toml::to_string_pretty(self)?;
-		fs::write(Self::path(), serialized).map_err(Error::from)
+		fs::write(path, serialized).map_err(Error::from)
 	}
 }

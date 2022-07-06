@@ -13,7 +13,18 @@ use strum::{EnumCount, EnumIter, IntoStaticStr};
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 #[cfg_attr(feature = "serde_support", serde(rename_all = "UPPERCASE"))]
 #[derive(
-	Copy, Clone, Debug, Default, EnumCount, EnumIter, Eq, Hash, IntoStaticStr, Ord, PartialEq, PartialOrd,
+	Copy,
+	Clone,
+	Debug,
+	Default,
+	EnumCount,
+	EnumIter,
+	Eq,
+	Hash,
+	IntoStaticStr,
+	Ord,
+	PartialEq,
+	PartialOrd,
 )]
 #[strum(serialize_all = "UPPERCASE")]
 pub enum Currency

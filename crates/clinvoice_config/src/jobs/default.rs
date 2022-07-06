@@ -1,6 +1,6 @@
-use super::{Duration, Timesheets};
+use super::{Duration, Jobs};
 
-impl Default for Timesheets
+impl Default for Jobs
 {
 	fn default() -> Self
 	{

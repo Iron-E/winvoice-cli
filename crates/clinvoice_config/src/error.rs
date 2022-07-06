@@ -4,9 +4,7 @@ use thiserror::Error;
 
 use crate::Adapters;
 
-/// # Summary
-///
-/// [`Error`](std::error::Error)s referencing [`Store`](crate::Store)s and [`Adapters`].
+/// An [`Error`](std::error::Error) for the crate.
 #[derive(Debug, Error)]
 pub enum Error
 {

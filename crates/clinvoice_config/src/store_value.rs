@@ -2,20 +2,32 @@ use serde::{Deserialize, Serialize};
 
 use crate::Store;
 
-/// # Summary
+/// Possible values for the `[store]` field of the [user config](crate::Config).
 ///
-/// Possible values for the `[store]` field of the user config.
+/// # Example
+///
+/// ```rust
+/// use std::collections::HashMap;
+/// use clinvoice_config::{Adapters, Store, StoreValue};
+///
+/// let values: HashMap<String, StoreValue> = toml::from_str(r#"
+///   default = "a"
+///   a = {adapter = "Postgres", url = "a/path"}
+/// "#).unwrap();
+///
+/// assert_eq!(values["default"], StoreValue::Alias("a".into()));
+/// assert_eq!(values["a"], StoreValue::Storage(Store {
+///   adapter: Adapters::Postgres,
+///   url: "a/path".into(),
+/// }));
+/// ```
 #[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 #[serde(untagged)]
 pub enum StoreValue
 {
-	/// # Summary
-	///
-	/// An alias of one ability name to another name.
+	/// A link to another `[store]` field.
 	Alias(String),
 
-	/// # Summary
-	///
-	/// A specification of storage.
+	/// A [`Store`] specification.
 	Storage(Store),
 }

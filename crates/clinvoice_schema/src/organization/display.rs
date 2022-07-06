@@ -30,15 +30,14 @@ mod tests
 					Location {
 						id: 0,
 						name: "USA".into(),
-						outer:
-							Some(
-								Location {
-									id: 0,
-									name: "Earth".into(),
-									outer: None,
-								}
-								.into(),
-							),
+						outer: Some(
+							Location {
+								id: 0,
+								name: "Earth".into(),
+								outer: None,
+							}
+							.into(),
+						),
 					}
 					.into(),
 				),

@@ -200,7 +200,7 @@ impl Command
 						},
 					);
 
-					new_config.update()?;
+					new_config.write()?;
 				}
 				else if !(delete || update)
 				{

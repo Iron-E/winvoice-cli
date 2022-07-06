@@ -85,7 +85,7 @@ impl ExchangeRates
 		self
 			.0
 			.get(current)
-			.and_then(|c| self.0.get(desired).map(|d|  d / c))
+			.and_then(|c| self.0.get(desired).map(|d| d / c))
 	}
 
 	/// Same as [`ExchangeRates::get`], except using range syntax (i.e. `current..desired`) and

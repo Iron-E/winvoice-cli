@@ -1,22 +1,23 @@
-//! # Summary
+//! `clinvoice_config` provides a definition for the [CLInvoice user config](Config), as well as
+//! the ability to [read](Config::read) and [write](Config::write) it from/to disk.
 //!
-//! This crate provides definitions of what a user's `clinvoice` configuration should look like.
+//! The user configuration is stored in the markup language __TOML__. If you are unfamiliar, you
+//! can learn about it [here](https://toml.io/).
 
-#[allow(clippy::tabs_in_doc_comments)]
 mod adapters;
 mod config;
 mod employees;
 mod error;
 mod invoices;
+mod jobs;
 mod store;
 mod store_value;
-mod timesheets;
 
 pub use adapters::Adapters;
 pub use config::Config;
 pub use employees::Employees;
 pub use error::{Error, Result};
 pub use invoices::Invoices;
+pub use jobs::Jobs;
 pub use store::Store;
 pub use store_value::StoreValue;
-pub use timesheets::Timesheets;

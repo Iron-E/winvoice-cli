@@ -6,13 +6,11 @@ use serde::{Deserialize, Serialize};
 
 /// Configurations for [`Job`](clinvoice_schema::Job)s.
 ///
-/// # Notes
-///
-/// * For how to format the `default_increment`, see [`humantime_serde`].
-///
 /// # Examples
 ///
 /// ## TOML
+///
+/// __Note:__ For more on how to format the `default_increment`, see [`humantime_serde`].
 ///
 /// ```rust
 /// # assert!(toml::from_str::<clinvoice_config::Jobs>(r#"

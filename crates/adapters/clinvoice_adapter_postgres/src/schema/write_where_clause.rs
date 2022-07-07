@@ -36,6 +36,17 @@ use crate::fmt::{PgInterval, PgTimestampTz};
 ///
 /// Append `"{context} ("` to `query`. If `NOT` is `true`, then everything preceding a
 /// closing [`write_context_scope_end`] is negated.
+fn write_any<Db>(query: &mut QueryBuilder<Db>, context: WriteContext)
+where
+	Db: Database,
+{
+	query.push(context).push(sql::TRUE);
+}
+
+/// # Summary
+///
+/// Append `"{context} ("` to `query`. If `NOT` is `true`, then everything preceding a
+/// closing [`write_context_scope_end`] is negated.
 fn write_context_scope_start<Db, const NEGATE: bool>(
 	query: &mut QueryBuilder<Db>,
 	context: WriteContext,
@@ -164,7 +175,7 @@ where
 	let ctx = PgSchema::write_where_clause(context, columns.label, &match_condition.label, query);
 	match match_condition.kind
 	{
-		MatchContactKind::Any => (),
+		MatchContactKind::Any => write_any(query, ctx),
 
 		MatchContactKind::Address(ref location) =>
 		{
@@ -253,7 +264,7 @@ where
 				ident,
 				&mut conditions.iter().filter(|m| *m != &Match::Any),
 			),
-			Match::Any => return context,
+			Match::Any => write_any(query, context),
 			Match::EqualTo(value) => write_comparison(query, context, ident, "=", value),
 			Match::GreaterThan(value) => write_comparison(query, context, ident, ">", value),
 			Match::InRange(low, high) =>
@@ -307,7 +318,7 @@ where
 				ident,
 				&mut conditions.iter().filter(|m| *m != &MatchOption::Any),
 			),
-			MatchOption::Any => return context,
+			MatchOption::Any => write_any(query, context),
 			MatchOption::EqualTo(value) => write_comparison(query, context, ident, "=", value),
 			MatchOption::GreaterThan(value) =>
 			{
@@ -354,7 +365,7 @@ impl WriteWhereClause<Postgres, &MatchSet<MatchExpense>> for PgSchema
 	{
 		match match_condition
 		{
-			MatchSet::Any => return context,
+			MatchSet::Any => write_any(query, context),
 
 			MatchSet::And(conditions) | MatchSet::Or(conditions) =>
 			{
@@ -432,7 +443,7 @@ impl WriteWhereClause<Postgres, &MatchStr<String>> for PgSchema
 				ident,
 				&mut conditions.iter().filter(|m| *m != &MatchStr::Any),
 			),
-			MatchStr::Any => return context,
+			MatchStr::Any => write_any(query, context),
 			MatchStr::Contains(string) =>
 			{
 				query

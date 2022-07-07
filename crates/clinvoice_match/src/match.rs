@@ -10,6 +10,10 @@ use serde::{Deserialize, Serialize};
 /// A value which describes the condition which some value of type `T` must meet in order to
 /// "_match_".
 ///
+/// # Warnings
+///
+/// * You should _never_ use [`Match<Option<T>>`]. Instead, use [`MatchOption<T>`](crate::MatchOption).
+///
 /// # Examples
 ///
 /// This is an example for how a [`Match`] should be interpreted:

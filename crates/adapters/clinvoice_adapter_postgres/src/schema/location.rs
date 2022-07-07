@@ -5,7 +5,7 @@ use clinvoice_adapter::{
 	schema::columns::LocationColumns,
 	WriteWhereClause,
 };
-use clinvoice_match::{Match, MatchLocation, MatchOuterLocation, MatchOption};
+use clinvoice_match::{Match, MatchLocation, MatchOption, MatchOuterLocation};
 use clinvoice_schema::{Id, Location};
 use futures::{future, TryFutureExt, TryStreamExt};
 use sqlx::{Error, Executor, Postgres, QueryBuilder, Result, Row};

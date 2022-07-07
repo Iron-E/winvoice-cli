@@ -7,13 +7,12 @@ use serde::{Deserialize, Serialize};
 ///
 /// # Examples
 ///
-/// ```rust
-/// use clinvoice_config::Invoices;
-/// use clinvoice_schema::Currency;
+/// ## TOML
 ///
-/// let _ = Invoices {
-///   default_currency: Currency::Usd,
-/// };
+/// ```rust
+/// # assert!(toml::from_str::<clinvoice_config::Invoices>(r#"
+/// default_currency = "USD"
+/// # "#).is_ok());
 /// ```
 #[derive(Copy, Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Invoices

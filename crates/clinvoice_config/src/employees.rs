@@ -5,13 +5,13 @@ use serde::{Deserialize, Serialize};
 ///
 /// # Examples
 ///
-/// ```rust
-/// use clinvoice_config::Employees;
+/// ## TOML
 ///
-/// let _ = Employees {
-///   id: Some(1),
-///   organization_id: Some(2),
-/// };
+/// ```rust
+/// # assert!(toml::from_str::<clinvoice_config::Employees>(r#"
+/// id = 1
+/// organization_id = 2
+/// # "#).is_ok());
 /// ```
 #[derive(
 	Copy, Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize,

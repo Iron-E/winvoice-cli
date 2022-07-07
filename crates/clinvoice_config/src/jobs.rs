@@ -6,15 +6,18 @@ use serde::{Deserialize, Serialize};
 
 /// Configurations for [`Job`](clinvoice_schema::Job)s.
 ///
+/// # Notes
+///
+/// * For how to format the `default_increment`, see [`humantime_serde`].
+///
 /// # Examples
 ///
-/// ```rust
-/// use core::time::Duration;
-/// use clinvoice_config::Jobs;
+/// ## TOML
 ///
-/// let _ = Jobs {
-///   default_increment: Duration::from_secs(300),
-/// };
+/// ```rust
+/// # assert!(toml::from_str::<clinvoice_config::Jobs>(r#"
+/// default_increment = "15min"
+/// # "#).is_ok());
 /// ```
 #[derive(Copy, Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Jobs

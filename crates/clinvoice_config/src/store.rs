@@ -9,13 +9,15 @@ use crate::Adapters;
 ///
 /// # Example
 ///
-/// ```rust
-/// use clinvoice_config::{Adapters, Store};
+/// ## TOML
 ///
-/// let _ = Store {
-///   adapter: Adapters::Postgres,
-///   url: "postgres://username:password@localhost:5432/database_name".into(),
-/// };
+/// For the [postgres adapter](Adapters::Postgres):
+///
+/// ```rust
+/// # assert!(toml::from_str::<clinvoice_config::Store>(r#"
+/// adapter = "postgres"
+/// url = "postgres://username:password@localhost:5432/database_name"
+/// # "#).is_ok());
 /// ```
 #[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Store
@@ -24,7 +26,9 @@ pub struct Store
 	pub adapter: Adapters,
 
 	/// The URL where CLInvoice can communicate with the storage. This setting is highly dependent
-	/// on the `adapter` which was chosen; see [the
-	/// docs](https://github.com/Iron-E/clinvoice/wiki/Usage#adapters) for more information.
+	/// on the `adapter` which was chosen:
+	///
+	/// * [`Postgres`](Adapters::Postgres): the connection URI per
+	///   [https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING]
 	pub url: String,
 }

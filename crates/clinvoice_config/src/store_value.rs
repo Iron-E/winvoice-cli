@@ -6,20 +6,18 @@ use crate::Store;
 ///
 /// # Example
 ///
+/// ## TOML
+///
+/// The following creates a storage named "a", and sets it as the default:
+///
 /// ```rust
-/// use std::collections::HashMap;
-/// use clinvoice_config::{Adapters, Store, StoreValue};
+/// # assert!(toml::from_str::<std::collections::HashMap<String, clinvoice_config::StoreValue>>(r#"
+/// default = "a"
 ///
-/// let values: HashMap<String, StoreValue> = toml::from_str(r#"
-///   default = "a"
-///   a = {adapter = "postgres", url = "a/path"}
-/// "#).unwrap();
-///
-/// assert_eq!(values["default"], StoreValue::Alias("a".into()));
-/// assert_eq!(values["a"], StoreValue::Storage(Store {
-///   adapter: Adapters::Postgres,
-///   url: "a/path".into(),
-/// }));
+/// [a]
+/// adapter = "postgres"
+/// url = "a/path"
+/// # "#).is_ok());
 /// ```
 #[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 #[serde(untagged)]

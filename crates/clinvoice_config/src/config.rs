@@ -8,26 +8,27 @@ use crate::{Adapters, Employees, Error, Invoices, Jobs, Result, Store, StoreValu
 ///
 /// # Examples
 ///
+/// ## TOML
+///
 /// ```rust
-/// use clinvoice_config::Config;
-/// assert!(toml::from_str::<Config>(r#"
-///   [employees]
-///   id = 1
-///   organization_id = 2
+/// # assert!(toml::from_str::<clinvoice_config::Config>(r#"
+/// [employees]
+/// id = 1
+/// organization_id = 2
 ///
-///   [invoices]
-///   default_currency = "USD"
+/// [invoices]
+/// default_currency = "USD"
 ///
-///   [jobs]
-///   default_increment = "15min"
+/// [jobs]
+/// default_increment = "15min"
 ///
-///   [stores]
-///   default = "foo"
+/// [stores]
+/// default = "foo"
 ///
-///   [stores.foo]
-///   adapter = "postgres"
-///   url = "postgres://username:password@localhost:5432/database_name"
-/// "#).is_ok());
+/// [stores.foo]
+/// adapter = "postgres"
+/// url = "postgres://username:password@localhost:5432/database_name"
+/// # "#).is_ok());
 /// ```
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Config

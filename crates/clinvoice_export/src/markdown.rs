@@ -185,7 +185,7 @@ pub fn export_job(
 ///
 /// Tracks the `organizations_with_serialized_contact_info` so that their contact information is not
 /// reiterated every time.
-pub fn export_timesheet(timesheet: &Timesheet, output: &mut String)
+fn export_timesheet(timesheet: &Timesheet, output: &mut String)
 {
 	writeln!(output, "{}", Element::Heading {
 		depth: 3,

@@ -14,6 +14,7 @@ use clinvoice_adapter::{
 	Updatable,
 };
 use clinvoice_config::Config;
+use clinvoice_export::Format;
 use clinvoice_finance::ExchangeRates;
 use clinvoice_match::{MatchJob, MatchOrganization, MatchTimesheet};
 use clinvoice_schema::{chrono::Utc, Currency, Location, RestorableSerde};
@@ -347,7 +348,7 @@ impl Command
 
 								fs::write(
 									format!("{}--{}.md", job.client.name.replace(' ', "-"), job.id),
-									clinvoice_markdown::export_job(
+									Format::Markdown.export_job(
 										&job,
 										contacts,
 										exchange_rates_ref,

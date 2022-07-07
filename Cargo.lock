@@ -189,8 +189,8 @@ dependencies = [
  "clinvoice_adapter_postgres",
  "clinvoice_config",
  "clinvoice_error",
+ "clinvoice_export",
  "clinvoice_finance",
- "clinvoice_markdown",
  "clinvoice_match",
  "clinvoice_schema",
  "dialoguer",
@@ -256,6 +256,14 @@ name = "clinvoice_error"
 version = "0.3.0"
 
 [[package]]
+name = "clinvoice_export"
+version = "0.1.0"
+dependencies = [
+ "clinvoice_finance",
+ "clinvoice_schema",
+]
+
+[[package]]
 name = "clinvoice_finance"
 version = "0.3.0"
 dependencies = [
@@ -269,14 +277,6 @@ dependencies = [
  "thiserror",
  "tokio",
  "zip",
-]
-
-[[package]]
-name = "clinvoice_markdown"
-version = "0.1.0"
-dependencies = [
- "clinvoice_finance",
- "clinvoice_schema",
 ]
 
 [[package]]

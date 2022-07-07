@@ -19,12 +19,12 @@ tokio = {features=["fs", "macros", "rt-multi-thread"], version="1"}
 
 # CLInvoice
 clinvoice_adapter = {path='crates/adapters/clinvoice_adapter', version="0.11"}
-clinvoice_adapter_postgres = {path='crates/adapters/clinvoice_adapter_postgres', optional=true, version="0.1"}
+clinvoice_adapter_postgres = {optional=true, path='crates/adapters/clinvoice_adapter_postgres', version="0.1"}
 clinvoice_config = {path='crates/clinvoice_config', version="0.5"}
 clinvoice_error = {path='crates/clinvoice_error', version="0.3"}
 clinvoice_finance = {path='crates/clinvoice_finance', version="0.3"}
-clinvoice_markdown = {path='crates/clinvoice_markdown', version="0.1"}
-clinvoice_match = {path='crates/clinvoice_match', features=["serde_support"], version="0.4"}
+clinvoice_export = {features=["markdown"], path='crates/clinvoice_export', version="0.1"}
+clinvoice_match = {features=["serde_support"], path='crates/clinvoice_match', version="0.4"}
 clinvoice_schema = {path='crates/clinvoice_schema', version="0.7"}
 
 # Database
@@ -55,7 +55,7 @@ members = [
 	"crates/clinvoice_config",
 	"crates/clinvoice_error",
 	"crates/clinvoice_finance",
-	"crates/clinvoice_markdown",
+	"crates/clinvoice_export",
 	"crates/clinvoice_match",
 	"crates/clinvoice_schema",
 ]

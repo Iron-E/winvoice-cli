@@ -53,53 +53,55 @@ use serde::{Deserialize, Serialize};
 /// Requires the `serde_support` feature.
 ///
 /// ```rust
-/// # assert!(serde_yaml::from_str::<clinvoice_match::Match<isize>>("
+/// # type Match = clinvoice_match::Match<isize>;
+/// # use serde_yaml::from_str;
+/// # assert!(from_str::<Match>("
 /// and:
 ///   - not:
 ///       equal_to: 3
 ///   - in_range: [0, 10]
 /// # ").is_ok());
-/// ```
 ///
-/// ```rust
-/// # assert!(serde_yaml::from_str::<clinvoice_match::Match<isize>>("
+/// // -----------------------
+///
+/// # assert!(from_str::<Match>("
 /// any
 /// # ").is_ok());
-/// ```
 ///
-/// ```rust
-/// # assert!(serde_yaml::from_str::<clinvoice_match::Match<isize>>("
+/// // -----------------------
+///
+/// # assert!(from_str::<Match>("
 /// equal_to: 3
 /// # ").is_ok());
-/// ```
 ///
-/// ```rust
-/// # assert!(serde_yaml::from_str::<clinvoice_match::Match<isize>>("
+/// // -----------------------
+///
+/// # assert!(from_str::<Match>("
 /// less_than: 3
 /// # ").is_ok());
-/// ```
 ///
-/// ```rust
-/// # assert!(serde_yaml::from_str::<clinvoice_match::Match<isize>>("
+/// // -----------------------
+///
+/// # assert!(from_str::<Match>("
 /// greater_than: 3
 /// # ").is_ok());
-/// ```
 ///
-/// ```rust
-/// # assert!(serde_yaml::from_str::<clinvoice_match::Match<isize>>("
+/// // -----------------------
+///
+/// # assert!(from_str::<Match>("
 /// in_range: [0, 3]
 /// # ").is_ok());
-/// ```
 ///
-/// ```rust
-/// # assert!(serde_yaml::from_str::<clinvoice_match::Match<isize>>("
+/// // -----------------------
+///
+/// # assert!(from_str::<Match>("
 /// not:
 ///   equal_to: 3
 /// # ").is_ok());
-/// ```
 ///
-/// ```rust
-/// # assert!(serde_yaml::from_str::<clinvoice_match::Match<isize>>("
+/// // -----------------------
+///
+/// # assert!(from_str::<Match>("
 /// or:
 ///   - greater_than: 2
 ///   - equal_to: 0

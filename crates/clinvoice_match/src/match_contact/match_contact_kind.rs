@@ -16,35 +16,37 @@ use crate::MatchLocation;
 /// [`Default`] for its type.
 ///
 /// ```rust
-/// # assert!(serde_yaml::from_str::<clinvoice_match::MatchContactKind>(r#"
+/// # use clinvoice_match::MatchContactKind;
+/// # use serde_yaml::from_str;
+/// # assert!(from_str::<MatchContactKind>(r#"
 /// address:
 ///   name:
 ///     contains: "New"
 /// # "#).is_ok());
-/// ```
 ///
-/// ```rust
-/// # assert!(serde_yaml::from_str::<clinvoice_match::MatchContactKind>(r#"
+/// // ------------------------------
+///
+/// # assert!(from_str::<MatchContactKind>("
 /// any
-/// # "#).is_ok());
-/// ```
+/// # ").is_ok());
 ///
-/// ```rust
-/// # assert!(serde_yaml::from_str::<clinvoice_match::MatchContactKind>(r#"
+/// // ------------------------------
+///
+/// # assert!(from_str::<MatchContactKind>(r#"
 /// email:
 ///   equal_to: "foo@bar.io"
 /// # "#).is_ok());
-/// ```
 ///
-/// ```rust
-/// # assert!(serde_yaml::from_str::<clinvoice_match::MatchContactKind>(r#"
+/// // ------------------------------
+///
+/// # assert!(from_str::<MatchContactKind>(r#"
 /// phone:
 ///   equal_to: "1-800-555-5555"
 /// # "#).is_ok());
-/// ```
 ///
-/// ```rust
-/// # assert!(serde_yaml::from_str::<clinvoice_match::MatchContactKind>(r#"
+/// // ------------------------------
+///
+/// # assert!(from_str::<MatchContactKind>(r#"
 /// other:
 ///   equal_to: "@MyUsername"
 /// # "#).is_ok());

@@ -49,51 +49,53 @@ use serde::{Deserialize, Serialize};
 /// Requires the `serde_support` feature.
 ///
 /// ```rust
-/// # assert!(serde_yaml::from_str::<clinvoice_match::MatchStr<String>>(r#"
+/// # type MatchStr = clinvoice_match::MatchStr<String>;
+/// # use serde_yaml::from_str;
+/// # assert!(from_str::<MatchStr>(r#"
 /// and:
 ///   - contains: "f"
 ///   - regex: 'o{2,}$'
 /// # "#).is_ok());
-/// ```
 ///
-/// ```rust
-/// # assert!(serde_yaml::from_str::<clinvoice_match::MatchStr<String>>("
+/// // -------------------
+///
+/// # assert!(from_str::<MatchStr>("
 /// any
 /// # ").is_ok());
-/// ```
 ///
-/// ```rust
-/// # assert!(serde_yaml::from_str::<clinvoice_match::MatchStr<String>>(r#"
+/// // -------------------
+///
+/// # assert!(from_str::<MatchStr>(r#"
 /// contains: "foo"
 /// # "#).is_ok());
-/// ```
 ///
-/// ```rust
-/// # assert!(serde_yaml::from_str::<clinvoice_match::MatchStr<String>>(r#"
+/// // -------------------
+///
+/// # assert!(from_str::<MatchStr>(r#"
 /// equal_to: "foo"
 /// # "#).is_ok());
-/// ```
 ///
-/// ```rust
-/// # assert!(serde_yaml::from_str::<clinvoice_match::MatchStr<String>>(r#"
+/// // -------------------
+///
+/// # assert!(from_str::<MatchStr>(r#"
 /// not:
 ///   equal_to: "bar"
 /// # "#).is_ok());
-/// ```
 ///
-/// ```rust
-/// # assert!(serde_yaml::from_str::<clinvoice_match::MatchStr<String>>(r#"
+/// // -------------------
+///
+/// # assert!(from_str::<MatchStr>(r#"
 /// or:
 ///   - not:
 ///       contains: "bar"
 ///   - equal_to: "foobar"
 /// # "#).is_ok());
-/// ```
 ///
-/// ```rust
-/// # assert!(serde_yaml::from_str::<clinvoice_match::MatchStr<String>>(r#"
+/// // -------------------
+///
+/// # assert!(from_str::<MatchStr>("
 /// regex: 'fo{2,}'
-/// # "#).is_ok());
+/// # ").is_ok());
 /// ```
 ///
 /// ### Warnings

@@ -68,38 +68,40 @@ use serde::{Deserialize, Serialize};
 /// Requires the `serde_support` feature.
 ///
 /// ```rust
-/// # assert!(serde_yaml::from_str::<clinvoice_match::MatchSet<clinvoice_match::Match<isize>>>("
+/// # type MatchSet = clinvoice_match::MatchSet<clinvoice_match::Match<isize>>;
+/// # use serde_yaml::from_str;
+/// # assert!(from_str::<MatchSet>("
 /// and:
 ///   - contains:
 ///       equal_to: 5
 ///   - contains:
 ///       greater_than: 7
 /// # ").is_ok());
-/// ```
 ///
-/// ```rust
-/// # assert!(serde_yaml::from_str::<clinvoice_match::MatchSet<clinvoice_match::Match<isize>>>("
+/// // --------------------
+///
+/// # assert!(from_str::<MatchSet>("
 /// any
 /// # ").is_ok());
-/// ```
 ///
-/// ```rust
-/// # assert!(serde_yaml::from_str::<clinvoice_match::MatchSet<clinvoice_match::Match<isize>>>("
+/// // --------------------
+///
+/// # assert!(from_str::<MatchSet>("
 /// contains:
 ///   in_range: [0, 10]
 /// # ").is_ok());
-/// ```
 ///
-/// ```rust
-/// # assert!(serde_yaml::from_str::<clinvoice_match::MatchSet<clinvoice_match::Match<isize>>>("
+/// // --------------------
+///
+/// # assert!(from_str::<MatchSet>("
 /// not:
 ///   contains:
 ///     equal_to: 5
 /// # ").is_ok());
-/// ```
 ///
-/// ```rust
-/// # assert!(serde_yaml::from_str::<clinvoice_match::MatchSet<clinvoice_match::Match<isize>>>("
+/// // --------------------
+///
+/// # assert!(from_str::<MatchSet>("
 /// or:
 ///   - contains:
 ///       equal_to: 5

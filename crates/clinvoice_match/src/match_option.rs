@@ -58,58 +58,60 @@ use serde::{Deserialize, Serialize};
 /// Requires the `serde_support` feature.
 ///
 /// ```rust
-/// # assert!(serde_yaml::from_str::<clinvoice_match::MatchOption<isize>>("
+/// # type MatchOption = clinvoice_match::MatchOption<isize>;
+/// # use serde_yaml::from_str;
+/// # assert!(from_str::<MatchOption>("
 /// and:
 ///   - not:
 ///       equal_to: 3
 ///   - in_range: [0, 10]
 /// # ").is_ok());
-/// ```
 ///
-/// ```rust
-/// # assert!(serde_yaml::from_str::<clinvoice_match::MatchOption<isize>>("
+/// // ----------------------------
+///
+/// # assert!(from_str::<MatchOption>("
 /// any
 /// # ").is_ok());
-/// ```
 ///
-/// ```rust
-/// # assert!(serde_yaml::from_str::<clinvoice_match::MatchOption<isize>>("
+/// // ----------------------------
+///
+/// # assert!(from_str::<MatchOption>("
 /// equal_to: 3
 /// # ").is_ok());
-/// ```
 ///
-/// ```rust
-/// # assert!(serde_yaml::from_str::<clinvoice_match::MatchOption<isize>>("
+/// // ----------------------------
+///
+/// # assert!(from_str::<MatchOption>("
 /// less_than: 3
 /// # ").is_ok());
-/// ```
 ///
-/// ```rust
-/// # assert!(serde_yaml::from_str::<clinvoice_match::MatchOption<isize>>("
+/// // ----------------------------
+///
+/// # assert!(from_str::<MatchOption>("
 /// greater_than: 3
 /// # ").is_ok());
-/// ```
 ///
-/// ```rust
-/// # assert!(serde_yaml::from_str::<clinvoice_match::MatchOption<isize>>("
+/// // ----------------------------
+///
+/// # assert!(from_str::<MatchOption>("
 /// in_range: [0, 3]
 /// # ").is_ok());
-/// ```
 ///
-/// ```rust
-/// # assert!(serde_yaml::from_str::<clinvoice_match::MatchOption<isize>>("
+/// // ----------------------------
+///
+/// # assert!(from_str::<MatchOption>("
 /// none
 /// # ").is_ok());
-/// ```
 ///
-/// ```rust
-/// # assert!(serde_yaml::from_str::<clinvoice_match::MatchOption<isize>>("
+/// // ----------------------------
+///
+/// # assert!(from_str::<MatchOption>("
 /// not: none
 /// # ").is_ok());
-/// ```
 ///
-/// ```rust
-/// # assert!(serde_yaml::from_str::<clinvoice_match::MatchOption<isize>>("
+/// // ----------------------------
+///
+/// # assert!(from_str::<MatchOption>("
 /// or:
 ///   - greater_than: 2
 ///   - equal_to: 0

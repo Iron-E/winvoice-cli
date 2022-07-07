@@ -15,19 +15,21 @@ use super::MatchLocation;
 /// [`Default`] for its type.
 ///
 /// ```rust
-/// # assert!(serde_yaml::from_str::<clinvoice_match::MatchOuterLocation>("
+/// # use clinvoice_match::MatchOuterLocation;
+/// # use serde_yaml::from_str;
+/// # assert!(from_str::<MatchOuterLocation>("
 /// any
 /// # ").is_ok());
-/// ```
 ///
-/// ```rust
-/// # assert!(serde_yaml::from_str::<clinvoice_match::MatchOuterLocation>("
+/// // ------------------
+///
+/// # assert!(from_str::<MatchOuterLocation>("
 /// none
 /// # ").is_ok());
-/// ```
 ///
-/// ```rust
-/// # assert!(serde_yaml::from_str::<clinvoice_match::MatchOuterLocation>(r#"
+/// // ------------------
+///
+/// # assert!(from_str::<MatchOuterLocation>(r#"
 /// some:
 ///   name:
 ///     equal_to: "Antarctica"

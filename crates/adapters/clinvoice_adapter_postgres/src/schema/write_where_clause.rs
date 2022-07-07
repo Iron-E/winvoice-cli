@@ -1,7 +1,7 @@
 use core::{fmt::Display, ops::Deref};
 
 use clinvoice_adapter::{
-	fmt::{sql, Nullable, QueryBuilderExt, SnakeCase, TableToSql},
+	fmt::{sql, QueryBuilderExt, SnakeCase, TableToSql},
 	schema::columns::{
 		ContactColumns,
 		EmployeeColumns,
@@ -21,12 +21,12 @@ use clinvoice_match::{
 	MatchExpense,
 	MatchInvoice,
 	MatchJob,
+	MatchOption,
 	MatchOrganization,
 	MatchSet,
 	MatchStr,
 	MatchTimesheet,
 };
-use clinvoice_schema::chrono::NaiveDateTime;
 use sqlx::{Database, PgPool, Postgres, QueryBuilder, Result};
 
 use super::{PgLocation, PgSchema};
@@ -134,32 +134,6 @@ fn write_comparison<Db>(
 		.push(ident)
 		.push(comparator)
 		.push(comparand);
-}
-
-/// # Summary
-///
-/// Write a comparison of `ident` and `comparand` using `comparator`.
-///
-/// The rest of the args are the same as [`WriteSql::write_where`].
-///
-/// # Errors
-///
-/// If any the following:
-///
-/// * `ident` is empty.
-fn write_is_null<Db>(
-	query: &mut QueryBuilder<Db>,
-	context: WriteContext,
-	ident: impl Copy + Display,
-) where
-	Db: Database,
-{
-	query
-		.separated(' ')
-		.push(context)
-		.push(ident)
-		.push_unseparated(sql::IS)
-		.push_unseparated(sql::NULL);
 }
 
 /// # Summary
@@ -288,16 +262,80 @@ where
 				write_comparison(query, WriteContext::InWhereCondition, "", sql::AND, high);
 			},
 			Match::LessThan(value) => write_comparison(query, context, ident, "<", value),
-			Match::Not(condition) => match condition.deref()
-			{
-				Match::Any => write_is_null(query, context, ident),
-				m => write_negated(query, context, ident, m),
-			},
+			Match::Not(condition) => write_negated(query, context, ident, condition.deref()),
 			Match::Or(conditions) => write_boolean_group::<_, _, _, _, false>(
 				query,
 				context,
 				ident,
 				&mut conditions.iter().filter(|m| *m != &Match::Any),
+			),
+		};
+
+		WriteContext::AcceptingAnotherWhereCondition
+	}
+}
+
+impl<T> WriteWhereClause<Postgres, &MatchOption<T>> for PgSchema
+where
+	T: Display + PartialEq,
+{
+	/// # Errors
+	///
+	/// If any the following:
+	///
+	/// * [`ident.to_string()`](ToString::to_string) returns an [empty string](String::is_empty).
+	///
+	/// # See
+	///
+	/// * [`WriteWhereClause::write_where_clause`]
+	///
+	/// # Warnings
+	///
+	/// * Does not guard against SQL injection.
+	fn write_where_clause(
+		context: WriteContext,
+		ident: impl Copy + Display,
+		match_condition: &MatchOption<T>,
+		query: &mut QueryBuilder<Postgres>,
+	) -> WriteContext
+	{
+		match match_condition
+		{
+			MatchOption::And(conditions) => write_boolean_group::<_, _, _, _, true>(
+				query,
+				context,
+				ident,
+				&mut conditions.iter().filter(|m| *m != &MatchOption::Any),
+			),
+			MatchOption::Any => return context,
+			MatchOption::EqualTo(value) => write_comparison(query, context, ident, "=", value),
+			MatchOption::GreaterThan(value) =>
+			{
+				PgSchema::write_where_clause(context, ident, &Match::GreaterThan(value), query);
+			},
+			MatchOption::InRange(low, high) =>
+			{
+				PgSchema::write_where_clause(context, ident, &Match::InRange(low, high), query);
+			},
+			MatchOption::LessThan(value) =>
+			{
+				PgSchema::write_where_clause(context, ident, &Match::LessThan(value), query);
+			},
+			MatchOption::None =>
+			{
+				query
+					.separated(' ')
+					.push(context)
+					.push(ident)
+					.push_unseparated(sql::IS)
+					.push_unseparated(sql::NULL);
+			},
+			MatchOption::Not(condition) => write_negated(query, context, ident, condition.deref()),
+			MatchOption::Or(conditions) => write_boolean_group::<_, _, _, _, false>(
+				query,
+				context,
+				ident,
+				&mut conditions.iter().filter(|m| *m != &MatchOption::Any),
 			),
 		};
 
@@ -368,12 +406,7 @@ impl WriteWhereClause<Postgres, &MatchSet<MatchExpense>> for PgSchema
 
 				query.push(')');
 			},
-
-			MatchSet::Not(condition) => match condition.deref()
-			{
-				m if m.eq(&Default::default()) => write_is_null(query, context, ident),
-				m => write_negated(query, context, ident, m),
-			},
+			MatchSet::Not(condition) => write_negated(query, context, ident, condition.deref()),
 		};
 
 		WriteContext::AcceptingAnotherWhereCondition
@@ -420,11 +453,7 @@ impl WriteWhereClause<Postgres, &MatchStr<String>> for PgSchema
 					.push_unseparated('=')
 					.push_bind(string.clone());
 			},
-			MatchStr::Not(condition) => match condition.deref()
-			{
-				MatchStr::Any => write_is_null(query, context, ident),
-				m => write_negated(query, context, ident, m),
-			},
+			MatchStr::Not(condition) => write_negated(query, context, ident, condition.deref()),
 			MatchStr::Or(conditions) => write_boolean_group::<_, _, _, _, false>(
 				query,
 				context,
@@ -550,21 +579,16 @@ impl WriteWhereClause<Postgres, &MatchInvoice> for PgSchema
 	{
 		let columns = JobColumns::default().scope(ident);
 
-		fn map_nullable(date: &Option<NaiveDateTime>) -> impl Display + PartialEq
-		{
-			Nullable(date.map(PgTimestampTz))
-		}
-
 		PgSchema::write_where_clause(
 			PgSchema::write_where_clause(
 				PgSchema::write_where_clause(
 					context,
 					columns.invoice_date_issued,
-					&match_condition.date_issued.map_ref(map_nullable),
+					&match_condition.date_issued,
 					query,
 				),
 				columns.invoice_date_paid,
-				&match_condition.date_paid.map_ref(map_nullable),
+				&match_condition.date_paid,
 				query,
 			),
 			// NOTE: `hourly_rate` is stored as text on the DB
@@ -604,9 +628,7 @@ impl WriteWhereClause<Postgres, &MatchJob> for PgSchema
 								PgSchema::write_where_clause(
 									context,
 									columns.date_close,
-									&match_condition
-										.date_close
-										.map_ref(|d| Nullable(d.map(PgTimestampTz))),
+									&match_condition.date_close.map_ref(|d| PgTimestampTz(*d)),
 									query,
 								),
 								columns.date_open,
@@ -696,9 +718,7 @@ impl WriteWhereClause<Postgres, &MatchTimesheet> for PgSchema
 					query,
 				),
 				columns.time_end,
-				&match_condition
-					.time_end
-					.map_ref(|d| Nullable(d.map(PgTimestampTz))),
+				&match_condition.time_end.map_ref(|d| PgTimestampTz(*d)),
 				query,
 			),
 			columns.work_notes,

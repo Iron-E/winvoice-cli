@@ -135,7 +135,7 @@ mod tests
 
 	use clinvoice_adapter::schema::{LocationAdapter, OrganizationAdapter};
 	use clinvoice_finance::{ExchangeRates, Exchangeable};
-	use clinvoice_match::{Match, MatchInvoice, MatchJob};
+	use clinvoice_match::{Match, MatchInvoice, MatchJob, MatchOption};
 	use clinvoice_schema::{
 		chrono::{TimeZone, Utc},
 		Currency,
@@ -322,7 +322,7 @@ mod tests
 			PgJob::retrieve(&connection, &MatchJob {
 				id: Match::Or(vec![job2.id.into(), job3.id.into()]),
 				invoice: MatchInvoice {
-					date_issued: Match::Not(Match::Not(Match::Any.into()).into()),
+					date_issued: MatchOption::Not(Box::new(None.into())),
 					..Default::default()
 				},
 				..Default::default()
@@ -343,7 +343,7 @@ mod tests
 			PgJob::retrieve(&connection, &MatchJob {
 				id: Match::Or(vec![job.id.into(), job4.id.into()]),
 				invoice: MatchInvoice {
-					date_issued: Match::Not(Match::Any.into()),
+					date_issued: None.into(),
 					..Default::default()
 				},
 				..Default::default()

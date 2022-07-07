@@ -5,7 +5,7 @@ use clinvoice_adapter::{
 	schema::columns::LocationColumns,
 	WriteWhereClause,
 };
-use clinvoice_match::{Match, MatchLocation, MatchOuterLocation};
+use clinvoice_match::{Match, MatchLocation, MatchOuterLocation, MatchOption};
 use clinvoice_schema::{Id, Location};
 use futures::{future, TryFutureExt, TryStreamExt};
 use sqlx::{Error, Executor, Postgres, QueryBuilder, Result, Row};
@@ -67,7 +67,7 @@ impl PgLocation
 						PgSchema::write_where_clause(
 							Default::default(),
 							outer_columns.outer_id,
-							&Match::Not(Match::<i64>::Any.into()),
+							&MatchOption::<Id>::None,
 							query,
 						)
 					}

@@ -12,6 +12,8 @@ use serde::{Deserialize, Serialize};
 ///
 /// # Warnings
 ///
+/// * `Match::Not(Box::new(Match::Any))` is always `false` and often begets a runtime
+///   [`Error`](std::error::Error).
 /// * You should _never_ use [`Match<Option<T>>`]. Instead, use [`MatchOption<T>`](crate::MatchOption).
 ///
 /// # Examples
@@ -101,6 +103,16 @@ use serde::{Deserialize, Serialize};
 /// or:
 ///   - greater_than: 2
 ///   - equal_to: 0
+/// # ").is_ok());
+/// ```
+///
+/// ### Warnings
+///
+/// Never use the following, as it is always `false` and often begets an error:
+///
+/// ```rust
+/// # assert!(serde_yaml::from_str::<clinvoice_match::Match<isize>>("
+/// not: any
 /// # ").is_ok());
 /// ```
 #[cfg_attr(

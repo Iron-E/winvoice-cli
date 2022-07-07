@@ -7,6 +7,11 @@ use serde::{Deserialize, Serialize};
 /// A value which describes the condition which some string of type `T` must meet in order to
 /// "_match_".
 ///
+/// # Warnings
+///
+/// * `MatchStr::Not(Box::new(MatchStr::Any))` is always `false` and often begets a runtime
+///   [`Error`](std::error::Error).
+///
 /// # Examples
 ///
 /// This is an example for how a [`MatchStr`] should be interpreted:
@@ -89,6 +94,16 @@ use serde::{Deserialize, Serialize};
 /// # assert!(serde_yaml::from_str::<clinvoice_match::MatchStr<String>>(r#"
 /// regex: 'fo{2,}'
 /// # "#).is_ok());
+/// ```
+///
+/// ### Warnings
+///
+/// Never use the following, as it is always `false` and often begets an error:
+///
+/// ```rust
+/// # assert!(serde_yaml::from_str::<clinvoice_match::Match<isize>>("
+/// not: any
+/// # ").is_ok());
 /// ```
 #[cfg_attr(
 	feature = "serde_support",

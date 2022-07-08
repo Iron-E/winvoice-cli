@@ -1,39 +1,21 @@
 use sqlx::{Database, Result, Transaction};
 
-/// # Summary
-///
-/// A structure which can be updated on some remote [`Store`][store].
+/// Implementors of this trait are capable of syncing the current state of an
+/// [`Updatable::Entity`] with its mirror in the [`Updatable::Db`].
 #[async_trait::async_trait]
 pub trait Updatable
 {
+	/// The [`Database`] where data of type [`Updatable::Entity`] is being stored.
 	type Db: Database;
+
+	/// The type of data that is to be [`update`](Deletable::update)d.
 	type Entity;
 
-	/// # Summary
+	/// Update each [`Updatable::Entity`] in `entities` via the `connection`.
 	///
-	/// Send this entity's data to the active [`Store`][store].
+	/// # Errors
 	///
-	/// # Remarks
-	///
-	/// This function is called by create methods in order to write a generated entity to some
-	/// [`Store`][store]. Manually creating an entity and running this function is not advised, as
-	/// it does not guarantee the ID of an entity will be unique.
-	///
-	/// Rather, it is better to retrieve an entity or create one and then update it.
-	///
-	/// # Warnings
-	///
-	/// Beware when trying to change the primary key of a row in the database, because:
-	///
-	/// 1. This function will not remove the row with the previous primary key.
-	/// 2. You may clobber an existing row which has that primary key.
-	///
-	/// # Returns
-	///
-	/// * `()`, on a success.
-	/// * An [`Error`](sqlx::Error), when something goes wrong.
-	///
-	/// [store]: crate::Store
+	/// * If any [`Updatable::Entity`] in `entities` does not exist over the `connection`.
 	async fn update<'e, 'i>(
 		connection: &mut Transaction<Self::Db>,
 		entities: impl 'async_trait + Clone + Iterator<Item = &'i Self::Entity> + Send,

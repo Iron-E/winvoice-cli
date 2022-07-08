@@ -1,34 +1,21 @@
 use sqlx::{Database, Executor, Result};
 
-/// # Summary
-///
-/// A structure which can be deleted from a remote [`Store`](crate::Store).
+/// Implementors of this trait are capable of deleting values of type [`Deletable::Entity`] being
+/// stored on a [`Deletable::Db`].
 #[async_trait::async_trait]
 pub trait Deletable
 {
+	/// The [`Database`] that is housing the values of type [`Deletable::Entitiy`].
 	type Db: Database;
+
+	/// The type of data that is to be [`delete`](Deletable::delete)d.
 	type Entity;
 
-	/// # Summary
+	/// Send instruction over the `connection` to delete some `entities`.
 	///
-	/// Delete a [`Person`].
+	/// # Errors
 	///
-	/// # Paramteters
-	///
-	/// * `id`, the [`Id`] of the [`Person`] to delete.
-	/// * `cascade`, whether or not to delete entries which reference this entity.
-	///
-	/// # Remarks
-	///
-	/// If `cascade` is false, the deletion operation will be restricted if any entities are found
-	/// that require this one.
-	///
-	/// # Returns
-	///
-	/// * `()`, on a success.
-	/// * An [`Error`] when:
-	///   * `self.id` had not already been `create`d.
-	///   * Something goes wrong.
+	/// * If any [`Self::Entity`] in `entities` does not exist over the `connection`.
 	async fn delete<'e, 'i>(
 		connection: impl 'async_trait + Executor<'_, Database = Self::Db>,
 		entities: impl 'async_trait + Iterator<Item = &'i Self::Entity> + Send,

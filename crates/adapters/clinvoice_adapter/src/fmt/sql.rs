@@ -1,3 +1,33 @@
+//! Contains constants for various SQL keywords. Useful to prevent any possibility of misspelling
+//! a keyword, or forgetting to insert spaces around keywords.
+//!
+//! # Examples
+//!
+//! ```rust
+//! use clinvoice_adapter::fmt::sql;
+//!
+//! fn bad_example(columns: &str, table: &str) -> String {
+//!   let mut example: String = "SELECT".into();
+//!   example.push(columns);
+//!   example.push("FROM");
+//!   example.push(table);
+//!   example
+//! }
+//!
+//! fn good_example(columns: &str, table: &str) -> String {
+//!   let mut example: String = sql::SELECT.into();
+//!   example.push(columns);
+//!   example.push(sql::FROM);
+//!   example.push(table);
+//!   example
+//! }
+//!
+//! let columns = "a, b, c, d";
+//! let table = "foo";
+//! assert_eq!(&bad_example(columns, table), "SELECTa, b, c, dFROMfoo"); // oops, no spacing
+//! assert_eq!(&good_example(columns, table), "SELECT a, b, c, d FROM foo"); // guaranteed correct
+//! ```
+
 pub const AND: &str = " AND ";
 pub const AS: &str = " AS ";
 pub const BETWEEN: &str = " BETWEEN ";

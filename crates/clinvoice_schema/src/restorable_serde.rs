@@ -1,7 +1,7 @@
 use super::RestoreResult;
 
-/// Allows implementors to preserve data which is important (e.g. a reference number), by
-/// [skipping serialization](https://serde.rs/attr-skip-serializing.html) and then using
+/// Implementors of this trait are enabled to preserve data which is important (e.g. a reference
+/// number), by [skipping serialization](https://serde.rs/attr-skip-serializing.html) and then using
 /// `#[serde(default)]` to generate a temporary value on [deserialization](serde::Deserialize).
 ///
 /// Then, this trait can be used to [restore](RestorableSerde::try_restore) the important data.

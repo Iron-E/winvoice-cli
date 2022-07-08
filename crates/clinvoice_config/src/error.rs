@@ -8,7 +8,7 @@ use crate::Adapters;
 #[derive(Debug, Error)]
 pub enum Error
 {
-	#[error("Using this adapter requires the {0} feature")]
+	#[error("Using this adapter requires the `{0}` feature")]
 	FeatureNotFound(Adapters),
 
 	#[error(transparent)]

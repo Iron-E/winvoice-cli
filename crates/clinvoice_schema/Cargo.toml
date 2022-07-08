@@ -1,7 +1,7 @@
 # See https://doc.rust-lang.org/cargo/reference/manifest.html
 [package]
 name = "clinvoice_schema"
-version = "0.7.0"
+version = "0.8.0"
 authors = ["Iron-E <code.iron.e@gmail.com>"]
 description = "Data structures for CLInvoice."
 

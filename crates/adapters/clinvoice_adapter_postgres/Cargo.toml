@@ -20,7 +20,7 @@ clinvoice_adapter = {path="../clinvoice_adapter", version="0.11"}
 clinvoice_error = {path="../../clinvoice_error", version="0.3"}
 clinvoice_finance = {path='../../clinvoice_finance', version="0.3"}
 clinvoice_match = {path="../../clinvoice_match", version="0.4"}
-clinvoice_schema = {path="../../clinvoice_schema", version="0.7"}
+clinvoice_schema = {path="../../clinvoice_schema", version="0.8"}
 
 # Database
 sqlx = {features=["chrono", "decimal", "macros", "postgres", "runtime-tokio-rustls", "tls"], version="0.5"}

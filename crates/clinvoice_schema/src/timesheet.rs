@@ -65,30 +65,32 @@ impl Timesheet
 	/// ```rust
 	/// use clinvoice_schema::{chrono::Utc, Currency, Expense, Money, Timesheet};
 	///
+	/// let timesheets = [
+	///   Timesheet {
+	///     time_begin: Utc::today().and_hms(2, 0, 0),
+	///     time_end: Some(Utc::today().and_hms(2, 30, 0)),
+	///     ..Default::default()
+	///   },
+	///   Timesheet {
+	///     expenses: vec![Expense {
+	///       cost: Money::new(20_00, 2, Currency::Usd),
+	///       ..Default::default()
+	///     }],
+	///     time_begin: Utc::today().and_hms(3, 0, 0),
+	///     time_end: Some(Utc::today().and_hms(3, 30, 0)),
+	///     ..Default::default()
+	///   },
+	/// ];
+	///
 	/// assert_eq!(
-	///   Timesheet::total(None, Money::new(20_00, 2, Currency::Usd), &[
-	///     Timesheet {
-	///       time_begin: Utc::today().and_hms(2, 0, 0),
-	///       time_end: Some(Utc::today().and_hms(2, 30, 0)),
-	///       ..Default::default()
-	///     },
-	///     Timesheet {
-	///       expenses: vec![Expense {
-	///         cost: Money::new(20_00, 2, Currency::Usd),
-	///         ..Default::default()
-	///       }],
-	///       time_begin: Utc::today().and_hms(3, 0, 0),
-	///       time_end: Some(Utc::today().and_hms(3, 30, 0)),
-	///       ..Default::default()
-	///     },
-	///   ]),
+	///   Timesheet::total_all(&timesheets, None, Money::new(20_00, 2, Currency::Usd)),
 	///   Money::new(4000, 2, Currency::Usd),
 	/// );
 	/// ```
-	pub fn total(
+	pub fn total_all(
+		timesheets: &[Self],
 		exchange_rates: Option<&ExchangeRates>,
 		hourly_rate: Money,
-		timesheets: &[Self],
 	) -> Money
 	{
 		lazy_static! {

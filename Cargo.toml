@@ -25,7 +25,7 @@ clinvoice_error = {path='crates/clinvoice_error', version="0.3"}
 clinvoice_finance = {path='crates/clinvoice_finance', version="0.3"}
 clinvoice_export = {features=["markdown"], path='crates/clinvoice_export', version="0.1"}
 clinvoice_match = {features=["serde_support"], path='crates/clinvoice_match', version="0.4"}
-clinvoice_schema = {path='crates/clinvoice_schema', version="0.7"}
+clinvoice_schema = {path='crates/clinvoice_schema', version="0.8"}
 
 # Database
 sqlx = {features=["runtime-tokio-rustls", "tls"], version="0.5"}

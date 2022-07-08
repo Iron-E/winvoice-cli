@@ -14,7 +14,7 @@ repository = "https://www.github.com/Iron-E/clinvoice"
 # CLInvoice
 clinvoice_error = {path="../clinvoice_error", version="0.3"}
 clinvoice_finance = {path='../clinvoice_finance', version="0.3"}
-clinvoice_schema = {features=["serde_support"], path="../clinvoice_schema", version="0.7"}
+clinvoice_schema = {features=["serde_support"], path="../clinvoice_schema", version="0.8"}
 
 # Const Contat
 const_format = "0.2"

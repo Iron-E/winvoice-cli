@@ -1,8 +1,13 @@
-mod element;
+//! This module contains types which [`Display`] as valid Markdown syntax. It provides a
+//! [function](export_job) to export a [`Job`](clinvoice_schema::Job) as
+//! [Markdown](crate::Format::Markdown).
+
+mod block;
 mod text;
 
 use core::fmt::Write;
 
+pub use block::Block;
 use clinvoice_finance::ExchangeRates;
 use clinvoice_schema::{
 	chrono::{DateTime, Local},
@@ -11,13 +16,23 @@ use clinvoice_schema::{
 	Organization,
 	Timesheet,
 };
-pub use element::Element;
 pub use text::Text;
 
-/// # Summary
+/// Export some `job` to [Markdown](crate::Format::Markdown).
 ///
-/// Export some `job` to the [`Target`] specified. `contact_info` and `timesheets` are exported
-/// in the order given.
+/// `contact_info` and `timesheets` are exported in the order given.
+///
+/// # Warnings
+///
+/// * The following fields must all contain valid markdown syntax:
+///   * The `objectives` and `notes` of the `job`.
+///   * The `work_notes` of every [`Timesheet`] of the `timesheets`.
+///   * The `category` and `description` of every [`Expense`] of the `expenses` of every [`Timesheet`] of
+///     the `timesheets`.
+///
+/// # Panics
+///
+/// * When [`Timesheet::total`](clinvoice_schema::Timesheet::total) does.
 pub fn export_job(
 	job: &Job,
 	contact_info: &[Contact],
@@ -28,8 +43,8 @@ pub fn export_job(
 {
 	let mut output = String::new();
 
-	writeln!(output, "{}", Element::Heading {
-		depth: 1,
+	writeln!(output, "{}", Block::Heading {
+		indents: 1,
 		text: format!("{} – Job №{}", organization.name, job.id),
 	})
 	.unwrap();
@@ -37,8 +52,8 @@ pub fn export_job(
 	writeln!(
 		output,
 		"{}: {}",
-		Element::UnorderedList {
-			depth: 0,
+		Block::UnorderedList {
+			indents: 0,
 			text: Text::Bold("Client"),
 		},
 		job.client,
@@ -48,8 +63,8 @@ pub fn export_job(
 	writeln!(
 		output,
 		"{}: {}",
-		Element::UnorderedList {
-			depth: 0,
+		Block::UnorderedList {
+			indents: 0,
 			text: Text::Bold("Date Opened"),
 		},
 		DateTime::<Local>::from(job.date_open),
@@ -61,8 +76,8 @@ pub fn export_job(
 		writeln!(
 			output,
 			"{}: {}",
-			Element::UnorderedList {
-				depth: 0,
+			Block::UnorderedList {
+				indents: 0,
 				text: Text::Bold("Date Closed"),
 			},
 			DateTime::<Local>::from(date),
@@ -70,40 +85,40 @@ pub fn export_job(
 		.unwrap();
 	}
 
-	writeln!(output, "{}", Element::<&str>::Break).unwrap();
+	writeln!(output, "{}", Block::<&str>::Break).unwrap();
 
 	if !job.objectives.is_empty()
 	{
-		writeln!(output, "{}", Element::Heading {
-			depth: 2,
+		writeln!(output, "{}", Block::Heading {
+			indents: 2,
 			text: "Objectives",
 		})
 		.unwrap();
 
-		writeln!(output, "{}", Element::BlockText(&job.objectives)).unwrap();
+		writeln!(output, "{}", Block::Text(&job.objectives)).unwrap();
 	}
 
 	if !job.notes.is_empty()
 	{
-		writeln!(output, "{}", Element::Heading {
-			depth: 2,
+		writeln!(output, "{}", Block::Heading {
+			indents: 2,
 			text: "Notes",
 		})
 		.unwrap();
 
-		writeln!(output, "{}", Element::BlockText(&job.notes)).unwrap();
+		writeln!(output, "{}", Block::Text(&job.notes)).unwrap();
 	}
 
-	writeln!(output, "{}", Element::Heading {
-		depth: 2,
+	writeln!(output, "{}", Block::Heading {
+		indents: 2,
 		text: "Invoice",
 	})
 	.unwrap();
 
 	if !contact_info.is_empty()
 	{
-		writeln!(output, "{}:", Element::UnorderedList {
-			depth: 0,
+		writeln!(output, "{}:", Block::UnorderedList {
+			indents: 0,
 			text: Text::Bold("Contact Information"),
 		})
 		.unwrap();
@@ -114,8 +129,8 @@ pub fn export_job(
 				writeln!(
 					output,
 					"{}: {}",
-					Element::UnorderedList {
-						depth: 1,
+					Block::UnorderedList {
+						indents: 1,
 						text: Text::Bold(&contact.label),
 					},
 					contact.kind,
@@ -127,8 +142,8 @@ pub fn export_job(
 	writeln!(
 		output,
 		"{} {}",
-		Element::UnorderedList {
-			depth: 0,
+		Block::UnorderedList {
+			indents: 0,
 			text: Text::Bold("Hourly Rate"),
 		},
 		job.invoice.hourly_rate,
@@ -140,8 +155,8 @@ pub fn export_job(
 		writeln!(
 			output,
 			"{}: {}",
-			Element::UnorderedList {
-				depth: 0,
+			Block::UnorderedList {
+				indents: 0,
 				text: Text::Bold("Status"),
 			},
 			date,
@@ -152,20 +167,20 @@ pub fn export_job(
 	writeln!(
 		output,
 		"{}: {}",
-		Element::UnorderedList {
-			depth: 0,
+		Block::UnorderedList {
+			indents: 0,
 			text: Text::Bold("Total Amount Owed"),
 		},
-		Timesheet::total(exchange_rates, job.invoice.hourly_rate, timesheets),
+		Timesheet::total_all(timesheets, exchange_rates, job.invoice.hourly_rate),
 	)
 	.unwrap();
 
-	writeln!(output, "{}", Element::<&str>::Break).unwrap();
+	writeln!(output, "{}", Block::<&str>::Break).unwrap();
 
 	if !timesheets.is_empty()
 	{
-		writeln!(output, "{}", Element::Heading {
-			depth: 2,
+		writeln!(output, "{}", Block::Heading {
+			indents: 2,
 			text: "Timesheets",
 		})
 		.unwrap();
@@ -178,17 +193,17 @@ pub fn export_job(
 	output
 }
 
-/// # Summary
+/// Export some `timesheet` to [Markdown](crate::Format::Markdown).
 ///
-/// Export some `job` to the [`Target`] specified. Appends to some pre-existing `output`, in
-/// case multiple [`Timesheet`]s must be serialized sequentially.
+/// # Warnings
 ///
-/// Tracks the `organizations_with_serialized_contact_info` so that their contact information is not
-/// reiterated every time.
+/// * The following fields must all contain valid markdown syntax:
+///   * The `work_notes` of the `timesheet`.
+///   * The `category` and `description` of every [`Expense`] of the `expenses` of the `timesheet`.
 fn export_timesheet(timesheet: &Timesheet, output: &mut String)
 {
-	writeln!(output, "{}", Element::Heading {
-		depth: 3,
+	writeln!(output, "{}", Block::Heading {
+		indents: 3,
 		text: timesheet
 			.time_end
 			.map(|time_end| format!("{} – {}", timesheet.time_begin, time_end))
@@ -199,8 +214,8 @@ fn export_timesheet(timesheet: &Timesheet, output: &mut String)
 	writeln!(
 		output,
 		"{}: {} {}",
-		Element::UnorderedList {
-			depth: 0,
+		Block::UnorderedList {
+			indents: 0,
 			text: Text::Bold("Employee"),
 		},
 		timesheet.employee.title,
@@ -208,12 +223,12 @@ fn export_timesheet(timesheet: &Timesheet, output: &mut String)
 	)
 	.unwrap();
 
-	writeln!(output, "{}", Element::<&str>::Break).unwrap();
+	writeln!(output, "{}", Block::<&str>::Break).unwrap();
 
 	if !timesheet.expenses.is_empty()
 	{
-		writeln!(output, "{}", Element::Heading {
-			depth: 4,
+		writeln!(output, "{}", Block::Heading {
+			indents: 4,
 			text: "Expenses",
 		})
 		.unwrap();
@@ -225,11 +240,11 @@ fn export_timesheet(timesheet: &Timesheet, output: &mut String)
 				writeln!(
 					output,
 					"{}\n{}",
-					Element::Heading {
-						depth: 5,
+					Block::Heading {
+						indents: 5,
 						text: format!("№{} – {} ({})", e.id, e.category, e.cost),
 					},
-					Element::BlockText(&e.description),
+					Block::Text(&e.description),
 				)
 			})
 			.unwrap();
@@ -237,12 +252,12 @@ fn export_timesheet(timesheet: &Timesheet, output: &mut String)
 
 	if !timesheet.work_notes.is_empty()
 	{
-		writeln!(output, "{}", Element::Heading {
-			depth: 4,
+		writeln!(output, "{}", Block::Heading {
+			indents: 4,
 			text: "Work Notes",
 		})
 		.unwrap();
-		writeln!(output, "{}", Element::BlockText(&timesheet.work_notes)).unwrap();
+		writeln!(output, "{}", Block::Text(&timesheet.work_notes)).unwrap();
 	}
 }
 

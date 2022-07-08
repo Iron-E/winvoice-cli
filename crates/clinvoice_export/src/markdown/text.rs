@@ -1,24 +1,27 @@
 mod display;
 
-/// # Summary
+/// [Markdown](crate::Format::Markdown) syntax for text formatting.
 ///
-/// Types of text within a Markdown document.
-#[allow(dead_code)]
+/// # Examples
+///
+/// ```rust
+/// use clinvoice_export::markdown::Text;
+/// assert_eq!(r#"*I* have a **really strong opinion** about the number $\pi$."#, format!(
+///   "{} have a {} about the number {}.",
+///   Text::Italic("I"),
+///   Text::Bold("really strong opinion"),
+///   Text::Math(r#"\pi"#),
+/// ));
+/// ```
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum Text<T>
 {
-	/// # Summary
-	///
 	/// Bold text.
 	Bold(T),
 
-	/// # Summary
-	///
 	/// Italic text.
 	Italic(T),
 
-	/// # Summary
-	///
-	/// LaTeX formatted text.
+	/// Inline LaTeX math.
 	Math(T),
 }

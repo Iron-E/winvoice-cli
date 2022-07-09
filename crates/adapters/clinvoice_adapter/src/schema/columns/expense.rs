@@ -19,7 +19,7 @@ impl<T> ExpenseColumns<T>
 	///
 	/// Returns a [`ExpenseColumns`] which outputs all of its columns as
 	/// `column_1 AS aliased_column_1`.
-	pub fn r#as<TAlias>(self, aliased: ExpenseColumns<TAlias>) -> ExpenseColumns<As<TAlias, T>>
+	pub fn r#as<TAlias>(self, aliased: ExpenseColumns<TAlias>) -> ExpenseColumns<As<T, TAlias>>
 	{
 		ExpenseColumns {
 			category: As(self.category, aliased.category),

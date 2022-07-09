@@ -19,7 +19,7 @@ impl<T> ContactColumns<T>
 	///
 	/// Returns a [`ContactColumns`] which outputs all of its columns as
 	/// `column_1 AS aliased_column_1`.
-	pub fn r#as<TAlias>(self, aliased: ContactColumns<TAlias>) -> ContactColumns<As<TAlias, T>>
+	pub fn r#as<TAlias>(self, aliased: ContactColumns<TAlias>) -> ContactColumns<As<T, TAlias>>
 	{
 		ContactColumns {
 			address_id: As(self.address_id, aliased.address_id),

@@ -17,7 +17,7 @@ impl<T> LocationColumns<T>
 	///
 	/// Returns a [`LocationColumns`] which outputs all of its columns as
 	/// `column_1 AS aliased_column_1`.
-	pub fn r#as<TAlias>(self, aliased: LocationColumns<TAlias>) -> LocationColumns<As<TAlias, T>>
+	pub fn r#as<TAlias>(self, aliased: LocationColumns<TAlias>) -> LocationColumns<As<T, TAlias>>
 	{
 		LocationColumns {
 			id: As(self.id, aliased.id),

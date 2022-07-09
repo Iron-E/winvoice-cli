@@ -24,7 +24,7 @@ impl<T> JobColumns<T>
 	///
 	/// Returns a [`JobColumns`] which outputs all of its columns as
 	/// `column_1 AS aliased_column_1`.
-	pub fn r#as<TAlias>(self, aliased: JobColumns<TAlias>) -> JobColumns<As<TAlias, T>>
+	pub fn r#as<TAlias>(self, aliased: JobColumns<TAlias>) -> JobColumns<As<T, TAlias>>
 	{
 		JobColumns {
 			client_id: As(self.client_id, aliased.client_id),

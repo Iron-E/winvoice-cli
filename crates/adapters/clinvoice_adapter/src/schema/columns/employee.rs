@@ -18,7 +18,7 @@ impl<T> EmployeeColumns<T>
 	///
 	/// Returns a [`EmployeeColumns`] which outputs all of its columns as
 	/// `column_1 AS aliased_column_1`.
-	pub fn r#as<TAlias>(self, aliased: EmployeeColumns<TAlias>) -> EmployeeColumns<As<TAlias, T>>
+	pub fn r#as<TAlias>(self, aliased: EmployeeColumns<TAlias>) -> EmployeeColumns<As<T, TAlias>>
 	{
 		EmployeeColumns {
 			id: As(self.id, aliased.id),

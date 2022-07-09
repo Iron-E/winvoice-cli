@@ -20,7 +20,7 @@ impl<T> OrganizationColumns<T>
 	pub fn r#as<TAlias>(
 		self,
 		aliased: OrganizationColumns<TAlias>,
-	) -> OrganizationColumns<As<TAlias, T>>
+	) -> OrganizationColumns<As<T, TAlias>>
 	{
 		OrganizationColumns {
 			id: As(self.id, aliased.id),

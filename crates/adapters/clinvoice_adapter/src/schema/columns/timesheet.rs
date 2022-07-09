@@ -20,7 +20,7 @@ impl<T> TimesheetColumns<T>
 	///
 	/// Returns a [`TimesheetColumns`] which outputs all of its columns as
 	/// `column_1 AS aliased_column_1`.
-	pub fn r#as<TAlias>(self, aliased: TimesheetColumns<TAlias>) -> TimesheetColumns<As<TAlias, T>>
+	pub fn r#as<TAlias>(self, aliased: TimesheetColumns<TAlias>) -> TimesheetColumns<As<T, TAlias>>
 	{
 		TimesheetColumns {
 			employee_id: As(self.employee_id, aliased.employee_id),

@@ -53,7 +53,7 @@ impl<T> LocationColumns<T>
 	///
 	/// Returns a [`LocationColumns`] which modifies its fields' [`Display`]
 	/// implementation to output `{column}::{cast}`.
-	pub fn typecast<TCast>(self, cast: TCast) -> LocationColumns<TypeCast<TCast, T>>
+	pub fn typecast<TCast>(self, cast: TCast) -> LocationColumns<TypeCast<T, TCast>>
 	where
 		TCast: Copy,
 	{

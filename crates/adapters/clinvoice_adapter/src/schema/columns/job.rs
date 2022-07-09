@@ -74,7 +74,7 @@ impl<T> JobColumns<T>
 	///
 	/// Returns a [`JobColumns`] which modifies its fields' [`Display`]
 	/// implementation to output `{column}::{cast}`.
-	pub fn typecast<TCast>(self, cast: TCast) -> JobColumns<TypeCast<TCast, T>>
+	pub fn typecast<TCast>(self, cast: TCast) -> JobColumns<TypeCast<T, TCast>>
 	where
 		TCast: Copy,
 	{

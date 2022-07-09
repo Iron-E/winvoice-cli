@@ -62,7 +62,7 @@ impl<T> TimesheetColumns<T>
 	///
 	/// Returns a [`TimesheetColumns`] which modifies its fields' [`Display`]
 	/// implementation to output `{column}::{cast}`.
-	pub fn typecast<TCast>(self, cast: TCast) -> TimesheetColumns<TypeCast<TCast, T>>
+	pub fn typecast<TCast>(self, cast: TCast) -> TimesheetColumns<TypeCast<T, TCast>>
 	where
 		TCast: Copy,
 	{

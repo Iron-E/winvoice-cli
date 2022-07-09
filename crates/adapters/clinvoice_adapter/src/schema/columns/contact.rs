@@ -59,7 +59,7 @@ impl<T> ContactColumns<T>
 	///
 	/// Returns a [`ContactColumns`] which modifies its fields' [`Display`]
 	/// implementation to output `{column}::{cast}`.
-	pub fn typecast<TCast>(self, cast: TCast) -> ContactColumns<TypeCast<TCast, T>>
+	pub fn typecast<TCast>(self, cast: TCast) -> ContactColumns<TypeCast<T, TCast>>
 	where
 		TCast: Copy,
 	{

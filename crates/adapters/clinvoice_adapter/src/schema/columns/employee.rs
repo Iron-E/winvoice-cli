@@ -56,7 +56,7 @@ impl<T> EmployeeColumns<T>
 	///
 	/// Returns a [`EmployeeColumns`] which modifies its fields' [`Display`]
 	/// implementation to output `{ident}.{column}`.
-	pub fn typecast<TCast>(self, cast: TCast) -> EmployeeColumns<TypeCast<TCast, T>>
+	pub fn typecast<TCast>(self, cast: TCast) -> EmployeeColumns<TypeCast<T, TCast>>
 	where
 		TCast: Copy,
 	{

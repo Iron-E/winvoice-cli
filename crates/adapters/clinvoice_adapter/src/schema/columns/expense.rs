@@ -59,7 +59,7 @@ impl<T> ExpenseColumns<T>
 	///
 	/// Returns a [`ExpenseColumns`] which modifies its fields' [`Display`]
 	/// implementation to output `{column}::{cast}`.
-	pub fn typecast<TCast>(self, cast: TCast) -> ExpenseColumns<TypeCast<TCast, T>>
+	pub fn typecast<TCast>(self, cast: TCast) -> ExpenseColumns<TypeCast<T, TCast>>
 	where
 		TCast: Copy,
 	{

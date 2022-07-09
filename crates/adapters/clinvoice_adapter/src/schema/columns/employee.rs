@@ -1,7 +1,7 @@
 mod columns_to_sql;
 mod table_to_sql;
 
-use crate::fmt::{As, TableToSql, TypeCast, WithIdentifier};
+use crate::fmt::{As, TableToSql, WithIdentifier};
 
 /// The names of the columns of the `employees` table.
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -25,26 +25,9 @@ impl<T> EmployeeColumns<T>
 	/// Returns a [`EmployeeColumns`] which aliases the names of these [`EmployeeColumns`] with the
 	/// `aliased` columns provided.
 	///
-	/// # Examples
+	/// # See also
 	///
-	/// ```rust
-	/// use clinvoice_adapter::schema::columns::EmployeeColumns;
-	/// # use pretty_assertions::assert_eq;
-	///
-	/// assert_eq!(
-	///   EmployeeColumns::default()
-	///     .default_scope()
-	///     .r#as(EmployeeColumns {
-	///       id: "one",
-	///       name: "two",
-	///       status: "three",
-	///       title: "four",
-	///     })
-	///     .id
-	///     .to_string(),
-	///   "E.id AS one",
-	/// );
-	/// ```
+	/// * [`As`]
 	pub fn r#as<TAlias>(self, aliased: EmployeeColumns<TAlias>) -> EmployeeColumns<As<T, TAlias>>
 	{
 		EmployeeColumns {
@@ -57,9 +40,9 @@ impl<T> EmployeeColumns<T>
 
 	/// Add a [scope](EmployeeColumns::scope) using the [default alias](TableToSql::default_alias)
 	///
-	/// # Examples
+	/// # See also
 	///
-	/// * See [`EmployeeColumns::r#as`].
+	/// * [`WithIdentifier`]
 	pub fn default_scope(self) -> EmployeeColumns<WithIdentifier<char, T>>
 	{
 		self.scope(Self::DEFAULT_ALIAS)
@@ -68,9 +51,9 @@ impl<T> EmployeeColumns<T>
 	/// Returns a [`EmployeeColumns`] which modifies its fields' [`Display`]
 	/// implementation to output `{alias}.{column}`.
 	///
-	/// # Examples
+	/// # See also
 	///
-	/// * See [`EmployeeColumns::default_scope`].
+	/// * [`WithIdentifier`]
 	pub fn scope<TAlias>(self, alias: TAlias) -> EmployeeColumns<WithIdentifier<TAlias, T>>
 	where
 		TAlias: Copy,
@@ -82,32 +65,6 @@ impl<T> EmployeeColumns<T>
 			title: WithIdentifier(alias, self.title),
 		}
 	}
-
-	/// Returns a [`EmployeeColumns`] which modifies its fields' [`Display`]
-	/// implementation to output `{column}::{cast}`.
-	///
-	/// # Examples
-	///
-	/// ```rust
-	/// use clinvoice_adapter::schema::columns::EmployeeColumns;
-	/// # use pretty_assertions::assert_eq;
-	///
-	/// assert_eq!(
-	///   EmployeeColumns::default().typecast("text").id.to_string(),
-	///   " CAST (id AS text)",
-	/// );
-	/// ```
-	pub fn typecast<TCast>(self, cast: TCast) -> EmployeeColumns<TypeCast<T, TCast>>
-	where
-		TCast: Copy,
-	{
-		EmployeeColumns {
-			id: TypeCast(self.id, cast),
-			name: TypeCast(self.name, cast),
-			status: TypeCast(self.status, cast),
-			title: TypeCast(self.title, cast),
-		}
-	}
 }
 
 impl EmployeeColumns<&'static str>
@@ -116,7 +73,7 @@ impl EmployeeColumns<&'static str>
 	///
 	/// # Examples
 	///
-	/// * See [`EmployeeColumns::r#as`].
+	/// * See [`EmployeeColumns::unique`].
 	pub const fn default() -> Self
 	{
 		Self {
@@ -160,16 +117,15 @@ impl EmployeeColumns<&'static str>
 	///   // no clobbering
 	///   assert_eq!(
 	///     query
-	///       .push_columns(&EmployeeColumns::default().default_scope().r#as(EmployeeColumns::unique()))
-	///       .push_more_columns(&OrganizationColumns::default().default_scope())
+	///       .push_columns(&OrganizationColumns::default().default_scope())
+	///       .push_more_columns(&EmployeeColumns::default().default_scope().r#as(EmployeeColumns::unique()))
 	///       .prepare()
 	///       .sql(),
-	///     " SELECT \
+	///     " SELECT O.id,O.location_id,O.name,\
 	///         E.id AS unique_2_employee_id,\
 	///         E.name AS unique_2_employee_name,\
 	///         E.status AS unique_2_employee_status,\
-	///         E.title AS unique_2_employee_title,\
-	///         O.id,O.location_id,O.name;"
+	///         E.title AS unique_2_employee_title;"
 	///   );
 	/// }
 	/// ```

@@ -23,14 +23,14 @@ pub trait QueryBuilderExt<'args>: sealed::Sealed
 	///
 	/// # Examples
 	///
-	/// * See [`ContactColumns::unique`](crate::schema::columns::ContactColumns::unique).
+	/// * See [`EmployeeColumns::unique`](crate::schema::columns::EmployeeColumns::unique).
 	fn prepare(&mut self) -> Query<Self::Db, <Self::Db as HasArguments<'args>>::Arguments>;
 
 	/// [`ColumnsToSql::push_to`] this query.
 	///
 	/// # Examples
 	///
-	/// * See [`ContactColumns::unique`](crate::schema::columns::ContactColumns::unique).
+	/// * See [`EmployeeColumns::unique`](crate::schema::columns::EmployeeColumns::unique).
 	fn push_columns<T>(&mut self, columns: &T) -> &mut Self
 	where
 		T: ColumnsToSql;

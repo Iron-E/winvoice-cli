@@ -6,7 +6,7 @@
 //! ```rust
 //! use clinvoice_adapter::{
 //!   fmt::{QueryBuilderExt, sql},
-//!   schema::columns::LocationColumns,
+//!   schema::columns::OrganizationColumns,
 //! };
 //! # use pretty_assertions::assert_eq;
 //! use sqlx::{Execute, Postgres, QueryBuilder};
@@ -15,14 +15,14 @@
 //!
 //! assert_eq!(
 //!   query
-//!     .push_columns(&LocationColumns::default().default_scope().r#as(LocationColumns {
+//!     .push_columns(&OrganizationColumns::default().default_scope().r#as(OrganizationColumns {
 //!       id: "aliased_id",
+//!       location_id: "aliased_location_id",
 //!       name: "aliased_name",
-//!       outer_id: "aliased_outer_id",
 //!     }))
 //!     .prepare()
 //!     .sql(),
-//!   " SELECT L.id AS aliased_id,L.name AS aliased_name,L.outer_id AS aliased_outer_id;"
+//!   " SELECT O.id AS aliased_id,O.location_id AS aliased_location_id,O.name AS aliased_name;"
 //! );
 //! ```
 

@@ -13,7 +13,7 @@ use core::fmt::Display;
 ///
 /// * Does not alter case of input.
 ///
-/// # See
+/// # See also
 ///
 /// * [`SnakeCase::push`]
 ///

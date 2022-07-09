@@ -77,7 +77,7 @@ impl PgSchema
 	/// the some values specified by `push_values` (e.g.
 	/// `|query| query.push_values(my_iterator, |mut q, value| …)`).
 	///
-	/// # See
+	/// # See also
 	///
 	/// * [`ColumnsToSql::push_columns`] for how the order of columns to bind in `push_values`.
 	/// * [`ColumnsToSql::push_set`] for how the `SET` clause is generated.

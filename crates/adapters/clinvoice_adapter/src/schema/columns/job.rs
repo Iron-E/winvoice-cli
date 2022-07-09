@@ -43,32 +43,9 @@ impl<T> JobColumns<T>
 	/// Returns a [`JobColumns`] which aliases the names of these [`JobColumns`] with the
 	/// `aliased` columns provided.
 	///
-	/// # Examples
+	/// # See also
 	///
-	/// ```rust
-	/// use clinvoice_adapter::schema::columns::JobColumns;
-	/// # use pretty_assertions::assert_eq;
-	///
-	/// assert_eq!(
-	///   JobColumns::default()
-	///     .default_scope()
-	///     .r#as(JobColumns {
-	///       client_id: "one",
-	///       date_close: "two",
-	///       date_open: "three",
-	///       id: "four",
-	///       increment: "five",
-	///       invoice_date_issued: "six",
-	///       invoice_date_paid: "seven",
-	///       invoice_hourly_rate: "eight",
-	///       notes: "nine",
-	///       objectives: "ten",
-	///     })
-	///     .id
-	///     .to_string(),
-	///   "J.id AS four",
-	/// );
-	/// ```
+	/// * [`As`]
 	pub fn r#as<TAlias>(self, aliased: JobColumns<TAlias>) -> JobColumns<As<T, TAlias>>
 	{
 		JobColumns {
@@ -87,9 +64,9 @@ impl<T> JobColumns<T>
 
 	/// Add a [scope](JobColumns::scope) using the [default alias](TableToSql::default_alias)
 	///
-	/// # Examples
+	/// # See also
 	///
-	/// * See [`JobColumns::r#as`].
+	/// * [`WithIdentifier`]
 	pub fn default_scope(self) -> JobColumns<WithIdentifier<char, T>>
 	{
 		self.scope(Self::DEFAULT_ALIAS)
@@ -98,9 +75,9 @@ impl<T> JobColumns<T>
 	/// Returns a [`JobColumns`] which modifies its fields' [`Display`]
 	/// implementation to output `{alias}.{column}`.
 	///
-	/// # Examples
+	/// # See also
 	///
-	/// * See [`JobColumns::default_scope`].
+	/// * [`WithIdentifier`]
 	pub fn scope<TAlias>(self, alias: TAlias) -> JobColumns<WithIdentifier<TAlias, T>>
 	where
 		TAlias: Copy,
@@ -122,17 +99,9 @@ impl<T> JobColumns<T>
 	/// Returns a [`JobColumns`] which modifies its fields' [`Display`]
 	/// implementation to output `{column}::{cast}`.
 	///
-	/// # Examples
+	/// # See also
 	///
-	/// ```rust
-	/// use clinvoice_adapter::schema::columns::JobColumns;
-	/// # use pretty_assertions::assert_eq;
-	///
-	/// assert_eq!(
-	///   JobColumns::default().typecast("numeric").invoice_hourly_rate.to_string(),
-	///   " CAST (invoice_hourly_rate AS numeric)",
-	/// );
-	/// ```
+	/// * [`TypeCast`]
 	pub fn typecast<TCast>(self, cast: TCast) -> JobColumns<TypeCast<T, TCast>>
 	where
 		TCast: Copy,
@@ -158,7 +127,7 @@ impl JobColumns<&'static str>
 	///
 	/// # Examples
 	///
-	/// * See [`JobColumns::r#as`].
+	/// * See [`JobColumns::unique`].
 	pub const fn default() -> Self
 	{
 		Self {
@@ -219,11 +188,11 @@ impl JobColumns<&'static str>
 	///   // no clobbering
 	///   assert_eq!(
 	///     query
-	///       .push_columns(&JobColumns::default().default_scope().r#as(JobColumns::unique()))
-	///       .push_more_columns(&OrganizationColumns::default().default_scope())
+	///       .push_columns(&OrganizationColumns::default().default_scope())
+	///       .push_more_columns(&JobColumns::default().default_scope().r#as(JobColumns::unique()))
 	///       .prepare()
 	///       .sql(),
-	///     " SELECT \
+	///     " SELECT O.id,O.location_id,O.name,\
 	///         J.client_id AS unique_4_job_client_id,\
 	///         J.date_open AS unique_4_job_date_open,\
 	///         J.date_close AS unique_4_job_date_close,\
@@ -233,10 +202,7 @@ impl JobColumns<&'static str>
 	///         J.invoice_date_paid AS unique_4_job_invoice_date_paid,\
 	///         J.invoice_hourly_rate AS unique_4_job_invoice_hourly_rate,\
 	///         J.notes AS unique_4_job_notes,\
-	///         J.objectives AS unique_4_job_objectives,\
-	///         O.id,\
-	///         O.location_id,\
-	///         O.name;"
+	///         J.objectives AS unique_4_job_objectives;"
 	///   );
 	/// }
 	/// ```

@@ -9,6 +9,11 @@ mod display;
 ///
 /// # Example
 ///
-/// * See [`ColumnsToSql::typecast`](crate::schema::columns::ContactColumns::typecast)
+/// ```rust
+/// use clinvoice_adapter::fmt::TypeCast;
+/// # use pretty_assertions::assert_eq;
+///
+/// assert_eq!(TypeCast("foo.a", "numeric").to_string(), " CAST (foo.a AS numeric)");
+/// ```
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct TypeCast<TColumn, TCast>(pub TColumn, pub TCast);

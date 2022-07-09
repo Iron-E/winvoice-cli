@@ -12,7 +12,7 @@ pub trait ColumnsToSql: TableToSql
 	///
 	/// # Examples
 	///
-	/// * See [`ContactColumns::unique`](crate::schema::columns::ContactColumns::unique), which uses
+	/// * See [`EmployeeColumns::unique`](crate::schema::columns::EmployeeColumns::unique), which uses
 	///   [`QueryBuilderExt::push_columns`](crate::fmt::QueryBuilderExt::push_columns).
 	fn push_to<Db>(&self, query: &mut QueryBuilder<Db>)
 	where

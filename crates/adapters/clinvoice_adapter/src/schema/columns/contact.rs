@@ -1,7 +1,7 @@
 mod columns_to_sql;
 mod table_to_sql;
 
-use crate::fmt::{As, TableToSql, TypeCast, WithIdentifier};
+use crate::fmt::{TableToSql, WithIdentifier};
 
 /// The names of the columns of the `contact_information` table.
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -25,46 +25,11 @@ pub struct ContactColumns<T>
 
 impl<T> ContactColumns<T>
 {
-	/// Returns a [`ContactColumns`] which aliases the names of these [`ContactColumns`] with the
-	/// `aliased` columns provided.
-	///
-	/// # Examples
-	///
-	/// ```rust
-	/// use clinvoice_adapter::schema::columns::ContactColumns;
-	/// # use pretty_assertions::assert_eq;
-	///
-	/// assert_eq!(
-	///   ContactColumns::default()
-	///     .default_scope()
-	///     .r#as(ContactColumns {
-	///       address_id: "one",
-	///       email: "two",
-	///       label: "three",
-	///       other: "four",
-	///       phone: "five",
-	///     })
-	///     .address_id
-	///     .to_string(),
-	///   "C.address_id AS one",
-	/// );
-	/// ```
-	pub fn r#as<TAlias>(self, aliased: ContactColumns<TAlias>) -> ContactColumns<As<T, TAlias>>
-	{
-		ContactColumns {
-			address_id: As(self.address_id, aliased.address_id),
-			email: As(self.email, aliased.email),
-			label: As(self.label, aliased.label),
-			other: As(self.other, aliased.other),
-			phone: As(self.phone, aliased.phone),
-		}
-	}
-
 	/// Add a [scope](ContactColumns::scope) using the [default alias](TableToSql::default_alias)
 	///
-	/// # Examples
+	/// # See also
 	///
-	/// * See [`ContactColumns::r#as`].
+	/// * [`WithIdentifier`]
 	pub fn default_scope(self) -> ContactColumns<WithIdentifier<char, T>>
 	{
 		self.scope(Self::DEFAULT_ALIAS)
@@ -73,9 +38,9 @@ impl<T> ContactColumns<T>
 	/// Returns a [`ContactColumns`] which modifies its fields' [`Display`]
 	/// implementation to output `{alias}.{column}`.
 	///
-	/// # Examples
+	/// # See also
 	///
-	/// * See [`ContactColumns::default_scope`].
+	/// * [`WithIdentifier`]
 	pub fn scope<TAlias>(self, alias: TAlias) -> ContactColumns<WithIdentifier<TAlias, T>>
 	where
 		TAlias: Copy,
@@ -88,42 +53,11 @@ impl<T> ContactColumns<T>
 			phone: WithIdentifier(alias, self.phone),
 		}
 	}
-
-	/// Returns a [`ContactColumns`] which modifies its fields' [`Display`]
-	/// implementation to output `{column}::{cast}`.
-	///
-	/// # Examples
-	///
-	/// ```rust
-	/// use clinvoice_adapter::schema::columns::ContactColumns;
-	/// # use pretty_assertions::assert_eq;
-	///
-	/// assert_eq!(
-	///   ContactColumns::default().typecast("text").address_id.to_string(),
-	///   " CAST (address_id AS text)",
-	/// );
-	/// ```
-	pub fn typecast<TCast>(self, cast: TCast) -> ContactColumns<TypeCast<T, TCast>>
-	where
-		TCast: Copy,
-	{
-		ContactColumns {
-			address_id: TypeCast(self.address_id, cast),
-			email: TypeCast(self.email, cast),
-			label: TypeCast(self.label, cast),
-			other: TypeCast(self.other, cast),
-			phone: TypeCast(self.phone, cast),
-		}
-	}
 }
 
 impl ContactColumns<&'static str>
 {
 	/// The names of the columns in `contact_information` without any aliasing.
-	///
-	/// # Examples
-	///
-	/// * See [`ContactColumns::r#as`].
 	pub const fn default() -> Self
 	{
 		Self {

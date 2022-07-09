@@ -9,6 +9,11 @@ mod display;
 ///
 /// # Example
 ///
-/// * See [`ColumnsToSql::scope`](crate::schema::columns::ContactColumns::scope)
+/// ```rust
+/// use clinvoice_adapter::fmt::WithIdentifier;
+/// # use pretty_assertions::assert_eq;
+///
+/// assert_eq!(WithIdentifier("foo", "a").to_string(), "foo.a");
+/// ```
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct WithIdentifier<TIdent, TColumn>(pub TIdent, pub TColumn);

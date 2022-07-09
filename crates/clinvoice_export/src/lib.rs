@@ -20,4 +20,12 @@ mod format;
 #[cfg(feature = "markdown")]
 pub mod markdown;
 
+#[cfg(not(any(feature = "markdown")))]
+#[rustfmt::skip]
+compile_error!("
+`clinvoice_export` must be compiled with at least one of the following features:
+
+* `markdown`
+");
+
 pub use format::Format;

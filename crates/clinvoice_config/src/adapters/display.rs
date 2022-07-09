@@ -21,6 +21,6 @@ mod tests
 	#[test]
 	fn display()
 	{
-		assert_eq!(format!("{}", Adapters::Postgres), "Postgres");
+		assert_eq!(Adapters::Postgres.to_string(), "Postgres");
 	}
 }

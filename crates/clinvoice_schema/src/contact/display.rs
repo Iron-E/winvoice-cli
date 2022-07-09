@@ -50,24 +50,27 @@ mod tests
 		};
 
 		assert_eq!(
-			format!("{}", Contact {
+			Contact {
 				kind: ContactKind::Address(street_view),
 				label: "Office".into(),
-			}),
+			}
+			.to_string(),
 			"Office: 1337 Some Street, Phoenix, Arizona, USA, Earth"
 		);
 		assert_eq!(
-			format!("{}", Contact {
+			Contact {
 				kind: ContactKind::Email("foo@bar.io".into()),
 				label: "Email".into(),
-			}),
+			}
+			.to_string(),
 			"Email: foo@bar.io"
 		);
 		assert_eq!(
-			format!("{}", Contact {
+			Contact {
 				kind: ContactKind::Phone("1-603-555-5555".into()),
 				label: "Cellphone".into(),
-			}),
+			}
+			.to_string(),
 			"Cellphone: 1-603-555-5555"
 		);
 	}

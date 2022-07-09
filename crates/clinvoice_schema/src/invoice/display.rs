@@ -41,7 +41,7 @@ mod tests
 		};
 
 		assert_eq!(
-			format!("{}", invoice),
+			invoice.to_string(),
 			format!(
 				"Hourly Rate: 10.00 USD
 Status: Issued on {}; Outstanding",

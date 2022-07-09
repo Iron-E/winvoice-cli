@@ -43,11 +43,6 @@ impl Format
 			{
 				crate::markdown::export_job(job, contact_info, exchange_rates, organization, timesheets)
 			},
-
-			// NOTE: this is allowed because there may be additional formats added later, and I want
-			//       to define this behavior now.
-			#[allow(unreachable_patterns)]
-			_ => panic!("`clinvoice_export` was not compiled to support any file formats."),
 		}
 	}
 }

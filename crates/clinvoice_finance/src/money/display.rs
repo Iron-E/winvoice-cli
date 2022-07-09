@@ -19,17 +19,8 @@ mod tests
 	#[test]
 	fn display()
 	{
-		assert_eq!(
-			format!("{}", Money::new(50_00, 2, Currency::Usd)),
-			"50.00 USD"
-		);
-		assert_eq!(
-			format!("{}", Money::new(90_00, 2, Currency::Eur)),
-			"90.00 EUR"
-		);
-		assert_eq!(
-			format!("{}", Money::new(20000, 0, Currency::Jpy)),
-			"20000 JPY"
-		);
+		assert_eq!(Money::new(50_00, 2, Currency::Usd).to_string(), "50.00 USD");
+		assert_eq!(Money::new(90_00, 2, Currency::Eur).to_string(), "90.00 EUR");
+		assert_eq!(Money::new(20000, 0, Currency::Jpy).to_string(), "20000 JPY");
 	}
 }

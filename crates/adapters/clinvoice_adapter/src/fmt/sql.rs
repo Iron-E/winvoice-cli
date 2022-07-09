@@ -3,36 +3,28 @@
 //!
 //! # Examples
 //!
+//! Ideally, a misspelling like in `misspelling_compiles` would result in a compile-time error— any
+//! SQL includes the output from `misspelling_compiles` would be invalid as well.
+//!
 //! ```rust
-//! use clinvoice_adapter::fmt::sql;
-//!
-//! fn bad_example(columns: &str, table: &str) -> String {
-//!   let mut example: String = "SELECT".into();
-//!   example.push(columns);
-//!   example.push("FROM");
-//!   example.push(table);
-//!   example
+//! fn misspelling_compiles(columns: &str, table: &str) -> String {
+//!   format!("SELCT {columns} FROM{table}")
 //! }
+//! # assert_eq!(&misspelling_compiles("a, b, c, d", "foo"), "SELCT a, b, c, d FROMfoo");
+//! ```
 //!
-//! fn good_example(columns: &str, table: &str) -> String {
-//!   let mut example: String = sql::SELECT.into();
-//!   example.push(columns);
-//!   example.push(sql::FROM);
-//!   example.push(table);
-//!   example
+//! ```rust,compile_fail
+//! use clinvoice_adapter::fmt::sql::{SELECT, FROM};
+//! fn misspelling_compiles_not(columns: &str, table: &str) -> String {
+//!   format!("{SELCT}{columns}{FROM}{table}")
 //! }
-//!
-//! let columns = "a, b, c, d";
-//! let table = "foo";
-//! assert_eq!(&bad_example(columns, table), "SELECTa, b, c, dFROMfoo"); // oops, no spacing
-//! assert_eq!(&good_example(columns, table), "SELECT a, b, c, d FROM foo"); // guaranteed correct
 //! ```
 
 pub const AND: &str = " AND ";
 pub const AS: &str = " AS ";
 pub const BETWEEN: &str = " BETWEEN ";
-pub const CAST: &str = " CAST";
-pub const DELETE_FROM: &str = "DELETE FROM ";
+pub const CAST: &str = " CAST ";
+pub const DELETE_FROM: &str = " DELETE FROM ";
 pub const EXISTS: &str = " EXISTS ";
 pub const FALSE: &str = " false ";
 pub const FROM: &str = " FROM ";
@@ -45,10 +37,10 @@ pub const NOT: &str = " NOT ";
 pub const NULL: &str = " null ";
 pub const OR: &str = " OR ";
 pub const RETURNING: &str = " RETURNING ";
-pub const SELECT: &str = "SELECT ";
+pub const SELECT: &str = " SELECT ";
 pub const SET: &str = " SET ";
 pub const TRUE: &str = " true ";
 pub const UNION: &str = " UNION ";
-pub const UPDATE: &str = "UPDATE ";
+pub const UPDATE: &str = " UPDATE ";
 pub const WHERE: &str = " WHERE ";
-pub const WITH_RECURSIVE: &str = "WITH RECURSIVE ";
+pub const WITH_RECURSIVE: &str = " WITH RECURSIVE ";

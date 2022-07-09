@@ -4,23 +4,13 @@ use sqlx::{Pool, Result};
 
 use crate::{Deletable, Updatable};
 
+/// Implementors of this trait may act as an [adapter](super) for [`Employee`]s.
 #[async_trait::async_trait]
 pub trait EmployeeAdapter:
 	Deletable<Entity = Employee>
 	+ Updatable<Db = <Self as Deletable>::Db, Entity = <Self as Deletable>::Entity>
 {
-	/// # Summary
-	///
-	/// Create some [`Employee`] on the database.
-	///
-	/// # Parameters
-	///
-	/// See [`Employee`].
-	///
-	/// # Returns
-	///
-	/// * The created [`Employee`], if there were no errors.
-	/// * An [`Error`], if something goes wrong.
+	/// Initialize and return a new [`Employee`] via the `connection`.
 	async fn create(
 		connection: &Pool<<Self as Deletable>::Db>,
 		name: String,
@@ -28,18 +18,7 @@ pub trait EmployeeAdapter:
 		title: String,
 	) -> Result<<Self as Deletable>::Entity>;
 
-	/// # Summary
-	///
-	/// Retrieve some [`Employee`]s from the database using a [query](MatchEmployee).
-	///
-	/// # Parameters
-	///
-	/// See [`Employee`].
-	///
-	/// # Returns
-	///
-	/// * Any matching [`Employee`]s.
-	/// * An [`Error`], should something go wrong.
+	/// Retrieve all [`Employee`]s (via `connection`) that match the `match_condition`.
 	async fn retrieve(
 		connection: &Pool<<Self as Deletable>::Db>,
 		match_condition: &MatchEmployee,

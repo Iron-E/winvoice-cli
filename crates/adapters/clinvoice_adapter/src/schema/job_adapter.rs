@@ -11,22 +11,13 @@ use sqlx::{Pool, Result};
 
 use crate::{Deletable, Updatable};
 
+/// Implementors of this trait may act as an [adapter](super) for [`Job`]s.
 #[async_trait::async_trait]
 pub trait JobAdapter:
 	Deletable<Entity = Job>
 	+ Updatable<Db = <Self as Deletable>::Db, Entity = <Self as Deletable>::Entity>
 {
-	/// # Summary
-	///
-	/// Create a new [`Job`] on the database.
-	///
-	/// # Paramters
-	///
-	/// See [`Job`].
-	///
-	/// # Returns
-	///
-	/// The newly created [`Job`].
+	/// Initialize and return a new [`Job`] via the `connection`.
 	#[allow(clippy::too_many_arguments)]
 	async fn create(
 		connection: &Pool<<Self as Deletable>::Db>,
@@ -39,14 +30,7 @@ pub trait JobAdapter:
 		objectives: String,
 	) -> Result<<Self as Deletable>::Entity>;
 
-	/// # Summary
-	///
-	/// Retrieve some [`Job`]s from the database using a [query](MatchJob).
-	///
-	/// # Returns
-	///
-	/// * An `Error`, if something goes wrong.
-	/// * A list of matching [`Job`]s.
+	/// Retrieve all [`Job`]s (via `connection`) that match the `match_condition`.
 	async fn retrieve(
 		connection: &Pool<<Self as Deletable>::Db>,
 		match_condition: &MatchJob,

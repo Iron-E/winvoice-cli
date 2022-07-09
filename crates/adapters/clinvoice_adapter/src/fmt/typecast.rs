@@ -11,7 +11,7 @@ mod display;
 ///
 /// ```rust
 /// use clinvoice_adapter::fmt::TypeCast;
-/// assert_eq!(&TypeCast("foo.a", "numeric").to_string(), " CAST (foo.a AS numeric)");
+/// assert_eq!(TypeCast("foo.a", "numeric").to_string(), " CAST (foo.a AS numeric)");
 /// ```
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct TypeCast<TColumn, TCast>(pub TColumn, pub TCast);

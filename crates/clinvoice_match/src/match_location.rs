@@ -37,8 +37,8 @@ pub struct MatchLocation
 	pub id: Match<Id>,
 
 	#[cfg_attr(feature = "serde_support", serde(default))]
-	pub outer: MatchOuterLocation,
+	pub name: MatchStr<String>,
 
 	#[cfg_attr(feature = "serde_support", serde(default))]
-	pub name: MatchStr<String>,
+	pub outer: MatchOuterLocation,
 }

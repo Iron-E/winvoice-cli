@@ -34,8 +34,8 @@ use super::{Id, Invoice, Organization};
 ///     id: 0, // NOTE: you normally want to avoid assigning an arbitrary ID like this
 ///     location: Location {
 ///       id: 0, // NOTE: you normally want to avoid assigning an arbitrary ID like this
-///       outer: None,
 ///       name: "1337 Some Street".into(),
+///       outer: None,
 ///     },
 ///     name: "Big Old Test".into(),
 ///   },

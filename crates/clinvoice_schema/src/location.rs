@@ -15,12 +15,12 @@ use super::Id;
 ///
 /// let _ = Location {
 ///   id: 0, // NOTE: you normally want to avoid assigning an arbitrary ID like this
+///   name: "New York".into(),
 ///   outer: Some(Location {
 ///     id: 0, // NOTE: you normally want to avoid assigning an arbitrary ID like this
-///     outer: None,
 ///     name: "USA".into(),
+///     outer: None,
 ///   }.into()),
-///   name: "New York".into(),
 /// };
 /// ```
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
@@ -33,11 +33,11 @@ pub struct Location
 	#[cfg_attr(feature = "serde_support", serde(skip))]
 	pub id: Id,
 
+	/// The name of the [`Location`].
+	pub name: String,
+
 	/// The [`Location`] which immediately surrounds this one, such that when `outer` is [`None`],
 	/// this [`Location`] must be at the outermost scope which is relevant to the
 	/// [`Organization`](super::Organization) using CLInvoice.
 	pub outer: Option<Box<Self>>,
-
-	/// The name of the [`Location`].
-	pub name: String,
 }

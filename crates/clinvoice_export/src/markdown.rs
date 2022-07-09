@@ -287,36 +287,36 @@ mod tests
 			id: 0,
 			location: Location {
 				id: 0,
+				name: "1337 Some Street".into(),
 				outer: Some(
 					Location {
 						id: 1,
+						name: "Phoenix".into(),
 						outer: Some(
 							Location {
 								id: 2,
+								name: "Arizona".into(),
 								outer: Some(
 									Location {
 										id: 3,
+										name: "USA".into(),
 										outer: Some(
 											Location {
 												id: 4,
-												outer: None,
 												name: "Earth".into(),
+												outer: None,
 											}
 											.into(),
 										),
-										name: "USA".into(),
 									}
 									.into(),
 								),
-								name: "Arizona".into(),
 							}
 							.into(),
 						),
-						name: "Phoenix".into(),
 					}
 					.into(),
 				),
-				name: "1337 Some Street".into(),
 			},
 			name: "Big Old Test".into(),
 		};

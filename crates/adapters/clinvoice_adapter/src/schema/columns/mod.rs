@@ -11,16 +11,16 @@
 //! use sqlx::{Execute, Postgres, QueryBuilder};
 //!
 //! let mut query = QueryBuilder::<Postgres>::new(sql::SELECT);
-//! let sql = query
-//!   .push_columns(&LocationColumns::default().default_scope().r#as(LocationColumns {
-//!     id: "aliased_id",
-//!     name: "aliased_name",
-//!     outer_id: "aliased_outer_id",
-//!   }))
-//!   .prepare()
-//!   .sql();
 //!
-//! assert_eq!(sql,
+//! assert_eq!(
+//!   query
+//!     .push_columns(&LocationColumns::default().default_scope().r#as(LocationColumns {
+//!       id: "aliased_id",
+//!       name: "aliased_name",
+//!       outer_id: "aliased_outer_id",
+//!     }))
+//!     .prepare()
+//!     .sql(),
 //!   " SELECT L.id AS aliased_id,L.name AS aliased_name,L.outer_id AS aliased_outer_id;"
 //! );
 //! ```

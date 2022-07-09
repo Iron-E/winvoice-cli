@@ -63,14 +63,7 @@ impl<T> ExpenseColumns<T>
 	///
 	/// # Examples
 	///
-	/// ```rust
-	/// use clinvoice_adapter::schema::columns::ExpenseColumns;
-	///
-	/// assert_eq!(
-	///   ExpenseColumns::default().default_scope().id.to_string(),
-	///   "X.id",
-	/// );
-	/// ```
+	/// * See [`ExpenseColumns::r#as`].
 	pub fn default_scope(self) -> ExpenseColumns<WithIdentifier<char, T>>
 	{
 		self.scope(Self::DEFAULT_ALIAS)
@@ -81,14 +74,7 @@ impl<T> ExpenseColumns<T>
 	///
 	/// # Examples
 	///
-	/// ```rust
-	/// use clinvoice_adapter::schema::columns::ExpenseColumns;
-	///
-	/// assert_eq!(
-	///   ExpenseColumns::default().scope('X').id.to_string(),
-	///   "X.id",
-	/// );
-	/// ```
+	/// * See [`ExpenseColumns::default_scope`].
 	pub fn scope<TAlias>(self, alias: TAlias) -> ExpenseColumns<WithIdentifier<TAlias, T>>
 	where
 		TAlias: Copy,
@@ -132,6 +118,10 @@ impl<T> ExpenseColumns<T>
 impl ExpenseColumns<&'static str>
 {
 	/// The names of the columns in `expenses` without any aliasing.
+	///
+	/// # Examples
+	///
+	/// * See [`ExpenseColumns::r#as`].
 	pub const fn default() -> Self
 	{
 		Self {
@@ -143,7 +133,7 @@ impl ExpenseColumns<&'static str>
 		}
 	}
 
-	/// Aliases for the columns in `employees` which are guaranteed to be unique among other [`columns`](super)'s `unique` aliases.
+	/// Aliases for the columns in `expenses` which are guaranteed to be unique among other [`columns`](super)'s `unique` aliases.
 	///
 	/// # Examples
 	///
@@ -156,29 +146,29 @@ impl ExpenseColumns<&'static str>
 	///
 	/// {
 	///   let mut query = QueryBuilder::<Postgres>::new(sql::SELECT);
-	///   let sql = query
-	///     .push_columns(&ExpenseColumns::default().default_scope())
-	///     .push_more_columns(&OrganizationColumns::default().default_scope())
-	///     .prepare()
-	///     .sql();
 	///
 	///   // `sqlx::Row::get` ignores scopes (e.g. "X." in "X.id") so "X.id" and "O.id" clobber each
 	///   // other.
-	///   assert_eq!(sql,
+	///   assert_eq!(
+	///     query
+	///       .push_columns(&ExpenseColumns::default().default_scope())
+	///       .push_more_columns(&OrganizationColumns::default().default_scope())
+	///       .prepare()
+	///       .sql(),
 	///     " SELECT X.category,X.cost,X.description,X.id,X.timesheet_id,O.id,O.location_id,O.name;"
 	///   );
 	/// }
 	///
 	/// {
 	///   let mut query = QueryBuilder::<Postgres>::new(sql::SELECT);
-	///   let sql = query
-	///     .push_columns(&ExpenseColumns::default().default_scope().r#as(ExpenseColumns::unique()))
-	///     .push_more_columns(&OrganizationColumns::default().default_scope())
-	///     .prepare()
-	///     .sql();
 	///
 	///   // no clobbering
-	///   assert_eq!(sql,
+	///   assert_eq!(
+	///     query
+	///       .push_columns(&ExpenseColumns::default().default_scope().r#as(ExpenseColumns::unique()))
+	///       .push_more_columns(&OrganizationColumns::default().default_scope())
+	///       .prepare()
+	///       .sql(),
 	///     " SELECT \
 	///         X.category AS unique_3_expense_category,\
 	///         X.cost AS unique_3_expense_cost,\

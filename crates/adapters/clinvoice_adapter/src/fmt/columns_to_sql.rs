@@ -9,28 +9,85 @@ use super::TableToSql;
 pub trait ColumnsToSql: TableToSql
 {
 	/// Push a comma-separated list of column names to the `query`, e.g.: `column_1,column_2,`…`column_n`.
+	///
+	/// # Examples
+	///
+	/// * See [`ContactColumns::unique`](crate::schema::columns::ContactColumns::unique), which uses
+	///   [`QueryBuilderExt::push_columns`](crate::fmt::QueryBuilderExt::push_columns).
 	fn push_to<Db>(&self, query: &mut QueryBuilder<Db>)
 	where
 		Db: Database;
 
-	/// Push the `SET` clause (keyword not included) to the `query`, e.g.:
+	/// Push the `SET` clause (keyword not included) to the `query`.
 	///
-	/// ```sql
-	/// column_1 = values_alias.column_1,
-	/// column_2 = values_alias.column_2,
-	/// …column_n = values_alias.column_n
+	/// # Examples
+	///
+	/// ```rust
+	/// use clinvoice_adapter::{
+	///   fmt::{ColumnsToSql, sql},
+	///   schema::columns::EmployeeColumns,
+	/// };
+	/// use clinvoice_schema::Employee;
+	/// use sqlx::{Execute, QueryBuilder, Postgres};
+	///
+	/// let values_alias = SnakeCase::from((C::DEFAULT_ALIAS, 'V'));
+	/// let mut query = QueryBuilder::<Postgres>::new(sql::UPDATE);
+	///
+	/// query
+	///   .push(As(
+	///     EmployeeColumns::TABLE_NAME,
+	///     EmployeeColumns::DEFAULT_ALIAS,
+	///   ))
+	///   .push(sql::SET);
+	///
+	/// columns.push_set_to(&mut query, values_alias);
+	///
+	/// query
+	///   .push(sql::FROM)
+	///   .push('(')
+	///   .push_values(
+	///     [
+	///       Employee {
+	///         id: 0, // NOTE: you normally want to avoid assigning an arbitrary ID like this
+	///         name: "Bob".into(),
+	///         status: "Employed".into(),
+	///         title: "CEO".into(),
+	///       },
+	///       Employee {
+	///         id: 1, // NOTE: you normally want to avoid assigning an arbitrary ID like this
+	///         name: "John".into(),
+	///         status: "Employed".into(),
+	///         title: "Janitor".into(),
+	///       },
+	///     ].iter(),
+	///     |mut q, e| {
+	///       q.push_bind(e.id)
+	///        .push_bind(&e.name)
+	///        .push_bind(&e.status)
+	///        .push_bind(&e.title)
+	///     }
+	///   )
+	///   .push(')')
+	///   .push(sql::AS)
+	///   .push(values_alias)
+	///   .push(" (")
+	///   .push_columns(&columns)
+	///   .push(')')
+	///   .push(sql::WHERE);
+	///
+	/// columns.push_update_where_to(&mut query, C::DEFAULT_ALIAS, values_alias);
+	///
+	/// assert_eq!(query.prepare().sql(), "");
 	/// ```
 	fn push_set_to<Db>(&self, query: &mut QueryBuilder<Db>, values_alias: impl Copy + Display)
 	where
 		Db: Database;
 
-	/// # Summary
-	///
 	/// Push the `WHERE` clause of an `UPDATE` statement (`WHERE` keyword not included) to the `query`, e.g.:
 	///
-	/// ```sql
-	/// table_alias.id = values_alias.id
-	/// ```
+	/// # Examples
+	///
+	/// * See [`ColumnsToSql::push_set_to`].
 	fn push_update_where_to<Db>(
 		&self,
 		query: &mut QueryBuilder<Db>,

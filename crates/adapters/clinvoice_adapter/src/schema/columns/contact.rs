@@ -63,14 +63,7 @@ impl<T> ContactColumns<T>
 	///
 	/// # Examples
 	///
-	/// ```rust
-	/// use clinvoice_adapter::schema::columns::ContactColumns;
-	///
-	/// assert_eq!(
-	///   ContactColumns::default().default_scope().address_id.to_string(),
-	///   "C.address_id",
-	/// );
-	/// ```
+	/// * See [`ContactColumns::r#as`].
 	pub fn default_scope(self) -> ContactColumns<WithIdentifier<char, T>>
 	{
 		self.scope(Self::DEFAULT_ALIAS)
@@ -81,14 +74,7 @@ impl<T> ContactColumns<T>
 	///
 	/// # Examples
 	///
-	/// ```rust
-	/// use clinvoice_adapter::schema::columns::ContactColumns;
-	///
-	/// assert_eq!(
-	///   ContactColumns::default().scope('C').address_id.to_string(),
-	///   "C.address_id",
-	/// );
-	/// ```
+	/// * See [`ContactColumns::default_scope`].
 	pub fn scope<TAlias>(self, alias: TAlias) -> ContactColumns<WithIdentifier<TAlias, T>>
 	where
 		TAlias: Copy,
@@ -132,6 +118,10 @@ impl<T> ContactColumns<T>
 impl ContactColumns<&'static str>
 {
 	/// The names of the columns in `contact_information` without any aliasing.
+	///
+	/// # Examples
+	///
+	/// * See [`ContactColumns::r#as`].
 	pub const fn default() -> Self
 	{
 		Self {

@@ -58,14 +58,7 @@ impl<T> EmployeeColumns<T>
 	///
 	/// # Examples
 	///
-	/// ```rust
-	/// use clinvoice_adapter::schema::columns::EmployeeColumns;
-	///
-	/// assert_eq!(
-	///   EmployeeColumns::default().default_scope().id.to_string(),
-	///   "E.id",
-	/// );
-	/// ```
+	/// * See [`EmployeeColumns::r#as`].
 	pub fn default_scope(self) -> EmployeeColumns<WithIdentifier<char, T>>
 	{
 		self.scope(Self::DEFAULT_ALIAS)
@@ -76,14 +69,7 @@ impl<T> EmployeeColumns<T>
 	///
 	/// # Examples
 	///
-	/// ```rust
-	/// use clinvoice_adapter::schema::columns::EmployeeColumns;
-	///
-	/// assert_eq!(
-	///   EmployeeColumns::default().scope('E').id.to_string(),
-	///   "E.id",
-	/// );
-	/// ```
+	/// * See [`EmployeeColumns::default_scope`].
 	pub fn scope<TAlias>(self, alias: TAlias) -> EmployeeColumns<WithIdentifier<TAlias, T>>
 	where
 		TAlias: Copy,
@@ -125,6 +111,10 @@ impl<T> EmployeeColumns<T>
 impl EmployeeColumns<&'static str>
 {
 	/// The names of the columns in `employees` without any aliasing.
+	///
+	/// # Examples
+	///
+	/// * See [`EmployeeColumns::r#as`].
 	pub const fn default() -> Self
 	{
 		Self {
@@ -148,27 +138,29 @@ impl EmployeeColumns<&'static str>
 	///
 	/// {
 	///   let mut query = QueryBuilder::<Postgres>::new(sql::SELECT);
-	///   let sql = query
-	///     .push_columns(&EmployeeColumns::default().default_scope())
-	///     .push_more_columns(&OrganizationColumns::default().default_scope())
-	///     .prepare()
-	///     .sql();
 	///
 	///   // `sqlx::Row::get` ignores scopes (e.g. "E." in "E.id") so "E.id" and "O.id", as well as
 	///   // "E.name" and "O.name", clobber each other.
-	///   assert_eq!(sql, " SELECT E.id,E.name,E.status,E.title,O.id,O.location_id,O.name;");
+	///   assert_eq!(
+	///     query
+	///       .push_columns(&EmployeeColumns::default().default_scope())
+	///       .push_more_columns(&OrganizationColumns::default().default_scope())
+	///       .prepare()
+	///       .sql(),
+	///     " SELECT E.id,E.name,E.status,E.title,O.id,O.location_id,O.name;"
+	///   );
 	/// }
 	///
 	/// {
 	///   let mut query = QueryBuilder::<Postgres>::new(sql::SELECT);
-	///   let sql = query
-	///     .push_columns(&EmployeeColumns::default().default_scope().r#as(EmployeeColumns::unique()))
-	///     .push_more_columns(&OrganizationColumns::default().default_scope())
-	///     .prepare()
-	///     .sql();
 	///
 	///   // no clobbering
-	///   assert_eq!(sql,
+	///   assert_eq!(
+	///     query
+	///       .push_columns(&EmployeeColumns::default().default_scope().r#as(EmployeeColumns::unique()))
+	///       .push_more_columns(&OrganizationColumns::default().default_scope())
+	///       .prepare()
+	///       .sql(),
 	///     " SELECT \
 	///         E.id AS unique_2_employee_id,\
 	///         E.name AS unique_2_employee_name,\

@@ -3,27 +3,71 @@ mod table_to_sql;
 
 use crate::fmt::{As, TableToSql, TypeCast, WithIdentifier};
 
+/// The names of the columns of the `jobs` table.
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct JobColumns<T>
 {
+	/// The name of the `client_id` column of the `jobs` table.
 	pub client_id: T,
+
+	/// The name of the `date_close` column of the `jobs` table.
 	pub date_close: T,
+
+	/// The name of the `date_open` column of the `jobs` table.
 	pub date_open: T,
+
+	/// The name of the `id` column of the `jobs` table.
 	pub id: T,
+
+	/// The name of the `increment` column of the `jobs` table.
 	pub increment: T,
+
+	/// The name of the `invoice_date_issued` column of the `jobs` table.
 	pub invoice_date_issued: T,
+
+	/// The name of the `invoice_date_paid` column of the `jobs` table.
 	pub invoice_date_paid: T,
+
+	/// The name of the `invoice_hourly_rate` column of the `jobs` table.
 	pub invoice_hourly_rate: T,
+
+	/// The name of the `notes` column of the `jobs` table.
 	pub notes: T,
+
+	/// The name of the `objectives` column of the `jobs` table.
 	pub objectives: T,
 }
 
 impl<T> JobColumns<T>
 {
-	/// # Summary
+	/// Returns a [`JobColumns`] which aliases the names of these [`JobColumns`] with the
+	/// `aliased` columns provided.
 	///
-	/// Returns a [`JobColumns`] which outputs all of its columns as
-	/// `column_1 AS aliased_column_1`.
+	/// # Examples
+	///
+	/// ```rust
+	/// use clinvoice_adapter::schema::columns::JobColumns;
+	///
+	/// assert_eq!(
+	///   JobColumns::default()
+	///     .default_scope()
+	///     .r#as(JobColumns {
+	///       client_id: "one",
+	///       date_close: "two",
+	///       date_open: "three",
+	///       id: "four",
+	///       increment: "five",
+	///       invoice_date_issued: "six",
+	///       invoice_date_paid: "seven",
+	///       invoice_hourly_rate: "eight",
+	///       notes: "nine",
+	///       objectives: "ten",
+	///     })
+	///     .id
+	///     .to_string(),
+	///   "J.id AS four",
+	/// );
+	/// ```
 	pub fn r#as<TAlias>(self, aliased: JobColumns<TAlias>) -> JobColumns<As<T, TAlias>>
 	{
 		JobColumns {
@@ -40,18 +84,22 @@ impl<T> JobColumns<T>
 		}
 	}
 
-	/// # Summary
+	/// Add a [scope](JobColumns::scope) using the [default alias](TableToSql::default_alias)
 	///
-	/// Add a [scope](Self::scope) using the [default alias](TableToSql::default_alias)
+	/// # Examples
+	///
+	/// * See [`JobColumns::r#as`].
 	pub fn default_scope(self) -> JobColumns<WithIdentifier<char, T>>
 	{
 		self.scope(Self::DEFAULT_ALIAS)
 	}
 
-	/// # Summary
-	///
 	/// Returns a [`JobColumns`] which modifies its fields' [`Display`]
-	/// implementation to output `{ident}.{column}`.
+	/// implementation to output `{alias}.{column}`.
+	///
+	/// # Examples
+	///
+	/// * See [`JobColumns::default_scope`].
 	pub fn scope<TAlias>(self, alias: TAlias) -> JobColumns<WithIdentifier<TAlias, T>>
 	where
 		TAlias: Copy,
@@ -70,10 +118,19 @@ impl<T> JobColumns<T>
 		}
 	}
 
-	/// # Summary
-	///
 	/// Returns a [`JobColumns`] which modifies its fields' [`Display`]
 	/// implementation to output `{column}::{cast}`.
+	///
+	/// # Examples
+	///
+	/// ```rust
+	/// use clinvoice_adapter::schema::columns::JobColumns;
+	///
+	/// assert_eq!(
+	///   JobColumns::default().typecast("numeric").invoice_hourly_rate.to_string(),
+	///   " CAST (invoice_hourly_rate AS numeric)",
+	/// );
+	/// ```
 	pub fn typecast<TCast>(self, cast: TCast) -> JobColumns<TypeCast<T, TCast>>
 	where
 		TCast: Copy,
@@ -95,6 +152,11 @@ impl<T> JobColumns<T>
 
 impl JobColumns<&'static str>
 {
+	/// The names of the columns in `jobs` without any aliasing.
+	///
+	/// # Examples
+	///
+	/// * See [`JobColumns::r#as`].
 	pub const fn default() -> Self
 	{
 		Self {
@@ -111,6 +173,63 @@ impl JobColumns<&'static str>
 		}
 	}
 
+	/// Aliases for the columns in `jobs` which are guaranteed to be unique among other [`columns`](super)' `unique` aliases.
+	///
+	/// # Examples
+	///
+	/// ```rust
+	/// use clinvoice_adapter::{
+	///   fmt::{QueryBuilderExt, sql},
+	///   schema::columns::{JobColumns, OrganizationColumns},
+	/// };
+	/// use sqlx::{Execute, Postgres, QueryBuilder};
+	///
+	/// {
+	///   let mut query = QueryBuilder::<Postgres>::new(sql::SELECT);
+	///
+	///   // `sqlx::Row::get` ignores scopes (e.g. "J." in "J.id") so `X.id` and `O.id` clobber each
+	///   // other.
+	///   assert_eq!(
+	///     query
+	///       .push_columns(&JobColumns::default().default_scope())
+	///       .push_more_columns(&OrganizationColumns::default().default_scope())
+	///       .prepare()
+	///       .sql(),
+	///     " SELECT \
+	///         J.client_id,\
+	///         J.date_open,\
+	///         J.date_close,\
+	///         J.id,\
+	///         J.increment,\
+	///         J.invoice_date_issued,\
+	///         J.invoice_date_paid,\
+	///         J.invoice_hourly_rate,\
+	///         J.notes,\
+	///         J.objectives,\
+	///         O.id,O.location_id,O.name;"
+	///   );
+	/// }
+	///
+	/// {
+	///   let mut query = QueryBuilder::<Postgres>::new(sql::SELECT);
+	///
+	///   // no clobbering
+	///   assert_eq!(
+	///     query
+	///       .push_columns(&JobColumns::default().default_scope().r#as(JobColumns::unique()))
+	///       .push_more_columns(&OrganizationColumns::default().default_scope())
+	///       .prepare()
+	///       .sql(),
+	///     " SELECT \
+	///         X.category AS unique_3_expense_category,\
+	///         X.cost AS unique_3_expense_cost,\
+	///         X.description AS unique_3_expense_description,\
+	///         X.id AS unique_3_expense_id,\
+	///         X.timesheet_id AS unique_3_expense_timesheet_id,\
+	///         O.id,O.location_id,O.name;"
+	///   );
+	/// }
+	/// ```
 	pub const fn unique() -> Self
 	{
 		Self {

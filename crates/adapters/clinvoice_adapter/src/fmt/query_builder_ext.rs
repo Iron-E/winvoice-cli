@@ -23,41 +23,14 @@ pub trait QueryBuilderExt<'args>: sealed::Sealed
 	///
 	/// # Examples
 	///
-	/// ```rust
-	/// use clinvoice_adapter::fmt::{QueryBuilderExt, sql, WithIdentifier};
-	/// use sqlx::{Execute, Postgres, QueryBuilder};
-	///
-	/// let mut query = QueryBuilder::<Postgres>::new(sql::SELECT);
-	/// let sql = query
-	///   .push(WithIdentifier('F', "bar"))
-	///   .push_from("foo", 'F')
-	///   .prepare()
-	///   .sql();
-	///
-	/// assert_eq!(sql.chars().last(), Some(';'));
-	/// ```
+	/// * See [`ContactColumns::unique`](crate::schema::columns::ContactColumns::unique).
 	fn prepare(&mut self) -> Query<Self::Db, <Self::Db as HasArguments<'args>>::Arguments>;
 
 	/// [`ColumnsToSql::push_to`] this query.
 	///
 	/// # Examples
 	///
-	/// ```rust
-	/// use clinvoice_adapter::{
-	///   fmt::{QueryBuilderExt, sql, WithIdentifier},
-	///   schema::columns::{ContactColumns, OrganizationColumns},
-	/// };
-	/// use sqlx::{Execute, Postgres, QueryBuilder};
-	///
-	/// let mut query = QueryBuilder::<Postgres>::new(sql::SELECT);
-	/// let sql = query
-	///   .push_columns(&ContactColumns::default())
-	///   .push_more_columns(&OrganizationColumns::default())
-	///   .prepare()
-	///   .sql();
-	///
-	/// assert_eq!(sql, " SELECT address_id,email,label,other,phone,id,location_id,name;");
-	/// ```
+	/// * See [`ContactColumns::unique`](crate::schema::columns::ContactColumns::unique).
 	fn push_columns<T>(&mut self, columns: &T) -> &mut Self
 	where
 		T: ColumnsToSql;
@@ -75,19 +48,18 @@ pub trait QueryBuilderExt<'args>: sealed::Sealed
 	///
 	/// let organization_columns = OrganizationColumns::default().default_scope();
 	/// let location_columns = LocationColumns::default().default_scope();
-	///
 	/// let mut query = QueryBuilder::<Postgres>::new(sql::SELECT);
-	/// let sql = query
-	///   .push_columns(&organization_columns)
-	///   .push_default_from::<OrganizationColumns<&str>>()
-	///   .push_default_equijoin::<LocationColumns<&str>, _, _>(
-	///     location_columns.id,
-	///     organization_columns.location_id,
-	///   )
-	///   .prepare()
-	///   .sql();
 	///
-	/// assert_eq!(sql,
+	/// assert_eq!(
+	///   query
+	///     .push_columns(&organization_columns)
+	///     .push_default_from::<OrganizationColumns<&str>>()
+	///     .push_default_equijoin::<LocationColumns<&str>, _, _>(
+	///       location_columns.id,
+	///       organization_columns.location_id,
+	///     )
+	///     .prepare()
+	///     .sql(),
 	///   " SELECT O.id,O.location_id,O.name \
 	///     FROM organizations O \
 	///     JOIN locations L ON (L.id=O.location_id);"
@@ -130,17 +102,18 @@ pub trait QueryBuilderExt<'args>: sealed::Sealed
 	/// use sqlx::{Execute, Postgres, QueryBuilder};
 	///
 	/// let organization_columns = OrganizationColumns::default().default_scope();
-	///
 	/// let mut query = QueryBuilder::<Postgres>::new(sql::SELECT);
-	/// let sql = query
-	///   .push_columns(&organization_columns)
-	///   .push_default_from::<OrganizationColumns<&str>>()
-	///   .push(sql::WHERE)
-	///   .push_equal(organization_columns.id, 3)
-	///   .prepare()
-	///   .sql();
 	///
-	/// assert_eq!(sql, " SELECT O.id,O.location_id,O.name FROM organizations O WHERE O.id=3;");
+	/// assert_eq!(
+	///   query
+	///     .push_columns(&organization_columns)
+	///     .push_default_from::<OrganizationColumns<&str>>()
+	///     .push(sql::WHERE)
+	///     .push_equal(organization_columns.id, 3)
+	///     .prepare()
+	///     .sql(),
+	///   " SELECT O.id,O.location_id,O.name FROM organizations O WHERE O.id=3;"
+	/// );
 	/// ```
 	fn push_equal<TLeft, TRight>(&mut self, left: TLeft, right: TRight) -> &mut Self
 	where
@@ -156,13 +129,15 @@ pub trait QueryBuilderExt<'args>: sealed::Sealed
 	/// use sqlx::{Execute, Postgres, QueryBuilder};
 	///
 	/// let mut query = QueryBuilder::<Postgres>::new(sql::SELECT);
-	/// let sql = query
-	///   .push_from("foo", 'F')
-	///   .push_equijoin("bar", 'B', "B.foo_id", "F.id")
-	///   .prepare()
-	///   .sql();
 	///
-	/// assert_eq!(sql, " SELECT  FROM foo F JOIN bar B ON (B.foo_id=F.id);");
+	/// assert_eq!(
+	///   query
+	///     .push_from("foo", 'F')
+	///     .push_equijoin("bar", 'B', "B.foo_id", "F.id")
+	///     .prepare()
+	///     .sql(),
+	///   " SELECT  FROM foo F JOIN bar B ON (B.foo_id=F.id);"
+	/// );
 	/// ```
 	fn push_equijoin<TIdent, TAlias, TLeft, TRight>(
 		&mut self,

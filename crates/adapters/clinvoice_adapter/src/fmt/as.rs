@@ -9,9 +9,6 @@ mod display;
 ///
 /// # Example
 ///
-/// ```rust
-/// use clinvoice_adapter::fmt::As;
-/// assert_eq!(As("foo.a", "MyAlias").to_string(), "foo.a AS MyAlias");
-/// ```
+/// * See [`ContactColumns::r#as`](crate::schema::columns::ContactColumns::r#as).
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct As<TIdent, TAs>(pub TIdent, pub TAs);

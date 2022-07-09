@@ -4,21 +4,15 @@ use sqlx::{Database, QueryBuilder};
 
 use super::TableToSql;
 
-/// # Summary
-///
-/// This trait defines methods which are commonly used when generating SQL that references all of
-/// the columns for a given table.
+/// Implementors of this trait are able to generate SQL which references all columns of a given
+/// table.
 pub trait ColumnsToSql: TableToSql
 {
-	/// # Summary
-	///
 	/// Push a comma-separated list of column names to the `query`, e.g.: `column_1,column_2,`…`column_n`.
 	fn push_to<Db>(&self, query: &mut QueryBuilder<Db>)
 	where
 		Db: Database;
 
-	/// # Summary
-	///
 	/// Push the `SET` clause (keyword not included) to the `query`, e.g.:
 	///
 	/// ```sql

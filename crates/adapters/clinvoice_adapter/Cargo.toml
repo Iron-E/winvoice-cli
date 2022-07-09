@@ -26,6 +26,9 @@ sqlx = "0.5"
 # Serialization
 serde = {version="1", optional=true}
 
+[dev-dependencies]
+sqlx = {features=["postgres"], version="0.5"}
+
 [features]
 default = []
 serde_support = ["clinvoice_match/serde_support", "serde/derive"]

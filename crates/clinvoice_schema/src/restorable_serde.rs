@@ -17,6 +17,7 @@ pub trait RestorableSerde
 	///
 	/// ```rust
 	/// use clinvoice_schema::{Employee, RestorableSerde};
+	/// # use pretty_assertions::{assert_eq, assert_ne};
 	///
 	/// let original = Employee {
 	///   id: 0, // NOTE: you normally want to avoid assigning an arbitrary ID like this

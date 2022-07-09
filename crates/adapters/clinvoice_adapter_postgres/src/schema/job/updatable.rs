@@ -87,6 +87,7 @@ mod tests
 	use clinvoice_match::MatchJob;
 	use clinvoice_schema::{chrono::Utc, Invoice, InvoiceDate};
 	use futures::TryFutureExt;
+	use pretty_assertions::assert_eq;
 
 	use crate::{
 		fmt::DateTimeExt,

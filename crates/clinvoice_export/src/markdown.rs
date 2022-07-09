@@ -33,7 +33,7 @@ pub use text::Text;
 /// # Panics
 ///
 /// * When [`Timesheet::total`](clinvoice_schema::Timesheet::total) does.
-pub fn export_job(
+pub(super) fn export_job(
 	job: &Job,
 	contact_info: &[Contact],
 	exchange_rates: Option<&ExchangeRates>,

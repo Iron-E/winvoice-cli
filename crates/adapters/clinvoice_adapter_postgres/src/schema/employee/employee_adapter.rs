@@ -71,6 +71,7 @@ mod tests
 	use std::collections::HashSet;
 
 	use clinvoice_match::{Match, MatchEmployee, MatchStr};
+	use pretty_assertions::assert_eq;
 
 	use super::{EmployeeAdapter, PgEmployee};
 	use crate::schema::util;

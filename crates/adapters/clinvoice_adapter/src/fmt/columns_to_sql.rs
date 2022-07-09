@@ -24,19 +24,38 @@ pub trait ColumnsToSql: TableToSql
 	///
 	/// ```rust
 	/// use clinvoice_adapter::{
-	///   fmt::{ColumnsToSql, sql},
+	///   fmt::{As, ColumnsToSql, QueryBuilderExt, SnakeCase, sql, TableToSql},
 	///   schema::columns::EmployeeColumns,
 	/// };
 	/// use clinvoice_schema::Employee;
+	/// # use pretty_assertions::assert_eq;
 	/// use sqlx::{Execute, QueryBuilder, Postgres};
 	///
-	/// let values_alias = SnakeCase::from((C::DEFAULT_ALIAS, 'V'));
-	/// let mut query = QueryBuilder::<Postgres>::new(sql::UPDATE);
+	/// let columns = EmployeeColumns::default();
+	/// let employees = [
+	///   Employee {
+	///     id: 0, // NOTE: you normally want to avoid assigning an arbitrary ID like this
+	///     name: "Bob".into(),
+	///     status: "Employed".into(),
+	///     title: "CEO".into(),
+	///   },
+	///   Employee {
+	///     id: 1, // NOTE: you normally want to avoid assigning an arbitrary ID like this
+	///     name: "John".into(),
+	///     status: "Employed".into(),
+	///     title: "Janitor".into(),
+	///   },
+	/// ];
 	///
+	///
+	/// // guarantees a uniqueness for `values_alias`, even if `DEFAULT_ALIAS` changes.
+	/// let values_alias = SnakeCase::from((EmployeeColumns::<char>::DEFAULT_ALIAS, 'V'));
+	///
+	/// let mut query = QueryBuilder::<Postgres>::new(sql::UPDATE);
 	/// query
 	///   .push(As(
-	///     EmployeeColumns::TABLE_NAME,
-	///     EmployeeColumns::DEFAULT_ALIAS,
+	///     EmployeeColumns::<&str>::TABLE_NAME,
+	///     EmployeeColumns::<char>::DEFAULT_ALIAS,
 	///   ))
 	///   .push(sql::SET);
 	///
@@ -46,25 +65,12 @@ pub trait ColumnsToSql: TableToSql
 	///   .push(sql::FROM)
 	///   .push('(')
 	///   .push_values(
-	///     [
-	///       Employee {
-	///         id: 0, // NOTE: you normally want to avoid assigning an arbitrary ID like this
-	///         name: "Bob".into(),
-	///         status: "Employed".into(),
-	///         title: "CEO".into(),
-	///       },
-	///       Employee {
-	///         id: 1, // NOTE: you normally want to avoid assigning an arbitrary ID like this
-	///         name: "John".into(),
-	///         status: "Employed".into(),
-	///         title: "Janitor".into(),
-	///       },
-	///     ].iter(),
+	///     employees.iter(),
 	///     |mut q, e| {
 	///       q.push_bind(e.id)
 	///        .push_bind(&e.name)
 	///        .push_bind(&e.status)
-	///        .push_bind(&e.title)
+	///        .push_bind(&e.title);
 	///     }
 	///   )
 	///   .push(')')
@@ -75,9 +81,15 @@ pub trait ColumnsToSql: TableToSql
 	///   .push(')')
 	///   .push(sql::WHERE);
 	///
-	/// columns.push_update_where_to(&mut query, C::DEFAULT_ALIAS, values_alias);
+	/// columns.push_update_where_to(&mut query, EmployeeColumns::<char>::DEFAULT_ALIAS, values_alias);
 	///
-	/// assert_eq!(query.prepare().sql(), "");
+	/// assert_eq!(
+	///   query.prepare().sql(),
+	///   " UPDATE employees AS E \
+	///     SET name=E_V.name,status=E_V.status,title=E_V.title \
+	///     FROM (VALUES ($1, $2, $3, $4), ($5, $6, $7, $8)) AS E_V (id,name,status,title) \
+	///     WHERE E.id=E_V.id;"
+	/// );
 	/// ```
 	fn push_set_to<Db>(&self, query: &mut QueryBuilder<Db>, values_alias: impl Copy + Display)
 	where

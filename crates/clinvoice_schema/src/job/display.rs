@@ -65,6 +65,7 @@ mod tests
 
 	use chrono::Utc;
 	use clinvoice_finance::{Currency, Money};
+	use pretty_assertions::assert_eq;
 
 	use super::{DateTime, Job, Local};
 	use crate::{Invoice, Location, Organization};
@@ -97,7 +98,7 @@ mod tests
 		};
 
 		assert_eq!(
-			format!("{create_job_view}"),
+			create_job_view.to_string(),
 			format!(
 				"Job №{} for Big Old Test: {} – {}
 	Invoice:

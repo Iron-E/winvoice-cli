@@ -30,6 +30,9 @@ lazy_static = "1"
 humantime-serde = "1"
 serde = {version="1", optional=true}
 
+[dev-dependencies]
+pretty_assertions = "1"
+
 [features]
 default = []
 serde_support = ["clinvoice_finance/serde_support", "serde/derive"]

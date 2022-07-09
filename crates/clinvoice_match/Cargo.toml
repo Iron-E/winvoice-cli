@@ -27,6 +27,7 @@ humantime-serde = "1"
 serde = {version="1", optional=true}
 
 [dev-dependencies]
+pretty_assertions = "1"
 regex = "1"
 serde_yaml = "0.8"
 

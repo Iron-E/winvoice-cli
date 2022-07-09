@@ -22,6 +22,10 @@ pub(crate) mod sealed
 
 /// Defines attributes of a table in a database which was
 /// [`init`](crate::Initializable::init)ialized for use with CLInvoice.
+///
+/// # Examples
+///
+/// * See [`QueryBuilderExt::push_default_from`](super::QueryBuilderExt::push_default_from).
 pub trait TableToSql: sealed::Sealed
 {
 	/// Get the standard alias that can be used to refer to this table.

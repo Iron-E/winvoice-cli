@@ -27,6 +27,7 @@ impl Display for InvoiceDate
 mod tests
 {
 	use chrono::Utc;
+	use pretty_assertions::assert_eq;
 
 	use super::{DateTime, InvoiceDate, Local};
 
@@ -44,14 +45,14 @@ mod tests
 		};
 
 		assert_eq!(
-			format!("{date}"),
+			date.to_string(),
 			format!(
 				"Issued on {}; Outstanding",
 				DateTime::<Local>::from(date.issued),
 			)
 		);
 		assert_eq!(
-			format!("{other_date}"),
+			other_date.to_string(),
 			format!(
 				"Issued on {}; Paid on {}",
 				DateTime::<Local>::from(other_date.issued),

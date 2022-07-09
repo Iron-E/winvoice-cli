@@ -163,6 +163,7 @@ impl<T> Match<T>
 	///
 	/// ```rust
 	/// use clinvoice_match::Match;
+	/// # use pretty_assertions::assert_eq;
 	///
 	/// assert_eq!(
 	///   Match::EqualTo("5").map(|s| s.parse::<isize>().unwrap()),

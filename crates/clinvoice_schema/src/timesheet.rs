@@ -64,6 +64,7 @@ impl Timesheet
 	///
 	/// ```rust
 	/// use clinvoice_schema::{chrono::Utc, Currency, Expense, Money, Timesheet};
+	/// # use pretty_assertions::assert_eq;
 	///
 	/// let timesheets = [
 	///   Timesheet {

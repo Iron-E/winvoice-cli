@@ -29,6 +29,7 @@ impl<T> EmployeeColumns<T>
 	///
 	/// ```rust
 	/// use clinvoice_adapter::schema::columns::EmployeeColumns;
+	/// # use pretty_assertions::assert_eq;
 	///
 	/// assert_eq!(
 	///   EmployeeColumns::default()
@@ -89,6 +90,7 @@ impl<T> EmployeeColumns<T>
 	///
 	/// ```rust
 	/// use clinvoice_adapter::schema::columns::EmployeeColumns;
+	/// # use pretty_assertions::assert_eq;
 	///
 	/// assert_eq!(
 	///   EmployeeColumns::default().typecast("text").id.to_string(),
@@ -134,6 +136,7 @@ impl EmployeeColumns<&'static str>
 	///   fmt::{QueryBuilderExt, sql},
 	///   schema::columns::{EmployeeColumns, OrganizationColumns},
 	/// };
+	/// # use pretty_assertions::assert_eq;
 	/// use sqlx::{Execute, Postgres, QueryBuilder};
 	///
 	/// {

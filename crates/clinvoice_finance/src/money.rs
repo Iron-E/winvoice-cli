@@ -33,6 +33,7 @@ impl Money
 	///
 	/// ```rust
 	/// use clinvoice_finance::{Currency, Decimal, Money};
+	/// # use pretty_assertions::assert_eq;
 	///
 	/// assert_eq!(
 	///   Money::new(20_00, 2, Currency::Usd),

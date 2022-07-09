@@ -25,3 +25,6 @@ thiserror = "1"
 humantime-serde = "1"
 serde = {version="1", features=["derive"]}
 toml = "0.5"
+
+[dev-dependencies]
+pretty_assertions = "1"

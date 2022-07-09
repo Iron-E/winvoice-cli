@@ -14,6 +14,8 @@ impl Display for Employee
 #[cfg(test)]
 mod tests
 {
+	use pretty_assertions::assert_eq;
+
 	use super::Employee;
 
 	#[test]
@@ -27,7 +29,7 @@ mod tests
 		};
 
 		assert_eq!(
-			format!("{employee}"),
+			employee.to_string(),
 			"CEO of Tests Testy McTesterson
 	Status: Representative",
 		);

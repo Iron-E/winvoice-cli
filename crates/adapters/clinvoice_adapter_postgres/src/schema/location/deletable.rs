@@ -34,6 +34,7 @@ mod tests
 {
 	use clinvoice_adapter::{schema::LocationAdapter, Deletable};
 	use clinvoice_match::{Match, MatchLocation};
+	use pretty_assertions::assert_eq;
 
 	use crate::schema::{util, PgLocation};
 

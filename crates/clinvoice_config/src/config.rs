@@ -70,8 +70,10 @@ impl Config
 	///
 	/// ```rust
 	/// use core::time::Duration;
+	///
 	/// use clinvoice_config::{Adapters, Config, Employees, Invoices, Jobs, Store, StoreValue};
 	/// use clinvoice_schema::Currency;
+	/// # use pretty_assertions::{assert_eq, assert_ne};
 	///
 	/// let conf: Config = toml::from_str(r#"
 	///   [stores]

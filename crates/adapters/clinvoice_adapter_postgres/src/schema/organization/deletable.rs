@@ -37,6 +37,7 @@ mod tests
 		Deletable,
 	};
 	use clinvoice_match::{Match, MatchOrganization};
+	use pretty_assertions::assert_eq;
 
 	use crate::schema::{util, PgLocation, PgOrganization};
 

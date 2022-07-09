@@ -32,6 +32,7 @@ impl<T> ExpenseColumns<T>
 	///
 	/// ```rust
 	/// use clinvoice_adapter::schema::columns::ExpenseColumns;
+	/// # use pretty_assertions::assert_eq;
 	///
 	/// assert_eq!(
 	///   ExpenseColumns::default()
@@ -95,6 +96,7 @@ impl<T> ExpenseColumns<T>
 	///
 	/// ```rust
 	/// use clinvoice_adapter::schema::columns::ExpenseColumns;
+	/// # use pretty_assertions::assert_eq;
 	///
 	/// assert_eq!(
 	///   ExpenseColumns::default().typecast("numeric").cost.to_string(),
@@ -142,6 +144,7 @@ impl ExpenseColumns<&'static str>
 	///   fmt::{QueryBuilderExt, sql},
 	///   schema::columns::{ExpenseColumns, OrganizationColumns},
 	/// };
+	/// # use pretty_assertions::assert_eq;
 	/// use sqlx::{Execute, Postgres, QueryBuilder};
 	///
 	/// {

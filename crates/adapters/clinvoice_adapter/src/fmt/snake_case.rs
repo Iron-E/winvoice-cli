@@ -23,6 +23,7 @@ use core::fmt::Display;
 ///
 /// ```rust
 /// use clinvoice_adapter::fmt::SnakeCase;
+/// # use pretty_assertions::assert_eq;
 ///
 /// /* Scenario 1: Eager, very bad */
 /// let job_alias = 'J';
@@ -69,6 +70,7 @@ where
 	///
 	/// ```rust
 	/// use clinvoice_adapter::fmt::SnakeCase;
+	/// # use pretty_assertions::assert_eq;
 	///
 	/// assert_eq!(SnakeCase::from("foo").push("bar").to_string(), "foo_bar");
 	/// ```
@@ -85,6 +87,7 @@ where
 	///
 	/// ```rust
 	/// use clinvoice_adapter::fmt::SnakeCase;
+	/// # use pretty_assertions::assert_eq;
 	///
 	/// let foo = SnakeCase::from("foo");
 	/// assert_eq!(foo.slice_end(), None::<(_, _)>);

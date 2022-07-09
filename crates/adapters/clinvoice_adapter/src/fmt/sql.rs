@@ -7,6 +7,7 @@
 //! SQL includes the output from `misspelling_compiles` would be invalid as well.
 //!
 //! ```rust
+//! # use pretty_assertions::assert_eq;
 //! fn misspelling_compiles(columns: &str, table: &str) -> String {
 //!   format!("SELCT {columns} FROM{table}")
 //! }

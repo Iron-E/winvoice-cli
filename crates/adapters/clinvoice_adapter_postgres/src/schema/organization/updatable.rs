@@ -48,6 +48,7 @@ mod tests
 		Updatable,
 	};
 	use clinvoice_match::MatchOrganization;
+	use pretty_assertions::assert_eq;
 
 	use crate::schema::{util, PgLocation, PgOrganization};
 

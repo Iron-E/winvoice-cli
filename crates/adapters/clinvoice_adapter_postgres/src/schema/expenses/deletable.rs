@@ -51,6 +51,7 @@ mod tests
 		chrono::{TimeZone, Utc},
 		Invoice,
 	};
+	use pretty_assertions::assert_eq;
 
 	use crate::schema::{
 		util,

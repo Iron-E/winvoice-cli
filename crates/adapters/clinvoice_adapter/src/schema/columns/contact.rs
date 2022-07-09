@@ -32,6 +32,7 @@ impl<T> ContactColumns<T>
 	///
 	/// ```rust
 	/// use clinvoice_adapter::schema::columns::ContactColumns;
+	/// # use pretty_assertions::assert_eq;
 	///
 	/// assert_eq!(
 	///   ContactColumns::default()
@@ -95,6 +96,7 @@ impl<T> ContactColumns<T>
 	///
 	/// ```rust
 	/// use clinvoice_adapter::schema::columns::ContactColumns;
+	/// # use pretty_assertions::assert_eq;
 	///
 	/// assert_eq!(
 	///   ContactColumns::default().typecast("text").address_id.to_string(),

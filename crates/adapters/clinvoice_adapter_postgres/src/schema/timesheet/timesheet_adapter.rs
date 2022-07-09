@@ -219,6 +219,7 @@ mod tests
 		InvoiceDate,
 		Money,
 	};
+	use pretty_assertions::assert_eq;
 
 	use super::{PgTimesheet, TimesheetAdapter};
 	use crate::schema::{util, PgEmployee, PgJob, PgLocation, PgOrganization};

@@ -47,6 +47,7 @@ impl<T> JobColumns<T>
 	///
 	/// ```rust
 	/// use clinvoice_adapter::schema::columns::JobColumns;
+	/// # use pretty_assertions::assert_eq;
 	///
 	/// assert_eq!(
 	///   JobColumns::default()
@@ -125,6 +126,7 @@ impl<T> JobColumns<T>
 	///
 	/// ```rust
 	/// use clinvoice_adapter::schema::columns::JobColumns;
+	/// # use pretty_assertions::assert_eq;
 	///
 	/// assert_eq!(
 	///   JobColumns::default().typecast("numeric").invoice_hourly_rate.to_string(),
@@ -182,6 +184,7 @@ impl JobColumns<&'static str>
 	///   fmt::{QueryBuilderExt, sql},
 	///   schema::columns::{JobColumns, OrganizationColumns},
 	/// };
+	/// # use pretty_assertions::assert_eq;
 	/// use sqlx::{Execute, Postgres, QueryBuilder};
 	///
 	/// {
@@ -221,12 +224,19 @@ impl JobColumns<&'static str>
 	///       .prepare()
 	///       .sql(),
 	///     " SELECT \
-	///         X.category AS unique_3_expense_category,\
-	///         X.cost AS unique_3_expense_cost,\
-	///         X.description AS unique_3_expense_description,\
-	///         X.id AS unique_3_expense_id,\
-	///         X.timesheet_id AS unique_3_expense_timesheet_id,\
-	///         O.id,O.location_id,O.name;"
+	///         J.client_id AS unique_4_job_client_id,\
+	///         J.date_open AS unique_4_job_date_open,\
+	///         J.date_close AS unique_4_job_date_close,\
+	///         J.id AS unique_4_job_id,\
+	///         J.increment AS unique_4_job_increment,\
+	///         J.invoice_date_issued AS unique_4_job_invoice_date_issued,\
+	///         J.invoice_date_paid AS unique_4_job_invoice_date_paid,\
+	///         J.invoice_hourly_rate AS unique_4_job_invoice_hourly_rate,\
+	///         J.notes AS unique_4_job_notes,\
+	///         J.objectives AS unique_4_job_objectives,\
+	///         O.id,\
+	///         O.location_id,\
+	///         O.name;"
 	///   );
 	/// }
 	/// ```

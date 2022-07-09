@@ -176,6 +176,7 @@ impl<T> MatchOption<T>
 	///
 	/// ```rust
 	/// use clinvoice_match::MatchOption;
+	/// # use pretty_assertions::assert_eq;
 	///
 	/// assert_eq!(
 	///   MatchOption::EqualTo("5").map(|s| s.parse::<isize>().unwrap()),

@@ -143,6 +143,7 @@ mod tests
 		InvoiceDate,
 		Money,
 	};
+	use pretty_assertions::assert_eq;
 
 	use super::{JobAdapter, PgJob};
 	use crate::schema::{util, PgLocation, PgOrganization};

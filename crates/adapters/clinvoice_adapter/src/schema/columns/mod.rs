@@ -8,6 +8,7 @@
 //!   fmt::{QueryBuilderExt, sql},
 //!   schema::columns::LocationColumns,
 //! };
+//! # use pretty_assertions::assert_eq;
 //! use sqlx::{Execute, Postgres, QueryBuilder};
 //!
 //! let mut query = QueryBuilder::<Postgres>::new(sql::SELECT);

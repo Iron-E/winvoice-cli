@@ -155,6 +155,7 @@ impl<T> MatchSet<T>
 	///
 	/// ```rust
 	/// use clinvoice_match::{Match, MatchSet};
+	/// # use pretty_assertions::assert_eq;
 	///
 	/// assert_eq!(
 	///   MatchSet::Contains(Match::EqualTo(7)).map(|_| Match::GreaterThan(5)),

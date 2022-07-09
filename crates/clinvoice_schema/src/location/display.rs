@@ -22,6 +22,8 @@ impl Display for Location
 #[cfg(test)]
 mod tests
 {
+	use pretty_assertions::assert_eq;
+
 	use super::Location;
 
 	#[test]
@@ -58,7 +60,7 @@ mod tests
 		};
 
 		assert_eq!(
-			format!("{street_view}"),
+			street_view.to_string(),
 			"1337 Some Street, Phoenix, Arizona, USA, Earth"
 		);
 	}

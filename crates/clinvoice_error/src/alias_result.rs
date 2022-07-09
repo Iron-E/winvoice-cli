@@ -6,26 +6,23 @@
 ///
 /// ```rust
 /// use clinvoice_error::AliasResult;
+/// # use pretty_assertions::assert_eq;
 ///
-/// #[derive(Debug, PartialEq)]
-/// struct Error;
+/// {
+///   #[derive(Debug, PartialEq)]
+///   struct Error;
 ///
-/// AliasResult!();
+///   AliasResult!();
+///   assert_eq!(Result::Ok(()), std::result::Result::<(), Error>::Ok(()));
+/// }
 ///
-/// assert_eq!(Result::Ok(()), std::result::Result::<(), Error>::Ok(()));
-/// ```
+/// {
+///   #[derive(Debug, PartialEq)]
+///   struct SomeError;
 ///
-/// For when you have `SomeError`:
-///
-/// ```rust
-/// use clinvoice_error::AliasResult;
-///
-/// #[derive(Debug, PartialEq)]
-/// struct SomeError;
-///
-/// AliasResult!(SomeError);
-///
-/// assert_eq!(Result::Ok(()), std::result::Result::<(), SomeError>::Ok(()));
+///   AliasResult!(SomeError);
+///   assert_eq!(Result::Ok(()), std::result::Result::<(), SomeError>::Ok(()));
+/// }
 /// ```
 #[macro_export]
 macro_rules! AliasResult {

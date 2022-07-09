@@ -13,6 +13,8 @@ impl Display for Contact
 #[cfg(test)]
 mod tests
 {
+	use pretty_assertions::assert_eq;
+
 	use super::Contact;
 	use crate::{ContactKind, Location};
 

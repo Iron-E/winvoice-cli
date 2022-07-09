@@ -59,6 +59,7 @@ mod tests
 
 	use chrono::Utc;
 	use clinvoice_finance::{Currency, Money};
+	use pretty_assertions::assert_eq;
 
 	use super::{DateTime, Local, Timesheet};
 	use crate::{Employee, Expense, Invoice, Job, Location, Organization};
@@ -139,7 +140,7 @@ mod tests
 		};
 
 		assert_eq!(
-			format!("{timesheet}"),
+			timesheet.to_string(),
 			format!(
 				"{} – {}
 	- Employee: CEO of Tests Testy McTesterson

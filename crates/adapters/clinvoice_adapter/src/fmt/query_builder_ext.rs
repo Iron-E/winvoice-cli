@@ -44,6 +44,7 @@ pub trait QueryBuilderExt<'args>: sealed::Sealed
 	///   fmt::{QueryBuilderExt, sql, WithIdentifier},
 	///   schema::columns::{LocationColumns, OrganizationColumns},
 	/// };
+	/// # use pretty_assertions::assert_eq;
 	/// use sqlx::{Execute, Postgres, QueryBuilder};
 	///
 	/// let organization_columns = OrganizationColumns::default().default_scope();
@@ -99,6 +100,7 @@ pub trait QueryBuilderExt<'args>: sealed::Sealed
 	///   fmt::{QueryBuilderExt, sql, WithIdentifier},
 	///   schema::columns::OrganizationColumns,
 	/// };
+	/// # use pretty_assertions::assert_eq;
 	/// use sqlx::{Execute, Postgres, QueryBuilder};
 	///
 	/// let organization_columns = OrganizationColumns::default().default_scope();
@@ -126,6 +128,7 @@ pub trait QueryBuilderExt<'args>: sealed::Sealed
 	///
 	/// ```rust
 	/// use clinvoice_adapter::fmt::{QueryBuilderExt, sql, WithIdentifier};
+	/// # use pretty_assertions::assert_eq;
 	/// use sqlx::{Execute, Postgres, QueryBuilder};
 	///
 	/// let mut query = QueryBuilder::<Postgres>::new(sql::SELECT);

@@ -27,6 +27,7 @@ sqlx = "0.5"
 serde = {version="1", optional=true}
 
 [dev-dependencies]
+pretty_assertions = "1"
 sqlx = {features=["postgres"], version="0.5"}
 
 [features]

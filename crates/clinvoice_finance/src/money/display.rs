@@ -13,6 +13,8 @@ impl Display for Money
 #[cfg(test)]
 mod tests
 {
+	use pretty_assertions::assert_eq;
+
 	use super::Money;
 	use crate::Currency;
 

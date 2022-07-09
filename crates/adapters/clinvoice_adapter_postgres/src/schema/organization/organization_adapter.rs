@@ -81,6 +81,7 @@ mod tests
 
 	use clinvoice_adapter::schema::LocationAdapter;
 	use clinvoice_match::{Match, MatchLocation, MatchOrganization, MatchOuterLocation};
+	use pretty_assertions::assert_eq;
 
 	use super::{OrganizationAdapter, PgOrganization};
 	use crate::schema::{util, PgLocation};

@@ -115,21 +115,17 @@ impl Command
 		for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 	{
 		let selection = input::select(entities, "Select the entities you want to update")?;
-		let selection_len = selection.len();
 
-		let edits =
-			selection
-				.into_iter()
-				.try_fold(Vec::with_capacity(selection_len), |mut v, entity| {
-					match input::edit_and_restore(&entity, "Make any desired edits")
-					{
-						Ok(e) => v.push(e),
-						Err(input::Error::NotEdited) => (),
-						Err(e) => return Err(e),
-					};
-
-					Ok(v)
-				})?;
+		let edits = selection
+			.into_iter()
+			.filter_map(
+				|entity| match input::edit_and_restore(&entity, "Make any desired edits")
+				{
+					Err(input::Error::NotEdited) => None,
+					result => Some(result),
+				},
+			)
+			.collect::<input::Result<Vec<_>>>()?;
 
 		connection
 			.begin()

@@ -70,7 +70,7 @@ where
 	/// ```rust
 	/// use clinvoice_adapter::fmt::SnakeCase;
 	///
-	/// assert_eq!(SnakeCase::from("foo").push("bar").to_string(), "foo_bar",);
+	/// assert_eq!(SnakeCase::from("foo").push("bar").to_string(), "foo_bar");
 	/// ```
 	pub const fn push<T>(self, token: T) -> SnakeCase<Self, T>
 	where

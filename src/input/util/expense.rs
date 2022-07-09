@@ -111,17 +111,14 @@ where
 	if !expenses.is_empty()
 	{
 		let to_remove_indices = input::select_as_indices(expenses, "Select expenses to remove")?;
-		let to_remove_count = to_remove_indices.len();
 
 		XAdapter::delete(
 			connection,
 			to_remove_indices
 				.into_iter()
 				.rev() // PERF: we use `rev` to prevent `expenses` from having to shift so many indexes after each removal
-				.fold(Vec::with_capacity(to_remove_count), |mut v, i| {
-					v.push(expenses.remove(i));
-					v
-				})
+				.map(|i| expenses.remove(i))
+				.collect::<Vec<_>>()
 				.iter(),
 		)
 		.await?;

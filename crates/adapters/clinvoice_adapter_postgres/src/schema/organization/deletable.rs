@@ -50,8 +50,8 @@ mod tests
 			.unwrap();
 
 		let (organization, organization2, organization3) = futures::try_join!(
-			PgOrganization::create(&connection, earth.clone(), "Some Organization".into(),),
-			PgOrganization::create(&connection, earth.clone(), "Some Other Organization".into(),),
+			PgOrganization::create(&connection, earth.clone(), "Some Organization".into()),
+			PgOrganization::create(&connection, earth.clone(), "Some Other Organization".into()),
 			PgOrganization::create(
 				&connection,
 				earth.clone(),

@@ -134,8 +134,8 @@ mod tests
 		.unwrap();
 
 		let (organization, organization2) = futures::try_join!(
-			PgOrganization::create(&connection, arizona.clone(), "Some Organization".into(),),
-			PgOrganization::create(&connection, utah, "Some Other Organizatión".into(),),
+			PgOrganization::create(&connection, arizona.clone(), "Some Organization".into()),
+			PgOrganization::create(&connection, utah, "Some Other Organizatión".into()),
 		)
 		.unwrap();
 

@@ -14,26 +14,6 @@ use super::{Id, Location};
 /// * An `Organization` can be a person (i.e. self-employement), or an entire business.
 /// * The [`Organization`] which is using CLInvoice must be in the database. The [`Id`] of this
 ///   [`Organization`] is configured elsewhere and retrieved as needed.
-///
-/// # Examples
-///
-/// ```rust
-/// use clinvoice_schema::{Location, Organization};
-///
-/// let _ = Organization {
-///   id: 0, // NOTE: you normally want to avoid assigning an arbitrary ID like this
-///   location: Location {
-///     id: 0, // NOTE: you normally want to avoid assigning an arbitrary ID like this
-///     name: "Tokyo".into(),
-///     outer: Some(Location {
-///       id: 0, // NOTE: you normally want to avoid assigning an arbitrary ID like this
-///       name: "Japan".into(),
-///       outer: None,
-///     }.into()),
-///   },
-///   name: "My Company".into(),
-/// };
-/// ```
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Organization

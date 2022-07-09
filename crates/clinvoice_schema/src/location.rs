@@ -7,22 +7,6 @@ use serde::{Deserialize, Serialize};
 use super::Id;
 
 /// A place in the real world where other parts of the schema can reside.
-///
-/// # Example
-///
-/// ```rust
-/// use clinvoice_schema::Location;
-///
-/// let _ = Location {
-///   id: 0, // NOTE: you normally want to avoid assigning an arbitrary ID like this
-///   name: "New York".into(),
-///   outer: Some(Location {
-///     id: 0, // NOTE: you normally want to avoid assigning an arbitrary ID like this
-///     name: "USA".into(),
-///     outer: None,
-///   }.into()),
-/// };
-/// ```
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Location

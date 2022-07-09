@@ -18,39 +18,6 @@ use super::{Id, Invoice, Organization};
 /// * It is assumed that the [`Organization`] working on completing the `objective` is the same as
 ///   the one using CLInvoice. This is a setting, configured elsewhere and retrieved as needed.
 /// * Work which is done for a [`Job`] is tracked by [`Timesheet`]s.
-///
-/// # Examples
-///
-/// ```rust
-/// use core::time::Duration;
-/// use clinvoice_schema::{
-///   chrono::Utc,
-///   Currency, Money,
-///   Invoice, Job, Location, Organization
-/// };
-///
-/// let _ = Job {
-///   client: Organization {
-///     id: 0, // NOTE: you normally want to avoid assigning an arbitrary ID like this
-///     location: Location {
-///       id: 0, // NOTE: you normally want to avoid assigning an arbitrary ID like this
-///       name: "1337 Some Street".into(),
-///       outer: None,
-///     },
-///     name: "Big Old Test".into(),
-///   },
-///   date_close: None,
-///   date_open: Utc::today().and_hms(0, 0, 0),
-///   id: Default::default(),
-///   increment: Duration::from_secs(300),
-///   invoice: Invoice {
-///     date: None,
-///     hourly_rate: Money::new(20_00, 2, Currency::Usd),
-///   },
-///   notes: "- I tested the function.".into(),
-///   objectives: "- I want to test this function.".into(),
-/// };
-/// ```
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Job

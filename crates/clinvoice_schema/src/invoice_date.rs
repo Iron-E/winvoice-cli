@@ -17,22 +17,6 @@ use serde::{Deserialize, Serialize};
 /// [`Invoice`][invoice], the above use of [`Option`] is useful while the [`Invoice`] exists
 /// outside of the constraint system of a database.
 ///
-/// # Examples
-///
-/// ```rust
-/// use clinvoice_schema::{chrono::Utc, InvoiceDate};
-///
-/// let _unpaid = InvoiceDate {
-///   issued: Utc::now(),
-///   paid: None,
-/// };
-///
-/// let _paid = InvoiceDate {
-///   issued: Utc::now(),
-///   paid: Some(Utc::now()),
-/// };
-/// ```
-///
 /// [invoice]: super::Invoice
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]

@@ -12,19 +12,6 @@ use super::Id;
 /// The [`Organization`][organization] that the [`Employee`] works for is not stored in the entity, as the
 /// [`Organization`][organization] using CLInvoice is configured elsewhere and referenced as necessary.
 ///
-/// # Examples
-///
-/// ```rust
-/// use clinvoice_schema::Employee;
-///
-/// let _ = Employee {
-///   id: 0, // NOTE: you normally want to avoid assigning an arbitrary ID like this
-///   name: "Bob".into(),
-///   status: "Employed".into(),
-///   title: "CEO".into(),
-/// };
-/// ```
-///
 /// [organization]: super::Organization
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 #[derive(Clone, Default, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]

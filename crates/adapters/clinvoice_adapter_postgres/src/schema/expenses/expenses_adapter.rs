@@ -93,7 +93,7 @@ impl ExpensesAdapter for PgExpenses
 		query
 			.push_default_from::<TimesheetColumns<char>>()
 			.push(sql::LEFT)
-			.push_default_equijoin::<_, _, ExpenseColumns<char>>(
+			.push_default_equijoin::<ExpenseColumns<char>, _, _>(
 				columns.timesheet_id,
 				timesheet_columns.id,
 			);

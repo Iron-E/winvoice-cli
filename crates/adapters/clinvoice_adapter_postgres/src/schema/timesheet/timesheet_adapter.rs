@@ -117,17 +117,17 @@ impl TimesheetAdapter for PgTimesheet
 			.push_more_columns(&job_columns.r#as(JOB_COLUMNS_UNIQUE))
 			.push_more_columns(&organization_columns.r#as(ORGANIZATION_COLUMNS_UNIQUE))
 			.push_default_from::<TimesheetColumns<char>>()
-			.push_default_equijoin::<_, _, EmployeeColumns<char>>(
+			.push_default_equijoin::<EmployeeColumns<char>, _, _>(
 				employee_columns.id,
 				columns.employee_id,
 			)
 			.push(sql::LEFT)
-			.push_default_equijoin::<_, _, ExpenseColumns<char>>(
+			.push_default_equijoin::<ExpenseColumns<char>, _, _>(
 				expense_columns.timesheet_id,
 				columns.id,
 			)
-			.push_default_equijoin::<_, _, JobColumns<char>>(job_columns.id, columns.job_id)
-			.push_default_equijoin::<_, _, OrganizationColumns<char>>(
+			.push_default_equijoin::<JobColumns<char>, _, _>(job_columns.id, columns.job_id)
+			.push_default_equijoin::<OrganizationColumns<char>, _, _>(
 				organization_columns.id,
 				job_columns.client_id,
 			)

@@ -93,7 +93,7 @@ impl JobAdapter for PgJob
 			.push_columns(&columns)
 			.push_more_columns(&organization_columns.r#as(ORGANIZATION_COLUMNS_UNIQUE))
 			.push_default_from::<JobColumns<char>>()
-			.push_default_equijoin::<_, _, OrganizationColumns<char>>(
+			.push_default_equijoin::<OrganizationColumns<char>, _, _>(
 				organization_columns.id,
 				columns.client_id,
 			)

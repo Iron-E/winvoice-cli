@@ -1,29 +1,34 @@
+mod sealed
+{
+	use sqlx::{Database, QueryBuilder};
+
+	pub trait Sealed {}
+	impl<'args, Db> Sealed for QueryBuilder<'args, Db> where Db: Database {}
+}
+
 use core::fmt::Display;
 
 use sqlx::{database::HasArguments, query::Query, Database, QueryBuilder};
 
 use super::{sql, ColumnsToSql, TableToSql};
 
-pub trait QueryBuilderExt<'args>
+/// An extension to [`QueryBuilder`] that expands upon
+/// [`insert_values`](QueryBuilder::insert_values`) by enabling it to generate other SQL clauses as
+/// well.
+pub trait QueryBuilderExt<'args>: sealed::Sealed
 {
 	type Db: Database;
 
-	/// # Summary
-	///
 	/// Add a semicolon to the end of the current query and then [build](QueryBuilder::build) it.
 	fn prepare(&mut self) -> Query<Self::Db, <Self::Db as HasArguments<'args>>::Arguments>;
 
-	/// # Summary
-	///
-	/// Use [`ColumnsToSql::push_to`] on this query.
+	/// [`ColumnsToSql::push_to`] this query.
 	fn push_columns<T>(&mut self, columns: &T) -> &mut Self
 	where
 		T: ColumnsToSql;
 
-	/// # Summary
-	///
 	/// Push `" JOIN {TTable::TABLE_NAME} {TTable::table_alias()} ON ({left} = {right})"`.
-	fn push_default_equijoin<TLeft, TRight, TTable>(
+	fn push_default_equijoin<TTable, TLeft, TRight>(
 		&mut self,
 		left: TLeft,
 		right: TRight,
@@ -36,8 +41,6 @@ pub trait QueryBuilderExt<'args>
 		self.push_equijoin(TTable::TABLE_NAME, TTable::DEFAULT_ALIAS, left, right)
 	}
 
-	/// # Summary
-	///
 	/// Push `" FROM {T::TABLE_NAME} {T::table_alias()}"`.
 	fn push_default_from<T>(&mut self) -> &mut Self
 	where
@@ -46,18 +49,14 @@ pub trait QueryBuilderExt<'args>
 		self.push_from(T::TABLE_NAME, T::DEFAULT_ALIAS)
 	}
 
-	/// # Summary
-	///
 	/// Push `"left = right"`.
 	fn push_equal<TLeft, TRight>(&mut self, left: TLeft, right: TRight) -> &mut Self
 	where
 		TLeft: Display,
 		TRight: Display;
 
-	/// # Summary
-	///
 	/// Push `" JOIN {table_ident} {table_alias} ON ({left} = {right})"`.
-	fn push_equijoin<TAlias, TIdent, TLeft, TRight>(
+	fn push_equijoin<TIdent, TAlias, TLeft, TRight>(
 		&mut self,
 		table_ident: TIdent,
 		table_alias: TAlias,
@@ -73,7 +72,7 @@ pub trait QueryBuilderExt<'args>
 	/// # Summary
 	///
 	/// Push `" FROM {table_ident} {table_alias}"`.
-	fn push_from<TAlias, TIdent>(&mut self, table_ident: TIdent, table_alias: TAlias) -> &mut Self
+	fn push_from<TIdent, TAlias>(&mut self, table_ident: TIdent, table_alias: TAlias) -> &mut Self
 	where
 		TAlias: Display,
 		TIdent: Display;
@@ -114,7 +113,7 @@ where
 		self
 	}
 
-	fn push_equijoin<TAlias, TIdent, TLeft, TRight>(
+	fn push_equijoin<TIdent, TAlias, TLeft, TRight>(
 		&mut self,
 		table_ident: TIdent,
 		table_alias: TAlias,
@@ -137,7 +136,7 @@ where
 		self.push_equal(left, right).push(')')
 	}
 
-	fn push_from<TAlias, TIdent>(&mut self, table_ident: TIdent, table_alias: TAlias) -> &mut Self
+	fn push_from<TIdent, TAlias>(&mut self, table_ident: TIdent, table_alias: TAlias) -> &mut Self
 	where
 		TAlias: Display,
 		TIdent: Display,

@@ -43,7 +43,7 @@ impl<T> JobColumns<T>
 	/// # Summary
 	///
 	/// Add a [scope](Self::scope) using the [default alias](TableToSql::default_alias)
-	pub fn default_scope(self) -> JobColumns<WithIdentifier<T, char>>
+	pub fn default_scope(self) -> JobColumns<WithIdentifier<char, T>>
 	{
 		self.scope(Self::DEFAULT_ALIAS)
 	}
@@ -52,7 +52,7 @@ impl<T> JobColumns<T>
 	///
 	/// Returns a [`JobColumns`] which modifies its fields' [`Display`]
 	/// implementation to output `{ident}.{column}`.
-	pub fn scope<TAlias>(self, alias: TAlias) -> JobColumns<WithIdentifier<T, TAlias>>
+	pub fn scope<TAlias>(self, alias: TAlias) -> JobColumns<WithIdentifier<TAlias, T>>
 	where
 		TAlias: Copy,
 	{

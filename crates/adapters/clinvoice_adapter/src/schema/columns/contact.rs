@@ -33,7 +33,7 @@ impl<T> ContactColumns<T>
 	/// # Summary
 	///
 	/// Add a [scope](Self::scope) using the [default alias](TableToSql::default_alias)
-	pub fn default_scope(self) -> ContactColumns<WithIdentifier<T, char>>
+	pub fn default_scope(self) -> ContactColumns<WithIdentifier<char, T>>
 	{
 		self.scope(Self::DEFAULT_ALIAS)
 	}
@@ -42,7 +42,7 @@ impl<T> ContactColumns<T>
 	///
 	/// Returns a [`ContactColumns`] which modifies its fields' [`Display`]
 	/// implementation to output `{alias}.{column}`.
-	pub fn scope<TAlias>(self, alias: TAlias) -> ContactColumns<WithIdentifier<T, TAlias>>
+	pub fn scope<TAlias>(self, alias: TAlias) -> ContactColumns<WithIdentifier<TAlias, T>>
 	where
 		TAlias: Copy,
 	{

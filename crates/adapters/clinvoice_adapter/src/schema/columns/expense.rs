@@ -33,7 +33,7 @@ impl<T> ExpenseColumns<T>
 	/// # Summary
 	///
 	/// Add a [scope](Self::scope) using the [default alias](TableToSql::default_alias)
-	pub fn default_scope(self) -> ExpenseColumns<WithIdentifier<T, char>>
+	pub fn default_scope(self) -> ExpenseColumns<WithIdentifier<char, T>>
 	{
 		self.scope(Self::DEFAULT_ALIAS)
 	}
@@ -42,7 +42,7 @@ impl<T> ExpenseColumns<T>
 	///
 	/// Returns a [`ExpenseColumns`] which modifies its fields' [`Display`]
 	/// implementation to output `{ident}.{column}`.
-	pub fn scope<TAlias>(self, alias: TAlias) -> ExpenseColumns<WithIdentifier<T, TAlias>>
+	pub fn scope<TAlias>(self, alias: TAlias) -> ExpenseColumns<WithIdentifier<TAlias, T>>
 	where
 		TAlias: Copy,
 	{

@@ -32,7 +32,7 @@ impl<T> OrganizationColumns<T>
 	/// # Summary
 	///
 	/// Add a [scope](Self::scope) using the [default alias](TableToSql::default_alias)
-	pub fn default_scope(self) -> OrganizationColumns<WithIdentifier<T, char>>
+	pub fn default_scope(self) -> OrganizationColumns<WithIdentifier<char, T>>
 	{
 		self.scope(Self::DEFAULT_ALIAS)
 	}
@@ -41,7 +41,7 @@ impl<T> OrganizationColumns<T>
 	///
 	/// Returns a [`OrganizationColumns`] which modifies its fields' [`Display`]
 	/// implementation to output `{ident}.{column}`.
-	pub fn scope<TAlias>(self, alias: TAlias) -> OrganizationColumns<WithIdentifier<T, TAlias>>
+	pub fn scope<TAlias>(self, alias: TAlias) -> OrganizationColumns<WithIdentifier<TAlias, T>>
 	where
 		TAlias: Copy,
 	{

@@ -1,4 +1,5 @@
 use core::time::Duration;
+use std::io;
 
 use clinvoice_finance::Error as FinanceError;
 use sqlx::{postgres::types::PgInterval, Error, Result};
@@ -66,12 +67,11 @@ pub(super) fn finance_err_to_sqlx(e: FinanceError) -> Error
 	match e
 	{
 		FinanceError::Decimal(e2) => Error::Decode(e2.into()),
-		FinanceError::EcbCsvDecode(_) | FinanceError::UnsupportedCurrency(_) =>
-		{
-			Error::Decode(e.into())
-		},
+		FinanceError::EcbCsvDecode(_) => Error::Io(io::Error::new(io::ErrorKind::InvalidData, e)),
 		FinanceError::Io(e2) => Error::Io(e2),
-		FinanceError::Reqwest(e2) => Error::Protocol(e2.to_string()),
+		FinanceError::Reqwest(e2) => Error::Io(io::Error::new(io::ErrorKind::Other, e2)),
+		FinanceError::UnsupportedCurrency(_) => Error::Decode(e.into()),
+		FinanceError::Zip(e2) => Error::Io(io::Error::new(io::ErrorKind::InvalidData, e2)),
 	}
 }
 

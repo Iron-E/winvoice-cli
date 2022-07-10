@@ -3,11 +3,21 @@ mod default;
 use clinvoice_schema::Currency;
 use serde::{Deserialize, Serialize};
 
-/// # Summary
+/// Configurations for [`Invoice`](clinvoice_schema::Invoice)s.
 ///
-/// Configurations for [`Invoice`](clinvoice_schema::invoice::Invoice)s.
+/// # Examples
+///
+/// ## TOML
+///
+/// ```rust
+/// # assert!(toml::from_str::<clinvoice_config::Invoices>(r#"
+/// default_currency = "USD"
+/// # "#).is_ok());
+/// ```
 #[derive(Copy, Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Invoices
 {
+	/// The default currency should be used for the `hourly_rate` of an
+	/// [`Invoice`](clinvoice_schema::Invoice).
 	pub default_currency: Currency,
 }

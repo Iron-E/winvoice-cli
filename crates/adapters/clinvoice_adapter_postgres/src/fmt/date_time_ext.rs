@@ -6,10 +6,10 @@ use clinvoice_schema::{
 	Timesheet,
 };
 
+/// An extension to the [`DateTime`] which provides utility methods that aid in ensuring
+/// that a given value is compatible with Postgres.
 pub trait DateTimeExt
 {
-	/// # Summary
-	///
 	/// Ensure that all dates/times contained in this type are not more precise than the postgres
 	/// database can store.
 	fn pg_sanitize(self) -> Self;

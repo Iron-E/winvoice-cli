@@ -35,7 +35,7 @@ impl Command
 		if let Some(edited) = Editor::new().extension(".toml").edit(&serialized)?
 		{
 			let deserialized: Config = toml::from_str(&edited)?;
-			deserialized.update()?;
+			deserialized.write()?;
 		}
 
 		Ok(())
@@ -57,7 +57,7 @@ impl Command
 			{
 				cmd.run(
 					config.invoices.default_currency,
-					config.timesheets.default_increment,
+					config.jobs.default_increment,
 					store,
 				)
 				.await

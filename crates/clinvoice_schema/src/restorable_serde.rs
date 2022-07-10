@@ -1,15 +1,50 @@
-use crate::RestoreResult;
+use super::RestoreResult;
 
-/// # Summary
+/// Implementors of this trait are enabled to preserve data which is important (e.g. a reference
+/// number), by [skipping serialization](https://serde.rs/attr-skip-serializing.html) and then using
+/// `#[serde(default)]` to generate a temporary value on [deserialization](serde::Deserialize).
 ///
-/// Defines procedures to preserve specific values during serialization and deserialization, while
-/// [hiding](https://serde.rs/attr-skip-serializing.html) the field from the user's view.
+/// Then, this trait can be used to [restore](RestorableSerde::try_restore) the important data.
 pub trait RestorableSerde
 {
-	/// # Summary
+	/// Take some aspects of an `original` and restore them from [`Default`]s which were assigned
+	/// upon [deserialization](serde::Deserialize).
 	///
-	/// Take some elements of an `original` and restore them from the defaults which were assigned
-	/// upon deserialization.
+	/// Will return a [`RestoreError`](super::RestoreError) if the `original` cannot be merged with
+	/// this value.
+	///
+	/// # Example
+	///
+	/// ```rust
+	/// use clinvoice_schema::{Employee, RestorableSerde};
+	/// # use pretty_assertions::{assert_eq, assert_ne};
+	///
+	/// let original = Employee {
+	///   id: 0, // NOTE: you normally want to avoid assigning an arbitrary ID like this
+	///   name: "Bob".into(),
+	///   status: "Employed".into(),
+	///   title: "CEO".into(),
+	/// };
+	///
+	/// // Pretend this is deserialized user input…
+	/// let mut edited = Employee {
+	///   id: 3,
+	///   name: "Bob Buildman".into(),
+	///   ..original.clone()
+	/// };
+	///
+	/// assert_ne!(edited.id, original.id);
+	/// assert_ne!(edited.name, original.name);
+	/// assert_eq!(edited.status, original.status);
+	/// assert_eq!(edited.title, original.title);
+	///
+	/// edited.try_restore(&original).unwrap();
+	///
+	/// assert_eq!(edited.id, original.id);
+	/// assert_ne!(edited.name, original.name);
+	/// assert_eq!(edited.status, original.status);
+	/// assert_eq!(edited.title, original.title);
+	/// ```
 	fn try_restore(&mut self, original: &Self) -> RestoreResult<()>;
 }
 

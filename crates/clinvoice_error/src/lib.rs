@@ -1,5 +1,6 @@
-//! # Summary
-//!
-//! This crate adds useful macros for creating custom error types.
+//! This crate adds macros which generate boilerplate code associated with [`Error`] and [`Result`]
+//! types.
 
-mod macros;
+#![macro_use]
+
+mod alias_result;

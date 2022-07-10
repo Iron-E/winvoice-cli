@@ -1,24 +1,34 @@
 mod columns_to_sql;
 mod table_to_sql;
 
-use crate::fmt::{As, TableToSql, TypeCast, WithIdentifier};
+use crate::fmt::{As, TableToSql, WithIdentifier};
 
+/// The names of the columns of the `employees` table.
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct EmployeeColumns<T>
 {
+	/// The name of the `id` column of the `employees` table.
 	pub id: T,
+
+	/// The name of the `name` column of the `employees` table.
 	pub name: T,
+
+	/// The name of the `status` column of the `employees` table.
 	pub status: T,
+
+	/// The name of the `title` column of the `employees` table.
 	pub title: T,
 }
 
 impl<T> EmployeeColumns<T>
 {
-	/// # Summary
+	/// Returns a [`EmployeeColumns`] which aliases the names of these [`EmployeeColumns`] with the
+	/// `aliased` columns provided.
 	///
-	/// Returns a [`EmployeeColumns`] which outputs all of its columns as
-	/// `column_1 AS aliased_column_1`.
-	pub fn r#as<TAlias>(self, aliased: EmployeeColumns<TAlias>) -> EmployeeColumns<As<TAlias, T>>
+	/// # See also
+	///
+	/// * [`As`]
+	pub fn r#as<TAlias>(self, aliased: EmployeeColumns<TAlias>) -> EmployeeColumns<As<T, TAlias>>
 	{
 		EmployeeColumns {
 			id: As(self.id, aliased.id),
@@ -28,19 +38,23 @@ impl<T> EmployeeColumns<T>
 		}
 	}
 
-	/// # Summary
+	/// Add a [scope](EmployeeColumns::scope) using the [default alias](TableToSql::default_alias)
 	///
-	/// Add a [scope](Self::scope) using the [default alias](TableToSql::default_alias)
-	pub fn default_scope(self) -> EmployeeColumns<WithIdentifier<T, char>>
+	/// # See also
+	///
+	/// * [`WithIdentifier`]
+	pub fn default_scope(self) -> EmployeeColumns<WithIdentifier<char, T>>
 	{
 		self.scope(Self::DEFAULT_ALIAS)
 	}
 
-	/// # Summary
-	///
 	/// Returns a [`EmployeeColumns`] which modifies its fields' [`Display`]
-	/// implementation to output `{column}::{cast}`.
-	pub fn scope<TAlias>(self, alias: TAlias) -> EmployeeColumns<WithIdentifier<T, TAlias>>
+	/// implementation to output `{alias}.{column}`.
+	///
+	/// # See also
+	///
+	/// * [`WithIdentifier`]
+	pub fn scope<TAlias>(self, alias: TAlias) -> EmployeeColumns<WithIdentifier<TAlias, T>>
 	where
 		TAlias: Copy,
 	{
@@ -51,26 +65,15 @@ impl<T> EmployeeColumns<T>
 			title: WithIdentifier(alias, self.title),
 		}
 	}
-
-	/// # Summary
-	///
-	/// Returns a [`EmployeeColumns`] which modifies its fields' [`Display`]
-	/// implementation to output `{ident}.{column}`.
-	pub fn typecast<TCast>(self, cast: TCast) -> EmployeeColumns<TypeCast<TCast, T>>
-	where
-		TCast: Copy,
-	{
-		EmployeeColumns {
-			id: TypeCast(self.id, cast),
-			name: TypeCast(self.name, cast),
-			status: TypeCast(self.status, cast),
-			title: TypeCast(self.title, cast),
-		}
-	}
 }
 
 impl EmployeeColumns<&'static str>
 {
+	/// The names of the columns in `employees` without any aliasing.
+	///
+	/// # Examples
+	///
+	/// * See [`EmployeeColumns::unique`].
 	pub const fn default() -> Self
 	{
 		Self {
@@ -81,6 +84,51 @@ impl EmployeeColumns<&'static str>
 		}
 	}
 
+	/// Aliases for the columns in `employees` which are guaranteed to be unique among other [`columns`](super)'s `unique` aliases.
+	///
+	/// # Examples
+	///
+	/// ```rust
+	/// use clinvoice_adapter::{
+	///   fmt::{QueryBuilderExt, sql},
+	///   schema::columns::{EmployeeColumns, OrganizationColumns},
+	/// };
+	/// # use pretty_assertions::assert_eq;
+	/// use sqlx::{Execute, Postgres, QueryBuilder};
+	///
+	/// {
+	///   let mut query = QueryBuilder::<Postgres>::new(sql::SELECT);
+	///
+	///   // `sqlx::Row::get` ignores scopes (e.g. "E." in "E.id") so "E.id" and "O.id", as well as
+	///   // "E.name" and "O.name", clobber each other.
+	///   assert_eq!(
+	///     query
+	///       .push_columns(&EmployeeColumns::default().default_scope())
+	///       .push_more_columns(&OrganizationColumns::default().default_scope())
+	///       .prepare()
+	///       .sql(),
+	///     " SELECT E.id,E.name,E.status,E.title,O.id,O.location_id,O.name;"
+	///   );
+	/// }
+	///
+	/// {
+	///   let mut query = QueryBuilder::<Postgres>::new(sql::SELECT);
+	///
+	///   // no clobbering
+	///   assert_eq!(
+	///     query
+	///       .push_columns(&OrganizationColumns::default().default_scope())
+	///       .push_more_columns(&EmployeeColumns::default().default_scope().r#as(EmployeeColumns::unique()))
+	///       .prepare()
+	///       .sql(),
+	///     " SELECT O.id,O.location_id,O.name,\
+	///         E.id AS unique_2_employee_id,\
+	///         E.name AS unique_2_employee_name,\
+	///         E.status AS unique_2_employee_status,\
+	///         E.title AS unique_2_employee_title;"
+	///   );
+	/// }
+	/// ```
 	pub const fn unique() -> Self
 	{
 		Self {

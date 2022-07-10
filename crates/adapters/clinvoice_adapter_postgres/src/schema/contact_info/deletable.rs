@@ -43,8 +43,9 @@ impl Deletable for PgContactInfo
 			return Ok(());
 		}
 
-		let mut query = QueryBuilder::new(sql::DELETE_FROM);
+		let mut query = QueryBuilder::new(sql::DELETE);
 		query
+			.push(sql::FROM)
 			.push(ContactColumns::<&str>::TABLE_NAME)
 			.push(sql::WHERE);
 
@@ -77,6 +78,7 @@ mod tests
 	};
 	use clinvoice_match::{MatchContact, MatchStr};
 	use clinvoice_schema::{Contact, ContactKind};
+	use pretty_assertions::assert_eq;
 
 	use crate::schema::{util, PgContactInfo, PgLocation};
 

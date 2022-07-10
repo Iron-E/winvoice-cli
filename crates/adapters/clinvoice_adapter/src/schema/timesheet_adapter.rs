@@ -10,22 +10,13 @@ use sqlx::{Pool, Result};
 
 use crate::{Deletable, Updatable};
 
+/// Implementors of this trait may act as an [adapter](super) for [`Timesheet`]s.
 #[async_trait::async_trait]
 pub trait TimesheetAdapter:
 	Deletable<Entity = Timesheet>
 	+ Updatable<Db = <Self as Deletable>::Db, Entity = <Self as Deletable>::Entity>
 {
-	/// # Summary
-	///
-	/// Create a new [`Timesheet`] on the database.
-	///
-	/// # Parameters
-	///
-	/// See [`Timesheet`].
-	///
-	/// # Returns
-	///
-	/// The newly created [`Timesheet`].
+	/// Initialize and return a new [`Timesheet`] via the `connection`.
 	async fn create(
 		connection: &Pool<<Self as Deletable>::Db>,
 		employee: Employee,
@@ -35,14 +26,7 @@ pub trait TimesheetAdapter:
 		time_end: Option<DateTime<Utc>>,
 	) -> Result<<Self as Deletable>::Entity>;
 
-	/// # Summary
-	///
-	/// Retrieve some [`Timesheet`]s from the database using a [query](MatchTimesheet).
-	///
-	/// # Returns
-	///
-	/// * An `Error`, if something goes wrong.
-	/// * A list of matching [`Timesheet`]s.
+	/// Retrieve all [`Timesheet`]s (via `connection`) that match the `match_condition`.
 	async fn retrieve(
 		connection: &Pool<<Self as Deletable>::Db>,
 		match_condition: &MatchTimesheet,

@@ -24,17 +24,17 @@ impl Display for Timesheet
 			self.employee.title, self.employee.name
 		)?;
 
-		const DEPTH_1: &str = "\n\t";
-		const DEPTH_2: &str = "\n\t\t";
+		const NEWLINE_INDENT: &str = "\n\t";
+		const NEWLINE_TWO_INDENTS: &str = "\n\t\t";
 
 		if !self.expenses.is_empty()
 		{
-			write!(formatter, "{DEPTH_1}- Expenses:")?;
+			write!(formatter, "{NEWLINE_INDENT}- Expenses:")?;
 			self.expenses.iter().try_for_each(|e| {
 				write!(
 					formatter,
-					"{DEPTH_2}{}",
-					e.to_string().replace('\n', DEPTH_2)
+					"{NEWLINE_TWO_INDENTS}{}",
+					e.to_string().replace('\n', NEWLINE_TWO_INDENTS)
 				)
 			})?;
 		}
@@ -43,8 +43,8 @@ impl Display for Timesheet
 		{
 			write!(
 				formatter,
-				"{DEPTH_1}- Work Notes:{DEPTH_2}{}",
-				self.work_notes.replace('\n', DEPTH_2)
+				"{NEWLINE_INDENT}- Work Notes:{NEWLINE_TWO_INDENTS}{}",
+				self.work_notes.replace('\n', NEWLINE_TWO_INDENTS)
 			)?;
 		}
 
@@ -59,6 +59,7 @@ mod tests
 
 	use chrono::Utc;
 	use clinvoice_finance::{Currency, Money};
+	use pretty_assertions::assert_eq;
 
 	use super::{DateTime, Local, Timesheet};
 	use crate::{Employee, Expense, Invoice, Job, Location, Organization};
@@ -139,7 +140,7 @@ mod tests
 		};
 
 		assert_eq!(
-			format!("{timesheet}"),
+			timesheet.to_string(),
 			format!(
 				"{} – {}
 	- Employee: CEO of Tests Testy McTesterson

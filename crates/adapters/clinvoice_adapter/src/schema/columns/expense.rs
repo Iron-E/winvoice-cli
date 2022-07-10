@@ -1,48 +1,47 @@
 mod columns_to_sql;
 mod table_to_sql;
 
-use crate::fmt::{As, TableToSql, TypeCast, WithIdentifier};
+use crate::fmt::{TableToSql, TypeCast, WithIdentifier};
 
+/// The names of the columns of the `expenses` table.
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct ExpenseColumns<T>
 {
+	/// The name of the `category` column of the `expenses` table.
 	pub category: T,
+
+	/// The name of the `cost` column of the `expenses` table.
 	pub cost: T,
+
+	/// The name of the `description` column of the `expenses` table.
 	pub description: T,
+
+	/// The name of the `id` column of the `expenses` table.
 	pub id: T,
+
+	/// The name of the `timesheet_id` column of the `expenses` table.
 	pub timesheet_id: T,
 }
 
 impl<T> ExpenseColumns<T>
 {
-	/// # Summary
+	/// Add a [scope](ExpenseColumns::scope) using the [default alias](TableToSql::default_alias)
 	///
-	/// Returns a [`ExpenseColumns`] which outputs all of its columns as
-	/// `column_1 AS aliased_column_1`.
-	pub fn r#as<TAlias>(self, aliased: ExpenseColumns<TAlias>) -> ExpenseColumns<As<TAlias, T>>
-	{
-		ExpenseColumns {
-			category: As(self.category, aliased.category),
-			cost: As(self.cost, aliased.cost),
-			description: As(self.description, aliased.description),
-			id: As(self.id, aliased.id),
-			timesheet_id: As(self.timesheet_id, aliased.timesheet_id),
-		}
-	}
-
-	/// # Summary
+	/// # See also
 	///
-	/// Add a [scope](Self::scope) using the [default alias](TableToSql::default_alias)
-	pub fn default_scope(self) -> ExpenseColumns<WithIdentifier<T, char>>
+	/// * [`WithIdentifier`]
+	pub fn default_scope(self) -> ExpenseColumns<WithIdentifier<char, T>>
 	{
 		self.scope(Self::DEFAULT_ALIAS)
 	}
 
-	/// # Summary
-	///
 	/// Returns a [`ExpenseColumns`] which modifies its fields' [`Display`]
-	/// implementation to output `{ident}.{column}`.
-	pub fn scope<TAlias>(self, alias: TAlias) -> ExpenseColumns<WithIdentifier<T, TAlias>>
+	/// implementation to output `{alias}.{column}`.
+	///
+	/// # See also
+	///
+	/// * [`WithIdentifier`]
+	pub fn scope<TAlias>(self, alias: TAlias) -> ExpenseColumns<WithIdentifier<TAlias, T>>
 	where
 		TAlias: Copy,
 	{
@@ -55,11 +54,13 @@ impl<T> ExpenseColumns<T>
 		}
 	}
 
-	/// # Summary
-	///
 	/// Returns a [`ExpenseColumns`] which modifies its fields' [`Display`]
 	/// implementation to output `{column}::{cast}`.
-	pub fn typecast<TCast>(self, cast: TCast) -> ExpenseColumns<TypeCast<TCast, T>>
+	///
+	/// # See also
+	///
+	/// * [`TypeCast`]
+	pub fn typecast<TCast>(self, cast: TCast) -> ExpenseColumns<TypeCast<T, TCast>>
 	where
 		TCast: Copy,
 	{
@@ -75,6 +76,7 @@ impl<T> ExpenseColumns<T>
 
 impl ExpenseColumns<&'static str>
 {
+	/// The names of the columns in `expenses` without any aliasing.
 	pub const fn default() -> Self
 	{
 		Self {
@@ -83,17 +85,6 @@ impl ExpenseColumns<&'static str>
 			description: "description",
 			id: "id",
 			timesheet_id: "timesheet_id",
-		}
-	}
-
-	pub const fn unique() -> Self
-	{
-		Self {
-			category: "unique_3_expense_category",
-			cost: "unique_3_expense_cost",
-			description: "unique_3_expense_description",
-			id: "unique_3_expense_id",
-			timesheet_id: "unique_3_expense_timesheet_id",
 		}
 	}
 }

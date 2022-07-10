@@ -25,6 +25,7 @@ mod tests
 {
 	use chrono::{DateTime, Local, Utc};
 	use clinvoice_finance::{Currency, Money};
+	use pretty_assertions::assert_eq;
 
 	use super::Invoice;
 	use crate::InvoiceDate;
@@ -41,7 +42,7 @@ mod tests
 		};
 
 		assert_eq!(
-			format!("{}", invoice),
+			invoice.to_string(),
 			format!(
 				"Hourly Rate: 10.00 USD
 Status: Issued on {}; Outstanding",

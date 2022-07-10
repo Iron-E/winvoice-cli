@@ -3,14 +3,17 @@ mod from;
 
 use core::fmt::Display;
 
-/// # Summary
+/// Wraps [`Display`] impls to produce a new value that [`Display`]s like a `snake_case`
+/// identifier.
 ///
-/// Wraps [`Display`] impls  to provide the necessary [`Display`] impl for a snake_case identifier.
+/// Created to avoid allocating a new [`String`] via `format!` every time this pattern was
+/// required, even if it was only needed to append onto another [`String`].
 ///
-/// Created to avoid using `format!` every time this pattern was required, thus eagerly allocating
-/// a [`String`] even if it was only needed for pushing to another [`String`].
+/// # Warnings
 ///
-/// # See
+/// * Does not alter case of input.
+///
+/// # See also
 ///
 /// * [`SnakeCase::push`]
 ///
@@ -20,6 +23,7 @@ use core::fmt::Display;
 ///
 /// ```rust
 /// use clinvoice_adapter::fmt::SnakeCase;
+/// # use pretty_assertions::assert_eq;
 ///
 /// /* Scenario 1: Eager, very bad */
 /// let job_alias = 'J';
@@ -48,13 +52,9 @@ where
 	TLeft: Display,
 	TRight: Display,
 {
-	/// # Summary
-	///
 	/// A [`SnakeCase`] containing multiple words separated by underscores.
 	Body(TLeft, TRight),
 
-	/// # Summary
-	///
 	/// A [`SnakeCase`] containing no underscores (i.e. only one word).
 	Head(TLeft),
 }
@@ -64,16 +64,15 @@ where
 	TLeft: Display,
 	TRight: Display,
 {
-	/// # Summary
-	///
 	/// Append a new token to the [`SnakeCase`] setting it as the [`TRight`] of a [`SnakeCase::Body`].
 	///
 	/// # Example
 	///
 	/// ```rust
 	/// use clinvoice_adapter::fmt::SnakeCase;
+	/// # use pretty_assertions::assert_eq;
 	///
-	/// assert_eq!(&SnakeCase::from("foo").push("bar").to_string(), "foo_bar",);
+	/// assert_eq!(SnakeCase::from("foo").push("bar").to_string(), "foo_bar");
 	/// ```
 	pub const fn push<T>(self, token: T) -> SnakeCase<Self, T>
 	where
@@ -82,14 +81,13 @@ where
 		SnakeCase::Body(self, token)
 	}
 
-	/// # Summary
-	///
 	/// Return both sides of the [`SnakeCase::Body`], or [`None`] if this is the [`SnakeCase::Head`].
 	///
 	/// # Example
 	///
 	/// ```rust
 	/// use clinvoice_adapter::fmt::SnakeCase;
+	/// # use pretty_assertions::assert_eq;
 	///
 	/// let foo = SnakeCase::from("foo");
 	/// assert_eq!(foo.slice_end(), None::<(_, _)>);
@@ -97,13 +95,13 @@ where
 	/// let foo_bar = foo.push("bar");
 	/// if let Some((foo_bar_left, foo_bar_right)) = foo_bar.slice_end()
 	/// {
-	///   assert_eq!(&foo_bar_left.to_string(), "foo");
+	///   assert_eq!(foo_bar_left.to_string(), "foo");
 	///   assert_eq!(*foo_bar_right, "bar");
 	/// }
 	///
 	/// if let Some((foo_bar_asdf_left, foo_bar_asdf_right)) = foo_bar.push("asdf").slice_end()
 	/// {
-	///   assert_eq!(&foo_bar_asdf_left.to_string(), "foo_bar");
+	///   assert_eq!(foo_bar_asdf_left.to_string(), "foo_bar");
 	///   assert_eq!(*foo_bar_asdf_right, "asdf");
 	/// }
 	/// ```

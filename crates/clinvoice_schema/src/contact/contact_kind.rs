@@ -5,55 +5,42 @@ use serde::{Deserialize, Serialize};
 
 use crate::Location;
 
-/// # Summary
-///
-/// The specific kind of [`Contact`] that something is.
+/// The variant data of a [`Contact`]. Created because [`Contact`]s have _some_ data in common
+/// (i.e. the `label`), but all of the rest is variable. Further, certain types of [`String`] data
+/// (namely, [`ContactKind::Email`] and [`ContactKind::Phone`]) can be minimally verified before
+/// insertion into a database which helps prevent user error.
+#[cfg_attr(
+	feature = "serde_support",
+	derive(Deserialize, Serialize),
+	serde(rename_all = "snake_case")
+)]
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-#[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
-#[cfg_attr(feature = "serde_support", serde(untagged))]
 pub enum ContactKind
 {
-	/// # Summary
-	///
-	/// A [`Location`](crate::Location).
+	/// Some address, which is a [`Location`] in the real world (e.g. an office in London).
 	Address(Location),
 
-	/// # Summary
-	///
-	/// An email address.
-	///
-	/// # Example
-	///
-	/// * 'foo@bar.io'
+	/// An email address, e.g. `"foo@bar.io"`.
 	Email(String),
 
-	/// # Summary
-	///
-	/// Any other kind of contact information.
-	///
-	/// # Examples
+	/// Any kind of information which is not covered by another [`ContactKind`] variant, for
+	/// example:
 	///
 	/// * A username for a social media platform (e.g. [Twitter](https://www.twitter.com)) or
 	///   monetary transfer service (e.g. [PayPal](https://www.paypal.com)).
 	/// * A bank account number.
 	/// * A crypto wallet.
+	///
+	/// One should not attempt to verify or constrain this data, as it is impossible to tell what it
+	/// might be.
 	Other(String),
 
-	/// # Summary
+	/// A phone number, with or without country code. The following should be treated as valid:
 	///
-	/// A phone number.
-	///
-	/// # Example
-	///
-	/// The following are valid for numbers with country code:
-	///
-	/// * '+1 (603) 555-1234'
+	/// * '+1 603 555-1234'
 	/// * '1-603-555-1234'
 	/// * '16035551234'
-	///
-	/// The following are valid for numbers without country code:
-	///
-	/// * '(603) 555-1234'
+	/// * '603 555-1234'
 	/// * '603-555-1234'
 	/// * '6035551234'
 	Phone(String),
@@ -61,9 +48,7 @@ pub enum ContactKind
 
 impl ContactKind
 {
-	/// # Summary
-	///
-	/// If this is a [`ContactKind::Address`] this function will return as [`Some`]. Otherwise, it will return [`None`].
+	/// If this is a [`ContactKind::Address`], return the inner [`Location`] value as [`Some`]. Otherwise, return [`None`].
 	pub fn address(&self) -> Option<&Location>
 	{
 		match self
@@ -73,9 +58,7 @@ impl ContactKind
 		}
 	}
 
-	/// # Summary
-	///
-	/// If this is a [`ContactKind::Email`] this function will return as [`Some`]. Otherwise, it will return [`None`].
+	/// If this is a [`ContactKind::Email`], return the inner [`str`] value as [`Some`]. Otherwise, return [`None`].
 	pub fn email(&self) -> Option<&str>
 	{
 		match self
@@ -85,9 +68,7 @@ impl ContactKind
 		}
 	}
 
-	/// # Summary
-	///
-	/// If this is a [`ContactKind::Phone`] this function will return as [`Some`]. Otherwise, it will return [`None`].
+	/// If this is a [`ContactKind::Phone`], return the inner [`str`] value as [`Some`]. Otherwise, return [`None`].
 	pub fn phone(&self) -> Option<&str>
 	{
 		match self
@@ -97,9 +78,7 @@ impl ContactKind
 		}
 	}
 
-	/// # Summary
-	///
-	/// If this is a [`ContactKind::Other`] this function will return as [`Some`]. Otherwise, it will return [`None`].
+	/// If this is a [`ContactKind::Other`], return the inner [`str`] value as [`Some`]. Otherwise, return [`None`].
 	pub fn other(&self) -> Option<&str>
 	{
 		match self

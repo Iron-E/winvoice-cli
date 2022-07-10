@@ -58,6 +58,7 @@ mod tests
 	use std::collections::HashSet;
 
 	use clinvoice_match::{MatchLocation, MatchOuterLocation};
+	use pretty_assertions::assert_eq;
 
 	use super::{LocationAdapter, PgLocation};
 	use crate::schema::util;

@@ -46,11 +46,12 @@ mod tests
 		Deletable,
 	};
 	use clinvoice_finance::{Currency, ExchangeRates, Exchangeable, Money};
-	use clinvoice_match::{Match, MatchExpense, MatchSet, MatchTimesheet};
+	use clinvoice_match::{Match, MatchExpense, MatchTimesheet};
 	use clinvoice_schema::{
 		chrono::{TimeZone, Utc},
 		Invoice,
 	};
+	use pretty_assertions::assert_eq;
 
 	use crate::schema::{
 		util,
@@ -159,25 +160,19 @@ mod tests
 		);
 
 		assert_eq!(
-			PgExpenses::retrieve(
-				&connection,
-				&MatchSet::Contains(MatchExpense {
-					timesheet_id: Match::Or(vec![
-						timesheet.id.into(),
-						timesheet2.id.into(),
-						timesheet3.id.into(),
-					]),
-					..Default::default()
-				}),
-			)
+			PgExpenses::retrieve(&connection, &MatchExpense {
+				timesheet_id: Match::Or(vec![
+					timesheet.id.into(),
+					timesheet2.id.into(),
+					timesheet3.id.into(),
+				]),
+				..Default::default()
+			})
 			.await
-			.unwrap()
-			.into_iter()
-			.filter(|(_, vec)| !vec.is_empty())
-			.map(|(id, _)| id)
-			.collect::<Vec<_>>()
-			.as_slice(),
-			&[timesheet3.id],
+			.unwrap(),
+			timesheet3
+				.expenses
+				.exchange_ref(Default::default(), &exchange_rates),
 		);
 	}
 }

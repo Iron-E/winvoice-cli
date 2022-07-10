@@ -19,6 +19,7 @@ impl Display for Expense
 mod tests
 {
 	use clinvoice_finance::{Currency, Money};
+	use pretty_assertions::assert_eq;
 
 	use super::Expense;
 
@@ -34,7 +35,7 @@ mod tests
 		};
 
 		assert_eq!(
-			format!("{expense}"),
+			expense.to_string(),
 			"№10 – Food (20.00 USD)
 	Take-out for 2",
 		);

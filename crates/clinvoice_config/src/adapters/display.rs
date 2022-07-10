@@ -16,11 +16,13 @@ impl Display for Adapters
 #[cfg(test)]
 mod tests
 {
+	use pretty_assertions::assert_eq;
+
 	use super::Adapters;
 
 	#[test]
 	fn display()
 	{
-		assert_eq!(format!("{}", Adapters::Postgres), "Postgres");
+		assert_eq!(Adapters::Postgres.to_string(), "Postgres");
 	}
 }

@@ -1,7 +1,7 @@
 # See https://doc.rust-lang.org/cargo/reference/manifest.html
 [package]
 name = "clinvoice_config"
-version = "0.4.0"
+version = "0.5.0"
 authors = ["Iron-E <code.iron.e@gmail.com>"]
 description = "User configuration of CLInvoice."
 
@@ -13,7 +13,7 @@ repository = "https://www.github.com/Iron-E/clinvoice"
 [dependencies]
 # CLInvoice
 clinvoice_error = {path="../clinvoice_error", version="0.3"}
-clinvoice_schema = {features = ["serde_support"], path="../clinvoice_schema", version="0.7"}
+clinvoice_schema = {features = ["serde_support"], path="../clinvoice_schema", version="0.8"}
 
 # Directories
 dirs = "3"
@@ -25,3 +25,6 @@ thiserror = "1"
 humantime-serde = "1"
 serde = {version="1", features=["derive"]}
 toml = "0.5"
+
+[dev-dependencies]
+pretty_assertions = "1"

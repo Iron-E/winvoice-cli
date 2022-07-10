@@ -1,15 +1,10 @@
-use std::collections::HashMap;
-
 use clinvoice_adapter::{
-	fmt::{sql, As, QueryBuilderExt, TableToSql},
-	schema::{
-		columns::{ExpenseColumns, TimesheetColumns},
-		ExpensesAdapter,
-	},
+	fmt::{sql, QueryBuilderExt, TableToSql},
+	schema::{columns::ExpenseColumns, ExpensesAdapter},
 	WriteWhereClause,
 };
 use clinvoice_finance::{ExchangeRates, Exchangeable, Money};
-use clinvoice_match::{MatchExpense, MatchSet};
+use clinvoice_match::MatchExpense;
 use clinvoice_schema::{Expense, Id};
 use futures::{future, stream, StreamExt, TryFutureExt, TryStreamExt};
 use sqlx::{Executor, PgPool, Postgres, QueryBuilder, Result, Row};
@@ -70,33 +65,17 @@ impl ExpensesAdapter for PgExpenses
 		.await
 	}
 
-	async fn retrieve(
-		connection: &PgPool,
-		match_condition: &MatchSet<MatchExpense>,
-	) -> Result<HashMap<Id, Vec<Expense>>>
+	async fn retrieve(connection: &PgPool, match_condition: &MatchExpense) -> Result<Vec<Expense>>
 	{
 		const COLUMNS: ExpenseColumns<&str> = ExpenseColumns::default();
 
 		let columns = COLUMNS.default_scope();
-		let timesheet_columns = TimesheetColumns::default().default_scope();
 		let exchange_rates_fut = ExchangeRates::new().map_err(util::finance_err_to_sqlx);
 		let mut query = QueryBuilder::new(sql::SELECT);
 
 		query
-			.separated(',')
-			.push(As(timesheet_columns.id, COLUMNS.timesheet_id))
-			.push(columns.category)
-			.push(columns.cost)
-			.push(columns.description)
-			.push(columns.id);
-
-		query
-			.push_default_from::<TimesheetColumns<char>>()
-			.push(sql::LEFT)
-			.push_default_equijoin::<_, _, ExpenseColumns<char>>(
-				columns.timesheet_id,
-				timesheet_columns.id,
-			);
+			.push_columns(&columns)
+			.push_default_from::<ExpenseColumns<char>>();
 
 		let exchange_rates = exchange_rates_fut.await?;
 		PgSchema::write_where_clause(
@@ -109,20 +88,8 @@ impl ExpensesAdapter for PgExpenses
 		query
 			.prepare()
 			.fetch(connection)
-			.try_fold(HashMap::new(), |mut map, row| {
-				let entry = map
-					.entry(row.get::<Id, _>(COLUMNS.timesheet_id))
-					.or_insert_with(Vec::new);
-
-				match PgExpenses::row_to_view(COLUMNS, &row)
-				{
-					Ok(Some(expense)) => entry.push(expense),
-					Err(e) => return future::err(e),
-					_ => (),
-				};
-
-				future::ok(map)
-			})
+			.and_then(|row| future::ready(PgExpenses::row_to_view(COLUMNS, &row)))
+			.try_collect()
 			.await
 	}
 }

@@ -22,30 +22,26 @@ impl Display for Job
 			_ => writeln!(formatter, "Current"),
 		}?;
 
-		/// # Summary
-		///
 		/// One indent in, with a newline.
-		const DEPTH_1: &str = "\n\t";
+		const NEWLINE_INDENT: &str = "\n\t";
 
-		/// # Summary
-		///
 		/// Two indents in, with a newline.
-		const DEPTH_2: &str = "\n\t\t";
+		const NEWLINE_TWO_INDENTS: &str = "\n\t\t";
 
 		// NOTE: we use `write` from here on out because it isn't certain which call will be the last
 
 		write!(
 			formatter,
-			"\tInvoice:{DEPTH_2}{}",
-			self.invoice.to_string().replace('\n', DEPTH_2)
+			"\tInvoice:{NEWLINE_TWO_INDENTS}{}",
+			self.invoice.to_string().replace('\n', NEWLINE_TWO_INDENTS)
 		)?;
 
 		if !self.objectives.is_empty()
 		{
 			write!(
 				formatter,
-				"{DEPTH_1}Objectives:{DEPTH_2}{}",
-				self.objectives.replace('\n', DEPTH_2)
+				"{NEWLINE_INDENT}Objectives:{NEWLINE_TWO_INDENTS}{}",
+				self.objectives.replace('\n', NEWLINE_TWO_INDENTS)
 			)?;
 		}
 
@@ -53,8 +49,8 @@ impl Display for Job
 		{
 			write!(
 				formatter,
-				"{DEPTH_1}Notes:{DEPTH_2}{}",
-				self.notes.replace('\n', DEPTH_2)
+				"{NEWLINE_INDENT}Notes:{NEWLINE_TWO_INDENTS}{}",
+				self.notes.replace('\n', NEWLINE_TWO_INDENTS)
 			)?;
 		}
 
@@ -69,6 +65,7 @@ mod tests
 
 	use chrono::Utc;
 	use clinvoice_finance::{Currency, Money};
+	use pretty_assertions::assert_eq;
 
 	use super::{DateTime, Job, Local};
 	use crate::{Invoice, Location, Organization};
@@ -101,7 +98,7 @@ mod tests
 		};
 
 		assert_eq!(
-			format!("{create_job_view}"),
+			create_job_view.to_string(),
 			format!(
 				"Job №{} for Big Old Test: {} – {}
 	Invoice:

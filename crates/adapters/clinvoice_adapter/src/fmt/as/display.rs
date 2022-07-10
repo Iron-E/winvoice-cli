@@ -3,10 +3,10 @@ use core::fmt::{Display, Formatter, Result};
 use super::As;
 use crate::fmt::sql;
 
-impl<TAlias, TColumn> Display for As<TAlias, TColumn>
+impl<TAs, TIdent> Display for As<TIdent, TAs>
 where
-	TAlias: Display,
-	TColumn: Display,
+	TAs: Display,
+	TIdent: Display,
 {
 	fn fmt(&self, f: &mut Formatter<'_>) -> Result
 	{

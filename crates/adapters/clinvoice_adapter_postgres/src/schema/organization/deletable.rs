@@ -37,6 +37,7 @@ mod tests
 		Deletable,
 	};
 	use clinvoice_match::{Match, MatchOrganization};
+	use pretty_assertions::assert_eq;
 
 	use crate::schema::{util, PgLocation, PgOrganization};
 
@@ -50,8 +51,8 @@ mod tests
 			.unwrap();
 
 		let (organization, organization2, organization3) = futures::try_join!(
-			PgOrganization::create(&connection, earth.clone(), "Some Organization".into(),),
-			PgOrganization::create(&connection, earth.clone(), "Some Other Organization".into(),),
+			PgOrganization::create(&connection, earth.clone(), "Some Organization".into()),
+			PgOrganization::create(&connection, earth.clone(), "Some Other Organization".into()),
 			PgOrganization::create(
 				&connection,
 				earth.clone(),

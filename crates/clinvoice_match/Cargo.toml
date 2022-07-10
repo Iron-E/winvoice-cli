@@ -1,7 +1,7 @@
 # See https://doc.rust-lang.org/cargo/reference/manifest.html
 [package]
 name = "clinvoice_match"
-version = "0.3.0"
+version = "0.4.0"
 authors = ["Iron-E <code.iron.e@gmail.com>"]
 description = "Strongly-typed match conditions for CLInvoice"
 
@@ -14,7 +14,7 @@ repository = "https://www.github.com/Iron-E/clinvoice"
 # CLInvoice
 clinvoice_error = {path="../clinvoice_error", version="0.3"}
 clinvoice_finance = {path='../clinvoice_finance', version="0.3"}
-clinvoice_schema = {features=["serde_support"], path="../clinvoice_schema", version="0.7"}
+clinvoice_schema = {features=["serde_support"], path="../clinvoice_schema", version="0.8"}
 
 # Const Contat
 const_format = "0.2"
@@ -25,6 +25,11 @@ thiserror = "1"
 # Serialization
 humantime-serde = "1"
 serde = {version="1", optional=true}
+
+[dev-dependencies]
+pretty_assertions = "1"
+regex = "1"
+serde_yaml = "0.8"
 
 [features]
 default = []

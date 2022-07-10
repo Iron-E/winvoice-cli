@@ -1,50 +1,50 @@
 mod columns_to_sql;
 mod table_to_sql;
 
-use crate::fmt::{As, TableToSql, TypeCast, WithIdentifier};
+use crate::fmt::{TableToSql, WithIdentifier};
 
+/// The names of the columns of the `timesheets` table.
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct TimesheetColumns<T>
 {
+	/// The name of the `employee_id` column of the `timesheets` table.
 	pub employee_id: T,
+
+	/// The name of the `id` column of the `timesheets` table.
 	pub id: T,
+
+	/// The name of the `job_id` column of the `timesheets` table.
 	pub job_id: T,
+
+	/// The name of the `time_begin` column of the `timesheets` table.
 	pub time_begin: T,
+
+	/// The name of the `time_end` column of the `timesheets` table.
 	pub time_end: T,
+
+	/// The name of the `work_notes` column of the `timesheets` table.
 	pub work_notes: T,
 }
 
 impl<T> TimesheetColumns<T>
 {
-	/// # Summary
+	/// Add a [scope](ExpenseColumns::scope) using the [default alias](TableToSql::default_alias)
 	///
-	/// Returns a [`TimesheetColumns`] which outputs all of its columns as
-	/// `column_1 AS aliased_column_1`.
-	pub fn r#as<TAlias>(self, aliased: TimesheetColumns<TAlias>) -> TimesheetColumns<As<TAlias, T>>
-	{
-		TimesheetColumns {
-			employee_id: As(self.employee_id, aliased.employee_id),
-			id: As(self.id, aliased.id),
-			job_id: As(self.job_id, aliased.job_id),
-			time_begin: As(self.time_begin, aliased.time_begin),
-			time_end: As(self.time_end, aliased.time_end),
-			work_notes: As(self.work_notes, aliased.work_notes),
-		}
-	}
-
-	/// # Summary
+	/// # See also
 	///
-	/// Add a [scope](Self::scope) using the [default alias](TableToSql::default_alias)
-	pub fn default_scope(self) -> TimesheetColumns<WithIdentifier<T, char>>
+	/// * [`WithIdentifier`].
+	pub fn default_scope(self) -> TimesheetColumns<WithIdentifier<char, T>>
 	{
 		self.scope(Self::DEFAULT_ALIAS)
 	}
 
-	/// # Summary
-	///
 	/// Returns a [`TimesheetColumns`] which modifies its fields' [`Display`]
-	/// implementation to output `{ident}.{column}`.
-	pub fn scope<TAlias>(self, alias: TAlias) -> TimesheetColumns<WithIdentifier<T, TAlias>>
+	/// implementation to output `{alias}.{column}`.
+	///
+	/// # See also
+	///
+	/// * [`WithIdentifier`]
+	pub fn scope<TAlias>(self, alias: TAlias) -> TimesheetColumns<WithIdentifier<TAlias, T>>
 	where
 		TAlias: Copy,
 	{
@@ -57,28 +57,11 @@ impl<T> TimesheetColumns<T>
 			work_notes: WithIdentifier(alias, self.work_notes),
 		}
 	}
-
-	/// # Summary
-	///
-	/// Returns a [`TimesheetColumns`] which modifies its fields' [`Display`]
-	/// implementation to output `{column}::{cast}`.
-	pub fn typecast<TCast>(self, cast: TCast) -> TimesheetColumns<TypeCast<TCast, T>>
-	where
-		TCast: Copy,
-	{
-		TimesheetColumns {
-			employee_id: TypeCast(self.employee_id, cast),
-			id: TypeCast(self.id, cast),
-			job_id: TypeCast(self.job_id, cast),
-			time_begin: TypeCast(self.time_begin, cast),
-			time_end: TypeCast(self.time_end, cast),
-			work_notes: TypeCast(self.work_notes, cast),
-		}
-	}
 }
 
 impl TimesheetColumns<&'static str>
 {
+	/// The names of the columns in `organizations` without any aliasing.
 	pub const fn default() -> Self
 	{
 		Self {
@@ -88,18 +71,6 @@ impl TimesheetColumns<&'static str>
 			time_begin: "time_begin",
 			time_end: "time_end",
 			work_notes: "work_notes",
-		}
-	}
-
-	pub const fn unique() -> Self
-	{
-		Self {
-			id: "unique_7_timesheet_id",
-			employee_id: "unique_7_timesheet_employee_id",
-			job_id: "unique_7_timesheet_job_id",
-			time_begin: "unique_7_timesheet_time_begin",
-			time_end: "unique_7_timesheet_time_end",
-			work_notes: "unique_7_timesheet_work_notes",
 		}
 	}
 }

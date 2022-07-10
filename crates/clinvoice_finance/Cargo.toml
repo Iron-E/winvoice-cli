@@ -26,6 +26,9 @@ rust_decimal = "1"
 # Date/Time
 chrono = "0.4"
 
+# Enums
+strum = {features = ["derive"], version = "0.24"}
+
 # Errors
 thiserror = "1"
 
@@ -36,6 +39,7 @@ serde = {optional=true, version="1"}
 reqwest = "0.11"
 
 [dev-dependencies]
+pretty_assertions = "1"
 tokio = {features=["macros", "rt-multi-thread"], version="1"}
 
 [features]

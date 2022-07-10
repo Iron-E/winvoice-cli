@@ -45,6 +45,7 @@ mod tests
 		Invoice,
 		InvoiceDate,
 	};
+	use pretty_assertions::assert_eq;
 
 	use crate::schema::{util, PgJob, PgLocation, PgOrganization};
 

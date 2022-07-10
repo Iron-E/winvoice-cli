@@ -92,6 +92,7 @@ mod tests
 	use clinvoice_adapter::{schema::LocationAdapter, Updatable};
 	use clinvoice_match::MatchLocation;
 	use clinvoice_schema::Location;
+	use pretty_assertions::{assert_eq, assert_ne};
 
 	use crate::schema::{util, PgLocation};
 

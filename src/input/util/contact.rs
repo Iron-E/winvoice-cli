@@ -161,7 +161,7 @@ where
 	// If the user edited the selected key, we must assert that the new key does not already exist. Otherwise, we will invalidate a constraint on the database that a label be unique per `employee_id`.
 	if labels_differ
 	{
-		// TODO: `if let` chain
+		// TODO: if-let chain
 		if let Some((_, kind, _)) = contact_info
 			.iter()
 			.find(|(_, _, label)| label.eq(&edited_contact_label))

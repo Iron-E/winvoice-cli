@@ -4,56 +4,142 @@ mod from;
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 
-/// # Summary
+/// A value which describes the condition which some string of type `T` must meet in order to
+/// "_match_".
 ///
-/// A value in a retrieval operation.
+/// # Warnings
+///
+/// * `MatchStr::Not(Box::new(MatchStr::Any))` is always `false` and often begets a runtime
+///   [`Error`](std::error::Error).
+///
+/// # Examples
+///
+/// This is an example for how a [`MatchStr`] should be interpreted:
+///
+/// ```rust
+/// use clinvoice_match::MatchStr;
+/// use regex::Regex;
+///
+/// fn matches(condition: MatchStr<&str>, x: &str) -> bool {
+///   match condition {
+///     MatchStr::And(conditions) => conditions.into_iter().all(|c| matches(c, x)),
+///     MatchStr::Any => true,
+///     MatchStr::Contains(value) => x.contains(value),
+///     MatchStr::EqualTo(value) => value == x,
+///     MatchStr::Not(c) => !matches(*c, x),
+///     MatchStr::Or(conditions) => conditions.into_iter().any(|c| matches(c, x)),
+///     MatchStr::Regex(value) => Regex::new(value).unwrap().is_match(x),
+///   }
+/// }
+///
+/// assert!(matches(MatchStr::Contains("f"), "foo"));
+/// assert!(matches(MatchStr::EqualTo("foo"), "foo"));
+/// assert!(matches(MatchStr::Regex("fo{2,}"), "foo"));
+/// assert!(matches(
+///   MatchStr::Not(Box::new(MatchStr::Or(vec![
+///     MatchStr::Contains("b"),
+///     MatchStr::Contains("a")
+///   ]))),
+///   "foo",
+/// ));
+/// ```
+///
+/// ## YAML
+///
+/// Requires the `serde_support` feature.
+///
+/// ```rust
+/// # type MatchStr = clinvoice_match::MatchStr<String>;
+/// # use serde_yaml::from_str;
+/// # assert!(from_str::<MatchStr>(r#"
+/// and:
+///   - contains: "f"
+///   - regex: 'o{2,}$'
+/// # "#).is_ok());
+///
+/// // -------------------
+///
+/// # assert!(from_str::<MatchStr>("
+/// any
+/// # ").is_ok());
+///
+/// // -------------------
+///
+/// # assert!(from_str::<MatchStr>(r#"
+/// contains: "foo"
+/// # "#).is_ok());
+///
+/// // -------------------
+///
+/// # assert!(from_str::<MatchStr>(r#"
+/// equal_to: "foo"
+/// # "#).is_ok());
+///
+/// // -------------------
+///
+/// # assert!(from_str::<MatchStr>(r#"
+/// not:
+///   equal_to: "bar"
+/// # "#).is_ok());
+///
+/// // -------------------
+///
+/// # assert!(from_str::<MatchStr>(r#"
+/// or:
+///   - not:
+///       contains: "bar"
+///   - equal_to: "foobar"
+/// # "#).is_ok());
+///
+/// // -------------------
+///
+/// # assert!(from_str::<MatchStr>("
+/// regex: 'fo{2,}'
+/// # ").is_ok());
+/// ```
+///
+/// ### Warnings
+///
+/// Never use the following, as it is always `false` and often begets an error:
+///
+/// ```rust
+/// # assert!(serde_yaml::from_str::<clinvoice_match::Match<isize>>("
+/// not: any
+/// # ").is_ok());
+/// ```
+#[cfg_attr(
+	feature = "serde_support",
+	derive(Deserialize, Serialize),
+	serde(rename_all = "snake_case")
+)]
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-#[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 pub enum MatchStr<T>
 {
-	/// # Summary
-	///
-	/// Match if and only if all of the contained [`Match`]es also match.
+	/// Match IFF all contained [`MatchStr`]s also match.
 	And(Vec<Self>),
 
-	/// # Summary
-	///
 	/// Always match.
 	Any,
 
-	/// # Summary
-	///
-	/// Match if and only if this value and some other string are exactly the same.
-	EqualTo(T),
-
-	/// # Summary
-	///
-	/// Match if and only if:
-	///
-	/// * Some string contains this value anywhere in its contents.
-	/// * A set of strings contains this value anywhere in its contents.
+	/// Match IFF some string `s` is partially equal to the contained value (e.g. "foo" contains
+	/// "oo").
 	Contains(T),
 
-	/// # Summary
-	///
-	/// Negate a [`Match`].
+	/// Match IFF some string `s` matches the contained value.
+	EqualTo(T),
+
+	/// Match IFF the contained [`MatchStr`] does _not_ match.
 	Not(Box<Self>),
 
-	/// # Summary
-	///
-	/// Match if and only if any of the contained [`Match`]es also match.
+	/// Match IFF any contained [`MatchStr`] matches.
 	Or(Vec<Self>),
 
-	/// # Summary
+	/// Match IFF some string `s` is described by this value when interpreted as a regular
+	/// expression.
 	///
-	/// Match if and only if:
+	/// # Warnings
 	///
-	/// * This regular expression matches some other string.
-	/// * This regular expression matches any string in a set of strings.
-	///
-	/// # Remarks
-	///
-	/// The regular expression syntax depends on the database adapter:
+	/// The syntax of a regular expression is highly dependent on the adapter which is being used:
 	///
 	/// * [Postgres](https://www.postgresql.org/docs/current/functions-matching.html#FUNCTIONS-POSIX-TABLE)
 	Regex(T),
@@ -61,15 +147,23 @@ pub enum MatchStr<T>
 
 impl<T> MatchStr<T>
 {
-	/// # Summary
-	///
-	/// Transform some `Match` of type `T` into another type `U` by providing a mapping function.
-	///
-	/// TODO: remove leading borrow from `f` once recursion limit calculation improves
+	/// Transform some [`MatchStr`] of type `T` into another type `U` by providing a mapping `f`unction.
 	///
 	/// # See also
 	///
 	/// * [`Iterator::map`]
+	///
+	/// # Examples
+	///
+	/// ```rust
+	/// use clinvoice_match::MatchStr;
+	/// # use pretty_assertions::assert_eq;
+	///
+	/// assert_eq!(
+	///   MatchStr::EqualTo("5").map(|s| s.to_string()),
+	///   MatchStr::EqualTo("5".to_string())
+	/// );
+	/// ```
 	pub fn map<U>(self, f: impl Copy + Fn(T) -> U) -> MatchStr<U>
 	{
 		match self
@@ -90,15 +184,11 @@ impl<T> MatchStr<T>
 		}
 	}
 
-	/// # Summary
-	///
-	/// Transform some `Match` of type `T` into another type `U` by providing a mapping function.
-	///
-	/// TODO: remove leading borrow from `f` once recursion limit calculation improves
+	/// Transform some [`MatchStr`] of type `T` into another type `U` by providing a mapping function.
 	///
 	/// # See also
 	///
-	/// * [`Iterator::map`]
+	/// * [`MatchStr::map`]
 	pub fn map_ref<U>(&self, f: impl Copy + Fn(&T) -> U) -> MatchStr<U>
 	{
 		match self

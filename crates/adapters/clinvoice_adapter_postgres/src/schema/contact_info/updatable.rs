@@ -52,6 +52,7 @@ mod tests
 	};
 	use clinvoice_match::{MatchContact, MatchStr};
 	use clinvoice_schema::{Contact, ContactKind};
+	use pretty_assertions::assert_eq;
 
 	use crate::schema::{util, PgContactInfo, PgLocation};
 

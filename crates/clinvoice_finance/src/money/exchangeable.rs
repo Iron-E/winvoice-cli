@@ -11,7 +11,7 @@ impl Exchangeable for Money
 			return self;
 		}
 
-		let mut exchanged = self.amount / rates.index(&self.currency..&currency);
+		let mut exchanged = self.amount * rates.index(&self.currency..&currency);
 		exchanged.rescale(2);
 		Self {
 			amount: exchanged,
@@ -28,43 +28,15 @@ impl Exchangeable for Money
 #[cfg(test)]
 mod tests
 {
-	use std::{env, fs};
+	use pretty_assertions::assert_eq;
 
 	use super::{Currency, ExchangeRates, Money};
-	use crate::{Error, Exchangeable, SAMPLE_EXCHANGE_RATES_CSV};
+	use crate::{Exchangeable, SAMPLE_EXCHANGE_RATES_CSV};
 
 	#[test]
 	fn exchange()
 	{
-		let filepath = env::temp_dir()
-			.join("clinvoice_finance")
-			.join("money")
-			.join("exchange.csv");
-
-		if filepath.is_file()
-		{
-			fs::remove_file(&filepath).unwrap();
-		}
-
-		assert!(fs::read_to_string(&filepath)
-			.map_err(Error::from)
-			.and_then(|s| s.parse::<ExchangeRates>())
-			.is_err());
-
-		let parent = filepath.parent().unwrap();
-		if !parent.is_dir()
-		{
-			fs::create_dir_all(parent).unwrap();
-		}
-
-		fs::write(&filepath, SAMPLE_EXCHANGE_RATES_CSV).unwrap();
-
-		assert!(filepath.is_file());
-
-		let exchange_rates = fs::read_to_string(&filepath)
-			.map_err(Error::from)
-			.and_then(|s| s.parse::<ExchangeRates>())
-			.unwrap();
+		let exchange_rates = SAMPLE_EXCHANGE_RATES_CSV.parse::<ExchangeRates>().unwrap();
 
 		let usd = Money::new(20_00, 2, Currency::Usd);
 

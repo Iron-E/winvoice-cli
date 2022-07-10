@@ -1,22 +1,31 @@
 use clinvoice_schema::Id;
 use serde::{Deserialize, Serialize};
 
-/// # Summary
+/// Configurations for [`Employee`](clinvoice_schema::Employee)s.
 ///
-/// Configurations for [`Employee`](clinvoice_schema::employee::Employee)s.
+/// # Examples
+///
+/// ## TOML
+///
+/// ```rust
+/// # assert!(toml::from_str::<clinvoice_config::Employees>(r#"
+/// id = 1
+/// organization_id = 2
+/// # "#).is_ok());
+/// ```
 #[derive(
 	Copy, Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize,
 )]
 pub struct Employees
 {
-	/// # Summary
-	///
 	/// The [`Id`] of the [`Employee`](clinvoice_schema::Employee) which uses this CLInvoice client.
+	///
+	/// Frontends for CLInvoice should provide mechanisms to assign this setting for the user.
 	pub id: Option<Id>,
 
-	/// # Summary
+	/// The [`Id`] of the [`Organization`](clinvoice_schema::Organization) which uses the CLInvoice
+	/// client.
 	///
-	/// The [`Id`] of the [`Organization`](clinvoice_schema::Organization) which the [`Employee`](clinvoice_schema::Employee) which uses this CLInvoice client
-	/// works for.
+	/// Frontends for CLInvoice should provide mechanisms to assign this setting for the user.
 	pub organization_id: Option<Id>,
 }

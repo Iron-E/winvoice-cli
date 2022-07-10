@@ -1,12 +1,11 @@
-//! # Summary
+//! This module defines adapters which enable the creation and retrieval of various data types
+//! using a [`Database`][database]. Each adapter must implement [`Deletable`](crate::Deletable) and
+//! [`Updatable`](crate::Updatable) for its respective data type.
 //!
-//! This module defines common and specific adapter types for [`clinvoice` data](clinvoice_schema).
+//! This module also has `const` representations of the [`columns`] for every table in the
+//! [`Database`][database] as well.
 //!
-//! # Remarks
-//!
-//! One example of a common adapter type is [`Deletable`], since all top-level
-//! [`clinvoice` data](clinvoice_schema) types may implement it with the same signature. This is in
-//! contrast to [`JobAdapter`], which may only be implemented by [`Job`](clinvoice_schema::Job)s.
+//! [database]: sqlx::Database
 
 pub mod columns;
 mod contact_info_adapter;

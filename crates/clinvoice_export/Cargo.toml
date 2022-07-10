@@ -1,9 +1,9 @@
 # See https://doc.rust-lang.org/cargo/reference/manifest.html
 [package]
-name = "clinvoice_markdown"
+name = "clinvoice_export"
 version = "0.1.0"
 authors = ["Iron-E <code.iron.e@gmail.com>"]
-description = "Export CLInvoice data to Markdown."
+description = "Export CLInvoice data to different file formats."
 
 edition = "2021"
 license = "GPL3"
@@ -13,4 +13,10 @@ repository = "https://www.github.com/Iron-E/clinvoice"
 [dependencies]
 # CLInvoice
 clinvoice_finance = {path='../clinvoice_finance', version="0.3"}
-clinvoice_schema = {path='../clinvoice_schema', version="0.7"}
+clinvoice_schema = {path='../clinvoice_schema', version="0.8"}
+
+[dev-dependencies]
+pretty_assertions = "1"
+
+[features]
+markdown = []

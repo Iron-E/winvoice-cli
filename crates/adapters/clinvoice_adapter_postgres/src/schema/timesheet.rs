@@ -44,11 +44,10 @@ impl PgTimesheet
 			expenses: row
 				.try_get(expenses_ident.as_ref())
 				.and_then(|raw_expenses: Vec<(_, String, _, _, _)>| {
-					let expenses_len = raw_expenses.len();
-					raw_expenses.into_iter().try_fold(
-						Vec::with_capacity(expenses_len),
-						|mut expenses, (category, cost, description, id, timesheet_id)| {
-							expenses.push(Expense {
+					raw_expenses
+						.into_iter()
+						.map(|(category, cost, description, id, timesheet_id)| {
+							Ok(Expense {
 								category,
 								description,
 								id,
@@ -59,11 +58,9 @@ impl PgTimesheet
 										.map_err(|e| util::finance_err_to_sqlx(e.into()))?,
 									..Default::default()
 								},
-							});
-
-							Ok(expenses)
-						},
-					)
+							})
+						})
+						.collect::<Result<Vec<_>>>()
 				})
 				.or_else(|e| match e
 				{

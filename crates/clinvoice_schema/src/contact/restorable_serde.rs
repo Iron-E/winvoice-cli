@@ -1,5 +1,5 @@
-use super::Contact;
-use crate::{ContactKind, RestorableSerde, RestoreError, RestoreResult};
+use super::{Contact, ContactKind};
+use crate::{RestorableSerde, RestoreError, RestoreResult};
 
 impl RestorableSerde for Contact
 {

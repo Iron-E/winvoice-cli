@@ -1,22 +1,41 @@
-//! # Summary
+//! `clinvoice_match` contains types that have counterparts with identical layout in
+//! [`clinvoice_schema`]. The only difference between the structures in this crate and
+//! [`clinvoice_schema`] is that the types in this crate can be used to describe any number of their
+//! counterpart types.
 //!
-//! This module contains [view](clinvoice_schema::views)-like structures which are queries that
-//! correspond to the [data item](clinvoice_schema) of the same name.
+//! The ability to "describe" other types comes from [`Match`], [`MatchSet`], and [`MatchStr`].
+//! As this is the distinguishing feature of the crate, none of those three types have equivalents
+//! in [`clinvoice_schema`].
 //!
-//! # Remarks
+//! # Features
 //!
-//! Each field of each structure contains an identically-named, but [matchable](crate::schema::Match)
-//! field which should be used to specify the desired contents of the structure.
+//! * `serde_support` adds support for the [`serde`] crate. This crate is intended for and tested
+//!   with [`serde_yaml`](https://docs.serde.rs/serde_yaml/) in particular.
 //!
-//! # Example
+//! # Re-exports
 //!
-//! For examples, see the `retrieve` tests for each adapter below:
+//! This crate re-exports [`humantime_serde::Serde`], as it is required to deserialize the
+//! `increment` of a [`MatchJob`] via human-readable time (e.g. "15min").
 //!
-//! * [`Employee`](crate::schema::EmployeeAdapter)
-//! * [`Job`](crate::schema::JobAdapter)
-//! * [`Location`](crate::schema::LocationAdapter)
-//! * [`Organization`](crate::schema::OrganizationAdapter)
-//! * [`Person`](crate::schema::PersonAdapter)
+//! # Examples
+//!
+//! The following [`MatchEmployee`] represents all [`Employee`](clinvoice_schema::Employee)s who
+//! meet all of the following criteria:
+//!
+//! * Have a `name` starting with 'A', 'B', or 'C'.
+//! * Have a `status` equal to "Hired".
+//! * Have a `title` not equal to "CEO".
+//!
+//! ```rust
+//! use clinvoice_match::{Match, MatchEmployee, MatchStr};
+//!
+//! let _ = MatchEmployee {
+//!   name: MatchStr::Regex("^[ABC]".into()),
+//!   status: "Hired".to_string().into(),
+//!   title: MatchStr::Not(Box::new("CEO".to_string().into())),
+//!   ..Default::default()
+//! };
+//! ```
 
 mod r#match;
 mod match_contact;
@@ -25,6 +44,7 @@ mod match_expense;
 mod match_invoice;
 mod match_job;
 mod match_location;
+mod match_option;
 mod match_organization;
 mod match_set;
 mod match_str;
@@ -37,6 +57,7 @@ pub use match_expense::MatchExpense;
 pub use match_invoice::MatchInvoice;
 pub use match_job::MatchJob;
 pub use match_location::{MatchLocation, MatchOuterLocation};
+pub use match_option::MatchOption;
 pub use match_organization::MatchOrganization;
 pub use match_set::MatchSet;
 pub use match_str::MatchStr;

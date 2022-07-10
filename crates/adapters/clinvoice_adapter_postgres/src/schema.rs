@@ -29,26 +29,21 @@ pub use organization::PgOrganization;
 use sqlx::{Executor, Postgres, QueryBuilder, Result, Transaction};
 pub use timesheet::PgTimesheet;
 
-/// # Summary
-///
-/// An empty struct which implements [`Initializable`](clinvoice_adapter::schema::Initializable) so
-/// that the Postgres database can have all of the necessary tables set up if this is the first run
-/// of the program.
+/// The struct which implements several [`clinvoice_adapter`] traits to allow CLInvoice to function
+/// within a Postgres database environment.
 pub struct PgSchema;
 
 impl PgSchema
 {
-	/// # Summary
-	///
-	/// Execute `DELETE FROM {table} WHERE (id = №) OR … OR (id = №)`
-	/// for each [`Id`] in `entities.
-	async fn delete<'args, TConn, TIter, TTable>(connection: TConn, entities: TIter) -> Result<()>
+	/// Via `connection`, execute `DELETE FROM {table} WHERE (id = №) OR … OR (id = №)` for each
+	/// [`Id`] in `ids`.
+	async fn delete<'args, TConn, TIter, TTable>(connection: TConn, ids: TIter) -> Result<()>
 	where
 		TConn: Executor<'args, Database = Postgres>,
 		TIter: Iterator<Item = Id>,
 		TTable: TableToSql,
 	{
-		let mut peekable_entities = entities.peekable();
+		let mut peekable_entities = ids.peekable();
 
 		// There is nothing to do
 		if peekable_entities.peek().is_none()
@@ -56,8 +51,8 @@ impl PgSchema
 			return Ok(());
 		}
 
-		let mut query = QueryBuilder::new(sql::DELETE_FROM);
-		query.push(TTable::TABLE_NAME);
+		let mut query = QueryBuilder::new(sql::DELETE);
+		query.push(sql::FROM).push(TTable::TABLE_NAME);
 
 		PgSchema::write_where_clause(
 			Default::default(),
@@ -71,13 +66,11 @@ impl PgSchema
 		Ok(())
 	}
 
-	/// # Summary
-	///
 	/// Execute a query over the given `connection` which updates `columns` of a `table` given
 	/// the some values specified by `push_values` (e.g.
 	/// `|query| query.push_values(my_iterator, |mut q, value| …)`).
 	///
-	/// # See
+	/// # See also
 	///
 	/// * [`ColumnsToSql::push_columns`] for how the order of columns to bind in `push_values`.
 	/// * [`ColumnsToSql::push_set`] for how the `SET` clause is generated.

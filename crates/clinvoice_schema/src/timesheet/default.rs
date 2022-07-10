@@ -1,6 +1,6 @@
 use chrono::Utc;
 
-use crate::Timesheet;
+use super::Timesheet;
 
 impl Default for Timesheet
 {

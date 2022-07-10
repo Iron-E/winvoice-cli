@@ -77,7 +77,7 @@ impl Updatable for PgJob
 #[cfg(test)]
 mod tests
 {
-	use std::time::Duration;
+	use core::time::Duration;
 
 	use clinvoice_adapter::{
 		schema::{JobAdapter, LocationAdapter, OrganizationAdapter},
@@ -87,6 +87,7 @@ mod tests
 	use clinvoice_match::MatchJob;
 	use clinvoice_schema::{chrono::Utc, Invoice, InvoiceDate};
 	use futures::TryFutureExt;
+	use pretty_assertions::assert_eq;
 
 	use crate::{
 		fmt::DateTimeExt,

@@ -1,4 +1,2 @@
-/// # Summary
-///
-/// An alias to some integer type which is used for storing IDs of records.
+/// The type which should be used for reference numbers.
 pub type Id = i64;

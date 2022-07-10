@@ -6,20 +6,20 @@ pub use contact_kind::ContactKind;
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 
-/// # Summary
-///
-/// A piece of [`Contact`] information for an [`Employee`].
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+/// A way that the [`Organization`](super::Organization) which uses CLInvoice can be contacted by
+/// another [`Organization`]/entity which has been given an [`Invoice`](super::Invoice)/exported
+/// [`Job`](super::Job) in order to facilitate payment or make a request for further services.
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Contact
 {
-	/// # Summary
-	///
-	/// The specific information contained by this [`Contact`].
+	/// See [`ContactKind`].
+	#[cfg_attr(feature = "serde_support", serde(flatten))]
 	pub kind: ContactKind,
 
-	/// # Summary
+	/// The reference label of this [`Contact`], which is human-readable and easily
+	/// contextualizes the information in `kind`.
 	///
-	/// The label for this [`Contact`]. Note that it must be unique per `employee_id`.
+	/// Should be assigned by a user, and updatable as well.
 	pub label: String,
 }

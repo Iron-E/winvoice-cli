@@ -4,36 +4,21 @@ use sqlx::{Executor, Pool, Result};
 
 use crate::{Deletable, Updatable};
 
+/// Implementors of this trait may act as an [adapter](super) for [`Contact`]s.
 #[async_trait::async_trait]
 pub trait ContactInfoAdapter:
 	Deletable<Entity = Contact>
 	+ Updatable<Db = <Self as Deletable>::Db, Entity = <Self as Deletable>::Entity>
 {
-	/// # Summary
+	/// Initialize all of the [`Contact`]s in `contact_info` via the `connection`.
 	///
-	/// Create new [`Contact`]s on the database.
-	///
-	/// # Parameters
-	///
-	/// `contact_info` is a slice of `(bool, ContactKind, String)`, which represents `(export, kind,
-	/// label)` for the created [`Contact`]s.
-	///
-	/// # Returns
-	///
-	/// The newly created [`Contact`].
+	/// If you want to update an existing [`Contact`] instead, try [`Updatable::update`].
 	async fn create(
 		connection: impl 'async_trait + Executor<'_, Database = <Self as Deletable>::Db> + Send,
 		contact_info: impl 'async_trait + Iterator<Item = &Contact> + Send,
 	) -> Result<()>;
 
-	/// # Summary
-	///
-	/// Retrieve some [`Contact`]s from the database using a [query](MatchContact).
-	///
-	/// # Returns
-	///
-	/// * An `Error`, if something goes wrong.
-	/// * A list of matching [`Contact`]s.
+	/// Retrieve all [`Contact`]s (via `connection`) that match the `match_condition`.
 	async fn retrieve(
 		connection: &Pool<<Self as Deletable>::Db>,
 		match_condition: &MatchContact,

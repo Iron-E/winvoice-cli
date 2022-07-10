@@ -93,7 +93,7 @@ impl JobAdapter for PgJob
 			.push_columns(&columns)
 			.push_more_columns(&organization_columns.r#as(ORGANIZATION_COLUMNS_UNIQUE))
 			.push_default_from::<JobColumns<char>>()
-			.push_default_equijoin::<_, _, OrganizationColumns<char>>(
+			.push_default_equijoin::<OrganizationColumns<char>, _, _>(
 				organization_columns.id,
 				columns.client_id,
 			)
@@ -135,7 +135,7 @@ mod tests
 
 	use clinvoice_adapter::schema::{LocationAdapter, OrganizationAdapter};
 	use clinvoice_finance::{ExchangeRates, Exchangeable};
-	use clinvoice_match::{Match, MatchInvoice, MatchJob};
+	use clinvoice_match::{Match, MatchInvoice, MatchJob, MatchOption};
 	use clinvoice_schema::{
 		chrono::{TimeZone, Utc},
 		Currency,
@@ -143,6 +143,7 @@ mod tests
 		InvoiceDate,
 		Money,
 	};
+	use pretty_assertions::assert_eq;
 
 	use super::{JobAdapter, PgJob};
 	use crate::schema::{util, PgLocation, PgOrganization};
@@ -177,7 +178,7 @@ mod tests
 		.unwrap();
 
 		let row = sqlx::query!(
-			r#"SELECT
+			"SELECT
 					id,
 					client_id,
 					date_close,
@@ -189,7 +190,7 @@ mod tests
 					notes,
 					objectives
 				FROM jobs
-				WHERE id = $1;"#,
+				WHERE id = $1;",
 			job.id,
 		)
 		.fetch_one(&connection)
@@ -322,7 +323,7 @@ mod tests
 			PgJob::retrieve(&connection, &MatchJob {
 				id: Match::Or(vec![job2.id.into(), job3.id.into()]),
 				invoice: MatchInvoice {
-					date_issued: Match::Not(Match::Not(Match::Any.into()).into()),
+					date_issued: MatchOption::Not(Box::new(None.into())),
 					..Default::default()
 				},
 				..Default::default()
@@ -343,7 +344,7 @@ mod tests
 			PgJob::retrieve(&connection, &MatchJob {
 				id: Match::Or(vec![job.id.into(), job4.id.into()]),
 				invoice: MatchInvoice {
-					date_issued: Match::Not(Match::Any.into()),
+					date_issued: None.into(),
 					..Default::default()
 				},
 				..Default::default()

@@ -81,6 +81,7 @@ mod tests
 
 	use clinvoice_adapter::schema::LocationAdapter;
 	use clinvoice_match::{Match, MatchLocation, MatchOrganization, MatchOuterLocation};
+	use pretty_assertions::assert_eq;
 
 	use super::{OrganizationAdapter, PgOrganization};
 	use crate::schema::{util, PgLocation};
@@ -134,8 +135,8 @@ mod tests
 		.unwrap();
 
 		let (organization, organization2) = futures::try_join!(
-			PgOrganization::create(&connection, arizona.clone(), "Some Organization".into(),),
-			PgOrganization::create(&connection, utah, "Some Other Organizatión".into(),),
+			PgOrganization::create(&connection, arizona.clone(), "Some Organization".into()),
+			PgOrganization::create(&connection, utah, "Some Other Organizatión".into()),
 		)
 		.unwrap();
 

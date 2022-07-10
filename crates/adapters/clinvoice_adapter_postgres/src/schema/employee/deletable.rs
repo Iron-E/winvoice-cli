@@ -34,6 +34,7 @@ mod tests
 {
 	use clinvoice_adapter::{schema::EmployeeAdapter, Deletable};
 	use clinvoice_match::{Match, MatchEmployee};
+	use pretty_assertions::assert_eq;
 
 	use crate::schema::{util, PgEmployee};
 

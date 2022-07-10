@@ -4,9 +4,7 @@ use sqlx::{Acquire, Executor, Postgres, Result};
 
 use super::PgSchema;
 
-/// # Summary
-///
-/// Initialize the database for a given [`Store`].
+/// Initialize the `locations` table.
 async fn init_locations(connection: impl Executor<'_, Database = Postgres>) -> Result<()>
 {
 	sqlx::query!(
@@ -24,9 +22,7 @@ async fn init_locations(connection: impl Executor<'_, Database = Postgres>) -> R
 	Ok(())
 }
 
-/// # Summary
-///
-/// Initialize the database for a given [`Store`].
+/// Initialize `organizations` table.
 async fn init_organizations(connection: impl Executor<'_, Database = Postgres>) -> Result<()>
 {
 	sqlx::query!(
@@ -42,9 +38,7 @@ async fn init_organizations(connection: impl Executor<'_, Database = Postgres>) 
 	Ok(())
 }
 
-/// # Summary
-///
-/// Initialize the database for a given [`Store`].
+/// Initialize the `employees` table.
 async fn init_employees(connection: impl Executor<'_, Database = Postgres> + Send) -> Result<()>
 {
 	sqlx::query!(
@@ -61,8 +55,7 @@ async fn init_employees(connection: impl Executor<'_, Database = Postgres> + Sen
 	Ok(())
 }
 
-/// # Summary
-/// Initialize the database for a given [`Store`].
+/// Initialize the `contact_information` table.
 async fn init_contact_info(connection: impl Executor<'_, Database = Postgres>) -> Result<()>
 {
 	sqlx::query!(
@@ -112,9 +105,7 @@ async fn init_contact_info(connection: impl Executor<'_, Database = Postgres>) -
 	Ok(())
 }
 
-/// # Summary
-///
-/// Initialize the database for a given [`Store`].
+/// Initialize the `amount_of_currency` type.
 async fn init_money(connection: impl Executor<'_, Database = Postgres>) -> Result<()>
 {
 	sqlx::query!(r#"CREATE DOMAIN amount_of_currency AS text CHECK (VALUE ~ '^\d+(\.\d+)?$');"#)
@@ -123,9 +114,7 @@ async fn init_money(connection: impl Executor<'_, Database = Postgres>) -> Resul
 	Ok(())
 }
 
-/// # Summary
-///
-/// Initialize the database for a given [`Store`].
+/// Initialize the `jobs` table.
 async fn init_jobs(connection: impl Executor<'_, Database = Postgres>) -> Result<()>
 {
 	sqlx::query!(
@@ -150,9 +139,7 @@ async fn init_jobs(connection: impl Executor<'_, Database = Postgres>) -> Result
 	Ok(())
 }
 
-/// # Summary
-///
-/// Initialize the database for a given [`Store`].
+/// Initialize the `timesheets` table.
 async fn init_timesheets(connection: impl Executor<'_, Database = Postgres>) -> Result<()>
 {
 	sqlx::query!(
@@ -173,9 +160,7 @@ async fn init_timesheets(connection: impl Executor<'_, Database = Postgres>) -> 
 	Ok(())
 }
 
-/// # Summary
-///
-/// Initialize the database for a given [`Store`].
+/// Initialize the `expenses` table.
 async fn init_expenses(connection: impl Executor<'_, Database = Postgres>) -> Result<()>
 {
 	sqlx::query!(
@@ -198,9 +183,6 @@ impl Initializable for PgSchema
 {
 	type Db = Postgres;
 
-	/// # Summary
-	///
-	/// Initialize the database for a given [`Store`].
 	async fn init(
 		connection: impl 'async_trait + Acquire<'_, Database = Self::Db> + Send,
 	) -> Result<()>

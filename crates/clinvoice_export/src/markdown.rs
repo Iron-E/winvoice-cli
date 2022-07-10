@@ -187,7 +187,7 @@ pub(super) fn export_job(
 
 		timesheets
 			.iter()
-			.for_each(|timesheet| export_timesheet(&timesheet, &mut output));
+			.for_each(|timesheet| export_timesheet(timesheet, &mut output));
 	}
 
 	output

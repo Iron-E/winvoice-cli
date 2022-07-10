@@ -32,10 +32,8 @@ use sqlx::{Database, PgPool, Postgres, QueryBuilder, Result};
 use super::{PgLocation, PgSchema};
 use crate::fmt::{PgInterval, PgTimestampTz};
 
-/// # Summary
-///
-/// Append `"{context} ("` to `query`. If `NOT` is `true`, then everything preceding a
-/// closing [`write_context_scope_end`] is negated.
+/// Write [`Match::Any`], [`MatchStr::Any`], [`MatchOption::Any`], or [`MatchSet::Any`] in a way
+/// that will produce valid syntax.
 fn write_any<Db>(query: &mut QueryBuilder<Db>, context: WriteContext)
 where
 	Db: Database,
@@ -43,28 +41,30 @@ where
 	query.push(context).push(sql::TRUE);
 }
 
-/// # Summary
+/// Append `"{context} ("` to `query`. If `NEGATE` is `true`, append `"{context} NOT ("`.
 ///
-/// Append `"{context} ("` to `query`. If `NOT` is `true`, then everything preceding a
-/// closing [`write_context_scope_end`] is negated.
+/// # See also
+///
+/// * [`write_context_scope_end`]
 fn write_context_scope_start<Db, const NEGATE: bool>(
 	query: &mut QueryBuilder<Db>,
 	context: WriteContext,
 ) where
 	Db: Database,
 {
-	let mut separated = query.separated(' ');
-	separated.push(context);
+	query.push(context);
 	if NEGATE
 	{
-		separated.push(sql::NOT);
+		query.push(sql::NOT);
 	}
-	separated.push('(');
+	query.push(" (");
 }
 
-/// # Summary
+/// Write `')'` to the `query`.
 ///
-/// Write `')'` to the `query`, ending some prior [`write_context_scope_start`].
+/// # See also
+///
+/// * [`write_context_scope_start`]
 fn write_context_scope_end<Db>(query: &mut QueryBuilder<Db>)
 where
 	Db: Database,
@@ -72,13 +72,11 @@ where
 	query.push(')');
 }
 
-/// # Summary
-///
 /// Write multiple `AND`/`OR` `conditions`.
 ///
-/// * If `union` is `true`, the `conditions` are separated by `AND`:
+/// * If `UNION` is `true`, the `conditions` are separated by `AND`:
 ///   `[Match::EqualTo(3), Match::LessThan(4)]` is interpreted as `(foo = 3 AND foo < 4)`.
-/// * If `union` is `false`, the `conditions` are separated by `OR`:
+/// * If `UNION` is `false`, the `conditions` are separated by `OR`:
 ///   `[Match::EqualTo(3), Match::LessThan(4)]` is interpreted as `(foo = 3 OR foo < 4)`.
 ///
 /// The rest of the args are the same as [`WriteSql::write_where`].
@@ -115,8 +113,6 @@ fn write_boolean_group<D, Db, I, M, const UNION: bool>(
 	write_context_scope_end(query);
 }
 
-/// # Summary
-///
 /// Write a comparison of `ident` and `comparand` using `comparator`.
 ///
 /// The rest of the args are the same as [`WriteSql::write_where`].
@@ -147,9 +143,9 @@ fn write_comparison<Db>(
 		.push(comparand);
 }
 
-/// # Summary
+/// An implementation of [`WriteWhereClause`] for [`MatchContact`].
 ///
-/// An implementation of [`WriteWhereClause`] for [`MatchContact`]
+/// Must be `async` because it involves multiple intermediary database queries to accomplish.
 ///
 /// # Errors
 ///
@@ -202,15 +198,9 @@ where
 	Ok(WriteContext::AcceptingAnotherWhereCondition)
 }
 
-/// # Summary
-///
-/// Wrap some `match_condition` in `NOT (…)`.
+/// Append `"{context} NOT ({match_condition})"` to the `query`.
 ///
 /// The args are the same as [`WriteSql::write_where`].
-///
-/// # Warnings
-///
-/// Does not guard against SQL injection.
 fn write_negated<Db, M>(
 	query: &mut QueryBuilder<Db>,
 	context: WriteContext,
@@ -236,19 +226,6 @@ impl<T> WriteWhereClause<Postgres, &Match<T>> for PgSchema
 where
 	T: Display + PartialEq,
 {
-	/// # Errors
-	///
-	/// If any the following:
-	///
-	/// * [`ident.to_string()`](ToString::to_string) returns an [empty string](String::is_empty).
-	///
-	/// # See also
-	///
-	/// * [`WriteWhereClause::write_where_clause`]
-	///
-	/// # Warnings
-	///
-	/// * Does not guard against SQL injection.
 	fn write_where_clause(
 		context: WriteContext,
 		ident: impl Copy + Display,
@@ -290,19 +267,6 @@ impl<T> WriteWhereClause<Postgres, &MatchOption<T>> for PgSchema
 where
 	T: Display + PartialEq,
 {
-	/// # Errors
-	///
-	/// If any the following:
-	///
-	/// * [`ident.to_string()`](ToString::to_string) returns an [empty string](String::is_empty).
-	///
-	/// # See also
-	///
-	/// * [`WriteWhereClause::write_where_clause`]
-	///
-	/// # Warnings
-	///
-	/// * Does not guard against SQL injection.
 	fn write_where_clause(
 		context: WriteContext,
 		ident: impl Copy + Display,
@@ -488,15 +452,6 @@ impl WriteWhereClause<Postgres, &MatchStr<String>> for PgSchema
 
 impl WriteWhereClause<Postgres, &MatchEmployee> for PgSchema
 {
-	/// # Panics
-	///
-	/// If any the following:
-	///
-	/// * `ident` is an empty string.
-	///
-	/// # See also
-	///
-	/// * [`WriteWhereClause::write_where_clause`]
 	fn write_where_clause(
 		context: WriteContext,
 		ident: impl Copy + Display,
@@ -527,15 +482,6 @@ impl WriteWhereClause<Postgres, &MatchEmployee> for PgSchema
 
 impl WriteWhereClause<Postgres, &MatchExpense> for PgSchema
 {
-	/// # Panics
-	///
-	/// If any the following:
-	///
-	/// * `ident` is an empty string.
-	///
-	/// # See also
-	///
-	/// * [`WriteWhereClause::write_where_clause`]
 	fn write_where_clause(
 		context: WriteContext,
 		ident: impl Copy + Display,
@@ -572,15 +518,6 @@ impl WriteWhereClause<Postgres, &MatchExpense> for PgSchema
 
 impl WriteWhereClause<Postgres, &MatchInvoice> for PgSchema
 {
-	/// # Panics
-	///
-	/// If any the following:
-	///
-	/// * `ident` is an empty string.
-	///
-	/// # See also
-	///
-	/// * [`WriteWhereClause::write_where_clause`]
 	fn write_where_clause(
 		context: WriteContext,
 		ident: impl Copy + Display,
@@ -612,15 +549,6 @@ impl WriteWhereClause<Postgres, &MatchInvoice> for PgSchema
 
 impl WriteWhereClause<Postgres, &MatchJob> for PgSchema
 {
-	/// # Panics
-	///
-	/// If any the following:
-	///
-	/// * `ident` is an empty string.
-	///
-	/// # See also
-	///
-	/// * [`WriteWhereClause::write_where_clause`]
 	fn write_where_clause(
 		context: WriteContext,
 		ident: impl Copy + Display,
@@ -673,15 +601,6 @@ impl WriteWhereClause<Postgres, &MatchJob> for PgSchema
 
 impl WriteWhereClause<Postgres, &MatchOrganization> for PgSchema
 {
-	/// # Panics
-	///
-	/// If any the following:
-	///
-	/// * `ident` is an empty string.
-	///
-	/// # See also
-	///
-	/// * [`WriteWhereClause::write_where_clause`]
 	fn write_where_clause(
 		context: WriteContext,
 		ident: impl Copy + Display,
@@ -702,15 +621,6 @@ impl WriteWhereClause<Postgres, &MatchOrganization> for PgSchema
 
 impl WriteWhereClause<Postgres, &MatchTimesheet> for PgSchema
 {
-	/// # Panics
-	///
-	/// If any the following:
-	///
-	/// * `ident` is an empty string.
-	///
-	/// # See also
-	///
-	/// * [`WriteWhereClause::write_where_clause`]
 	fn write_where_clause(
 		context: WriteContext,
 		ident: impl Copy + Display,

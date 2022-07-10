@@ -20,6 +20,9 @@ pub enum Error
 
 	#[error("The {0} currency is not recognized by CLInvoice. Please see https://github.com/Iron-E/clinvoice/wiki/Usage for a list of supported currencies")]
 	UnsupportedCurrency(String),
+
+	#[error(transparent)]
+	Zip(#[from] zip::result::ZipError),
 }
 
 clinvoice_error::AliasResult!();

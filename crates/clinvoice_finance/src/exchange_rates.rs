@@ -5,7 +5,7 @@ use std::{
 	convert::TryInto,
 	env,
 	fs,
-	io::{Cursor, Error as IoError, ErrorKind as IoErrorKind, Read},
+	io::{Cursor, Read},
 	ops::Range,
 	path::PathBuf,
 };
@@ -14,7 +14,7 @@ use chrono::{Datelike, Local};
 use futures::TryFutureExt;
 use reqwest::Response;
 use rust_decimal::Decimal;
-use zip::{result::ZipError, ZipArchive};
+use zip::ZipArchive;
 
 use crate::{Currency, Result};
 
@@ -92,25 +92,13 @@ impl ExchangeRates
 		}
 		else
 		{
-			/// Converts [`ZipError`]s to [`IoError`]s, since there is no [`Into`] impl.
-			fn zip_err_to_io(e: ZipError) -> IoError
-			{
-				match e
-				{
-					ZipError::Io(e2) => e2,
-					ZipError::FileNotFound => IoErrorKind::NotFound.into(),
-					ZipError::InvalidArchive(_) => IoErrorKind::InvalidData.into(),
-					ZipError::UnsupportedArchive(_) => IoErrorKind::Unsupported.into(),
-				}
-			}
-
 			let cursor = reqwest::get("https://www.ecb.europa.eu/stats/eurofxref/eurofxref.zip")
 				.and_then(Response::bytes)
 				.map_ok(Cursor::new)
 				.await?;
 
-			let mut archive = ZipArchive::new(cursor).map_err(zip_err_to_io)?;
-			let mut csv = archive.by_index(0).map_err(zip_err_to_io)?;
+			let mut archive = ZipArchive::new(cursor)?;
+			let mut csv = archive.by_index(0)?;
 
 			let mut csv_contents = String::with_capacity(csv.size().try_into().unwrap());
 			csv.read_to_string(&mut csv_contents)?;

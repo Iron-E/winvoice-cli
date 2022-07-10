@@ -49,9 +49,7 @@ pub(super) fn duration_from(interval: PgInterval) -> Result<Duration>
 	))
 }
 
-/// # Summary
-///
-/// Map some [error](clinvoice_finance::Error) `e` to an [`Error`]
+/// Map some [error](clinvoice_finance::Error) `e` to an [`Error`].
 pub(super) fn finance_err_to_sqlx(e: FinanceError) -> Error
 {
 	match e

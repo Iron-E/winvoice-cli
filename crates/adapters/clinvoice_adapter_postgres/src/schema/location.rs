@@ -22,18 +22,21 @@ pub struct PgLocation;
 
 impl PgLocation
 {
-	/// # Summary
+	/// Generate a `WITH RECURSIVE` statement given some `match_condition`.
 	///
-	/// Generate a `WITH RECURSIVE` statement which contains a `location` for `match_condition`, and
-	/// `location_outer` (plus `location_outer_outer`) for each `match_condition.outer` (plus
-	/// `match_condition.outer.outer`) as well as a `location_report` which contains all rows of the
-	/// `locations` table which match the `match_condition`.
+	///
+	/// Contains a `location` identifier, plus a `location_outer` (plus `location_outer_outer`) for
+	/// each `match_condition.outer` (`match_condition.outer.outer`, etc.) as well as a
+	/// `location_report` which contains all rows of the `locations` table which match the
+	/// `match_condition`.
+	///
+	/// # See also
+	///
+	/// * [`PgLocationRecursiveCte`] for more about the identifiers.
 	pub(super) fn query_with_recursive(match_condition: &MatchLocation) -> QueryBuilder<Postgres>
 	{
-		/// # Summary
-		///
-		/// Generate multiple Common Table Expressions for a recursive query.
-		fn generate_cte<T, TOuter>(
+		/// Generate one expression in a recursive CTE.
+		fn generate_expression<T, TOuter>(
 			query: &mut QueryBuilder<Postgres>,
 			ident: PgLocationRecursiveCte<T, TOuter>,
 			match_condition: &MatchLocation,
@@ -91,7 +94,7 @@ impl PgLocation
 				MatchOuterLocation::Some(ref outer) =>
 				{
 					query.push(',');
-					generate_cte(
+					generate_expression(
 						query,
 						// HACK: remove `.to_string()` after rust-lang/rust#39959
 						PgLocationRecursiveCte::outer(ident.to_string()),
@@ -132,19 +135,13 @@ impl PgLocation
 
 		let mut query = QueryBuilder::new(sql::WITH_RECURSIVE);
 
-		generate_cte(&mut query, PgLocationRecursiveCte::new(), match_condition);
+		generate_expression(&mut query, PgLocationRecursiveCte::new(), match_condition);
 
 		query.push(' ');
 		query
 	}
 
-	/// # Summary
-	///
-	/// Recursively constructs a [`Location`] which matches the `id` in the database over the `connection`.
-	///
-	/// # Panics
-	///
-	/// If `id` does not match any row in the database.
+	/// Construct a [`Location`], also constructing all outer [`Location`]s, and return it.
 	pub(super) async fn retrieve_by_id(
 		connection: impl Executor<'_, Database = Postgres>,
 		id: Id,
@@ -188,10 +185,12 @@ impl PgLocation
 				outer: previous.map(Box::new),
 			}))
 		})
-		.map_ok(|v| v.expect("`id` did not match any row in the database"))
 		.await
+		.and_then(|v| v.ok_or(Error::RowNotFound))
 	}
 
+	/// Retrieve a [`Match`] which will match all of the [`Id`]s of the [`Location`]s which match the
+	/// `match_condition`.
 	pub(super) async fn retrieve_matching_ids(
 		connection: impl Executor<'_, Database = Postgres>,
 		match_condition: &MatchLocation,

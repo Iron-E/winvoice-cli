@@ -104,7 +104,10 @@ impl ExchangeRates
 			csv.read_to_string(&mut csv_contents)?;
 
 			// cache the download for next time this method is called
-			debug_assert!(!filepath.is_file());
+			debug_assert!(
+				!filepath.is_file(),
+				"attemped to initialize `ExchangeRates` cache at {filepath:?}, but it already exists"
+			);
 			fs::write(filepath, &csv_contents)?;
 
 			csv_contents

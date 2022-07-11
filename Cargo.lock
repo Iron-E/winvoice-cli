@@ -230,8 +230,8 @@ dependencies = [
 
 [[package]]
 name = "clinvoice_config"
-version = "0.5.0"
-source = "git+https://github.com/Iron-E/clinvoice_config?branch=release/0.5#f5437fcbd18d0793f949cbf0c9ae471e41cffd64"
+version = "0.6.0"
+source = "git+https://github.com/Iron-E/clinvoice_config?branch=release/0.6#a227cb50c576301dc0a99bdd50d4a5eee12b02c8"
 dependencies = [
  "clinvoice_error",
  "clinvoice_schema",

@@ -15,7 +15,7 @@ repository = "https://www.github.com/Iron-E/clinvoice"
 [dependencies]
 clinvoice_adapter = {branch = "release/0.11", git = "https://github.com/Iron-E/clinvoice_adapter"}
 clinvoice_adapter_postgres = {branch = "release/0.1", git = "https://github.com/Iron-E/clinvoice_adapter_postgres", optional = true}
-clinvoice_config = {branch = "release/0.5", git = "https://github.com/Iron-E/clinvoice_config"}
+clinvoice_config = {branch = "release/0.6", git = "https://github.com/Iron-E/clinvoice_config"}
 clinvoice_error = {branch = "release/0.3", git = "https://github.com/Iron-E/clinvoice_error"}
 clinvoice_finance = {branch = "release/0.3", git = "https://github.com/Iron-E/clinvoice_finance"}
 clinvoice_export = {branch = "release/0.1", features = ["markdown"], git = "https://github.com/Iron-E/clinvoice_export"}

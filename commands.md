@@ -19,8 +19,7 @@ clinvoice --store="default"
 
                                    # will need to GENERATE `id`
                                    # will need to SELECT `outer` when `--inside`|`--outside` are `true`.
-                                   location --name="Arizona"
-                                                             --inside # specify that "Arizona" is inside another `Location`
+                                   location --name="Arizona" --inside # specify that "Arizona" is inside another `Location`
                                                              --inside="USA" --inside="Earth" # create the all `Location`s outside `Arizona`
                                                              --outside # specify that "Arizona" is outside another `Location`
 
@@ -30,36 +29,38 @@ clinvoice --store="default"
 
                                    # will need to GENERATE `id`
                                    # will need to PROMPT to create `expenses`
-                                   # will need to SELECT `employee`
+                                   # will need to SELECT `employee` without `--default-employee`
                                    # will need to SELECT `job`
-                                   timesheet --work-notes=""
-                                                             --time-begin --time-end
-                                                             --time-begin="" --time-end=""
+                                   timesheet --default-employee --work-notes="note" # implies `--time-begin=<now>` and no `--time-end`
+                                                                                    --time-begin="2022-01-01T00:00:00" --time-end="2022-01-01T00:00:00"
 
-                            delete
-                                   contact
-                                   employee
-                                   expense
-                                   job
-                                   location
-                                   organization
-                                   timesheet
+                            delete --match="foo.yml"
+                                                     contact
+                                                     employee
+                                                     expense
+                                                     job
+                                                     location
+                                                     organization
+                                                     timesheet
 
-                            retrieve
-                                     contact
-                                     employee
-                                     expense
-                                     job
-                                     location
-                                     organization
-                                     timesheet
+                            retrieve --match="foo.yml"
+                                                       contact
+                                                       employee --default
+																		          --set-default
+                                                       expense
+                                                       job --export
+                                                       location
+                                                       organization --employer
+																		              --set-employer
+                                                       timesheet
 
-                            update
-                                   contact
-                                   employee
-                                   expense
-                                   job
-                                   location
-                                   organization
-                                   timesheet
+                            update --match="foo.yml"
+                                                     contact
+                                                     employee
+                                                     expense
+                                                     job --close
+																			--reopen
+                                                     location
+                                                     organization
+                                                     timesheet --stop
 ```

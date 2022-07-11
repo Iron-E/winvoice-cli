@@ -20,15 +20,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "aho-corasick"
-version = "0.7.18"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1e37cfd5e7657ada45f742d6e99ca5788580b5c529dc78faf11ece6dc702656f"
-dependencies = [
- "memchr",
-]
-
-[[package]]
 name = "ansi_term"
 version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -196,6 +187,7 @@ dependencies = [
  "dialoguer",
  "futures",
  "humantime",
+ "pretty_assertions",
  "serde",
  "serde_yaml",
  "sqlx",
@@ -208,20 +200,20 @@ dependencies = [
 [[package]]
 name = "clinvoice_adapter"
 version = "0.11.0"
+source = "git+https://github.com/Iron-E/clinvoice_adapter?branch=release/0.11#08cb59a52837cdd2bc5652f2b64f30e8aeafa044"
 dependencies = [
  "async-trait",
  "clinvoice_error",
  "clinvoice_match",
  "clinvoice_schema",
  "futures",
- "pretty_assertions",
- "serde",
  "sqlx",
 ]
 
 [[package]]
 name = "clinvoice_adapter_postgres"
 version = "0.1.0"
+source = "git+https://github.com/Iron-E/clinvoice_adapter_postgres?branch=release/0.1#a5525b703dbf1c9d36094c0cba0ec70af0cd88a2"
 dependencies = [
  "async-trait",
  "clinvoice_adapter",
@@ -229,26 +221,22 @@ dependencies = [
  "clinvoice_finance",
  "clinvoice_match",
  "clinvoice_schema",
- "dotenv",
  "futures",
  "humantime",
- "lazy_static",
- "pretty_assertions",
  "shellexpand",
  "sqlx",
  "thiserror",
- "tokio",
 ]
 
 [[package]]
 name = "clinvoice_config"
 version = "0.5.0"
+source = "git+https://github.com/Iron-E/clinvoice_config?branch=release/0.5#f5437fcbd18d0793f949cbf0c9ae471e41cffd64"
 dependencies = [
  "clinvoice_error",
  "clinvoice_schema",
  "dirs 3.0.2",
  "humantime-serde",
- "pretty_assertions",
  "serde",
  "thiserror",
  "toml",
@@ -257,62 +245,56 @@ dependencies = [
 [[package]]
 name = "clinvoice_error"
 version = "0.3.0"
-dependencies = [
- "pretty_assertions",
-]
+source = "git+https://github.com/Iron-E/clinvoice_error?branch=release/0.3#ead8eb3ab7bd42f8cdd979d7146eb05b7d33f43c"
 
 [[package]]
 name = "clinvoice_export"
 version = "0.1.0"
+source = "git+https://github.com/Iron-E/clinvoice_export?branch=release/0.1#d3cd0d4d4a4882ff576dca863ff39f69bdd8c521"
 dependencies = [
  "clinvoice_finance",
  "clinvoice_schema",
- "pretty_assertions",
 ]
 
 [[package]]
 name = "clinvoice_finance"
 version = "0.3.0"
+source = "git+https://github.com/Iron-E/clinvoice_finance?branch=release/0.3#078e109b36d7f4671143b013cb07fac843976901"
 dependencies = [
  "chrono",
  "clinvoice_error",
  "futures",
- "pretty_assertions",
  "reqwest",
  "rust_decimal",
  "serde",
  "strum",
  "thiserror",
- "tokio",
  "zip",
 ]
 
 [[package]]
 name = "clinvoice_match"
 version = "0.4.0"
+source = "git+https://github.com/Iron-E/clinvoice_match?branch=release/0.4#6223ddb415e3f9079e25ee770ae4a6188b578f07"
 dependencies = [
  "clinvoice_error",
  "clinvoice_finance",
  "clinvoice_schema",
- "const_format",
  "humantime-serde",
- "pretty_assertions",
- "regex",
  "serde",
- "serde_yaml",
  "thiserror",
 ]
 
 [[package]]
 name = "clinvoice_schema"
 version = "0.8.0"
+source = "git+https://github.com/Iron-E/clinvoice_schema?branch=release/0.8#40ca67ce1a7c195ef25e15d529fd6014a478c9cd"
 dependencies = [
  "chrono",
  "clinvoice_finance",
  "futures",
  "humantime-serde",
  "lazy_static",
- "pretty_assertions",
  "serde",
  "thiserror",
 ]
@@ -330,26 +312,6 @@ dependencies = [
  "terminal_size",
  "unicode-width",
  "winapi",
-]
-
-[[package]]
-name = "const_format"
-version = "0.2.26"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "939dc9e2eb9077e0679d2ce32de1ded8531779360b003b4a972a7a39ec263495"
-dependencies = [
- "const_format_proc_macros",
-]
-
-[[package]]
-name = "const_format_proc_macros"
-version = "0.2.22"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ef196d5d972878a48da7decb7686eded338b4858fbabeed513d63a7c98b2b82d"
-dependencies = [
- "proc-macro2",
- "quote",
- "unicode-xid",
 ]
 
 [[package]]
@@ -1355,8 +1317,6 @@ version = "1.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4c4eb3267174b8c6c2f654116623910a0fef09c4753f8dd83db29c48a0df988b"
 dependencies = [
- "aho-corasick",
- "memchr",
  "regex-syntax",
 ]
 
@@ -2044,12 +2004,6 @@ name = "unicode-width"
 version = "0.1.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3ed742d4ea2bd1176e236172c8429aaf54486e7ac098db29ffe6529e0ce50973"
-
-[[package]]
-name = "unicode-xid"
-version = "0.2.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "957e51f3646910546462e67d5f7599b9e4fb8acdd304b087a6494730f9eebf04"
 
 [[package]]
 name = "unicode_categories"

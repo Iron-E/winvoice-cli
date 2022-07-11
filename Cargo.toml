@@ -9,53 +9,33 @@ categories = ["command-line-utilities", "config", "date-and-time"]
 edition = "2021"
 keywords = ["invoice", "freelance", "cli", "command", "line", "command-line"]
 license = "GPL3"
-readme = "./README.md"
+readme = "README.md"
 repository = "https://www.github.com/Iron-E/clinvoice"
 
 [dependencies]
-# Async
-futures = "0.3"
-tokio = {features=["fs", "macros", "rt-multi-thread"], version="1"}
+clinvoice_adapter = {branch = "release/0.11", git = "https://github.com/Iron-E/clinvoice_adapter"}
+clinvoice_adapter_postgres = {branch = "release/0.1", git = "https://github.com/Iron-E/clinvoice_adapter_postgres", optional = true}
+clinvoice_config = {branch = "release/0.5", git = "https://github.com/Iron-E/clinvoice_config"}
+clinvoice_error = {branch = "release/0.3", git = "https://github.com/Iron-E/clinvoice_error"}
+clinvoice_finance = {branch = "release/0.3", git = "https://github.com/Iron-E/clinvoice_finance"}
+clinvoice_export = {branch = "release/0.1", features = ["markdown"], git = "https://github.com/Iron-E/clinvoice_export"}
+clinvoice_match = {branch = "release/0.4", features = ["serde_support"], git = "https://github.com/Iron-E/clinvoice_match"}
+clinvoice_schema = {branch = "release/0.8", git = "https://github.com/Iron-E/clinvoice_schema"}
 
-# CLInvoice
-clinvoice_adapter = {path='crates/adapters/clinvoice_adapter', version="0.11"}
-clinvoice_adapter_postgres = {optional=true, path='crates/adapters/clinvoice_adapter_postgres', version="0.1"}
-clinvoice_config = {path='crates/clinvoice_config', version="0.5"}
-clinvoice_error = {path='crates/clinvoice_error', version="0.3"}
-clinvoice_finance = {path='crates/clinvoice_finance', version="0.3"}
-clinvoice_export = {features=["markdown"], path='crates/clinvoice_export', version="0.1"}
-clinvoice_match = {features=["serde_support"], path='crates/clinvoice_match', version="0.4"}
-clinvoice_schema = {path='crates/clinvoice_schema', version="0.8"}
-
-# Database
-sqlx = {features=["runtime-tokio-rustls", "tls"], version="0.5"}
-# Dialogues
 dialoguer = "0.8"
-
-# Errors
-thiserror = "1"
-
-# Parsing Arguments
+futures = "0.3"
 humantime = "2"
-structopt = "0.3"
-
-# Serialization
 serde = "1"
-toml = "0.5"
 serde_yaml = "0.8"
+sqlx = {features = ["runtime-tokio-rustls", "tls"], version = "0.5"}
+structopt = "0.3"
+thiserror = "1"
+tokio = {features = ["fs", "macros", "rt-multi-thread"], version = "1"}
+toml = "0.5"
+
+[dev-dependencies]
+pretty_assertions = "1"
 
 [features]
 default = ["postgres"]
 postgres = ["clinvoice_adapter_postgres", "sqlx/postgres"]
-
-[workspace]
-members = [
-	"crates/adapters/clinvoice_adapter",
-	"crates/adapters/clinvoice_adapter_postgres",
-	"crates/clinvoice_config",
-	"crates/clinvoice_error",
-	"crates/clinvoice_finance",
-	"crates/clinvoice_export",
-	"crates/clinvoice_match",
-	"crates/clinvoice_schema",
-]

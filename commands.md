@@ -2,6 +2,8 @@
 
 ```sh
 clinvoice --store default
+                          config
+
                           create
                                  # will need to SELECT a `Location` when `--address`
                                  contact --label label --address # signifies that the contact is an `Address`
@@ -45,6 +47,8 @@ clinvoice --store default
                                                  location
                                                  organization
                                                  timesheet
+
+								  init
 
                           retrieve --match foo.yml
                                                    contact

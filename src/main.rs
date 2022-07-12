@@ -2,11 +2,12 @@
 #![warn(missing_docs)]
 
 mod app;
+mod args;
 mod dyn_result;
 mod input;
 
-// PERF: we're using `std::fs` because the main function does not need asynchrony at this point.
 use app::App;
+use args::Args;
 use clinvoice_config::Config;
 use dyn_result::DynResult;
 use structopt::StructOpt;

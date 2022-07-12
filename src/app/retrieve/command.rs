@@ -310,9 +310,8 @@ impl Command
 					.and_then(|mut vec| {
 						vec.pop().ok_or_else(|| {
 							format!(
-								"Your configuration specifies that your employer has ID \
-								 {employer_id}, however no `Organization` in the database has \
-								 this ID."
+								"Your configuration specifies that your employer has ID {employer_id}, \
+								 however no `Organization` in the database has this ID."
 							)
 							.into()
 						})

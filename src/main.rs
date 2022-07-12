@@ -1,4 +1,5 @@
 #![allow(clippy::suspicious_else_formatting)]
+#![warn(missing_docs)]
 
 mod app;
 mod dyn_result;

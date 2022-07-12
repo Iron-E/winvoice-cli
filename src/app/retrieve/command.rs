@@ -297,12 +297,12 @@ impl Command
 							vec
 						});
 
-					let default_organization_id = config.employees.organization_id.ok_or_else(|| {
+					let employer_id = config.organizations.employer_id.ok_or_else(|| {
 						"You must specify the `Organization` you work for before exporting `Job`s."
 							.to_string()
 					})?;
-					let default_organization = OAdapter::retrieve(&connection, &MatchOrganization {
-						id: default_organization_id.into(),
+					let employer = OAdapter::retrieve(&connection, &MatchOrganization {
+						id: employer_id.into(),
 						..Default::default()
 					})
 					.err_into::<Box<dyn Error>>()
@@ -311,7 +311,7 @@ impl Command
 						vec.pop().ok_or_else(|| {
 							format!(
 								"Your configuration specifies that your employer has ID \
-								 {default_organization_id}, however no `Organization` in the database has \
+								 {employer_id}, however no `Organization` in the database has \
 								 this ID."
 							)
 							.into()
@@ -328,7 +328,7 @@ impl Command
 						.try_for_each_concurrent(None, |job| {
 							let conn = &connection;
 							let exchange_rates_ref = exchange_rates.as_ref();
-							let org = &default_organization;
+							let org = &employer;
 							let contacts = &contact_information;
 
 							async move {

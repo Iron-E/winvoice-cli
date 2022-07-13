@@ -1,5 +1,4 @@
 mod command;
-mod config;
 mod create;
 mod delete;
 mod init;
@@ -9,8 +8,9 @@ mod store_args;
 mod update;
 
 use clap::Parser as Clap;
-use clinvoice_config::Config;
+use clinvoice_config::{Config, Error as ConfigError};
 use command::Command;
+use dialoguer::Editor;
 
 use crate::DynResult;
 
@@ -33,12 +33,23 @@ impl Args
 
 		match self.command
 		{
-			Command::Config => config::edit(&config).map_err(|e| e.into()),
-			Command::Create(create) => create.run(&config).await,
-			Command::Delete(delete) => delete.run(&config).await,
-			Command::Init(init) => init.run(&config).await,
-			Command::Retrieve(retrieve) => retrieve.run(config).await,
-			Command::Update(update) => update.run(&config).await,
-		}
+			Command::Config =>
+			{
+				let serialized = toml::to_string_pretty(&config)?;
+				if let Some(edited) = Editor::new().extension(".toml").edit(&serialized)?
+				{
+					toml::from_str(&edited)
+						.map_err(ConfigError::from)
+						.and_then(|c: Config| c.write())?;
+				}
+			},
+			Command::Create(create) => create.run(&config).await?,
+			Command::Delete(delete) => delete.run(&config).await?,
+			Command::Init(init) => init.run(&config).await?,
+			Command::Retrieve(retrieve) => retrieve.run(config).await?,
+			Command::Update(update) => update.run(&config).await?,
+		};
+
+		Ok(())
 	}
 }

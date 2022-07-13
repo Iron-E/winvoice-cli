@@ -29,6 +29,7 @@ impl Update
 {
 	pub async fn run(self, config: &Config) -> DynResult<()>
 	{
+		let store = self.store_args.try_get_from(&config)?;
 		todo!()
 	}
 }

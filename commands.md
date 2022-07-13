@@ -48,7 +48,7 @@ clinvoice --store default
                                                  organization
                                                  timesheet
 
-								  init
+                          init
 
                           retrieve --match foo.yml
                                                    contact

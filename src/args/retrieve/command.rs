@@ -15,12 +15,14 @@ pub enum RetrieveCommand
 	{
 		/// Retrieve the `Employee` specified in the `id` field of the `[employees]` section of the
 		/// CLInvoice configuration file.
-		#[clap(action, default_value_t = false, long, short)]
+		///
+		/// Ignores `--match`.
+		#[clap(action, default_value_t = false, group = "config", long, short)]
 		default: bool,
 
 		/// Set the `id` field of the `[employees]` section of the CLInvoice configuration file to
 		/// the `Employee` which was retrieved by this operation.
-		#[clap(action, default_value_t = false, long, short)]
+		#[clap(action, default_value_t = false, group = "config", long, short)]
 		set_default: bool,
 	},
 
@@ -51,12 +53,14 @@ pub enum RetrieveCommand
 	{
 		/// Retrieve the `Organization` specified in the `employer_id` field of the `[organizations]`
 		/// section of the CLInvoice configuration file.
-		#[clap(action, default_value_t = false, long, short)]
+		///
+		/// Ignores `--match`.
+		#[clap(action, default_value_t = false, group = "config", long, short)]
 		employer: bool,
 
 		/// Set the `employer_id` field of the `[organizations]` section of the CLInvoice configuration
 		/// file to the `Organization` which was retrieved by this operation.
-		#[clap(action, default_value_t = false, long, short)]
+		#[clap(action, default_value_t = false, group = "config", long, short)]
 		set_employer: bool,
 	},
 

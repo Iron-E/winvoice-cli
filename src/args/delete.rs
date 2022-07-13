@@ -1,9 +1,9 @@
 mod command;
 
 use clap::Args as Clap;
-use command::Command;
+use command::DeleteCommand;
 
-use super::retrieve::Args;
+use super::match_args::MatchArgs;
 
 /// Delete data which is being stored by CLInvoice.
 ///
@@ -14,9 +14,9 @@ use super::retrieve::Args;
 #[clap(about = "Retrieve information that was recorded with CLInvoice")]
 pub struct Delete
 {
-	#[clap(flatten)]
-	args: Args,
-
 	#[clap(subcommand)]
-	command: Command,
+	command: DeleteCommand,
+
+	#[clap(flatten)]
+	match_args: MatchArgs,
 }

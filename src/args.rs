@@ -2,6 +2,7 @@ mod command;
 mod create;
 mod delete;
 mod init;
+mod match_args;
 mod retrieve;
 mod update;
 
@@ -10,9 +11,8 @@ use command::Command;
 
 /// CLInvoice is a tool to track and generate invoices from the command line. Pass `--help` for more.
 ///
-/// CLInvoice is invoice software targeting both businesses and freelancers. It is capable of
-/// managing information about clients, employees, jobs, timesheets, and exporting the information
-/// into the format of your choice.
+/// It is capable of managing information about clients, employees, jobs, timesheets, and exporting
+/// the information into the format of your choice.
 #[derive(Clap, Clone, Debug, Eq, Hash, PartialEq)]
 pub struct Args
 {

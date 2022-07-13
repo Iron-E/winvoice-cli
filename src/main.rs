@@ -8,6 +8,7 @@ mod input;
 
 use app::App;
 use args::Args;
+use clap::Parser;
 use clinvoice_config::Config;
 use dyn_result::DynResult;
 use structopt::StructOpt;
@@ -19,5 +20,6 @@ use structopt::StructOpt;
 async fn main() -> DynResult<()>
 {
 	let config = Config::read()?;
-	App::from_args().run(config).await
+	dbg!(Args::parse());
+	Ok(())
 }

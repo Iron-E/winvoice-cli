@@ -5,6 +5,7 @@ mod delete;
 mod init;
 mod match_args;
 mod retrieve;
+mod store_args;
 mod update;
 
 use clap::Parser as Clap;
@@ -20,15 +21,6 @@ use crate::DynResult;
 #[derive(Clap, Clone, Debug, Eq, Hash, PartialEq)]
 pub struct Args
 {
-	/// A key from the `[stores]` section of the [configuration file](clinvoice_config::Config).
-	#[clap(
-		default_value = "default",
-		help = "A key from the `[stores]` section of the configuration file.",
-		long,
-		short
-	)]
-	store: String,
-
 	#[clap(subcommand)]
 	command: Command,
 }
@@ -38,21 +30,15 @@ impl Args
 	pub async fn run(self) -> DynResult<()>
 	{
 		let config = Config::read()?;
-		let store = config.get_store(&self.store).cloned().ok_or_else(|| {
-			format!(
-				r#"The store named "{}" was not found in your configuration file."#,
-				self.store,
-			)
-		})?;
 
 		match self.command
 		{
-			Self::Config => config::edit(&config).map_err(|e| e.into()),
-			Self::Create(cmd) => todo!(),
-			Self::Delete(args) => todo!(),
-			Self::Init => init::run(&store).await,
-			Self::Retrieve(args) => todo!(),
-			Self::Update(args) => todo!(),
+			Command::Config => config::edit(&config).map_err(|e| e.into()),
+			Command::Create(create) => create.run(&config).await,
+			Command::Delete(delete) => delete.run(&config).await,
+			Command::Init(init) => init.run(&config).await,
+			Command::Retrieve(retrieve) => retrieve.run(config).await,
+			Command::Update(update) => update.run(&config).await,
 		}
 	}
 }

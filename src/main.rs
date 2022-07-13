@@ -6,12 +6,9 @@ mod args;
 mod dyn_result;
 mod input;
 
-use app::App;
 use args::Args;
 use clap::Parser;
-use clinvoice_config::Config;
 use dyn_result::DynResult;
-use structopt::StructOpt;
 
 /// # Summary
 ///

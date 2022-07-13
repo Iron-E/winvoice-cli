@@ -1,9 +1,11 @@
 mod command;
 
 use clap::Args as Clap;
+use clinvoice_config::Config;
 use command::DeleteCommand;
 
-use super::match_args::MatchArgs;
+use super::{match_args::MatchArgs, store_args::StoreArgs};
+use crate::DynResult;
 
 /// Delete data which is being stored by CLInvoice.
 ///
@@ -18,4 +20,15 @@ pub struct Delete
 
 	#[clap(flatten)]
 	match_args: MatchArgs,
+
+	#[clap(flatten)]
+	store_args: StoreArgs,
+}
+
+impl Delete
+{
+	pub async fn run(self, config: &Config) -> DynResult<()>
+	{
+		todo!()
+	}
 }

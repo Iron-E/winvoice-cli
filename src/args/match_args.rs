@@ -4,7 +4,6 @@ use clap::Args as Clap;
 
 /// Reusable arguments used for retrieving information from a CLInvoice store.
 #[derive(Clap, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-#[clap(about = "Retrieve information that was recorded with CLInvoice")]
 pub struct MatchArgs
 {
 	/// A path to a YAML file that contains valid a match condition/query/search term for

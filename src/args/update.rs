@@ -11,7 +11,6 @@ use super::match_args::MatchArgs;
 /// information, or information that has changed over time. This command will allow you to alter
 /// the data that is being stored by CLInvoice to make it accurate.
 #[derive(Clap, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-#[clap(about = "Retrieve information that was recorded with CLInvoice")]
 pub struct Update
 {
 	#[clap(subcommand)]

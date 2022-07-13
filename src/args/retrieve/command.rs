@@ -1,10 +1,10 @@
-use clinvoice_export::Format;
 use std::path::PathBuf;
+
 use clap::Subcommand as Clap;
+use clinvoice_export::Format;
 
 /// The specific type of information that is being retrieved.
 #[derive(Clap, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-#[clap(about = "Retrieve information that was recorded with CLInvoice")]
 pub enum RetrieveCommand
 {
 	/// Retrieve `Contact`s from the store (-s) specified.
@@ -17,12 +17,12 @@ pub enum RetrieveCommand
 		/// CLInvoice configuration file.
 		///
 		/// Ignores --match.
-		#[clap(action, default_value_t = false, group = "config", long, short)]
+		#[clap(action, group = "config", long, short)]
 		default: bool,
 
 		/// Set the `id` field of the `[employees]` section of the CLInvoice configuration file to
 		/// the `Employee` which was retrieved by this operation.
-		#[clap(action, default_value_t = false, group = "config", long, short)]
+		#[clap(action, group = "config", long, short)]
 		set_default: bool,
 	},
 
@@ -33,7 +33,7 @@ pub enum RetrieveCommand
 	Job
 	{
 		/// Select a number of closed `Job`s and export them to a file.
-		#[clap(action, default_value_t = false, long, short)]
+		#[clap(action, long, short)]
 		export: bool,
 
 		/// What file format to --export to.
@@ -55,12 +55,12 @@ pub enum RetrieveCommand
 		/// section of the CLInvoice configuration file.
 		///
 		/// Ignores --match.
-		#[clap(action, default_value_t = false, group = "config", long, short)]
+		#[clap(action, group = "config", long, short)]
 		employer: bool,
 
 		/// Set the `employer_id` field of the `[organizations]` section of the CLInvoice configuration
 		/// file to the `Organization` which was retrieved by this operation.
-		#[clap(action, default_value_t = false, group = "config", long, short)]
+		#[clap(action, group = "config", long, short)]
 		set_employer: bool,
 	},
 

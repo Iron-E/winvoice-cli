@@ -1,6 +1,8 @@
 use clap::Subcommand as Clap;
+use clinvoice_config::{Config, Store};
 
-use super::{create::Create, delete::Delete, init, retrieve::Retrieve, update::Update};
+use super::{create::Create, delete::Delete, retrieve::Retrieve, update::Update};
+use crate::DynResult;
 
 /// The specific command that CLInvoice should run.
 #[derive(Clap, Clone, Debug, Eq, Hash, PartialEq)]

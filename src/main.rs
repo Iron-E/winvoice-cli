@@ -19,7 +19,5 @@ use structopt::StructOpt;
 #[tokio::main]
 async fn main() -> DynResult<()>
 {
-	let config = Config::read()?;
-	dbg!(Args::parse());
-	Ok(())
+	Args::parse().run().await
 }

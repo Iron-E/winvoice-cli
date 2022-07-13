@@ -5,12 +5,24 @@ use clap::Subcommand as Clap;
 #[clap(about = "Retrieve information that was recorded with CLInvoice")]
 pub enum DeleteCommand
 {
-	// TODO: flesh out
+	/// Delete `Contact`s in the store (-s) specified.
 	Contact,
+
+	/// Delete `Employee`s in the store (-s) specified.
 	Employee,
+
+	/// Delete `Expense`s in the store (-s) specified.
 	Expense,
+
+	/// Delete `Job`s in the store (-s) specified.
 	Job,
+
+	/// Delete `Location`s in the store (-s) specified.
 	Location,
+
+	/// Delete `Organization`s in the store (-s) specified.
 	Organization,
+
+	/// Delete `Timesheet`s in the store (-s) specified.
 	Timesheet,
 }

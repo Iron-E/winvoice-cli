@@ -9,7 +9,7 @@ mod update;
 use clap::Parser as Clap;
 use command::Command;
 
-/// CLInvoice is a tool to track and generate invoices from the command line. Pass `--help` for more.
+/// CLInvoice is a tool to track and generate invoices from the command line. Pass --help for more.
 ///
 /// It is capable of managing information about clients, employees, jobs, timesheets, and exporting
 /// the information into the format of your choice.

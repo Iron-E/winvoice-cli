@@ -16,7 +16,7 @@ pub enum RetrieveCommand
 		/// Retrieve the `Employee` specified in the `id` field of the `[employees]` section of the
 		/// CLInvoice configuration file.
 		///
-		/// Ignores `--match`.
+		/// Ignores --match.
 		#[clap(action, default_value_t = false, group = "config", long, short)]
 		default: bool,
 
@@ -32,15 +32,15 @@ pub enum RetrieveCommand
 	/// Retrieve `Job`s from the store (-s) specified.
 	Job
 	{
-		/// Select retrieved `Job`s and export them to a file.
+		/// Select a number of closed `Job`s and export them to a file.
 		#[clap(action, default_value_t = false, long, short)]
 		export: bool,
 
-		/// What file format to `--export` to.
+		/// What file format to --export to.
 		#[clap(long, short, requires("export"), value_name = "markdown")]
 		format: Option<Format>,
 
-		/// What directory the `--export`ed files should be placed in.
+		/// Which directory to --export files into.
 		#[clap(long, short, requires("export"), value_name = "DIR", value_parser)]
 		output_dir: Option<PathBuf>,
 	},
@@ -54,7 +54,7 @@ pub enum RetrieveCommand
 		/// Retrieve the `Organization` specified in the `employer_id` field of the `[organizations]`
 		/// section of the CLInvoice configuration file.
 		///
-		/// Ignores `--match`.
+		/// Ignores --match.
 		#[clap(action, default_value_t = false, group = "config", long, short)]
 		employer: bool,
 

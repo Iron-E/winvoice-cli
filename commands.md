@@ -67,6 +67,7 @@ clinvoice --store default
                                                  employee
                                                  expense
                                                  job --close
+                                                     --paid
                                                      --reopen
                                                  location
                                                  organization

@@ -18,9 +18,7 @@ pub enum Command
 	/// `clinvoice delete`
 	Delete(Delete),
 
-	/// Prepare the specified store (-s) for use with CLInvoice.
-	///
-	/// Will not clobber existing data. Should only be run by administrators.
+	/// `clinvoice init`
 	Init(Init),
 
 	/// `clinvoice retrieve`

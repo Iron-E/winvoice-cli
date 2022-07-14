@@ -21,6 +21,7 @@ use crate::DynResult;
 #[derive(Clap, Clone, Debug, Eq, Hash, PartialEq)]
 pub struct Args
 {
+	/// The specific CLInvoice subcommand to run.
 	#[clap(subcommand)]
 	command: Command,
 }

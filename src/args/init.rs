@@ -6,9 +6,13 @@ use sqlx::Connection;
 use super::store_args::StoreArgs;
 use crate::DynResult;
 
+/// Prepare the specified store (-s) for use with CLInvoice.
+///
+/// Will not clobber existing data. Should only be run by administrators.
 #[derive(Clap, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Init
 {
+	/// Specifies the [`Store`](clinvoice_config::Store) to [`Init`].
 	#[clap(flatten)]
 	store_args: StoreArgs,
 }

@@ -15,12 +15,15 @@ use crate::DynResult;
 #[derive(Clap, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Update
 {
+	/// Specifies the object to [`Update`] and related arguments.
 	#[clap(subcommand)]
 	command: UpdateCommand,
 
+	/// Specifies a file which can be used in place of the prompt of a user query.
 	#[clap(flatten)]
 	match_args: MatchArgs,
 
+	/// Specifies the [`Store`](clinvoice_config::Store) to send [`Update`]s to.
 	#[clap(flatten)]
 	store_args: StoreArgs,
 }

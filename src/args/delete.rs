@@ -15,12 +15,15 @@ use crate::DynResult;
 #[derive(Clap, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Delete
 {
+	/// The specifies the object to [`Delete`] and related arguments.
 	#[clap(subcommand)]
 	command: DeleteCommand,
 
+	/// Specifies a file which can be used in place of the prompt of a user query.
 	#[clap(flatten)]
 	match_args: MatchArgs,
 
+	/// Specifies the [`Store`](clinvoice_config::Store) to [`Delete`] from.
 	#[clap(flatten)]
 	store_args: StoreArgs,
 }

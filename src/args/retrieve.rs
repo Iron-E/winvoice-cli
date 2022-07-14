@@ -11,12 +11,15 @@ use crate::DynResult;
 #[derive(Clap, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Retrieve
 {
+	/// The specific object to [`Retrieve`] and related arguments.
 	#[clap(subcommand)]
 	command: RetrieveCommand,
 
+	/// Specifies a file which can be used in place of the prompt of a user query.
 	#[clap(flatten)]
 	match_args: MatchArgs,
 
+	/// Specifies the [`Store`](clinvoice_config::Store) to [`Retrieve`] from.
 	#[clap(flatten)]
 	store_args: StoreArgs,
 }

@@ -216,14 +216,14 @@ name = "clinvoice"
 version = "0.2.0-rc3"
 dependencies = [
  "clap 3.2.12",
- "clinvoice_adapter",
- "clinvoice_adapter_postgres",
- "clinvoice_config",
- "clinvoice_error",
- "clinvoice_export",
- "clinvoice_finance",
- "clinvoice_match",
- "clinvoice_schema",
+ "clinvoice-adapter",
+ "clinvoice-adapter-postgres",
+ "clinvoice-config",
+ "clinvoice-error",
+ "clinvoice-export",
+ "clinvoice-finance",
+ "clinvoice-match",
+ "clinvoice-schema",
  "dialoguer",
  "futures",
  "humantime",
@@ -238,29 +238,29 @@ dependencies = [
 ]
 
 [[package]]
-name = "clinvoice_adapter"
+name = "clinvoice-adapter"
 version = "0.11.0"
-source = "git+https://github.com/Iron-E/clinvoice_adapter?branch=release/0.11#d3b7262fe9a323165c0ea628ed8b6ebbeed2d6d0"
+source = "git+https://github.com/Iron-E/clinvoice-adapter?branch=release/0.11#37d7e545e6c4696d2499b332c04771b0bf0b636b"
 dependencies = [
  "async-trait",
- "clinvoice_error",
- "clinvoice_match",
- "clinvoice_schema",
+ "clinvoice-error",
+ "clinvoice-match",
+ "clinvoice-schema",
  "futures",
  "sqlx",
 ]
 
 [[package]]
-name = "clinvoice_adapter_postgres"
+name = "clinvoice-adapter-postgres"
 version = "0.1.0"
-source = "git+https://github.com/Iron-E/clinvoice_adapter_postgres?branch=release/0.1#65cfd9cdc34fdc56eb3e4a74780f2c8a4eead615"
+source = "git+https://github.com/Iron-E/clinvoice-adapter-postgres?branch=release/0.1#d667d33f6a19ed756482ec9e40a35450906624d2"
 dependencies = [
  "async-trait",
- "clinvoice_adapter",
- "clinvoice_error",
- "clinvoice_finance",
- "clinvoice_match",
- "clinvoice_schema",
+ "clinvoice-adapter",
+ "clinvoice-error",
+ "clinvoice-finance",
+ "clinvoice-match",
+ "clinvoice-schema",
  "futures",
  "humantime",
  "shellexpand",
@@ -269,12 +269,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "clinvoice_config"
+name = "clinvoice-config"
 version = "0.6.0"
-source = "git+https://github.com/Iron-E/clinvoice_config?branch=release/0.6#ada62fb102d43e2f69693de0102abf23f09a086c"
+source = "git+https://github.com/Iron-E/clinvoice-config?branch=release/0.6#3c5f73a9db1d2bb00ebf0ab578880b7dd4c43cc9"
 dependencies = [
- "clinvoice_error",
- "clinvoice_schema",
+ "clinvoice-error",
+ "clinvoice-schema",
  "dirs 3.0.2",
  "humantime-serde",
  "serde",
@@ -283,29 +283,29 @@ dependencies = [
 ]
 
 [[package]]
-name = "clinvoice_error"
+name = "clinvoice-error"
 version = "0.3.0"
-source = "git+https://github.com/Iron-E/clinvoice_error?branch=release/0.3#2bc7a4ec54dcca9f562f8ce2c214b52b8cc73b36"
+source = "git+https://github.com/Iron-E/clinvoice-error?branch=release/0.3#b6e0f1ce63387cace65c3572b2002a9b329dcd96"
 
 [[package]]
-name = "clinvoice_export"
+name = "clinvoice-export"
 version = "0.1.0"
-source = "git+https://github.com/Iron-E/clinvoice_export?branch=release/0.1#875796af03c95673d35d800364e355a04e6220fa"
+source = "git+https://github.com/Iron-E/clinvoice-export?branch=release/0.1#e12beacf1520ef36cf2d66300f2c3786dafad756"
 dependencies = [
- "clinvoice_error",
- "clinvoice_finance",
- "clinvoice_schema",
+ "clinvoice-error",
+ "clinvoice-finance",
+ "clinvoice-schema",
  "strum",
  "thiserror",
 ]
 
 [[package]]
-name = "clinvoice_finance"
+name = "clinvoice-finance"
 version = "0.3.0"
-source = "git+https://github.com/Iron-E/clinvoice_finance?branch=release/0.3#7689bf67662c7b9951dc78c27dad979df7abac03"
+source = "git+https://github.com/Iron-E/clinvoice-finance?branch=release/0.3#f4b79c500120561e8183ca24072b9314f636cbf9"
 dependencies = [
  "chrono",
- "clinvoice_error",
+ "clinvoice-error",
  "futures",
  "reqwest",
  "rust_decimal",
@@ -316,25 +316,25 @@ dependencies = [
 ]
 
 [[package]]
-name = "clinvoice_match"
+name = "clinvoice-match"
 version = "0.4.0"
-source = "git+https://github.com/Iron-E/clinvoice_match?branch=release/0.4#a69c952f2e6b14478b656879cd8f217c5bfeb714"
+source = "git+https://github.com/Iron-E/clinvoice-match?branch=release/0.4#4bd092b462bea211b2339a9417b5daf673eabf22"
 dependencies = [
- "clinvoice_error",
- "clinvoice_finance",
- "clinvoice_schema",
+ "clinvoice-error",
+ "clinvoice-finance",
+ "clinvoice-schema",
  "humantime-serde",
  "serde",
  "thiserror",
 ]
 
 [[package]]
-name = "clinvoice_schema"
+name = "clinvoice-schema"
 version = "0.8.0"
-source = "git+https://github.com/Iron-E/clinvoice_schema?branch=release/0.8#68441cba894952ff953675d45ad125b7bd09c527"
+source = "git+https://github.com/Iron-E/clinvoice-schema?branch=release/0.8#01fa09a0e40d3051a6bf909e9eef1b0f69169f93"
 dependencies = [
  "chrono",
- "clinvoice_finance",
+ "clinvoice-finance",
  "futures",
  "humantime-serde",
  "lazy_static",

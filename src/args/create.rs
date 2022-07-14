@@ -173,7 +173,7 @@ impl Create
 				};
 				use sqlx::PgPool;
 
-				let pool = sqlx::PgPool::connect_lazy(&store.url)?;
+				let pool = PgPool::connect_lazy(&store.url)?;
 				self
 					.create::<_, PgContact, PgEmployee, PgLocation, PgOrganization>(pool, config)
 					.await?

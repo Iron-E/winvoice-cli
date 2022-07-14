@@ -8,6 +8,7 @@ use clinvoice_adapter::{
 use clinvoice_config::{Adapters, Config, Error as ConfigError};
 use clinvoice_schema::{Contact, ContactKind};
 use command::CreateCommand;
+use futures::{stream, TryFutureExt, TryStreamExt};
 use sqlx::{Database, Executor, Pool};
 
 use super::store_args::StoreArgs;
@@ -101,7 +102,37 @@ impl Create
 				inside,
 				outside,
 				names,
-			} => todo!(),
+			} =>
+			{
+				let mut names_reversed = names.into_iter().rev();
+
+				let final_name = names_reversed
+					.next()
+					.expect("clap config should have ensured that `names` has length of at least one");
+
+				let outside_of_final = match inside
+				{
+					true => input::util::location::select_one::<_, _, LAdapter, true>(
+						&connection,
+						format!("Query the `Location` outside of {final_name}"),
+					)
+					.await
+					.map(Some)?,
+					_ => None,
+				};
+
+				let location = LAdapter::create(&connection, final_name, outside_of_final)
+					.and_then(|created| {
+						stream::iter(names_reversed.map(Ok))
+							.try_fold(created, |l, n| LAdapter::create(&connection, n, Some(l)))
+					})
+					.await?;
+
+				if outside
+				{
+					todo!("Select `Location`s that are inside this one")
+				}
+			},
 
 			CreateCommand::Organization { name } =>
 			{

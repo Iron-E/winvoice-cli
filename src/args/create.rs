@@ -1,9 +1,11 @@
 mod command;
 
 use clap::Args as Clap;
+use clinvoice_adapter::{schema::ContactInfoAdapter, Deletable};
 use clinvoice_config::{Adapters, Config, Error as ConfigError};
+use clinvoice_schema::{Contact, ContactKind};
 use command::CreateCommand;
-use sqlx::{Database, Pool};
+use sqlx::{Database, Executor, Pool};
 
 use super::store_args::StoreArgs;
 use crate::DynResult;
@@ -27,9 +29,11 @@ pub struct Create
 
 impl Create
 {
-	pub async fn create<Db>(self, connection: Pool<Db>, config: &Config) -> DynResult<()>
+	pub async fn create<Db, CAdapter>(self, connection: Pool<Db>, config: &Config) -> DynResult<()>
 	where
+		CAdapter: Deletable<Db = Db> + ContactInfoAdapter,
 		Db: Database,
+		for<'c> &'c mut Db::Connection: Executor<'c>,
 	{
 		match self.command
 		{
@@ -39,7 +43,28 @@ impl Create
 				email,
 				phone,
 				info,
-			} => todo!(),
+			} =>
+			{
+				let kind = if address
+				{
+					todo!()
+				}
+				else if email
+				{
+					ContactKind::Email(info)
+				}
+				else if phone
+				{
+					ContactKind::Phone(info)
+				}
+				else
+				{
+					ContactKind::Other(info)
+				};
+
+				todo!("UNCOMMENT BELOW")
+				// CAdapter::create(&connection, [Contact {label, kind}].iter()).await?;
+			},
 
 			CreateCommand::Employee {
 				name,
@@ -78,7 +103,9 @@ impl Create
 				time_end,
 				work_notes,
 			} => todo!(),
-		}
+		};
+
+		Ok(())
 	}
 
 	pub async fn run(self, config: &Config) -> DynResult<()>
@@ -90,8 +117,11 @@ impl Create
 			#[cfg(feature = "postgres")]
 			Adapters::Postgres =>
 			{
+				use clinvoice_adapter_postgres::schema::PgContactInfo;
+				use sqlx::PgPool;
+
 				let pool = sqlx::PgPool::connect_lazy(&store.url)?;
-				self.create(pool, config).await?
+				self.create::<_, PgContactInfo>(pool, config).await?
 			},
 
 			// NOTE: this is allowed because there may be additional adapters added later, and I want

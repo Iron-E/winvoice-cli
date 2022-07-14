@@ -1,7 +1,7 @@
 use clap::Subcommand as Clap;
 
 /// The specific type of information that is being deleted.
-#[derive(Clap, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clap, Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum DeleteCommand
 {
 	/// Delete `Contact`s in the store (-s) specified.

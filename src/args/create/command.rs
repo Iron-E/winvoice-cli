@@ -1,8 +1,9 @@
+use core::time::Duration;
+
 use clap::Subcommand as Clap;
 use clinvoice_config::{Config, Store};
 use clinvoice_finance::Money;
 use clinvoice_schema::chrono::NaiveDateTime;
-use humantime::Duration;
 use sqlx::{Database, Pool};
 
 /// Use CLInvoice to store new information.
@@ -92,7 +93,7 @@ pub enum CreateCommand
 	Job
 	{
 		/// The `date_close` of the `Job` to create.
-		#[clap(long, requires("date-open"), short = 'c')]
+		#[clap(long, requires("date-open"))]
 		date_close: Option<NaiveDateTime>,
 
 		/// The `invoice.date_issued` of the `Job` to create.
@@ -104,7 +105,7 @@ pub enum CreateCommand
 		date_invoice_paid: Option<NaiveDateTime>,
 
 		/// The `date_open` of the `Job` to create.
-		#[clap(long, short = 'o')]
+		#[clap(long)]
 		date_open: Option<NaiveDateTime>,
 
 		/// The `invoice.hourly_rate` of the `Job` to create e.g. "50.00 USD".
@@ -115,7 +116,7 @@ pub enum CreateCommand
 		///
 		/// See the documentation of [`humantime`] to see more information about how to format
 		/// this argument.
-		#[clap(long, short)]
+		#[clap(long, short, value_parser = humantime::parse_duration)]
 		increment: Duration,
 
 		/// The `notes` of the `Job` to create.

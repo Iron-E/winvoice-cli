@@ -3,7 +3,7 @@ use clap::Subcommand as Clap;
 use super::{create::Create, delete::Delete, init::Init, retrieve::Retrieve, update::Update};
 
 /// The specific command that CLInvoice should run.
-#[derive(Clap, Clone, Debug, Eq, Hash, PartialEq)]
+#[derive(Clap, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum Command
 {
 	/// Edit the CLInvoice configuration file in your default editor.

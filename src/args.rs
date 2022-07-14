@@ -18,7 +18,7 @@ use crate::DynResult;
 ///
 /// It is capable of managing information about clients, employees, jobs, timesheets, and exporting
 /// the information into the format of your choice.
-#[derive(Clap, Clone, Debug, Eq, Hash, PartialEq)]
+#[derive(Clap, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Args
 {
 	/// The specific CLInvoice subcommand to run.

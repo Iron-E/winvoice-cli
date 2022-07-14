@@ -29,7 +29,9 @@ pub fn ask_to_retry() -> input::Result<bool>
 /// * `Ok(true)` if the user answers "yes".
 /// * `Ok(false)` if the user answers "no".
 /// * `Err(_)` if there was an error gathering input.
-pub fn confirm(prompt: impl Into<String>) -> input::Result<bool>
+pub fn confirm<T>(prompt: T) -> input::Result<bool>
+where
+	T: Into<String>,
 {
 	const NO: &str = "No";
 	const YES: &str = "Yes";

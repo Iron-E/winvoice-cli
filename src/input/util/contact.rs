@@ -67,10 +67,9 @@ where
 	{
 		ADDRESS =>
 		{
-			let location = input::util::location::select_one::<&str, _, LAdapter>(
+			let location = input::util::location::select_one::<_, _, LAdapter, true>(
 				connection,
 				"Query the `Location` which can be used to reach this `Employee`",
-				true,
 			)
 			.await?;
 			insert!(Address, location);
@@ -205,10 +204,9 @@ where
 					 {location}."
 				))?
 				{
-					input::util::location::select_one::<&str, _, LAdapter>(
+					input::util::location::select_one::<_, _, LAdapter, true>(
 						connection,
 						"Query the `Location` which can be used to reach this `Organization`",
-						true,
 					)
 					.await?
 				}

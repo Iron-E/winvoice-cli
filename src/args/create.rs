@@ -1,14 +1,17 @@
 mod command;
 
 use clap::Args as Clap;
-use clinvoice_adapter::{schema::ContactInfoAdapter, Deletable};
+use clinvoice_adapter::{
+	schema::{ContactInfoAdapter, EmployeeAdapter, LocationAdapter, OrganizationAdapter},
+	Deletable,
+};
 use clinvoice_config::{Adapters, Config, Error as ConfigError};
 use clinvoice_schema::{Contact, ContactKind};
 use command::CreateCommand;
 use sqlx::{Database, Executor, Pool};
 
 use super::store_args::StoreArgs;
-use crate::DynResult;
+use crate::{input, DynResult};
 
 /// Use CLInvoice to store new information.
 ///
@@ -29,11 +32,18 @@ pub struct Create
 
 impl Create
 {
-	pub async fn create<Db, CAdapter>(self, connection: Pool<Db>, config: &Config) -> DynResult<()>
+	pub async fn create<Db, CAdapter, EAdapter, LAdapter, OAdapter>(
+		self,
+		connection: Pool<Db>,
+		config: &Config,
+	) -> DynResult<()>
 	where
-		CAdapter: Deletable<Db = Db> + ContactInfoAdapter,
 		Db: Database,
-		for<'c> &'c mut Db::Connection: Executor<'c>,
+		CAdapter: Deletable<Db = Db> + ContactInfoAdapter,
+		EAdapter: Deletable<Db = Db> + EmployeeAdapter,
+		LAdapter: Deletable<Db = Db> + LocationAdapter,
+		OAdapter: Deletable<Db = Db> + OrganizationAdapter,
+		for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 	{
 		match self.command
 		{
@@ -45,32 +55,30 @@ impl Create
 				info,
 			} =>
 			{
-				let kind = if address
+				let kind = match (address, email, phone)
 				{
-					todo!()
-				}
-				else if email
-				{
-					ContactKind::Email(info)
-				}
-				else if phone
-				{
-					ContactKind::Phone(info)
-				}
-				else
-				{
-					ContactKind::Other(info)
+					(true, ..) => input::util::location::select_one::<_, _, LAdapter, true>(
+						&connection,
+						"Query the `Location` of this address",
+					)
+					.await
+					.map(ContactKind::Address)?,
+					(_, true, _) => ContactKind::Email(info),
+					(.., true) => ContactKind::Phone(info),
+					_ => ContactKind::Other(info),
 				};
 
-				todo!("UNCOMMENT BELOW")
-				// CAdapter::create(&connection, [Contact {label, kind}].iter()).await?;
+				CAdapter::create(&connection, [Contact { label, kind }].iter()).await?;
 			},
 
 			CreateCommand::Employee {
 				name,
 				status,
 				title,
-			} => todo!(),
+			} =>
+			{
+				EAdapter::create(&connection, name, status, title).await?;
+			},
 
 			CreateCommand::Expense {
 				category,
@@ -95,7 +103,16 @@ impl Create
 				names,
 			} => todo!(),
 
-			CreateCommand::Organization { name } => todo!(),
+			CreateCommand::Organization { name } =>
+			{
+				let selected = input::util::location::select_one::<_, _, LAdapter, true>(
+					&connection,
+					"Query the `Location` of this `Organization`",
+				)
+				.await?;
+
+				OAdapter::create(&connection, selected, name).await?;
+			},
 
 			CreateCommand::Timesheet {
 				default_employee,
@@ -117,11 +134,18 @@ impl Create
 			#[cfg(feature = "postgres")]
 			Adapters::Postgres =>
 			{
-				use clinvoice_adapter_postgres::schema::PgContactInfo;
+				use clinvoice_adapter_postgres::schema::{
+					PgContactInfo,
+					PgEmployee,
+					PgLocation,
+					PgOrganization,
+				};
 				use sqlx::PgPool;
 
 				let pool = sqlx::PgPool::connect_lazy(&store.url)?;
-				self.create::<_, PgContactInfo>(pool, config).await?
+				self
+					.create::<_, PgContactInfo, PgEmployee, PgLocation, PgOrganization>(pool, config)
+					.await?
 			},
 
 			// NOTE: this is allowed because there may be additional adapters added later, and I want

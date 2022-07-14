@@ -1,7 +1,6 @@
 #![allow(clippy::suspicious_else_formatting)]
 #![warn(missing_docs)]
 
-mod app;
 mod args;
 mod dyn_result;
 mod input;

@@ -21,10 +21,9 @@ use crate::{input, DynResult};
 ///
 /// [L_retrieve]: clinvoice_adapter::schema::LocationAdapter::retrieve
 /// [location]: clinvoice_schema::Location
-pub async fn retrieve<D, Db, LAdapter>(
+pub async fn retrieve<D, Db, LAdapter, const RETRY_ON_EMPTY: bool>(
 	connection: &Pool<Db>,
 	prompt: D,
-	retry_on_empty: bool,
 ) -> DynResult<Vec<Location>>
 where
 	D: Display,
@@ -39,7 +38,7 @@ where
 
 		let results = LAdapter::retrieve(connection, &match_condition).await?;
 
-		if retry_on_empty && results.is_empty() && menu::ask_to_retry()?
+		if RETRY_ON_EMPTY && results.is_empty() && menu::ask_to_retry()?
 		{
 			continue;
 		}
@@ -61,10 +60,9 @@ where
 ///
 /// [L_retrieve]: clinvoice_adapter::schema::LocationAdapter::retrieve
 /// [location]: clinvoice_schema::Location
-pub async fn select_one<D, Db, LAdapter>(
+pub async fn select_one<D, Db, LAdapter, const RETRY_ON_EMPTY: bool>(
 	connection: &Pool<Db>,
 	prompt: D,
-	retry_on_empty: bool,
 ) -> DynResult<Location>
 where
 	D: Display,
@@ -72,9 +70,9 @@ where
 	LAdapter: Deletable<Db = Db> + LocationAdapter,
 	for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 {
-	let locations = retrieve::<D, Db, LAdapter>(connection, prompt, retry_on_empty).await?;
+	let locations = retrieve::<D, Db, LAdapter, RETRY_ON_EMPTY>(connection, prompt).await?;
 
-	let location = input::select_one(&locations, "Select the location")?;
+	let location = input::select_one(&locations, "Select the `Location`")?;
 
 	Ok(location)
 }

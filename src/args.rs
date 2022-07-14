@@ -39,9 +39,8 @@ impl Args
 				let serialized = toml::to_string_pretty(&config)?;
 				if let Some(edited) = Editor::new().extension(".toml").edit(&serialized)?
 				{
-					toml::from_str(&edited)
-						.map_err(ConfigError::from)
-						.and_then(|c: Config| c.write())?;
+					let deserialized: Config = toml::from_str(&edited)?;
+					deserialized.write()?;
 				}
 			},
 			Command::Create(create) => create.run(&config).await?,

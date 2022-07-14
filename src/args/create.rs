@@ -2,7 +2,7 @@ mod command;
 
 use clap::Args as Clap;
 use clinvoice_adapter::{
-	schema::{ContactInfoAdapter, EmployeeAdapter, LocationAdapter, OrganizationAdapter},
+	schema::{ContactAdapter, EmployeeAdapter, LocationAdapter, OrganizationAdapter},
 	Deletable,
 };
 use clinvoice_config::{Adapters, Config, Error as ConfigError};
@@ -40,7 +40,7 @@ impl Create
 	) -> DynResult<()>
 	where
 		Db: Database,
-		CAdapter: Deletable<Db = Db> + ContactInfoAdapter,
+		CAdapter: Deletable<Db = Db> + ContactAdapter,
 		EAdapter: Deletable<Db = Db> + EmployeeAdapter,
 		LAdapter: Deletable<Db = Db> + LocationAdapter,
 		OAdapter: Deletable<Db = Db> + OrganizationAdapter,
@@ -69,7 +69,7 @@ impl Create
 					_ => ContactKind::Other(info),
 				};
 
-				CAdapter::create(&connection, [Contact { label, kind }].iter()).await?;
+				CAdapter::create(&connection, kind, label).await?;
 			},
 
 			CreateCommand::Employee {
@@ -166,7 +166,7 @@ impl Create
 			Adapters::Postgres =>
 			{
 				use clinvoice_adapter_postgres::schema::{
-					PgContactInfo,
+					PgContact,
 					PgEmployee,
 					PgLocation,
 					PgOrganization,
@@ -175,7 +175,7 @@ impl Create
 
 				let pool = sqlx::PgPool::connect_lazy(&store.url)?;
 				self
-					.create::<_, PgContactInfo, PgEmployee, PgLocation, PgOrganization>(pool, config)
+					.create::<_, PgContact, PgEmployee, PgLocation, PgOrganization>(pool, config)
 					.await?
 			},
 

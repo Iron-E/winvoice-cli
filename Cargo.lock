@@ -239,8 +239,8 @@ dependencies = [
 
 [[package]]
 name = "clinvoice-adapter"
-version = "0.11.0"
-source = "git+https://github.com/Iron-E/clinvoice-adapter?branch=release/0.11#37d7e545e6c4696d2499b332c04771b0bf0b636b"
+version = "0.12.0"
+source = "git+https://github.com/Iron-E/clinvoice-adapter?branch=release/0.12#62f2487605ee5ea621e20eb8eaebe843997e4915"
 dependencies = [
  "async-trait",
  "clinvoice-error",
@@ -252,8 +252,8 @@ dependencies = [
 
 [[package]]
 name = "clinvoice-adapter-postgres"
-version = "0.1.0"
-source = "git+https://github.com/Iron-E/clinvoice-adapter-postgres?branch=release/0.1#d667d33f6a19ed756482ec9e40a35450906624d2"
+version = "0.2.0"
+source = "git+https://github.com/Iron-E/clinvoice-adapter-postgres?branch=release/0.2#7e86d5f53d319bc1e5bf8c959ada90f90272a4af"
 dependencies = [
  "async-trait",
  "clinvoice-adapter",

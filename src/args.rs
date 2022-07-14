@@ -8,7 +8,7 @@ mod store_args;
 mod update;
 
 use clap::Parser as Clap;
-use clinvoice_config::{Config, Error as ConfigError};
+use clinvoice_config::Config;
 use command::Command;
 use dialoguer::Editor;
 

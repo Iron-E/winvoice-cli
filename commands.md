@@ -7,9 +7,9 @@ clinvoice --store default
                           create
                                  # will need to SELECT a `Location` when `--address`
                                  contact --label label --address # signifies that the contact is an `Address`
-								  	                        --email "foo@bar.io" # signifies that the contact is an `Email`
-								  									--phone "555-555-5555" # signifies that the contact is a `Phone`
-								  									         "@foo" # signifies that the contact is an `Other`
+                                                       --email "foo@bar.io" # signifies that the contact is an `Email`
+                                                       --phone "555-555-5555" # signifies that the contact is a `Phone`
+                                                               "@foo" # signifies that the contact is an `Other`
 
                                  # will need to GENERATE `id`
                                  employee --name name --status status --title title
@@ -25,7 +25,7 @@ clinvoice --store default
                                  # will need to GENERATE `id`
                                  # will need to SELECT `outer` when `--inside`|`--outside` are `true`.
                                  location Phoenix Arizona USA # create the `Locations` and set "Earth" as an outermost location
-											                             --inside # specify that "Earth" is inside another `Location`
+											                                        --inside # specify that "Earth" is inside another `Location`
                                                               --outside # specify that "Arizona" is outside another `Location`
 
                                  # will need to GENERATE `id`
@@ -53,10 +53,9 @@ clinvoice --store default
                           retrieve --match foo.yml
                                                    contact
                                                    employee --default
-								  								            --set-default
+                                                            --set-default
                                                    expense
-                                                   job
-                                                       --export --format markdown --output-dir path/to/dir
+                                                   job --export --format markdown --output-dir path/to/dir
                                                    location
                                                    organization --employer
                                                                 --set-employer
@@ -72,5 +71,5 @@ clinvoice --store default
                                                  location
                                                  organization
                                                  timesheet --restart
-																           --stop
+                                                           --stop
 ```

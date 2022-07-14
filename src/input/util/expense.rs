@@ -110,7 +110,7 @@ where
 {
 	if !expenses.is_empty()
 	{
-		let to_remove_indices = input::select_as_indices(expenses, "Select expenses to remove")?;
+		let to_remove_indices = input::select_indices(expenses, "Select expenses to remove")?;
 
 		XAdapter::delete(
 			connection,
@@ -143,7 +143,7 @@ where
 {
 	if !expenses.is_empty()
 	{
-		let edit_index = input::select_one_as_index(expenses, "Select an expense to edit")?;
+		let edit_index = input::select_one_index(expenses, "Select an expense to edit")?;
 		let to_edit = &expenses[edit_index];
 
 		match input::edit(

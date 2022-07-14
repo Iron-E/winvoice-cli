@@ -103,7 +103,7 @@ fn delete_menu(contact_info: &mut Vec<(bool, ContactKind, String)>) -> input::Re
 {
 	if !contact_info.is_empty()
 	{
-		let to_remove = input::select_as_indices(
+		let to_remove = input::select_indices(
 			&contact_info
 				.iter()
 				.map(|(_, _, label)| label)
@@ -141,7 +141,7 @@ where
 		return Ok(());
 	}
 
-	let selected_index = input::select_one_as_index(
+	let selected_index = input::select_one_index(
 		&contact_info
 			.iter()
 			.map(|(_, _, label)| label)

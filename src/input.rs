@@ -14,171 +14,127 @@ pub use error::{Error, Result};
 use serde::{de::DeserializeOwned, Serialize};
 use serde_yaml as yaml;
 
-/// # Summary
+/// Gather input from the user's text editor, defined by the:
 ///
-/// Gather input from the user's text editor of choice.
-///
-/// # Remarks
-///
-/// The user's specified `$EDITOR` environment variable will be opened first, followed by whichever
-/// editor is discovered by the [`edit_file`](edit::edit_file) function.
-///
-/// # Returns
-///
-/// * The deserialized entity with values filled in by the user.
-/// * An [`Error`] encountered while creating, editing, or removing the temporary file.
-pub fn edit<T>(entity: &T, prompt: impl AsRef<str>) -> Result<T>
+/// 1. "VISUAL" environment variable.
+/// 2. "EDITOR" environment variable.
+/// 3. Platform default (Notepad on Windows, Vi on Unix).
+pub fn edit<TEntity, TPrompt>(entity: &TEntity, prompt: TPrompt) -> Result<TEntity>
 where
-	T: DeserializeOwned + Serialize,
+	TEntity: DeserializeOwned + Serialize,
+	TPrompt: AsRef<str>,
 {
-	let serialized = yaml::to_string(&entity)?;
-	let to_edit = format!(
-		"# {}\n\n{serialized}",
-		prompt.as_ref().replace('\n', "\n# "),
-	);
+	let to_edit = yaml::to_string(&entity).map(|serialized| {
+		format!(
+			"# {}\n\n{serialized}",
+			prompt.as_ref().replace('\n', "\n# "),
+		)
+	})?;
 
-	let result = Editor::new().extension(".yaml").edit(&to_edit)?;
-	let edited = result.ok_or(Error::NotEdited)?;
-	yaml::from_str(&edited).map_err(|e| e.into())
+	let maybe_edited = Editor::new().extension(".yaml").edit(&to_edit)?;
+
+	maybe_edited
+		.ok_or(Error::NotEdited)
+		.and_then(|edit| yaml::from_str(&edit).map_err(Error::from))
 }
 
-/// # Summary
-///
-/// Gather input from the user's text editor of choice.
-///
-/// # Remarks
-///
-/// The user's specified `$EDITOR` environment variable will be opened first, followed by whichever
-/// editor is discovered by the [`edit_file`](edit::edit_file) function.
-///
-/// # Returns
-///
-/// * The deserialized entity with values filled in by the user.
-/// * An [`Error`] encountered while creating, editing, or removing the temporary file.
-pub fn edit_and_restore<T>(entity: &T, prompt: impl AsRef<str>) -> Result<T>
+/// [Edit](edit) an `entity`, and then [restore](clinvoice_schema::RestorableSerde) it.
+pub fn edit_and_restore<TEntity, TPrompt>(entity: &TEntity, prompt: TPrompt) -> Result<TEntity>
 where
-	T: DeserializeOwned + RestorableSerde + Serialize,
+	TEntity: DeserializeOwned + RestorableSerde + Serialize,
+	TPrompt: AsRef<str>,
 {
 	let mut edited = edit(entity, prompt)?;
 	edited.try_restore(entity)?;
 	Ok(edited)
 }
 
-/// # Summary
-///
-/// Gather input from the user's text editor of choice.
-///
-/// # Remarks
-///
-/// The user's specified `$EDITOR` environment variable will be opened first, followed by whichever
-/// editor is discovered by the [`edit_file`](edit::edit_file) function.
-///
-/// # Returns
-///
-/// * The deserialized entity with values filled in by the user.
-/// * An [`Error`] encountered while creating, editing, or removing the temporary file.
-pub fn edit_default<T>(prompt: impl AsRef<str>) -> Result<T>
+/// [Edit](edit) `TEntity::default`, returning that `default` if [no edits](Error::NotEdited) were
+/// made.
+pub fn edit_default<TEntity, TPrompt>(prompt: TPrompt) -> Result<TEntity>
 where
-	T: Default + DeserializeOwned + Serialize,
+	TEntity: Default + DeserializeOwned + Serialize,
+	TPrompt: AsRef<str>,
 {
-	let default = T::default();
-	match edit(&default, prompt)
+	let default = TEntity::default();
+	edit(&default, prompt).or_else(|e| match e
 	{
-		Err(Error::NotEdited) => Ok(default),
-		result => result,
-	}
+		Error::NotEdited => Ok(default),
+		_ => Err(e),
+	})
 }
 
-/// # Summary
-///
-/// [Edit](edit_func) markdown based on some `prompt` which will appear in the user's editor.
-///
-/// # Errors
-///
-/// * [`io::Error`] when the [edit][edit_func] fails.
-/// * [`Error::NotEdited`] when the user does not change the `prompt`.
-///
-/// [edit_func]: Editor::edit
-pub fn edit_markdown(prompt: &str) -> Result<String>
+/// [Edit](Editor::edit) some `prompt`, rendered as Markdown.
+pub fn edit_markdown<T>(content: T) -> Result<String>
+where
+	T: AsRef<str>,
 {
-	let result = Editor::new().extension(".md").edit(prompt)?;
+	let result = Editor::new().extension(".md").edit(content.as_ref())?;
 	result.ok_or(Error::NotEdited)
 }
 
-/// # Summary
+/// `prompt` users to select elements from `entities`, returning them.
 ///
-/// `prompt` users to select elements from `entities`, then return them.
-///
-/// # Returns
-///
-/// * The selected entities.
-/// * An [`Error`] incurred while selecting.
-pub fn select<T>(entities: &[T], prompt: impl Into<String>) -> io::Result<Vec<T>>
+/// TODO: analyze usage to see if `entities` should be `Vec<T>`
+pub fn select<TEntity, TPrompt>(entities: &[TEntity], prompt: TPrompt) -> io::Result<Vec<TEntity>>
 where
-	T: Clone + Display,
+	TEntity: Clone + Display,
+	TPrompt: Into<String>,
 {
-	select_as_indices(entities, prompt)
-		.map(|selection| selection.into_iter().map(|i| entities[i].clone()).collect())
+	select_indices(entities, prompt)
+		.map(|indices| indices.into_iter().map(|i| entities[i].clone()).collect())
 }
 
-/// # Summary
-///
-/// `prompt` users to select elements from `entities`, then return the indices where they were
-/// found.
-///
-/// # Returns
-///
-/// * The selected entities.
-/// * An [`Error`] incurred while selecting.
-pub fn select_as_indices<T>(entities: &[T], prompt: impl Into<String>) -> io::Result<Vec<usize>>
+/// `prompt` users to select elements from `entities`, and then return the index where they appear.
+pub fn select_indices<TEntity, TPrompt>(
+	entities: &[TEntity],
+	prompt: TPrompt,
+) -> io::Result<Vec<usize>>
 where
-	T: Clone + Display,
+	TEntity: Clone + Display,
+	TPrompt: Into<String>,
 {
 	if entities.is_empty()
 	{
 		return Ok(Vec::new());
 	}
 
-	let selection = MultiSelect::new()
+	MultiSelect::new()
 		.items(entities)
 		.paged(true)
 		.with_prompt(prompt)
-		.interact()?;
-
-	Ok(selection)
+		.interact()
 }
 
-/// # Summary
+/// `prompt` users to select one element from `entities`, returning it.
 ///
-/// `prompt` users to select one element from `entities`, then return it.
+/// TODO: analyze usage to see if `entities` should be `Vec<T>`
 ///
-/// # Returns
+/// # Errors
 ///
-/// * The selected entity.
-/// * An [`Error`] incurred while selecting.
-pub fn select_one<T>(entities: &[T], prompt: impl Into<String>) -> Result<T>
+/// * When [`select_one_index`] does.
+pub fn select_one<TEntity, TPrompt>(entities: &[TEntity], prompt: TPrompt) -> Result<TEntity>
 where
-	T: Clone + Display,
+	TEntity: Clone + Display,
+	TPrompt: Into<String>,
 {
-	let selection = select_one_as_index(entities, prompt)?;
-	Ok(entities[selection].clone())
+	select_one_index(entities, prompt).map(|i| entities[i].clone())
 }
 
-/// # Summary
+/// `prompt` users to select one element from `entities`, returning the index where it is found.
 ///
-/// `prompt` users to select one element from `entities`, then return the index where it was found.
+/// # Errors
 ///
-/// # Returns
-///
-/// * The selected entity.
-/// * An [`Error`] incurred while selecting.
-pub fn select_one_as_index<T>(entities: &[T], prompt: impl Into<String>) -> Result<usize>
+/// * When `entities` is empty.
+/// * When [`Select::interact`] does.
+pub fn select_one_index<TEntity, TPrompt>(entities: &[TEntity], prompt: TPrompt) -> Result<usize>
 where
-	T: Clone + Display,
+	TEntity: Clone + Display,
+	TPrompt: Into<String>,
 {
 	if entities.is_empty()
 	{
-		return Err(Error::NoData(format!("`{}`", any::type_name::<T>())));
+		return Err(Error::NoData(format!("`{}`", any::type_name::<TEntity>())));
 	}
 
 	let selector = {
@@ -189,40 +145,31 @@ where
 
 	loop
 	{
-		return match selector.interact()
+		match selector.interact()
 		{
-			Ok(index) => Ok(index),
 			Err(e)
-				if !(e.kind() == io::ErrorKind::Other &&
-					e.to_string().contains("Quit not allowed")) =>
-			{
-				Err(e.into())
-			},
-			_ =>
+				if e.kind() == io::ErrorKind::Other && e.to_string().contains("Quit not allowed") =>
 			{
 				println!("Please select something, or press Ctrl+C to quit");
-				continue;
 			},
+			result => return result.map_err(Error::from),
 		};
 	}
 }
 
-/// # Summary
-///
-/// `prompt` the user to enter text.
-pub fn text<S, T>(default_text: Option<T>, prompt: S) -> io::Result<T>
+/// `prompt` the user to enter text, and return what they entered.
+pub fn text<TText, TPrompt>(default_text: Option<TText>, prompt: TPrompt) -> io::Result<TText>
 where
-	S: Into<String>,
-	T: Clone + FromStr + Display,
-	T::Err: Display + Debug,
+	TPrompt: Into<String>,
+	TText: Clone + FromStr + Display,
+	<TText as FromStr>::Err: Display + Debug,
 {
 	let mut input = Input::new();
-	input.with_prompt(prompt);
 
 	if let Some(text) = default_text
 	{
 		input.default(text);
 	}
 
-	input.interact_text()
+	input.with_prompt(prompt).interact_text()
 }

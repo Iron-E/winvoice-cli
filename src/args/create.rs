@@ -6,7 +6,7 @@ use clinvoice_adapter::{
 	Deletable,
 };
 use clinvoice_config::{Adapters, Config, Error as ConfigError};
-use clinvoice_schema::{Contact, ContactKind};
+use clinvoice_schema::ContactKind;
 use command::CreateCommand;
 use futures::{stream, TryFutureExt, TryStreamExt};
 use sqlx::{Database, Executor, Pool};
@@ -92,6 +92,7 @@ impl Create
 				date_invoice_issued,
 				date_invoice_paid,
 				date_open,
+				employer,
 				hourly_rate,
 				increment,
 				notes,

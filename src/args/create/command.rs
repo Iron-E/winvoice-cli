@@ -1,10 +1,8 @@
 use core::time::Duration;
 
 use clap::Subcommand as Clap;
-use clinvoice_config::{Config, Store};
 use clinvoice_finance::Money;
 use clinvoice_schema::chrono::NaiveDateTime;
-use sqlx::{Database, Pool};
 
 /// Use CLInvoice to store new information.
 ///
@@ -107,6 +105,11 @@ pub enum CreateCommand
 		/// The `date_open` of the `Job` to create.
 		#[clap(long)]
 		date_open: Option<NaiveDateTime>,
+
+		/// Set the `client` to the `Organization` specified by the `employee` field of the
+		/// `[organizations]` section of the CLInvoice config.
+		#[clap(action, long, short)]
+		employer: bool,
 
 		/// The `invoice.hourly_rate` of the `Job` to create e.g. "50.00 USD".
 		#[clap(long, short = '$')]

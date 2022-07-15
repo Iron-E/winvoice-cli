@@ -216,7 +216,7 @@ name = "clinvoice"
 version = "0.2.0-rc3"
 dependencies = [
  "clap 3.2.12",
- "clinvoice-adapter 0.12.0 (git+https://github.com/Iron-E/clinvoice-adapter?branch=release/0.14)",
+ "clinvoice-adapter",
  "clinvoice-adapter-postgres",
  "clinvoice-config",
  "clinvoice-error",
@@ -239,21 +239,8 @@ dependencies = [
 
 [[package]]
 name = "clinvoice-adapter"
-version = "0.12.0"
-source = "git+https://github.com/Iron-E/clinvoice-adapter?branch=release/0.13#36de01b38aa31a369b5911f1ef3ee1c13ce38e4a"
-dependencies = [
- "async-trait",
- "clinvoice-error",
- "clinvoice-match",
- "clinvoice-schema",
- "futures",
- "sqlx",
-]
-
-[[package]]
-name = "clinvoice-adapter"
-version = "0.12.0"
-source = "git+https://github.com/Iron-E/clinvoice-adapter?branch=release/0.14#233e26cbb4bf7d819e422fc9bd057606603d64ff"
+version = "0.14.6"
+source = "git+https://github.com/Iron-E/clinvoice-adapter?branch=release/0.14#b3de389801ce97d75f613f6406801228c2f395c8"
 dependencies = [
  "async-trait",
  "clinvoice-error",
@@ -265,11 +252,11 @@ dependencies = [
 
 [[package]]
 name = "clinvoice-adapter-postgres"
-version = "0.2.0"
-source = "git+https://github.com/Iron-E/clinvoice-adapter-postgres?branch=release/0.2#5058d4058d7ede6fdd7911c8e3c286c8b9d5c78d"
+version = "0.3.0"
+source = "git+https://github.com/Iron-E/clinvoice-adapter-postgres?branch=release/0.3#8df235244422c916ecbdb0d1f28643512474ea18"
 dependencies = [
  "async-trait",
- "clinvoice-adapter 0.12.0 (git+https://github.com/Iron-E/clinvoice-adapter?branch=release/0.13)",
+ "clinvoice-adapter",
  "clinvoice-error",
  "clinvoice-finance",
  "clinvoice-match",
@@ -303,7 +290,7 @@ source = "git+https://github.com/Iron-E/clinvoice-error?branch=release/0.3#b6e0f
 [[package]]
 name = "clinvoice-export"
 version = "0.1.0"
-source = "git+https://github.com/Iron-E/clinvoice-export?branch=release/0.1#cf93470f3850256d6163c9a2b1071072eaa5399a"
+source = "git+https://github.com/Iron-E/clinvoice-export?branch=release/0.1#acfd07199332608bbc0caa43081219cfeebdd0eb"
 dependencies = [
  "clinvoice-error",
  "clinvoice-finance",
@@ -331,7 +318,7 @@ dependencies = [
 [[package]]
 name = "clinvoice-match"
 version = "0.5.0"
-source = "git+https://github.com/Iron-E/clinvoice-match?branch=release/0.5#d1bb3a0373505847f831992e3eb24931a45efe6b"
+source = "git+https://github.com/Iron-E/clinvoice-match?branch=release/0.5#16b582c38c909874d0f97cf35bd3c8080fa7bbcc"
 dependencies = [
  "clinvoice-error",
  "clinvoice-finance",

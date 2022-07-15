@@ -20,7 +20,7 @@ clinvoice --store default
 
                                  # will need to GENERATE `id`
                                  # will need to SELECT `client`
-                                 job --date-close="2022-01-01T00:00:00" --date-invoice-issued="2022-01-01T00:00:00" --date-invoice-paid="2022-01-01T00:00:00" --date-open="2022-01-01T00:00:00" --hourly-rate="50.00 USD" --increment 15min --notes="note" --objectives="objective"
+                                 job --date-close="2022-01-01T00:00:00" --date-invoice-issued="2022-01-01T00:00:00" --date-invoice-paid="2022-01-01T00:00:00" --date-open="2022-01-01T00:00:00" --employer --hourly-rate="50.00 USD" --increment 15min --notes="note" --objectives="objective"
 
                                  # will need to GENERATE `id`
                                  # will need to SELECT `outer` when `--inside`|`--outside` are `true`.

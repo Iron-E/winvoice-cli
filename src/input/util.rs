@@ -5,6 +5,7 @@ pub mod job;
 pub mod location;
 mod menu;
 pub mod organization;
+pub mod timesheet;
 
 /// # Summary
 ///

@@ -289,8 +289,8 @@ source = "git+https://github.com/Iron-E/clinvoice-error?branch=release/0.3#b6e0f
 
 [[package]]
 name = "clinvoice-export"
-version = "0.1.0"
-source = "git+https://github.com/Iron-E/clinvoice-export?branch=release/0.1#acfd07199332608bbc0caa43081219cfeebdd0eb"
+version = "0.1.5"
+source = "git+https://github.com/Iron-E/clinvoice-export?branch=release/0.1#d809d9724685a57b4d305d95d7d5a677e1ac63d0"
 dependencies = [
  "clinvoice-error",
  "clinvoice-finance",
@@ -301,8 +301,8 @@ dependencies = [
 
 [[package]]
 name = "clinvoice-finance"
-version = "0.3.0"
-source = "git+https://github.com/Iron-E/clinvoice-finance?branch=release/0.4#8ca6e360fccbc7b57f1e3998faa78e36034ac79a"
+version = "0.4.2"
+source = "git+https://github.com/Iron-E/clinvoice-finance?branch=release/0.4#b1636c1c7f61e9379714748210b6f11929f718c0"
 dependencies = [
  "chrono",
  "clinvoice-error",
@@ -317,8 +317,8 @@ dependencies = [
 
 [[package]]
 name = "clinvoice-match"
-version = "0.5.0"
-source = "git+https://github.com/Iron-E/clinvoice-match?branch=release/0.5#16b582c38c909874d0f97cf35bd3c8080fa7bbcc"
+version = "0.5.2"
+source = "git+https://github.com/Iron-E/clinvoice-match?branch=release/0.5#b3232dd73f671a5352bc80777e646af187530490"
 dependencies = [
  "clinvoice-error",
  "clinvoice-finance",
@@ -330,8 +330,8 @@ dependencies = [
 
 [[package]]
 name = "clinvoice-schema"
-version = "0.8.0"
-source = "git+https://github.com/Iron-E/clinvoice-schema?branch=release/0.9#7c868d8706730419c6066c20921f071fe6ef7d58"
+version = "0.9.1"
+source = "git+https://github.com/Iron-E/clinvoice-schema?branch=release/0.9#9e089189ae11bbb175579ef3d2f0f30a0ed16ffe"
 dependencies = [
  "chrono",
  "clinvoice-finance",

@@ -8,28 +8,17 @@ use sqlx::{Database, Executor, Pool};
 use super::{menu, MATCH_PROMPT};
 use crate::{input, DynResult};
 
-/// # Summary
-///
-/// Retrieve all [`Location`][location]s from the specified `store`. If no
-/// [`Location`][location]s are retrieved, return an [error](DataError::NoData).
-///
-/// # Errors
-///
-/// * If the [retrieval][L_retrieve] operation fails, its error is forwarded.
-/// * If no [`Location`][location]s are [retrieved][L_retrieve], an [`Error::NoData`] is returned.
-/// * If the [selection](input::select) operation fails, its error is forwarded.
-///
-/// [L_retrieve]: clinvoice_adapter::schema::LocationAdapter::retrieve
-/// [location]: clinvoice_schema::Location
-pub async fn retrieve<D, Db, LAdapter, const RETRY_ON_EMPTY: bool>(
-	connection: &Pool<Db>,
-	prompt: D,
+/// Retrieve all [`Location`][location]s from the specified `store` that match a user-provided
+/// query. If `RETRY_ON_EMPTY`, the query is attempted again when the query returns no results.
+pub async fn retrieve<LAdapter, TDb, TPrompt, const RETRY_ON_EMPTY: bool>(
+	connection: &Pool<TDb>,
+	prompt: TPrompt,
 ) -> DynResult<Vec<Location>>
 where
-	D: Display,
-	Db: Database,
-	LAdapter: Deletable<Db = Db> + LocationAdapter,
-	for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
+	LAdapter: Deletable<Db = TDb> + LocationAdapter,
+	TDb: Database,
+	TPrompt: Display,
+	for<'c> &'c mut TDb::Connection: Executor<'c, Database = TDb>,
 {
 	loop
 	{
@@ -47,31 +36,18 @@ where
 	}
 }
 
-/// # Summary
-///
-/// Retrieve all [`Location`][location]s from the specified `store`. If no
-/// [`Location`][location]s are retrieved, return an [error](DataError::NoData).
-///
-/// # Errors
-///
-/// * If the [retrieval][L_retrieve] operation fails, its error is forwarded.
-/// * If no [`Location`][location]s are [retrieved][L_retrieve], an [`Error::NoData`] is returned.
-/// * If the [selection](input::select) operation fails, its error is forwarded.
-///
-/// [L_retrieve]: clinvoice_adapter::schema::LocationAdapter::retrieve
-/// [location]: clinvoice_schema::Location
-pub async fn select_one<D, Db, LAdapter, const RETRY_ON_EMPTY: bool>(
-	connection: &Pool<Db>,
-	prompt: D,
+/// [Retrieve](retrieve) `Location`s and then [select one](input::select_one) of them.
+pub async fn select_one<LAdapter, TDb, TPrompt, const RETRY_ON_EMPTY: bool>(
+	connection: &Pool<TDb>,
+	prompt: TPrompt,
 ) -> DynResult<Location>
 where
-	D: Display,
-	Db: Database,
-	LAdapter: Deletable<Db = Db> + LocationAdapter,
-	for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
+	LAdapter: Deletable<Db = TDb> + LocationAdapter,
+	TDb: Database,
+	TPrompt: Display,
+	for<'c> &'c mut TDb::Connection: Executor<'c, Database = TDb>,
 {
-	let locations = retrieve::<D, Db, LAdapter, RETRY_ON_EMPTY>(connection, prompt).await?;
-
+	let locations = retrieve::<LAdapter, TDb, TPrompt, RETRY_ON_EMPTY>(connection, prompt).await?;
 	let location = input::select_one(&locations, "Select the `Location`")?;
 
 	Ok(location)

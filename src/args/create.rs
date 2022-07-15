@@ -58,7 +58,7 @@ impl Create
 			{
 				let kind = match (address, email, phone)
 				{
-					(true, ..) => input::util::location::select_one::<_, _, LAdapter, true>(
+					(true, ..) => input::util::location::select_one::<LAdapter, _, _, true>(
 						&connection,
 						"Query the `Location` of this address",
 					)
@@ -112,7 +112,7 @@ impl Create
 
 				let outside_of_final = match inside
 				{
-					true => input::util::location::select_one::<_, _, LAdapter, true>(
+					true => input::util::location::select_one::<LAdapter, _, _, true>(
 						&connection,
 						format!("Query the `Location` outside of {final_name}"),
 					)
@@ -136,7 +136,7 @@ impl Create
 
 			CreateCommand::Organization { name } =>
 			{
-				let selected = input::util::location::select_one::<_, _, LAdapter, true>(
+				let selected = input::util::location::select_one::<LAdapter, _, _, true>(
 					&connection,
 					"Query the `Location` of this `Organization`",
 				)

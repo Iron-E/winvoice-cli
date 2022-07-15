@@ -67,7 +67,7 @@ where
 	{
 		ADDRESS =>
 		{
-			let location = input::util::location::select_one::<_, _, LAdapter, true>(
+			let location = input::util::location::select_one::<LAdapter, _, _, true>(
 				connection,
 				"Query the `Location` which can be used to reach this `Employee`",
 			)
@@ -204,7 +204,7 @@ where
 					 {location}."
 				))?
 				{
-					input::util::location::select_one::<_, _, LAdapter, true>(
+					input::util::location::select_one::<LAdapter, _, _, true>(
 						connection,
 						"Query the `Location` which can be used to reach this `Organization`",
 					)

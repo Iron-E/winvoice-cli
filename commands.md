@@ -25,7 +25,7 @@ clinvoice --store default
                                  # will need to GENERATE `id`
                                  # will need to SELECT `outer` when `--inside`|`--outside` are `true`.
                                  location Phoenix Arizona USA # create the `Locations` and set "Earth" as an outermost location
-											                                        --inside # specify that "Earth" is inside another `Location`
+                                                              --inside # specify that "Earth" is inside another `Location`
                                                               --outside # specify that "Arizona" is outside another `Location`
 
                                  # will need to GENERATE `id`

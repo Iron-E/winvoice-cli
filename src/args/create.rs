@@ -4,6 +4,7 @@ use clap::Args as Clap;
 use clinvoice_adapter::{
 	schema::{ContactAdapter, EmployeeAdapter, LocationAdapter, OrganizationAdapter},
 	Deletable,
+	Updatable,
 };
 use clinvoice_config::{Adapters, Config, Error as ConfigError};
 use clinvoice_schema::ContactKind;
@@ -42,7 +43,7 @@ impl Create
 		Db: Database,
 		CAdapter: Deletable<Db = Db> + ContactAdapter,
 		EAdapter: Deletable<Db = Db> + EmployeeAdapter,
-		LAdapter: Deletable<Db = Db> + LocationAdapter,
+		LAdapter: Deletable<Db = Db> + LocationAdapter + Updatable,
 		OAdapter: Deletable<Db = Db> + OrganizationAdapter,
 		for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
 	{
@@ -131,7 +132,32 @@ impl Create
 
 				if outside
 				{
-					todo!("Select `Location`s that are inside this one")
+					let mut inside_locations = input::util::location::select::<LAdapter, _, _, true>(
+						&connection,
+						format!("Select `Location`s that are inside {location}"),
+					)
+					.await?;
+
+					// PERF: call `.clone` minimum amount of times by moving it into the first element.
+					if let Some(after_first) = inside_locations.get_mut(1..)
+					{
+						after_first.iter_mut().for_each(|mut l| {
+							l.outer = Some(location.clone().into());
+						})
+					}
+
+					if let Some(first) = inside_locations.first_mut()
+					{
+						first.outer = Some(location.into());
+					}
+
+					connection
+						.begin()
+						.and_then(|mut transaction| async {
+							LAdapter::update(&mut transaction, inside_locations.iter()).await?;
+							transaction.commit().await
+						})
+						.await?;
 				}
 			},
 

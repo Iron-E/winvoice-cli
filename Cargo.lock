@@ -301,8 +301,8 @@ dependencies = [
 
 [[package]]
 name = "clinvoice-finance"
-version = "0.4.2"
-source = "git+https://github.com/Iron-E/clinvoice-finance?branch=release/0.4#b1636c1c7f61e9379714748210b6f11929f718c0"
+version = "0.4.3"
+source = "git+https://github.com/Iron-E/clinvoice-finance?branch=release/0.4#5f693beca78b72d9ec8d233f4bc37573e9ffab0e"
 dependencies = [
  "chrono",
  "clinvoice-error",

@@ -36,6 +36,23 @@ where
 	}
 }
 
+/// [Retrieve](retrieve) `Location`s and then [select](input::select) from them.
+pub async fn select<LAdapter, TDb, TPrompt, const RETRY_ON_EMPTY: bool>(
+	connection: &Pool<TDb>,
+	prompt: TPrompt,
+) -> DynResult<Vec<Location>>
+where
+	LAdapter: Deletable<Db = TDb> + LocationAdapter,
+	TDb: Database,
+	TPrompt: Display,
+	for<'c> &'c mut TDb::Connection: Executor<'c, Database = TDb>,
+{
+	let locations = retrieve::<LAdapter, TDb, TPrompt, RETRY_ON_EMPTY>(connection, prompt).await?;
+	let selected = input::select(&locations, "Select the `Location`s")?;
+
+	Ok(selected)
+}
+
 /// [Retrieve](retrieve) `Location`s and then [select one](input::select_one) of them.
 pub async fn select_one<LAdapter, TDb, TPrompt, const RETRY_ON_EMPTY: bool>(
 	connection: &Pool<TDb>,
@@ -48,7 +65,7 @@ where
 	for<'c> &'c mut TDb::Connection: Executor<'c, Database = TDb>,
 {
 	let locations = retrieve::<LAdapter, TDb, TPrompt, RETRY_ON_EMPTY>(connection, prompt).await?;
-	let location = input::select_one(&locations, "Select the `Location`")?;
+	let selected = input::select_one(&locations, "Select the `Location`")?;
 
-	Ok(location)
+	Ok(selected)
 }

@@ -138,7 +138,8 @@ impl Create
 					)
 					.await?;
 
-					// PERF: call `.clone` minimum amount of times by moving it into the first element.
+					// PERF: only call `.clone` on the newly-created `location` for elements in
+					//       `inside_locations` other than the first
 					if let Some(after_first) = inside_locations.get_mut(1..)
 					{
 						after_first.iter_mut().for_each(|mut l| {

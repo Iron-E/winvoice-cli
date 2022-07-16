@@ -1,19 +1,20 @@
 mod command;
 
+use core::{any, fmt::Display};
+
 use clap::Args as Clap;
 use clinvoice_adapter::{
 	schema::{ContactAdapter, EmployeeAdapter, LocationAdapter, OrganizationAdapter},
 	Deletable,
-	Updatable,
 };
 use clinvoice_config::{Adapters, Config, Error as ConfigError};
-use clinvoice_schema::ContactKind;
+use clinvoice_schema::{Contact, ContactKind, Employee, Id, Location, Organization};
 use command::CreateCommand;
 use futures::{stream, TryFutureExt, TryStreamExt};
 use sqlx::{Database, Executor, Pool};
 
 use super::store_args::StoreArgs;
-use crate::{input, DynResult};
+use crate::{args::update::Update, input, DynResult};
 
 /// Use CLInvoice to store new information.
 ///
@@ -34,18 +35,18 @@ pub struct Create
 
 impl Create
 {
-	pub async fn create<Db, CAdapter, EAdapter, LAdapter, OAdapter>(
+	pub async fn create<CAdapter, EAdapter, LAdapter, OAdapter, TDb>(
 		self,
-		connection: Pool<Db>,
+		connection: Pool<TDb>,
 		config: &Config,
 	) -> DynResult<()>
 	where
-		Db: Database,
-		CAdapter: Deletable<Db = Db> + ContactAdapter,
-		EAdapter: Deletable<Db = Db> + EmployeeAdapter,
-		LAdapter: Deletable<Db = Db> + LocationAdapter + Updatable,
-		OAdapter: Deletable<Db = Db> + OrganizationAdapter,
-		for<'c> &'c mut Db::Connection: Executor<'c, Database = Db>,
+		TDb: Database,
+		CAdapter: Deletable<Db = TDb> + ContactAdapter,
+		EAdapter: Deletable<Db = TDb> + EmployeeAdapter,
+		LAdapter: Deletable<Db = TDb> + LocationAdapter,
+		OAdapter: Deletable<Db = TDb> + OrganizationAdapter,
+		for<'c> &'c mut TDb::Connection: Executor<'c, Database = TDb>,
 	{
 		match self.command
 		{
@@ -70,7 +71,10 @@ impl Create
 					_ => ContactKind::Other(info),
 				};
 
-				CAdapter::create(&connection, kind, label).await?;
+				Create::report_created::<Contact, _>(format!(
+					r#""{}""#,
+					CAdapter::create(&connection, kind, label).await?.label,
+				));
 			},
 
 			CreateCommand::Employee {
@@ -79,7 +83,10 @@ impl Create
 				title,
 			} =>
 			{
-				EAdapter::create(&connection, name, status, title).await?;
+				Create::report_created::<Employee, _>(format!(
+					"№{}",
+					EAdapter::create(&connection, name, status, title).await?.id,
+				));
 			},
 
 			CreateCommand::Expense {
@@ -125,10 +132,14 @@ impl Create
 
 				let location = LAdapter::create(&connection, final_name, outside_of_final)
 					.and_then(|created| {
-						stream::iter(names_reversed.map(Ok))
-							.try_fold(created, |l, n| LAdapter::create(&connection, n, Some(l)))
+						stream::iter(names_reversed.map(Ok)).try_fold(created, |l, n| {
+							Create::report_created::<Location, _>(format!("№{}", l.id));
+							LAdapter::create(&connection, n, Some(l))
+						})
 					})
 					.await?;
+
+				Create::report_created::<Location, _>(format!("№{}", location.id));
 
 				if outside
 				{
@@ -159,6 +170,10 @@ impl Create
 							transaction.commit().await
 						})
 						.await?;
+
+					inside_locations.into_iter().for_each(|l| {
+						Update::report_updated::<Location, _>(l.id);
+					});
 				}
 			},
 
@@ -170,7 +185,10 @@ impl Create
 				)
 				.await?;
 
-				OAdapter::create(&connection, selected, name).await?;
+				Create::report_created::<Organization, _>(format!(
+					"№{}",
+					OAdapter::create(&connection, selected, name).await?.id
+				));
 			},
 
 			CreateCommand::Timesheet {
@@ -184,6 +202,22 @@ impl Create
 		Ok(())
 	}
 
+	/// Indicate with [`println!`] that a value of type `TCreated` — identified by `id` — has been
+	/// created successfully.
+	pub(super) fn report_created<TCreated, TId>(id: TId)
+	where
+		TId: Display,
+	{
+		println!(
+			"{} {id} has been created.",
+			any::type_name::<TCreated>()
+				.split("::")
+				.last()
+				.expect("`TCreated` should have a type name")
+		);
+	}
+
+	/// Execute this command given the user's [`Config`].
 	pub async fn run(self, config: &Config) -> DynResult<()>
 	{
 		let store = self.store_args.try_get_from(config)?;
@@ -203,7 +237,7 @@ impl Create
 
 				let pool = PgPool::connect_lazy(&store.url)?;
 				self
-					.create::<_, PgContact, PgEmployee, PgLocation, PgOrganization>(pool, config)
+					.create::<PgContact, PgEmployee, PgLocation, PgOrganization, _>(pool, config)
 					.await?
 			},
 

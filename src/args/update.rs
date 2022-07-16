@@ -1,5 +1,7 @@
 mod command;
 
+use core::{any, fmt::Display};
+
 use clap::Args as Clap;
 use clinvoice_config::Config;
 use command::UpdateCommand;
@@ -30,6 +32,22 @@ pub struct Update
 
 impl Update
 {
+	/// Indicate with [`println!`] that a value of type `TCreated` — identified by `id` — has been
+	/// updated successfully.
+	pub(super) fn report_updated<TUpdated, TId>(id: TId)
+	where
+		TId: Display,
+	{
+		println!(
+			"{} {id} has been updated.",
+			any::type_name::<TUpdated>()
+				.split("::")
+				.last()
+				.expect("`TCreated` should have a type name")
+		);
+	}
+
+	/// Execute this command given the user's [`Config`].
 	pub async fn run(self, config: &Config) -> DynResult<()>
 	{
 		let store = self.store_args.try_get_from(&config)?;

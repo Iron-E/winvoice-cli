@@ -200,7 +200,7 @@ where
 /// [`select_one`] from the [`retrieve`]d values.
 ///
 /// If `RETRY_ON_EMPTY`, the query is attempted again when the query returns no results.
-pub async fn select_one_retrievable<TRetrievable, TDb, TPrompt, const RETRY_ON_EMPTY: bool>(
+pub async fn select_one_retrieved<TRetrievable, TDb, TPrompt, const RETRY_ON_EMPTY: bool>(
 	connection: &Pool<TDb>,
 	prompt: TPrompt,
 ) -> DynResult<TRetrievable::Entity>
@@ -221,7 +221,7 @@ where
 /// [`select`] from the [`retrieve`]d values.
 ///
 /// If `RETRY_ON_EMPTY`, the query is attempted again when the query returns no results.
-pub async fn select_retrievable<TRetrievable, TDb, TPrompt, const RETRY_ON_EMPTY: bool>(
+pub async fn select_retrieved<TRetrievable, TDb, TPrompt, const RETRY_ON_EMPTY: bool>(
 	connection: &Pool<TDb>,
 	prompt: TPrompt,
 ) -> DynResult<Vec<TRetrievable::Entity>>

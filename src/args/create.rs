@@ -61,7 +61,7 @@ impl Create
 			{
 				let kind = match (address, email, phone)
 				{
-					(true, ..) => input::select_one_retrievable::<LAdapter, _, _, true>(
+					(true, ..) => input::select_one_retrieved::<LAdapter, _, _, true>(
 						&connection,
 						"Query the `Location` of this address",
 					)
@@ -122,7 +122,7 @@ impl Create
 
 				let outside_of_final = match inside
 				{
-					true => input::select_one_retrievable::<LAdapter, _, _, true>(
+					true => input::select_one_retrieved::<LAdapter, _, _, true>(
 						&connection,
 						format!("Query the `Location` outside of {final_name}"),
 					)
@@ -148,7 +148,7 @@ impl Create
 
 				if outside
 				{
-					let mut inside_locations = input::select_retrievable::<LAdapter, _, _, true>(
+					let mut inside_locations = input::select_retrieved::<LAdapter, _, _, true>(
 						&connection,
 						format!("Select `Location`s that are inside {created}"),
 					)
@@ -184,7 +184,7 @@ impl Create
 
 			CreateCommand::Organization { name } =>
 			{
-				let selected = input::select_one_retrievable::<LAdapter, _, _, true>(
+				let selected = input::select_one_retrieved::<LAdapter, _, _, true>(
 					&connection,
 					"Query the `Location` of this `Organization`",
 				)

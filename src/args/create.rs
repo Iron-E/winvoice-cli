@@ -72,8 +72,7 @@ impl Create
 					_ => ContactKind::Other(info),
 				};
 
-				Self::report_created::<Contact, _>(format!(
-					r#""{}""#,
+				Self::report_created::<Contact, _>(fmt::quoted(
 					CAdapter::create(&connection, kind, label).await?.label,
 				));
 			},

@@ -1,13 +1,21 @@
 //! Tools to format data.
 
-use core::any;
+use core::{any, fmt::Display};
 
 use clinvoice_schema::Id;
 
-/// Return "№{id}".
+/// Return "№{id}" (without quotes).
 pub fn id_num(id: Id) -> String
 {
 	format!("№{id}")
+}
+
+/// Return "{t}" (with quotes).
+pub fn quoted<T>(t: T) -> String
+where
+	T: Display,
+{
+	format!(r#""{t}""#)
 }
 
 /// The [`type_name`](any::type_name) without any leading module names.

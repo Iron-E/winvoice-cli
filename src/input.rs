@@ -212,8 +212,7 @@ where
 	TRetrievable::Match: Default + DeserializeOwned + Serialize,
 	for<'c> &'c mut TDb::Connection: Executor<'c, Database = TDb>,
 {
-	let locations =
-		retrieve::<TRetrievable, TDb, TPrompt, RETRY_ON_EMPTY>(connection, prompt).await?;
+	let locations = retrieve::<TRetrievable, _, _, RETRY_ON_EMPTY>(connection, prompt).await?;
 	let selected = select_one(&locations, "Select a `Location`")?;
 
 	Ok(selected)
@@ -234,8 +233,7 @@ where
 	TRetrievable::Match: Default + DeserializeOwned + Serialize,
 	for<'c> &'c mut TDb::Connection: Executor<'c, Database = TDb>,
 {
-	let locations =
-		retrieve::<TRetrievable, TDb, TPrompt, RETRY_ON_EMPTY>(connection, prompt).await?;
+	let locations = retrieve::<TRetrievable, _, _, RETRY_ON_EMPTY>(connection, prompt).await?;
 	let selected = select(&locations, "Select the `Location`s")?;
 
 	Ok(selected)

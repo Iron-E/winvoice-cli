@@ -239,8 +239,8 @@ dependencies = [
 
 [[package]]
 name = "clinvoice-adapter"
-version = "0.14.6"
-source = "git+https://github.com/Iron-E/clinvoice-adapter?branch=release/0.14#b3de389801ce97d75f613f6406801228c2f395c8"
+version = "0.15.0"
+source = "git+https://github.com/Iron-E/clinvoice-adapter?branch=release/0.15#be5aa90d20b268b67f341dd9ad68e507a3f592b8"
 dependencies = [
  "async-trait",
  "clinvoice-error",
@@ -252,8 +252,8 @@ dependencies = [
 
 [[package]]
 name = "clinvoice-adapter-postgres"
-version = "0.3.0"
-source = "git+https://github.com/Iron-E/clinvoice-adapter-postgres?branch=release/0.3#8df235244422c916ecbdb0d1f28643512474ea18"
+version = "0.4.0"
+source = "git+https://github.com/Iron-E/clinvoice-adapter-postgres?branch=release/0.4#c5e9c7e6cff06388e36f2af65f76a95c590cc62e"
 dependencies = [
  "async-trait",
  "clinvoice-adapter",
@@ -1462,9 +1462,9 @@ dependencies = [
 
 [[package]]
 name = "rustversion"
-version = "1.0.7"
+version = "1.0.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a0a5f7c728f5d284929a1cccb5bc19884422bfe6ef4d6c409da2c41838983fcf"
+checksum = "24c8ad4f0c00e1eb5bc7614d236a7f1300e3dbd76b68cac8e06fb00b015ad8d8"
 
 [[package]]
 name = "ryu"
@@ -2051,9 +2051,9 @@ checksum = "099b7128301d285f79ddd55b9a83d5e6b9e97c92e0ea0daebee7263e932de992"
 
 [[package]]
 name = "unicode-ident"
-version = "1.0.1"
+version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5bd2fe26506023ed7b5e1e315add59d6f584c621d037f9368fea9cfb988f368c"
+checksum = "15c61ba63f9235225a22310255a29b806b907c9b8c964bcbd0a2c70f3f2deea7"
 
 [[package]]
 name = "unicode-normalization"

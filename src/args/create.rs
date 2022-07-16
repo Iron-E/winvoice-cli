@@ -10,7 +10,7 @@ use clinvoice_adapter::{
 use clinvoice_config::{Adapters, Config, Error as ConfigError};
 use clinvoice_schema::{Contact, ContactKind, Employee, Location, Organization};
 use command::CreateCommand;
-use futures::{stream, TryFutureExt, TryStreamExt};
+use futures::{TryFutureExt, TryStreamExt};
 use sqlx::{Database, Executor, Pool, Transaction};
 
 use super::store_args::StoreArgs;
@@ -72,7 +72,7 @@ impl Create
 					_ => ContactKind::Other(info),
 				};
 
-				Create::report_created::<Contact, _>(format!(
+				Self::report_created::<Contact, _>(format!(
 					r#""{}""#,
 					CAdapter::create(&connection, kind, label).await?.label,
 				));
@@ -84,7 +84,7 @@ impl Create
 				title,
 			} =>
 			{
-				Create::report_created::<Employee, _>(format!(
+				Self::report_created::<Employee, _>(format!(
 					"№{}",
 					EAdapter::create(&connection, name, status, title).await?.id,
 				));
@@ -134,14 +134,17 @@ impl Create
 				// {{{
 				let mut transaction = connection.begin().await?;
 
-				let mut created =
-					LAdapter::create(&mut *transaction, final_name, outside_of_final).await?;
-				for n in names_reversed
-				{
-					Create::report_created::<Location, _>(format!("№{}", created.id));
-					created = LAdapter::create(&mut *transaction, n, Some(created)).await?;
-				}
-				Create::report_created::<Location, _>(format!("№{}", created.id));
+				let created = LAdapter::create(&connection, final_name, outside_of_final)
+					.and_then(|mut l| async {
+						Self::report_created::<Location, _>(format!("№{}", l.id));
+						for n in names_reversed
+						{
+							l = LAdapter::create(&mut *transaction, n, Some(l)).await?;
+							Self::report_created::<Location, _>(format!("№{}", l.id));
+						}
+						Ok(l)
+					})
+					.await?;
 
 				if outside
 				{
@@ -165,10 +168,14 @@ impl Create
 						first.outer = Some(created.into());
 					}
 
-					LAdapter::update(&mut transaction, inside_locations.iter()).await?;
-					inside_locations.into_iter().for_each(|l| {
-						Update::report_updated::<Location, _>(l.id);
-					});
+					LAdapter::update(
+						&mut transaction,
+						inside_locations.iter().map(|l| {
+							Update::report_updated::<Location, _>(l.id);
+							l
+						}),
+					)
+					.await?;
 				}
 
 				transaction.commit().await?;
@@ -183,7 +190,7 @@ impl Create
 				)
 				.await?;
 
-				Create::report_created::<Organization, _>(format!(
+				Self::report_created::<Organization, _>(format!(
 					"№{}",
 					OAdapter::create(&connection, selected, name).await?.id
 				));

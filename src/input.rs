@@ -1,4 +1,5 @@
 mod error;
+mod menu;
 pub mod util;
 
 use core::{
@@ -8,11 +9,19 @@ use core::{
 };
 use std::io;
 
+use clinvoice_adapter::Retrievable;
 use clinvoice_schema::RestorableSerde;
 use dialoguer::{Editor, Input, MultiSelect, Select};
 pub use error::{Error, Result};
 use serde::{de::DeserializeOwned, Serialize};
 use serde_yaml as yaml;
+use sqlx::{Database, Executor, Pool};
+
+use crate::dyn_result::DynResult;
+
+/// The prompt for when [matching](clinvoice_match).
+const MATCH_PROMPT: &str =
+	"See the documentation of this query at https://github.com/Iron-E/clinvoice/wiki/Query-Syntax#";
 
 /// Gather input from the user's text editor, defined by the:
 ///
@@ -71,6 +80,37 @@ where
 {
 	let result = Editor::new().extension(".md").edit(content.as_ref())?;
 	result.ok_or(Error::NotEdited)
+}
+
+/// [Retrieve](Retrievable::retrieve) all [entities](Retrievable::Entity) that match a
+/// user-provided query.
+///
+/// If `RETRY_ON_EMPTY`, the query is attempted again when the query returns no results.
+pub async fn retrieve<TRetrievable, TDb, TPrompt, const RETRY_ON_EMPTY: bool>(
+	connection: &Pool<TDb>,
+	prompt: TPrompt,
+) -> DynResult<Vec<TRetrievable::Entity>>
+where
+	TDb: Database,
+	TPrompt: Display,
+	TRetrievable: Retrievable<Db = TDb>,
+	TRetrievable::Match: Default + DeserializeOwned + Serialize,
+	for<'c> &'c mut TDb::Connection: Executor<'c, Database = TDb>,
+{
+	loop
+	{
+		let match_condition: TRetrievable::Match =
+			edit_default(format!("{prompt}\n{}locations", MATCH_PROMPT))?;
+
+		let results = TRetrievable::retrieve(connection, &match_condition).await?;
+
+		if RETRY_ON_EMPTY && results.is_empty() && menu::ask_to_retry()?
+		{
+			continue;
+		}
+
+		return Ok(results);
+	}
 }
 
 /// `prompt` users to select elements from `entities`, returning them.
@@ -155,6 +195,50 @@ where
 			result => return result.map_err(Error::from),
 		};
 	}
+}
+
+/// [`select_one`] from the [`retrieve`]d values.
+///
+/// If `RETRY_ON_EMPTY`, the query is attempted again when the query returns no results.
+pub async fn select_one_retrievable<TRetrievable, TDb, TPrompt, const RETRY_ON_EMPTY: bool>(
+	connection: &Pool<TDb>,
+	prompt: TPrompt,
+) -> DynResult<TRetrievable::Entity>
+where
+	TDb: Database,
+	TPrompt: Display,
+	TRetrievable: Retrievable<Db = TDb>,
+	TRetrievable::Entity: Clone + Display,
+	TRetrievable::Match: Default + DeserializeOwned + Serialize,
+	for<'c> &'c mut TDb::Connection: Executor<'c, Database = TDb>,
+{
+	let locations =
+		retrieve::<TRetrievable, TDb, TPrompt, RETRY_ON_EMPTY>(connection, prompt).await?;
+	let selected = select_one(&locations, "Select a `Location`")?;
+
+	Ok(selected)
+}
+
+/// [`select`] from the [`retrieve`]d values.
+///
+/// If `RETRY_ON_EMPTY`, the query is attempted again when the query returns no results.
+pub async fn select_retrievable<TRetrievable, TDb, TPrompt, const RETRY_ON_EMPTY: bool>(
+	connection: &Pool<TDb>,
+	prompt: TPrompt,
+) -> DynResult<Vec<TRetrievable::Entity>>
+where
+	TDb: Database,
+	TPrompt: Display,
+	TRetrievable: Retrievable<Db = TDb>,
+	TRetrievable::Entity: Clone + Display,
+	TRetrievable::Match: Default + DeserializeOwned + Serialize,
+	for<'c> &'c mut TDb::Connection: Executor<'c, Database = TDb>,
+{
+	let locations =
+		retrieve::<TRetrievable, TDb, TPrompt, RETRY_ON_EMPTY>(connection, prompt).await?;
+	let selected = select(&locations, "Select the `Location`s")?;
+
+	Ok(selected)
 }
 
 /// `prompt` the user to enter text, and return what they entered.

@@ -3,7 +3,6 @@ use clinvoice_schema::{Currency, Expense, Id, Money};
 use futures::TryFutureExt;
 use sqlx::{Database, Executor, Pool};
 
-use super::menu::{ADD, ALL_ACTIONS, CONTINUE, DELETE, EDIT};
 use crate::{input, DynResult};
 
 /// # Summary
@@ -77,16 +76,16 @@ where
 	loop
 	{
 		let action = input::select_one(
-			&ALL_ACTIONS,
+			&input::menu::ALL_ACTIONS,
 			"\nThis is the menu for entering expenses\nWhat would you like to do?",
 		)?;
 
 		match action
 		{
-			ADD => add_menu::<_, XAdapter>(connection, expenses, default_currency, timesheet_id).await?,
-			CONTINUE => return Ok(()),
-			DELETE => delete_menu::<_, XAdapter>(connection, expenses).await?,
-			EDIT => edit_menu::<_, XAdapter>(connection, expenses).await?,
+			input::menu::ADD => add_menu::<_, XAdapter>(connection, expenses, default_currency, timesheet_id).await?,
+			input::menu::CONTINUE => return Ok(()),
+			input::menu::DELETE => delete_menu::<_, XAdapter>(connection, expenses).await?,
+			input::menu::EDIT => edit_menu::<_, XAdapter>(connection, expenses).await?,
 			_ => unreachable!("Unknown action. This should not have happened, please file an issue at https://github.com/Iron-E/clinvoice/issues"),
 		};
 	}

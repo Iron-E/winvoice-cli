@@ -1,9 +1,18 @@
 use crate::input;
 
+/// Enter a new value.
 pub const ADD: &str = "Add";
+
+/// Exit the menu, saving changes.
 pub const CONTINUE: &str = "Continue";
+
+/// Delete a value that was entered.
 pub const DELETE: &str = "Delete";
+
+/// Edit a value that was entered.
 pub const EDIT: &str = "Edit";
+
+/// All possible actions.
 pub const ALL_ACTIONS: [&str; 4] = [ADD, CONTINUE, DELETE, EDIT];
 
 /// # Summary

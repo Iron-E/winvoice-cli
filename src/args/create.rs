@@ -8,10 +8,10 @@ use clinvoice_adapter::{
 	Deletable,
 };
 use clinvoice_config::{Adapters, Config, Error as ConfigError};
-use clinvoice_schema::{Contact, ContactKind, Employee, Id, Location, Organization};
+use clinvoice_schema::{Contact, ContactKind, Employee, Location, Organization};
 use command::CreateCommand;
 use futures::{stream, TryFutureExt, TryStreamExt};
-use sqlx::{Database, Executor, Pool};
+use sqlx::{Database, Executor, Pool, Transaction};
 
 use super::store_args::StoreArgs;
 use crate::{args::update::Update, input, DynResult};
@@ -47,6 +47,7 @@ impl Create
 		LAdapter: Deletable<Db = TDb> + LocationAdapter,
 		OAdapter: Deletable<Db = TDb> + OrganizationAdapter,
 		for<'c> &'c mut TDb::Connection: Executor<'c, Database = TDb>,
+		for<'c> &'c mut Transaction<'c, TDb>: Executor<'c, Database = TDb>,
 	{
 		match self.command
 		{
@@ -60,7 +61,7 @@ impl Create
 			{
 				let kind = match (address, email, phone)
 				{
-					(true, ..) => input::util::location::select_one::<LAdapter, _, _, true>(
+					(true, ..) => input::select_one_retrievable::<LAdapter, _, _, true>(
 						&connection,
 						"Query the `Location` of this address",
 					)
@@ -121,7 +122,7 @@ impl Create
 
 				let outside_of_final = match inside
 				{
-					true => input::util::location::select_one::<LAdapter, _, _, true>(
+					true => input::select_one_retrievable::<LAdapter, _, _, true>(
 						&connection,
 						format!("Query the `Location` outside of {final_name}"),
 					)
@@ -130,56 +131,52 @@ impl Create
 					_ => None,
 				};
 
-				let location = LAdapter::create(&connection, final_name, outside_of_final)
-					.and_then(|created| {
-						stream::iter(names_reversed.map(Ok)).try_fold(created, |l, n| {
-							Create::report_created::<Location, _>(format!("№{}", l.id));
-							LAdapter::create(&connection, n, Some(l))
-						})
-					})
-					.await?;
+				// {{{
+				let mut transaction = connection.begin().await?;
 
-				Create::report_created::<Location, _>(format!("№{}", location.id));
+				let mut created = LAdapter::create(&mut *transaction, final_name, outside_of_final).await?;
+				for n in names_reversed
+				{
+					Create::report_created::<Location, _>(format!("№{}", created.id));
+					created = LAdapter::create(&mut *transaction, n, Some(created)).await?;
+				}
+				Create::report_created::<Location, _>(format!("№{}", created.id));
 
 				if outside
 				{
-					let mut inside_locations = input::util::location::select::<LAdapter, _, _, true>(
+					let mut inside_locations = input::select_retrievable::<LAdapter, _, _, true>(
 						&connection,
-						format!("Select `Location`s that are inside {location}"),
+						format!("Select `Location`s that are inside {created}"),
 					)
 					.await?;
 
-					// PERF: only call `.clone` on the newly-created `location` for elements in
+					// PERF: only call `.clone` on the newly-`created` `Location` for elements in
 					//       `inside_locations` other than the first
 					if let Some(after_first) = inside_locations.get_mut(1..)
 					{
 						after_first.iter_mut().for_each(|mut l| {
-							l.outer = Some(location.clone().into());
+							l.outer = Some(created.clone().into());
 						})
 					}
 
 					if let Some(first) = inside_locations.first_mut()
 					{
-						first.outer = Some(location.into());
+						first.outer = Some(created.into());
 					}
 
-					connection
-						.begin()
-						.and_then(|mut transaction| async {
-							LAdapter::update(&mut transaction, inside_locations.iter()).await?;
-							transaction.commit().await
-						})
-						.await?;
-
+					LAdapter::update(&mut transaction, inside_locations.iter()).await?;
 					inside_locations.into_iter().for_each(|l| {
 						Update::report_updated::<Location, _>(l.id);
 					});
 				}
+
+				transaction.commit().await?;
+				// }}}
 			},
 
 			CreateCommand::Organization { name } =>
 			{
-				let selected = input::util::location::select_one::<LAdapter, _, _, true>(
+				let selected = input::select_one_retrievable::<LAdapter, _, _, true>(
 					&connection,
 					"Query the `Location` of this `Organization`",
 				)

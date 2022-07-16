@@ -1,13 +1,13 @@
 mod command;
 
-use core::{any, fmt::Display};
+use core::fmt::Display;
 
 use clap::Args as Clap;
 use clinvoice_config::Config;
 use command::UpdateCommand;
 
 use super::{match_args::MatchArgs, store_args::StoreArgs};
-use crate::DynResult;
+use crate::{fmt, DynResult};
 
 /// Update information being stored by CLInvoice.
 ///
@@ -38,13 +38,7 @@ impl Update
 	where
 		TId: Display,
 	{
-		println!(
-			"{} {id} has been updated.",
-			any::type_name::<TUpdated>()
-				.split("::")
-				.last()
-				.expect("`TCreated` should have a type name")
-		);
+		println!("{} {id} has been updated.", fmt::type_name::<TUpdated>());
 	}
 
 	/// Execute this command given the user's [`Config`].

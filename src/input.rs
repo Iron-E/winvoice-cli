@@ -17,7 +17,7 @@ use serde::{de::DeserializeOwned, Serialize};
 use serde_yaml as yaml;
 use sqlx::{Database, Executor, Pool};
 
-use crate::dyn_result::DynResult;
+use crate::{fmt, DynResult};
 
 /// The prompt for when [matching](clinvoice_match).
 const MATCH_PROMPT: &str =
@@ -213,7 +213,10 @@ where
 	for<'c> &'c mut TDb::Connection: Executor<'c, Database = TDb>,
 {
 	let locations = retrieve::<TRetrievable, _, _, RETRY_ON_EMPTY>(connection, prompt).await?;
-	let selected = select_one(&locations, "Select a `Location`")?;
+	let selected = select_one(
+		&locations,
+		format!("Select a `{}`", fmt::type_name::<TRetrievable::Entity>()),
+	)?;
 
 	Ok(selected)
 }
@@ -234,7 +237,10 @@ where
 	for<'c> &'c mut TDb::Connection: Executor<'c, Database = TDb>,
 {
 	let locations = retrieve::<TRetrievable, _, _, RETRY_ON_EMPTY>(connection, prompt).await?;
-	let selected = select(&locations, "Select the `Location`s")?;
+	let selected = select(
+		&locations,
+		format!("Select the `{}`s", fmt::type_name::<TRetrievable::Entity>()),
+	)?;
 
 	Ok(selected)
 }

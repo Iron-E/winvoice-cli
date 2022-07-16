@@ -3,6 +3,7 @@
 
 mod args;
 mod dyn_result;
+mod fmt;
 mod input;
 
 use args::Args;

@@ -1,6 +1,6 @@
 mod command;
 
-use core::{any, fmt::Display};
+use core::fmt::Display;
 
 use clap::Args as Clap;
 use clinvoice_adapter::{
@@ -14,7 +14,7 @@ use futures::{TryFutureExt, TryStreamExt};
 use sqlx::{Database, Executor, Pool, Transaction};
 
 use super::store_args::StoreArgs;
-use crate::{args::update::Update, input, DynResult};
+use crate::{args::update::Update, fmt, input, DynResult};
 
 /// Use CLInvoice to store new information.
 ///
@@ -213,13 +213,7 @@ impl Create
 	where
 		TId: Display,
 	{
-		println!(
-			"{} {id} has been created.",
-			any::type_name::<TCreated>()
-				.split("::")
-				.last()
-				.expect("`TCreated` should have a type name")
-		);
+		println!("{} {id} has been created.", fmt::type_name::<TCreated>());
 	}
 
 	/// Execute this command given the user's [`Config`].

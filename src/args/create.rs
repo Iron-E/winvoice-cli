@@ -132,13 +132,19 @@ impl Create
 				// {{{
 				let mut transaction = connection.begin().await?;
 
+				/// A human-readable version of `Location`.
+				fn readable(l: &Location) -> String
+				{
+					format!("{} {}", fmt::id_num(l.id), fmt::quoted(&l.name))
+				}
+
 				let created = LAdapter::create(&connection, final_name, outside_of_final)
 					.and_then(|mut l| async {
-						Self::report_created::<Location, _>(fmt::id_num(l.id));
+						Self::report_created::<Location, _>(readable(&l));
 						for n in names_reversed
 						{
 							l = LAdapter::create(&mut *transaction, n, Some(l)).await?;
-							Self::report_created::<Location, _>(fmt::id_num(l.id));
+							Self::report_created::<Location, _>(readable(&l));
 						}
 						Ok(l)
 					})
@@ -169,7 +175,7 @@ impl Create
 					LAdapter::update(
 						&mut transaction,
 						inside_locations.iter().map(|l| {
-							Update::report_updated::<Location, _>(l.id);
+							Update::report_updated::<Location, _>(readable(&l));
 							l
 						}),
 					)
@@ -189,7 +195,7 @@ impl Create
 				.await?;
 
 				Self::report_created::<Organization, _>(fmt::id_num(
-					OAdapter::create(&connection, selected, name).await?.id
+					OAdapter::create(&connection, selected, name).await?.id,
 				));
 			},
 

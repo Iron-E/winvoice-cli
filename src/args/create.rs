@@ -134,7 +134,8 @@ impl Create
 				// {{{
 				let mut transaction = connection.begin().await?;
 
-				let mut created = LAdapter::create(&mut *transaction, final_name, outside_of_final).await?;
+				let mut created =
+					LAdapter::create(&mut *transaction, final_name, outside_of_final).await?;
 				for n in names_reversed
 				{
 					Create::report_created::<Location, _>(format!("№{}", created.id));

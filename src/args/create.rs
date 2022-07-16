@@ -84,8 +84,7 @@ impl Create
 				title,
 			} =>
 			{
-				Self::report_created::<Employee, _>(format!(
-					"№{}",
+				Self::report_created::<Employee, _>(fmt::id_num(
 					EAdapter::create(&connection, name, status, title).await?.id,
 				));
 			},
@@ -136,11 +135,11 @@ impl Create
 
 				let created = LAdapter::create(&connection, final_name, outside_of_final)
 					.and_then(|mut l| async {
-						Self::report_created::<Location, _>(format!("№{}", l.id));
+						Self::report_created::<Location, _>(fmt::id_num(l.id));
 						for n in names_reversed
 						{
 							l = LAdapter::create(&mut *transaction, n, Some(l)).await?;
-							Self::report_created::<Location, _>(format!("№{}", l.id));
+							Self::report_created::<Location, _>(fmt::id_num(l.id));
 						}
 						Ok(l)
 					})
@@ -190,8 +189,7 @@ impl Create
 				)
 				.await?;
 
-				Self::report_created::<Organization, _>(format!(
-					"№{}",
+				Self::report_created::<Organization, _>(fmt::id_num(
 					OAdapter::create(&connection, selected, name).await?.id
 				));
 			},

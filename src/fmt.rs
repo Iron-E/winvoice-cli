@@ -5,13 +5,13 @@ use core::{any, fmt::Display};
 use clinvoice_schema::Id;
 
 /// Return "№{id}" (without quotes).
-pub fn id_num(id: Id) -> String
+pub(crate) fn id_num(id: Id) -> String
 {
 	format!("№{id}")
 }
 
 /// Return "{t}" (with quotes).
-pub fn quoted<T>(t: T) -> String
+pub(crate) fn quoted<T>(t: T) -> String
 where
 	T: Display,
 {
@@ -19,7 +19,7 @@ where
 }
 
 /// The [`type_name`](any::type_name) without any leading module names.
-pub fn type_name<T>() -> &'static str
+pub(crate) fn type_name<T>() -> &'static str
 {
 	any::type_name::<T>()
 		.split("::")

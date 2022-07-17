@@ -9,7 +9,7 @@ mod utils;
 
 use args::Args;
 use clap::Parser;
-use dyn_result::DynResult;
+use dyn_result::{DynError, DynResult};
 
 /// # Summary
 ///

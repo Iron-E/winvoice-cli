@@ -138,17 +138,17 @@ impl Create
 					format!("{} {}", fmt::id_num(l.id), fmt::quoted(&l.name))
 				}
 
-				let created = LAdapter::create(&connection, final_name, outside_of_final)
-					.and_then(|mut l| async {
-						Self::report_created::<Location, _>(readable(&l));
-						for n in names_reversed
-						{
-							l = LAdapter::create(&mut *transaction, n, Some(l)).await?;
-							Self::report_created::<Location, _>(readable(&l));
-						}
-						Ok(l)
-					})
-					.await?;
+				// TODO: convert to `try_fold` after `stream`s merge to `std`? {{{2
+				let mut l = LAdapter::create(&mut *transaction, final_name, outside_of_final).await?;
+				Self::report_created::<Location, _>(readable(&l));
+				for n in names_reversed
+				{
+					l = LAdapter::create(&mut *transaction, n, Some(l)).await?;
+					Self::report_created::<Location, _>(readable(&l));
+				}
+				// 2}}}
+
+				let created = l;
 
 				if outside
 				{

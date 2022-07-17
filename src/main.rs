@@ -5,6 +5,7 @@ mod args;
 mod dyn_result;
 mod fmt;
 mod input;
+mod utils;
 
 use args::Args;
 use clap::Parser;

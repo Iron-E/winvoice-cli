@@ -13,7 +13,7 @@ pub enum Error
 	Io(#[from] io::Error),
 
 	#[allow(missing_docs)]
-	#[error("No {0} could be selected for this operation, and at least one was required")]
+	#[error("There were no {0} values, and at least one was required")]
 	NoData(String),
 
 	#[allow(missing_docs)]

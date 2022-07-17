@@ -3,7 +3,6 @@ mod menu;
 pub mod util;
 
 use core::{
-	any,
 	fmt::{Debug, Display},
 	str::FromStr,
 };
@@ -174,7 +173,7 @@ where
 {
 	if entities.is_empty()
 	{
-		return Err(Error::NoData(format!("`{}`", any::type_name::<TEntity>())));
+		return Err(Error::NoData(crate::fmt::type_name::<TEntity>().into()));
 	}
 
 	let selector = {

@@ -4,17 +4,36 @@ use core::fmt::Display;
 
 use clap::Args as Clap;
 use clinvoice_adapter::{
-	schema::{ContactAdapter, EmployeeAdapter, LocationAdapter, OrganizationAdapter},
+	schema::{
+		ContactAdapter,
+		EmployeeAdapter,
+		ExpensesAdapter,
+		JobAdapter,
+		LocationAdapter,
+		OrganizationAdapter,
+		TimesheetAdapter,
+	},
 	Deletable,
 };
 use clinvoice_config::{Adapters, Config, Error as ConfigError};
-use clinvoice_schema::{Contact, ContactKind, Employee, Location, Organization};
+use clinvoice_match::{Match, MatchOrganization};
+use clinvoice_schema::{
+	chrono::Utc,
+	Contact,
+	ContactKind,
+	Employee,
+	Invoice,
+	InvoiceDate,
+	Job,
+	Location,
+	Organization,
+};
 use command::CreateCommand;
 use futures::{TryFutureExt, TryStreamExt};
 use sqlx::{Database, Executor, Pool, Transaction};
 
 use super::store_args::StoreArgs;
-use crate::{args::update::Update, fmt, input, DynResult};
+use crate::{args::update::Update, fmt, input, utils, DynError, DynResult};
 
 /// Use CLInvoice to store new information.
 ///
@@ -35,7 +54,7 @@ pub struct Create
 
 impl Create
 {
-	pub async fn create<CAdapter, EAdapter, LAdapter, OAdapter, TDb>(
+	pub async fn create<CAdapter, EAdapter, JAdapter, LAdapter, OAdapter, TAdapter, XAdapter, TDb>(
 		self,
 		connection: Pool<TDb>,
 		config: &Config,
@@ -44,8 +63,11 @@ impl Create
 		TDb: Database,
 		CAdapter: Deletable<Db = TDb> + ContactAdapter,
 		EAdapter: Deletable<Db = TDb> + EmployeeAdapter,
+		JAdapter: Deletable<Db = TDb> + JobAdapter,
 		LAdapter: Deletable<Db = TDb> + LocationAdapter,
 		OAdapter: Deletable<Db = TDb> + OrganizationAdapter,
+		TAdapter: Deletable<Db = TDb> + TimesheetAdapter,
+		XAdapter: Deletable<Db = TDb> + ExpensesAdapter,
 		for<'c> &'c mut TDb::Connection: Executor<'c, Database = TDb>,
 		for<'c> &'c mut Transaction<'c, TDb>: Executor<'c, Database = TDb>,
 	{
@@ -63,7 +85,7 @@ impl Create
 				{
 					(true, ..) => input::select_one_retrieved::<LAdapter, _, _, true>(
 						&connection,
-						"Query the `Location` of this address",
+						"Query the Location of this address",
 					)
 					.await
 					.map(ContactKind::Address)?,
@@ -104,7 +126,57 @@ impl Create
 				increment,
 				notes,
 				objectives,
-			} => todo!(),
+			} =>
+			{
+				let client = match employer
+				{
+					true =>
+					{
+						let mut retrieved =
+							OAdapter::retrieve(&connection, &MatchOrganization {
+								id: config.organizations.employer_id.map(Match::from).ok_or(
+									"The `employer_id` field of the configuration file was not set",
+								)?,
+								..Default::default()
+							})
+							.await?;
+
+						retrieved
+							.pop()
+							.ok_or_else(|| input::Error::NoData(fmt::type_name::<Organization>().into()))?
+					},
+
+					#[rustfmt::skip]
+					_ => input::select_one_retrieved::<OAdapter, _, _, true>(
+						&connection,
+						"Query the client for this Job",
+					)
+					.await?,
+				};
+
+				Self::report_created::<Job, _>(
+					JAdapter::create(
+						&connection,
+						client,
+						date_close.map(utils::naive_local_datetime_to_utc),
+						date_open
+							.map(utils::naive_local_datetime_to_utc)
+							.unwrap_or_else(|| Utc::now()),
+						increment,
+						Invoice {
+							date: date_invoice_issued.map(|issued| InvoiceDate {
+								issued: utils::naive_local_datetime_to_utc(issued),
+								paid: date_invoice_paid.map(utils::naive_local_datetime_to_utc),
+							}),
+							hourly_rate,
+						},
+						notes,
+						objectives,
+					)
+					.await?
+					.id,
+				);
+			},
 
 			CreateCommand::Location {
 				inside,
@@ -122,7 +194,7 @@ impl Create
 				{
 					true => input::select_one_retrieved::<LAdapter, _, _, true>(
 						&connection,
-						format!("Query the `Location` outside of {final_name}"),
+						format!("Query the Location outside of {final_name}"),
 					)
 					.await
 					.map(Some)?,
@@ -154,7 +226,7 @@ impl Create
 				{
 					let mut inside_locations = input::select_retrieved::<LAdapter, _, _, true>(
 						&connection,
-						format!("Select `Location`s that are inside {created}"),
+						format!("Select Locations that are inside {created}"),
 					)
 					.await?;
 
@@ -190,7 +262,7 @@ impl Create
 			{
 				let selected = input::select_one_retrieved::<LAdapter, _, _, true>(
 					&connection,
-					"Query the `Location` of this `Organization`",
+					"Query the Location of this Organization",
 				)
 				.await?;
 
@@ -232,14 +304,19 @@ impl Create
 				use clinvoice_adapter_postgres::schema::{
 					PgContact,
 					PgEmployee,
+					PgExpenses,
+					PgJob,
 					PgLocation,
 					PgOrganization,
+					PgTimesheet,
 				};
 				use sqlx::PgPool;
 
 				let pool = PgPool::connect_lazy(&store.url)?;
 				self
-					.create::<PgContact, PgEmployee, PgLocation, PgOrganization, _>(pool, config)
+					.create::<PgContact, PgEmployee, PgJob, PgLocation, PgOrganization, PgTimesheet, PgExpenses, _>(
+						pool, config,
+					)
 					.await?
 			},
 

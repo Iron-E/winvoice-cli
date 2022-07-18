@@ -90,19 +90,28 @@ pub enum CreateCommand
 	/// See the documentation for more information about `Job`s.
 	Job
 	{
-		/// The `date_close` of the `Job` to create.
+		/// The date and time that work on the `Job` to create stopped.
+		///
+		/// See --date-open for formatting information.
 		#[clap(long, requires("date-open"))]
 		date_close: Option<NaiveDateTime>,
 
-		/// The `invoice.date_issued` of the `Job` to create.
-		#[clap(long, short = 's')]
+		/// The date and time that the `Job` to create's associated `Invoice` was issued to the `client`.
+		///
+		/// See --date-open for formatting information.
+		#[clap(long)]
 		date_invoice_issued: Option<NaiveDateTime>,
 
-		/// The `invoice.date_paid` of the `Job` to create.
-		#[clap(long, requires("date-invoice-issued"), short = 'p')]
+		/// The date and time that the `Job` to create's associated `Invoice` was paid by the `client`.
+		///
+		/// See --date-open for formatting information.
+		#[clap(long, requires("date-invoice-issued"))]
 		date_invoice_paid: Option<NaiveDateTime>,
 
-		/// The `date_open` of the `Job` to create.
+		/// The date and time that work on the `Job` to create started. Defaults to the current date
+		/// and time.
+		///
+		/// e.g. December 12th, 2022 at 1:30:00pm is "2022-12-31T13:30:00"
 		#[clap(long)]
 		date_open: Option<NaiveDateTime>,
 
@@ -117,10 +126,13 @@ pub enum CreateCommand
 
 		/// The `increment` of the `Job` to create e.g. "15min".
 		///
+		/// If this argument is not provided, CLInvoice will attempt to use the value from the
+		/// `default_increment` key in the `[jobs]` field of your configuration.
+		///
 		/// See the documentation of [`humantime`] to see more information about how to format
 		/// this argument.
 		#[clap(long, short, value_parser = humantime::parse_duration)]
-		increment: Duration,
+		increment: Option<Duration>,
 
 		/// The `notes` of the `Job` to create.
 		#[clap(long, short)]
@@ -171,7 +183,7 @@ pub enum CreateCommand
 		#[clap(action, long, short)]
 		default_employee: bool,
 
-		/// The `time_begin` of the `Timesheet` to create. Defaults to the current time.
+		/// The `time_begin` of the `Timesheet` to create. Defaults to the current date and time.
 		///
 		/// e.g. December 12th, 2022 at 1:30:00pm is "2022-12-31T13:30:00"
 		#[clap(long, short = 'b')]
@@ -179,7 +191,7 @@ pub enum CreateCommand
 
 		/// The `time_end` of the `Timesheet` to create. Defaults to the current time.
 		///
-		/// See --time-begin for more info.
+		/// See --time-begin for formatting information.
 		#[clap(long, requires("time-begin"), short = 'e')]
 		time_end: Option<NaiveDateTime>,
 

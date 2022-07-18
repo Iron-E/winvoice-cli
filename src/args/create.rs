@@ -29,11 +29,10 @@ use clinvoice_schema::{
 	Organization,
 };
 use command::CreateCommand;
-use futures::{TryFutureExt, TryStreamExt};
 use sqlx::{Database, Executor, Pool, Transaction};
 
 use super::store_args::StoreArgs;
-use crate::{args::update::Update, fmt, input, utils, DynError, DynResult};
+use crate::{args::update::Update, fmt, input, utils, DynResult};
 
 /// Use CLInvoice to store new information.
 ///
@@ -162,7 +161,7 @@ impl Create
 						date_open
 							.map(utils::naive_local_datetime_to_utc)
 							.unwrap_or_else(|| Utc::now()),
-						increment,
+						increment.unwrap_or(config.jobs.default_increment),
 						Invoice {
 							date: date_invoice_issued.map(|issued| InvoiceDate {
 								issued: utils::naive_local_datetime_to_utc(issued),

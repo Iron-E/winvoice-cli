@@ -129,21 +129,21 @@ impl Create
 			{
 				let client = match employer
 				{
-					true =>
-					{
-						let mut retrieved =
-							OAdapter::retrieve(&connection, &MatchOrganization {
-								id: config.organizations.employer_id.map(Match::from).ok_or(
-									"The `employer_id` field of the configuration file was not set",
-								)?,
-								..Default::default()
-							})
-							.await?;
-
-						retrieved
-							.pop()
-							.ok_or_else(|| input::Error::NoData(fmt::type_name::<Organization>().into()))?
-					},
+					true => OAdapter::retrieve(&connection, &MatchOrganization {
+						id: config
+							.organizations
+							.employer_id
+							.map(Match::from)
+							.ok_or("The `employer_id` field of the configuration file was not set")?,
+						..Default::default()
+					})
+					.await
+					.map_err(DynError::from)
+					.and_then(|mut v| {
+						v.pop()
+							.ok_or_else(|| input::Error::NoData(fmt::type_name::<Organization>().into()))
+							.into()
+					})?,
 
 					#[rustfmt::skip]
 					_ => input::select_one_retrieved::<OAdapter, _, _>(

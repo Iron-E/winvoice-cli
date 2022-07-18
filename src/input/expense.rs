@@ -1,18 +1,16 @@
+//! This module contains methods which guide the user through the creation of
+//! [`Expense`](clinvoice_schema::Expense)s. See [`menu`] for more information.
+
 mod action;
 
 use action::Action;
-use clinvoice_adapter::{schema::ExpensesAdapter, Deletable};
-use clinvoice_schema::{Currency, Expense, Id, Money};
+use clinvoice_schema::Money;
 use strum::IntoEnumIterator;
 
-use super::{Error, Result};
+use super::Result;
 use crate::DynResult;
 
-/// Show a menu for adding [expenses](clinvoice_schema::Expense).
-///
-/// # Errors
-///
-/// Will error whenever [`select_one`](super::select_one) or [`text`](super::text) does.
+/// Show a menu for adding `expenses`.
 fn add_menu(expenses: &mut Vec<(String, Money, String)>) -> DynResult<()>
 {
 	let category = super::text(None, "What type of Expense is this?")?;
@@ -29,12 +27,12 @@ fn add_menu(expenses: &mut Vec<(String, Money, String)>) -> DynResult<()>
 	Ok(())
 }
 
-/// Show a menu for creating [expenses](clinvoice_schema::Expense). Returns a [`Vec`] of tuples
-/// with the fields `category`, `cost`, and `description` defined (in that order).
+/// Show a menu for queueing the creation of [`Expense`](clinvoice_schema::Expense)s. Returns a
+/// [`Vec`] of tuples with the fields `category`, `cost`, and `description` defined (in that order).
 ///
 /// # Errors
 ///
-/// Will error whenever [`select_one`](super::select_one), [`add_menu`], [`delete_menu`], or [`edit_menu`] does.
+/// * When [`select_one`](super::select_one), [`add_menu`], [`delete_menu`], or [`edit_menu`] does.
 pub fn menu() -> DynResult<Vec<(String, Money, String)>>
 {
 	let all_actions: Vec<_> = Action::iter().collect();

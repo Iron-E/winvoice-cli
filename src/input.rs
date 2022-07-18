@@ -8,6 +8,7 @@ use core::{
 use std::io;
 
 use clinvoice_adapter::Retrievable;
+use clinvoice_export::Format;
 use clinvoice_schema::RestorableSerde;
 use dialoguer::{Confirm, Editor, Input, MultiSelect, Select};
 pub use error::{Error, Result};
@@ -86,12 +87,16 @@ where
 }
 
 /// [Edit](Editor::edit) some `prompt`, rendered as Markdown.
-pub fn edit_markdown<T>(content: T) -> Result<String>
+pub fn edit_text<T>(content: T, format: Option<Format>) -> Result<String>
 where
 	T: AsRef<str>,
 {
-	let result = Editor::new().extension(".md").edit(content.as_ref())?;
-	result.ok_or(Error::NotEdited)
+	let maybe_edit = Editor::new()
+		// HACK: have to use closure here
+		.extension(format.map(|f| f.extension()).unwrap_or("txt"))
+		.edit(content.as_ref())?;
+
+	maybe_edit.ok_or(Error::NotEdited)
 }
 
 /// [Retrieve](Retrievable::retrieve) all [entities](Retrievable::Entity) that match a

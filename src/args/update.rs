@@ -7,7 +7,7 @@ use clinvoice_config::Config;
 use command::UpdateCommand;
 
 use super::{match_args::MatchArgs, store_args::StoreArgs};
-use crate::{fmt, utils, DynResult};
+use crate::{utils, DynResult};
 
 /// Update information being stored by CLInvoice.
 ///

@@ -19,12 +19,10 @@ use clinvoice_config::{Adapters, Config, Error as ConfigError};
 use clinvoice_match::{MatchEmployee, MatchOrganization};
 use clinvoice_schema::{
 	chrono::Utc,
-	Contact,
 	ContactKind,
 	Employee,
 	Invoice,
 	InvoiceDate,
-	Job,
 	Location,
 	Organization,
 };
@@ -347,6 +345,7 @@ impl Create
 						.map(utils::naive_local_datetime_to_utc)
 						.unwrap_or_else(|| Utc::now()),
 					time_end.map(utils::naive_local_datetime_to_utc),
+					work_notes.unwrap_or_else(|| "None".into()),
 				)
 				.await?;
 

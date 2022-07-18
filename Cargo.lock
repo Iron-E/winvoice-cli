@@ -270,8 +270,8 @@ dependencies = [
 
 [[package]]
 name = "clinvoice-adapter"
-version = "0.15.3"
-source = "git+https://github.com/Iron-E/clinvoice-adapter?branch=release/0.15#23f20267b9585b452c3f389d2e64b143155fa04c"
+version = "0.16.0"
+source = "git+https://github.com/Iron-E/clinvoice-adapter?branch=release/0.16#f2540a67a676559840bf3dc35244b41d7dacf51b"
 dependencies = [
  "async-trait",
  "clinvoice-error",
@@ -283,8 +283,8 @@ dependencies = [
 
 [[package]]
 name = "clinvoice-adapter-postgres"
-version = "0.4.0"
-source = "git+https://github.com/Iron-E/clinvoice-adapter-postgres?branch=release/0.4#4d43a2b621bbf8228cf0ecf6d8502c60648c1aae"
+version = "0.5.0"
+source = "git+https://github.com/Iron-E/clinvoice-adapter-postgres?branch=release/0.5#23651fdeb5309a2efecf64fd34062ee33f62195a"
 dependencies = [
  "async-trait",
  "clinvoice-adapter",
@@ -321,7 +321,7 @@ source = "git+https://github.com/Iron-E/clinvoice-error?branch=release/0.3#b6e0f
 [[package]]
 name = "clinvoice-export"
 version = "0.1.5"
-source = "git+https://github.com/Iron-E/clinvoice-export?branch=release/0.1#d809d9724685a57b4d305d95d7d5a677e1ac63d0"
+source = "git+https://github.com/Iron-E/clinvoice-export?branch=release/0.1#f1404aeaf8ad8a327a88fe58f3a20b9792963417"
 dependencies = [
  "clinvoice-error",
  "clinvoice-finance",

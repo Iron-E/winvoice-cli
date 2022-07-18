@@ -1,6 +1,5 @@
 mod error;
-mod menu;
-pub mod util;
+pub mod expense;
 
 use core::{
 	fmt::{Debug, Display},
@@ -10,7 +9,7 @@ use std::io;
 
 use clinvoice_adapter::Retrievable;
 use clinvoice_schema::RestorableSerde;
-use dialoguer::{Editor, Input, MultiSelect, Select};
+use dialoguer::{Confirm, Editor, Input, MultiSelect, Select};
 pub use error::{Error, Result};
 use serde::{de::DeserializeOwned, Serialize};
 use serde_yaml as yaml;
@@ -21,6 +20,20 @@ use crate::{fmt, DynResult};
 /// The prompt for when [matching](clinvoice_match).
 const MATCH_PROMPT: &str =
 	"See the documentation of this query at https://github.com/Iron-E/clinvoice/wiki/Query-Syntax#";
+
+/// `prompt` the user with a yes/no question and map the response to a `bool`.
+///
+/// # Returns
+///
+/// * `Ok(true)` if the user answers "yes".
+/// * `Ok(false)` if the user answers "no".
+/// * `Err(_)` if there was an error gathering input.
+pub fn confirm<T>(prompt: T) -> io::Result<bool>
+where
+	T: Into<String>,
+{
+	Confirm::new().with_prompt(prompt).interact()
+}
 
 /// Gather input from the user's text editor, defined by the:
 ///
@@ -103,7 +116,9 @@ where
 
 		let results = TRetrievable::retrieve(connection, &match_condition).await?;
 
-		if RETRY_ON_EMPTY && results.is_empty() && menu::ask_to_retry()?
+		if RETRY_ON_EMPTY &&
+			results.is_empty() &&
+			confirm("That query did not return any results, would you like to try again?")?
 		{
 			continue;
 		}
@@ -140,7 +155,6 @@ where
 
 	MultiSelect::new()
 		.items(entities)
-		.paged(true)
 		.with_prompt(prompt)
 		.interact()
 }
@@ -178,7 +192,7 @@ where
 
 	let selector = {
 		let mut s = Select::new();
-		s.items(entities).paged(true).with_prompt(prompt);
+		s.items(entities).with_prompt(prompt);
 		s
 	};
 

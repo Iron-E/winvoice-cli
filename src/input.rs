@@ -98,7 +98,7 @@ where
 /// user-provided query.
 ///
 /// If `RETRY_ON_EMPTY`, the query is attempted again when the query returns no results.
-pub async fn retrieve<TRetrievable, TDb, TPrompt, const RETRY_ON_EMPTY: bool>(
+pub async fn retrieve<TRetrievable, TDb, TPrompt>(
 	connection: &Pool<TDb>,
 	prompt: TPrompt,
 ) -> DynResult<Vec<TRetrievable::Entity>>
@@ -116,8 +116,7 @@ where
 
 		let results = TRetrievable::retrieve(connection, &match_condition).await?;
 
-		if RETRY_ON_EMPTY &&
-			results.is_empty() &&
+		if results.is_empty() &&
 			confirm("That query did not return any results, would you like to try again?")?
 		{
 			continue;
@@ -213,7 +212,7 @@ where
 /// [`select_one`] from the [`retrieve`]d values.
 ///
 /// If `RETRY_ON_EMPTY`, the query is attempted again when the query returns no results.
-pub async fn select_one_retrieved<TRetrievable, TDb, TPrompt, const RETRY_ON_EMPTY: bool>(
+pub async fn select_one_retrieved<TRetrievable, TDb, TPrompt>(
 	connection: &Pool<TDb>,
 	prompt: TPrompt,
 ) -> DynResult<TRetrievable::Entity>
@@ -225,7 +224,7 @@ where
 	TRetrievable::Match: Default + DeserializeOwned + Serialize,
 	for<'c> &'c mut TDb::Connection: Executor<'c, Database = TDb>,
 {
-	let locations = retrieve::<TRetrievable, _, _, RETRY_ON_EMPTY>(connection, prompt).await?;
+	let locations = retrieve::<TRetrievable, _, _>(connection, prompt).await?;
 	let selected = select_one(
 		&locations,
 		format!("Select a `{}`", fmt::type_name::<TRetrievable::Entity>()),
@@ -237,7 +236,7 @@ where
 /// [`select`] from the [`retrieve`]d values.
 ///
 /// If `RETRY_ON_EMPTY`, the query is attempted again when the query returns no results.
-pub async fn select_retrieved<TRetrievable, TDb, TPrompt, const RETRY_ON_EMPTY: bool>(
+pub async fn select_retrieved<TRetrievable, TDb, TPrompt>(
 	connection: &Pool<TDb>,
 	prompt: TPrompt,
 ) -> DynResult<Vec<TRetrievable::Entity>>
@@ -249,7 +248,7 @@ where
 	TRetrievable::Match: Default + DeserializeOwned + Serialize,
 	for<'c> &'c mut TDb::Connection: Executor<'c, Database = TDb>,
 {
-	let locations = retrieve::<TRetrievable, _, _, RETRY_ON_EMPTY>(connection, prompt).await?;
+	let locations = retrieve::<TRetrievable, _, _>(connection, prompt).await?;
 	let selected = select(
 		&locations,
 		format!("Select the `{}`s", fmt::type_name::<TRetrievable::Entity>()),

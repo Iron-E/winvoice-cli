@@ -82,7 +82,7 @@ impl Create
 			{
 				let kind = match (address, email, phone)
 				{
-					(true, ..) => input::select_one_retrieved::<LAdapter, _, _, true>(
+					(true, ..) => input::select_one_retrieved::<LAdapter, _, _>(
 						&connection,
 						"Query the Location of this address",
 					)
@@ -146,7 +146,7 @@ impl Create
 					},
 
 					#[rustfmt::skip]
-					_ => input::select_one_retrieved::<OAdapter, _, _, true>(
+					_ => input::select_one_retrieved::<OAdapter, _, _>(
 						&connection,
 						"Query the client for this Job",
 					)
@@ -191,7 +191,7 @@ impl Create
 
 				let outside_of_final = match inside
 				{
-					true => input::select_one_retrieved::<LAdapter, _, _, true>(
+					true => input::select_one_retrieved::<LAdapter, _, _>(
 						&connection,
 						format!("Query the Location outside of {final_name}"),
 					)
@@ -223,7 +223,7 @@ impl Create
 
 				if outside
 				{
-					let mut inside_locations = input::select_retrieved::<LAdapter, _, _, true>(
+					let mut inside_locations = input::select_retrieved::<LAdapter, _, _>(
 						&connection,
 						format!("Select Locations that are inside {created}"),
 					)
@@ -259,7 +259,7 @@ impl Create
 
 			CreateCommand::Organization { name } =>
 			{
-				let selected = input::select_one_retrieved::<LAdapter, _, _, true>(
+				let selected = input::select_one_retrieved::<LAdapter, _, _>(
 					&connection,
 					"Query the Location of this Organization",
 				)

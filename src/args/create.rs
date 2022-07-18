@@ -16,7 +16,7 @@ use clinvoice_adapter::{
 	Deletable,
 };
 use clinvoice_config::{Adapters, Config, Error as ConfigError};
-use clinvoice_match::{Match, MatchOrganization};
+use clinvoice_match::{MatchEmployee, MatchOrganization};
 use clinvoice_schema::{
 	chrono::Utc,
 	Contact,
@@ -32,7 +32,7 @@ use command::CreateCommand;
 use sqlx::{Database, Executor, Pool, Transaction};
 
 use super::store_args::StoreArgs;
-use crate::{args::update::Update, fmt, input, utils, DynResult};
+use crate::{args::update::Update, fmt, input, utils, DynError, DynResult};
 
 /// Use CLInvoice to store new information.
 ///
@@ -93,9 +93,8 @@ impl Create
 					_ => ContactKind::Other(info),
 				};
 
-				Self::report_created::<Contact, _>(fmt::quoted(
-					CAdapter::create(&connection, kind, label).await?.label,
-				));
+				let created = CAdapter::create(&connection, kind, label).await?;
+				Self::report_created(&created, |c| fmt::quoted(&c.label));
 			},
 
 			CreateCommand::Employee {
@@ -104,16 +103,32 @@ impl Create
 				title,
 			} =>
 			{
-				Self::report_created::<Employee, _>(fmt::id_num(
-					EAdapter::create(&connection, name, status, title).await?.id,
-				));
+				let created = EAdapter::create(&connection, name, status, title).await?;
+				Self::report_created(&created, |e| fmt::id_num(e.id));
 			},
 
 			CreateCommand::Expense {
 				category,
 				cost,
 				description,
-			} => todo!(),
+			} =>
+			{
+				let timesheet = input::select_one_retrieved::<TAdapter, _, _>(
+					&connection,
+					"Query the Timesheet this Expense is for",
+				)
+				.await?;
+
+				let created = XAdapter::create(
+					&connection,
+					vec![(category, cost, description)],
+					timesheet.id,
+				)
+				.await
+				.map(|mut v| v.pop().unwrap())?;
+
+				Self::report_created(&created, |x| fmt::id_num(x.id));
+			},
 
 			CreateCommand::Job {
 				date_close,
@@ -129,52 +144,56 @@ impl Create
 			{
 				let client = match employer
 				{
-					true => OAdapter::retrieve(&connection, &MatchOrganization {
-						id: config
+					true =>
+					{
+						let match_condition = config
 							.organizations
 							.employer_id
-							.map(Match::from)
-							.ok_or("The `employer_id` field of the configuration file was not set")?,
-						..Default::default()
-					})
-					.await
-					.map_err(DynError::from)
-					.and_then(|mut v| {
-						v.pop()
-							.ok_or_else(|| input::Error::NoData(fmt::type_name::<Organization>().into()))
-							.into()
-					})?,
+							.map(|id| MatchOrganization::id(id.into()))
+							.ok_or(
+								"The `employer_id` key in the `[organizations]` field of the \
+								 configuration file has no value",
+							)?;
+
+						OAdapter::retrieve(&connection, &match_condition)
+							.await
+							.map_err(DynError::from)
+							.and_then(|mut v| {
+								v.pop().ok_or_else(|| {
+									input::Error::NoData(fmt::type_name::<Organization>().into()).into()
+								})
+							})?
+					},
 
 					#[rustfmt::skip]
 					_ => input::select_one_retrieved::<OAdapter, _, _>(
 						&connection,
-						"Query the client for this Job",
+						"Query the client Organization for this Job",
 					)
 					.await?,
 				};
 
-				Self::report_created::<Job, _>(
-					JAdapter::create(
-						&connection,
-						client,
-						date_close.map(utils::naive_local_datetime_to_utc),
-						date_open
-							.map(utils::naive_local_datetime_to_utc)
-							.unwrap_or_else(|| Utc::now()),
-						increment.unwrap_or(config.jobs.default_increment),
-						Invoice {
-							date: date_invoice_issued.map(|issued| InvoiceDate {
-								issued: utils::naive_local_datetime_to_utc(issued),
-								paid: date_invoice_paid.map(utils::naive_local_datetime_to_utc),
-							}),
-							hourly_rate,
-						},
-						notes,
-						objectives,
-					)
-					.await?
-					.id,
-				);
+				let created = JAdapter::create(
+					&connection,
+					client,
+					date_close.map(utils::naive_local_datetime_to_utc),
+					date_open
+						.map(utils::naive_local_datetime_to_utc)
+						.unwrap_or_else(|| Utc::now()),
+					increment.unwrap_or(config.jobs.default_increment),
+					Invoice {
+						date: date_invoice_issued.map(|issued| InvoiceDate {
+							issued: utils::naive_local_datetime_to_utc(issued),
+							paid: date_invoice_paid.map(utils::naive_local_datetime_to_utc),
+						}),
+						hourly_rate,
+					},
+					notes,
+					objectives,
+				)
+				.await?;
+
+				Self::report_created(&created, |j| fmt::id_num(j.id));
 			},
 
 			CreateCommand::Location {
@@ -211,11 +230,11 @@ impl Create
 
 				// TODO: convert to `try_fold` after `stream`s merge to `std`? {{{2
 				let mut l = LAdapter::create(&mut *transaction, final_name, outside_of_final).await?;
-				Self::report_created::<Location, _>(readable(&l));
+				Self::report_created(&l, readable);
 				for n in names_reversed
 				{
 					l = LAdapter::create(&mut *transaction, n, Some(l)).await?;
-					Self::report_created::<Location, _>(readable(&l));
+					Self::report_created(&l, readable);
 				}
 				// 2}}}
 
@@ -246,7 +265,7 @@ impl Create
 					LAdapter::update(
 						&mut transaction,
 						inside_locations.iter().map(|l| {
-							Update::report_updated::<Location, _>(readable(&l));
+							Update::report_updated(&l, readable);
 							l
 						}),
 					)
@@ -265,9 +284,8 @@ impl Create
 				)
 				.await?;
 
-				Self::report_created::<Organization, _>(fmt::id_num(
-					OAdapter::create(&connection, selected, name).await?.id,
-				));
+				let created = OAdapter::create(&connection, selected, name).await?;
+				Self::report_created(&created, |o| fmt::id_num(o.id));
 			},
 
 			CreateCommand::Timesheet {
@@ -275,19 +293,81 @@ impl Create
 				time_begin,
 				time_end,
 				work_notes,
-			} => todo!(),
+			} =>
+			{
+				let employee = match default_employee
+				{
+					true =>
+					{
+						let match_condition = config
+							.employees
+							.id
+							.map(|id| MatchEmployee::id(id.into()))
+							.ok_or(
+								"The `id` key in the `[employees]` field of the configuration file has no \
+								 value",
+							)?;
+
+						EAdapter::retrieve(&connection, &match_condition)
+							.await
+							.map_err(DynError::from)
+							.and_then(|mut v| {
+								v.pop().ok_or_else(|| {
+									input::Error::NoData(fmt::type_name::<Employee>().into()).into()
+								})
+							})?
+					},
+
+					#[rustfmt::skip]
+					_ => input::select_one_retrieved::<EAdapter, _, _>(
+						&connection,
+						"Query the Employee who is responsible for the work",
+					)
+					.await?,
+				};
+
+				let job = input::select_one_retrieved::<JAdapter, _, _>(
+					&connection,
+					"Query the Job being worked on",
+				)
+				.await?;
+
+				let mut expenses = Vec::new();
+				todo!("input::expense::menu()");
+
+				// {{{
+				let mut transaction = connection.begin().await?;
+
+				let created = TAdapter::create(
+					&mut transaction,
+					employee,
+					expenses,
+					job,
+					time_begin
+						.map(utils::naive_local_datetime_to_utc)
+						.unwrap_or_else(|| Utc::now()),
+					time_end.map(utils::naive_local_datetime_to_utc),
+				)
+				.await?;
+
+				transaction.commit().await?;
+				// }}}
+
+				Self::report_created(&created, |t| t.id);
+			},
 		};
 
 		Ok(())
 	}
 
-	/// Indicate with [`println!`] that a value of type `TCreated` — identified by `id` — has been
-	/// created successfully.
-	pub(super) fn report_created<TCreated, TId>(id: TId)
+	/// Indicate with [`println!`] that a value of type `TCreated` — [`Display`]ed by calling
+	/// `selector` on the `created` value — was created.
+	pub(super) fn report_created<TCreated, TFn, TId>(created: &TCreated, selector: TFn)
 	where
+		TFn: FnOnce(&TCreated) -> TId,
 		TId: Display,
 	{
-		println!("{} {id} has been created.", fmt::type_name::<TCreated>());
+		utils::report_action::<TCreated, _>("created", selector(created));
 	}
 
 	/// Execute this command given the user's [`Config`].

@@ -7,7 +7,7 @@ use clinvoice_config::Config;
 use command::UpdateCommand;
 
 use super::{match_args::MatchArgs, store_args::StoreArgs};
-use crate::{fmt, DynResult};
+use crate::{fmt, utils, DynResult};
 
 /// Update information being stored by CLInvoice.
 ///
@@ -32,13 +32,14 @@ pub struct Update
 
 impl Update
 {
-	/// Indicate with [`println!`] that a value of type `TCreated` — identified by `id` — has been
-	/// updated successfully.
-	pub(super) fn report_updated<TUpdated, TId>(id: TId)
+	/// Indicate with [`println!`] that a value of type `TUpdated` — [`Display`]ed by calling
+	/// `selector` on the `created` value — was updated.
+	pub(super) fn report_updated<TUpdated, TFn, TId>(updated: &TUpdated, selector: TFn)
 	where
+		TFn: FnOnce(&TUpdated) -> TId,
 		TId: Display,
 	{
-		println!("{} {id} has been updated.", fmt::type_name::<TUpdated>());
+		utils::report_action::<TUpdated, _>("updated", selector(updated));
 	}
 
 	/// Execute this command given the user's [`Config`].

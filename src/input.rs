@@ -21,13 +21,13 @@ use crate::{fmt, DynResult};
 const MATCH_PROMPT: &str =
 	"See the documentation of this query at https://github.com/Iron-E/clinvoice/wiki/Query-Syntax#";
 
-/// `prompt` the user with a yes/no question and map the response to a `bool`.
+/// `prompt` the user with a yes/no question.
 ///
 /// # Returns
 ///
-/// * `Ok(true)` if the user answers "yes".
-/// * `Ok(false)` if the user answers "no".
-/// * `Err(_)` if there was an error gathering input.
+/// * [`Ok(true)`] if the user answers "yes".
+/// * [`Ok(false)`] if the user answers "no".
+/// * [`Err`] if there was an error gathering input.
 pub fn confirm<T>(prompt: T) -> io::Result<bool>
 where
 	T: Into<String>,

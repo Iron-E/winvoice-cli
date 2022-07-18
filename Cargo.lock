@@ -283,7 +283,7 @@ dependencies = [
 [[package]]
 name = "clinvoice-adapter-postgres"
 version = "0.4.0"
-source = "git+https://github.com/Iron-E/clinvoice-adapter-postgres?branch=release/0.4#7f9426b87bf1f4d64503e8980a95aee10b1471f6"
+source = "git+https://github.com/Iron-E/clinvoice-adapter-postgres?branch=release/0.4#4d43a2b621bbf8228cf0ecf6d8502c60648c1aae"
 dependencies = [
  "async-trait",
  "clinvoice-adapter",
@@ -347,8 +347,8 @@ dependencies = [
 
 [[package]]
 name = "clinvoice-match"
-version = "0.5.2"
-source = "git+https://github.com/Iron-E/clinvoice-match?branch=release/0.5#b3232dd73f671a5352bc80777e646af187530490"
+version = "0.5.4"
+source = "git+https://github.com/Iron-E/clinvoice-match?branch=release/0.5#751f1bfd1797fe627fa2a7848e2942705d519f36"
 dependencies = [
  "clinvoice-error",
  "clinvoice-finance",

@@ -23,7 +23,7 @@ clinvoice-match = {branch = "release/0.5", features = ["serde"], git = "https://
 clinvoice-schema = {branch = "release/0.9", git = "https://github.com/Iron-E/clinvoice-schema"}
 
 clap = {features=["derive"], version = "3"}
-dialoguer = "0.8"
+dialoguer = "0.10"
 futures = "0.3"
 humantime = "2"
 serde = "1"

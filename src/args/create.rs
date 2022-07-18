@@ -265,7 +265,8 @@ impl Create
 					LAdapter::update(
 						&mut transaction,
 						inside_locations.iter().map(|l| {
-							Update::report_updated(&l, readable);
+							// HACK: can't pass `readable` in directly
+							Update::report_updated(&l, |l| readable(l));
 							l
 						}),
 					)
@@ -332,8 +333,7 @@ impl Create
 				)
 				.await?;
 
-				let mut expenses = Vec::new();
-				todo!("input::expense::menu()");
+				let expenses = input::expense::menu()?;
 
 				// {{{
 				let mut transaction = connection.begin().await?;

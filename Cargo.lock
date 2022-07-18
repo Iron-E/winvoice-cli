@@ -262,6 +262,7 @@ dependencies = [
  "serde_yaml",
  "sqlx",
  "structopt",
+ "strum",
  "thiserror",
  "tokio",
  "toml",

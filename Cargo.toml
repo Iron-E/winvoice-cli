@@ -30,6 +30,7 @@ serde = "1"
 serde_yaml = "0.8"
 sqlx = {features = ["runtime-tokio-rustls", "tls"], version = "0.5"}
 structopt = "0.3"
+strum = "0.24"
 thiserror = "1"
 tokio = {features = ["fs", "macros", "rt-multi-thread"], version = "1"}
 toml = "0.5"

@@ -51,7 +51,10 @@ pub struct Create
 
 impl Create
 {
-	pub async fn create<CAdapter, EAdapter, JAdapter, LAdapter, OAdapter, TAdapter, XAdapter, TDb>(
+	/// [`Create`] an entity according to the [`CreateCommand`].
+	///
+	/// The [`StoreArgs`] must be resolved into a `connection` by this point.
+	async fn create<CAdapter, EAdapter, JAdapter, LAdapter, OAdapter, TAdapter, XAdapter, TDb>(
 		self,
 		connection: Pool<TDb>,
 		config: &Config,

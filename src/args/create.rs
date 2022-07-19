@@ -123,7 +123,10 @@ impl Create
 					timesheet.id,
 				)
 				.await
-				.map(|mut v| v.pop().unwrap())?;
+				.map(|mut v| {
+					v.pop()
+						.expect("at least one `Expense` should have been created")
+				})?;
 
 				Self::report_created(&created, |x| fmt::id_num(x.id));
 			},

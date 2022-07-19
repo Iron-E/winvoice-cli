@@ -232,7 +232,7 @@ where
 	let locations = retrieve::<TRetrievable, _, _>(connection, prompt).await?;
 	let selected = select_one(
 		&locations,
-		format!("Select a `{}`", fmt::type_name::<TRetrievable::Entity>()),
+		format!("Select a {}", fmt::type_name::<TRetrievable::Entity>()),
 	)?;
 
 	Ok(selected)
@@ -256,7 +256,7 @@ where
 	let locations = retrieve::<TRetrievable, _, _>(connection, prompt).await?;
 	let selected = select(
 		&locations,
-		format!("Select the `{}`s", fmt::type_name::<TRetrievable::Entity>()),
+		format!("Select the {}s", fmt::type_name::<TRetrievable::Entity>()),
 	)?;
 
 	Ok(selected)

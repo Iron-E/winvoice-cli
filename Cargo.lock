@@ -237,7 +237,7 @@ dependencies = [
  "clinvoice-error",
  "clinvoice-export",
  "clinvoice-finance",
- "clinvoice-match 0.6.1",
+ "clinvoice-match",
  "clinvoice-schema",
  "dialoguer",
  "futures",
@@ -259,7 +259,7 @@ source = "git+https://github.com/Iron-E/clinvoice-adapter?branch=release/0.16#c5
 dependencies = [
  "async-trait",
  "clinvoice-error",
- "clinvoice-match 0.6.1",
+ "clinvoice-match",
  "clinvoice-schema",
  "futures",
  "sqlx",
@@ -267,14 +267,14 @@ dependencies = [
 
 [[package]]
 name = "clinvoice-adapter-postgres"
-version = "0.5.0"
-source = "git+https://github.com/Iron-E/clinvoice-adapter-postgres?branch=release/0.5#23651fdeb5309a2efecf64fd34062ee33f62195a"
+version = "0.6.0"
+source = "git+https://github.com/Iron-E/clinvoice-adapter-postgres?branch=release/0.6#c17844d7466ba9915b7bc6c8f233491cb122d518"
 dependencies = [
  "async-trait",
  "clinvoice-adapter",
  "clinvoice-error",
  "clinvoice-finance",
- "clinvoice-match 0.5.4",
+ "clinvoice-match",
  "clinvoice-schema",
  "futures",
  "humantime",
@@ -328,18 +328,6 @@ dependencies = [
  "strum",
  "thiserror",
  "zip",
-]
-
-[[package]]
-name = "clinvoice-match"
-version = "0.5.4"
-source = "git+https://github.com/Iron-E/clinvoice-match?branch=release/0.5#751f1bfd1797fe627fa2a7848e2942705d519f36"
-dependencies = [
- "clinvoice-error",
- "clinvoice-finance",
- "clinvoice-schema",
- "humantime-serde",
- "thiserror",
 ]
 
 [[package]]

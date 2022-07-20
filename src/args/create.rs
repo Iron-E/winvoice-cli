@@ -17,13 +17,7 @@ use clinvoice_adapter::{
 };
 use clinvoice_config::{Adapters, Config, Error as ConfigError};
 use clinvoice_match::{MatchEmployee, MatchOrganization};
-use clinvoice_schema::{
-	chrono::Utc,
-	ContactKind,
-	Invoice,
-	InvoiceDate,
-	Location,
-};
+use clinvoice_schema::{chrono::Utc, ContactKind, Invoice, InvoiceDate, Location};
 use command::CreateCommand;
 use sqlx::{Database, Executor, Pool, Transaction};
 
@@ -151,7 +145,7 @@ impl Create
 						config
 							.organizations
 							.employer_id
-							.map(|id| MatchOrganization::id(id.into()))
+							.map(MatchOrganization::from)
 							.ok_or(
 								"The `employer_id` key in the `[organizations]` field of the \
 								 configuration file has no value",
@@ -297,7 +291,7 @@ impl Create
 						config
 							.employees
 							.id
-							.map(|id| MatchEmployee::id(id.into()))
+							.map(MatchEmployee::from)
 							.ok_or(
 								"The `id` key in the `[employees]` field of the configuration file has no \
 								 value",

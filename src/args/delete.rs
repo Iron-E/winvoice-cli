@@ -1,7 +1,6 @@
 mod command;
 
 use core::fmt::Display;
-use std::path::Path;
 
 use clap::Args as Clap;
 use clinvoice_adapter::{
@@ -23,7 +22,7 @@ use serde::{de::DeserializeOwned, Serialize};
 use sqlx::{Database, Executor, Pool};
 
 use super::{match_args::MatchArgs, store_args::StoreArgs};
-use crate::{fmt, input, DynError, DynResult};
+use crate::{fmt, input, DynResult};
 
 /// Delete data which is being stored by CLInvoice.
 ///

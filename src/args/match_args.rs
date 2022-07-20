@@ -1,11 +1,10 @@
 use std::{fs, path::PathBuf};
 
 use clap::Args as Clap;
-use clinvoice_config::Error as ConfigError;
 use serde::de::DeserializeOwned;
 use serde_yaml as yaml;
 
-use crate::input::{Error, Result};
+use crate::input::Result;
 
 /// Reusable arguments used for retrieving information from a CLInvoice store.
 #[derive(Clap, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]

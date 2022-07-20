@@ -123,9 +123,8 @@ impl Delete
 					PgOrganization,
 					PgTimesheet,
 				};
-				use sqlx::PgPool;
 
-				let pool = PgPool::connect_lazy(&store.url)?;
+				let pool = Pool::connect_lazy(&store.url)?;
 				self
 					.delete::<PgContact, PgEmployee, PgJob, PgLocation, PgOrganization, PgTimesheet, PgExpenses, _>(
 						pool,

@@ -1,6 +1,7 @@
 mod command;
 
 use core::fmt::Display;
+use std::path::Path;
 
 use clap::Args as Clap;
 use clinvoice_adapter::{
@@ -22,7 +23,7 @@ use serde::{de::DeserializeOwned, Serialize};
 use sqlx::{Database, Executor, Pool};
 
 use super::{match_args::MatchArgs, store_args::StoreArgs};
-use crate::{fmt, input, DynResult};
+use crate::{fmt, input, DynError, DynResult};
 
 /// Delete data which is being stored by CLInvoice.
 ///
@@ -66,41 +67,55 @@ impl Delete
 		for<'c> &'c mut TDb::Connection: Executor<'c, Database = TDb>,
 	{
 		/// A generic deletion function which works for any of the provided adapters in the outer
-		/// function, as they all implement `TDelRetr` at the minimum.
-		async fn del<TDelRetrievable, TDb>(connection: Pool<TDb>) -> DynResult<()>
+		/// function, as they all implement `TDelRetrievable` at the minimum.
+		async fn del<TDelRetrievable, TDb>(
+			connection: Pool<TDb>,
+			match_condition: Option<TDelRetrievable::Match>,
+		) -> DynResult<()>
 		where
 			TDb: Database,
 			TDelRetrievable: Deletable<Db = TDb>,
 			<TDelRetrievable as Deletable>::Entity: Clone + Display + Sync,
 			TDelRetrievable: Retrievable<Db = TDb, Entity = <TDelRetrievable as Deletable>::Entity>,
-			<TDelRetrievable as Retrievable>::Match: Default + DeserializeOwned + Serialize,
+			TDelRetrievable::Match: Default + DeserializeOwned + Serialize,
 			for<'c> &'c mut TDb::Connection: Executor<'c, Database = TDb>,
 		{
-			let selected = input::select_retrieved::<TDelRetrievable, _, _>(
-				&connection,
-				format!(
-					"Query the {} to delete",
-					fmt::type_name::<<TDelRetrievable as Deletable>::Entity>()
-				),
-			)
-			.await?;
+			let type_name = fmt::type_name::<<TDelRetrievable as Deletable>::Entity>();
+			let retrieved = match match_condition
+			{
+				Some(condition) => TDelRetrievable::retrieve(&connection, &condition).await?,
 
+				#[rustfmt::skip]
+				_ => input::retrieve::<TDelRetrievable, _, _>(
+					&connection,
+					format!("Query the {type_name} to delete"),
+				)
+				.await?,
+			};
+
+			let selected = input::select(&retrieved, format!("Select the {type_name} to delete"))?;
 			TDelRetrievable::delete(&connection, selected.iter()).await?;
 			Ok(())
 		}
 
+		/// Boilerplate for calling the [`del`] function.
+		macro_rules! del {
+			($T:ty) => {{
+				let match_condition = self.match_args.deserialize()?;
+				del::<$T, _>(connection, match_condition).await
+			}};
+		}
+
 		match self.command
 		{
-			DeleteCommand::Contact => del::<CAdapter, _>(connection).await?,
-			DeleteCommand::Employee => del::<EAdapter, _>(connection).await?,
-			DeleteCommand::Expense => del::<XAdapter, _>(connection).await?,
-			DeleteCommand::Job => del::<JAdapter, _>(connection).await?,
-			DeleteCommand::Location => del::<LAdapter, _>(connection).await?,
-			DeleteCommand::Organization => del::<OAdapter, _>(connection).await?,
-			DeleteCommand::Timesheet => del::<TAdapter, _>(connection).await?,
-		};
-
-		Ok(())
+			DeleteCommand::Contact => del!(CAdapter),
+			DeleteCommand::Employee => del!(EAdapter),
+			DeleteCommand::Expense => del!(XAdapter),
+			DeleteCommand::Job => del!(JAdapter),
+			DeleteCommand::Location => del!(LAdapter),
+			DeleteCommand::Organization => del!(OAdapter),
+			DeleteCommand::Timesheet => del!(TAdapter),
+		}
 	}
 
 	pub async fn run(self, config: &Config) -> DynResult<()>

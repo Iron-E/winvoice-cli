@@ -69,7 +69,7 @@ impl Delete
 		/// function, as they all implement `TDelRetrievable` at the minimum.
 		async fn del<TDelRetrievable, TDb>(
 			connection: Pool<TDb>,
-			match_condition: Option<TDelRetrievable::Match>,
+			match_args: MatchArgs,
 		) -> DynResult<()>
 		where
 			TDb: Database,
@@ -79,6 +79,7 @@ impl Delete
 			TDelRetrievable::Match: Default + DeserializeOwned + Serialize,
 			for<'c> &'c mut TDb::Connection: Executor<'c, Database = TDb>,
 		{
+			let match_condition = match_args.deserialize()?;
 			let type_name = fmt::type_name::<<TDelRetrievable as Deletable>::Entity>();
 			let retrieved = input::select_retrieved::<TDelRetrievable, _, _>(
 				&connection,
@@ -92,23 +93,15 @@ impl Delete
 			Ok(())
 		}
 
-		/// Boilerplate for calling the [`del`] function.
-		macro_rules! del {
-			($T:ty) => {{
-				let match_condition = self.match_args.deserialize()?;
-				del::<$T, _>(connection, match_condition).await
-			}};
-		}
-
 		match self.command
 		{
-			DeleteCommand::Contact => del!(CAdapter),
-			DeleteCommand::Employee => del!(EAdapter),
-			DeleteCommand::Expense => del!(XAdapter),
-			DeleteCommand::Job => del!(JAdapter),
-			DeleteCommand::Location => del!(LAdapter),
-			DeleteCommand::Organization => del!(OAdapter),
-			DeleteCommand::Timesheet => del!(TAdapter),
+			DeleteCommand::Contact => del::<CAdapter, _>(connection, self.match_args).await,
+			DeleteCommand::Employee => del::<EAdapter, _>(connection, self.match_args).await,
+			DeleteCommand::Expense => del::<XAdapter, _>(connection, self.match_args).await,
+			DeleteCommand::Job => del::<JAdapter, _>(connection, self.match_args).await,
+			DeleteCommand::Location => del::<LAdapter, _>(connection, self.match_args).await,
+			DeleteCommand::Organization => del::<OAdapter, _>(connection, self.match_args).await,
+			DeleteCommand::Timesheet => del::<TAdapter, _>(connection, self.match_args).await,
 		}
 	}
 

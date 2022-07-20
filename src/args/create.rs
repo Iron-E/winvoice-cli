@@ -288,14 +288,10 @@ impl Create
 			{
 				let match_condition = default_employee
 					.then(|| {
-						config
-							.employees
-							.id
-							.map(MatchEmployee::from)
-							.ok_or(
-								"The `id` key in the `[employees]` field of the configuration file has no \
-								 value",
-							)
+						config.employees.id.map(MatchEmployee::from).ok_or(
+							"The `id` key in the `[employees]` field of the configuration file has no \
+							 value",
+						)
 					})
 					.transpose()?;
 

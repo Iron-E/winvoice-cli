@@ -22,7 +22,7 @@ use serde::{de::DeserializeOwned, Serialize};
 use sqlx::{Database, Executor, Pool};
 
 use super::{match_args::MatchArgs, store_args::StoreArgs};
-use crate::{fmt, input, DynResult};
+use crate::{fmt, input, utils, DynResult};
 
 /// Delete data which is being stored by CLInvoice.
 ///
@@ -89,7 +89,14 @@ impl Delete
 			.await?;
 
 			let selected = input::select(&retrieved, format!("Select the {type_name} to delete"))?;
-			TDelRetrievable::delete(&connection, selected.iter()).await?;
+			TDelRetrievable::delete(
+				&connection,
+				selected.iter().map(|s| {
+					Delete::report_deleted(&s);
+					s
+				}),
+			)
+			.await?;
 			Ok(())
 		}
 
@@ -103,6 +110,16 @@ impl Delete
 			DeleteCommand::Organization => del::<OAdapter, _>(connection, self.match_args).await,
 			DeleteCommand::Timesheet => del::<TAdapter, _>(connection, self.match_args).await,
 		}
+	}
+
+	/// Indicate with [`println!`] that a value of type `TDeleted` — [`Display`]ed by calling
+	/// `selector` on the `deleted` value — was deleted.
+	pub(super) fn report_deleted<TDeleted, TFn, TId>(deleted: &TDeleted, selector: TFn)
+	where
+		TFn: FnOnce(&TDeleted) -> TId,
+		TId: Display,
+	{
+		utils::report_action::<TDeleted, _>("deleted", selector(deleted));
 	}
 
 	pub async fn run(self, config: &Config) -> DynResult<()>

@@ -80,17 +80,12 @@ impl Delete
 			for<'c> &'c mut TDb::Connection: Executor<'c, Database = TDb>,
 		{
 			let type_name = fmt::type_name::<<TDelRetrievable as Deletable>::Entity>();
-			let retrieved = match match_condition
-			{
-				Some(condition) => TDelRetrievable::retrieve(&connection, &condition).await?,
-
-				#[rustfmt::skip]
-				_ => input::retrieve::<TDelRetrievable, _, _>(
-					&connection,
-					format!("Query the {type_name} to delete"),
-				)
-				.await?,
-			};
+			let retrieved = input::select_retrieved::<TDelRetrievable, _, _>(
+				&connection,
+				match_condition,
+				format!("Query the {type_name} to delete"),
+			)
+			.await?;
 
 			let selected = input::select(&retrieved, format!("Select the {type_name} to delete"))?;
 			TDelRetrievable::delete(&connection, selected.iter()).await?;

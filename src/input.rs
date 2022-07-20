@@ -214,11 +214,13 @@ where
 	}
 }
 
-/// [`select_one`] from the [`retrieve`]d values.
+/// [`select_one`] from:
 ///
-/// If `RETRY_ON_EMPTY`, the query is attempted again when the query returns no results.
+/// * If `match_condition` is [`None`], values the user was `prompt`ed to [`retrieve`].
+/// * If `match_condition` is [`Some`], values matching the condition.
 pub async fn select_one_retrieved<TRetrievable, TDb, TPrompt>(
 	connection: &Pool<TDb>,
+	match_condition: Option<TRetrievable::Match>,
 	prompt: TPrompt,
 ) -> DynResult<TRetrievable::Entity>
 where
@@ -229,20 +231,27 @@ where
 	TRetrievable::Match: Default + DeserializeOwned + Serialize,
 	for<'c> &'c mut TDb::Connection: Executor<'c, Database = TDb>,
 {
-	let locations = retrieve::<TRetrievable, _, _>(connection, prompt).await?;
+	let retrieved = match match_condition
+	{
+		Some(condition) => TRetrievable::retrieve(&connection, &condition).await?,
+		_ => retrieve::<TRetrievable, _, _>(connection, prompt).await?,
+	};
+
 	let selected = select_one(
-		&locations,
+		&retrieved,
 		format!("Select a {}", fmt::type_name::<TRetrievable::Entity>()),
 	)?;
 
 	Ok(selected)
 }
 
-/// [`select`] from the [`retrieve`]d values.
+/// [`select`] from:
 ///
-/// If `RETRY_ON_EMPTY`, the query is attempted again when the query returns no results.
+/// * If `match_condition` is [`None`], values the user was `prompt`ed to [`retrieve`].
+/// * If `match_condition` is [`Some`], values matching the condition.
 pub async fn select_retrieved<TRetrievable, TDb, TPrompt>(
 	connection: &Pool<TDb>,
+	match_condition: Option<TRetrievable::Match>,
 	prompt: TPrompt,
 ) -> DynResult<Vec<TRetrievable::Entity>>
 where
@@ -253,9 +262,14 @@ where
 	TRetrievable::Match: Default + DeserializeOwned + Serialize,
 	for<'c> &'c mut TDb::Connection: Executor<'c, Database = TDb>,
 {
-	let locations = retrieve::<TRetrievable, _, _>(connection, prompt).await?;
+	let retrieved = match match_condition
+	{
+		Some(condition) => TRetrievable::retrieve(&connection, &condition).await?,
+		_ => retrieve::<TRetrievable, _, _>(connection, prompt).await?,
+	};
+
 	let selected = select(
-		&locations,
+		&retrieved,
 		format!("Select the {}s", fmt::type_name::<TRetrievable::Entity>()),
 	)?;
 
@@ -267,7 +281,7 @@ pub fn text<TText, TPrompt>(default_text: Option<TText>, prompt: TPrompt) -> io:
 where
 	TPrompt: Into<String>,
 	TText: Clone + FromStr + Display,
-	<TText as FromStr>::Err: Display + Debug,
+	TText::Err: Display + Debug,
 {
 	let mut input = Input::new();
 

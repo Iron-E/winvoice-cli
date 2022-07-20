@@ -20,17 +20,15 @@ use clinvoice_match::{MatchEmployee, MatchOrganization};
 use clinvoice_schema::{
 	chrono::Utc,
 	ContactKind,
-	Employee,
 	Invoice,
 	InvoiceDate,
 	Location,
-	Organization,
 };
 use command::CreateCommand;
 use sqlx::{Database, Executor, Pool, Transaction};
 
 use super::store_args::StoreArgs;
-use crate::{args::update::Update, fmt, input, utils, DynError, DynResult};
+use crate::{args::update::Update, fmt, input, utils, DynResult};
 
 /// Use CLInvoice to store new information.
 ///
@@ -85,6 +83,7 @@ impl Create
 				{
 					(true, ..) => input::select_one_retrieved::<LAdapter, _, _>(
 						&connection,
+						None,
 						"Query the Location of this address",
 					)
 					.await
@@ -116,6 +115,7 @@ impl Create
 			{
 				let timesheet = input::select_one_retrieved::<TAdapter, _, _>(
 					&connection,
+					None,
 					"Query the Timesheet this Expense is for",
 				)
 				.await?;
@@ -146,36 +146,25 @@ impl Create
 				objectives,
 			} =>
 			{
-				let client = match employer
-				{
-					true =>
-					{
-						let match_condition = config
+				let match_condition = employer
+					.then(|| {
+						config
 							.organizations
 							.employer_id
 							.map(|id| MatchOrganization::id(id.into()))
 							.ok_or(
 								"The `employer_id` key in the `[organizations]` field of the \
 								 configuration file has no value",
-							)?;
+							)
+					})
+					.transpose()?;
 
-						OAdapter::retrieve(&connection, &match_condition)
-							.await
-							.map_err(DynError::from)
-							.and_then(|mut v| {
-								v.pop().ok_or_else(|| {
-									input::Error::NoData(fmt::type_name::<Organization>().into()).into()
-								})
-							})?
-					},
-
-					#[rustfmt::skip]
-					_ => input::select_one_retrieved::<OAdapter, _, _>(
-						&connection,
-						"Query the client Organization for this Job",
-					)
-					.await?,
-				};
+				let client = input::select_one_retrieved::<OAdapter, _, _>(
+					&connection,
+					match_condition,
+					"Query the client Organization for this Job",
+				)
+				.await?;
 
 				let created = JAdapter::create(
 					&connection,
@@ -216,6 +205,7 @@ impl Create
 				{
 					true => input::select_one_retrieved::<LAdapter, _, _>(
 						&connection,
+						None,
 						format!("Query the Location outside of {final_name}"),
 					)
 					.await
@@ -248,6 +238,7 @@ impl Create
 				{
 					let mut inside_locations = input::select_retrieved::<LAdapter, _, _>(
 						&connection,
+						None,
 						format!("Select Locations that are inside {created}"),
 					)
 					.await?;
@@ -285,6 +276,7 @@ impl Create
 			{
 				let selected = input::select_one_retrieved::<LAdapter, _, _>(
 					&connection,
+					None,
 					"Query the Location of this Organization",
 				)
 				.await?;
@@ -300,39 +292,29 @@ impl Create
 				work_notes,
 			} =>
 			{
-				let employee = match default_employee
-				{
-					true =>
-					{
-						let match_condition = config
+				let match_condition = default_employee
+					.then(|| {
+						config
 							.employees
 							.id
 							.map(|id| MatchEmployee::id(id.into()))
 							.ok_or(
 								"The `id` key in the `[employees]` field of the configuration file has no \
 								 value",
-							)?;
+							)
+					})
+					.transpose()?;
 
-						EAdapter::retrieve(&connection, &match_condition)
-							.await
-							.map_err(DynError::from)
-							.and_then(|mut v| {
-								v.pop().ok_or_else(|| {
-									input::Error::NoData(fmt::type_name::<Employee>().into()).into()
-								})
-							})?
-					},
-
-					#[rustfmt::skip]
-					_ => input::select_one_retrieved::<EAdapter, _, _>(
-						&connection,
-						"Query the Employee who is responsible for the work",
-					)
-					.await?,
-				};
+				let employee = input::select_one_retrieved::<EAdapter, _, _>(
+					&connection,
+					match_condition,
+					"Query the Employee who is responsible for the work",
+				)
+				.await?;
 
 				let job = input::select_one_retrieved::<JAdapter, _, _>(
 					&connection,
+					None,
 					"Query the Job being worked on",
 				)
 				.await?;

@@ -101,8 +101,6 @@ where
 
 /// [Retrieve](Retrievable::retrieve) all [entities](Retrievable::Entity) that match a
 /// user-provided query.
-///
-/// If `RETRY_ON_EMPTY`, the query is attempted again when the query returns no results.
 pub async fn retrieve<TRetrievable, TDb, TPrompt>(
 	connection: &Pool<TDb>,
 	prompt: TPrompt,

@@ -19,7 +19,7 @@ clinvoice-config = {branch = "release/0.6", git = "https://github.com/Iron-E/cli
 clinvoice-error = {branch = "release/0.3", git = "https://github.com/Iron-E/clinvoice-error"}
 clinvoice-finance = {branch = "release/0.4", git = "https://github.com/Iron-E/clinvoice-finance"}
 clinvoice-export = {branch = "release/0.1", features = ["markdown"], git = "https://github.com/Iron-E/clinvoice-export"}
-clinvoice-match = {branch = "release/0.5", features = ["serde"], git = "https://github.com/Iron-E/clinvoice-match"}
+clinvoice-match = {branch = "release/0.6", features = ["serde"], git = "https://github.com/Iron-E/clinvoice-match"}
 clinvoice-schema = {branch = "release/0.9", git = "https://github.com/Iron-E/clinvoice-schema"}
 
 clap = {features=["derive"], version = "3"}

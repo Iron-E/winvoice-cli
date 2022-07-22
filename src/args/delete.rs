@@ -1,6 +1,7 @@
 mod command;
 
 use core::fmt::Display;
+use std::error::Error;
 
 use clap::Args as Clap;
 use clinvoice_adapter::{
@@ -72,19 +73,21 @@ impl Delete
 	{
 		/// A generic deletion function which works for any of the provided adapters in the outer
 		/// function, as they all implement `TDelRetrievable` at the minimum.
-		async fn del<TDelRetrievable, TDb>(
+		async fn del<TDelRetrievable, TDb, TMatch>(
 			connection: Pool<TDb>,
-			match_args: MatchArgs,
+			match_condition: TMatch,
 		) -> DynResult<()>
 		where
 			TDb: Database,
+			TMatch: TryInto<Option<TDelRetrievable::Match>>,
+			TMatch::Error: 'static + Error,
 			TDelRetrievable: Deletable<Db = TDb>,
 			<TDelRetrievable as Deletable>::Entity: Clone + Display + Identifiable + Sync,
 			TDelRetrievable: Retrievable<Db = TDb, Entity = <TDelRetrievable as Deletable>::Entity>,
 			TDelRetrievable::Match: Default + DeserializeOwned + Serialize,
 			for<'c> &'c mut TDb::Connection: Executor<'c, Database = TDb>,
 		{
-			let match_condition = match_args.deserialize()?;
+			let match_condition = match_condition.try_into()?;
 			let type_name = fmt::type_name::<<TDelRetrievable as Deletable>::Entity>();
 			let retrieved = input::select_retrieved::<TDelRetrievable, _, _>(
 				&connection,
@@ -107,13 +110,13 @@ impl Delete
 
 		match self.command
 		{
-			DeleteCommand::Contact => del::<CAdapter, _>(connection, self.match_args).await,
-			DeleteCommand::Employee => del::<EAdapter, _>(connection, self.match_args).await,
-			DeleteCommand::Expense => del::<XAdapter, _>(connection, self.match_args).await,
-			DeleteCommand::Job => del::<JAdapter, _>(connection, self.match_args).await,
-			DeleteCommand::Location => del::<LAdapter, _>(connection, self.match_args).await,
-			DeleteCommand::Organization => del::<OAdapter, _>(connection, self.match_args).await,
-			DeleteCommand::Timesheet => del::<TAdapter, _>(connection, self.match_args).await,
+			DeleteCommand::Contact => del::<CAdapter, _, _>(connection, self.match_args).await,
+			DeleteCommand::Employee => del::<EAdapter, _, _>(connection, self.match_args).await,
+			DeleteCommand::Expense => del::<XAdapter, _, _>(connection, self.match_args).await,
+			DeleteCommand::Job => del::<JAdapter, _, _>(connection, self.match_args).await,
+			DeleteCommand::Location => del::<LAdapter, _, _>(connection, self.match_args).await,
+			DeleteCommand::Organization => del::<OAdapter, _, _>(connection, self.match_args).await,
+			DeleteCommand::Timesheet => del::<TAdapter, _, _>(connection, self.match_args).await,
 		}
 	}
 

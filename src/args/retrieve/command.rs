@@ -39,8 +39,8 @@ pub enum RetrieveCommand
 		/// What file format to --export to.
 		///
 		/// Supported formats are: markdown.
-		#[clap(long, short, requires("export"))]
-		format: Option<Format>,
+		#[clap(default_value_t = Format::Markdown, long, short, requires("export"))]
+		format: Format,
 
 		/// Which directory to --export files into.
 		#[clap(long, short, requires("export"), value_name = "DIR", value_parser)]

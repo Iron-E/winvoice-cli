@@ -1,13 +1,14 @@
 mod command;
 
-use core::fmt::Display;
-
 use clap::Args as Clap;
 use clinvoice_config::Config;
 use command::UpdateCommand;
 
 use super::{match_args::MatchArgs, store_args::StoreArgs};
-use crate::{utils, DynResult};
+use crate::{
+	utils::{self, Identifiable},
+	DynResult,
+};
 
 /// Update information being stored by CLInvoice.
 ///
@@ -34,12 +35,11 @@ impl Update
 {
 	/// Indicate with [`println!`] that a value of type `TUpdated` — [`Display`]ed by calling
 	/// `selector` on the `created` value — was updated.
-	pub(super) fn report_updated<TUpdated, TFn, TId>(updated: &TUpdated, selector: TFn)
+	pub(super) fn report_updated<TUpdated>(updated: &TUpdated)
 	where
-		TFn: FnOnce(&TUpdated) -> TId,
-		TId: Display,
+		TUpdated: Identifiable,
 	{
-		utils::report_action::<TUpdated, _>("updated", selector(updated));
+		utils::report_action("updated", updated);
 	}
 
 	/// Execute this command given the user's [`Config`].

@@ -1,7 +1,5 @@
 mod command;
 
-use core::fmt::Display;
-
 use clap::Args as Clap;
 use clinvoice_adapter::{
 	schema::{
@@ -17,12 +15,17 @@ use clinvoice_adapter::{
 };
 use clinvoice_config::{Adapters, Config, Error as ConfigError};
 use clinvoice_match::{MatchEmployee, MatchOrganization};
-use clinvoice_schema::{chrono::Utc, ContactKind, Invoice, InvoiceDate, Location};
+use clinvoice_schema::{chrono::Utc, ContactKind, Invoice, InvoiceDate};
 use command::CreateCommand;
 use sqlx::{Database, Executor, Pool, Transaction};
 
 use super::store_args::StoreArgs;
-use crate::{args::update::Update, fmt, input, utils, DynResult};
+use crate::{
+	args::update::Update,
+	input,
+	utils::{self, Identifiable},
+	DynResult,
+};
 
 /// Use CLInvoice to store new information.
 ///
@@ -88,7 +91,7 @@ impl Create
 				};
 
 				let created = CAdapter::create(&connection, kind, label).await?;
-				Self::report_created(&created, |c| fmt::quoted(&c.label));
+				Self::report_created(&created);
 			},
 
 			CreateCommand::Employee {
@@ -98,7 +101,7 @@ impl Create
 			} =>
 			{
 				let created = EAdapter::create(&connection, name, status, title).await?;
-				Self::report_created(&created, |e| fmt::id_num(e.id));
+				Self::report_created(&created);
 			},
 
 			CreateCommand::Expense {
@@ -125,7 +128,7 @@ impl Create
 						.expect("at least one `Expense` should have been created")
 				})?;
 
-				Self::report_created(&created, |x| fmt::id_num(x.id));
+				Self::report_created(&created);
 			},
 
 			CreateCommand::Job {
@@ -180,7 +183,7 @@ impl Create
 				)
 				.await?;
 
-				Self::report_created(&created, |j| fmt::id_num(j.id));
+				Self::report_created(&created);
 			},
 
 			CreateCommand::Location {
@@ -210,19 +213,13 @@ impl Create
 				// {{{
 				let mut transaction = connection.begin().await?;
 
-				/// A human-readable version of `Location`.
-				fn readable(l: &Location) -> String
-				{
-					format!("{} {}", fmt::id_num(l.id), fmt::quoted(&l.name))
-				}
-
 				// TODO: convert to `try_fold` after `stream`s merge to `std`? {{{2
 				let mut l = LAdapter::create(&mut *transaction, final_name, outside_of_final).await?;
-				Self::report_created(&l, readable);
+				Self::report_created(&l);
 				for n in names_reversed
 				{
 					l = LAdapter::create(&mut *transaction, n, Some(l)).await?;
-					Self::report_created(&l, readable);
+					Self::report_created(&l);
 				}
 				// 2}}}
 
@@ -255,7 +252,7 @@ impl Create
 						&mut transaction,
 						inside_locations.iter().map(|l| {
 							// HACK: can't pass `readable` in directly
-							Update::report_updated(&l, |l| readable(l));
+							Update::report_updated(l);
 							l
 						}),
 					)
@@ -276,7 +273,7 @@ impl Create
 				.await?;
 
 				let created = OAdapter::create(&connection, selected, name).await?;
-				Self::report_created(&created, |o| fmt::id_num(o.id));
+				Self::report_created(&created);
 			},
 
 			CreateCommand::Timesheet {
@@ -330,7 +327,7 @@ impl Create
 				transaction.commit().await?;
 				// }}}
 
-				Self::report_created(&created, |t| t.id);
+				Self::report_created(&created);
 			},
 		};
 
@@ -339,12 +336,11 @@ impl Create
 
 	/// Indicate with [`println!`] that a value of type `TCreated` — [`Display`]ed by calling
 	/// `selector` on the `created` value — was created.
-	pub(super) fn report_created<TCreated, TFn, TId>(created: &TCreated, selector: TFn)
+	pub(super) fn report_created<TCreated>(created: &TCreated)
 	where
-		TFn: FnOnce(&TCreated) -> TId,
-		TId: Display,
+		TCreated: Identifiable,
 	{
-		utils::report_action::<TCreated, _>("created", selector(created));
+		utils::report_action("created", created);
 	}
 
 	/// Execute this command given the user's [`Config`].

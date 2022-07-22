@@ -1,8 +1,9 @@
 //! Misc utilities for CLInvoice.
 
-use core::fmt::Display;
+mod identifiable;
 
 use clinvoice_schema::chrono::{DateTime, Datelike, Local, NaiveDateTime, TimeZone, Timelike, Utc};
+pub use identifiable::Identifiable;
 
 use crate::fmt;
 
@@ -15,11 +16,15 @@ pub(crate) fn naive_local_datetime_to_utc(d: NaiveDateTime) -> DateTime<Utc>
 		.into()
 }
 
-/// Indicate with [`println!`] that a value of type `TCreated` — identified by `id` — has been
-/// created successfully.
-pub(super) fn report_action<TCreated, TId>(action: &str, id: TId)
+/// Indicate with [`println!`] that a value of type `TActioned` — identified by `id` — has been
+/// `action`ed.
+pub(super) fn report_action<TActioned>(action: &str, actioned: &TActioned)
 where
-	TId: Display,
+	TActioned: Identifiable,
 {
-	println!("{} {id} has been {action}.", fmt::type_name::<TCreated>());
+	println!(
+		"{} {} has been {action}.",
+		fmt::type_name::<TActioned>(),
+		actioned.id()
+	);
 }

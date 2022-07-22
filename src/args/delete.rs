@@ -22,7 +22,12 @@ use serde::{de::DeserializeOwned, Serialize};
 use sqlx::{Database, Executor, Pool};
 
 use super::{match_args::MatchArgs, store_args::StoreArgs};
-use crate::{fmt, input, utils, DynResult};
+use crate::{
+	fmt,
+	input,
+	utils::{self, Identifiable},
+	DynResult,
+};
 
 /// Delete data which is being stored by CLInvoice.
 ///
@@ -74,7 +79,7 @@ impl Delete
 		where
 			TDb: Database,
 			TDelRetrievable: Deletable<Db = TDb>,
-			<TDelRetrievable as Deletable>::Entity: Clone + Display + Sync,
+			<TDelRetrievable as Deletable>::Entity: Clone + Display + Identifiable + Sync,
 			TDelRetrievable: Retrievable<Db = TDb, Entity = <TDelRetrievable as Deletable>::Entity>,
 			TDelRetrievable::Match: Default + DeserializeOwned + Serialize,
 			for<'c> &'c mut TDb::Connection: Executor<'c, Database = TDb>,
@@ -92,7 +97,7 @@ impl Delete
 			TDelRetrievable::delete(
 				&connection,
 				selected.iter().map(|s| {
-					Delete::report_deleted(&s);
+					Delete::report_deleted(s);
 					s
 				}),
 			)
@@ -114,12 +119,11 @@ impl Delete
 
 	/// Indicate with [`println!`] that a value of type `TDeleted` — [`Display`]ed by calling
 	/// `selector` on the `deleted` value — was deleted.
-	pub(super) fn report_deleted<TDeleted, TFn, TId>(deleted: &TDeleted, selector: TFn)
+	pub(super) fn report_deleted<TDeleted>(deleted: &TDeleted)
 	where
-		TFn: FnOnce(&TDeleted) -> TId,
-		TId: Display,
+		TDeleted: Identifiable,
 	{
-		utils::report_action::<TDeleted, _>("deleted", selector(deleted));
+		utils::report_action("deleted", deleted);
 	}
 
 	pub async fn run(self, config: &Config) -> DynResult<()>

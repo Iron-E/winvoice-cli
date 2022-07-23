@@ -191,34 +191,28 @@ impl Retrieve
 							let contact_information = &contact_information;
 							let employer = &employer;
 							let exchange_rates = exchange_rates.as_ref();
+							let match_condition = MatchTimesheet {
+								job: job.id.into(),
+								..Default::default()
+							};
 							let output_dir = output_dir.as_ref();
 
 							async move {
-								let timesheets = {
-									let mut t = TAdapter::retrieve(connection, &MatchTimesheet {
-										job: job.id.into(),
-										..Default::default()
-									})
-									.await?;
+								let timesheets_fut = TAdapter::retrieve(connection, &match_condition)
+									.map_ok(|mut v| {
+										v.sort_by(|lhs, rhs| lhs.time_begin.cmp(&rhs.time_begin));
+										v
+									});
 
-									t.sort_by(|lhs, rhs| lhs.time_begin.cmp(&rhs.time_begin));
-									t
-								};
+								#[rustfmt::skip]
+								let filename =
+									format!("{}--{}.{}", job.client.name.replace(' ', "-"), job.id, format.extension());
 
-								let exported = format.export_job(
-									&job,
-									contact_information,
-									exchange_rates,
-									employer,
-									&timesheets,
-								);
+								let timesheets = timesheets_fut.await?;
 
-								let filename = format!(
-									"{}--{}.{}",
-									job.client.name.replace(' ', "-"),
-									job.id,
-									format.extension(),
-								);
+								#[rustfmt::skip]
+								let exported =
+									format.export_job(&job, contact_information, exchange_rates, employer, &timesheets);
 
 								match output_dir
 								{

@@ -192,12 +192,12 @@ where
 		return Err(Error::NoData(crate::fmt::type_name::<TEntity>().into()));
 	}
 
-	let selector = {
-		let mut s = Select::new();
-		s.items(entities).with_prompt(prompt);
-		s
-	};
+	// {{{
+	let mut s = Select::new();
+	s.items(entities).with_prompt(prompt);
+	// }}}
 
+	let selector = s;
 	loop
 	{
 		match selector.interact()

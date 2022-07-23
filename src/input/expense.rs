@@ -3,15 +3,16 @@
 
 mod action;
 
+use std::io;
+
 use action::Action;
 use clinvoice_schema::Money;
 use strum::IntoEnumIterator;
 
 use super::Result;
-use crate::DynResult;
 
 /// Show a menu for adding `expenses`.
-fn add_menu(expenses: &mut Vec<(String, Money, String)>) -> DynResult<()>
+fn add_menu(expenses: &mut Vec<(String, Money, String)>) -> io::Result<()>
 {
 	let category = super::text(None, "What type of Expense is this?")?;
 	let description = super::text(None, format!("Describe the {category} Expense"))?;
@@ -33,7 +34,7 @@ fn add_menu(expenses: &mut Vec<(String, Money, String)>) -> DynResult<()>
 /// # Errors
 ///
 /// * When [`select_one`](super::select_one), [`add_menu`], [`delete_menu`], or [`edit_menu`] does.
-pub fn menu() -> DynResult<Vec<(String, Money, String)>>
+pub fn menu() -> Result<Vec<(String, Money, String)>>
 {
 	let all_actions: Vec<_> = Action::iter().collect();
 	let mut expenses = Vec::new();

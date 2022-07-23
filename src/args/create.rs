@@ -149,10 +149,9 @@ impl Create
 							.organizations
 							.employer_id
 							.map(MatchOrganization::from)
-							.ok_or(
-								"The `employer_id` key in the `[organizations]` field of the \
-								 configuration file has no value",
-							)
+							.ok_or_else(|| {
+								ConfigError::NotConfigured("employer_id".into(), "organizations".into())
+							})
 					})
 					.transpose()?;
 
@@ -285,10 +284,11 @@ impl Create
 			{
 				let match_condition = default_employee
 					.then(|| {
-						config.employees.id.map(MatchEmployee::from).ok_or(
-							"The `id` key in the `[employees]` field of the configuration file has no \
-							 value",
-						)
+						config
+							.employees
+							.id
+							.map(MatchEmployee::from)
+							.ok_or_else(|| ConfigError::NotConfigured("id".into(), "employees".into()))
 					})
 					.transpose()?;
 

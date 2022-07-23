@@ -125,23 +125,20 @@ impl Retrieve
 				set_default,
 			} =>
 			{
-				let default_condition = default
-					.then(|| {
-						config.employees.id.map(MatchEmployee::from).ok_or(
-							"The `id` key in the `[employees]` field of the configuration file has no \
-							 value",
-						)
-					})
-					.transpose()?;
+				let match_condition = self.match_args.try_into().and_then(|condition| {
+					default
+						.then(|| {
+							config.employees.id.map(MatchEmployee::from).ok_or_else(|| {
+								ConfigError::NotConfigured("id".into(), "employees".into()).into()
+							})
+						})
+						.transpose()
+						.map(|default_condition| default_condition.or(condition))
+				})?;
 
-				let match_condition: Option<_> = self.match_args.try_into()?;
-
-				let retrieved = retrieve::<EAdapter, _, _>(
-					&connection,
-					match_condition.or(default_condition),
-					!(default || set_default),
-				)
-				.await?;
+				let retrieved =
+					retrieve::<EAdapter, _, _>(&connection, match_condition, !(default || set_default))
+						.await?;
 
 				if set_default
 				{
@@ -169,9 +166,9 @@ impl Retrieve
 
 				if export
 				{
-					let employer_id = config.organizations.employer_id.ok_or(
-						"You must specify the Organization you work for before exporting `Job`s.",
-					)?;
+					let employer_id = config.organizations.employer_id.ok_or_else(|| {
+						ConfigError::NotConfigured("employer_id".into(), "organizations".into())
+					})?;
 					let exchange_rates_fut = ExchangeRates::new().map_ok(Some);
 					let match_all_contacts = Default::default();
 					let selected = input::select(&retrieved, "Select the Jobs to export")?;
@@ -247,24 +244,25 @@ impl Retrieve
 				set_employer,
 			} =>
 			{
-				let employer_condition = employer
-					.then(|| {
-						config
-							.organizations
-							.employer_id
-							.map(MatchOrganization::from)
-							.ok_or(
-								"The `employer_id` key in the `[organizations]` field of the \
-								 configuration file has no value",
-							)
-					})
-					.transpose()?;
-
-				let match_condition: Option<_> = self.match_args.try_into()?;
+				let match_condition = self.match_args.try_into().and_then(|condition| {
+					employer
+						.then(|| {
+							config
+								.organizations
+								.employer_id
+								.map(MatchOrganization::from)
+								.ok_or_else(|| {
+									ConfigError::NotConfigured("employer_id".into(), "organizations".into())
+										.into()
+								})
+						})
+						.transpose()
+						.map(|employer_condition| employer_condition.or(condition))
+				})?;
 
 				let retrieved = retrieve::<OAdapter, _, _>(
 					&connection,
-					match_condition.or(employer_condition),
+					match_condition,
 					!(employer || set_employer),
 				)
 				.await?;

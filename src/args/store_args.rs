@@ -1,5 +1,5 @@
 use clap::Args as Clap;
-use clinvoice_config::{Config, Store};
+use clinvoice_config::{Config, Error, Result, Store};
 
 /// Reusable arguments used for specifying a store.
 #[derive(Clap, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -19,13 +19,10 @@ impl StoreArgs
 {
 	/// Try to get the store named `store_name` from `config` and return it, erroring if it does not
 	/// exist.
-	pub fn try_get_from<'c>(&self, config: &'c Config) -> Result<&'c Store, String>
+	pub fn try_get_from<'c>(&self, config: &'c Config) -> Result<&'c Store>
 	{
-		config.get_store(&self.store).ok_or_else(|| {
-			format!(
-				r#"The store named "{}" was not found in your configuration file."#,
-				self.store,
-			)
-		})
+		config
+			.get_store(&self.store)
+			.ok_or_else(|| Error::NotConfigured(self.store.clone(), "stores".into()))
 	}
 }

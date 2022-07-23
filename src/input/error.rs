@@ -1,5 +1,6 @@
 use std::io;
 
+use clinvoice_config::Error as ConfigError;
 use clinvoice_schema::RestoreError;
 use serde_yaml as yaml;
 use thiserror::Error;
@@ -8,6 +9,10 @@ use thiserror::Error;
 #[derive(Debug, Error)]
 pub enum Error
 {
+	#[allow(missing_docs)]
+	#[error(transparent)]
+	Config(#[from] ConfigError),
+
 	#[allow(missing_docs)]
 	#[error(transparent)]
 	Io(#[from] io::Error),

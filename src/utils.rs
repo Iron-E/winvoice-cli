@@ -25,6 +25,6 @@ where
 	println!(
 		"{} {} has been {action}.",
 		fmt::type_name::<TActioned>(),
-		actioned.id()
+		actioned.id(),
 	);
 }

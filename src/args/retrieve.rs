@@ -137,8 +137,7 @@ impl Retrieve
 				})?;
 
 				let retrieved =
-					retrieve::<EAdapter, _, _>(&connection, match_condition, !(default || set_default))
-						.await?;
+					retrieve::<EAdapter, _, _>(&connection, match_condition, !set_default).await?;
 
 				if set_default
 				{
@@ -260,12 +259,8 @@ impl Retrieve
 						.map(|employer_condition| employer_condition.or(condition))
 				})?;
 
-				let retrieved = retrieve::<OAdapter, _, _>(
-					&connection,
-					match_condition,
-					!(employer || set_employer),
-				)
-				.await?;
+				let retrieved =
+					retrieve::<OAdapter, _, _>(&connection, match_condition, !set_employer).await?;
 
 				if set_employer
 				{

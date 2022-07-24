@@ -125,16 +125,15 @@ impl Retrieve
 				set_default,
 			} =>
 			{
-				let match_condition = self.match_args.try_into().and_then(|condition| {
-					default
-						.then(|| {
-							config.employees.id.map(MatchEmployee::from).ok_or_else(|| {
-								ConfigError::NotConfigured("id".into(), "employees".into()).into()
-							})
-						})
-						.transpose()
-						.map(|default_condition| default_condition.or(condition))
-				})?;
+				let match_condition = match default
+				{
+					false => self.match_args.try_into()?,
+					_ => config
+						.employees
+						.id
+						.ok_or_else(|| ConfigError::NotConfigured("id".into(), "employees".into()))
+						.map(|id| Some(id.into()))?,
+				};
 
 				let retrieved =
 					retrieve::<EAdapter, _, _>(&connection, match_condition, !set_default).await?;
@@ -237,21 +236,15 @@ impl Retrieve
 				set_employer,
 			} =>
 			{
-				let match_condition = self.match_args.try_into().and_then(|condition| {
-					employer
-						.then(|| {
-							config
-								.organizations
-								.employer_id
-								.map(MatchOrganization::from)
-								.ok_or_else(|| {
-									ConfigError::NotConfigured("employer_id".into(), "organizations".into())
-										.into()
-								})
-						})
-						.transpose()
-						.map(|employer_condition| employer_condition.or(condition))
-				})?;
+				let match_condition = match employer
+				{
+					false => self.match_args.try_into()?,
+					_ => config
+						.organizations
+						.employer_id
+						.ok_or_else(|| ConfigError::NotConfigured("employer_id".into(), "organizations".into()))
+						.map(|id| Some(id.into()))?,
+				};
 
 				let retrieved =
 					retrieve::<OAdapter, _, _>(&connection, match_condition, !set_employer).await?;

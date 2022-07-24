@@ -19,9 +19,9 @@ use clinvoice_adapter::{
 };
 use clinvoice_config::{Adapters, Config, Error as ConfigError};
 use clinvoice_finance::ExchangeRates;
-use clinvoice_match::MatchTimesheet;
+use clinvoice_match::{MatchOrganization, MatchTimesheet};
 use command::RetrieveCommand;
-use futures::{stream, TryFutureExt, TryStreamExt};
+use futures::{future, stream, TryFutureExt, TryStreamExt};
 use serde::{de::DeserializeOwned, Serialize};
 use sqlx::{Database, Executor, Pool};
 use tokio::fs;
@@ -164,65 +164,62 @@ impl Retrieve
 
 				if export
 				{
-					let employer_id = config.organizations.employer_id.ok_or_else(|| {
-						ConfigError::NotConfigured("employer_id".into(), "organizations".into())
-					})?;
-					let exchange_rates_fut = ExchangeRates::new().map_ok(Some);
 					let match_all_contacts = Default::default();
-					let selected = input::select(&retrieved, "Select the Jobs to export")?;
+					let match_employer = config
+						.organizations
+						.employer_id
+						.map(MatchOrganization::from)
+						.ok_or_else(|| {
+							ConfigError::NotConfigured("employer_id".into(), "organizations".into())
+						})?;
 
-					let contact_information_fut = CAdapter::retrieve(&connection, &match_all_contacts)
-						.map_ok(|mut vec| {
+					let exchange_rates_fut = ExchangeRates::new().map_ok(Some);
+					let (contact_information, employer) = futures::try_join!(
+						CAdapter::retrieve(&connection, &match_all_contacts).map_ok(|mut vec| {
 							vec.sort_by(|lhs, rhs| lhs.label.cmp(&rhs.label));
 							vec
-						});
+						}),
+						OAdapter::retrieve(&connection, &match_employer)
+							.and_then(|mut vec| future::ready(vec.pop().ok_or(sqlx::Error::RowNotFound))),
+					)?;
 
-					let employer = OAdapter::retrieve(&connection, &employer_id.into())
-						.await
-						.and_then(|mut vec| vec.pop().ok_or(sqlx::Error::RowNotFound))?;
-
-					let contact_information = contact_information_fut.await?;
 					let exchange_rates = exchange_rates_fut.await?;
+					let selected = input::select(&retrieved, "Select the Jobs to export")?;
 
-					stream::iter(selected.into_iter().map(Ok))
-						.try_for_each_concurrent(None, |job| {
-							let connection = &connection;
-							let contact_information = &contact_information;
-							let employer = &employer;
-							let exchange_rates = exchange_rates.as_ref();
-							let match_condition = MatchTimesheet {
-								job: job.id.into(),
-								..Default::default()
-							};
-							let output_dir = output_dir.as_ref();
+					#[rustfmt::skip]
+					stream::iter(selected.into_iter().map(Ok)).try_for_each_concurrent(None, |j| {
+						let connection = &connection;
+						let contact_information = &contact_information;
+						let employer = &employer;
+						let exchange_rates = exchange_rates.as_ref();
+						let match_condition = MatchTimesheet { job: j.id.into(), ..Default::default() };
+						let output_dir = output_dir.as_ref();
 
-							async move {
-								let timesheets_fut = TAdapter::retrieve(connection, &match_condition)
-									.map_ok(|mut v| {
-										v.sort_by(|lhs, rhs| lhs.time_begin.cmp(&rhs.time_begin));
-										v
-									});
+						async move {
+							let timesheets_fut = TAdapter::retrieve(connection, &match_condition)
+								.map_ok(|mut v| {
+									v.sort_by(|lhs, rhs| lhs.time_begin.cmp(&rhs.time_begin));
+									v
+								});
 
-								#[rustfmt::skip]
-								let filename =
-									format!("{}--{}.{}", job.client.name.replace(' ', "-"), job.id, format.extension());
+							let filename =
+								format!("{}--{}.{}", j.client.name.replace(' ', "-"), j.id, format.extension());
 
-								let timesheets = timesheets_fut.await?;
+							let timesheets = timesheets_fut.await?;
 
-								#[rustfmt::skip]
-								let exported =
-									format.export_job(&job, contact_information, exchange_rates, employer, &timesheets);
+							let exported =
+								format.export_job(&j, contact_information, exchange_rates, employer, &timesheets);
 
-								match output_dir
-								{
-									Some(d) => fs::write(d.join(filename), exported).await,
-									_ => fs::write(filename, exported).await,
-								}?;
+							match output_dir
+							{
+								Some(d) => fs::write(d.join(filename), exported).await,
+								_ => fs::write(filename, exported).await,
+							}?;
 
-								DynResult::Ok(())
-							}
-						})
-						.await?;
+							DynResult::Ok(())
+						}
+					})
+					.await?;
 				}
 			},
 
@@ -242,7 +239,9 @@ impl Retrieve
 					_ => config
 						.organizations
 						.employer_id
-						.ok_or_else(|| ConfigError::NotConfigured("employer_id".into(), "organizations".into()))
+						.ok_or_else(|| {
+							ConfigError::NotConfigured("employer_id".into(), "organizations".into())
+						})
 						.map(|id| Some(id.into()))?,
 				};
 

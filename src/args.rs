@@ -4,6 +4,7 @@ mod delete;
 mod init;
 mod match_args;
 mod retrieve;
+mod run_action;
 mod store_args;
 mod update;
 
@@ -11,6 +12,7 @@ use clap::Parser as Clap;
 use clinvoice_config::Config;
 use command::Command;
 use dialoguer::Editor;
+use run_action::RunAction;
 
 use crate::DynResult;
 
@@ -43,11 +45,11 @@ impl Args
 					deserialized.write()?;
 				}
 			},
-			Command::Create(create) => create.run(&config).await?,
-			Command::Delete(delete) => delete.run(&config).await?,
+			Command::Create(create) => create.run(config).await?,
+			Command::Delete(delete) => delete.run(config).await?,
 			Command::Init(init) => init.run(&config).await?,
 			Command::Retrieve(retrieve) => retrieve.run(config).await?,
-			Command::Update(update) => update.run(&config).await?,
+			Command::Update(update) => update.run(config).await?,
 		};
 
 		Ok(())

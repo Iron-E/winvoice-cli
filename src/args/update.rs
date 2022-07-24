@@ -1,14 +1,12 @@
+mod as_ref;
 mod command;
+mod run_action;
 
 use clap::Args as Clap;
-use clinvoice_config::Config;
 use command::UpdateCommand;
 
 use super::{match_args::MatchArgs, store_args::StoreArgs};
-use crate::{
-	utils::{self, Identifiable},
-	DynResult,
-};
+use crate::utils::{self, Identifiable};
 
 /// Update information being stored by CLInvoice.
 ///
@@ -40,12 +38,5 @@ impl Update
 		TUpdated: Identifiable,
 	{
 		utils::report_action("updated", updated);
-	}
-
-	/// Execute this command given the user's [`Config`].
-	pub async fn run(self, config: &Config) -> DynResult<()>
-	{
-		let store = self.store_args.try_get_from(&config)?;
-		todo!()
 	}
 }

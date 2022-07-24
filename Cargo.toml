@@ -22,6 +22,7 @@ clinvoice-export = {branch = "release/0.1", features = ["markdown"], git = "http
 clinvoice-match = {branch = "release/0.6", features = ["serde"], git = "https://github.com/Iron-E/clinvoice-match"}
 clinvoice-schema = {branch = "release/0.9", git = "https://github.com/Iron-E/clinvoice-schema"}
 
+async-trait = "0.1"
 clap = {features=["derive"], version = "3"}
 dialoguer = "0.10"
 futures = "0.3"

@@ -19,7 +19,7 @@ use clinvoice_adapter::{
 };
 use clinvoice_config::{Adapters, Config, Error as ConfigError};
 use clinvoice_finance::ExchangeRates;
-use clinvoice_match::{MatchEmployee, MatchOrganization, MatchTimesheet};
+use clinvoice_match::MatchTimesheet;
 use command::RetrieveCommand;
 use futures::{stream, TryFutureExt, TryStreamExt};
 use serde::{de::DeserializeOwned, Serialize};

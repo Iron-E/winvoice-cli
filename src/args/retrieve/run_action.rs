@@ -164,13 +164,15 @@ impl RunAction for Retrieve
 					let exchange_rates = exchange_rates_fut.await?;
 					let mut selected = input::select(&retrieved, "Select the Jobs to export")?;
 
-					#[rustfmt::skip]
-					selected.iter_mut().filter(|j| j.invoice.date.is_none()).for_each(|j| {
-						j.invoice.date = Some(InvoiceDate {
-							issued: Utc::now(),
-							paid: None,
+					selected
+						.iter_mut()
+						.filter(|j| j.invoice.date.and_then(|d| d.paid).is_none())
+						.for_each(|j| {
+							j.invoice.date = Some(InvoiceDate {
+								issued: Utc::now(),
+								paid: None,
+							});
 						});
-					});
 
 					#[rustfmt::skip]
 					stream::iter(selected.into_iter().map(Ok)).try_for_each_concurrent(None, |j| {

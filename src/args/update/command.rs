@@ -32,11 +32,6 @@ pub enum UpdateCommand
 		/// Select a number of `Job`s that have been export and sent to their respective clients,
 		/// marking them as having been paid for.
 		#[clap(action, group = "quick-update", long, short)]
-		invoice_issued: bool,
-
-		/// Select a number of `Job`s that have been export and sent to their respective clients,
-		/// marking them as having been paid for.
-		#[clap(action, group = "quick-update", long, short)]
 		invoice_paid: bool,
 
 		/// Select a number of `Job`s that were --closed in order to mark them as being currently

@@ -118,32 +118,27 @@ impl RunAction for Update
 			},
 			UpdateCommand::Job {
 				close,
-				invoice_issued,
 				invoice_paid,
 				reopen,
 			} =>
 			{
 				#[rustfmt::skip]
-				let match_condition = (close || reopen).then(|| MatchJob {
-						date_close: close
-							.then_some(MatchOption::None)
-							.unwrap_or_else(|| MatchOption::Not(Box::new(None.into()))),
+				let selected = input::select_retrieved::<JAdapter, _, _>(
+					&connection,
+					(close || reopen).then(|| MatchJob {
+						date_close: close.then_some(MatchOption::None).unwrap_or_else(MatchOption::some),
 						..Default::default()
 					})
-					.or_else(|| invoice_issued.then(|| MatchJob {
-						invoice: MatchInvoice {
-							date_paid: None.into(),
-							..Default::default()
-						},
-						..Default::default()
-					}))
 					.or_else(|| invoice_paid.then(|| MatchJob {
 						invoice: MatchInvoice {
-							date_issued: MatchOption::Not(Box::new(None.into())),
+							date_issued: MatchOption::some(),
 							..Default::default()
 						},
 						..Default::default()
-					}));
+					})),
+					"Query the Jobs to update",
+				)
+				.await?;
 
 				todo!();
 			},
@@ -161,20 +156,24 @@ impl RunAction for Update
 					})
 					.transpose()?;
 
+				let selected = input::select_retrieved::<OAdapter, _, _>(
+					&connection,
+					match_condition,
+					"Query the Organizations to update",
+				)
+				.await?;
+
 				todo!();
 			},
 			UpdateCommand::Timesheet { restart, stop } =>
 			{
-				let match_condition = (restart || stop).then(|| MatchTimesheet {
-					time_end: stop
-						.then_some(MatchOption::None)
-						.unwrap_or_else(|| MatchOption::Not(Box::new(None.into()))),
-					..Default::default()
-				});
-
+				#[rustfmt::skip]
 				let selected = input::select_retrieved::<TAdapter, _, _>(
 					&connection,
-					match_condition,
+					(restart || stop).then(|| MatchTimesheet {
+						time_end: stop.then_some(MatchOption::None).unwrap_or_else(MatchOption::some),
+						..Default::default()
+					}),
 					"Query the Timesheets to update",
 				)
 				.await?;

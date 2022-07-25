@@ -43,7 +43,7 @@ impl RunAction for Delete
 		/// A generic deletion function which works for any of the provided adapters in the outer
 		/// function, as they all implement `TDelRetrievable` at the minimum.
 		async fn del<TDelRetrievable, TDb, TMatch>(
-			connection: Pool<TDb>,
+			connection: &Pool<TDb>,
 			match_condition: TMatch,
 		) -> DynResult<()>
 		where
@@ -59,7 +59,7 @@ impl RunAction for Delete
 			let match_condition = match_condition.try_into()?;
 			let type_name = fmt::type_name::<<TDelRetrievable as Deletable>::Entity>();
 			let retrieved = input::select_retrieved::<TDelRetrievable, _, _>(
-				&connection,
+				connection,
 				match_condition,
 				format!("Query the {type_name} to delete"),
 			)
@@ -67,7 +67,7 @@ impl RunAction for Delete
 
 			let selected = input::select(&retrieved, format!("Select the {type_name} to delete"))?;
 			TDelRetrievable::delete(
-				&connection,
+				connection,
 				selected.iter().inspect(|s| Delete::report_deleted(*s)),
 			)
 			.await?;
@@ -76,13 +76,13 @@ impl RunAction for Delete
 
 		match self.command
 		{
-			DeleteCommand::Contact => del::<CAdapter, _, _>(connection, self.match_args).await,
-			DeleteCommand::Employee => del::<EAdapter, _, _>(connection, self.match_args).await,
-			DeleteCommand::Expense => del::<XAdapter, _, _>(connection, self.match_args).await,
-			DeleteCommand::Job => del::<JAdapter, _, _>(connection, self.match_args).await,
-			DeleteCommand::Location => del::<LAdapter, _, _>(connection, self.match_args).await,
-			DeleteCommand::Organization => del::<OAdapter, _, _>(connection, self.match_args).await,
-			DeleteCommand::Timesheet => del::<TAdapter, _, _>(connection, self.match_args).await,
+			DeleteCommand::Contact => del::<CAdapter, _, _>(&connection, self.match_args).await,
+			DeleteCommand::Employee => del::<EAdapter, _, _>(&connection, self.match_args).await,
+			DeleteCommand::Expense => del::<XAdapter, _, _>(&connection, self.match_args).await,
+			DeleteCommand::Job => del::<JAdapter, _, _>(&connection, self.match_args).await,
+			DeleteCommand::Location => del::<LAdapter, _, _>(&connection, self.match_args).await,
+			DeleteCommand::Organization => del::<OAdapter, _, _>(&connection, self.match_args).await,
+			DeleteCommand::Timesheet => del::<TAdapter, _, _>(&connection, self.match_args).await,
 		}
 	}
 }

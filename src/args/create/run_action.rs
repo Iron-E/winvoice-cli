@@ -224,13 +224,10 @@ impl RunAction for Create
 						first.outer = Some(created.into());
 					}
 
+					#[rustfmt::skip]
 					LAdapter::update(
 						&mut transaction,
-						inside_locations.iter().map(|l| {
-							// HACK: can't pass `readable` in directly
-							Update::report_updated(l);
-							l
-						}),
+						inside_locations.iter().inspect(|l| Update::report_updated(*l)),
 					)
 					.await?;
 				}

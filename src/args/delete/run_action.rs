@@ -68,10 +68,7 @@ impl RunAction for Delete
 			let selected = input::select(&retrieved, format!("Select the {type_name} to delete"))?;
 			TDelRetrievable::delete(
 				&connection,
-				selected.iter().map(|s| {
-					Delete::report_deleted(s);
-					s
-				}),
+				selected.iter().inspect(|s| Delete::report_deleted(*s)),
 			)
 			.await?;
 			Ok(())

@@ -77,10 +77,7 @@ impl RunAction for Update
 
 			TUpdatable::update(
 				&mut transaction,
-				entities.iter().map(|e| {
-					Update::report_updated(e);
-					e
-				}),
+				entities.iter().inspect(|e| Update::report_updated(*e)),
 			)
 			.await?;
 

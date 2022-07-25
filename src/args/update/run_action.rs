@@ -51,8 +51,8 @@ impl RunAction for Update
 	{
 		/// A generic deletion function which works for any of the provided adapters in the outer
 		/// function, as they all implement `TUpdatable` at the minimum.
-		async fn update<TUpdatable, TDb, TMatch>(
-			connection: Pool<TDb>,
+		async fn update<TUpdatable, TDb>(
+			connection: &Pool<TDb>,
 			entities: &mut [TUpdatable::Entity],
 		) -> DynResult<()>
 		where
@@ -60,7 +60,6 @@ impl RunAction for Update
 			TUpdatable: Updatable<Db = TDb>,
 			TUpdatable::Entity:
 				Clone + DeserializeOwned + Display + Identifiable + RestorableSerde + Serialize + Sync,
-			for<'c> &'c mut TDb::Connection: Executor<'c, Database = TDb>,
 			for<'c> &'c mut Transaction<'c, TDb>: Executor<'c, Database = TDb>,
 		{
 			#[rustfmt::skip]
@@ -89,25 +88,29 @@ impl RunAction for Update
 		{
 			UpdateCommand::Contact =>
 			{
-				let selected = input::select_retrieved::<CAdapter, _, _>(
+				let mut selected = input::select_retrieved::<CAdapter, _, _>(
 					&connection,
 					None,
 					"Query the Contacts to update",
 				)
 				.await?;
 
-				todo!();
+				todo!("Prompt to change Location if `kind` is `Address`");
+
+				update::<CAdapter, _>(&connection, &mut selected).await?;
 			},
 			UpdateCommand::Expense =>
 			{
-				let selected = input::select_retrieved::<XAdapter, _, _>(
+				let mut selected = input::select_retrieved::<XAdapter, _, _>(
 					&connection,
 					None,
 					"Query the Expenses to update",
 				)
 				.await?;
 
-				todo!();
+				todo!("Prompt to change attached Timesheet");
+
+				update::<XAdapter, _>(&connection, &mut selected).await?;
 			},
 			UpdateCommand::Employee { default } =>
 			{
@@ -121,25 +124,27 @@ impl RunAction for Update
 					})
 					.transpose()?;
 
-				let selected = input::select_retrieved::<EAdapter, _, _>(
+				let mut selected = input::select_retrieved::<EAdapter, _, _>(
 					&connection,
 					match_condition,
 					"Query the Employees to update",
 				)
 				.await?;
 
-				todo!();
+				update::<EAdapter, _>(&connection, &mut selected).await?;
 			},
 			UpdateCommand::Location =>
 			{
-				let selected = input::select_retrieved::<LAdapter, _, _>(
+				let mut selected = input::select_retrieved::<LAdapter, _, _>(
 					&connection,
 					None,
 					"Query the Locations to update",
 				)
 				.await?;
 
-				todo!();
+				todo!("Prompt to select new outer location");
+
+				update::<LAdapter, _>(&connection, &mut selected).await?;
 			},
 			UpdateCommand::Job {
 				close,
@@ -148,7 +153,7 @@ impl RunAction for Update
 			} =>
 			{
 				#[rustfmt::skip]
-				let selected = input::select_retrieved::<JAdapter, _, _>(
+				let mut selected = input::select_retrieved::<JAdapter, _, _>(
 					&connection,
 					(close || reopen)
 						.then(|| MatchJob {
@@ -166,7 +171,9 @@ impl RunAction for Update
 				)
 				.await?;
 
-				todo!();
+				todo!("Prompt to change client");
+
+				update::<JAdapter, _>(&connection, &mut selected).await?;
 			},
 			UpdateCommand::Organization { employer } =>
 			{
@@ -182,19 +189,21 @@ impl RunAction for Update
 					})
 					.transpose()?;
 
-				let selected = input::select_retrieved::<OAdapter, _, _>(
+				let mut selected = input::select_retrieved::<OAdapter, _, _>(
 					&connection,
 					match_condition,
 					"Query the Organizations to update",
 				)
 				.await?;
 
-				todo!();
+				todo!("Prompt to change Location");
+
+				update::<OAdapter, _>(&connection, &mut selected).await?;
 			},
 			UpdateCommand::Timesheet { restart, stop } =>
 			{
 				#[rustfmt::skip]
-				let selected = input::select_retrieved::<TAdapter, _, _>(
+				let mut selected = input::select_retrieved::<TAdapter, _, _>(
 					&connection,
 					(restart || stop).then(|| MatchTimesheet {
 						time_end: stop.then_some(MatchOption::None).unwrap_or_else(MatchOption::some),
@@ -204,7 +213,10 @@ impl RunAction for Update
 				)
 				.await?;
 
-				todo!();
+				todo!("Prompt to change employee");
+				todo!("Prompt to change job");
+
+				update::<TAdapter, _>(&connection, &mut selected).await?;
 			},
 		};
 

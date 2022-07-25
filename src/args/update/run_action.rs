@@ -92,10 +92,24 @@ impl RunAction for Update
 		{
 			UpdateCommand::Contact =>
 			{
+				let selected = input::select_retrieved::<CAdapter, _, _>(
+					&connection,
+					None,
+					"Query the Contacts to update",
+				)
+				.await?;
+
 				todo!();
 			},
 			UpdateCommand::Expense =>
 			{
+				let selected = input::select_retrieved::<XAdapter, _, _>(
+					&connection,
+					None,
+					"Query the Expenses to update",
+				)
+				.await?;
+
 				todo!();
 			},
 			UpdateCommand::Employee { default } =>
@@ -110,10 +124,24 @@ impl RunAction for Update
 					})
 					.transpose()?;
 
+				let selected = input::select_retrieved::<EAdapter, _, _>(
+					&connection,
+					match_condition,
+					"Query the Employees to update",
+				)
+				.await?;
+
 				todo!();
 			},
 			UpdateCommand::Location =>
 			{
+				let selected = input::select_retrieved::<LAdapter, _, _>(
+					&connection,
+					None,
+					"Query the Locations to update",
+				)
+				.await?;
+
 				todo!();
 			},
 			UpdateCommand::Job {
@@ -125,17 +153,18 @@ impl RunAction for Update
 				#[rustfmt::skip]
 				let selected = input::select_retrieved::<JAdapter, _, _>(
 					&connection,
-					(close || reopen).then(|| MatchJob {
-						date_close: close.then_some(MatchOption::None).unwrap_or_else(MatchOption::some),
-						..Default::default()
-					})
-					.or_else(|| invoice_paid.then(|| MatchJob {
-						invoice: MatchInvoice {
-							date_issued: MatchOption::some(),
+					(close || reopen)
+						.then(|| MatchJob {
+							date_close: close.then_some(MatchOption::None).unwrap_or_else(MatchOption::some),
 							..Default::default()
-						},
-						..Default::default()
-					})),
+						})
+						.or_else(|| invoice_paid.then(|| MatchJob {
+							invoice: MatchInvoice {
+								date_issued: MatchOption::some(),
+								..Default::default()
+							},
+							..Default::default()
+						})),
 					"Query the Jobs to update",
 				)
 				.await?;

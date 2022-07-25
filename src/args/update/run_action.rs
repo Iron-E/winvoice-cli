@@ -118,25 +118,30 @@ impl RunAction for Update
 			},
 			UpdateCommand::Job {
 				close,
-				paid,
+				invoice_issued,
+				invoice_paid,
 				reopen,
 			} =>
 			{
 				#[rustfmt::skip]
-				let match_condition = close
-					.then(|| MatchJob {
-						date_close: None.into(),
+				let match_condition = (close || reopen).then(|| MatchJob {
+						date_close: close
+							.then_some(MatchOption::None)
+							.unwrap_or_else(|| MatchOption::Not(Box::new(None.into()))),
 						..Default::default()
 					})
-					.or_else(|| paid.then(|| MatchJob {
+					.or_else(|| invoice_issued.then(|| MatchJob {
 						invoice: MatchInvoice {
 							date_paid: None.into(),
 							..Default::default()
 						},
 						..Default::default()
 					}))
-					.or_else(|| reopen.then(|| MatchJob {
-						date_close: MatchOption::Not(Box::new(None.into())),
+					.or_else(|| invoice_paid.then(|| MatchJob {
+						invoice: MatchInvoice {
+							date_issued: MatchOption::Not(Box::new(None.into())),
+							..Default::default()
+						},
 						..Default::default()
 					}));
 
@@ -160,16 +165,12 @@ impl RunAction for Update
 			},
 			UpdateCommand::Timesheet { restart, stop } =>
 			{
-				#[rustfmt::skip]
-				let match_condition = restart
-					.then(|| MatchTimesheet {
-						time_end: None.into(),
-						..Default::default()
-					})
-					.or_else(|| stop.then(|| MatchTimesheet {
-						time_end: MatchOption::Not(Box::new(None.into())),
-						..Default::default()
-					}));
+				let match_condition = (restart || stop).then(|| MatchTimesheet {
+					time_end: stop
+						.then_some(MatchOption::None)
+						.unwrap_or_else(|| MatchOption::Not(Box::new(None.into()))),
+					..Default::default()
+				});
 
 				let selected = input::select_retrieved::<TAdapter, _, _>(
 					&connection,

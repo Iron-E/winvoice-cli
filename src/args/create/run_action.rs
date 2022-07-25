@@ -206,7 +206,7 @@ impl RunAction for Create
 					let mut inside_locations = input::select_retrieved::<LAdapter, _, _>(
 						&connection,
 						None,
-						format!("Select Locations that are inside {created}"),
+						format!("Query Locations that are inside {created}"),
 					)
 					.await?;
 

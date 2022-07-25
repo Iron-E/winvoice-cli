@@ -17,6 +17,7 @@ use clinvoice_adapter::{
 use clinvoice_config::{Config, Error};
 use clinvoice_finance::ExchangeRates;
 use clinvoice_match::{MatchOrganization, MatchTimesheet};
+use clinvoice_schema::{chrono::Utc, InvoiceDate};
 use futures::{future, stream, TryFutureExt, TryStreamExt};
 use serde::{de::DeserializeOwned, Serialize};
 use sqlx::{Database, Executor, Pool};
@@ -161,7 +162,15 @@ impl RunAction for Retrieve
 					)?;
 
 					let exchange_rates = exchange_rates_fut.await?;
-					let selected = input::select(&retrieved, "Select the Jobs to export")?;
+					let mut selected = input::select(&retrieved, "Select the Jobs to export")?;
+
+					#[rustfmt::skip]
+					selected.iter_mut().filter(|j| j.invoice.date.is_none()).for_each(|j| {
+						j.invoice.date = Some(InvoiceDate {
+							issued: Utc::now(),
+							paid: None,
+						});
+					});
 
 					#[rustfmt::skip]
 					stream::iter(selected.into_iter().map(Ok)).try_for_each_concurrent(None, |j| {

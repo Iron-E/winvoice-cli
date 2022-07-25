@@ -1,3 +1,5 @@
+use core::fmt::Display;
+
 use clinvoice_adapter::{
 	schema::{
 		ContactAdapter,
@@ -9,12 +11,23 @@ use clinvoice_adapter::{
 		TimesheetAdapter,
 	},
 	Deletable,
+	Updatable,
 };
-use clinvoice_config::Config;
+use clinvoice_config::{Config, Error};
+use clinvoice_match::{
+	MatchEmployee,
+	MatchInvoice,
+	MatchJob,
+	MatchOption,
+	MatchOrganization,
+	MatchTimesheet,
+};
+use clinvoice_schema::RestorableSerde;
+use serde::{de::DeserializeOwned, Serialize};
 use sqlx::{Database, Executor, Pool, Transaction};
 
 use super::{Update, UpdateCommand};
-use crate::{args::RunAction, DynResult};
+use crate::{args::RunAction, fmt, input, utils::Identifiable, DynResult};
 
 #[async_trait::async_trait(?Send)]
 impl RunAction for Update
@@ -36,19 +49,137 @@ impl RunAction for Update
 		for<'c> &'c mut TDb::Connection: Executor<'c, Database = TDb>,
 		for<'c> &'c mut Transaction<'c, TDb>: Executor<'c, Database = TDb>,
 	{
+		/// A generic deletion function which works for any of the provided adapters in the outer
+		/// function, as they all implement `TUpdatable` at the minimum.
+		async fn update<TUpdatable, TDb, TMatch>(
+			connection: Pool<TDb>,
+			entities: &mut [TUpdatable::Entity],
+		) -> DynResult<()>
+		where
+			TDb: Database,
+			TUpdatable: Updatable<Db = TDb>,
+			TUpdatable::Entity:
+				Clone + DeserializeOwned + Display + Identifiable + RestorableSerde + Serialize + Sync,
+			for<'c> &'c mut TDb::Connection: Executor<'c, Database = TDb>,
+			for<'c> &'c mut Transaction<'c, TDb>: Executor<'c, Database = TDb>,
+		{
+			#[rustfmt::skip]
+			entities.iter_mut().try_for_each(|e| {
+				*e = input::edit_and_restore(e, format!(
+					"Make any desired edits to the {}",
+					fmt::type_name::<TUpdatable::Entity>()
+				))?;
+
+				input::Result::Ok(())
+			})?;
+
+			let mut transaction = connection.begin().await?;
+
+			TUpdatable::update(
+				&mut transaction,
+				entities.iter().map(|e| {
+					Update::report_updated(e);
+					e
+				}),
+			)
+			.await?;
+
+			transaction.commit().await?;
+			Ok(())
+		}
+
 		match self.command
 		{
-			UpdateCommand::Contact => todo!(),
-			UpdateCommand::Expense => todo!(),
-			UpdateCommand::Employee { default } => todo!(),
-			UpdateCommand::Location => todo!(),
+			UpdateCommand::Contact =>
+			{
+				todo!();
+			},
+			UpdateCommand::Expense =>
+			{
+				todo!();
+			},
+			UpdateCommand::Employee { default } =>
+			{
+				let match_condition = default
+					.then(|| {
+						config
+							.employees
+							.id
+							.map(MatchEmployee::from)
+							.ok_or_else(|| Error::NotConfigured("id".into(), "employees".into()))
+					})
+					.transpose()?;
+
+				todo!();
+			},
+			UpdateCommand::Location =>
+			{
+				todo!();
+			},
 			UpdateCommand::Job {
 				close,
 				paid,
 				reopen,
-			} => todo!(),
-			UpdateCommand::Organization { employer } => todo!(),
-			UpdateCommand::Timesheet { restart, stop } => todo!(),
+			} =>
+			{
+				#[rustfmt::skip]
+				let match_condition = close
+					.then(|| MatchJob {
+						date_close: None.into(),
+						..Default::default()
+					})
+					.or_else(|| paid.then(|| MatchJob {
+						invoice: MatchInvoice {
+							date_paid: None.into(),
+							..Default::default()
+						},
+						..Default::default()
+					}))
+					.or_else(|| reopen.then(|| MatchJob {
+						date_close: MatchOption::Not(Box::new(None.into())),
+						..Default::default()
+					}));
+
+				todo!();
+			},
+			UpdateCommand::Organization { employer } =>
+			{
+				let match_condition = employer
+					.then(|| {
+						config
+							.organizations
+							.employer_id
+							.map(MatchOrganization::from)
+							.ok_or_else(|| {
+								Error::NotConfigured("employer_id".into(), "organizations".into())
+							})
+					})
+					.transpose()?;
+
+				todo!();
+			},
+			UpdateCommand::Timesheet { restart, stop } =>
+			{
+				#[rustfmt::skip]
+				let match_condition = restart
+					.then(|| MatchTimesheet {
+						time_end: None.into(),
+						..Default::default()
+					})
+					.or_else(|| stop.then(|| MatchTimesheet {
+						time_end: MatchOption::Not(Box::new(None.into())),
+						..Default::default()
+					}));
+
+				let selected = input::select_retrieved::<TAdapter, _, _>(
+					&connection,
+					match_condition,
+					"Query the Timesheets to update",
+				)
+				.await?;
+
+				todo!();
+			},
 		};
 
 		Ok(())

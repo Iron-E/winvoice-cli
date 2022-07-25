@@ -28,7 +28,7 @@ pub enum CreateCommand
 		label: String,
 
 		/// The `Contact` to create is the address of a physical `Location`.
-		#[clap(action, group = "kind", group = "content", long, short)]
+		#[clap(action, groups = &["content", "kind"], long, short)]
 		address: bool,
 
 		/// The `Contact` to create is an email address.

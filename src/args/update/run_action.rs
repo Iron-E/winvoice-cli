@@ -40,14 +40,14 @@ impl RunAction for Update
 		{
 			UpdateCommand::Contact => todo!(),
 			UpdateCommand::Expense => todo!(),
-			UpdateCommand::Employee => todo!(),
+			UpdateCommand::Employee { default } => todo!(),
 			UpdateCommand::Location => todo!(),
 			UpdateCommand::Job {
 				close,
 				paid,
 				reopen,
 			} => todo!(),
-			UpdateCommand::Organization => todo!(),
+			UpdateCommand::Organization { employer } => todo!(),
 			UpdateCommand::Timesheet { restart, stop } => todo!(),
 		};
 

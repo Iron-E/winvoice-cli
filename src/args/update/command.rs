@@ -8,7 +8,15 @@ pub enum UpdateCommand
 	Contact,
 
 	/// Update `Employee`s in the store (-s) specified.
-	Employee,
+	Employee
+	{
+		/// Update the `Employee` specified in the `id` field of the `[employees]` section of the
+		/// CLInvoice configuration file.
+		///
+		/// Ignores --match.
+		#[clap(action, long, short)]
+		default: bool,
+	},
 
 	/// Update `Expense`s in the store (-s) specified.
 	Expense,
@@ -36,7 +44,15 @@ pub enum UpdateCommand
 	Location,
 
 	/// Update `Organization`s in the store (-s) specified.
-	Organization,
+	Organization
+	{
+		/// Update the `Organization` specified in the `employer_id` field of the `[organizations]`
+		/// section of the CLInvoice configuration file.
+		///
+		/// Ignores --match.
+		#[clap(action, long, short)]
+		employer: bool,
+	},
 
 	/// Update `Timesheet`s in the store (-s) specified.
 	Timesheet

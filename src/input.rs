@@ -36,6 +36,14 @@ where
 	Confirm::new().with_prompt(prompt).interact()
 }
 
+/// If a `prompt` is [`confirm`]ed, return `some` value.
+pub fn confirm_then_some<TPrompt, TSome>(prompt: TPrompt, some: TSome) -> Option<TSome>
+where
+	TPrompt: Into<String>,
+{
+	confirm(prompt).unwrap_or(false).then_some(some)
+}
+
 /// Gather input from the user's text editor, defined by the:
 ///
 /// 1. "VISUAL" environment variable.

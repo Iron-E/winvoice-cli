@@ -22,7 +22,8 @@ use clinvoice_match::{
 	MatchOrganization,
 	MatchTimesheet,
 };
-use clinvoice_schema::RestorableSerde;
+use clinvoice_schema::{ContactKind, RestorableSerde};
+use futures::{stream, TryStreamExt};
 use serde::{de::DeserializeOwned, Serialize};
 use sqlx::{Database, Executor, Pool, Transaction};
 
@@ -95,7 +96,31 @@ impl RunAction for Update
 				)
 				.await?;
 
-				todo!("Prompt to change Location if `kind` is `Address`");
+				#[rustfmt::skip]
+				stream::iter(selected.iter_mut().filter_map(|contact| match contact.kind
+				{
+					ContactKind::Address(_) => input::confirm_then_some(
+						format!("Do you want to change the location of {}?", fmt::quoted(&contact.label)),
+						Ok(contact),
+					),
+					_ => None,
+				}))
+				.try_for_each(|contact| {
+					let connection = &connection;
+
+					async {
+						contact.kind = input::select_one_retrieved::<LAdapter, _, _>(
+							connection,
+							None,
+							"Query the Location you want to set this address to",
+						)
+						.await
+						.map(ContactKind::Address)?;
+
+						DynResult::Ok(())
+					}
+				})
+				.await?;
 
 				update::<CAdapter, _>(&connection, &mut selected).await?;
 			},
@@ -108,7 +133,27 @@ impl RunAction for Update
 				)
 				.await?;
 
-				todo!("Prompt to change attached Timesheet");
+				#[rustfmt::skip]
+				stream::iter(selected.iter_mut().filter_map(|expense| input::confirm_then_some(
+					format!("Do you want to change the Timesheet of {expense}?"),
+					Ok(expense),
+				)))
+				.try_for_each(|expense| {
+					let connection = &connection;
+
+					async {
+						expense.timesheet_id = input::select_one_retrieved::<TAdapter, _, _>(
+							connection,
+							None,
+							"Query the Timesheet to attach this Expense to",
+						)
+						.await
+						.map(|t| t.id)?;
+
+						DynResult::Ok(())
+					}
+				})
+				.await?;
 
 				update::<XAdapter, _>(&connection, &mut selected).await?;
 			},
@@ -142,7 +187,30 @@ impl RunAction for Update
 				)
 				.await?;
 
-				todo!("Prompt to select new outer location");
+				#[rustfmt::skip]
+				stream::iter(selected.iter_mut().filter_map(|location| input::confirm_then_some(
+					format!("Do you want to put {} into a new Location", fmt::quoted(&location.name)),
+					Ok(location),
+				)))
+				.try_for_each(|location| {
+					let connection = &connection;
+
+					async {
+						location.outer = input::select_one_retrieved::<LAdapter, _, _>(
+							connection,
+							None,
+							format!(
+								"Query the Location you want to put {} inside of",
+								location.name,
+							),
+						)
+						.await
+						.map(|l| Some(l.into()))?;
+
+						DynResult::Ok(())
+					}
+				})
+				.await?;
 
 				update::<LAdapter, _>(&connection, &mut selected).await?;
 			},
@@ -171,7 +239,34 @@ impl RunAction for Update
 				)
 				.await?;
 
-				todo!("Prompt to change client");
+				#[rustfmt::skip]
+				stream::iter(selected.iter_mut().filter_map(|job| input::confirm_then_some(
+					format!(
+						"Do you want to change the client {} of Job {} ({})?",
+						fmt::quoted(&job.client.name),
+						fmt::id_num(job.id),
+						job.objectives
+							.lines()
+							.next()
+							.expect("Job should have at least one line of description"),
+					),
+					Ok(job),
+				)))
+				.try_for_each(|job| {
+					let connection = &connection;
+
+					async {
+						job.client = input::select_one_retrieved::<OAdapter, _, _>(
+							connection,
+							None,
+							"Query the Organization you want to set this Job's client to",
+						)
+						.await?;
+
+						DynResult::Ok(())
+					}
+				})
+				.await?;
 
 				update::<JAdapter, _>(&connection, &mut selected).await?;
 			},
@@ -196,7 +291,26 @@ impl RunAction for Update
 				)
 				.await?;
 
-				todo!("Prompt to change Location");
+				#[rustfmt::skip]
+				stream::iter(selected.iter_mut().filter_map(|organization| input::confirm_then_some(
+					format!("Do you want to change the Location of {}?", fmt::quoted(&organization.name)),
+					Ok(organization),
+				)))
+				.try_for_each(|organization| {
+					let connection = &connection;
+
+					async {
+						organization.location = input::select_one_retrieved::<LAdapter, _, _>(
+							connection,
+							None,
+							"Query the Location you want to move this Organization to",
+						)
+						.await?;
+
+						DynResult::Ok(())
+					}
+				})
+				.await?;
 
 				update::<OAdapter, _>(&connection, &mut selected).await?;
 			},

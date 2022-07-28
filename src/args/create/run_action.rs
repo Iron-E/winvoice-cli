@@ -145,7 +145,7 @@ impl RunAction for Create
 					date_close.map(utils::naive_local_datetime_to_utc),
 					date_open
 						.map(utils::naive_local_datetime_to_utc)
-						.unwrap_or_else(|| Utc::now()),
+						.unwrap_or_else(Utc::now),
 					increment.unwrap_or(config.jobs.default_increment),
 					Invoice {
 						date: date_invoice_issued.map(|issued| InvoiceDate {
@@ -292,7 +292,7 @@ impl RunAction for Create
 					job,
 					time_begin
 						.map(utils::naive_local_datetime_to_utc)
-						.unwrap_or_else(|| Utc::now()),
+						.unwrap_or_else(Utc::now),
 					time_end.map(utils::naive_local_datetime_to_utc),
 					work_notes.unwrap_or_else(|| "None".into()),
 				)

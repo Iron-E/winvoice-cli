@@ -73,11 +73,11 @@ impl RunAction for Retrieve
 		{
 			let retrieved = match match_condition.try_into()?
 			{
-				Some(condition) => TRetrievable::retrieve(&connection, &condition).await?,
+				Some(condition) => TRetrievable::retrieve(connection, &condition).await?,
 
 				#[rustfmt::skip]
 				_ => input::retrieve::<TRetrievable, _, _>(
-					&connection,
+					connection,
 					format!("Query the {} to delete", fmt::type_name::<TRetrievable::Entity>()),
 				)
 				.await?,

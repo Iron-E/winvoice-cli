@@ -231,7 +231,7 @@ where
 {
 	let retrieved = match match_condition
 	{
-		Some(condition) => TRetrievable::retrieve(&connection, &condition).await?,
+		Some(condition) => TRetrievable::retrieve(connection, &condition).await?,
 		_ => retrieve::<TRetrievable, _, _>(connection, prompt).await?,
 	};
 
@@ -262,7 +262,7 @@ where
 {
 	let retrieved = match match_condition
 	{
-		Some(condition) => TRetrievable::retrieve(&connection, &condition).await?,
+		Some(condition) => TRetrievable::retrieve(connection, &condition).await?,
 		_ => retrieve::<TRetrievable, _, _>(connection, prompt).await?,
 	};
 

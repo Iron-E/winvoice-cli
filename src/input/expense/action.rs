@@ -1,3 +1,5 @@
+#![allow(clippy::use_self)]
+
 use strum::{Display, EnumIter};
 
 /// A possible action to choose while using the [`menu`](super::menu).

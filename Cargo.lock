@@ -255,8 +255,8 @@ dependencies = [
 
 [[package]]
 name = "clinvoice-adapter"
-version = "0.16.3"
-source = "git+https://github.com/Iron-E/clinvoice-adapter?branch=release/0.16#65729ca422636383d12d1825c23dafc2c01d446f"
+version = "0.17.0"
+source = "git+https://github.com/Iron-E/clinvoice-adapter?branch=release/0.17#13ed87c2462cea9e80c8c903279a4a98ba037c83"
 dependencies = [
  "async-trait",
  "clinvoice-error",
@@ -268,8 +268,8 @@ dependencies = [
 
 [[package]]
 name = "clinvoice-adapter-postgres"
-version = "0.6.0"
-source = "git+https://github.com/Iron-E/clinvoice-adapter-postgres?branch=release/0.6#c17844d7466ba9915b7bc6c8f233491cb122d518"
+version = "0.7.0"
+source = "git+https://github.com/Iron-E/clinvoice-adapter-postgres?branch=release/0.7#326719bb36f7c61d0f8b0fc3288df16331770b35"
 dependencies = [
  "async-trait",
  "clinvoice-adapter",
@@ -286,8 +286,8 @@ dependencies = [
 
 [[package]]
 name = "clinvoice-config"
-version = "0.7.0"
-source = "git+https://github.com/Iron-E/clinvoice-config?branch=release/0.7#6502f5a5a1e5d3e783ccc85a28b9914b5f186190"
+version = "0.7.1"
+source = "git+https://github.com/Iron-E/clinvoice-config?branch=release/0.7#79fee845d70302c4672dbca30e9450fbcdccf945"
 dependencies = [
  "clinvoice-error",
  "clinvoice-schema",
@@ -300,13 +300,13 @@ dependencies = [
 
 [[package]]
 name = "clinvoice-error"
-version = "0.3.0"
-source = "git+https://github.com/Iron-E/clinvoice-error?branch=release/0.3#b6e0f1ce63387cace65c3572b2002a9b329dcd96"
+version = "0.3.1"
+source = "git+https://github.com/Iron-E/clinvoice-error?branch=release/0.3#fdf3de0910bbbbb10c300da08a199ac9087dcced"
 
 [[package]]
 name = "clinvoice-export"
-version = "0.1.5"
-source = "git+https://github.com/Iron-E/clinvoice-export?branch=release/0.1#3004b3334bc0aec7124f243ae8c789e590bf915d"
+version = "0.1.8"
+source = "git+https://github.com/Iron-E/clinvoice-export?branch=release/0.1#25e09e71fe4c0ff0db9a3189c55bef8ec1491d07"
 dependencies = [
  "clinvoice-error",
  "clinvoice-finance",
@@ -317,8 +317,8 @@ dependencies = [
 
 [[package]]
 name = "clinvoice-finance"
-version = "0.4.4"
-source = "git+https://github.com/Iron-E/clinvoice-finance?branch=release/0.4#df831d9a5b403fb4e32c9663434b012eb45ef3be"
+version = "0.4.6"
+source = "git+https://github.com/Iron-E/clinvoice-finance?branch=release/0.4#68a6dcffe03c5f110cef66297386be2390ad389a"
 dependencies = [
  "chrono",
  "clinvoice-error",
@@ -346,8 +346,8 @@ dependencies = [
 
 [[package]]
 name = "clinvoice-schema"
-version = "0.9.1"
-source = "git+https://github.com/Iron-E/clinvoice-schema?branch=release/0.9#9e089189ae11bbb175579ef3d2f0f30a0ed16ffe"
+version = "0.9.2"
+source = "git+https://github.com/Iron-E/clinvoice-schema?branch=release/0.9#9303b8e0c720cb5f66a87715159db711de30b78d"
 dependencies = [
  "chrono",
  "clinvoice-finance",
@@ -459,9 +459,9 @@ dependencies = [
 
 [[package]]
 name = "ctor"
-version = "0.1.22"
+version = "0.1.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f877be4f7c9f246b183111634f75baa039715e3f46ce860677d3b19a69fb229c"
+checksum = "cdffe87e1d521a10f9696f833fe502293ea446d7f256c06128293a4119bdf4cb"
 dependencies = [
  "quote",
  "syn",
@@ -469,9 +469,9 @@ dependencies = [
 
 [[package]]
 name = "dialoguer"
-version = "0.10.1"
+version = "0.10.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d8c8ae48e400addc32a8710c8d62d55cb84249a7d58ac4cd959daecfbaddc545"
+checksum = "a92e7e37ecef6857fdc0c0c5d42fd5b0938e46590c2183cc92dd310a6d078eb1"
 dependencies = [
  "console",
  "tempfile",

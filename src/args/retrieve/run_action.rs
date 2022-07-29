@@ -43,7 +43,7 @@ impl RunAction for Retrieve
 		OAdapter: Deletable<Db = TDb> + OrganizationAdapter,
 		TAdapter: Deletable<Db = TDb> + TimesheetAdapter,
 		XAdapter: Deletable<Db = TDb> + ExpensesAdapter,
-		for<'c> &'c mut TDb::Connection: Executor<'c, Database = TDb>,
+		for<'connection> &'connection mut TDb::Connection: Executor<'connection, Database = TDb>,
 	{
 		/// [`Display`] every element of some `array` using [`println!`].
 		fn print_all<T>(array: &[T])
@@ -69,7 +69,7 @@ impl RunAction for Retrieve
 			TRetrievable: Retrievable<Db = TDb>,
 			TRetrievable::Entity: Clone + Display + Sync,
 			TRetrievable::Match: Default + DeserializeOwned + Serialize,
-			for<'c> &'c mut TDb::Connection: Executor<'c, Database = TDb>,
+			for<'connection> &'connection mut TDb::Connection: Executor<'connection, Database = TDb>,
 		{
 			let retrieved = match match_condition.try_into()?
 			{

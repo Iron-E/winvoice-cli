@@ -34,8 +34,9 @@ pub trait RunAction: AsRef<StoreArgs> + Sized
 		OAdapter: Deletable<Db = TDb> + OrganizationAdapter,
 		TAdapter: Deletable<Db = TDb> + TimesheetAdapter,
 		XAdapter: Deletable<Db = TDb> + ExpensesAdapter,
-		for<'c> &'c mut TDb::Connection: Executor<'c, Database = TDb>,
-		for<'c> &'c mut Transaction<'c, TDb>: Executor<'c, Database = TDb>;
+		for<'connection> &'connection mut TDb::Connection: Executor<'connection, Database = TDb>,
+		for<'connection> &'connection mut Transaction<'connection, TDb>:
+			Executor<'connection, Database = TDb>;
 
 	/// Execute this command given the user's [`Config`].
 	async fn run(self, config: Config) -> DynResult<()>

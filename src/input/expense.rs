@@ -80,12 +80,13 @@ fn edit_menu(expenses: &mut Vec<(String, Money, String)>) -> Result<()>
 {
 	if !expenses.is_empty()
 	{
+		const PROMPT: &str = "Make any desired changes to the ";
+
 		let edit_index = super::select_one_index(
 			&expenses.iter().map(tuple_to_string).collect::<Vec<_>>(),
 			"Select an Expense to edit",
 		)?;
 
-		const PROMPT: &str = "Make any desired changes to the ";
 		let (mut category, mut cost, mut description) = expenses.remove(edit_index);
 
 		category = super::text(Some(category), format!("{PROMPT} category"))?;

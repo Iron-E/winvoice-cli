@@ -101,7 +101,7 @@ where
 {
 	let maybe_edit = Editor::new()
 		// HACK: have to use closure here
-		.extension(format.map(|f| f.extension()).unwrap_or("txt"))
+		.extension(format.map_or("txt", |f| f.extension()))
 		.edit(content.as_ref())?;
 
 	maybe_edit.ok_or(Error::NotEdited)
@@ -118,7 +118,7 @@ where
 	TPrompt: Display,
 	TRetrievable: Retrievable<Db = TDb>,
 	TRetrievable::Match: Default + DeserializeOwned + Serialize,
-	for<'c> &'c mut TDb::Connection: Executor<'c, Database = TDb>,
+	for<'connection> &'connection mut TDb::Connection: Executor<'connection, Database = TDb>,
 {
 	loop
 	{
@@ -235,7 +235,7 @@ where
 	TRetrievable: Retrievable<Db = TDb>,
 	TRetrievable::Entity: Clone + Display,
 	TRetrievable::Match: Default + DeserializeOwned + Serialize,
-	for<'c> &'c mut TDb::Connection: Executor<'c, Database = TDb>,
+	for<'connection> &'connection mut TDb::Connection: Executor<'connection, Database = TDb>,
 {
 	let retrieved = match match_condition
 	{
@@ -266,7 +266,7 @@ where
 	TRetrievable: Retrievable<Db = TDb>,
 	TRetrievable::Entity: Clone + Display,
 	TRetrievable::Match: Default + DeserializeOwned + Serialize,
-	for<'c> &'c mut TDb::Connection: Executor<'c, Database = TDb>,
+	for<'connection> &'connection mut TDb::Connection: Executor<'connection, Database = TDb>,
 {
 	let retrieved = match match_condition
 	{

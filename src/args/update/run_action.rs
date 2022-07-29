@@ -47,8 +47,9 @@ impl RunAction for Update
 		TAdapter: Deletable<Db = TDb> + TimesheetAdapter,
 		XAdapter: Deletable<Db = TDb> + ExpensesAdapter,
 		TDb: Database,
-		for<'c> &'c mut TDb::Connection: Executor<'c, Database = TDb>,
-		for<'c> &'c mut Transaction<'c, TDb>: Executor<'c, Database = TDb>,
+		for<'connection> &'connection mut TDb::Connection: Executor<'connection, Database = TDb>,
+		for<'connection> &'connection mut Transaction<'connection, TDb>:
+			Executor<'connection, Database = TDb>,
 	{
 		/// A generic deletion function which works for any of the provided adapters in the outer
 		/// function, as they all implement `TUpdatable` at the minimum.
@@ -61,7 +62,8 @@ impl RunAction for Update
 			TUpdatable: Updatable<Db = TDb>,
 			TUpdatable::Entity:
 				Clone + DeserializeOwned + Display + Identifiable + RestorableSerde + Serialize + Sync,
-			for<'c> &'c mut Transaction<'c, TDb>: Executor<'c, Database = TDb>,
+			for<'connection> &'connection mut Transaction<'connection, TDb>:
+				Executor<'connection, Database = TDb>,
 		{
 			#[rustfmt::skip]
 			entities.iter_mut().try_for_each(|e| {

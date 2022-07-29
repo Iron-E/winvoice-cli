@@ -19,7 +19,10 @@ impl StoreArgs
 {
 	/// Try to get the store named `store_name` from `config` and return it, erroring if it does not
 	/// exist.
-	pub fn try_get_from<'c>(&self, config: &'c Config) -> Result<&'c Store>
+	pub fn try_get_from<'connection>(
+		&self,
+		config: &'connection Config,
+	) -> Result<&'connection Store>
 	{
 		config
 			.get_store(&self.store)

@@ -38,7 +38,7 @@ impl RunAction for Delete
 		TAdapter: Deletable<Db = TDb> + TimesheetAdapter,
 		XAdapter: Deletable<Db = TDb> + ExpensesAdapter,
 		TDb: Database,
-		for<'c> &'c mut TDb::Connection: Executor<'c, Database = TDb>,
+		for<'connection> &'connection mut TDb::Connection: Executor<'connection, Database = TDb>,
 	{
 		/// A generic deletion function which works for any of the provided adapters in the outer
 		/// function, as they all implement `TDelRetrievable` at the minimum.
@@ -54,7 +54,7 @@ impl RunAction for Delete
 			<TDelRetrievable as Deletable>::Entity: Clone + Display + Identifiable + Sync,
 			TDelRetrievable: Retrievable<Db = TDb, Entity = <TDelRetrievable as Deletable>::Entity>,
 			TDelRetrievable::Match: Default + DeserializeOwned + Serialize,
-			for<'c> &'c mut TDb::Connection: Executor<'c, Database = TDb>,
+			for<'connection> &'connection mut TDb::Connection: Executor<'connection, Database = TDb>,
 		{
 			let match_condition = match_condition.try_into()?;
 			let type_name = fmt::type_name::<<TDelRetrievable as Deletable>::Entity>();

@@ -40,8 +40,9 @@ impl RunAction for Create
 		TAdapter: Deletable<Db = TDb> + TimesheetAdapter,
 		XAdapter: Deletable<Db = TDb> + ExpensesAdapter,
 		TDb: Database,
-		for<'c> &'c mut TDb::Connection: Executor<'c, Database = TDb>,
-		for<'c> &'c mut Transaction<'c, TDb>: Executor<'c, Database = TDb>,
+		for<'connection> &'connection mut TDb::Connection: Executor<'connection, Database = TDb>,
+		for<'connection> &'connection mut Transaction<'connection, TDb>:
+			Executor<'connection, Database = TDb>,
 	{
 		match self.command
 		{
@@ -143,9 +144,7 @@ impl RunAction for Create
 					&connection,
 					client,
 					date_close.map(utils::naive_local_datetime_to_utc),
-					date_open
-						.map(utils::naive_local_datetime_to_utc)
-						.unwrap_or_else(Utc::now),
+					date_open.map_or_else(Utc::now, utils::naive_local_datetime_to_utc),
 					increment.unwrap_or(config.jobs.default_increment),
 					Invoice {
 						date: date_invoice_issued.map(|issued| InvoiceDate {
@@ -290,9 +289,7 @@ impl RunAction for Create
 					employee,
 					expenses,
 					job,
-					time_begin
-						.map(utils::naive_local_datetime_to_utc)
-						.unwrap_or_else(Utc::now),
+					time_begin.map_or_else(Utc::now, utils::naive_local_datetime_to_utc),
 					time_end.map(utils::naive_local_datetime_to_utc),
 					work_notes.unwrap_or_else(|| "None".into()),
 				)

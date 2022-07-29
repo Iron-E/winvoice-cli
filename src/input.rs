@@ -94,19 +94,6 @@ where
 	})
 }
 
-/// [Edit](Editor::edit) some `prompt`, rendered as Markdown.
-pub fn edit_text<T>(content: T, format: Option<Format>) -> Result<String>
-where
-	T: AsRef<str>,
-{
-	let maybe_edit = Editor::new()
-		// HACK: have to use closure here
-		.extension(format.map_or("txt", |f| f.extension()))
-		.edit(content.as_ref())?;
-
-	maybe_edit.ok_or(Error::NotEdited)
-}
-
 /// [Retrieve](Retrievable::retrieve) all [entities](Retrievable::Entity) that match a
 /// user-provided query.
 pub async fn retrieve<Retr, Db, Prompt>(

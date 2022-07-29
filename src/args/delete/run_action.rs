@@ -24,7 +24,7 @@ use crate::{args::RunAction, fmt, input, utils::Identifiable, DynResult};
 #[async_trait::async_trait(?Send)]
 impl RunAction for Delete
 {
-	async fn action<CAdapter, EAdapter, JAdapter, LAdapter, OAdapter, Adapter, XAdapter, Db>(
+	async fn action<CAdapter, EAdapter, JAdapter, LAdapter, OAdapter, TAdapter, XAdapter, Db>(
 		self,
 		connection: Pool<Db>,
 		_config: Config,
@@ -35,7 +35,7 @@ impl RunAction for Delete
 		JAdapter: Deletable<Db = Db> + JobAdapter,
 		LAdapter: Deletable<Db = Db> + LocationAdapter,
 		OAdapter: Deletable<Db = Db> + OrganizationAdapter,
-		Adapter: Deletable<Db = Db> + TimesheetAdapter,
+		TAdapter: Deletable<Db = Db> + TimesheetAdapter,
 		XAdapter: Deletable<Db = Db> + ExpensesAdapter,
 		Db: Database,
 		for<'connection> &'connection mut Db::Connection: Executor<'connection, Database = Db>,
@@ -82,7 +82,7 @@ impl RunAction for Delete
 			DeleteCommand::Job => del::<JAdapter, _, _>(&connection, self.match_args).await,
 			DeleteCommand::Location => del::<LAdapter, _, _>(&connection, self.match_args).await,
 			DeleteCommand::Organization => del::<OAdapter, _, _>(&connection, self.match_args).await,
-			DeleteCommand::Timesheet => del::<Adapter, _, _>(&connection, self.match_args).await,
+			DeleteCommand::Timesheet => del::<TAdapter, _, _>(&connection, self.match_args).await,
 		}
 	}
 }

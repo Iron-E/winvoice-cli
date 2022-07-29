@@ -23,7 +23,7 @@ use clinvoice_match::{
 	MatchTimesheet,
 };
 use clinvoice_schema::{ContactKind, RestorableSerde};
-use futures::{stream, TryStreamExt};
+use futures::{stream, Future, TryStreamExt};
 use serde::{de::DeserializeOwned, Serialize};
 use sqlx::{Database, Executor, Pool, Transaction};
 
@@ -33,7 +33,7 @@ use crate::{args::RunAction, fmt, input, utils::Identifiable, DynResult};
 #[async_trait::async_trait(?Send)]
 impl RunAction for Update
 {
-	async fn action<CAdapter, EAdapter, JAdapter, LAdapter, OAdapter, Adapter, XAdapter, Db>(
+	async fn action<CAdapter, EAdapter, JAdapter, LAdapter, OAdapter, TAdapter, XAdapter, Db>(
 		self,
 		connection: Pool<Db>,
 		config: Config,
@@ -44,7 +44,7 @@ impl RunAction for Update
 		JAdapter: Deletable<Db = Db> + JobAdapter,
 		LAdapter: Deletable<Db = Db> + LocationAdapter,
 		OAdapter: Deletable<Db = Db> + OrganizationAdapter,
-		Adapter: Deletable<Db = Db> + TimesheetAdapter,
+		TAdapter: Deletable<Db = Db> + TimesheetAdapter,
 		XAdapter: Deletable<Db = Db> + ExpensesAdapter,
 		Db: Database,
 		for<'connection> &'connection mut Db::Connection: Executor<'connection, Database = Db>,
@@ -53,16 +53,28 @@ impl RunAction for Update
 	{
 		/// Uses [`Iterator::filter_map`] to filter out items of `iter` which return [`None`] from
 		/// [`input::confirm_then_some`], otherwise mapping
-		fn filter_by_confirm_then_ok<Iter, Input, PromptFn, Prompt>(
+		async fn filter_then_try_for_each<'input, Iter, Input, PromptFn, Prompt, TryFn, TryFnFut>(
 			iter: Iter,
 			prompt: PromptFn,
-		) -> impl Iterator<Item = DynResult<Input>>
+			try_fn: TryFn,
+		) -> DynResult<()>
 		where
-			Iter: Iterator<Item = Input>,
+			Input: 'input,
+			Iter: Iterator<Item = &'input mut Input>,
 			Prompt: Into<String>,
 			PromptFn: Fn(&Input) -> Prompt,
+			TryFn: Fn(&'input mut Input) -> TryFnFut,
+			TryFnFut: Future<Output = DynResult<()>>,
 		{
-			iter.filter_map(move |item| input::confirm_then_some(prompt(&item), Ok(item)))
+			stream::iter(iter.filter_map(move |item| input::confirm_then_some(prompt(item), Ok(item))))
+				.try_for_each(try_fn)
+				.await
+		}
+
+		/// Gets the first line of any given [`&str`] `s`.
+		fn first_line(s: &str) -> &str
+		{
+			s.lines().next().unwrap()
 		}
 
 		/// A generic deletion function which works for any of the provided adapters in the outer
@@ -109,7 +121,6 @@ impl RunAction for Update
 				)
 				.await?;
 
-				use std::iter::Iterator;
 				#[rustfmt::skip]
 				stream::iter(selected.iter_mut().filter_map(|contact| match contact.kind
 				{
@@ -121,7 +132,6 @@ impl RunAction for Update
 				}))
 				.try_for_each(|contact| {
 					let connection = &connection;
-
 					async {
 						contact.kind = input::select_one_retrieved::<LAdapter, _, _>(
 							connection,
@@ -148,24 +158,24 @@ impl RunAction for Update
 				.await?;
 
 				#[rustfmt::skip]
-				stream::iter(filter_by_confirm_then_ok(selected.iter_mut(), |x| format!(
-					"Do you want to change the Timesheet of {x}?",
-				)))
-				.try_for_each(|expense| {
-					let connection = &connection;
+				filter_then_try_for_each(
+					selected.iter_mut(),
+					|x| format!("Do you want to change the Timesheet of {x}?"),
+					|x| {
+						let connection = &connection;
+						async {
+							x.timesheet_id = input::select_one_retrieved::<TAdapter, _, _>(
+								connection,
+								None,
+								"Query the Timesheet to attach this Expense to",
+							)
+							.await
+							.map(|t| t.id)?;
 
-					async {
-						expense.timesheet_id = input::select_one_retrieved::<Adapter, _, _>(
-							connection,
-							None,
-							"Query the Timesheet to attach this Expense to",
-						)
-						.await
-						.map(|t| t.id)?;
-
-						DynResult::Ok(())
-					}
-				})
+							Ok(())
+						}
+					},
+				)
 				.await?;
 
 				update::<XAdapter, _>(&connection, &mut selected).await?;
@@ -201,28 +211,30 @@ impl RunAction for Update
 				.await?;
 
 				#[rustfmt::skip]
-				stream::iter(filter_by_confirm_then_ok(selected.iter_mut(), |l| format!(
-					"Do you want to put {} into a new Location",
-					fmt::quoted(&l.name),
-				)))
-				.try_for_each(|location| {
-					let connection = &connection;
+				filter_then_try_for_each(
+					selected.iter_mut(),
+					|l| format!(
+						"Do you want to put {} into a new Location",
+						fmt::quoted(&l.name),
+					),
+					|location| {
+						let connection = &connection;
+						async {
+							location.outer = input::select_one_retrieved::<LAdapter, _, _>(
+								connection,
+								None,
+								format!(
+									"Query the Location you want to put {} inside of",
+									location.name,
+								),
+							)
+							.await
+							.map(|l| Some(l.into()))?;
 
-					async {
-						location.outer = input::select_one_retrieved::<LAdapter, _, _>(
-							connection,
-							None,
-							format!(
-								"Query the Location you want to put {} inside of",
-								location.name,
-							),
-						)
-						.await
-						.map(|l| Some(l.into()))?;
-
-						DynResult::Ok(())
-					}
-				})
+							Ok(())
+						}
+					},
+				)
 				.await?;
 
 				update::<LAdapter, _>(&connection, &mut selected).await?;
@@ -253,30 +265,28 @@ impl RunAction for Update
 				.await?;
 
 				#[rustfmt::skip]
-				stream::iter(filter_by_confirm_then_ok(selected.iter_mut(), |j| format!(
-					"Do you want to change the client {} of Job {} ({})?",
-					fmt::quoted(&j.client.name),
-					fmt::id_num(j.id),
-					j.objectives
-						.lines()
-						.next()
-						.expect("Job should have at least one line of description"),
-				)))
-				.try_for_each(|job| {
-					let connection = &connection;
+				filter_then_try_for_each(
+					selected.iter_mut(),
+					|j| format!(
+						"Do you want to change the client {} of Job {} ({})?",
+						fmt::quoted(&j.client.name),
+						fmt::id_num(j.id),
+						first_line(&j.objectives),
+					),
+					|j| {
+						let connection = &connection;
+						async {
+							j.client = input::select_one_retrieved::<OAdapter, _, _>(
+								connection,
+								None,
+								"Query the Organization you want to set this Job's client to",
+							)
+							.await?;
 
-					async {
-						job.client = input::select_one_retrieved::<OAdapter, _, _>(
-							connection,
-							None,
-							"Query the Organization you want to set this Job's client to",
-						)
-						.await?;
-
-						DynResult::Ok(())
-					}
-				})
-				.await?;
+							Ok(())
+						}
+					},
+				).await?;
 
 				update::<JAdapter, _>(&connection, &mut selected).await?;
 			},
@@ -302,24 +312,23 @@ impl RunAction for Update
 				.await?;
 
 				#[rustfmt::skip]
-				stream::iter(filter_by_confirm_then_ok(selected.iter_mut(), |o| format!(
-					"Do you want to change the Location of {}?",
-					fmt::quoted(&o.name),
-				)))
-				.try_for_each(|organization| {
-					let connection = &connection;
+				filter_then_try_for_each(
+					selected.iter_mut(),
+					|o| format!("Do you want to change the Location of {}?", fmt::quoted(&o.name)),
+					|o| {
+						let connection = &connection;
+						async {
+							o.location = input::select_one_retrieved::<LAdapter, _, _>(
+								connection,
+								None,
+								"Query the Location you want to move this Organization to",
+							)
+							.await?;
 
-					async {
-						organization.location = input::select_one_retrieved::<LAdapter, _, _>(
-							connection,
-							None,
-							"Query the Location you want to move this Organization to",
-						)
-						.await?;
-
-						DynResult::Ok(())
-					}
-				})
+							Ok(())
+						}
+					},
+				)
 				.await?;
 
 				update::<OAdapter, _>(&connection, &mut selected).await?;
@@ -327,7 +336,7 @@ impl RunAction for Update
 			UpdateCommand::Timesheet { restart, stop } =>
 			{
 				#[rustfmt::skip]
-				let mut selected = input::select_retrieved::<Adapter, _, _>(
+				let mut selected = input::select_retrieved::<TAdapter, _, _>(
 					&connection,
 					(restart || stop).then(|| MatchTimesheet {
 						time_end: stop.then_some(MatchOption::None).unwrap_or_else(MatchOption::some),
@@ -337,10 +346,58 @@ impl RunAction for Update
 				)
 				.await?;
 
-				todo!("Prompt to change employee");
-				todo!("Prompt to change job");
+				#[rustfmt::skip]
+				filter_then_try_for_each(
+					selected.iter_mut(),
+					|t| format!(
+						"Do you want to change the employee {} attached to Timesheet {} ({})?",
+						fmt::quoted(&t.employee.name),
+						fmt::id_num(t.id),
+						first_line(&t.work_notes),
+					),
+					|t| {
+						let connection = &connection;
+						async {
+							t.employee = input::select_one_retrieved::<EAdapter, _, _>(
+								connection,
+								None,
+								"Query the Employee you want to assign to this Timesheet",
+							)
+							.await?;
 
-				update::<Adapter, _>(&connection, &mut selected).await?;
+							Ok(())
+						}
+					},
+				)
+				.await?;
+
+				#[rustfmt::skip]
+				filter_then_try_for_each(
+					selected.iter_mut(),
+					|t| format!(
+						"Do you want to change the job {} ({}) that Timesheet {} ({}) is assigned to?",
+						fmt::id_num(t.job.id),
+						first_line(&t.job.objectives),
+						fmt::id_num(t.id),
+						first_line(&t.work_notes),
+					),
+					|t| {
+						let connection = &connection;
+						async {
+							t.job = input::select_one_retrieved::<JAdapter, _, _>(
+								connection,
+								None,
+								"Query the Job you want to assign this Timesheet to",
+							)
+							.await?;
+
+							Ok(())
+						}
+					},
+				)
+				.await?;
+
+				update::<TAdapter, _>(&connection, &mut selected).await?;
 			},
 		};
 

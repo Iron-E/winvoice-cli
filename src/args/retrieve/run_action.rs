@@ -29,7 +29,7 @@ use crate::{args::RunAction, fmt, input, DynResult};
 #[async_trait::async_trait(?Send)]
 impl RunAction for Retrieve
 {
-	async fn action<CAdapter, EAdapter, JAdapter, LAdapter, OAdapter, Adapter, XAdapter, Db>(
+	async fn action<CAdapter, EAdapter, JAdapter, LAdapter, OAdapter, TAdapter, XAdapter, Db>(
 		self,
 		connection: Pool<Db>,
 		config: Config,
@@ -41,7 +41,7 @@ impl RunAction for Retrieve
 		JAdapter: Deletable<Db = Db> + JobAdapter,
 		LAdapter: Deletable<Db = Db> + LocationAdapter,
 		OAdapter: Deletable<Db = Db> + OrganizationAdapter,
-		Adapter: Deletable<Db = Db> + TimesheetAdapter,
+		TAdapter: Deletable<Db = Db> + TimesheetAdapter,
 		XAdapter: Deletable<Db = Db> + ExpensesAdapter,
 		for<'connection> &'connection mut Db::Connection: Executor<'connection, Database = Db>,
 	{
@@ -184,7 +184,7 @@ impl RunAction for Retrieve
 						let output_dir = output_dir.as_ref();
 
 						async move {
-							let timesheets_fut = Adapter::retrieve(connection, &match_condition)
+							let timesheets_fut = TAdapter::retrieve(connection, &match_condition)
 								.map_ok(|mut v| {
 									v.sort_by(|lhs, rhs| lhs.time_begin.cmp(&rhs.time_begin));
 									v
@@ -248,7 +248,7 @@ impl RunAction for Retrieve
 
 			RetrieveCommand::Timesheet =>
 			{
-				retrieve::<Adapter, _, _>(&connection, self.match_args, true).await?;
+				retrieve::<TAdapter, _, _>(&connection, self.match_args, true).await?;
 			},
 		};
 

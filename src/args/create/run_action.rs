@@ -26,7 +26,7 @@ use crate::{
 #[async_trait::async_trait(?Send)]
 impl RunAction for Create
 {
-	async fn action<CAdapter, EAdapter, JAdapter, LAdapter, OAdapter, Adapter, XAdapter, Db>(
+	async fn action<CAdapter, EAdapter, JAdapter, LAdapter, OAdapter, TAdapter, XAdapter, Db>(
 		self,
 		connection: Pool<Db>,
 		config: Config,
@@ -37,7 +37,7 @@ impl RunAction for Create
 		JAdapter: Deletable<Db = Db> + JobAdapter,
 		LAdapter: Deletable<Db = Db> + LocationAdapter,
 		OAdapter: Deletable<Db = Db> + OrganizationAdapter,
-		Adapter: Deletable<Db = Db> + TimesheetAdapter,
+		TAdapter: Deletable<Db = Db> + TimesheetAdapter,
 		XAdapter: Deletable<Db = Db> + ExpensesAdapter,
 		Db: Database,
 		for<'connection> &'connection mut Db::Connection: Executor<'connection, Database = Db>,
@@ -88,7 +88,7 @@ impl RunAction for Create
 				description,
 			} =>
 			{
-				let timesheet = input::select_one_retrieved::<Adapter, _, _>(
+				let timesheet = input::select_one_retrieved::<TAdapter, _, _>(
 					&connection,
 					None,
 					"Query the Timesheet this Expense is for",
@@ -284,7 +284,7 @@ impl RunAction for Create
 				// {{{
 				let mut transaction = connection.begin().await?;
 
-				let created = Adapter::create(
+				let created = TAdapter::create(
 					&mut transaction,
 					employee,
 					expenses,

@@ -20,7 +20,7 @@ use crate::DynResult;
 pub trait RunAction: AsRef<StoreArgs> + Sized
 {
 	/// Perform this command's action using a specific set of database-struct adapters.
-	async fn action<CAdapter, EAdapter, JAdapter, LAdapter, OAdapter, Adapter, XAdapter, Db>(
+	async fn action<CAdapter, EAdapter, JAdapter, LAdapter, OAdapter, TAdapter, XAdapter, Db>(
 		self,
 		connection: Pool<Db>,
 		config: Config,
@@ -32,7 +32,7 @@ pub trait RunAction: AsRef<StoreArgs> + Sized
 		JAdapter: Deletable<Db = Db> + JobAdapter,
 		LAdapter: Deletable<Db = Db> + LocationAdapter,
 		OAdapter: Deletable<Db = Db> + OrganizationAdapter,
-		Adapter: Deletable<Db = Db> + TimesheetAdapter,
+		TAdapter: Deletable<Db = Db> + TimesheetAdapter,
 		XAdapter: Deletable<Db = Db> + ExpensesAdapter,
 		for<'connection> &'connection mut Db::Connection: Executor<'connection, Database = Db>,
 		for<'connection> &'connection mut Transaction<'connection, Db>:

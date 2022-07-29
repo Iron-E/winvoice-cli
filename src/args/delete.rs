@@ -31,11 +31,11 @@ pub struct Delete
 
 impl Delete
 {
-	/// Indicate with [`println!`] that a value of type `TDeleted` — [`Display`]ed by calling
+	/// Indicate with [`println!`] that a value of type `Deleted` — [`Display`]ed by calling
 	/// `selector` on the `deleted` value — was deleted.
-	pub(super) fn report_deleted<TDeleted>(deleted: &TDeleted)
+	pub(super) fn report_deleted<Deleted>(deleted: &Deleted)
 	where
-		TDeleted: Identifiable,
+		Deleted: Identifiable,
 	{
 		utils::report_action("deleted", deleted);
 	}

@@ -24,41 +24,41 @@ use crate::{args::RunAction, fmt, input, utils::Identifiable, DynResult};
 #[async_trait::async_trait(?Send)]
 impl RunAction for Delete
 {
-	async fn action<CAdapter, EAdapter, JAdapter, LAdapter, OAdapter, TAdapter, XAdapter, TDb>(
+	async fn action<CAdapter, EAdapter, JAdapter, LAdapter, OAdapter, Adapter, XAdapter, Db>(
 		self,
-		connection: Pool<TDb>,
+		connection: Pool<Db>,
 		_config: Config,
 	) -> DynResult<()>
 	where
-		CAdapter: Deletable<Db = TDb> + ContactAdapter,
-		EAdapter: Deletable<Db = TDb> + EmployeeAdapter,
-		JAdapter: Deletable<Db = TDb> + JobAdapter,
-		LAdapter: Deletable<Db = TDb> + LocationAdapter,
-		OAdapter: Deletable<Db = TDb> + OrganizationAdapter,
-		TAdapter: Deletable<Db = TDb> + TimesheetAdapter,
-		XAdapter: Deletable<Db = TDb> + ExpensesAdapter,
-		TDb: Database,
-		for<'connection> &'connection mut TDb::Connection: Executor<'connection, Database = TDb>,
+		CAdapter: Deletable<Db = Db> + ContactAdapter,
+		EAdapter: Deletable<Db = Db> + EmployeeAdapter,
+		JAdapter: Deletable<Db = Db> + JobAdapter,
+		LAdapter: Deletable<Db = Db> + LocationAdapter,
+		OAdapter: Deletable<Db = Db> + OrganizationAdapter,
+		Adapter: Deletable<Db = Db> + TimesheetAdapter,
+		XAdapter: Deletable<Db = Db> + ExpensesAdapter,
+		Db: Database,
+		for<'connection> &'connection mut Db::Connection: Executor<'connection, Database = Db>,
 	{
 		/// A generic deletion function which works for any of the provided adapters in the outer
-		/// function, as they all implement `TDelRetrievable` at the minimum.
-		async fn del<TDelRetrievable, TDb, TMatch>(
-			connection: &Pool<TDb>,
-			match_condition: TMatch,
+		/// function, as they all implement `DelRetrievable` at the minimum.
+		async fn del<DelRetrievable, Db, Match>(
+			connection: &Pool<Db>,
+			match_condition: Match,
 		) -> DynResult<()>
 		where
-			TDb: Database,
-			TMatch: TryInto<Option<TDelRetrievable::Match>>,
-			TMatch::Error: 'static + Error,
-			TDelRetrievable: Deletable<Db = TDb>,
-			<TDelRetrievable as Deletable>::Entity: Clone + Display + Identifiable + Sync,
-			TDelRetrievable: Retrievable<Db = TDb, Entity = <TDelRetrievable as Deletable>::Entity>,
-			TDelRetrievable::Match: Default + DeserializeOwned + Serialize,
-			for<'connection> &'connection mut TDb::Connection: Executor<'connection, Database = TDb>,
+			Db: Database,
+			Match: TryInto<Option<DelRetrievable::Match>>,
+			Match::Error: 'static + Error,
+			DelRetrievable: Deletable<Db = Db>,
+			<DelRetrievable as Deletable>::Entity: Clone + Display + Identifiable + Sync,
+			DelRetrievable: Retrievable<Db = Db, Entity = <DelRetrievable as Deletable>::Entity>,
+			DelRetrievable::Match: Default + DeserializeOwned + Serialize,
+			for<'connection> &'connection mut Db::Connection: Executor<'connection, Database = Db>,
 		{
 			let match_condition = match_condition.try_into()?;
-			let type_name = fmt::type_name::<<TDelRetrievable as Deletable>::Entity>();
-			let retrieved = input::select_retrieved::<TDelRetrievable, _, _>(
+			let type_name = fmt::type_name::<<DelRetrievable as Deletable>::Entity>();
+			let retrieved = input::select_retrieved::<DelRetrievable, _, _>(
 				connection,
 				match_condition,
 				format!("Query the {type_name} to delete"),
@@ -66,7 +66,7 @@ impl RunAction for Delete
 			.await?;
 
 			let selected = input::select(&retrieved, format!("Select the {type_name} to delete"))?;
-			TDelRetrievable::delete(
+			DelRetrievable::delete(
 				connection,
 				selected.iter().inspect(|s| Delete::report_deleted(*s)),
 			)
@@ -82,7 +82,7 @@ impl RunAction for Delete
 			DeleteCommand::Job => del::<JAdapter, _, _>(&connection, self.match_args).await,
 			DeleteCommand::Location => del::<LAdapter, _, _>(&connection, self.match_args).await,
 			DeleteCommand::Organization => del::<OAdapter, _, _>(&connection, self.match_args).await,
-			DeleteCommand::Timesheet => del::<TAdapter, _, _>(&connection, self.match_args).await,
+			DeleteCommand::Timesheet => del::<Adapter, _, _>(&connection, self.match_args).await,
 		}
 	}
 }

@@ -27,11 +27,11 @@ pub struct Create
 
 impl Create
 {
-	/// Indicate with [`println!`] that a value of type `TCreated` — [`Display`]ed by calling
+	/// Indicate with [`println!`] that a value of type `Created` — [`Display`]ed by calling
 	/// `selector` on the `created` value — was created.
-	pub(super) fn report_created<TCreated>(created: &TCreated)
+	pub(super) fn report_created<Created>(created: &Created)
 	where
-		TCreated: Identifiable,
+		Created: Identifiable,
 	{
 		utils::report_action("created", created);
 	}

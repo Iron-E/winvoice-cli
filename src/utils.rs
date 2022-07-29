@@ -16,15 +16,15 @@ pub(crate) fn naive_local_datetime_to_utc(d: NaiveDateTime) -> DateTime<Utc>
 		.into()
 }
 
-/// Indicate with [`println!`] that a value of type `TActioned` — identified by `id` — has been
+/// Indicate with [`println!`] that a value of type `Actioned` — identified by `id` — has been
 /// `action`ed.
-pub(super) fn report_action<TActioned>(action: &str, actioned: &TActioned)
+pub(super) fn report_action<Actioned>(action: &str, actioned: &Actioned)
 where
-	TActioned: Identifiable,
+	Actioned: Identifiable,
 {
 	println!(
 		"{} {} has been {action}.",
-		fmt::type_name::<TActioned>(),
+		fmt::type_name::<Actioned>(),
 		actioned.id(),
 	);
 }

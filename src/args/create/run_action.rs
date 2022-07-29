@@ -26,23 +26,23 @@ use crate::{
 #[async_trait::async_trait(?Send)]
 impl RunAction for Create
 {
-	async fn action<CAdapter, EAdapter, JAdapter, LAdapter, OAdapter, TAdapter, XAdapter, TDb>(
+	async fn action<CAdapter, EAdapter, JAdapter, LAdapter, OAdapter, Adapter, XAdapter, Db>(
 		self,
-		connection: Pool<TDb>,
+		connection: Pool<Db>,
 		config: Config,
 	) -> DynResult<()>
 	where
-		CAdapter: Deletable<Db = TDb> + ContactAdapter,
-		EAdapter: Deletable<Db = TDb> + EmployeeAdapter,
-		JAdapter: Deletable<Db = TDb> + JobAdapter,
-		LAdapter: Deletable<Db = TDb> + LocationAdapter,
-		OAdapter: Deletable<Db = TDb> + OrganizationAdapter,
-		TAdapter: Deletable<Db = TDb> + TimesheetAdapter,
-		XAdapter: Deletable<Db = TDb> + ExpensesAdapter,
-		TDb: Database,
-		for<'connection> &'connection mut TDb::Connection: Executor<'connection, Database = TDb>,
-		for<'connection> &'connection mut Transaction<'connection, TDb>:
-			Executor<'connection, Database = TDb>,
+		CAdapter: Deletable<Db = Db> + ContactAdapter,
+		EAdapter: Deletable<Db = Db> + EmployeeAdapter,
+		JAdapter: Deletable<Db = Db> + JobAdapter,
+		LAdapter: Deletable<Db = Db> + LocationAdapter,
+		OAdapter: Deletable<Db = Db> + OrganizationAdapter,
+		Adapter: Deletable<Db = Db> + TimesheetAdapter,
+		XAdapter: Deletable<Db = Db> + ExpensesAdapter,
+		Db: Database,
+		for<'connection> &'connection mut Db::Connection: Executor<'connection, Database = Db>,
+		for<'connection> &'connection mut Transaction<'connection, Db>:
+			Executor<'connection, Database = Db>,
 	{
 		match self.command
 		{
@@ -88,7 +88,7 @@ impl RunAction for Create
 				description,
 			} =>
 			{
-				let timesheet = input::select_one_retrieved::<TAdapter, _, _>(
+				let timesheet = input::select_one_retrieved::<Adapter, _, _>(
 					&connection,
 					None,
 					"Query the Timesheet this Expense is for",
@@ -284,7 +284,7 @@ impl RunAction for Create
 				// {{{
 				let mut transaction = connection.begin().await?;
 
-				let created = TAdapter::create(
+				let created = Adapter::create(
 					&mut transaction,
 					employee,
 					expenses,

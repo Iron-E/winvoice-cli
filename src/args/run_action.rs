@@ -20,23 +20,23 @@ use crate::DynResult;
 pub trait RunAction: AsRef<StoreArgs> + Sized
 {
 	/// Perform this command's action using a specific set of database-struct adapters.
-	async fn action<CAdapter, EAdapter, JAdapter, LAdapter, OAdapter, TAdapter, XAdapter, TDb>(
+	async fn action<CAdapter, EAdapter, JAdapter, LAdapter, OAdapter, Adapter, XAdapter, Db>(
 		self,
-		connection: Pool<TDb>,
+		connection: Pool<Db>,
 		config: Config,
 	) -> DynResult<()>
 	where
-		TDb: Database,
-		CAdapter: Deletable<Db = TDb> + ContactAdapter,
-		EAdapter: Deletable<Db = TDb> + EmployeeAdapter,
-		JAdapter: Deletable<Db = TDb> + JobAdapter,
-		LAdapter: Deletable<Db = TDb> + LocationAdapter,
-		OAdapter: Deletable<Db = TDb> + OrganizationAdapter,
-		TAdapter: Deletable<Db = TDb> + TimesheetAdapter,
-		XAdapter: Deletable<Db = TDb> + ExpensesAdapter,
-		for<'connection> &'connection mut TDb::Connection: Executor<'connection, Database = TDb>,
-		for<'connection> &'connection mut Transaction<'connection, TDb>:
-			Executor<'connection, Database = TDb>;
+		Db: Database,
+		CAdapter: Deletable<Db = Db> + ContactAdapter,
+		EAdapter: Deletable<Db = Db> + EmployeeAdapter,
+		JAdapter: Deletable<Db = Db> + JobAdapter,
+		LAdapter: Deletable<Db = Db> + LocationAdapter,
+		OAdapter: Deletable<Db = Db> + OrganizationAdapter,
+		Adapter: Deletable<Db = Db> + TimesheetAdapter,
+		XAdapter: Deletable<Db = Db> + ExpensesAdapter,
+		for<'connection> &'connection mut Db::Connection: Executor<'connection, Database = Db>,
+		for<'connection> &'connection mut Transaction<'connection, Db>:
+			Executor<'connection, Database = Db>;
 
 	/// Execute this command given the user's [`Config`].
 	async fn run(self, config: Config) -> DynResult<()>

@@ -29,21 +29,21 @@ use crate::{args::RunAction, fmt, input, DynResult};
 #[async_trait::async_trait(?Send)]
 impl RunAction for Retrieve
 {
-	async fn action<CAdapter, EAdapter, JAdapter, LAdapter, OAdapter, TAdapter, XAdapter, TDb>(
+	async fn action<CAdapter, EAdapter, JAdapter, LAdapter, OAdapter, Adapter, XAdapter, Db>(
 		self,
-		connection: Pool<TDb>,
+		connection: Pool<Db>,
 		config: Config,
 	) -> DynResult<()>
 	where
-		TDb: Database,
-		CAdapter: Deletable<Db = TDb> + ContactAdapter,
-		EAdapter: Deletable<Db = TDb> + EmployeeAdapter,
-		JAdapter: Deletable<Db = TDb> + JobAdapter,
-		LAdapter: Deletable<Db = TDb> + LocationAdapter,
-		OAdapter: Deletable<Db = TDb> + OrganizationAdapter,
-		TAdapter: Deletable<Db = TDb> + TimesheetAdapter,
-		XAdapter: Deletable<Db = TDb> + ExpensesAdapter,
-		for<'connection> &'connection mut TDb::Connection: Executor<'connection, Database = TDb>,
+		Db: Database,
+		CAdapter: Deletable<Db = Db> + ContactAdapter,
+		EAdapter: Deletable<Db = Db> + EmployeeAdapter,
+		JAdapter: Deletable<Db = Db> + JobAdapter,
+		LAdapter: Deletable<Db = Db> + LocationAdapter,
+		OAdapter: Deletable<Db = Db> + OrganizationAdapter,
+		Adapter: Deletable<Db = Db> + TimesheetAdapter,
+		XAdapter: Deletable<Db = Db> + ExpensesAdapter,
+		for<'connection> &'connection mut Db::Connection: Executor<'connection, Database = Db>,
 	{
 		/// [`Display`] every element of some `array` using [`println!`].
 		fn print_all<T>(array: &[T])
@@ -56,29 +56,29 @@ impl RunAction for Retrieve
 		}
 
 		/// A generic deletion function which works for any of the provided adapters in the outer
-		/// function, as they all implement `TDelRetrievable` at the minimum.
-		async fn retrieve<TRetrievable, TDb, TMatch>(
-			connection: &Pool<TDb>,
-			match_condition: TMatch,
+		/// function, as they all implement `Retr` at the minimum.
+		async fn retrieve<Retr, Db, Match>(
+			connection: &Pool<Db>,
+			match_condition: Match,
 			print: bool,
-		) -> DynResult<Vec<TRetrievable::Entity>>
+		) -> DynResult<Vec<Retr::Entity>>
 		where
-			TDb: Database,
-			TMatch: TryInto<Option<TRetrievable::Match>>,
-			TMatch::Error: 'static + StdError,
-			TRetrievable: Retrievable<Db = TDb>,
-			TRetrievable::Entity: Clone + Display + Sync,
-			TRetrievable::Match: Default + DeserializeOwned + Serialize,
-			for<'connection> &'connection mut TDb::Connection: Executor<'connection, Database = TDb>,
+			Db: Database,
+			Match: TryInto<Option<Retr::Match>>,
+			Match::Error: 'static + StdError,
+			Retr: Retrievable<Db = Db>,
+			Retr::Entity: Clone + Display + Sync,
+			Retr::Match: Default + DeserializeOwned + Serialize,
+			for<'connection> &'connection mut Db::Connection: Executor<'connection, Database = Db>,
 		{
 			let retrieved = match match_condition.try_into()?
 			{
-				Some(condition) => TRetrievable::retrieve(connection, &condition).await?,
+				Some(condition) => Retr::retrieve(connection, &condition).await?,
 
 				#[rustfmt::skip]
-				_ => input::retrieve::<TRetrievable, _, _>(
+				_ => input::retrieve::<Retr, _, _>(
 					connection,
-					format!("Query the {} to delete", fmt::type_name::<TRetrievable::Entity>()),
+					format!("Query the {} to delete", fmt::type_name::<Retr::Entity>()),
 				)
 				.await?,
 			};
@@ -184,7 +184,7 @@ impl RunAction for Retrieve
 						let output_dir = output_dir.as_ref();
 
 						async move {
-							let timesheets_fut = TAdapter::retrieve(connection, &match_condition)
+							let timesheets_fut = Adapter::retrieve(connection, &match_condition)
 								.map_ok(|mut v| {
 									v.sort_by(|lhs, rhs| lhs.time_begin.cmp(&rhs.time_begin));
 									v
@@ -248,7 +248,7 @@ impl RunAction for Retrieve
 
 			RetrieveCommand::Timesheet =>
 			{
-				retrieve::<TAdapter, _, _>(&connection, self.match_args, true).await?;
+				retrieve::<Adapter, _, _>(&connection, self.match_args, true).await?;
 			},
 		};
 

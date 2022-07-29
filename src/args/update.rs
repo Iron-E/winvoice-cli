@@ -31,11 +31,11 @@ pub struct Update
 
 impl Update
 {
-	/// Indicate with [`println!`] that a value of type `TUpdated` — [`Display`]ed by calling
+	/// Indicate with [`println!`] that a value of type `Updated` — [`Display`]ed by calling
 	/// `selector` on the `created` value — was updated.
-	pub(super) fn report_updated<TUpdated>(updated: &TUpdated)
+	pub(super) fn report_updated<Updated>(updated: &Updated)
 	where
-		TUpdated: Identifiable,
+		Updated: Identifiable,
 	{
 		utils::report_action("updated", updated);
 	}

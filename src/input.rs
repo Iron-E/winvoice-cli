@@ -37,9 +37,9 @@ where
 }
 
 /// If a `prompt` is [`confirm`]ed, return `some` value.
-pub fn confirm_then_some<TPrompt, TSome>(prompt: TPrompt, some: TSome) -> Option<TSome>
+pub fn confirm_then_some<Prompt, Some>(prompt: Prompt, some: Some) -> Option<Some>
 where
-	TPrompt: Into<String>,
+	Prompt: Into<String>,
 {
 	confirm(prompt).unwrap_or(false).then_some(some)
 }
@@ -49,10 +49,10 @@ where
 /// 1. "VISUAL" environment variable.
 /// 2. "EDITOR" environment variable.
 /// 3. Platform default (Notepad on Windows, Vi on Unix).
-pub fn edit<TEntity, TPrompt>(entity: &TEntity, prompt: TPrompt) -> Result<TEntity>
+pub fn edit<Entity, Prompt>(entity: &Entity, prompt: Prompt) -> Result<Entity>
 where
-	TEntity: DeserializeOwned + Serialize,
-	TPrompt: AsRef<str>,
+	Entity: DeserializeOwned + Serialize,
+	Prompt: AsRef<str>,
 {
 	let to_edit = yaml::to_string(&entity).map(|serialized| {
 		format!(
@@ -69,24 +69,24 @@ where
 }
 
 /// [Edit](edit) an `entity`, and then [restore](clinvoice_schema::RestorableSerde) it.
-pub fn edit_and_restore<TEntity, TPrompt>(entity: &TEntity, prompt: TPrompt) -> Result<TEntity>
+pub fn edit_and_restore<Entity, Prompt>(entity: &Entity, prompt: Prompt) -> Result<Entity>
 where
-	TEntity: DeserializeOwned + RestorableSerde + Serialize,
-	TPrompt: AsRef<str>,
+	Entity: DeserializeOwned + RestorableSerde + Serialize,
+	Prompt: AsRef<str>,
 {
 	let mut edited = edit(entity, prompt)?;
 	edited.try_restore(entity)?;
 	Ok(edited)
 }
 
-/// [Edit](edit) `TEntity::default`, returning that `default` if [no edits](Error::NotEdited) were
+/// [Edit](edit) `Entity::default`, returning that `default` if [no edits](Error::NotEdited) were
 /// made.
-pub fn edit_default<TEntity, TPrompt>(prompt: TPrompt) -> Result<TEntity>
+pub fn edit_default<Entity, Prompt>(prompt: Prompt) -> Result<Entity>
 where
-	TEntity: Default + DeserializeOwned + Serialize,
-	TPrompt: AsRef<str>,
+	Entity: Default + DeserializeOwned + Serialize,
+	Prompt: AsRef<str>,
 {
-	let default = TEntity::default();
+	let default = Entity::default();
 	edit(&default, prompt).or_else(|e| match e
 	{
 		Error::NotEdited => Ok(default),
@@ -109,23 +109,23 @@ where
 
 /// [Retrieve](Retrievable::retrieve) all [entities](Retrievable::Entity) that match a
 /// user-provided query.
-pub async fn retrieve<TRetrievable, TDb, TPrompt>(
-	connection: &Pool<TDb>,
-	prompt: TPrompt,
-) -> DynResult<Vec<TRetrievable::Entity>>
+pub async fn retrieve<Retr, Db, Prompt>(
+	connection: &Pool<Db>,
+	prompt: Prompt,
+) -> DynResult<Vec<Retr::Entity>>
 where
-	TDb: Database,
-	TPrompt: Display,
-	TRetrievable: Retrievable<Db = TDb>,
-	TRetrievable::Match: Default + DeserializeOwned + Serialize,
-	for<'connection> &'connection mut TDb::Connection: Executor<'connection, Database = TDb>,
+	Db: Database,
+	Prompt: Display,
+	Retr: Retrievable<Db = Db>,
+	Retr::Match: Default + DeserializeOwned + Serialize,
+	for<'connection> &'connection mut Db::Connection: Executor<'connection, Database = Db>,
 {
 	loop
 	{
-		let match_condition: TRetrievable::Match =
+		let match_condition: Retr::Match =
 			edit_default(format!("{prompt}\n{}locations", MATCH_PROMPT))?;
 
-		let results = TRetrievable::retrieve(connection, &match_condition).await?;
+		let results = Retr::retrieve(connection, &match_condition).await?;
 
 		if results.is_empty() &&
 			confirm("That query did not return any results, would you like to try again?")?
@@ -140,23 +140,20 @@ where
 /// `prompt` users to select elements from `entities`, returning them.
 ///
 /// TODO: analyze usage to see if `entities` should be `Vec<T>`
-pub fn select<TEntity, TPrompt>(entities: &[TEntity], prompt: TPrompt) -> io::Result<Vec<TEntity>>
+pub fn select<Entity, Prompt>(entities: &[Entity], prompt: Prompt) -> io::Result<Vec<Entity>>
 where
-	TEntity: Clone + Display,
-	TPrompt: Into<String>,
+	Entity: Clone + Display,
+	Prompt: Into<String>,
 {
 	select_indices(entities, prompt)
 		.map(|indices| indices.into_iter().map(|i| entities[i].clone()).collect())
 }
 
 /// `prompt` users to select elements from `entities`, and then return the index where they appear.
-pub fn select_indices<TEntity, TPrompt>(
-	entities: &[TEntity],
-	prompt: TPrompt,
-) -> io::Result<Vec<usize>>
+pub fn select_indices<Entity, Prompt>(entities: &[Entity], prompt: Prompt) -> io::Result<Vec<usize>>
 where
-	TEntity: Clone + Display,
-	TPrompt: Into<String>,
+	Entity: Clone + Display,
+	Prompt: Into<String>,
 {
 	if entities.is_empty()
 	{
@@ -176,10 +173,10 @@ where
 /// # Errors
 ///
 /// * When [`select_one_index`] does.
-pub fn select_one<TEntity, TPrompt>(entities: &[TEntity], prompt: TPrompt) -> Result<TEntity>
+pub fn select_one<Entity, Prompt>(entities: &[Entity], prompt: Prompt) -> Result<Entity>
 where
-	TEntity: Clone + Display,
-	TPrompt: Into<String>,
+	Entity: Clone + Display,
+	Prompt: Into<String>,
 {
 	select_one_index(entities, prompt).map(|i| entities[i].clone())
 }
@@ -190,14 +187,14 @@ where
 ///
 /// * When `entities` is empty.
 /// * When [`Select::interact`] does.
-pub fn select_one_index<TEntity, TPrompt>(entities: &[TEntity], prompt: TPrompt) -> Result<usize>
+pub fn select_one_index<Entity, Prompt>(entities: &[Entity], prompt: Prompt) -> Result<usize>
 where
-	TEntity: Clone + Display,
-	TPrompt: Into<String>,
+	Entity: Clone + Display,
+	Prompt: Into<String>,
 {
 	if entities.is_empty()
 	{
-		return Err(Error::NoData(crate::fmt::type_name::<TEntity>().into()));
+		return Err(Error::NoData(crate::fmt::type_name::<Entity>().into()));
 	}
 
 	// {{{
@@ -224,28 +221,28 @@ where
 ///
 /// * If `match_condition` is [`None`], values the user was `prompt`ed to [`retrieve`].
 /// * If `match_condition` is [`Some`], values matching the condition.
-pub async fn select_one_retrieved<TRetrievable, TDb, TPrompt>(
-	connection: &Pool<TDb>,
-	match_condition: Option<TRetrievable::Match>,
-	prompt: TPrompt,
-) -> DynResult<TRetrievable::Entity>
+pub async fn select_one_retrieved<Retr, Db, Prompt>(
+	connection: &Pool<Db>,
+	match_condition: Option<Retr::Match>,
+	prompt: Prompt,
+) -> DynResult<Retr::Entity>
 where
-	TDb: Database,
-	TPrompt: Display,
-	TRetrievable: Retrievable<Db = TDb>,
-	TRetrievable::Entity: Clone + Display,
-	TRetrievable::Match: Default + DeserializeOwned + Serialize,
-	for<'connection> &'connection mut TDb::Connection: Executor<'connection, Database = TDb>,
+	Db: Database,
+	Prompt: Display,
+	Retr: Retrievable<Db = Db>,
+	Retr::Entity: Clone + Display,
+	Retr::Match: Default + DeserializeOwned + Serialize,
+	for<'connection> &'connection mut Db::Connection: Executor<'connection, Database = Db>,
 {
 	let retrieved = match match_condition
 	{
-		Some(condition) => TRetrievable::retrieve(connection, &condition).await?,
-		_ => retrieve::<TRetrievable, _, _>(connection, prompt).await?,
+		Some(condition) => Retr::retrieve(connection, &condition).await?,
+		_ => retrieve::<Retr, _, _>(connection, prompt).await?,
 	};
 
 	let selected = select_one(
 		&retrieved,
-		format!("Select a {}", fmt::type_name::<TRetrievable::Entity>()),
+		format!("Select a {}", fmt::type_name::<Retr::Entity>()),
 	)?;
 
 	Ok(selected)
@@ -255,39 +252,39 @@ where
 ///
 /// * If `match_condition` is [`None`], values the user was `prompt`ed to [`retrieve`].
 /// * If `match_condition` is [`Some`], values matching the condition.
-pub async fn select_retrieved<TRetrievable, TDb, TPrompt>(
-	connection: &Pool<TDb>,
-	match_condition: Option<TRetrievable::Match>,
-	prompt: TPrompt,
-) -> DynResult<Vec<TRetrievable::Entity>>
+pub async fn select_retrieved<Retr, Db, Prompt>(
+	connection: &Pool<Db>,
+	match_condition: Option<Retr::Match>,
+	prompt: Prompt,
+) -> DynResult<Vec<Retr::Entity>>
 where
-	TDb: Database,
-	TPrompt: Display,
-	TRetrievable: Retrievable<Db = TDb>,
-	TRetrievable::Entity: Clone + Display,
-	TRetrievable::Match: Default + DeserializeOwned + Serialize,
-	for<'connection> &'connection mut TDb::Connection: Executor<'connection, Database = TDb>,
+	Db: Database,
+	Prompt: Display,
+	Retr: Retrievable<Db = Db>,
+	Retr::Entity: Clone + Display,
+	Retr::Match: Default + DeserializeOwned + Serialize,
+	for<'connection> &'connection mut Db::Connection: Executor<'connection, Database = Db>,
 {
 	let retrieved = match match_condition
 	{
-		Some(condition) => TRetrievable::retrieve(connection, &condition).await?,
-		_ => retrieve::<TRetrievable, _, _>(connection, prompt).await?,
+		Some(condition) => Retr::retrieve(connection, &condition).await?,
+		_ => retrieve::<Retr, _, _>(connection, prompt).await?,
 	};
 
 	let selected = select(
 		&retrieved,
-		format!("Select the {}s", fmt::type_name::<TRetrievable::Entity>()),
+		format!("Select the {}s", fmt::type_name::<Retr::Entity>()),
 	)?;
 
 	Ok(selected)
 }
 
 /// `prompt` the user to enter text, and return what they entered.
-pub fn text<TText, TPrompt>(default_text: Option<TText>, prompt: TPrompt) -> io::Result<TText>
+pub fn text<Text, Prompt>(default_text: Option<Text>, prompt: Prompt) -> io::Result<Text>
 where
-	TPrompt: Into<String>,
-	TText: Clone + FromStr + Display,
-	TText::Err: Display + Debug,
+	Prompt: Into<String>,
+	Text: Clone + FromStr + Display,
+	Text::Err: Display + Debug,
 {
 	let mut input = Input::new();
 

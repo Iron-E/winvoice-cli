@@ -33,43 +33,54 @@ use crate::{args::RunAction, fmt, input, utils::Identifiable, DynResult};
 #[async_trait::async_trait(?Send)]
 impl RunAction for Update
 {
-	async fn action<CAdapter, EAdapter, JAdapter, LAdapter, OAdapter, TAdapter, XAdapter, TDb>(
+	async fn action<CAdapter, EAdapter, JAdapter, LAdapter, OAdapter, Adapter, XAdapter, Db>(
 		self,
-		connection: Pool<TDb>,
+		connection: Pool<Db>,
 		config: Config,
 	) -> DynResult<()>
 	where
-		CAdapter: Deletable<Db = TDb> + ContactAdapter,
-		EAdapter: Deletable<Db = TDb> + EmployeeAdapter,
-		JAdapter: Deletable<Db = TDb> + JobAdapter,
-		LAdapter: Deletable<Db = TDb> + LocationAdapter,
-		OAdapter: Deletable<Db = TDb> + OrganizationAdapter,
-		TAdapter: Deletable<Db = TDb> + TimesheetAdapter,
-		XAdapter: Deletable<Db = TDb> + ExpensesAdapter,
-		TDb: Database,
-		for<'connection> &'connection mut TDb::Connection: Executor<'connection, Database = TDb>,
-		for<'connection> &'connection mut Transaction<'connection, TDb>:
-			Executor<'connection, Database = TDb>,
+		CAdapter: Deletable<Db = Db> + ContactAdapter,
+		EAdapter: Deletable<Db = Db> + EmployeeAdapter,
+		JAdapter: Deletable<Db = Db> + JobAdapter,
+		LAdapter: Deletable<Db = Db> + LocationAdapter,
+		OAdapter: Deletable<Db = Db> + OrganizationAdapter,
+		Adapter: Deletable<Db = Db> + TimesheetAdapter,
+		XAdapter: Deletable<Db = Db> + ExpensesAdapter,
+		Db: Database,
+		for<'connection> &'connection mut Db::Connection: Executor<'connection, Database = Db>,
+		for<'connection> &'connection mut Transaction<'connection, Db>:
+			Executor<'connection, Database = Db>,
 	{
-		/// A generic deletion function which works for any of the provided adapters in the outer
-		/// function, as they all implement `TUpdatable` at the minimum.
-		async fn update<TUpdatable, TDb>(
-			connection: &Pool<TDb>,
-			entities: &mut [TUpdatable::Entity],
-		) -> DynResult<()>
+		/// Uses [`Iterator::filter_map`] to filter out items of `iter` which return [`None`] from
+		/// [`input::confirm_then_some`], otherwise mapping
+		fn filter_by_confirm_then_ok<Iter, Input, PromptFn, Prompt>(
+			iter: Iter,
+			prompt: PromptFn,
+		) -> impl Iterator<Item = DynResult<Input>>
 		where
-			TDb: Database,
-			TUpdatable: Updatable<Db = TDb>,
-			TUpdatable::Entity:
+			Iter: Iterator<Item = Input>,
+			Prompt: Into<String>,
+			PromptFn: Fn(&Input) -> Prompt,
+		{
+			iter.filter_map(move |item| input::confirm_then_some(prompt(&item), Ok(item)))
+		}
+
+		/// A generic deletion function which works for any of the provided adapters in the outer
+		/// function, as they all implement `Updatable` at the minimum.
+		async fn update<Upd, Db>(connection: &Pool<Db>, entities: &mut [Upd::Entity]) -> DynResult<()>
+		where
+			Db: Database,
+			Upd: Updatable<Db = Db>,
+			Upd::Entity:
 				Clone + DeserializeOwned + Display + Identifiable + RestorableSerde + Serialize + Sync,
-			for<'connection> &'connection mut Transaction<'connection, TDb>:
-				Executor<'connection, Database = TDb>,
+			for<'connection> &'connection mut Transaction<'connection, Db>:
+				Executor<'connection, Database = Db>,
 		{
 			#[rustfmt::skip]
 			entities.iter_mut().try_for_each(|e| {
 				*e = input::edit_and_restore(e, format!(
 					"Make any desired edits to the {}",
-					fmt::type_name::<TUpdatable::Entity>()
+					fmt::type_name::<Upd::Entity>()
 				))?;
 
 				input::Result::Ok(())
@@ -77,7 +88,7 @@ impl RunAction for Update
 
 			let mut transaction = connection.begin().await?;
 
-			TUpdatable::update(
+			Upd::update(
 				&mut transaction,
 				entities.iter().inspect(|e| Update::report_updated(*e)),
 			)
@@ -98,6 +109,7 @@ impl RunAction for Update
 				)
 				.await?;
 
+				use std::iter::Iterator;
 				#[rustfmt::skip]
 				stream::iter(selected.iter_mut().filter_map(|contact| match contact.kind
 				{
@@ -136,15 +148,14 @@ impl RunAction for Update
 				.await?;
 
 				#[rustfmt::skip]
-				stream::iter(selected.iter_mut().filter_map(|expense| input::confirm_then_some(
-					format!("Do you want to change the Timesheet of {expense}?"),
-					Ok(expense),
+				stream::iter(filter_by_confirm_then_ok(selected.iter_mut(), |x| format!(
+					"Do you want to change the Timesheet of {x}?",
 				)))
 				.try_for_each(|expense| {
 					let connection = &connection;
 
 					async {
-						expense.timesheet_id = input::select_one_retrieved::<TAdapter, _, _>(
+						expense.timesheet_id = input::select_one_retrieved::<Adapter, _, _>(
 							connection,
 							None,
 							"Query the Timesheet to attach this Expense to",
@@ -190,9 +201,9 @@ impl RunAction for Update
 				.await?;
 
 				#[rustfmt::skip]
-				stream::iter(selected.iter_mut().filter_map(|location| input::confirm_then_some(
-					format!("Do you want to put {} into a new Location", fmt::quoted(&location.name)),
-					Ok(location),
+				stream::iter(filter_by_confirm_then_ok(selected.iter_mut(), |l| format!(
+					"Do you want to put {} into a new Location",
+					fmt::quoted(&l.name),
 				)))
 				.try_for_each(|location| {
 					let connection = &connection;
@@ -242,17 +253,14 @@ impl RunAction for Update
 				.await?;
 
 				#[rustfmt::skip]
-				stream::iter(selected.iter_mut().filter_map(|job| input::confirm_then_some(
-					format!(
-						"Do you want to change the client {} of Job {} ({})?",
-						fmt::quoted(&job.client.name),
-						fmt::id_num(job.id),
-						job.objectives
-							.lines()
-							.next()
-							.expect("Job should have at least one line of description"),
-					),
-					Ok(job),
+				stream::iter(filter_by_confirm_then_ok(selected.iter_mut(), |j| format!(
+					"Do you want to change the client {} of Job {} ({})?",
+					fmt::quoted(&j.client.name),
+					fmt::id_num(j.id),
+					j.objectives
+						.lines()
+						.next()
+						.expect("Job should have at least one line of description"),
 				)))
 				.try_for_each(|job| {
 					let connection = &connection;
@@ -294,9 +302,9 @@ impl RunAction for Update
 				.await?;
 
 				#[rustfmt::skip]
-				stream::iter(selected.iter_mut().filter_map(|organization| input::confirm_then_some(
-					format!("Do you want to change the Location of {}?", fmt::quoted(&organization.name)),
-					Ok(organization),
+				stream::iter(filter_by_confirm_then_ok(selected.iter_mut(), |o| format!(
+					"Do you want to change the Location of {}?",
+					fmt::quoted(&o.name),
 				)))
 				.try_for_each(|organization| {
 					let connection = &connection;
@@ -319,7 +327,7 @@ impl RunAction for Update
 			UpdateCommand::Timesheet { restart, stop } =>
 			{
 				#[rustfmt::skip]
-				let mut selected = input::select_retrieved::<TAdapter, _, _>(
+				let mut selected = input::select_retrieved::<Adapter, _, _>(
 					&connection,
 					(restart || stop).then(|| MatchTimesheet {
 						time_end: stop.then_some(MatchOption::None).unwrap_or_else(MatchOption::some),
@@ -332,7 +340,7 @@ impl RunAction for Update
 				todo!("Prompt to change employee");
 				todo!("Prompt to change job");
 
-				update::<TAdapter, _>(&connection, &mut selected).await?;
+				update::<Adapter, _>(&connection, &mut selected).await?;
 			},
 		};
 

@@ -1,3 +1,4 @@
+mod from;
 mod try_into;
 
 use std::path::PathBuf;

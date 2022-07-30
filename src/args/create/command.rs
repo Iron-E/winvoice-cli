@@ -1,4 +1,5 @@
 use core::time::Duration;
+use std::path::PathBuf;
 
 use clap::Subcommand as Clap;
 use clinvoice_finance::Money;
@@ -83,6 +84,11 @@ pub enum CreateCommand
 		/// A specific `description` of the `Expense` to create e.g. "Flight to Meeting"
 		#[clap(long, short)]
 		description: String,
+
+		/// A path to a YAML file that contains a valid match condition/query/search for a
+		/// CLInvoice Timesheet.
+		#[clap(long, short, value_name = "MATCH FILE", value_parser)]
+		timesheet: Option<PathBuf>,
 	},
 
 	/// Create a `Job` in the store (-s) specified.
@@ -90,6 +96,17 @@ pub enum CreateCommand
 	/// See the documentation for more information about `Job`s.
 	Job
 	{
+		/// A path to a YAML file that contains a valid match condition/query/search for a
+		/// CLInvoice Organization.
+		#[clap(
+			group = "client-args",
+			long,
+			short,
+			value_name = "MATCH FILE",
+			value_parser
+		)]
+		client: Option<PathBuf>,
+
 		/// The date and time that work on the `Job` to create stopped.
 		///
 		/// See --date-open for formatting information.
@@ -117,7 +134,7 @@ pub enum CreateCommand
 
 		/// Set the `client` to the `Organization` specified by the `employee` field of the
 		/// `[organizations]` section of the CLInvoice config.
-		#[clap(action, long, short)]
+		#[clap(action, group = "client-args", long, short)]
 		employer: bool,
 
 		/// The `invoice.hourly_rate` of the `Job` to create e.g. "50.00 USD".
@@ -168,6 +185,11 @@ pub enum CreateCommand
 	/// See the documentation for more information about `Organization`s.
 	Organization
 	{
+		/// A path to a YAML file that contains a valid match condition/query/search for a
+		/// CLInvoice Organization.
+		#[clap(long, short, value_name = "MATCH FILE", value_parser)]
+		location: Option<PathBuf>,
+
 		/// The `name` of the `Organization` to create.
 		#[clap(long, short)]
 		name: String,
@@ -180,19 +202,35 @@ pub enum CreateCommand
 	{
 		/// Set the one who is working on the `Timesheet` to the `Employee` specified by the `id` field of
 		/// the `[employees]` section of the CLInvoice config.
-		#[clap(action, long, short)]
+		#[clap(action, group = "employee-args", long, short)]
 		default_employee: bool,
+
+		/// A path to a YAML file that contains a valid match condition/query/search for a
+		/// CLInvoice Employee.
+		#[clap(
+			group = "employee-args",
+			long,
+			short,
+			value_name = "MATCH FILE",
+			value_parser
+		)]
+		employee: Option<PathBuf>,
+
+		/// A path to a YAML file that contains a valid match condition/query/search for a
+		/// CLInvoice Job.
+		#[clap(long, short, value_name = "MATCH FILE", value_parser)]
+		job: Option<PathBuf>,
 
 		/// The `time_begin` of the `Timesheet` to create. Defaults to the current date and time.
 		///
 		/// e.g. December 12th, 2022 at 1:30:00pm is "2022-12-31T13:30:00"
-		#[clap(long, short = 'b')]
+		#[clap(long)]
 		time_begin: Option<NaiveDateTime>,
 
 		/// The `time_end` of the `Timesheet` to create. Defaults to the current time.
 		///
 		/// See --time-begin for formatting information.
-		#[clap(long, requires("time-begin"), short = 'e')]
+		#[clap(long, requires("time-begin"))]
 		time_end: Option<NaiveDateTime>,
 
 		/// The `work_notes` of the `Timesheet` to create.

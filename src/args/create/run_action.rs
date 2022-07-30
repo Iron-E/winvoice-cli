@@ -11,13 +11,12 @@ use clinvoice_adapter::{
 	Deletable,
 };
 use clinvoice_config::{Config, Error};
-use clinvoice_match::{MatchEmployee, MatchOrganization};
 use clinvoice_schema::{chrono::Utc, ContactKind, Invoice, InvoiceDate};
 use sqlx::{Database, Executor, Pool, Transaction};
 
 use super::{Create, CreateCommand};
 use crate::{
-	args::{update::Update, RunAction},
+	args::{match_args::MatchArgs, update::Update, RunAction},
 	input,
 	utils,
 	DynResult,
@@ -86,30 +85,27 @@ impl RunAction for Create
 				category,
 				cost,
 				description,
+				timesheet,
 			} =>
 			{
-				let timesheet = input::select_one_retrieved::<TAdapter, _, _>(
+				let match_timesheet = MatchArgs::from(timesheet).try_into()?;
+				let selected = input::select_one_retrieved::<TAdapter, _, _>(
 					&connection,
-					None,
+					match_timesheet,
 					"Query the Timesheet this Expense is for",
 				)
 				.await?;
 
-				let created = XAdapter::create(
-					&connection,
-					vec![(category, cost, description)],
-					timesheet.id,
-				)
-				.await
-				.map(|mut v| {
-					v.pop()
-						.expect("at least one `Expense` should have been created")
-				})?;
+				#[rustfmt::skip]
+				let created = XAdapter::create(&connection, vec![(category, cost, description)], selected.id)
+					.await
+					.map(|mut v| v.pop().expect("at least one `Expense` should have been created"))?;
 
 				Self::report_created(&created);
 			},
 
 			CreateCommand::Job {
+				client,
 				date_close,
 				date_invoice_issued,
 				date_invoice_paid,
@@ -121,28 +117,26 @@ impl RunAction for Create
 				objectives,
 			} =>
 			{
-				let match_condition = employer
-					.then(|| {
-						config
-							.organizations
-							.employer_id
-							.map(MatchOrganization::from)
-							.ok_or_else(|| {
-								Error::NotConfigured("employer_id".into(), "organizations".into())
-							})
-					})
-					.transpose()?;
+				let match_client = match employer
+				{
+					false => MatchArgs::from(client).try_into()?,
+					_ => config
+						.organizations
+						.employer_id
+						.ok_or_else(|| Error::NotConfigured("employer_id".into(), "organizations".into()))
+						.map(|id| Some(id.into()))?,
+				};
 
-				let client = input::select_one_retrieved::<OAdapter, _, _>(
+				let selected = input::select_one_retrieved::<OAdapter, _, _>(
 					&connection,
-					match_condition,
+					match_client,
 					"Query the client Organization for this Job",
 				)
 				.await?;
 
 				let created = JAdapter::create(
 					&connection,
-					client,
+					selected,
 					date_close.map(utils::naive_local_datetime_to_utc),
 					date_open.map_or_else(Utc::now, utils::naive_local_datetime_to_utc),
 					increment.unwrap_or(config.jobs.default_increment),
@@ -235,11 +229,12 @@ impl RunAction for Create
 				// }}}
 			},
 
-			CreateCommand::Organization { name } =>
+			CreateCommand::Organization { location, name } =>
 			{
+				let match_location = MatchArgs::from(location).try_into()?;
 				let selected = input::select_one_retrieved::<LAdapter, _, _>(
 					&connection,
-					None,
+					match_location,
 					"Query the Location of this Organization",
 				)
 				.await?;
@@ -250,31 +245,34 @@ impl RunAction for Create
 
 			CreateCommand::Timesheet {
 				default_employee,
+				employee,
+				job,
 				time_begin,
 				time_end,
 				work_notes,
 			} =>
 			{
-				let match_condition = default_employee
-					.then(|| {
-						config
-							.employees
-							.id
-							.map(MatchEmployee::from)
-							.ok_or_else(|| Error::NotConfigured("id".into(), "employees".into()))
-					})
-					.transpose()?;
+				let match_employee = match default_employee
+				{
+					false => MatchArgs::from(employee).try_into()?,
+					_ => config
+						.employees
+						.id
+						.ok_or_else(|| Error::NotConfigured("id".into(), "employees".into()))
+						.map(|id| Some(id.into()))?,
+				};
 
 				let employee = input::select_one_retrieved::<EAdapter, _, _>(
 					&connection,
-					match_condition,
+					match_employee,
 					"Query the Employee who is responsible for the work",
 				)
 				.await?;
 
+				let match_job = MatchArgs::from(job).try_into()?;
 				let job = input::select_one_retrieved::<JAdapter, _, _>(
 					&connection,
-					None,
+					match_job,
 					"Query the Job being worked on",
 				)
 				.await?;

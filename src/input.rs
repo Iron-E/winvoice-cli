@@ -8,7 +8,6 @@ use core::{
 use std::io;
 
 use clinvoice_adapter::Retrievable;
-use clinvoice_export::Format;
 use clinvoice_schema::RestorableSerde;
 use dialoguer::{Confirm, Editor, Input, MultiSelect, Select};
 pub use error::{Error, Result};

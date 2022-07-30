@@ -14,7 +14,7 @@ Requirements:
 
 * `cargo`
 
-### [crates.io](https://crates.io)
+### [crates.io][crates]
 
 Run the following command in a terminal:
 
@@ -22,9 +22,9 @@ Run the following command in a terminal:
 cargo install clinvoice --features=<adapters>
 ```
 
-* Any desired storage implementations (e.g. Bincode, PostreSQL) should be listed in place of `<adapters>`.
+* Any desired storage implementations (e.g. Bincode, PostgreSQL) should be listed in place of `<adapters>`.
 
-> __NOTE__: This application has not yet been uploaded to [crates.io](crates.io)!
+> __NOTE__: This application has not yet been uploaded to [crates.io][crates]!
 
 ### Source
 
@@ -46,5 +46,7 @@ Run `clinvoice config` to edit the configuration file for this program. See the 
 
 * For basic information, run `clinvoice help` from the command line.
 * For an in-depth guide, see the [wiki](https://github.com/Iron-E/clinvoice/wiki/Usage).
+
+[crates]: https://crates.io
 
 <!-- cargo-rdme end -->

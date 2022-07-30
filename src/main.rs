@@ -11,7 +11,7 @@
 //!
 //! * `cargo`
 //!
-//! ## [crates.io](https://crates.io)
+//! ## [crates.io][crates]
 //!
 //! Run the following command in a terminal:
 //!
@@ -19,10 +19,10 @@
 //! cargo install clinvoice --features=<adapters>
 //! ```
 //!
-//! * Any desired storage implementations (e.g. Bincode, PostreSQL) should be listed in place of
+//! * Any desired storage implementations (e.g. Bincode, PostgreSQL) should be listed in place of
 //!   `<adapters>`.
 //!
-//! > __NOTE__: This application has not yet been uploaded to [crates.io](crates.io)!
+//! > __NOTE__: This application has not yet been uploaded to [crates.io][crates]!
 //!
 //! ## Source
 //!
@@ -46,6 +46,8 @@
 //!
 //! * For basic information, run `clinvoice help` from the command line.
 //! * For an in-depth guide, see the [wiki](https://github.com/Iron-E/clinvoice/wiki/Usage).
+//!
+//! [crates]: https://crates.io
 
 #![allow(clippy::drop_non_drop)]
 #![forbid(unsafe_code)]

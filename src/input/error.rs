@@ -1,3 +1,4 @@
+use core::result::Result as StdResult;
 use std::io;
 
 use clinvoice_config::Error as ConfigError;
@@ -34,4 +35,5 @@ pub enum Error
 	Yaml(#[from] yaml::Error),
 }
 
-clinvoice_error::AliasResult!();
+/// A [`Result`](StdResult) for getting input from STDIO.
+pub type Result<T> = StdResult<T, Error>;

@@ -1,7 +1,7 @@
 # See https://doc.rust-lang.org/cargo/reference/manifest.html
 [package]
 name = "clinvoice"
-version = "0.2.0-rc3"
+version = "0.2.0"
 authors = ["Iron-E <code.iron.e@gmail.com>"]
 description = "Invoice from the command line."
 
@@ -16,7 +16,6 @@ repository = "https://www.github.com/Iron-E/clinvoice"
 clinvoice-adapter = {branch = "release/0.17", default-features = false, git = "https://github.com/Iron-E/clinvoice-adapter"}
 clinvoice-adapter-postgres = {branch = "release/0.7", git = "https://github.com/Iron-E/clinvoice-adapter-postgres", optional = true}
 clinvoice-config = {branch = "release/0.7", git = "https://github.com/Iron-E/clinvoice-config"}
-clinvoice-error = {branch = "release/0.3", git = "https://github.com/Iron-E/clinvoice-error"}
 clinvoice-finance = {branch = "release/0.4", git = "https://github.com/Iron-E/clinvoice-finance"}
 clinvoice-export = {branch = "release/0.1", features = ["markdown"], git = "https://github.com/Iron-E/clinvoice-export"}
 clinvoice-match = {branch = "release/0.6", features = ["serde"], git = "https://github.com/Iron-E/clinvoice-match"}

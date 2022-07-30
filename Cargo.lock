@@ -124,9 +124,9 @@ checksum = "14c189c53d098945499cdfa7ecc63567cf3886b3332b312a5b4585d8d3a6a610"
 
 [[package]]
 name = "bytes"
-version = "1.2.0"
+version = "1.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f0b3de4a0c5e67e16066a0715723abd91edc2f9001d09c46e1dca929351e130e"
+checksum = "ec8a7b6a70fde80372154c65702f00a0f56f3e1c36abbc6c440484be248856db"
 
 [[package]]
 name = "bzip2"
@@ -189,9 +189,9 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "3.2.15"
+version = "3.2.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "44bbe24bbd31a185bc2c4f7c2abe80bea13a20d57ee4e55be70ac512bdc76417"
+checksum = "a3dbbb6653e7c55cc8595ad3e1f7be8f32aba4eb7ff7f0fd1163d4f3d137c0a9"
 dependencies = [
  "atty",
  "bitflags",
@@ -235,7 +235,6 @@ dependencies = [
  "clinvoice-adapter",
  "clinvoice-adapter-postgres",
  "clinvoice-config",
- "clinvoice-error",
  "clinvoice-export",
  "clinvoice-finance",
  "clinvoice-match",
@@ -255,11 +254,10 @@ dependencies = [
 
 [[package]]
 name = "clinvoice-adapter"
-version = "0.17.0"
-source = "git+https://github.com/Iron-E/clinvoice-adapter?branch=release/0.17#13ed87c2462cea9e80c8c903279a4a98ba037c83"
+version = "0.17.1"
+source = "git+https://github.com/Iron-E/clinvoice-adapter?branch=release/0.17#79b29db31558f8521928c6263265ce18b192059e"
 dependencies = [
  "async-trait",
- "clinvoice-error",
  "clinvoice-match",
  "clinvoice-schema",
  "futures",
@@ -268,12 +266,11 @@ dependencies = [
 
 [[package]]
 name = "clinvoice-adapter-postgres"
-version = "0.7.0"
-source = "git+https://github.com/Iron-E/clinvoice-adapter-postgres?branch=release/0.7#326719bb36f7c61d0f8b0fc3288df16331770b35"
+version = "0.7.1"
+source = "git+https://github.com/Iron-E/clinvoice-adapter-postgres?branch=release/0.7#84c3e78e3c773c4057d2b1d06dd462539fe80649"
 dependencies = [
  "async-trait",
  "clinvoice-adapter",
- "clinvoice-error",
  "clinvoice-finance",
  "clinvoice-match",
  "clinvoice-schema",
@@ -286,10 +283,9 @@ dependencies = [
 
 [[package]]
 name = "clinvoice-config"
-version = "0.7.1"
-source = "git+https://github.com/Iron-E/clinvoice-config?branch=release/0.7#79fee845d70302c4672dbca30e9450fbcdccf945"
+version = "0.7.2"
+source = "git+https://github.com/Iron-E/clinvoice-config?branch=release/0.7#21de1739e0223e5d447db2d77f1102b252e4f66a"
 dependencies = [
- "clinvoice-error",
  "clinvoice-schema",
  "dirs",
  "humantime-serde",
@@ -299,16 +295,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "clinvoice-error"
-version = "0.3.1"
-source = "git+https://github.com/Iron-E/clinvoice-error?branch=release/0.3#fdf3de0910bbbbb10c300da08a199ac9087dcced"
-
-[[package]]
 name = "clinvoice-export"
-version = "0.1.8"
-source = "git+https://github.com/Iron-E/clinvoice-export?branch=release/0.1#25e09e71fe4c0ff0db9a3189c55bef8ec1491d07"
+version = "0.1.9"
+source = "git+https://github.com/Iron-E/clinvoice-export?branch=release/0.1#ffc6f45d8b38ad974198c6f79c0bfe36f9fd62d4"
 dependencies = [
- "clinvoice-error",
  "clinvoice-finance",
  "clinvoice-schema",
  "strum",
@@ -317,11 +307,10 @@ dependencies = [
 
 [[package]]
 name = "clinvoice-finance"
-version = "0.4.6"
-source = "git+https://github.com/Iron-E/clinvoice-finance?branch=release/0.4#68a6dcffe03c5f110cef66297386be2390ad389a"
+version = "0.4.7"
+source = "git+https://github.com/Iron-E/clinvoice-finance?branch=release/0.4#a6b1962d6ca56b5d88240288beea8dd2c827d329"
 dependencies = [
  "chrono",
- "clinvoice-error",
  "futures",
  "reqwest",
  "rust_decimal",
@@ -333,10 +322,9 @@ dependencies = [
 
 [[package]]
 name = "clinvoice-match"
-version = "0.6.2"
-source = "git+https://github.com/Iron-E/clinvoice-match?branch=release/0.6#f9369ea8e17fb8aaa2c3acf9920fc127d153bd5c"
+version = "0.6.3"
+source = "git+https://github.com/Iron-E/clinvoice-match?branch=release/0.6#6706456866ad20fd1debaaa3960e9387202319bb"
 dependencies = [
- "clinvoice-error",
  "clinvoice-finance",
  "clinvoice-schema",
  "humantime-serde",
@@ -2040,9 +2028,9 @@ checksum = "b6bc1c9ce2b5135ac7f93c72918fc37feb872bdc6a5533a8b85eb4b86bfdae52"
 
 [[package]]
 name = "tracing"
-version = "0.1.35"
+version = "0.1.36"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a400e31aa60b9d44a52a8ee0343b5b18566b03a8321e0d321f695cf56e940160"
+checksum = "2fce9567bd60a67d08a16488756721ba392f24f29006402881e43b19aac64307"
 dependencies = [
  "cfg-if",
  "pin-project-lite",
@@ -2051,9 +2039,9 @@ dependencies = [
 
 [[package]]
 name = "tracing-core"
-version = "0.1.28"
+version = "0.1.29"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7b7358be39f2f274f322d2aaed611acc57f382e8eb1e5b48cb9ae30933495ce7"
+checksum = "5aeea4303076558a00714b823f9ad67d58a3bbda1df83d8827d21193156e22f7"
 dependencies = [
  "once_cell",
 ]

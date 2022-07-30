@@ -2,8 +2,8 @@ use core::time::Duration;
 use std::path::PathBuf;
 
 use clap::Subcommand as Clap;
-use clinvoice_finance::Money;
 use clinvoice_schema::chrono::NaiveDateTime;
+use money2::Money;
 
 /// Use CLInvoice to store new information.
 ///

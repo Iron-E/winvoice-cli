@@ -15,10 +15,10 @@ use clinvoice_adapter::{
 	Retrievable,
 };
 use clinvoice_config::{Config, Error};
-use clinvoice_finance::ExchangeRates;
 use clinvoice_match::{MatchOrganization, MatchTimesheet};
 use clinvoice_schema::{chrono::Utc, InvoiceDate};
 use futures::{future, stream, TryFutureExt, TryStreamExt};
+use money2::ExchangeRates;
 use serde::{de::DeserializeOwned, Serialize};
 use sqlx::{Database, Executor, Pool};
 use tokio::fs;

@@ -16,16 +16,16 @@ repository = "https://www.github.com/Iron-E/clinvoice"
 clinvoice-adapter = {branch = "release/0.17", default-features = false, git = "https://github.com/Iron-E/clinvoice-adapter"}
 clinvoice-adapter-postgres = {branch = "release/0.7", git = "https://github.com/Iron-E/clinvoice-adapter-postgres", optional = true}
 clinvoice-config = {branch = "release/0.7", git = "https://github.com/Iron-E/clinvoice-config"}
-clinvoice-finance = {branch = "release/0.4", git = "https://github.com/Iron-E/clinvoice-finance"}
 clinvoice-export = {branch = "release/0.1", features = ["markdown"], git = "https://github.com/Iron-E/clinvoice-export"}
-clinvoice-match = {branch = "release/0.6", features = ["serde"], git = "https://github.com/Iron-E/clinvoice-match"}
-clinvoice-schema = {branch = "release/0.9", git = "https://github.com/Iron-E/clinvoice-schema"}
+clinvoice-match = {branch = "release/0.7", features = ["serde"], git = "https://github.com/Iron-E/clinvoice-match"}
+clinvoice-schema = {branch = "release/0.10", features = ["serde"], git = "https://github.com/Iron-E/clinvoice-schema"}
 
 async-trait = "0.1"
 clap = {features=["derive"], version = "3"}
 dialoguer = "0.10"
 futures = "0.3"
 humantime = "2"
+money2 = {branch = "release/0.6", git = "https://github.com/Iron-E/money"}
 serde = "1"
 serde_yaml = "0.8"
 sqlx = {features = ["runtime-tokio-rustls", "tls"], version = "0.5"}

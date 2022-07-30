@@ -183,6 +183,7 @@ impl RunAction for Create
 				let mut transaction = connection.begin().await?;
 
 				// TODO: convert to `try_fold` after `stream`s merge to `std`? {{{2
+				// TODO: use `inspect` after rust-lang/rust#91345
 				let mut l = LAdapter::create(&mut *transaction, final_name, outside_of_final).await?;
 				Self::report_created(&l);
 				for n in names_reversed

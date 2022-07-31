@@ -266,8 +266,8 @@ dependencies = [
 
 [[package]]
 name = "clinvoice-adapter-postgres"
-version = "0.7.3"
-source = "git+https://github.com/Iron-E/clinvoice-adapter-postgres?branch=release/0.7#1205ebcf9cd42635a5b603980311862ce45d6f44"
+version = "0.7.4"
+source = "git+https://github.com/Iron-E/clinvoice-adapter-postgres?branch=release/0.7#4c2462d0928c1da2e2ffd06f073a8f8f23a9e9e6"
 dependencies = [
  "async-trait",
  "clinvoice-adapter",
@@ -296,8 +296,8 @@ dependencies = [
 
 [[package]]
 name = "clinvoice-export"
-version = "0.1.11"
-source = "git+https://github.com/Iron-E/clinvoice-export?branch=release/0.1#63f23b3148c2dae491e947cf256560071c219321"
+version = "0.1.12"
+source = "git+https://github.com/Iron-E/clinvoice-export?branch=release/0.1#504ce8df987229aa71b140846bdb54fac50b9213"
 dependencies = [
  "clinvoice-schema",
  "money2",
@@ -307,8 +307,8 @@ dependencies = [
 
 [[package]]
 name = "clinvoice-match"
-version = "0.7.0"
-source = "git+https://github.com/Iron-E/clinvoice-match?branch=release/0.7#3e78ff68cf924f54564f75ba559874d16e9ea6b2"
+version = "0.7.1"
+source = "git+https://github.com/Iron-E/clinvoice-match?branch=release/0.7#5f22433ebf3ec28c1739cbb755934cf20276193f"
 dependencies = [
  "clinvoice-schema",
  "humantime-serde",
@@ -319,8 +319,8 @@ dependencies = [
 
 [[package]]
 name = "clinvoice-schema"
-version = "0.10.0"
-source = "git+https://github.com/Iron-E/clinvoice-schema?branch=release/0.10#c26365eccd71f64357d60f50689d8f967f035b4c"
+version = "0.10.1"
+source = "git+https://github.com/Iron-E/clinvoice-schema?branch=release/0.10#00998aa47e9180510ded90db813352c7d6d2f917"
 dependencies = [
  "chrono",
  "futures",
@@ -1047,8 +1047,9 @@ dependencies = [
 
 [[package]]
 name = "money2"
-version = "0.6.0"
-source = "git+https://github.com/Iron-E/money?branch=release/0.6#ba8fc86fba545d9e10d89eeb2dbfab4de98636bb"
+version = "0.6.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4ced621b67cbe4b80f0dc606bb611fe5cc0097d799eeb3381b79cd329472ea4c"
 dependencies = [
  "chrono",
  "futures",

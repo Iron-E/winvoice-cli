@@ -25,7 +25,7 @@ clap = {features=["derive"], version = "3"}
 dialoguer = "0.10"
 futures = "0.3"
 humantime = "2"
-money2 = "0.6"
+money2 = "0.7"
 serde = "1"
 serde_yaml = "0.8"
 sqlx = {features = ["runtime-tokio-rustls", "tls"], version = "0.5"}

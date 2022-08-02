@@ -127,7 +127,7 @@ use dyn_result::DynResult;
 /// # Summary
 ///
 /// The main method.
-#[tokio::main]
+#[tokio::main(flavor = "current_thread")]
 async fn main() -> DynResult<()>
 {
 	Args::parse().run().await

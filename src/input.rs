@@ -111,7 +111,7 @@ where
 		let match_condition: Retr::Match =
 			edit_default(format!("{prompt}\n{}locations", MATCH_PROMPT))?;
 
-		let results = Retr::retrieve(connection, &match_condition).await?;
+		let results = Retr::retrieve(connection, match_condition).await?;
 
 		if results.is_empty() &&
 			confirm("That query did not return any results, would you like to try again?")?
@@ -222,7 +222,7 @@ where
 {
 	let retrieved = match match_condition
 	{
-		Some(condition) => Retr::retrieve(connection, &condition).await?,
+		Some(condition) => Retr::retrieve(connection, condition).await?,
 		_ => retrieve::<Retr, _, _>(connection, prompt).await?,
 	};
 
@@ -253,7 +253,7 @@ where
 {
 	let retrieved = match match_condition
 	{
-		Some(condition) => Retr::retrieve(connection, &condition).await?,
+		Some(condition) => Retr::retrieve(connection, condition).await?,
 		_ => retrieve::<Retr, _, _>(connection, prompt).await?,
 	};
 

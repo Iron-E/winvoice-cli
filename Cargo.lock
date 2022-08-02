@@ -237,11 +237,11 @@ dependencies = [
  "clinvoice-config",
  "clinvoice-export",
  "clinvoice-match",
- "clinvoice-schema",
+ "clinvoice-schema 0.11.0",
  "dialoguer",
  "futures",
  "humantime",
- "money2",
+ "money2 0.8.0",
  "pretty_assertions",
  "serde",
  "serde_yaml",
@@ -254,28 +254,28 @@ dependencies = [
 
 [[package]]
 name = "clinvoice-adapter"
-version = "0.17.2"
-source = "git+https://github.com/Iron-E/clinvoice-adapter?branch=release/0.17#7cb31cff36d7e1dfc50041102b67bb35207910cf"
+version = "0.18.0"
+source = "git+https://github.com/Iron-E/clinvoice-adapter?branch=release/0.18#44a5d620b7c0ebf8c7d5c56e2e3ca6bbb526de2c"
 dependencies = [
  "async-trait",
  "clinvoice-match",
- "clinvoice-schema",
+ "clinvoice-schema 0.11.0",
  "futures",
  "sqlx",
 ]
 
 [[package]]
 name = "clinvoice-adapter-postgres"
-version = "0.7.5"
-source = "git+https://github.com/Iron-E/clinvoice-adapter-postgres?branch=release/0.7#96d01e80a80b949d9fc67952fea0ccf37c9431d3"
+version = "0.8.0"
+source = "git+https://github.com/Iron-E/clinvoice-adapter-postgres?branch=release/0.8#223b62d0e3033b70aced4236a395a5d2f17e82c3"
 dependencies = [
  "async-trait",
  "clinvoice-adapter",
  "clinvoice-match",
- "clinvoice-schema",
+ "clinvoice-schema 0.11.0",
  "futures",
  "humantime",
- "money2",
+ "money2 0.8.0",
  "shellexpand",
  "sqlx",
  "thiserror",
@@ -286,7 +286,7 @@ name = "clinvoice-config"
 version = "0.7.3"
 source = "git+https://github.com/Iron-E/clinvoice-config?branch=release/0.7#8379c334c6e4d7f163366a04c3354eb2ae616354"
 dependencies = [
- "clinvoice-schema",
+ "clinvoice-schema 0.10.2",
  "dirs",
  "humantime-serde",
  "serde",
@@ -296,23 +296,23 @@ dependencies = [
 
 [[package]]
 name = "clinvoice-export"
-version = "0.1.13"
-source = "git+https://github.com/Iron-E/clinvoice-export?branch=release/0.1#ba7475dde398f47730935801f57610cf523bc125"
+version = "0.2.0"
+source = "git+https://github.com/Iron-E/clinvoice-export?branch=release/0.2#bab1e6c988c0d93aac69bc4b8b1c995ef1f9954a"
 dependencies = [
- "clinvoice-schema",
- "money2",
+ "clinvoice-schema 0.11.0",
+ "money2 0.8.0",
  "strum",
  "thiserror",
 ]
 
 [[package]]
 name = "clinvoice-match"
-version = "0.7.2"
-source = "git+https://github.com/Iron-E/clinvoice-match?branch=release/0.7#224e832097760f72ee3fff239362703cbe21b0aa"
+version = "0.8.0"
+source = "git+https://github.com/Iron-E/clinvoice-match?branch=release/0.8#b546567878a5ad1c1b1f58ba24a0041ca026d099"
 dependencies = [
- "clinvoice-schema",
+ "clinvoice-schema 0.11.0",
  "humantime-serde",
- "money2",
+ "money2 0.8.0",
  "serde",
  "thiserror",
 ]
@@ -326,7 +326,21 @@ dependencies = [
  "futures",
  "humantime-serde",
  "lazy_static",
- "money2",
+ "money2 0.7.3",
+ "serde",
+ "thiserror",
+]
+
+[[package]]
+name = "clinvoice-schema"
+version = "0.11.0"
+source = "git+https://github.com/Iron-E/clinvoice-schema?branch=release/0.11#f42c41a5ebb549a7b9b1c873d150fb868c5dba26"
+dependencies = [
+ "chrono",
+ "futures",
+ "humantime-serde",
+ "lazy_static",
+ "money2 0.8.0",
  "serde",
  "thiserror",
 ]
@@ -1050,6 +1064,22 @@ name = "money2"
 version = "0.7.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5fb931e7e58684df30dc5dd6dbea8349f293f29e68233f58b0e3f3e70751aea1"
+dependencies = [
+ "chrono",
+ "futures",
+ "reqwest",
+ "rust_decimal",
+ "serde",
+ "strum",
+ "thiserror",
+ "zip",
+]
+
+[[package]]
+name = "money2"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8f2ddc54738a5640d883658627ca8bc6486d5317b20f85545ebd44d3977b43e0"
 dependencies = [
  "chrono",
  "futures",

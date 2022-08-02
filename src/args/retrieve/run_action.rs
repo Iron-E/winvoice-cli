@@ -73,7 +73,7 @@ impl RunAction for Retrieve
 		{
 			let retrieved = match match_condition.try_into()?
 			{
-				Some(condition) => Retr::retrieve(connection, &condition).await?,
+				Some(condition) => Retr::retrieve(connection, condition).await?,
 
 				#[rustfmt::skip]
 				_ => input::retrieve::<Retr, _, _>(
@@ -153,11 +153,11 @@ impl RunAction for Retrieve
 
 					let exchange_rates_fut = ExchangeRates::new().map_ok(Some);
 					let (contact_information, employer) = futures::try_join!(
-						CAdapter::retrieve(&connection, &match_all_contacts).map_ok(|mut vec| {
+						CAdapter::retrieve(&connection, match_all_contacts).map_ok(|mut vec| {
 							vec.sort_by(|lhs, rhs| lhs.label.cmp(&rhs.label));
 							vec
 						}),
-						OAdapter::retrieve(&connection, &match_employer)
+						OAdapter::retrieve(&connection, match_employer)
 							.and_then(|mut vec| future::ready(vec.pop().ok_or(sqlx::Error::RowNotFound))),
 					)?;
 
@@ -184,7 +184,7 @@ impl RunAction for Retrieve
 						let output_dir = output_dir.as_ref();
 
 						async move {
-							let timesheets_fut = TAdapter::retrieve(connection, &match_condition)
+							let timesheets_fut = TAdapter::retrieve(connection, match_condition)
 								.map_ok(|mut v| {
 									v.sort_by(|lhs, rhs| lhs.time_begin.cmp(&rhs.time_begin));
 									v

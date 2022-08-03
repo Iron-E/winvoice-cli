@@ -10,7 +10,7 @@ use clinvoice_adapter::{
 	},
 	Deletable,
 };
-use clinvoice_config::{Config, Error};
+use clinvoice_config::Config;
 use clinvoice_schema::{chrono::Utc, ContactKind, Invoice, InvoiceDate};
 use sqlx::{Database, Executor, Pool, Transaction};
 
@@ -62,9 +62,12 @@ impl RunAction for Create
 					)
 					.await
 					.map(ContactKind::Address)?,
+
 					(_, true, _) => ContactKind::Email(info),
+
 					(.., true) => ContactKind::Phone(info),
-					_ => ContactKind::Other(info),
+
+					(false, false, false) => ContactKind::Other(info),
 				};
 
 				let created = CAdapter::create(&connection, kind, label).await?;
@@ -122,8 +125,7 @@ impl RunAction for Create
 					false => MatchArgs::from(client).try_into()?,
 					_ => config
 						.organizations
-						.employer_id
-						.ok_or_else(|| Error::NotConfigured("employer_id".into(), "organizations".into()))
+						.employer_id_or_err()
 						.map(|id| Some(id.into()))?,
 				};
 
@@ -256,11 +258,7 @@ impl RunAction for Create
 				let match_employee = match default_employee
 				{
 					false => MatchArgs::from(employee).try_into()?,
-					_ => config
-						.employees
-						.id
-						.ok_or_else(|| Error::NotConfigured("id".into(), "employees".into()))
-						.map(|id| Some(id.into()))?,
+					_ => config.employees.id_or_err().map(|id| Some(id.into()))?,
 				};
 
 				let employee = input::select_one_retrieved::<EAdapter, _, _>(

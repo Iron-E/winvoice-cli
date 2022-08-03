@@ -14,7 +14,7 @@ use clinvoice_adapter::{
 	Deletable,
 	Retrievable,
 };
-use clinvoice_config::{Config, Error};
+use clinvoice_config::Config;
 use clinvoice_match::{MatchOrganization, MatchTimesheet};
 use clinvoice_schema::{chrono::Utc, InvoiceDate};
 use futures::{future, stream, TryFutureExt, TryStreamExt};
@@ -106,11 +106,7 @@ impl RunAction for Retrieve
 				let match_condition = match default
 				{
 					false => self.match_args.try_into()?,
-					_ => config
-						.employees
-						.id
-						.ok_or_else(|| Error::NotConfigured("id".into(), "employees".into()))
-						.map(|id| Some(id.into()))?,
+					_ => config.employees.id_or_err().map(|id| Some(id.into()))?,
 				};
 
 				let retrieved =
@@ -145,11 +141,8 @@ impl RunAction for Retrieve
 					let match_all_contacts = Default::default();
 					let match_employer = config
 						.organizations
-						.employer_id
-						.map(MatchOrganization::from)
-						.ok_or_else(|| {
-							Error::NotConfigured("employer_id".into(), "organizations".into())
-						})?;
+						.employer_id_or_err()
+						.map(MatchOrganization::from)?;
 
 					let exchange_rates_fut = ExchangeRates::new().map_ok(Some);
 					let (contact_information, employer) = futures::try_join!(
@@ -226,8 +219,7 @@ impl RunAction for Retrieve
 					false => self.match_args.try_into()?,
 					_ => config
 						.organizations
-						.employer_id
-						.ok_or_else(|| Error::NotConfigured("employer_id".into(), "organizations".into()))
+						.employer_id_or_err()
 						.map(|id| Some(id.into()))?,
 				};
 

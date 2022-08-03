@@ -13,15 +13,8 @@ use clinvoice_adapter::{
 	Deletable,
 	Updatable,
 };
-use clinvoice_config::{Config, Error};
-use clinvoice_match::{
-	MatchEmployee,
-	MatchInvoice,
-	MatchJob,
-	MatchOption,
-	MatchOrganization,
-	MatchTimesheet,
-};
+use clinvoice_config::Config;
+use clinvoice_match::{MatchInvoice, MatchJob, MatchOption, MatchTimesheet};
 use clinvoice_schema::{ContactKind, RestorableSerde};
 use futures::{stream, Future, TryStreamExt};
 use serde::{de::DeserializeOwned, Serialize};
@@ -114,9 +107,10 @@ impl RunAction for Update
 		{
 			UpdateCommand::Contact =>
 			{
+				let match_condition = self.match_args.try_into()?;
 				let mut selected = input::select_retrieved::<CAdapter, _, _>(
 					&connection,
-					None,
+					match_condition,
 					"Query the Contacts to update",
 				)
 				.await?;
@@ -148,11 +142,31 @@ impl RunAction for Update
 
 				update::<CAdapter, _>(&connection, &mut selected).await?;
 			},
+
+			UpdateCommand::Employee { default } =>
+			{
+				let match_condition = match default
+				{
+					false => self.match_args.try_into()?,
+					_ => config.employees.id_or_err().map(|id| Some(id.into()))?,
+				};
+
+				let mut selected = input::select_retrieved::<EAdapter, _, _>(
+					&connection,
+					match_condition,
+					"Query the Employees to update",
+				)
+				.await?;
+
+				update::<EAdapter, _>(&connection, &mut selected).await?;
+			},
+
 			UpdateCommand::Expense =>
 			{
+				let match_condition = self.match_args.try_into()?;
 				let mut selected = input::select_retrieved::<XAdapter, _, _>(
 					&connection,
-					None,
+					match_condition,
 					"Query the Expenses to update",
 				)
 				.await?;
@@ -180,32 +194,13 @@ impl RunAction for Update
 
 				update::<XAdapter, _>(&connection, &mut selected).await?;
 			},
-			UpdateCommand::Employee { default } =>
-			{
-				let match_condition = default
-					.then(|| {
-						config
-							.employees
-							.id
-							.map(MatchEmployee::from)
-							.ok_or_else(|| Error::NotConfigured("id".into(), "employees".into()))
-					})
-					.transpose()?;
 
-				let mut selected = input::select_retrieved::<EAdapter, _, _>(
-					&connection,
-					match_condition,
-					"Query the Employees to update",
-				)
-				.await?;
-
-				update::<EAdapter, _>(&connection, &mut selected).await?;
-			},
 			UpdateCommand::Location =>
 			{
+				let match_condition = self.match_args.try_into()?;
 				let mut selected = input::select_retrieved::<LAdapter, _, _>(
 					&connection,
-					None,
+					match_condition,
 					"Query the Locations to update",
 				)
 				.await?;
@@ -239,27 +234,35 @@ impl RunAction for Update
 
 				update::<LAdapter, _>(&connection, &mut selected).await?;
 			},
+
 			UpdateCommand::Job {
 				close,
 				invoice_paid,
 				reopen,
 			} =>
 			{
-				#[rustfmt::skip]
+				let match_condition = match (close || reopen, invoice_paid)
+				{
+					#[rustfmt::skip]
+					(true, _) => Some(MatchJob {
+						date_close: close.then_some(MatchOption::None).unwrap_or_else(MatchOption::some),
+						..Default::default()
+					}),
+
+					(_, true) => Some(MatchJob {
+						invoice: MatchInvoice {
+							date_issued: MatchOption::some(),
+							..Default::default()
+						},
+						..Default::default()
+					}),
+
+					(false, false) => self.match_args.try_into()?,
+				};
+
 				let mut selected = input::select_retrieved::<JAdapter, _, _>(
 					&connection,
-					(close || reopen)
-						.then(|| MatchJob {
-							date_close: close.then_some(MatchOption::None).unwrap_or_else(MatchOption::some),
-							..Default::default()
-						})
-						.or_else(|| invoice_paid.then(|| MatchJob {
-							invoice: MatchInvoice {
-								date_issued: MatchOption::some(),
-								..Default::default()
-							},
-							..Default::default()
-						})),
+					match_condition,
 					"Query the Jobs to update",
 				)
 				.await?;
@@ -290,19 +293,17 @@ impl RunAction for Update
 
 				update::<JAdapter, _>(&connection, &mut selected).await?;
 			},
+
 			UpdateCommand::Organization { employer } =>
 			{
-				let match_condition = employer
-					.then(|| {
-						config
-							.organizations
-							.employer_id
-							.map(MatchOrganization::from)
-							.ok_or_else(|| {
-								Error::NotConfigured("employer_id".into(), "organizations".into())
-							})
-					})
-					.transpose()?;
+				let match_condition = match employer
+				{
+					false => self.match_args.try_into()?,
+					_ => config
+						.organizations
+						.employer_id_or_err()
+						.map(|id| Some(id.into()))?,
+				};
 
 				let mut selected = input::select_retrieved::<OAdapter, _, _>(
 					&connection,
@@ -333,15 +334,23 @@ impl RunAction for Update
 
 				update::<OAdapter, _>(&connection, &mut selected).await?;
 			},
+
 			UpdateCommand::Timesheet { restart, stop } =>
 			{
-				#[rustfmt::skip]
-				let mut selected = input::select_retrieved::<TAdapter, _, _>(
-					&connection,
-					(restart || stop).then(|| MatchTimesheet {
+				let match_condition = match restart || stop
+				{
+					false => self.match_args.try_into()?,
+
+					#[rustfmt::skip]
+					_ => Some(MatchTimesheet {
 						time_end: stop.then_some(MatchOption::None).unwrap_or_else(MatchOption::some),
 						..Default::default()
 					}),
+				};
+
+				let mut selected = input::select_retrieved::<TAdapter, _, _>(
+					&connection,
+					match_condition,
 					"Query the Timesheets to update",
 				)
 				.await?;

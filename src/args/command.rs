@@ -12,18 +12,18 @@ pub enum Command
 	/// `$EDITOR`.
 	Config,
 
-	/// `clinvoice create`
+	#[allow(missing_docs)]
 	Create(Create),
 
-	/// `clinvoice delete`
+	#[allow(missing_docs)]
 	Delete(Delete),
 
-	/// `clinvoice init`
+	#[allow(missing_docs)]
 	Init(Init),
 
-	/// `clinvoice retrieve`
+	#[allow(missing_docs)]
 	Retrieve(Retrieve),
 
-	/// `clinvoice update`
+	#[allow(missing_docs)]
 	Update(Update),
 }

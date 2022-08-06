@@ -38,8 +38,8 @@ impl Init
 				PgSchema::init(&mut connection).await?;
 			},
 
-			// NOTE: this is allowed because there may be additional adapters added later, and I want
-			//       to define this behavior now.
+			// NOTE: this is allowed because there may be additional adapters added later, and I
+			// want       to define this behavior now.
 			#[allow(unreachable_patterns)]
 			_ => return Err(Error::FeatureNotFound(store.adapter).into()),
 		};

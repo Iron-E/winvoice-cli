@@ -54,17 +54,12 @@ where
 	Prompt: AsRef<str>,
 {
 	let to_edit = yaml::to_string(&entity).map(|serialized| {
-		format!(
-			"# {}\n\n{serialized}",
-			prompt.as_ref().replace('\n', "\n# "),
-		)
+		format!("# {}\n\n{serialized}", prompt.as_ref().replace('\n', "\n# "),)
 	})?;
 
 	let maybe_edited = Editor::new().extension(".yaml").edit(&to_edit)?;
 
-	maybe_edited
-		.ok_or(Error::NotEdited)
-		.and_then(|edit| yaml::from_str(&edit).map_err(Error::from))
+	maybe_edited.ok_or(Error::NotEdited).and_then(|edit| yaml::from_str(&edit).map_err(Error::from))
 }
 
 /// [Edit](edit) an `entity`, and then [restore](clinvoice_schema::RestorableSerde) it.
@@ -146,10 +141,7 @@ where
 		return Ok(Vec::new());
 	}
 
-	MultiSelect::new()
-		.items(entities)
-		.with_prompt(prompt)
-		.interact()
+	MultiSelect::new().items(entities).with_prompt(prompt).interact()
 }
 
 /// `prompt` users to select one element from `entities`, returning it.
@@ -194,7 +186,8 @@ where
 		match selector.interact()
 		{
 			Err(e)
-				if e.kind() == io::ErrorKind::Other && e.to_string().contains("Quit not allowed") =>
+				if e.kind() == io::ErrorKind::Other &&
+					e.to_string().contains("Quit not allowed") =>
 			{
 				println!("Please select something, or press Ctrl+C to quit");
 			},
@@ -226,10 +219,8 @@ where
 		_ => retrieve::<Retr, _, _>(connection, prompt).await?,
 	};
 
-	let selected = select_one(
-		&retrieved,
-		format!("Select a {}", fmt::type_name::<Retr::Entity>()),
-	)?;
+	let selected =
+		select_one(&retrieved, format!("Select a {}", fmt::type_name::<Retr::Entity>()))?;
 
 	Ok(selected)
 }
@@ -257,10 +248,7 @@ where
 		_ => retrieve::<Retr, _, _>(connection, prompt).await?,
 	};
 
-	let selected = select(
-		&retrieved,
-		format!("Select the {}s", fmt::type_name::<Retr::Entity>()),
-	)?;
+	let selected = select(&retrieved, format!("Select the {}s", fmt::type_name::<Retr::Entity>()))?;
 
 	Ok(selected)
 }

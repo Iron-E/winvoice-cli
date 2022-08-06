@@ -18,7 +18,7 @@ use clinvoice_config::Config;
 use clinvoice_match::{MatchOrganization, MatchTimesheet};
 use clinvoice_schema::{chrono::Utc, InvoiceDate};
 use futures::{future, stream, TryFutureExt, TryStreamExt};
-use money2::ExchangeRates;
+use money2::{Exchange, ExchangeRates};
 use serde::{de::DeserializeOwned, Serialize};
 use sqlx::{Database, Executor, Pool};
 use tokio::fs;
@@ -98,10 +98,7 @@ impl RunAction for Retrieve
 				retrieve::<CAdapter, _, _>(&connection, self.match_args, true).await?;
 			},
 
-			RetrieveCommand::Employee {
-				default,
-				set_default,
-			} =>
+			RetrieveCommand::Employee { default, set_default } =>
 			{
 				let match_condition = match default
 				{
@@ -127,11 +124,7 @@ impl RunAction for Retrieve
 				retrieve::<XAdapter, _, _>(&connection, self.match_args, true).await?;
 			},
 
-			RetrieveCommand::Job {
-				export,
-				format,
-				output_dir,
-			} =>
+			RetrieveCommand::Job { currency, export, format, output_dir } =>
 			{
 				let retrieved =
 					retrieve::<JAdapter, _, _>(&connection, self.match_args, !export).await?;
@@ -139,10 +132,8 @@ impl RunAction for Retrieve
 				if export
 				{
 					let match_all_contacts = Default::default();
-					let match_employer = config
-						.organizations
-						.employer_id_or_err()
-						.map(MatchOrganization::from)?;
+					let match_employer =
+						config.organizations.employer_id_or_err().map(MatchOrganization::from)?;
 
 					let exchange_rates_fut = ExchangeRates::new().map_ok(Some);
 					let (contact_information, employer) = futures::try_join!(
@@ -150,8 +141,9 @@ impl RunAction for Retrieve
 							vec.sort_by(|lhs, rhs| lhs.label.cmp(&rhs.label));
 							vec
 						}),
-						OAdapter::retrieve(&connection, match_employer)
-							.and_then(|mut vec| future::ready(vec.pop().ok_or(sqlx::Error::RowNotFound))),
+						OAdapter::retrieve(&connection, match_employer).and_then(|mut vec| {
+							future::ready(vec.pop().ok_or(sqlx::Error::RowNotFound))
+						}),
 					)?;
 
 					let exchange_rates = exchange_rates_fut.await?;
@@ -161,10 +153,7 @@ impl RunAction for Retrieve
 						.iter_mut()
 						.filter(|j| j.invoice.date.and_then(|d| d.paid).is_none())
 						.for_each(|j| {
-							j.invoice.date = Some(InvoiceDate {
-								issued: Utc::now(),
-								paid: None,
-							});
+							j.invoice.date = Some(InvoiceDate { issued: Utc::now(), paid: None });
 						});
 
 					#[rustfmt::skip]
@@ -188,8 +177,17 @@ impl RunAction for Retrieve
 
 							let timesheets = timesheets_fut.await?;
 
-							let exported =
-								format.export_job(&j, contact_information, exchange_rates, employer, &timesheets);
+							let exported = format.export_job(
+								&match exchange_rates
+								{
+									Some(r) => j.exchange(currency, r),
+									_ => j,
+								},
+								contact_information,
+								exchange_rates,
+								employer,
+								&timesheets,
+							);
 
 							match output_dir
 							{
@@ -209,18 +207,12 @@ impl RunAction for Retrieve
 				retrieve::<LAdapter, _, _>(&connection, self.match_args, true).await?;
 			},
 
-			RetrieveCommand::Organization {
-				employer,
-				set_employer,
-			} =>
+			RetrieveCommand::Organization { employer, set_employer } =>
 			{
 				let match_condition = match employer
 				{
 					false => self.match_args.try_into()?,
-					_ => config
-						.organizations
-						.employer_id_or_err()
-						.map(|id| Some(id.into()))?,
+					_ => config.organizations.employer_id_or_err().map(|id| Some(id.into()))?,
 				};
 
 				let retrieved =

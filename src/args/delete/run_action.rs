@@ -81,7 +81,10 @@ impl RunAction for Delete
 			DeleteCommand::Expense => del::<XAdapter, _, _>(&connection, self.match_args).await,
 			DeleteCommand::Job => del::<JAdapter, _, _>(&connection, self.match_args).await,
 			DeleteCommand::Location => del::<LAdapter, _, _>(&connection, self.match_args).await,
-			DeleteCommand::Organization => del::<OAdapter, _, _>(&connection, self.match_args).await,
+			DeleteCommand::Organization =>
+			{
+				del::<OAdapter, _, _>(&connection, self.match_args).await
+			},
 			DeleteCommand::Timesheet => del::<TAdapter, _, _>(&connection, self.match_args).await,
 		}
 	}

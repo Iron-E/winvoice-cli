@@ -21,10 +21,7 @@ where
 /// The [`type_name`](any::type_name) without any leading module names.
 pub(crate) fn type_name<T>() -> &'static str
 {
-	any::type_name::<T>()
-		.split("::")
-		.last()
-		.expect("`T` should have a type name")
+	any::type_name::<T>().split("::").last().expect("`T` should have a type name")
 }
 
 #[cfg(test)]

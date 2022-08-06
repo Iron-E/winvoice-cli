@@ -98,13 +98,7 @@ pub enum CreateCommand
 	{
 		/// A path to a YAML file that contains a valid match condition/query/search for a
 		/// CLInvoice Organization.
-		#[clap(
-			group = "client-args",
-			long,
-			short,
-			value_name = "MATCH FILE",
-			value_parser
-		)]
+		#[clap(group = "client-args", long, short, value_name = "MATCH FILE", value_parser)]
 		client: Option<PathBuf>,
 
 		/// The date and time that work on the `Job` to create stopped.
@@ -113,20 +107,22 @@ pub enum CreateCommand
 		#[clap(long, requires("date-open"))]
 		date_close: Option<NaiveDateTime>,
 
-		/// The date and time that the `Job` to create's associated `Invoice` was issued to the `client`.
+		/// The date and time that the `Job` to create's associated `Invoice` was issued to the
+		/// `client`.
 		///
 		/// See --date-open for formatting information.
 		#[clap(long)]
 		date_invoice_issued: Option<NaiveDateTime>,
 
-		/// The date and time that the `Job` to create's associated `Invoice` was paid by the `client`.
+		/// The date and time that the `Job` to create's associated `Invoice` was paid by the
+		/// `client`.
 		///
 		/// See --date-open for formatting information.
 		#[clap(long, requires("date-invoice-issued"))]
 		date_invoice_paid: Option<NaiveDateTime>,
 
-		/// The date and time that work on the `Job` to create started. Defaults to the current date
-		/// and time.
+		/// The date and time that work on the `Job` to create started. Defaults to the current
+		/// date and time.
 		///
 		/// e.g. December 12th, 2022 at 1:30:00pm is "2022-12-31T13:30:00"
 		#[clap(long)]
@@ -200,20 +196,14 @@ pub enum CreateCommand
 	/// See the documentation for more information about `Timesheet`s.
 	Timesheet
 	{
-		/// Set the one who is working on the `Timesheet` to the `Employee` specified by the `id` field of
-		/// the `[employees]` section of the CLInvoice config.
+		/// Set the one who is working on the `Timesheet` to the `Employee` specified by the `id`
+		/// field of the `[employees]` section of the CLInvoice config.
 		#[clap(action, group = "employee-args", long, short)]
 		default_employee: bool,
 
 		/// A path to a YAML file that contains a valid match condition/query/search for a
 		/// CLInvoice Employee.
-		#[clap(
-			group = "employee-args",
-			long,
-			short,
-			value_name = "MATCH FILE",
-			value_parser
-		)]
+		#[clap(group = "employee-args", long, short, value_name = "MATCH FILE", value_parser)]
 		employee: Option<PathBuf>,
 
 		/// A path to a YAML file that contains a valid match condition/query/search for a

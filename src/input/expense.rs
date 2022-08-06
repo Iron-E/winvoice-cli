@@ -66,7 +66,8 @@ fn delete_menu(expenses: &mut Vec<(String, Money, String)>) -> Result<()>
 			"Select Expenses to remove",
 		)?;
 
-		// PERF: we use `rev` to prevent `expenses` from having to shift so many indexes after each removal
+		// PERF: we use `rev` to prevent `expenses` from having to shift so many indexes after each
+		// removal
 		to_remove_indices.into_iter().rev().for_each(|i| {
 			expenses.remove(i);
 		});

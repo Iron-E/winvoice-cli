@@ -59,9 +59,11 @@ impl RunAction for Update
 			TryFn: Fn(&'input mut Input) -> TryFnFut,
 			TryFnFut: Future<Output = DynResult<()>>,
 		{
-			stream::iter(iter.filter_map(move |item| input::confirm_then_some(prompt(item), Ok(item))))
-				.try_for_each(try_fn)
-				.await
+			stream::iter(
+				iter.filter_map(move |item| input::confirm_then_some(prompt(item), Ok(item))),
+			)
+			.try_for_each(try_fn)
+			.await
 		}
 
 		/// Gets the first line of any given [`&str`] `s`.
@@ -72,12 +74,20 @@ impl RunAction for Update
 
 		/// A generic deletion function which works for any of the provided adapters in the outer
 		/// function, as they all implement `Updatable` at the minimum.
-		async fn update<Upd, Db>(connection: &Pool<Db>, entities: &mut [Upd::Entity]) -> DynResult<()>
+		async fn update<Upd, Db>(
+			connection: &Pool<Db>,
+			entities: &mut [Upd::Entity],
+		) -> DynResult<()>
 		where
 			Db: Database,
 			Upd: Updatable<Db = Db>,
-			Upd::Entity:
-				Clone + DeserializeOwned + Display + Identifiable + RestorableSerde + Serialize + Sync,
+			Upd::Entity: Clone
+				+ DeserializeOwned
+				+ Display
+				+ Identifiable
+				+ RestorableSerde
+				+ Serialize
+				+ Sync,
 			for<'connection> &'connection mut Transaction<'connection, Db>:
 				Executor<'connection, Database = Db>,
 		{
@@ -93,11 +103,8 @@ impl RunAction for Update
 
 			let mut transaction = connection.begin().await?;
 
-			Upd::update(
-				&mut transaction,
-				entities.iter().inspect(|e| Update::report_updated(*e)),
-			)
-			.await?;
+			Upd::update(&mut transaction, entities.iter().inspect(|e| Update::report_updated(*e)))
+				.await?;
 
 			transaction.commit().await?;
 			Ok(())
@@ -235,11 +242,7 @@ impl RunAction for Update
 				update::<LAdapter, _>(&connection, &mut selected).await?;
 			},
 
-			UpdateCommand::Job {
-				close,
-				invoice_paid,
-				reopen,
-			} =>
+			UpdateCommand::Job { close, invoice_paid, reopen } =>
 			{
 				let match_condition = match (close || reopen, invoice_paid)
 				{
@@ -299,10 +302,7 @@ impl RunAction for Update
 				let match_condition = match employer
 				{
 					false => self.match_args.try_into()?,
-					_ => config
-						.organizations
-						.employer_id_or_err()
-						.map(|id| Some(id.into()))?,
+					_ => config.organizations.employer_id_or_err().map(|id| Some(id.into()))?,
 				};
 
 				let mut selected = input::select_retrieved::<OAdapter, _, _>(

@@ -45,13 +45,7 @@ impl RunAction for Create
 	{
 		match self.command
 		{
-			CreateCommand::Contact {
-				label,
-				address,
-				email,
-				phone,
-				info,
-			} =>
+			CreateCommand::Contact { label, address, email, phone, info } =>
 			{
 				let kind = match (address, email, phone)
 				{
@@ -74,22 +68,13 @@ impl RunAction for Create
 				Self::report_created(&created);
 			},
 
-			CreateCommand::Employee {
-				name,
-				status,
-				title,
-			} =>
+			CreateCommand::Employee { name, status, title } =>
 			{
 				let created = EAdapter::create(&connection, name, status, title).await?;
 				Self::report_created(&created);
 			},
 
-			CreateCommand::Expense {
-				category,
-				cost,
-				description,
-				timesheet,
-			} =>
+			CreateCommand::Expense { category, cost, description, timesheet } =>
 			{
 				let match_timesheet = MatchArgs::from(timesheet).try_into()?;
 				let selected = input::select_one_retrieved::<TAdapter, _, _>(
@@ -123,10 +108,7 @@ impl RunAction for Create
 				let match_client = match employer
 				{
 					false => MatchArgs::from(client).try_into()?,
-					_ => config
-						.organizations
-						.employer_id_or_err()
-						.map(|id| Some(id.into()))?,
+					_ => config.organizations.employer_id_or_err().map(|id| Some(id.into()))?,
 				};
 
 				let selected = input::select_one_retrieved::<OAdapter, _, _>(
@@ -145,7 +127,7 @@ impl RunAction for Create
 					Invoice {
 						date: date_invoice_issued.map(|issued| InvoiceDate {
 							issued: utils::naive_local_datetime_to_utc(issued),
-							paid: date_invoice_paid.map(utils::naive_local_datetime_to_utc),
+							paid:   date_invoice_paid.map(utils::naive_local_datetime_to_utc),
 						}),
 						hourly_rate,
 					},
@@ -157,17 +139,13 @@ impl RunAction for Create
 				Self::report_created(&created);
 			},
 
-			CreateCommand::Location {
-				inside,
-				outside,
-				names,
-			} =>
+			CreateCommand::Location { inside, outside, names } =>
 			{
 				let mut names_reversed = names.into_iter().rev();
 
-				let final_name = names_reversed
-					.next()
-					.expect("clap config should have ensured that `names` has length of at least one");
+				let final_name = names_reversed.next().expect(
+					"clap config should have ensured that `names` has length of at least one",
+				);
 
 				let outside_of_final = match inside
 				{
@@ -186,7 +164,8 @@ impl RunAction for Create
 
 				// TODO: convert to `try_fold` after `stream`s merge to `std`? {{{2
 				// TODO: use `inspect` after rust-lang/rust#91345
-				let mut l = LAdapter::create(&mut *transaction, final_name, outside_of_final).await?;
+				let mut l =
+					LAdapter::create(&mut *transaction, final_name, outside_of_final).await?;
 				Self::report_created(&l);
 				for n in names_reversed
 				{

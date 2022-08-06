@@ -2,8 +2,8 @@
 //!
 //! # Motivation
 //!
-//! There is a lack of programs for CLI invoice maintenance, especially those which are able to export
-//! invoices in a presentable manner.
+//! There is a lack of programs for CLI invoice maintenance, especially those which are able to
+//! export invoices in a presentable manner.
 //!
 //! # Installation
 //!

@@ -184,7 +184,6 @@ impl RunAction for Retrieve
 									_ => j,
 								},
 								contact_information,
-								exchange_rates,
 								employer,
 								&timesheets,
 							);

@@ -166,15 +166,16 @@ checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
 name = "chrono"
-version = "0.4.19"
+version = "0.4.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "670ad68c9088c2a963aaa298cb369688cf3f9465ce5e2d4ca10e6e0098a1ce73"
+checksum = "6127248204b9aba09a362f6c930ef6a78f2c1b2215f8a7b398c06e1083f17af0"
 dependencies = [
- "libc",
+ "js-sys",
  "num-integer",
  "num-traits",
  "serde",
  "time 0.1.44",
+ "wasm-bindgen",
  "winapi",
 ]
 
@@ -241,7 +242,7 @@ dependencies = [
  "dialoguer",
  "futures",
  "humantime",
- "money2 0.8.0",
+ "money2 0.8.3",
  "pretty_assertions",
  "serde",
  "serde_yaml",
@@ -255,7 +256,7 @@ dependencies = [
 [[package]]
 name = "clinvoice-adapter"
 version = "0.18.0"
-source = "git+https://github.com/Iron-E/clinvoice-adapter?branch=release/0.18#44a5d620b7c0ebf8c7d5c56e2e3ca6bbb526de2c"
+source = "git+https://github.com/Iron-E/clinvoice-adapter?branch=release/0.18#fe484a26f6dc7d0ac72b48397787ec4e993f7604"
 dependencies = [
  "async-trait",
  "clinvoice-match",
@@ -267,7 +268,7 @@ dependencies = [
 [[package]]
 name = "clinvoice-adapter-postgres"
 version = "0.8.0"
-source = "git+https://github.com/Iron-E/clinvoice-adapter-postgres?branch=release/0.8#223b62d0e3033b70aced4236a395a5d2f17e82c3"
+source = "git+https://github.com/Iron-E/clinvoice-adapter-postgres?branch=release/0.8#d935d4325bf3df41e0d4cf24f6eaba617fa80364"
 dependencies = [
  "async-trait",
  "clinvoice-adapter",
@@ -275,7 +276,7 @@ dependencies = [
  "clinvoice-schema 0.11.0",
  "futures",
  "humantime",
- "money2 0.8.0",
+ "money2 0.8.3",
  "shellexpand",
  "sqlx",
  "thiserror",
@@ -284,7 +285,7 @@ dependencies = [
 [[package]]
 name = "clinvoice-config"
 version = "0.7.4"
-source = "git+https://github.com/Iron-E/clinvoice-config?branch=release/0.7#7f4cb43686e5449405d84ea7a29feac08d408daf"
+source = "git+https://github.com/Iron-E/clinvoice-config?branch=release/0.7#794c34fe68d01c6b98102f7de989d54d98dbcdcf"
 dependencies = [
  "clinvoice-schema 0.10.2",
  "dirs",
@@ -297,10 +298,9 @@ dependencies = [
 [[package]]
 name = "clinvoice-export"
 version = "0.2.0"
-source = "git+https://github.com/Iron-E/clinvoice-export?branch=release/0.2#bab1e6c988c0d93aac69bc4b8b1c995ef1f9954a"
+source = "git+https://github.com/Iron-E/clinvoice-export?branch=release/0.2#199c43e6d9f3548b519c2cf221fa1d4cfff9c101"
 dependencies = [
  "clinvoice-schema 0.11.0",
- "money2 0.8.0",
  "strum",
  "thiserror",
 ]
@@ -308,11 +308,11 @@ dependencies = [
 [[package]]
 name = "clinvoice-match"
 version = "0.8.0"
-source = "git+https://github.com/Iron-E/clinvoice-match?branch=release/0.8#e4dc86e866c05159f244d7c1baaee9163e797040"
+source = "git+https://github.com/Iron-E/clinvoice-match?branch=release/0.8#f25f1a402680f6c4086c0816c9fb91b736b5fb48"
 dependencies = [
  "clinvoice-schema 0.11.0",
  "humantime-serde",
- "money2 0.8.0",
+ "money2 0.8.3",
  "serde",
  "thiserror",
 ]
@@ -334,13 +334,13 @@ dependencies = [
 [[package]]
 name = "clinvoice-schema"
 version = "0.11.0"
-source = "git+https://github.com/Iron-E/clinvoice-schema?branch=release/0.11#f42c41a5ebb549a7b9b1c873d150fb868c5dba26"
+source = "git+https://github.com/Iron-E/clinvoice-schema?branch=release/0.11#c051f5277d0e632ae5b1ff4f0a6183fa3c3c482e"
 dependencies = [
  "chrono",
  "futures",
  "humantime-serde",
  "lazy_static",
- "money2 0.8.0",
+ "money2 0.8.3",
  "serde",
  "thiserror",
 ]
@@ -492,31 +492,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "dirs-next"
-version = "2.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b98cf8ebf19c3d1b223e151f99a4f9f0690dca41414773390fc824184ac833e1"
-dependencies = [
- "cfg-if",
- "dirs-sys-next",
-]
-
-[[package]]
 name = "dirs-sys"
 version = "0.3.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1b1d1d91c932ef41c0f2663aa8b0ca0342d444d842c06914aa0a7e352d0bada6"
-dependencies = [
- "libc",
- "redox_users",
- "winapi",
-]
-
-[[package]]
-name = "dirs-sys-next"
-version = "0.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4ebda144c4fe02d1f7ea1a7d9641b6fc6b580adcfa024ae48797ecdeb6825b4d"
 dependencies = [
  "libc",
  "redox_users",
@@ -1077,9 +1056,9 @@ dependencies = [
 
 [[package]]
 name = "money2"
-version = "0.8.0"
+version = "0.8.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8f2ddc54738a5640d883658627ca8bc6486d5317b20f85545ebd44d3977b43e0"
+checksum = "6603ec0d0e21678e41e545f7223366b346493995cef70a0e0dd1a6e2f3082c1d"
 dependencies = [
  "chrono",
  "futures",
@@ -1491,9 +1470,9 @@ dependencies = [
 
 [[package]]
 name = "rust_decimal"
-version = "1.25.0"
+version = "1.26.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "34a3bb58e85333f1ab191bf979104b586ebd77475bc6681882825f4532dfe87c"
+checksum = "ee9164faf726e4f3ece4978b25ca877ddc6802fa77f38cdccb32c7f805ecd70c"
 dependencies = [
  "arrayvec",
  "num-traits",
@@ -1664,11 +1643,11 @@ dependencies = [
 
 [[package]]
 name = "shellexpand"
-version = "2.1.0"
+version = "2.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "83bdb7831b2d85ddf4a7b148aa19d0587eddbe8671a436b7bd1182eaad0f2829"
+checksum = "7ccc8076840c4da029af4f87e4e8daeb0fca6b87bbb02e10cb60b791450e11e4"
 dependencies = [
- "dirs-next",
+ "dirs",
 ]
 
 [[package]]

@@ -148,7 +148,7 @@ pub enum CreateCommand
 		increment: Option<Duration>,
 
 		/// The `notes` of the `Job` to create.
-		#[clap(long, short)]
+		#[clap(default_value_t, long, short)]
 		notes: String,
 
 		/// The `objectives` of the `Job` to create.

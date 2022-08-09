@@ -124,12 +124,13 @@ impl RunAction for Retrieve
 				retrieve::<XAdapter, _, _>(&connection, self.match_args, true).await?;
 			},
 
-			RetrieveCommand::Job { currency, export, format, output_dir } =>
+			RetrieveCommand::Job { currency, export, output_dir } =>
 			{
 				let retrieved =
-					retrieve::<JAdapter, _, _>(&connection, self.match_args, !export).await?;
+					retrieve::<JAdapter, _, _>(&connection, self.match_args, export.is_none())
+						.await?;
 
-				if export
+				if let Some(format) = export
 				{
 					let match_all_contacts = Default::default();
 					let match_employer =

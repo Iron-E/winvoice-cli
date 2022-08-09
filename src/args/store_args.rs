@@ -8,7 +8,7 @@ pub struct StoreArgs
 	/// A key from the `[stores]` section of the [configuration file](clinvoice_config::Config).
 	#[clap(
 		default_value = "default",
-		help = "A key from the `[stores]` section of the configuration file.",
+		help = "A key from the `[stores]` section of the configuration file",
 		long,
 		short
 	)]

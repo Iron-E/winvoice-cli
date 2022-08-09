@@ -19,5 +19,5 @@ pub(super) fn report_action<Actioned>(action: &str, actioned: &Actioned)
 where
 	Actioned: Identifiable,
 {
-	println!("{} {} has been {action}.", fmt::type_name::<Actioned>(), actioned.id(),);
+	println!("{} {} has been {action}", fmt::type_name::<Actioned>(), actioned.id(),);
 }

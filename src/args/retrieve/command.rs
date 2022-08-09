@@ -33,19 +33,15 @@ pub enum RetrieveCommand
 	/// Retrieve `Job`s from the store (-s) specified.
 	Job
 	{
-		/// Provide the curency to use when exporting.
+		/// Provide the currency to use when exporting
 		#[clap(default_value_t, long, short, requires("export"))]
 		currency: Currency,
 
-		/// Select a number of closed `Job`s and export them to a file.
-		#[clap(action, long, short)]
-		export: bool,
-
-		/// What file format to --export to.
+		/// Select a number of closed `Job`s and export them to a file of the specified format.
 		///
 		/// Supported formats are: markdown.
-		#[clap(default_value_t = Format::Markdown, long, short, requires("export"))]
-		format: Format,
+		#[clap(long, short, value_name = "FORMAT")]
+		export: Option<Format>,
 
 		/// Which directory to --export files into.
 		#[clap(long, short, requires("export"), value_name = "DIR", value_parser)]

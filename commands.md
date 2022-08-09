@@ -55,7 +55,7 @@ clinvoice --store default
                                                    employee --default
                                                             --set-default
                                                    expense
-                                                   job --export --format markdown --output-dir path/to/dir
+                                                   job --export markdown --currency USD --output-dir path/to/dir
                                                    location
                                                    organization --employer
                                                                 --set-employer
@@ -66,10 +66,12 @@ clinvoice --store default
                                                  employee
                                                  expense
                                                  job --close
-                                                     --paid
+                                                     --invoice-issued
+                                                     --invoice-paid
                                                      --reopen
                                                  location
                                                  organization
-                                                 timesheet --restart
+                                                 timesheet
+                                                           --restart
                                                            --stop
 ```

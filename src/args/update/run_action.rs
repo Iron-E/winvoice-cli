@@ -242,9 +242,9 @@ impl RunAction for Update
 				update::<LAdapter, _>(&connection, &mut selected).await?;
 			},
 
-			UpdateCommand::Job { close, invoice_paid, reopen } =>
+			UpdateCommand::Job { close, invoice_issued, invoice_paid, reopen } =>
 			{
-				let match_condition = match (close || reopen, invoice_paid)
+				let match_condition = match (close || reopen, invoice_issued || invoice_paid)
 				{
 					#[rustfmt::skip]
 					(true, _) => Some(MatchJob {
@@ -254,7 +254,7 @@ impl RunAction for Update
 
 					(_, true) => Some(MatchJob {
 						invoice: MatchInvoice {
-							date_issued: MatchOption::some(),
+							date_issued: invoice_issued.then_some(MatchOption::None).unwrap_or_else(MatchOption::some),
 							..Default::default()
 						},
 						..Default::default()

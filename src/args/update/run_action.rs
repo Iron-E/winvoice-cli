@@ -252,6 +252,7 @@ impl RunAction for Update
 						..Default::default()
 					}),
 
+					#[rustfmt::skip]
 					(_, true) => Some(MatchJob {
 						invoice: MatchInvoice {
 							date_issued: invoice_issued.then_some(MatchOption::None).unwrap_or_else(MatchOption::some),

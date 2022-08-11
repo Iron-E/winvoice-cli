@@ -5,6 +5,8 @@ use clap::Subcommand as Clap;
 use clinvoice_schema::chrono::NaiveDateTime;
 use money2::Money;
 
+use crate::args::flag_or_argument::FlagOrArgument;
+
 /// Use CLInvoice to store new information.
 ///
 /// CLInvoice is capable of storing multiple kinds of information. This command has multiple
@@ -29,8 +31,20 @@ pub enum CreateCommand
 		label: String,
 
 		/// The `Contact` to create is the address of a physical `Location`.
-		#[clap(action, groups = &["content", "kind"], long, short)]
-		address: bool,
+		///
+		/// You may *optionally* provide a path to a YAML file that contains a valid match
+		/// condition/query/search for a CLInvoice location.
+		#[clap(
+			default_missing_value = stringify!(true),
+			default_value_t,
+			groups = &["content", "kind"],
+			hide_default_value = true,
+			long,
+			short,
+			value_name = "(OPTIONAL) FILE",
+			value_parser
+		)]
+		address: FlagOrArgument<PathBuf>,
 
 		/// The `Contact` to create is an email address.
 		#[clap(action, group = "kind", long, short)]
@@ -42,10 +56,10 @@ pub enum CreateCommand
 
 		/// The information which is represented by the --label.
 		#[clap(
-			default_value_if("address", Some("true"), Some("")),
+			default_value_if("address", None, Some("")),
 			group = "content",
-			required_if_eq("email", "true"),
-			required_if_eq("phone", "true")
+			required_if_eq("email", stringify!(true)),
+			required_if_eq("phone", stringify!(true))
 		)]
 		info: String,
 	},
@@ -87,7 +101,7 @@ pub enum CreateCommand
 
 		/// A path to a YAML file that contains a valid match condition/query/search for a
 		/// CLInvoice Timesheet.
-		#[clap(long, short, value_name = "MATCH FILE", value_parser)]
+		#[clap(long, short, value_name = "FILE", value_parser)]
 		timesheet: Option<PathBuf>,
 	},
 
@@ -98,7 +112,7 @@ pub enum CreateCommand
 	{
 		/// A path to a YAML file that contains a valid match condition/query/search for a
 		/// CLInvoice Organization.
-		#[clap(group = "client-args", long, short, value_name = "MATCH FILE", value_parser)]
+		#[clap(group = "client-args", long, short, value_name = "FILE", value_parser)]
 		client: Option<PathBuf>,
 
 		/// The date and time that work on the `Job` to create stopped.
@@ -164,12 +178,34 @@ pub enum CreateCommand
 	Location
 	{
 		/// Indicate that final location <NAME> specified is inside another `Location`.
-		#[clap(action, long, short)]
-		inside: bool,
+		///
+		/// You may *optionally* provide a path to a YAML file that contains a valid match
+		/// condition/query/search for a CLInvoice location.
+		#[clap(
+			default_missing_value = stringify!(true),
+			default_value_t,
+			hide_default_value = true,
+			long,
+			short,
+			value_name = "(OPTIONAL) FILE",
+			value_parser
+		)]
+		inside: FlagOrArgument<PathBuf>,
 
 		/// Indicate that first location <NAME> specified is outside another `Location`.
-		#[clap(action, long, short)]
-		outside: bool,
+		///
+		/// You may *optionally* provide a path to a YAML file that contains a valid match
+		/// condition/query/search for a CLInvoice location.
+		#[clap(
+			default_missing_value = stringify!(true),
+			default_value_t,
+			hide_default_value = true,
+			long,
+			short,
+			value_name = "(OPTIONAL) FILE",
+			value_parser
+		)]
+		outside: FlagOrArgument<PathBuf>,
 
 		/// The `name`s of the locations which will be created, in order of innermost to outermost.
 		#[clap(required(true))]
@@ -183,7 +219,7 @@ pub enum CreateCommand
 	{
 		/// A path to a YAML file that contains a valid match condition/query/search for a
 		/// CLInvoice Organization.
-		#[clap(long, short, value_name = "MATCH FILE", value_parser)]
+		#[clap(long, short, value_name = "FILE", value_parser)]
 		location: Option<PathBuf>,
 
 		/// The `name` of the `Organization` to create.
@@ -203,12 +239,12 @@ pub enum CreateCommand
 
 		/// A path to a YAML file that contains a valid match condition/query/search for a
 		/// CLInvoice Employee.
-		#[clap(group = "employee-args", long, short, value_name = "MATCH FILE", value_parser)]
+		#[clap(group = "employee-args", long, short, value_name = "FILE", value_parser)]
 		employee: Option<PathBuf>,
 
 		/// A path to a YAML file that contains a valid match condition/query/search for a
 		/// CLInvoice Job.
-		#[clap(long, short, value_name = "MATCH FILE", value_parser)]
+		#[clap(long, short, value_name = "FILE", value_parser)]
 		job: Option<PathBuf>,
 
 		/// The `time_begin` of the `Timesheet` to create. Defaults to the current date and time.

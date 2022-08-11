@@ -47,20 +47,22 @@ impl RunAction for Create
 		{
 			CreateCommand::Contact { label, address, email, phone, info } =>
 			{
-				let kind = match (address, email, phone)
+				let kind = match (address.flag(), email, phone)
 				{
-					(true, ..) => input::select_one_retrieved::<LAdapter, _, _>(
-						&connection,
-						None,
-						"Query the Location of this address",
-					)
-					.await
-					.map(ContactKind::Address)?,
+					(true, ..) =>
+					{
+						let match_condition = MatchArgs::from(address.argument()).try_into()?;
+						input::select_one_retrieved::<LAdapter, _, _>(
+							&connection,
+							match_condition,
+							"Query the Location of this address",
+						)
+						.await
+						.map(ContactKind::Address)?
+					},
 
 					(_, true, _) => ContactKind::Email(info),
-
 					(.., true) => ContactKind::Phone(info),
-
 					(false, false, false) => ContactKind::Other(info),
 				};
 
@@ -147,15 +149,19 @@ impl RunAction for Create
 					"clap config should have ensured that `names` has length of at least one",
 				);
 
-				let outside_of_final = match inside
+				let outside_of_final = match inside.flag()
 				{
-					true => input::select_one_retrieved::<LAdapter, _, _>(
-						&connection,
-						None,
-						format!("Query the Location outside of {final_name}"),
-					)
-					.await
-					.map(Some)?,
+					true =>
+					{
+						let match_condition = MatchArgs::from(inside.argument()).try_into()?;
+						input::select_one_retrieved::<LAdapter, _, _>(
+							&connection,
+							match_condition,
+							format!("Query the Location outside of {final_name}"),
+						)
+						.await
+						.map(Some)?
+					},
 					_ => None,
 				};
 
@@ -176,11 +182,12 @@ impl RunAction for Create
 
 				let created = l;
 
-				if outside
+				if outside.flag()
 				{
+					let match_condition = MatchArgs::from(outside.argument()).try_into()?;
 					let mut inside_locations = input::select_retrieved::<LAdapter, _, _>(
 						&connection,
-						None,
+						match_condition,
 						format!("Query Locations that are inside {created}"),
 					)
 					.await?;

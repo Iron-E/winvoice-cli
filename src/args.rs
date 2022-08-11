@@ -1,6 +1,7 @@
 mod command;
 mod create;
 mod delete;
+mod flag_or_argument;
 mod init;
 mod match_args;
 mod retrieve;

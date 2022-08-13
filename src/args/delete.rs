@@ -3,7 +3,7 @@ mod command;
 mod run_action;
 
 use clap::Args as Clap;
-use command::DeleteCommand;
+pub use command::DeleteCommand;
 
 use super::{match_args::MatchArgs, store_args::StoreArgs};
 use crate::utils::{self, Identifiable};

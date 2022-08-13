@@ -1,3 +1,6 @@
+#[cfg(test)]
+mod from;
+
 use clap::Args as Clap;
 use clinvoice_config::{Config, Error, Result, Store};
 

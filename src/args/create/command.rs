@@ -125,7 +125,7 @@ pub enum CreateCommand
 		/// `client`.
 		///
 		/// See --date-open for formatting information.
-		#[clap(long)]
+		#[clap(long, requires("date-close"))]
 		date_invoice_issued: Option<NaiveDateTime>,
 
 		/// The date and time that the `Job` to create's associated `Invoice` was paid by the

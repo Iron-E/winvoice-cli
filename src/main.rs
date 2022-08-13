@@ -124,9 +124,7 @@ use args::Args;
 use clap::Parser;
 use dyn_result::DynResult;
 
-/// # Summary
-///
-/// The main method.
+/// Interprets arguments `clinvoice` (if any) and executes the implied instruction.
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> DynResult<()>
 {

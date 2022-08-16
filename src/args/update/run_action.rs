@@ -15,13 +15,19 @@ use clinvoice_adapter::{
 };
 use clinvoice_config::Config;
 use clinvoice_match::{MatchInvoice, MatchJob, MatchOption, MatchTimesheet};
-use clinvoice_schema::{ContactKind, RestorableSerde};
+use clinvoice_schema::{chrono::Utc, ContactKind, InvoiceDate, RestorableSerde};
 use futures::{stream, Future, TryStreamExt};
 use serde::{de::DeserializeOwned, Serialize};
 use sqlx::{Database, Executor, Pool, Transaction};
 
 use super::{Update, UpdateCommand};
-use crate::{args::RunAction, fmt, input, utils::Identifiable, DynResult};
+use crate::{
+	args::RunAction,
+	fmt,
+	input,
+	utils::{self, Identifiable},
+	DynResult,
+};
 
 #[async_trait::async_trait(?Send)]
 impl RunAction for Update
@@ -244,26 +250,7 @@ impl RunAction for Update
 
 			UpdateCommand::Job { close, invoice_issued, invoice_paid, reopen } =>
 			{
-				let match_condition = match (close || reopen, invoice_issued || invoice_paid)
-				{
-					#[rustfmt::skip]
-					(true, _) => Some(MatchJob {
-						date_close: close.then_some(MatchOption::None).unwrap_or_else(MatchOption::some),
-						..Default::default()
-					}),
-
-					#[rustfmt::skip]
-					(_, true) => Some(MatchJob {
-						invoice: MatchInvoice {
-							date_issued: invoice_issued.then_some(MatchOption::None).unwrap_or_else(MatchOption::some),
-							..Default::default()
-						},
-						..Default::default()
-					}),
-
-					(false, false) => self.match_args.try_into()?,
-				};
-
+				let match_condition = self.match_args.try_into()?;
 				let mut selected = input::select_retrieved::<JAdapter, _, _>(
 					&connection,
 					match_condition,
@@ -295,7 +282,56 @@ impl RunAction for Update
 					},
 				).await?;
 
-				update::<JAdapter, _>(&connection, &mut selected).await?;
+				if !(close.flag() || invoice_issued.flag() || invoice_paid.flag() || reopen)
+				{
+					return update::<JAdapter, _>(&connection, &mut selected).await;
+				}
+
+				let close_arg = close.flag().then(|| {
+					close.argument().map_or_else(Utc::now, utils::naive_local_datetime_to_utc)
+				});
+
+				let issued_arg = invoice_issued.flag().then(|| {
+					invoice_issued
+						.argument()
+						.map_or_else(Utc::now, utils::naive_local_datetime_to_utc)
+				});
+
+				let paid_arg = invoice_paid.flag().then(|| {
+					invoice_paid
+						.argument()
+						.map_or_else(Utc::now, utils::naive_local_datetime_to_utc)
+				});
+
+				selected.iter_mut().for_each(|s| {
+					if reopen
+					{
+						s.date_close = None;
+						s.invoice.date = None;
+						return;
+					}
+
+					if close_arg.is_some()
+					{
+						s.date_close = close_arg;
+					}
+
+					s.invoice.date =
+						issued_arg.map(|arg| InvoiceDate { issued: arg, paid: None });
+
+					s.invoice.date = paid_arg
+						.zip(s.invoice.date)
+						.map(|(arg, date)| InvoiceDate { paid: Some(arg), ..date });
+				});
+
+				let mut transaction = connection.begin().await?;
+				JAdapter::update(
+					&mut transaction,
+					selected.iter().inspect(|e| Self::report_updated(*e)),
+				)
+				.await?;
+
+				transaction.commit().await?;
 			},
 
 			UpdateCommand::Organization { employer } =>
@@ -338,17 +374,7 @@ impl RunAction for Update
 
 			UpdateCommand::Timesheet { restart, stop } =>
 			{
-				let match_condition = match restart || stop
-				{
-					false => self.match_args.try_into()?,
-
-					#[rustfmt::skip]
-					_ => Some(MatchTimesheet {
-						time_end: stop.then_some(MatchOption::None).unwrap_or_else(MatchOption::some),
-						..Default::default()
-					}),
-				};
-
+				let match_condition = self.match_args.try_into()?;
 				let mut selected = input::select_retrieved::<TAdapter, _, _>(
 					&connection,
 					match_condition,
@@ -407,7 +433,38 @@ impl RunAction for Update
 				)
 				.await?;
 
-				update::<TAdapter, _>(&connection, &mut selected).await?;
+				if !(restart.flag() || stop.flag())
+				{
+					return update::<TAdapter, _>(&connection, &mut selected).await;
+				}
+
+				let restart_arg = restart.flag().then(|| {
+					restart.argument().map_or_else(Utc::now, utils::naive_local_datetime_to_utc)
+				});
+
+				let stop_arg = stop.flag().then(|| {
+					stop.argument().map_or_else(Utc::now, utils::naive_local_datetime_to_utc)
+				});
+
+				selected.iter_mut().for_each(|s| {
+					if let Some(arg) = restart_arg
+					{
+						s.time_begin = arg;
+					}
+					else if stop_arg.is_some()
+					{
+						s.time_end = stop_arg;
+					}
+				});
+
+				let mut transaction = connection.begin().await?;
+				TAdapter::update(
+					&mut transaction,
+					selected.iter().inspect(|e| Self::report_updated(*e)),
+				)
+				.await?;
+
+				transaction.commit().await?;
 			},
 		};
 

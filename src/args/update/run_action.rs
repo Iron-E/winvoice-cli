@@ -469,28 +469,3 @@ impl RunAction for Update
 		Ok(())
 	}
 }
-
-#[cfg(all(feature = "postgres", test))]
-mod tests
-{
-	use clinvoice_adapter::schema::EmployeeAdapter;
-	use clinvoice_adapter_postgres::schema::PgEmployee;
-	use sqlx::{Connection, PgConnection};
-
-	use crate::utils;
-
-	#[tokio::test]
-	async fn run_action()
-	{
-		// let database_url = utils::database_url().unwrap();
-		// let mut connection = PgConnection::connect(&database_url).await.unwrap();
-		// PgEmployee::create(
-		// 	&mut connection,
-		// 	"asldkj".to_owned(),
-		// 	"vbfhjs".to_owned(),
-		// 	"vbiaosfu".to_owned(),
-		// )
-		// .await
-		// .unwrap();
-	}
-}

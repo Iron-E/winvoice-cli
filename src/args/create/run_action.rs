@@ -770,7 +770,7 @@ mod tests
 
 		utils::write_yaml(&filepath, MatchTimesheet::from(timesheet_id));
 
-		run(config.clone(), CreateCommand::Expense {
+		run(config, CreateCommand::Expense {
 			category: category.into(),
 			cost,
 			description: description.into(),

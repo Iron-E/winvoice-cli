@@ -65,7 +65,12 @@ impl RunAction for Delete
 			)
 			.await?;
 
-			let selected = input::select(&retrieved, format!("Select the {type_name} to delete"))?;
+			let selected = match cfg!(test)
+			{
+				false => input::select(&retrieved, format!("Select the {type_name} to delete"))?,
+				true => retrieved,
+			};
+
 			DelRetrievable::delete(
 				connection,
 				selected.iter().inspect(|s| Delete::report_deleted(*s)),
@@ -159,10 +164,11 @@ mod tests
 		.unwrap();
 
 		let filepath = utils::temp_file::<Delete>("run-action");
-		let run = |config: Config, command: DeleteCommand| {
-			let filepath = filepath.clone();
+		let run = |command: DeleteCommand| {
+			let config = config.clone();
+			let filepath = Some(filepath.clone());
 			async move {
-				Delete { command, match_args: Some(filepath).into(), store_args: "default".into() }
+				Delete { command, match_args: filepath.into(), store_args: "default".into() }
 					.run(config)
 					.await
 					.unwrap()
@@ -182,7 +188,7 @@ mod tests
 		let match_employee = MatchEmployee::from(employee.id);
 		utils::write_yaml(&filepath, &match_employee);
 
-		run(config.clone(), DeleteCommand::Employee).await;
+		run(DeleteCommand::Employee).await;
 		assert_eq!(PgEmployee::retrieve(&connection, match_employee).await.unwrap(), Vec::new());
 		// }}}
 
@@ -194,7 +200,7 @@ mod tests
 		let match_location = MatchLocation::from(location.id);
 		utils::write_yaml(&filepath, &match_location);
 
-		run(config.clone(), DeleteCommand::Location).await;
+		run(DeleteCommand::Location).await;
 		assert_eq!(PgLocation::retrieve(&connection, match_location).await.unwrap(), Vec::new());
 		// }}}
 
@@ -209,7 +215,7 @@ mod tests
 		let match_contact = MatchContact::from(contact.label);
 		utils::write_yaml(&filepath, &match_contact);
 
-		run(config.clone(), DeleteCommand::Contact).await;
+		run(DeleteCommand::Contact).await;
 		assert_eq!(PgContact::retrieve(&connection, match_contact).await.unwrap(), Vec::new());
 		// }}}
 
@@ -222,7 +228,7 @@ mod tests
 		let match_organization = MatchOrganization::from(organization.id);
 		utils::write_yaml(&filepath, &match_organization);
 
-		run(config.clone(), DeleteCommand::Organization).await;
+		run(DeleteCommand::Organization).await;
 		assert_eq!(
 			PgOrganization::retrieve(&connection, match_organization).await.unwrap(),
 			Vec::new()
@@ -248,7 +254,7 @@ mod tests
 		let match_job = MatchJob::from(job.id);
 		utils::write_yaml(&filepath, &match_job);
 
-		run(config.clone(), DeleteCommand::Job).await;
+		run(DeleteCommand::Job).await;
 		assert_eq!(PgJob::retrieve(&connection, match_job).await.unwrap(), Vec::new());
 		// }}}
 
@@ -272,7 +278,7 @@ mod tests
 		let match_timesheet = MatchTimesheet::from(timesheet.id);
 		utils::write_yaml(&filepath, &match_timesheet);
 
-		run(config.clone(), DeleteCommand::Timesheet).await;
+		run(DeleteCommand::Timesheet).await;
 		assert_eq!(PgTimesheet::retrieve(&connection, match_timesheet).await.unwrap(), Vec::new());
 		// }}}
 
@@ -291,7 +297,7 @@ mod tests
 		let match_expense = MatchExpense::from(expense.id);
 		utils::write_yaml(&filepath, &match_expense);
 
-		run(config.clone(), DeleteCommand::Expense).await;
+		run(DeleteCommand::Expense).await;
 		assert_eq!(PgExpenses::retrieve(&connection, match_expense).await.unwrap(), Vec::new());
 		// }}}
 	}

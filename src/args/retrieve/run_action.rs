@@ -239,10 +239,3 @@ impl RunAction for Retrieve
 		Ok(())
 	}
 }
-
-#[cfg(all(feature = "postgres", test))]
-mod tests
-{
-	#[tokio::test]
-	async fn run_action() {}
-}

@@ -14,7 +14,6 @@ use clinvoice_adapter::{
 	Updatable,
 };
 use clinvoice_config::Config;
-use clinvoice_match::{MatchInvoice, MatchJob, MatchOption, MatchTimesheet};
 use clinvoice_schema::{chrono::Utc, ContactKind, InvoiceDate, RestorableSerde};
 use futures::{stream, Future, TryStreamExt};
 use serde::{de::DeserializeOwned, Serialize};
@@ -316,8 +315,7 @@ impl RunAction for Update
 						s.date_close = close_arg;
 					}
 
-					s.invoice.date =
-						issued_arg.map(|arg| InvoiceDate { issued: arg, paid: None });
+					s.invoice.date = issued_arg.map(|arg| InvoiceDate { issued: arg, paid: None });
 
 					s.invoice.date = paid_arg
 						.zip(s.invoice.date)

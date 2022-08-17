@@ -1,11 +1,9 @@
 use super::StoreArgs;
 
-impl<T> From<T> for StoreArgs
-where
-	T: Into<String>,
+impl From<&str> for StoreArgs
 {
-	fn from(t: T) -> Self
+	fn from(s: &str) -> Self
 	{
-		Self { store: t.into() }
+		Self { store: s.to_owned() }
 	}
 }

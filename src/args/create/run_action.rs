@@ -129,7 +129,7 @@ impl RunAction for Create
 					Invoice {
 						date: date_invoice_issued.map(|issued| InvoiceDate {
 							issued: utils::naive_local_datetime_to_utc(issued),
-							paid:   date_invoice_paid.map(utils::naive_local_datetime_to_utc),
+							paid: date_invoice_paid.map(utils::naive_local_datetime_to_utc),
 						}),
 						hourly_rate,
 					},

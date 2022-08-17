@@ -219,6 +219,9 @@ where
 		_ => retrieve::<Retr, _, _>(connection, prompt).await?,
 	};
 
+	#[cfg(test)]
+	return Ok(retrieved[0].clone());
+
 	let selected =
 		select_one(&retrieved, format!("Select a {}", fmt::type_name::<Retr::Entity>()))?;
 
@@ -247,6 +250,9 @@ where
 		Some(condition) => Retr::retrieve(connection, condition).await?,
 		_ => retrieve::<Retr, _, _>(connection, prompt).await?,
 	};
+
+	#[cfg(test)]
+	return Ok(retrieved);
 
 	let selected = select(&retrieved, format!("Select the {}s", fmt::type_name::<Retr::Entity>()))?;
 

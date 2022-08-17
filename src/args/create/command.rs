@@ -192,6 +192,10 @@ pub enum CreateCommand
 		)]
 		inside: FlagOrArgument<PathBuf>,
 
+		/// The `name`s of the locations which will be created, in order of innermost to outermost.
+		#[clap(required(true))]
+		names: Vec<String>,
+
 		/// Indicate that first location <NAME> specified is outside another `Location`.
 		///
 		/// You may *optionally* provide a path to a YAML file that contains a valid match
@@ -206,10 +210,6 @@ pub enum CreateCommand
 			value_parser
 		)]
 		outside: FlagOrArgument<PathBuf>,
-
-		/// The `name`s of the locations which will be created, in order of innermost to outermost.
-		#[clap(required(true))]
-		names: Vec<String>,
 	},
 
 	/// Create a `Organization` in the store (-s) specified.

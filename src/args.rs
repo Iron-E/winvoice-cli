@@ -348,7 +348,8 @@ mod tests
 		unwrap!(update job {-d "--close" "--invoice-issued"}                         "--reopen", Err);
 		unwrap!(update job {-d "--close" "--invoice-issued" "--invoice-paid"});
 		unwrap!(update job {-d "--close" "--invoice-issued" "--invoice-paid"}        "--reopen", Err);
-		// unwrap!(update job {-d "--close"                    "--invoice-paid"}, Err); // FIX: this fails
+		// unwrap!(update job {-d "--close"                    "--invoice-paid"}, Err); // FIX: this
+		// fails
 		unwrap!(update job {-d "--close"                    "--invoice-paid"}        "--reopen", Err);
 		unwrap!(update job {-d           "--invoice-issued"});
 		unwrap!(update job {-d           "--invoice-issued"}                         "--reopen", Err);

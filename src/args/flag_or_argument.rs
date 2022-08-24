@@ -30,7 +30,7 @@ impl<T> FlagOrArgument<T>
 		match self
 		{
 			Self::Argument(a) => Some(a),
-			_ => None,
+			Self::Flag(_) => None,
 		}
 	}
 
@@ -40,8 +40,8 @@ impl<T> FlagOrArgument<T>
 	{
 		match self
 		{
+			Self::Argument(_) => true,
 			Self::Flag(b) => *b,
-			_ => true,
 		}
 	}
 }

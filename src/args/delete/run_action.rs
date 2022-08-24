@@ -98,7 +98,8 @@ impl RunAction for Delete
 #[cfg(all(feature = "postgres", test))]
 mod tests
 {
-	use core::time::Duration;
+	use core::{fmt::Debug, time::Duration};
+	use std::path::PathBuf;
 
 	use clinvoice_adapter::{
 		schema::{
@@ -122,30 +123,45 @@ mod tests
 		PgTimesheet,
 	};
 	use clinvoice_config::Config;
-	use clinvoice_match::{
-		MatchContact,
-		MatchEmployee,
-		MatchExpense,
-		MatchJob,
-		MatchLocation,
-		MatchOrganization,
-		MatchTimesheet,
-	};
 	use clinvoice_schema::{chrono::Utc, ContactKind::Other, Currency, Invoice, Money};
 	use pretty_assertions::assert_eq;
-	use serde_yaml as yaml;
-	use sqlx::PgPool;
+	use serde::Serialize;
+	use sqlx::{PgPool, Postgres};
 
 	use super::{Delete, DeleteCommand, RunAction};
 	use crate::utils;
 
-	/// WARN: use `cargo test -- --test-threads=1`.
+	/// WARN: must use `cargo test -- --test-threads=1`.
 	#[tokio::test]
 	async fn run_action()
 	{
+		/// Runs the given `command`, then [assert](pretty_assertions)s that there are no rows in
+		/// the database matching the `condition` derived `from` the value specified.
+		async fn assert<R, T>(
+			connection: &PgPool,
+			command: DeleteCommand,
+			config: Config,
+			from: T,
+			filepath: PathBuf,
+		) where
+			R: Retrievable<Db = Postgres>,
+			R::Entity: Debug + PartialEq,
+			R::Match: From<T> + Serialize,
+		{
+			let condition = R::Match::from(from);
+			utils::write_yaml(&filepath, &condition);
+			Delete { command, match_args: Some(filepath).into(), store_args: "default".into() }
+				.run(config)
+				.await
+				.unwrap();
+
+			assert_eq!(R::retrieve(&connection, condition).await.unwrap(), []);
+		}
+
 		let database_url = utils::database_url().unwrap();
 		let connection_fut = PgPool::connect(&database_url);
 
+		let filepath = utils::temp_file::<Delete>("run-action");
 		let config: Config = toml::from_str(&format!(
 			"[jobs]
 			default_increment = '15min'
@@ -163,81 +179,23 @@ mod tests
 		))
 		.unwrap();
 
-		let filepath = utils::temp_file::<Delete>("run-action");
-		let run = |command: DeleteCommand| {
-			let config = config.clone();
-			let filepath = Some(filepath.clone());
-			async move {
-				Delete { command, match_args: filepath.into(), store_args: "default".into() }
-					.run(config)
-					.await
-					.unwrap()
-			}
-		};
-
-		/* ########## `clinvoice delete employee` ########## */
-
+		/* Setup {{{ */
 		let connection = connection_fut.await.unwrap();
 
-		// {{{
-		let employee =
-			PgEmployee::create(&connection, "bob".into(), "bob status".into(), "bob title".into())
-				.await
-				.unwrap();
+		let (contact, employee, location) = futures::try_join!(
+			PgContact::create(&connection, Other("Email".into()), "Preferred Contact".into()),
+			PgEmployee::create(&connection, "bob".into(), "bob status".into(), "bob title".into()),
+			PgLocation::create(&connection, "location".into(), None),
+		)
+		.unwrap();
 
-		let match_employee = MatchEmployee::from(employee.id);
-		utils::write_yaml(&filepath, &match_employee);
+		let (contact_label, employee_id, location_id) =
+			(contact.label.clone(), employee.id, location.id);
 
-		run(DeleteCommand::Employee).await;
-		assert_eq!(PgEmployee::retrieve(&connection, match_employee).await.unwrap(), Vec::new());
-		// }}}
-
-		/* ########## `clinvoice delete location` ########## */
-
-		// {{{
-		let location = PgLocation::create(&connection, "location".into(), None).await.unwrap();
-
-		let match_location = MatchLocation::from(location.id);
-		utils::write_yaml(&filepath, &match_location);
-
-		run(DeleteCommand::Location).await;
-		assert_eq!(PgLocation::retrieve(&connection, match_location).await.unwrap(), Vec::new());
-		// }}}
-
-		/* ########## `clinvoice delete contact` ########## */
-
-		// {{{
-		let contact =
-			PgContact::create(&connection, Other("Email".into()), "Preferred Contact".into())
-				.await
-				.unwrap();
-
-		let match_contact = MatchContact::from(contact.label);
-		utils::write_yaml(&filepath, &match_contact);
-
-		run(DeleteCommand::Contact).await;
-		assert_eq!(PgContact::retrieve(&connection, match_contact).await.unwrap(), Vec::new());
-		// }}}
-
-		/* ########## `clinvoice delete organization` ########## */
-
-		// {{{
 		let organization =
 			PgOrganization::create(&connection, location, "Foo".into()).await.unwrap();
+		let organization_id = organization.id;
 
-		let match_organization = MatchOrganization::from(organization.id);
-		utils::write_yaml(&filepath, &match_organization);
-
-		run(DeleteCommand::Organization).await;
-		assert_eq!(
-			PgOrganization::retrieve(&connection, match_organization).await.unwrap(),
-			Vec::new()
-		);
-		// }}}
-
-		/* ########## `clinvoice delete job` ########## */
-
-		// {{{
 		let job = PgJob::create(
 			&connection,
 			organization,
@@ -250,17 +208,8 @@ mod tests
 		)
 		.await
 		.unwrap();
+		let job_id = job.id;
 
-		let match_job = MatchJob::from(job.id);
-		utils::write_yaml(&filepath, &match_job);
-
-		run(DeleteCommand::Job).await;
-		assert_eq!(PgJob::retrieve(&connection, match_job).await.unwrap(), Vec::new());
-		// }}}
-
-		/* ########## `clinvoice delete timesheet` ########## */
-
-		// {{{
 		let mut transaction = connection.begin().await.unwrap();
 		let timesheet = PgTimesheet::create(
 			&mut transaction,
@@ -275,16 +224,6 @@ mod tests
 		.unwrap();
 		transaction.commit().await.unwrap();
 
-		let match_timesheet = MatchTimesheet::from(timesheet.id);
-		utils::write_yaml(&filepath, &match_timesheet);
-
-		run(DeleteCommand::Timesheet).await;
-		assert_eq!(PgTimesheet::retrieve(&connection, match_timesheet).await.unwrap(), Vec::new());
-		// }}}
-
-		/* ########## `clinvoice delete expense` ########## */
-
-		// {{{
 		let expense = PgExpenses::create(
 			&connection,
 			vec![("Category".into(), Money::new(2, 0, Default::default()), "Desc".into())],
@@ -294,11 +233,67 @@ mod tests
 		.map(|mut v| v.remove(0))
 		.unwrap();
 
-		let match_expense = MatchExpense::from(expense.id);
-		utils::write_yaml(&filepath, &match_expense);
+		/* }}}
+		 * Tests {{{ */
+		assert::<PgExpenses, _>(
+			&connection,
+			DeleteCommand::Expense,
+			config.clone(),
+			expense.id,
+			filepath.clone(),
+		)
+		.await;
 
-		run(DeleteCommand::Expense).await;
-		assert_eq!(PgExpenses::retrieve(&connection, match_expense).await.unwrap(), Vec::new());
-		// }}}
+		assert::<PgTimesheet, _>(
+			&connection,
+			DeleteCommand::Timesheet,
+			config.clone(),
+			timesheet.id,
+			filepath.clone(),
+		)
+		.await;
+
+		assert::<PgJob, _>(
+			&connection,
+			DeleteCommand::Job,
+			config.clone(),
+			job_id,
+			filepath.clone(),
+		)
+		.await;
+
+		assert::<PgOrganization, _>(
+			&connection,
+			DeleteCommand::Organization,
+			config.clone(),
+			organization_id,
+			filepath.clone(),
+		)
+		.await;
+
+		futures::join!(
+			assert::<PgContact, _>(
+				&connection,
+				DeleteCommand::Contact,
+				config.clone(),
+				contact_label,
+				filepath.clone(),
+			),
+			assert::<PgEmployee, _>(
+				&connection,
+				DeleteCommand::Employee,
+				config.clone(),
+				employee_id,
+				filepath.clone(),
+			),
+			assert::<PgLocation, _>(
+				&connection,
+				DeleteCommand::Location,
+				config,
+				location_id,
+				filepath,
+			),
+		);
+		/* }}} */
 	}
 }

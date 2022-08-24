@@ -110,7 +110,7 @@ impl RunAction for Create
 				let match_client = match employer
 				{
 					false => MatchArgs::from(client).try_into()?,
-					_ => config.organizations.employer_id_or_err().map(|id| Some(id.into()))?,
+					true => config.organizations.employer_id_or_err().map(|id| Some(id.into()))?,
 				};
 
 				let selected = input::select_one_retrieved::<OAdapter, _, _>(
@@ -151,6 +151,7 @@ impl RunAction for Create
 
 				let outside_of_final = match inside.flag()
 				{
+					false => None,
 					true =>
 					{
 						let match_condition = MatchArgs::from(inside.argument()).try_into()?;
@@ -162,7 +163,6 @@ impl RunAction for Create
 						.await
 						.map(Some)?
 					},
-					_ => None,
 				};
 
 				// {{{
@@ -244,7 +244,7 @@ impl RunAction for Create
 				let match_employee = match default_employee
 				{
 					false => MatchArgs::from(employee).try_into()?,
-					_ => config.employees.id_or_err().map(|id| Some(id.into()))?,
+					true => config.employees.id_or_err().map(|id| Some(id.into()))?,
 				};
 
 				let employee = input::select_one_retrieved::<EAdapter, _, _>(
@@ -265,7 +265,7 @@ impl RunAction for Create
 				let expenses = match cfg!(test) || time_end.is_none()
 				{
 					false => input::expense::menu()?,
-					_ => Vec::new(),
+					true => Vec::new(),
 				};
 
 				// {{{

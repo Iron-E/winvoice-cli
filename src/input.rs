@@ -216,7 +216,7 @@ where
 	let retrieved = match match_condition
 	{
 		Some(condition) => Retr::retrieve(connection, condition).await?,
-		_ => retrieve::<Retr, _, _>(connection, prompt).await?,
+		None => retrieve::<Retr, _, _>(connection, prompt).await?,
 	};
 
 	#[cfg(test)]
@@ -248,7 +248,7 @@ where
 	let retrieved = match match_condition
 	{
 		Some(condition) => Retr::retrieve(connection, condition).await?,
-		_ => retrieve::<Retr, _, _>(connection, prompt).await?,
+		None => retrieve::<Retr, _, _>(connection, prompt).await?,
 	};
 
 	#[cfg(test)]

@@ -160,7 +160,7 @@ impl RunAction for Update
 				let match_condition = match default
 				{
 					false => self.match_args.try_into()?,
-					_ => config.employees.id_or_err().map(|id| Some(id.into()))?,
+					true => config.employees.id_or_err().map(|id| Some(id.into()))?,
 				};
 
 				let mut selected = input::select_retrieved::<EAdapter, _, _>(
@@ -337,7 +337,7 @@ impl RunAction for Update
 				let match_condition = match employer
 				{
 					false => self.match_args.try_into()?,
-					_ => config.organizations.employer_id_or_err().map(|id| Some(id.into()))?,
+					true => config.organizations.employer_id_or_err().map(|id| Some(id.into()))?,
 				};
 
 				let mut selected = input::select_retrieved::<OAdapter, _, _>(

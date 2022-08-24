@@ -76,7 +76,7 @@ impl RunAction for Retrieve
 				Some(condition) => Retr::retrieve(connection, condition).await?,
 
 				#[rustfmt::skip]
-				_ => input::retrieve::<Retr, _, _>(
+				None => input::retrieve::<Retr, _, _>(
 					connection,
 					format!("Query the {} to delete", fmt::type_name::<Retr::Entity>()),
 				)
@@ -103,7 +103,7 @@ impl RunAction for Retrieve
 				let match_condition = match default
 				{
 					false => self.match_args.try_into()?,
-					_ => config.employees.id_or_err().map(|id| Some(id.into()))?,
+					true => config.employees.id_or_err().map(|id| Some(id.into()))?,
 				};
 
 				let retrieved =
@@ -182,7 +182,7 @@ impl RunAction for Retrieve
 								&match exchange_rates
 								{
 									Some(r) => j.exchange(currency, r),
-									_ => j,
+									None => j,
 								},
 								contact_information,
 								employer,
@@ -192,7 +192,7 @@ impl RunAction for Retrieve
 							match output_dir
 							{
 								Some(d) => fs::write(d.join(filename), exported).await,
-								_ => fs::write(filename, exported).await,
+								None => fs::write(filename, exported).await,
 							}?;
 
 							DynResult::Ok(())
@@ -212,7 +212,7 @@ impl RunAction for Retrieve
 				let match_condition = match employer
 				{
 					false => self.match_args.try_into()?,
-					_ => config.organizations.employer_id_or_err().map(|id| Some(id.into()))?,
+					true => config.organizations.employer_id_or_err().map(|id| Some(id.into()))?,
 				};
 
 				let retrieved =

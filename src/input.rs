@@ -119,15 +119,18 @@ where
 }
 
 /// `prompt` users to select elements from `entities`, returning them.
-///
-/// TODO: analyze usage to see if `entities` should be `Vec<T>`
-pub fn select<Entity, Prompt>(entities: &[Entity], prompt: Prompt) -> io::Result<Vec<Entity>>
+pub fn select<Entity, Prompt>(entities: Vec<Entity>, prompt: Prompt) -> io::Result<Vec<Entity>>
 where
 	Entity: Clone + Display,
 	Prompt: Into<String>,
 {
-	select_indices(entities, prompt)
-		.map(|indices| indices.into_iter().map(|i| entities[i].clone()).collect())
+	let indices = select_indices(&entities, prompt)?;
+	Ok(entities
+		.into_iter()
+		.enumerate()
+		.filter(|(i, _)| indices.binary_search(i).is_ok())
+		.map(|(_, e)| e)
+		.collect())
 }
 
 /// `prompt` users to select elements from `entities`, and then return the index where they appear.
@@ -146,17 +149,15 @@ where
 
 /// `prompt` users to select one element from `entities`, returning it.
 ///
-/// TODO: analyze usage to see if `entities` should be `Vec<T>`
-///
 /// # Errors
 ///
 /// * When [`select_one_index`] does.
-pub fn select_one<Entity, Prompt>(entities: &[Entity], prompt: Prompt) -> Result<Entity>
+pub fn select_one<Entity, Prompt>(mut entities: Vec<Entity>, prompt: Prompt) -> Result<Entity>
 where
 	Entity: Clone + Display,
 	Prompt: Into<String>,
 {
-	select_one_index(entities, prompt).map(|i| entities[i].clone())
+	select_one_index(&entities, prompt).map(|i| entities.remove(i))
 }
 
 /// `prompt` users to select one element from `entities`, returning the index where it is found.
@@ -213,17 +214,16 @@ where
 	Retr::Match: Default + DeserializeOwned + Serialize,
 	for<'connection> &'connection mut Db::Connection: Executor<'connection, Database = Db>,
 {
-	let retrieved = match match_condition
+	let mut retrieved = match match_condition
 	{
 		Some(condition) => Retr::retrieve(connection, condition).await?,
 		None => retrieve::<Retr, _, _>(connection, prompt).await?,
 	};
 
 	#[cfg(test)]
-	return Ok(retrieved[0].clone());
+	return Ok(retrieved.remove(0));
 
-	let selected =
-		select_one(&retrieved, format!("Select a {}", fmt::type_name::<Retr::Entity>()))?;
+	let selected = select_one(retrieved, format!("Select a {}", fmt::type_name::<Retr::Entity>()))?;
 
 	Ok(selected)
 }
@@ -254,8 +254,7 @@ where
 	#[cfg(test)]
 	return Ok(retrieved);
 
-	let selected = select(&retrieved, format!("Select the {}s", fmt::type_name::<Retr::Entity>()))?;
-
+	let selected = select(retrieved, format!("Select the {}s", fmt::type_name::<Retr::Entity>()))?;
 	Ok(selected)
 }
 

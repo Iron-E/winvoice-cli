@@ -67,7 +67,7 @@ impl RunAction for Delete
 
 			let selected = match cfg!(test)
 			{
-				false => input::select(&retrieved, format!("Select the {type_name} to delete"))?,
+				false => input::select(retrieved, format!("Select the {type_name} to delete"))?,
 				true => retrieved,
 			};
 

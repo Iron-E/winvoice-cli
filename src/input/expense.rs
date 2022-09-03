@@ -41,10 +41,11 @@ pub fn menu() -> Result<Vec<(String, Money, String)>>
 
 	loop
 	{
-		let action = super::select_one(
+		let action = super::select_one_index(
 			&all_actions,
 			"\nThis is the menu for entering Expenses\nWhat would you like to do?",
-		)?;
+		)
+		.map(|i| all_actions[i])?;
 
 		match action
 		{

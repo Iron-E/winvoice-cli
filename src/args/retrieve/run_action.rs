@@ -112,7 +112,7 @@ impl RunAction for Retrieve
 				if set_default
 				{
 					let selected =
-						input::select_one(&retrieved, "Select the Employee to set as the default")?;
+						input::select_one(retrieved, "Select the Employee to set as the default")?;
 					let mut c = config;
 					c.employees.id = Some(selected.id);
 					c.write()?;
@@ -148,7 +148,7 @@ impl RunAction for Retrieve
 					)?;
 
 					let exchange_rates = exchange_rates_fut.await?;
-					let mut selected = input::select(&retrieved, "Select the Jobs to export")?;
+					let mut selected = input::select(retrieved, "Select the Jobs to export")?;
 
 					selected
 						.iter_mut()
@@ -221,7 +221,7 @@ impl RunAction for Retrieve
 				if set_employer
 				{
 					let selected = input::select_one(
-						&retrieved,
+						retrieved,
 						"Select the Employer to use in your configuration",
 					)?;
 					let mut c = config;

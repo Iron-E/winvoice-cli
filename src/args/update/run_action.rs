@@ -14,19 +14,13 @@ use clinvoice_adapter::{
 	Updatable,
 };
 use clinvoice_config::Config;
-use clinvoice_schema::{chrono::Utc, ContactKind, InvoiceDate, RestorableSerde};
+use clinvoice_schema::{ContactKind, InvoiceDate, RestorableSerde};
 use futures::{stream, Future, TryStreamExt};
 use serde::{de::DeserializeOwned, Serialize};
 use sqlx::{Database, Executor, Pool, Transaction};
 
 use super::{Update, UpdateCommand};
-use crate::{
-	args::RunAction,
-	fmt,
-	input,
-	utils::{self, Identifiable},
-	DynResult,
-};
+use crate::{args::RunAction, fmt, input, utils::Identifiable, DynResult};
 
 #[async_trait::async_trait(?Send)]
 impl RunAction for Update
@@ -303,11 +297,15 @@ impl RunAction for Update
 						s.date_close = close_arg;
 					}
 
-					s.invoice.date = issued_arg.map(|arg| InvoiceDate { issued: arg, paid: None });
+					if let Some(arg) = issued_arg
+					{
+						s.invoice.date = Some(InvoiceDate { issued: arg, paid: None });
+					}
 
-					s.invoice.date = paid_arg
-						.zip(s.invoice.date)
-						.map(|(arg, date)| InvoiceDate { paid: Some(arg), ..date });
+					if let Some((_, date)) = paid_arg.zip(s.invoice.date)
+					{
+						s.invoice.date = Some(InvoiceDate { paid: paid_arg, ..date });
+					}
 				});
 
 				let mut transaction = connection.begin().await?;

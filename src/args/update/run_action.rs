@@ -286,21 +286,9 @@ impl RunAction for Update
 					return update::<JAdapter, _>(&connection, &mut selected).await;
 				}
 
-				let close_arg = close.flag().then(|| {
-					close.argument().map_or_else(Utc::now, utils::naive_local_datetime_to_utc)
-				});
-
-				let issued_arg = invoice_issued.flag().then(|| {
-					invoice_issued
-						.argument()
-						.map_or_else(Utc::now, utils::naive_local_datetime_to_utc)
-				});
-
-				let paid_arg = invoice_paid.flag().then(|| {
-					invoice_paid
-						.argument()
-						.map_or_else(Utc::now, utils::naive_local_datetime_to_utc)
-				});
+				let close_arg = close.iff_flagged_utc_or_now();
+				let issued_arg = invoice_issued.iff_flagged_utc_or_now();
+				let paid_arg = invoice_paid.iff_flagged_utc_or_now();
 
 				selected.iter_mut().for_each(|s| {
 					if reopen
@@ -436,13 +424,8 @@ impl RunAction for Update
 					return update::<TAdapter, _>(&connection, &mut selected).await;
 				}
 
-				let restart_arg = restart.flag().then(|| {
-					restart.argument().map_or_else(Utc::now, utils::naive_local_datetime_to_utc)
-				});
-
-				let stop_arg = stop.flag().then(|| {
-					stop.argument().map_or_else(Utc::now, utils::naive_local_datetime_to_utc)
-				});
+				let restart_arg = restart.iff_flagged_utc_or_now();
+				let stop_arg = stop.iff_flagged_utc_or_now();
 
 				selected.iter_mut().for_each(|s| {
 					if let Some(arg) = restart_arg

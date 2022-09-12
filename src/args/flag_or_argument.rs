@@ -2,6 +2,10 @@ mod default;
 mod display;
 mod from_str;
 
+use clinvoice_schema::chrono::{DateTime, NaiveDateTime, Utc};
+
+use crate::utils;
+
 /// Can be used with [`clap`] to create options with optional arguments e.g. `--foo` and `--foo
 /// bar`.
 ///
@@ -43,5 +47,20 @@ impl<T> FlagOrArgument<T>
 			Self::Argument(_) => true,
 			Self::Flag(b) => *b,
 		}
+	}
+}
+
+impl FlagOrArgument<NaiveDateTime>
+{
+	/// IFF [`flag`][flag]ged, map [`Self::Argument`] to its [`DateTime<Utc>`] or default to
+	/// [`Utc::now`].
+	///
+	/// IFF not [`flag`][flag]ged, return [`None`].
+	///
+	/// [flag]: Self::flag
+	pub fn iff_flagged_utc_or_now(self) -> Option<DateTime<Utc>>
+	{
+		self.flag()
+			.then(|| self.argument().map_or_else(Utc::now, utils::naive_local_datetime_to_utc))
 	}
 }

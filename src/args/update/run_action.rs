@@ -1,4 +1,5 @@
 use core::fmt::Display;
+use std::collections::HashMap;
 
 use clinvoice_adapter::{
 	schema::{
@@ -20,7 +21,13 @@ use serde::{de::DeserializeOwned, Serialize};
 use sqlx::{Database, Executor, Pool, Transaction};
 
 use super::{Update, UpdateCommand};
-use crate::{args::RunAction, fmt, input, utils::Identifiable, DynResult};
+use crate::{
+	args::RunAction,
+	fmt,
+	input::{self, expense},
+	utils::Identifiable,
+	DynResult,
+};
 
 #[async_trait::async_trait(?Send)]
 impl RunAction for Update
@@ -284,17 +291,20 @@ impl RunAction for Update
 				let issued_arg = invoice_issued.iff_flagged_utc_or_now();
 				let paid_arg = invoice_paid.iff_flagged_utc_or_now();
 
-				selected.iter_mut().for_each(|s| {
+				for s in &mut selected
+				{
 					if reopen
 					{
 						s.date_close = None;
 						s.invoice.date = None;
-						return;
+						continue;
 					}
 
 					if close_arg.is_some()
 					{
 						s.date_close = close_arg;
+						let expenses = expense::menu()?;
+						XAdapter::create(&connection, expenses, s.id).await?;
 					}
 
 					if let Some(arg) = issued_arg
@@ -306,7 +316,7 @@ impl RunAction for Update
 					{
 						s.invoice.date = Some(InvoiceDate { paid: paid_arg, ..date });
 					}
-				});
+				}
 
 				let mut transaction = connection.begin().await?;
 				JAdapter::update(

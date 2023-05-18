@@ -1,7 +1,7 @@
 # Commands
 
 ```sh
-clinvoice
+winvoice
                           config
 
                           create --store default

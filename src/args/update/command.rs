@@ -1,5 +1,5 @@
 use clap::Subcommand as Clap;
-use clinvoice_schema::chrono::NaiveDateTime;
+use winvoice_schema::chrono::NaiveDateTime;
 
 use crate::args::flag_or_argument::FlagOrArgument;
 
@@ -14,7 +14,7 @@ pub enum UpdateCommand
 	Employee
 	{
 		/// Update the `Employee` specified in the `id` field of the `[employees]` section of the
-		/// CLInvoice configuration file.
+		/// Winvoice configuration file.
 		///
 		/// Ignores --match.
 		#[clap(action, long, short)]
@@ -88,7 +88,7 @@ pub enum UpdateCommand
 	Organization
 	{
 		/// Update the `Organization` specified in the `employer_id` field of the `[organizations]`
-		/// section of the CLInvoice configuration file.
+		/// section of the Winvoice configuration file.
 		///
 		/// Ignores --match.
 		#[clap(action, long, short)]

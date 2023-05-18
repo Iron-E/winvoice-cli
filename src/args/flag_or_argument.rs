@@ -2,7 +2,7 @@ mod default;
 mod display;
 mod from_str;
 
-use clinvoice_schema::chrono::{DateTime, NaiveDateTime, Utc};
+use winvoice_schema::chrono::{DateTime, NaiveDateTime, Utc};
 
 use crate::utils;
 
@@ -10,17 +10,17 @@ use crate::utils;
 /// bar`.
 ///
 /// ```sh
-/// clinvoice           # FlagOrArgument::Flag(false)
-/// clinvoice --foo     # FlagOrArgument::Flag(true)
-/// clinvoice --foo bar # FlagOrArgument::Argument("bar")
+/// winvoice           # FlagOrArgument::Flag(false)
+/// winvoice --foo     # FlagOrArgument::Flag(true)
+/// winvoice --foo bar # FlagOrArgument::Argument("bar")
 /// ```
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum FlagOrArgument<T>
 {
-	/// A option with an argument e.g. "bar" for `clinvoice --foo bar`.
+	/// A option with an argument e.g. "bar" for `winvoice --foo bar`.
 	Argument(T),
 
-	/// A flag with no argument e.g. `clinvoice`, `clinvoice --foo`.
+	/// A flag with no argument e.g. `winvoice`, `winvoice --foo`.
 	Flag(bool),
 }
 

@@ -2,14 +2,14 @@ use core::time::Duration;
 use std::path::PathBuf;
 
 use clap::Subcommand as Clap;
-use clinvoice_schema::chrono::NaiveDateTime;
+use winvoice_schema::chrono::NaiveDateTime;
 use money2::Money;
 
 use crate::args::flag_or_argument::FlagOrArgument;
 
-/// Use CLInvoice to store new information.
+/// Use Winvoice to store new information.
 ///
-/// CLInvoice is capable of storing multiple kinds of information. This command has multiple
+/// Winvoice is capable of storing multiple kinds of information. This command has multiple
 /// subcommands and options which will guide you through the process and ensure that the data
 /// provided is valid.
 #[derive(Clap, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -33,7 +33,7 @@ pub enum CreateCommand
 		/// The `Contact` to create is the address of a physical `Location`.
 		///
 		/// You may *optionally* provide a path to a YAML file that contains a valid match
-		/// condition/query/search for a CLInvoice location.
+		/// condition/query/search for a Winvoice location.
 		#[clap(
 			default_missing_value = stringify!(true),
 			default_value_t,
@@ -100,7 +100,7 @@ pub enum CreateCommand
 		description: String,
 
 		/// A path to a YAML file that contains a valid match condition/query/search for a
-		/// CLInvoice Timesheet.
+		/// Winvoice Timesheet.
 		#[clap(long, short, value_name = "FILE", value_parser)]
 		timesheet: Option<PathBuf>,
 	},
@@ -111,7 +111,7 @@ pub enum CreateCommand
 	Job
 	{
 		/// A path to a YAML file that contains a valid match condition/query/search for a
-		/// CLInvoice Organization.
+		/// Winvoice Organization.
 		#[clap(group = "client-args", long, short, value_name = "FILE", value_parser)]
 		client: Option<PathBuf>,
 
@@ -143,7 +143,7 @@ pub enum CreateCommand
 		date_open: Option<NaiveDateTime>,
 
 		/// Set the `client` to the `Organization` specified by the `employee` field of the
-		/// `[organizations]` section of the CLInvoice config.
+		/// `[organizations]` section of the Winvoice config.
 		#[clap(action, group = "client-args", long, short)]
 		employer: bool,
 
@@ -153,7 +153,7 @@ pub enum CreateCommand
 
 		/// The `increment` of the `Job` to create e.g. "15min".
 		///
-		/// If this argument is not provided, CLInvoice will attempt to use the value from the
+		/// If this argument is not provided, Winvoice will attempt to use the value from the
 		/// `default_increment` key in the `[jobs]` field of your configuration.
 		///
 		/// See the documentation of [`humantime`] to see more information about how to format
@@ -174,13 +174,13 @@ pub enum CreateCommand
 	///
 	/// See the documentation for more information about `Job`s.
 	///
-	/// Example: `clinvoice create location Phoenix --outside Arizona USA --inside`
+	/// Example: `winvoice create location Phoenix --outside Arizona USA --inside`
 	Location
 	{
 		/// Indicate that final location <NAME> specified is inside another `Location`.
 		///
 		/// You may *optionally* provide a path to a YAML file that contains a valid match
-		/// condition/query/search for a CLInvoice location.
+		/// condition/query/search for a Winvoice location.
 		#[clap(
 			default_missing_value = stringify!(true),
 			default_value_t,
@@ -199,7 +199,7 @@ pub enum CreateCommand
 		/// Indicate that first location <NAME> specified is outside another `Location`.
 		///
 		/// You may *optionally* provide a path to a YAML file that contains a valid match
-		/// condition/query/search for a CLInvoice location.
+		/// condition/query/search for a Winvoice location.
 		#[clap(
 			default_missing_value = stringify!(true),
 			default_value_t,
@@ -218,7 +218,7 @@ pub enum CreateCommand
 	Organization
 	{
 		/// A path to a YAML file that contains a valid match condition/query/search for a
-		/// CLInvoice Organization.
+		/// Winvoice Organization.
 		#[clap(long, short, value_name = "FILE", value_parser)]
 		location: Option<PathBuf>,
 
@@ -233,17 +233,17 @@ pub enum CreateCommand
 	Timesheet
 	{
 		/// Set the one who is working on the `Timesheet` to the `Employee` specified by the `id`
-		/// field of the `[employees]` section of the CLInvoice config.
+		/// field of the `[employees]` section of the Winvoice config.
 		#[clap(action, group = "employee-args", long, short)]
 		default_employee: bool,
 
 		/// A path to a YAML file that contains a valid match condition/query/search for a
-		/// CLInvoice Employee.
+		/// Winvoice Employee.
 		#[clap(group = "employee-args", long, short, value_name = "FILE", value_parser)]
 		employee: Option<PathBuf>,
 
 		/// A path to a YAML file that contains a valid match condition/query/search for a
-		/// CLInvoice Job.
+		/// Winvoice Job.
 		#[clap(long, short, value_name = "FILE", value_parser)]
 		job: Option<PathBuf>,
 

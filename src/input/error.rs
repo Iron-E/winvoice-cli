@@ -1,8 +1,8 @@
 use core::result::Result as StdResult;
 use std::io;
 
-use clinvoice_config::Error as ConfigError;
-use clinvoice_schema::RestoreError;
+use winvoice_config::Error as ConfigError;
+use winvoice_schema::RestoreError;
 use serde_yaml as yaml;
 use thiserror::Error;
 

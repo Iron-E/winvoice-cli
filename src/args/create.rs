@@ -8,9 +8,9 @@ pub use command::CreateCommand;
 use super::store_args::StoreArgs;
 use crate::utils::{self, Identifiable};
 
-/// Use CLInvoice to store new information.
+/// Use Winvoice to store new information.
 ///
-/// CLInvoice is capable of storing multiple kinds of information. This command has multiple
+/// Winvoice is capable of storing multiple kinds of information. This command has multiple
 /// subcommands and options which will guide you through the process and ensure that the data
 /// provided is valid.
 #[derive(Clap, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -20,7 +20,7 @@ pub struct Create
 	#[clap(subcommand)]
 	command: CreateCommand,
 
-	/// Specifies the [`Store`](clinvoice_config::Store) to insert [`Create`]d data into.
+	/// Specifies the [`Store`](winvoice_config::Store) to insert [`Create`]d data into.
 	#[clap(flatten)]
 	store_args: StoreArgs,
 }

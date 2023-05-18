@@ -1,7 +1,7 @@
 use core::fmt::Display;
 use std::collections::HashMap;
 
-use clinvoice_adapter::{
+use winvoice_adapter::{
 	schema::{
 		ContactAdapter,
 		EmployeeAdapter,
@@ -14,8 +14,8 @@ use clinvoice_adapter::{
 	Deletable,
 	Updatable,
 };
-use clinvoice_config::Config;
-use clinvoice_schema::{ContactKind, InvoiceDate, RestorableSerde};
+use winvoice_config::Config;
+use winvoice_schema::{ContactKind, InvoiceDate, RestorableSerde};
 use futures::{stream, Future, TryStreamExt};
 use serde::{de::DeserializeOwned, Serialize};
 use sqlx::{Database, Executor, Pool, Transaction};

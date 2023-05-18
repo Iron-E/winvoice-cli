@@ -1,7 +1,7 @@
 use core::fmt::Display;
 use std::error::Error;
 
-use clinvoice_adapter::{
+use winvoice_adapter::{
 	schema::{
 		ContactAdapter,
 		EmployeeAdapter,
@@ -14,7 +14,7 @@ use clinvoice_adapter::{
 	Deletable,
 	Retrievable,
 };
-use clinvoice_config::Config;
+use winvoice_config::Config;
 use serde::{de::DeserializeOwned, Serialize};
 use sqlx::{Database, Executor, Pool};
 
@@ -101,7 +101,7 @@ mod tests
 	use core::{fmt::Debug, time::Duration};
 	use std::path::PathBuf;
 
-	use clinvoice_adapter::{
+	use winvoice_adapter::{
 		schema::{
 			ContactAdapter,
 			EmployeeAdapter,
@@ -113,7 +113,7 @@ mod tests
 		},
 		Retrievable,
 	};
-	use clinvoice_adapter_postgres::schema::{
+	use winvoice_adapter_postgres::schema::{
 		PgContact,
 		PgEmployee,
 		PgExpenses,
@@ -122,8 +122,8 @@ mod tests
 		PgOrganization,
 		PgTimesheet,
 	};
-	use clinvoice_config::Config;
-	use clinvoice_schema::{chrono::Utc, ContactKind::Other, Currency, Invoice, Money};
+	use winvoice_config::Config;
+	use winvoice_schema::{chrono::Utc, ContactKind::Other, Currency, Invoice, Money};
 	use pretty_assertions::assert_eq;
 	use serde::Serialize;
 	use sqlx::{PgPool, Postgres};

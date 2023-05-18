@@ -1,4 +1,4 @@
-//! CLInvoice is a __WIP__ program to manage invoices from the command-line.
+//! Winvoice is a __WIP__ program to manage invoices from the command-line.
 //!
 //! # Motivation
 //!
@@ -16,7 +16,7 @@
 //! Run the following command in a terminal:
 //!
 //! ```sh
-//! cargo install clinvoice --features=<adapters>
+//! cargo install winvoice --features=<adapters>
 //! ```
 //!
 //! * Any desired storage implementations (e.g. Bincode, PostgreSQL) should be listed in place of
@@ -28,7 +28,7 @@
 //!
 //! 1. Download this repository from GitHub:
 //!    ```sh
-//!    git clone https://github.com/Iron-E/clinvoice
+//!    git clone https://github.com/Iron-E/winvoice
 //!    ```
 //! 2. `cd` to the directory which `git` just created.
 //! 3. Use `cargo` to build and install the cloned repo:
@@ -38,14 +38,14 @@
 //!
 //! # Configuration
 //!
-//! Run `clinvoice config` to edit the configuration file for this program. See the documentation
-//! of [`Config`](clinvoice_config::Config) for more information about the configuration file and
+//! Run `winvoice config` to edit the configuration file for this program. See the documentation
+//! of [`Config`](winvoice_config::Config) for more information about the configuration file and
 //! its options.
 //!
 //! # Usage
 //!
-//! * For basic information, run `clinvoice help` from the command line.
-//! * For an in-depth guide, see the [wiki](https://github.com/Iron-E/clinvoice/wiki/Usage).
+//! * For basic information, run `winvoice help` from the command line.
+//! * For an in-depth guide, see the [wiki](https://github.com/Iron-E/winvoice/wiki/Usage).
 //!
 //! [crates]: https://crates.io
 
@@ -124,7 +124,7 @@ use args::Args;
 use clap::Parser;
 use dyn_result::DynResult;
 
-/// Interprets arguments `clinvoice` (if any) and executes the implied instruction.
+/// Interprets arguments `winvoice` (if any) and executes the implied instruction.
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> DynResult<()>
 {

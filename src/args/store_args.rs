@@ -2,13 +2,13 @@
 mod from;
 
 use clap::Args as Clap;
-use clinvoice_config::{Config, Error, Result, Store};
+use winvoice_config::{Config, Error, Result, Store};
 
 /// Reusable arguments used for specifying a store.
 #[derive(Clap, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct StoreArgs
 {
-	/// A key from the `[stores]` section of the [configuration file](clinvoice_config::Config).
+	/// A key from the `[stores]` section of the [configuration file](winvoice_config::Config).
 	#[clap(
 		default_value = "default",
 		help = "A key from the `[stores]` section of the configuration file",

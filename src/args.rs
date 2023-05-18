@@ -10,21 +10,21 @@ mod store_args;
 mod update;
 
 use clap::Parser as Clap;
-use clinvoice_config::Config;
+use winvoice_config::Config;
 use command::Command;
 use dialoguer::Editor;
 use run_action::RunAction;
 
 use crate::DynResult;
 
-/// CLInvoice is a tool to track and generate invoices from the command line. Pass --help for more.
+/// Winvoice is a tool to track and generate invoices from the command line. Pass --help for more.
 ///
 /// It is capable of managing information about clients, employees, jobs, timesheets, and exporting
 /// the information into the format of your choice.
 #[derive(Clap, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Args
 {
-	/// The specific CLInvoice subcommand to run.
+	/// The specific Winvoice subcommand to run.
 	#[clap(subcommand)]
 	command: Command,
 }
@@ -68,7 +68,7 @@ mod tests
 	fn try_parse()
 	{
 		/// An example date which can be deserialized into a
-		/// [`clinvoice_schema::chrono::NaiveDateTime`].
+		/// [`winvoice_schema::chrono::NaiveDateTime`].
 		const DATE: &str = "2022-01-01T00:00:00";
 
 		// sub-subcommands
@@ -206,16 +206,16 @@ mod tests
 
 			($($arg:expr) +)            => { unwrap!($($arg) +, unwrap) };
 			($($arg:expr) +, Err)       => { unwrap!($($arg) +, unwrap_err) };
-			($($arg:expr) +, $fn:ident) => { Args::try_parse_from(["clinvoice", $($arg),+]).$fn() };
+			($($arg:expr) +, $fn:ident) => { Args::try_parse_from(["winvoice", $($arg),+]).$fn() };
 		}
 
-		// # clinvoice config
+		// # winvoice config
 		unwrap!("config");
 
-		// # clinvoice create
+		// # winvoice create
 		unwrap!(create, Err);
 
-		// # clinvoice create contact
+		// # winvoice create contact
 		unwrap!(create contact, Err);
 		unwrap!(create contact "info");
 
@@ -235,7 +235,7 @@ mod tests
 
 		unwrap!(create contact                       "--phone" "info");
 
-		// # clinvoice create employee
+		// # winvoice create employee
 		unwrap!(create EMPLOYEE, Err);
 
 		unwrap!(create EMPLOYEE "--name" "first last", Err);
@@ -248,7 +248,7 @@ mod tests
 
 		unwrap!(create EMPLOYEE                                        "--title" "nothx", Err);
 
-		// # clinvoice create expense
+		// # winvoice create expense
 		unwrap!(create expense, Err);
 		unwrap!(create expense "--category" "foo", Err);
 		unwrap!(create expense "--category" "foo" "--cost" "20.00 USD", Err);
@@ -258,25 +258,25 @@ mod tests
 		unwrap!(create expense                    "--cost" "20.00 USD" "--description" "bar", Err);
 		unwrap!(create expense                                         "--description" "bar", Err);
 
-		// clinvoice create job
+		// winvoice create job
 		unwrap!(create job, Err);
 		unwrap!(create job "--hourly-rate" "20.00 USD", Err);
 		unwrap!(create job "--hourly-rate" "20.00 USD" "--objectives" "test");
 		unwrap!(create job                             "--objectives" "test", Err);
 
-		// # clinvoice create location
+		// # winvoice create location
 		unwrap!(create location, Err);
 		unwrap!(create location "Arizona");
 		unwrap!(create location "Desert View" "Phoenix" "Arizona" "USA");
 
-		// # clinvoice create organization
+		// # winvoice create organization
 		unwrap!(create organization, Err);
 		unwrap!(create organization "--name" "first last");
 
-		// # clinvoice create timesheet
+		// # winvoice create timesheet
 		unwrap!(create timesheet);
 
-		// # clinvoice delete
+		// # winvoice delete
 		unwrap!(delete, Err);
 		unwrap!(delete CONTACT);
 		unwrap!(delete EMPLOYEE);
@@ -286,25 +286,25 @@ mod tests
 		unwrap!(delete ORGANIZATION);
 		unwrap!(delete TIMESHEET);
 
-		// # clinvoice init
+		// # winvoice init
 		unwrap!(init);
 
-		// # clinvoice retrieve
+		// # winvoice retrieve
 		unwrap!(retrieve, Err);
 
-		// # clinvoice retrieve contact
+		// # winvoice retrieve contact
 		unwrap!(retrieve CONTACT);
 
-		// # clinvoice retrieve employee
+		// # winvoice retrieve employee
 		unwrap!(retrieve EMPLOYEE);
 		unwrap!(retrieve EMPLOYEE "--default");
 		unwrap!(retrieve EMPLOYEE "--default" "--set-default", Err);
 		unwrap!(retrieve EMPLOYEE             "--set-default");
 
-		// # clinvoice retrieve expense
+		// # winvoice retrieve expense
 		unwrap!(retrieve EXPENSE);
 
-		// # clinvoice retrieve job
+		// # winvoice retrieve job
 		unwrap!(retrieve JOB);
 		unwrap!(retrieve JOB "--export" "markdown");
 		unwrap!(retrieve JOB "--export" "markdown" "--currency" "USD");
@@ -314,32 +314,32 @@ mod tests
 		unwrap!(retrieve JOB                       "--currency" "USD" "--output-dir" "path/to/dir", Err);
 		unwrap!(retrieve JOB                                          "--output-dir" "path/to/dir", Err);
 
-		// # clinvoice retrieve location
+		// # winvoice retrieve location
 		unwrap!(retrieve LOCATION);
 
-		// # clinvoice retrieve organization
+		// # winvoice retrieve organization
 		unwrap!(retrieve ORGANIZATION);
 		unwrap!(retrieve ORGANIZATION "--employer");
 		unwrap!(retrieve ORGANIZATION "--employer" "--set-employer", Err);
 		unwrap!(retrieve ORGANIZATION              "--set-employer");
 
-		// # clinvoice retrieve timesheet
+		// # winvoice retrieve timesheet
 		unwrap!(retrieve TIMESHEET);
 
-		// # clinvoice update
+		// # winvoice update
 		unwrap!(update, Err);
 
-		// # clinvoice update contact
+		// # winvoice update contact
 		unwrap!(update CONTACT);
 
-		// # clinvoice update employee
+		// # winvoice update employee
 		unwrap!(update EMPLOYEE);
 		unwrap!(update EMPLOYEE "--default");
 
-		// # clinvoice update expense
+		// # winvoice update expense
 		unwrap!(update EXPENSE);
 
-		// # clinvoice update job
+		// # winvoice update job
 		unwrap!(update job);
 
 		unwrap!(update job {-d "--close"});
@@ -358,14 +358,14 @@ mod tests
 		unwrap!(update job {-d                              "--invoice-paid"}        "--reopen", Err);
 		unwrap!(update job                                                           "--reopen");
 
-		// # clinvoice update location
+		// # winvoice update location
 		unwrap!(update LOCATION);
 
-		// # clinvoice update organization
+		// # winvoice update organization
 		unwrap!(update ORGANIZATION);
 		unwrap!(update ORGANIZATION "--employer");
 
-		// # clinvoice update timesheet
+		// # winvoice update timesheet
 		unwrap!(update timesheet);
 		unwrap!(update timesheet {-d "--restart"});
 		unwrap!(update timesheet {-d "--restart" "--stop"}, Err);

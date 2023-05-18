@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use clap::Subcommand as Clap;
-use clinvoice_export::Format;
+use winvoice_export::Format;
 use money2::Currency;
 
 /// The specific type of information that is being retrieved.
@@ -15,13 +15,13 @@ pub enum RetrieveCommand
 	Employee
 	{
 		/// Retrieve the `Employee` specified in the `id` field of the `[employees]` section of the
-		/// CLInvoice configuration file.
+		/// Winvoice configuration file.
 		///
 		/// Ignores --match.
 		#[clap(action, group = "config", long, short)]
 		default: bool,
 
-		/// Set the `id` field of the `[employees]` section of the CLInvoice configuration file to
+		/// Set the `id` field of the `[employees]` section of the Winvoice configuration file to
 		/// the `Employee` which was retrieved by this operation.
 		#[clap(action, group = "config", long, short)]
 		set_default: bool,
@@ -55,13 +55,13 @@ pub enum RetrieveCommand
 	Organization
 	{
 		/// Retrieve the `Organization` specified in the `employer_id` field of the
-		/// `[organizations]` section of the CLInvoice configuration file.
+		/// `[organizations]` section of the Winvoice configuration file.
 		///
 		/// Ignores --match.
 		#[clap(action, group = "config", long, short)]
 		employer: bool,
 
-		/// Set the `employer_id` field of the `[organizations]` section of the CLInvoice
+		/// Set the `employer_id` field of the `[organizations]` section of the Winvoice
 		/// configuration file to the `Organization` which was retrieved by this operation.
 		#[clap(action, group = "config", long, short)]
 		set_employer: bool,

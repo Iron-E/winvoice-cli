@@ -8,11 +8,11 @@ pub use command::UpdateCommand;
 use super::{match_args::MatchArgs, store_args::StoreArgs};
 use crate::utils::{self, Identifiable};
 
-/// Update information being stored by CLInvoice.
+/// Update information being stored by Winvoice.
 ///
-/// Sometimes information that is mistakenly entered into the CLInvoice system with incorrect
+/// Sometimes information that is mistakenly entered into the Winvoice system with incorrect
 /// information, or information that has changed over time. This command will allow you to alter
-/// the data that is being stored by CLInvoice to make it accurate.
+/// the data that is being stored by Winvoice to make it accurate.
 #[derive(Clap, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Update
 {
@@ -24,7 +24,7 @@ pub struct Update
 	#[clap(flatten)]
 	match_args: MatchArgs,
 
-	/// Specifies the [`Store`](clinvoice_config::Store) to send [`Update`]s to.
+	/// Specifies the [`Store`](winvoice_config::Store) to send [`Update`]s to.
 	#[clap(flatten)]
 	store_args: StoreArgs,
 }

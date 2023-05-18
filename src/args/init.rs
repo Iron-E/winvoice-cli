@@ -1,18 +1,18 @@
 use clap::Args as Clap;
-use clinvoice_adapter::Initializable;
-use clinvoice_config::{Adapters, Config, Error};
+use winvoice_adapter::Initializable;
+use winvoice_config::{Adapters, Config, Error};
 use sqlx::Connection;
 
 use super::store_args::StoreArgs;
 use crate::DynResult;
 
-/// Prepare the specified store (-s) for use with CLInvoice.
+/// Prepare the specified store (-s) for use with Winvoice.
 ///
 /// Will not clobber existing data. Should only be run by administrators.
 #[derive(Clap, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Init
 {
-	/// Specifies the [`Store`](clinvoice_config::Store) to [`Init`].
+	/// Specifies the [`Store`](winvoice_config::Store) to [`Init`].
 	#[clap(flatten)]
 	store_args: StoreArgs,
 }
@@ -31,7 +31,7 @@ impl Init
 			#[cfg(feature = "postgres")]
 			Adapters::Postgres =>
 			{
-				use clinvoice_adapter_postgres::PgSchema;
+				use winvoice_adapter_postgres::PgSchema;
 				use sqlx::PgConnection;
 
 				let mut connection = PgConnection::connect(&store.url).await?;

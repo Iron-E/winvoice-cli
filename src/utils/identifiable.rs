@@ -1,4 +1,4 @@
-use clinvoice_schema::{Contact, Employee, Expense, Job, Location, Organization, Timesheet};
+use winvoice_schema::{Contact, Employee, Expense, Job, Location, Organization, Timesheet};
 
 use crate::fmt;
 

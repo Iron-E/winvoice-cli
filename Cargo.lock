@@ -238,111 +238,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "clinvoice"
-version = "0.2.0"
-dependencies = [
- "async-trait",
- "clap",
- "clinvoice-adapter",
- "clinvoice-adapter-postgres",
- "clinvoice-config",
- "clinvoice-export",
- "clinvoice-match",
- "clinvoice-schema",
- "dialoguer",
- "dotenvy",
- "futures",
- "humantime",
- "money2",
- "pretty_assertions",
- "serde",
- "serde_yaml",
- "sqlx",
- "strum",
- "thiserror",
- "tokio",
- "toml",
-]
-
-[[package]]
-name = "clinvoice-adapter"
-version = "0.18.0"
-source = "git+https://github.com/Iron-E/clinvoice-adapter?branch=release/0.18#e40ec2f4221230abbf1ac45652d5a6262c012a2b"
-dependencies = [
- "async-trait",
- "clinvoice-match",
- "clinvoice-schema",
- "futures",
- "sqlx",
-]
-
-[[package]]
-name = "clinvoice-adapter-postgres"
-version = "0.8.0"
-source = "git+https://github.com/Iron-E/clinvoice-adapter-postgres?branch=release/0.8#06d598bb3445ecf3346f707d8524ac6645ef9657"
-dependencies = [
- "async-trait",
- "clinvoice-adapter",
- "clinvoice-match",
- "clinvoice-schema",
- "futures",
- "humantime",
- "money2",
- "shellexpand",
- "sqlx",
- "thiserror",
-]
-
-[[package]]
-name = "clinvoice-config"
-version = "0.7.4"
-source = "git+https://github.com/Iron-E/clinvoice-config?branch=release/0.7#a4502c9628c69c8a6a334c17c410b2b42a184a1b"
-dependencies = [
- "clinvoice-schema",
- "dirs",
- "humantime-serde",
- "serde",
- "thiserror",
- "toml",
-]
-
-[[package]]
-name = "clinvoice-export"
-version = "0.2.0"
-source = "git+https://github.com/Iron-E/clinvoice-export?branch=release/0.2#c46576596d9ced47ef64d634299d1cec1fc51c8a"
-dependencies = [
- "clinvoice-schema",
- "strum",
- "thiserror",
-]
-
-[[package]]
-name = "clinvoice-match"
-version = "0.8.0"
-source = "git+https://github.com/Iron-E/clinvoice-match?branch=release/0.8#889d021599d31d44d67edd7ac9a6d747fd866762"
-dependencies = [
- "clinvoice-schema",
- "humantime-serde",
- "money2",
- "serde",
- "thiserror",
-]
-
-[[package]]
-name = "clinvoice-schema"
-version = "0.11.0"
-source = "git+https://github.com/Iron-E/clinvoice-schema?branch=release/0.11#97fac069339a45ccdc4366c49241c7d4eb6515ae"
-dependencies = [
- "chrono",
- "futures",
- "humantime-serde",
- "lazy_static",
- "money2",
- "serde",
- "thiserror",
-]
-
-[[package]]
 name = "console"
 version = "0.15.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2348,6 +2243,112 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "80d0f4e272c85def139476380b12f9ac60926689dd2e01d4923222f40580869d"
 dependencies = [
  "winapi",
+]
+
+[[package]]
+name = "winvoice-adapter"
+version = "0.19.0"
+source = "git+https://github.com/Iron-E/winvoice-adapter?branch=release/0.19#ccbc328ac8fbf7e05dfbb6f47f48c5f3ed4b6ad7"
+dependencies = [
+ "async-trait",
+ "futures",
+ "sqlx",
+ "winvoice-match",
+ "winvoice-schema",
+]
+
+[[package]]
+name = "winvoice-adapter-postgres"
+version = "0.9.0"
+source = "git+https://github.com/Iron-E/winvoice-adapter-postgres?branch=release/0.9#756939164789e0c938a50caa8627124c75f4d1be"
+dependencies = [
+ "async-trait",
+ "futures",
+ "humantime",
+ "money2",
+ "shellexpand",
+ "sqlx",
+ "thiserror",
+ "tokio",
+ "winvoice-adapter",
+ "winvoice-match",
+ "winvoice-schema",
+]
+
+[[package]]
+name = "winvoice-cli"
+version = "0.3.0"
+dependencies = [
+ "async-trait",
+ "clap",
+ "dialoguer",
+ "dotenvy",
+ "futures",
+ "humantime",
+ "money2",
+ "pretty_assertions",
+ "serde",
+ "serde_yaml",
+ "sqlx",
+ "strum",
+ "thiserror",
+ "tokio",
+ "toml",
+ "winvoice-adapter",
+ "winvoice-adapter-postgres",
+ "winvoice-config",
+ "winvoice-export",
+ "winvoice-match",
+ "winvoice-schema",
+]
+
+[[package]]
+name = "winvoice-config"
+version = "0.8.0"
+source = "git+https://github.com/Iron-E/winvoice-config?branch=release/0.8#32ce036b50e77b14236fa22ffe3ab42895abd828"
+dependencies = [
+ "dirs",
+ "humantime-serde",
+ "serde",
+ "thiserror",
+ "toml",
+ "winvoice-schema",
+]
+
+[[package]]
+name = "winvoice-export"
+version = "0.3.0"
+source = "git+https://github.com/Iron-E/winvoice-export?branch=release/0.3#add1bed065767329b99762e3192fbe5689e50e9a"
+dependencies = [
+ "strum",
+ "thiserror",
+ "winvoice-schema",
+]
+
+[[package]]
+name = "winvoice-match"
+version = "0.9.0"
+source = "git+https://github.com/Iron-E/winvoice-match?branch=release/0.9#20885a5acf2bc41e7cbb94ece43b8729f02dce45"
+dependencies = [
+ "humantime-serde",
+ "money2",
+ "serde",
+ "thiserror",
+ "winvoice-schema",
+]
+
+[[package]]
+name = "winvoice-schema"
+version = "0.12.0"
+source = "git+https://github.com/Iron-E/winvoice-schema?branch=release/0.12#4e7e5cbc1f28b6d9a39574f6c23522520a813b23"
+dependencies = [
+ "chrono",
+ "futures",
+ "humantime-serde",
+ "lazy_static",
+ "money2",
+ "serde",
+ "thiserror",
 ]
 
 [[package]]

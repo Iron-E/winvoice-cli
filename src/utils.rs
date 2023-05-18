@@ -1,8 +1,8 @@
-//! Misc utilities for CLInvoice.
+//! Misc utilities for Winvoice.
 
 mod identifiable;
 
-use clinvoice_schema::chrono::{DateTime, Datelike, Local, NaiveDateTime, TimeZone, Timelike, Utc};
+use winvoice_schema::chrono::{DateTime, Datelike, Local, NaiveDateTime, TimeZone, Timelike, Utc};
 pub use identifiable::Identifiable;
 #[cfg(test)]
 use {
@@ -25,7 +25,7 @@ pub(crate) fn database_url() -> dotenvy::Result<String>
 pub(crate) fn temp_file<T>(test: &str) -> std::path::PathBuf
 {
 	let mut parent = env::temp_dir();
-	parent.push("clinvoice-bin");
+	parent.push("winvoice-bin");
 	parent.push(fmt::type_name::<T>());
 
 	fs::create_dir_all(&parent).unwrap();

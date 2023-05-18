@@ -1,4 +1,4 @@
-use clinvoice_adapter::{
+use winvoice_adapter::{
 	schema::{
 		ContactAdapter,
 		EmployeeAdapter,
@@ -10,7 +10,7 @@ use clinvoice_adapter::{
 	},
 	Deletable,
 };
-use clinvoice_config::{Adapters, Config, Error};
+use winvoice_config::{Adapters, Config, Error};
 use sqlx::{Database, Executor, Pool, Transaction};
 
 use super::store_args::StoreArgs;
@@ -48,7 +48,7 @@ pub trait RunAction: AsRef<StoreArgs> + Sized
 			#[cfg(feature = "postgres")]
 			Adapters::Postgres =>
 			{
-				use clinvoice_adapter_postgres::schema::{
+				use winvoice_adapter_postgres::schema::{
 					PgContact,
 					PgEmployee,
 					PgExpenses,

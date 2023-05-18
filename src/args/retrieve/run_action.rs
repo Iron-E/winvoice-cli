@@ -1,7 +1,7 @@
 use core::fmt::Display;
 use std::error::Error as StdError;
 
-use clinvoice_adapter::{
+use winvoice_adapter::{
 	schema::{
 		ContactAdapter,
 		EmployeeAdapter,
@@ -14,9 +14,9 @@ use clinvoice_adapter::{
 	Deletable,
 	Retrievable,
 };
-use clinvoice_config::Config;
-use clinvoice_match::{MatchOrganization, MatchTimesheet};
-use clinvoice_schema::{chrono::Utc, InvoiceDate};
+use winvoice_config::Config;
+use winvoice_match::{MatchOrganization, MatchTimesheet};
+use winvoice_schema::{chrono::Utc, InvoiceDate};
 use futures::{future, stream, TryFutureExt, TryStreamExt};
 use money2::{Exchange, ExchangeRates};
 use serde::{de::DeserializeOwned, Serialize};

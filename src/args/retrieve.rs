@@ -7,7 +7,7 @@ use command::RetrieveCommand;
 
 use super::{match_args::MatchArgs, store_args::StoreArgs};
 
-/// Retrieve information being stored by CLInvoice.
+/// Retrieve information being stored by Winvoice.
 #[derive(Clap, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Retrieve
 {
@@ -19,7 +19,7 @@ pub struct Retrieve
 	#[clap(flatten)]
 	match_args: MatchArgs,
 
-	/// Specifies the [`Store`](clinvoice_config::Store) to [`Retrieve`] from.
+	/// Specifies the [`Store`](winvoice_config::Store) to [`Retrieve`] from.
 	#[clap(flatten)]
 	store_args: StoreArgs,
 }

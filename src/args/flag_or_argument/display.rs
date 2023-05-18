@@ -1,7 +1,7 @@
 use core::fmt::{Debug, Display, Formatter, Result};
 use std::path::PathBuf;
 
-use clinvoice_schema::chrono::NaiveDateTime;
+use winvoice_schema::chrono::NaiveDateTime;
 
 use super::FlagOrArgument;
 

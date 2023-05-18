@@ -7,8 +7,8 @@ use core::{
 };
 use std::io;
 
-use clinvoice_adapter::Retrievable;
-use clinvoice_schema::RestorableSerde;
+use winvoice_adapter::Retrievable;
+use winvoice_schema::RestorableSerde;
 use dialoguer::{Confirm, Editor, Input, MultiSelect, Select};
 pub use error::{Error, Result};
 use serde::{de::DeserializeOwned, Serialize};
@@ -17,9 +17,9 @@ use sqlx::{Database, Executor, Pool};
 
 use crate::{fmt, DynResult};
 
-/// The prompt for when [matching](clinvoice_match).
+/// The prompt for when [matching](winvoice_match).
 const MATCH_PROMPT: &str =
-	"See the documentation of this query at https://github.com/Iron-E/clinvoice/wiki/Query-Syntax#";
+	"See the documentation of this query at https://github.com/Iron-E/winvoice/wiki/Query-Syntax#";
 
 /// `prompt` the user with a yes/no question.
 ///
@@ -62,7 +62,7 @@ where
 	maybe_edited.ok_or(Error::NotEdited).and_then(|edit| yaml::from_str(&edit).map_err(Error::from))
 }
 
-/// [Edit](edit) an `entity`, and then [restore](clinvoice_schema::RestorableSerde) it.
+/// [Edit](edit) an `entity`, and then [restore](winvoice_schema::RestorableSerde) it.
 pub fn edit_and_restore<Entity, Prompt>(entity: &Entity, prompt: Prompt) -> Result<Entity>
 where
 	Entity: DeserializeOwned + RestorableSerde + Serialize,

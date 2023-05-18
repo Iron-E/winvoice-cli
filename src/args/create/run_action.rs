@@ -1,4 +1,4 @@
-use clinvoice_adapter::{
+use winvoice_adapter::{
 	schema::{
 		ContactAdapter,
 		EmployeeAdapter,
@@ -10,8 +10,8 @@ use clinvoice_adapter::{
 	},
 	Deletable,
 };
-use clinvoice_config::Config;
-use clinvoice_schema::{chrono::Utc, ContactKind, Invoice, InvoiceDate};
+use winvoice_config::Config;
+use winvoice_schema::{chrono::Utc, ContactKind, Invoice, InvoiceDate};
 use sqlx::{Database, Executor, Pool, Transaction};
 
 use super::{Create, CreateCommand};
@@ -296,7 +296,7 @@ impl RunAction for Create
 #[cfg(all(feature = "postgres", test))]
 mod tests
 {
-	use clinvoice_adapter::{
+	use winvoice_adapter::{
 		fmt::{sql, QueryBuilderExt, TableToSql},
 		schema::{
 			columns::{
@@ -312,7 +312,7 @@ mod tests
 		Deletable,
 		Retrievable,
 	};
-	use clinvoice_adapter_postgres::schema::{
+	use winvoice_adapter_postgres::schema::{
 		PgContact,
 		PgEmployee,
 		PgExpenses,
@@ -321,15 +321,15 @@ mod tests
 		PgOrganization,
 		PgTimesheet,
 	};
-	use clinvoice_config::Config;
-	use clinvoice_match::{
+	use winvoice_config::Config;
+	use winvoice_match::{
 		MatchEmployee,
 		MatchJob,
 		MatchLocation,
 		MatchOrganization,
 		MatchTimesheet,
 	};
-	use clinvoice_schema::{
+	use winvoice_schema::{
 		chrono::{DateTime, Duration, Local, NaiveDate, Utc},
 		Currency,
 		Id,
@@ -415,7 +415,7 @@ mod tests
 		))
 		.unwrap();
 
-		/* ########## `clinvoice create employee` ########## */
+		/* ########## `winvoice create employee` ########## */
 
 		// {{{
 		let name = "bob";
@@ -441,7 +441,7 @@ mod tests
 
 		config.employees.id = Some(most_recent.id);
 
-		/* ########## `clinvoice create location` ########## */
+		/* ########## `winvoice create location` ########## */
 
 		// {{{
 		let (arizona, usa) = ("Arizona", "USA");
@@ -498,7 +498,7 @@ mod tests
 		assert_eq!(db_usa.outer.as_deref().unwrap(), &earth);
 		// }}}
 
-		/* ########## `clinvoice create contact` ########## */
+		/* ########## `winvoice create contact` ########## */
 
 		let location_id = most_recent.id;
 
@@ -585,7 +585,7 @@ mod tests
 		.await
 		.unwrap();
 
-		/* ########## `clinvoice create organization` ########## */
+		/* ########## `winvoice create organization` ########## */
 
 		// {{{
 		let name = "Foo";
@@ -605,12 +605,12 @@ mod tests
 
 		config.organizations.employer_id = Some(most_recent.id);
 
-		/* ########## `clinvoice create job` ########## */
+		/* ########## `winvoice create job` ########## */
 
 		// {{{
 		let invoice = Invoice { hourly_rate: Money::new(17_60, 2, Currency::Usd), date: None };
 		let notes = "Placeholder";
-		let objectives = "Test `clinvoice create job --employer`";
+		let objectives = "Test `winvoice create job --employer`";
 
 		run(config.clone(), CreateCommand::Job {
 			client: None,
@@ -685,7 +685,7 @@ mod tests
 		assert_eq!(most_recent.objectives, objectives);
 		// }}}
 
-		/* ########## `clinvoice create timesheet` ########## */
+		/* ########## `winvoice create timesheet` ########## */
 
 		let job_id = most_recent.id;
 
@@ -755,7 +755,7 @@ mod tests
 		assert_eq!(most_recent.work_notes, work_notes);
 		// }}}
 
-		/* ########## `clinvoice create expense` ########## */
+		/* ########## `winvoice create expense` ########## */
 
 		let timesheet_id = most_recent.id;
 

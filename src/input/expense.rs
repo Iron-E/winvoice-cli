@@ -1,12 +1,12 @@
 //! This module contains methods which guide the user through the creation of
-//! [`Expense`](clinvoice_schema::Expense)s. See [`menu`] for more information.
+//! [`Expense`](winvoice_schema::Expense)s. See [`menu`] for more information.
 
 mod action;
 
 use std::io;
 
 use action::Action;
-use clinvoice_schema::Money;
+use winvoice_schema::Money;
 use strum::IntoEnumIterator;
 
 use super::Result;
@@ -28,7 +28,7 @@ fn add_menu(expenses: &mut Vec<(String, Money, String)>) -> io::Result<()>
 	Ok(())
 }
 
-/// Show a menu for queueing the creation of [`Expense`](clinvoice_schema::Expense)s. Returns a
+/// Show a menu for queueing the creation of [`Expense`](winvoice_schema::Expense)s. Returns a
 /// [`Vec`] of tuples with the fields `category`, `cost`, and `description` defined (in that order).
 ///
 /// # Errors

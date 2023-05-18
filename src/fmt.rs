@@ -2,7 +2,7 @@
 
 use core::{any, fmt::Display};
 
-use clinvoice_schema::Id;
+use winvoice_schema::Id;
 
 /// Return "№{id}" (without quotes).
 pub(crate) fn id_num(id: Id) -> String
@@ -27,7 +27,7 @@ pub(crate) fn type_name<T>() -> &'static str
 #[cfg(test)]
 mod tests
 {
-	use clinvoice_adapter::schema::columns::JobColumns;
+	use winvoice_adapter::schema::columns::JobColumns;
 
 	use crate::fmt;
 

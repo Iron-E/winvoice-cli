@@ -2,8 +2,8 @@ use core::time::Duration;
 use std::path::PathBuf;
 
 use clap::Subcommand as Clap;
-use winvoice_schema::chrono::NaiveDateTime;
 use money2::Money;
+use winvoice_schema::chrono::NaiveDateTime;
 
 use crate::args::flag_or_argument::FlagOrArgument;
 

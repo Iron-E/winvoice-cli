@@ -10,10 +10,10 @@ mod store_args;
 mod update;
 
 use clap::Parser as Clap;
-use winvoice_config::Config;
 use command::Command;
 use dialoguer::Editor;
 use run_action::RunAction;
+use winvoice_config::Config;
 
 use crate::DynResult;
 

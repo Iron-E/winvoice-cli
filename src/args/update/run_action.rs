@@ -1,6 +1,8 @@
 use core::fmt::Display;
-use std::collections::HashMap;
 
+use futures::{stream, Future, TryStreamExt};
+use serde::{de::DeserializeOwned, Serialize};
+use sqlx::{Database, Executor, Pool, Transaction};
 use winvoice_adapter::{
 	schema::{
 		ContactAdapter,
@@ -16,9 +18,6 @@ use winvoice_adapter::{
 };
 use winvoice_config::Config;
 use winvoice_schema::{ContactKind, InvoiceDate, RestorableSerde};
-use futures::{stream, Future, TryStreamExt};
-use serde::{de::DeserializeOwned, Serialize};
-use sqlx::{Database, Executor, Pool, Transaction};
 
 use super::{Update, UpdateCommand};
 use crate::{

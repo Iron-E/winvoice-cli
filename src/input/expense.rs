@@ -6,8 +6,8 @@ mod action;
 use std::io;
 
 use action::Action;
-use winvoice_schema::Money;
 use strum::IntoEnumIterator;
+use winvoice_schema::Money;
 
 use super::Result;
 

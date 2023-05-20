@@ -2,8 +2,8 @@
 
 mod identifiable;
 
-use winvoice_schema::chrono::{DateTime, Datelike, Local, NaiveDateTime, TimeZone, Timelike, Utc};
 pub use identifiable::Identifiable;
+use winvoice_schema::chrono::{DateTime, Datelike, Local, NaiveDateTime, TimeZone, Timelike, Utc};
 #[cfg(test)]
 use {
 	serde::Serialize,

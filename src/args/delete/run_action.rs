@@ -1,6 +1,8 @@
 use core::fmt::Display;
 use std::error::Error;
 
+use serde::{de::DeserializeOwned, Serialize};
+use sqlx::{Database, Executor, Pool};
 use winvoice_adapter::{
 	schema::{
 		ContactAdapter,
@@ -15,8 +17,6 @@ use winvoice_adapter::{
 	Retrievable,
 };
 use winvoice_config::Config;
-use serde::{de::DeserializeOwned, Serialize};
-use sqlx::{Database, Executor, Pool};
 
 use super::{Delete, DeleteCommand};
 use crate::{args::RunAction, fmt, input, utils::Identifiable, DynResult};
@@ -101,6 +101,9 @@ mod tests
 	use core::{fmt::Debug, time::Duration};
 	use std::path::PathBuf;
 
+	use pretty_assertions::assert_eq;
+	use serde::Serialize;
+	use sqlx::{PgPool, Postgres};
 	use winvoice_adapter::{
 		schema::{
 			ContactAdapter,
@@ -124,9 +127,6 @@ mod tests
 	};
 	use winvoice_config::Config;
 	use winvoice_schema::{chrono::Utc, ContactKind::Other, Currency, Invoice, Money};
-	use pretty_assertions::assert_eq;
-	use serde::Serialize;
-	use sqlx::{PgPool, Postgres};
 
 	use super::{Delete, DeleteCommand, RunAction};
 	use crate::utils;

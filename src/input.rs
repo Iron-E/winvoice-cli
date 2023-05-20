@@ -7,13 +7,13 @@ use core::{
 };
 use std::io;
 
-use winvoice_adapter::Retrievable;
-use winvoice_schema::RestorableSerde;
 use dialoguer::{Confirm, Editor, Input, MultiSelect, Select};
 pub use error::{Error, Result};
 use serde::{de::DeserializeOwned, Serialize};
 use serde_yaml as yaml;
 use sqlx::{Database, Executor, Pool};
+use winvoice_adapter::Retrievable;
+use winvoice_schema::RestorableSerde;
 
 use crate::{fmt, DynResult};
 
@@ -201,6 +201,7 @@ where
 ///
 /// * If `match_condition` is [`None`], values the user was `prompt`ed to [`retrieve`].
 /// * If `match_condition` is [`Some`], values matching the condition.
+#[cfg_attr(test, allow(unreachable_code))]
 pub async fn select_one_retrieved<Retr, Db, Prompt>(
 	connection: &Pool<Db>,
 	match_condition: Option<Retr::Match>,
@@ -214,6 +215,7 @@ where
 	Retr::Match: Default + DeserializeOwned + Serialize,
 	for<'connection> &'connection mut Db::Connection: Executor<'connection, Database = Db>,
 {
+	#[cfg_attr(not(test), allow(unused_mut))]
 	let mut retrieved = match match_condition
 	{
 		Some(condition) => Retr::retrieve(connection, condition).await?,
@@ -232,6 +234,7 @@ where
 ///
 /// * If `match_condition` is [`None`], values the user was `prompt`ed to [`retrieve`].
 /// * If `match_condition` is [`Some`], values matching the condition.
+#[cfg_attr(test, allow(unreachable_code))]
 pub async fn select_retrieved<Retr, Db, Prompt>(
 	connection: &Pool<Db>,
 	match_condition: Option<Retr::Match>,

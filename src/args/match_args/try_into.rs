@@ -1,5 +1,6 @@
 use std::fs;
 
+use serde_yaml as yaml;
 use winvoice_match::{
 	MatchContact,
 	MatchEmployee,
@@ -9,7 +10,6 @@ use winvoice_match::{
 	MatchOrganization,
 	MatchTimesheet,
 };
-use serde_yaml as yaml;
 
 use super::MatchArgs;
 use crate::input::{Error, Result};

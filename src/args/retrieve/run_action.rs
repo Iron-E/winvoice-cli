@@ -1,6 +1,11 @@
 use core::fmt::Display;
 use std::error::Error as StdError;
 
+use futures::{future, stream, TryFutureExt, TryStreamExt};
+use money2::{Exchange, ExchangeRates};
+use serde::{de::DeserializeOwned, Serialize};
+use sqlx::{Database, Executor, Pool};
+use tokio::fs;
 use winvoice_adapter::{
 	schema::{
 		ContactAdapter,
@@ -17,11 +22,6 @@ use winvoice_adapter::{
 use winvoice_config::Config;
 use winvoice_match::{MatchOrganization, MatchTimesheet};
 use winvoice_schema::{chrono::Utc, InvoiceDate};
-use futures::{future, stream, TryFutureExt, TryStreamExt};
-use money2::{Exchange, ExchangeRates};
-use serde::{de::DeserializeOwned, Serialize};
-use sqlx::{Database, Executor, Pool};
-use tokio::fs;
 
 use super::{Retrieve, RetrieveCommand};
 use crate::{args::RunAction, fmt, input, DynResult};

@@ -1,7 +1,7 @@
 use clap::Args as Clap;
+use sqlx::Connection;
 use winvoice_adapter::Initializable;
 use winvoice_config::{Adapters, Config, Error};
-use sqlx::Connection;
 
 use super::store_args::StoreArgs;
 use crate::DynResult;
@@ -31,8 +31,8 @@ impl Init
 			#[cfg(feature = "postgres")]
 			Adapters::Postgres =>
 			{
-				use winvoice_adapter_postgres::PgSchema;
 				use sqlx::PgConnection;
+				use winvoice_adapter_postgres::PgSchema;
 
 				let mut connection = PgConnection::connect(&store.url).await?;
 				PgSchema::init(&mut connection).await?;

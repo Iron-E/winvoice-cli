@@ -1,8 +1,8 @@
 use std::path::PathBuf;
 
 use clap::Subcommand as Clap;
-use winvoice_export::Format;
 use money2::Currency;
+use winvoice_export::Format;
 
 /// The specific type of information that is being retrieved.
 #[derive(Clap, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]

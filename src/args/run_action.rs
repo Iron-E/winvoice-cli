@@ -1,3 +1,4 @@
+use sqlx::{Database, Executor, Pool, Transaction};
 use winvoice_adapter::{
 	schema::{
 		ContactAdapter,
@@ -11,7 +12,6 @@ use winvoice_adapter::{
 	Deletable,
 };
 use winvoice_config::{Adapters, Config, Error};
-use sqlx::{Database, Executor, Pool, Transaction};
 
 use super::store_args::StoreArgs;
 use crate::DynResult;

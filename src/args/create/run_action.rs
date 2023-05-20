@@ -1,3 +1,4 @@
+use sqlx::{Database, Executor, Pool, Transaction};
 use winvoice_adapter::{
 	schema::{
 		ContactAdapter,
@@ -12,7 +13,6 @@ use winvoice_adapter::{
 };
 use winvoice_config::Config;
 use winvoice_schema::{chrono::Utc, ContactKind, Invoice, InvoiceDate};
-use sqlx::{Database, Executor, Pool, Transaction};
 
 use super::{Create, CreateCommand};
 use crate::{
@@ -296,6 +296,14 @@ impl RunAction for Create
 #[cfg(all(feature = "postgres", test))]
 mod tests
 {
+	use money2::{Exchange, ExchangeRates};
+	use pretty_assertions::assert_eq;
+	use sqlx::{
+		postgres::{PgPool, Postgres},
+		QueryBuilder,
+		Result,
+		Row,
+	};
 	use winvoice_adapter::{
 		fmt::{sql, QueryBuilderExt, TableToSql},
 		schema::{
@@ -336,14 +344,6 @@ mod tests
 		Invoice,
 		InvoiceDate,
 		Money,
-	};
-	use money2::{Exchange, ExchangeRates};
-	use pretty_assertions::assert_eq;
-	use sqlx::{
-		postgres::{PgPool, Postgres},
-		QueryBuilder,
-		Result,
-		Row,
 	};
 
 	use super::{Create, CreateCommand, RunAction};

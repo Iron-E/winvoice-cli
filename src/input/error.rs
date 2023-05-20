@@ -1,10 +1,10 @@
 use core::result::Result as StdResult;
 use std::io;
 
-use winvoice_config::Error as ConfigError;
-use winvoice_schema::RestoreError;
 use serde_yaml as yaml;
 use thiserror::Error;
+use winvoice_config::Error as ConfigError;
+use winvoice_schema::RestoreError;
 
 /// An [`Error`](std::error::Error) for getting input from STDIO.
 #[derive(Debug, Error)]

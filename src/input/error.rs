@@ -1,3 +1,5 @@
+#![allow(clippy::std_instead_of_core)]
+
 use core::result::Result as StdResult;
 use std::io;
 

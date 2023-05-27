@@ -196,7 +196,7 @@ impl RunAction for Create
 					//       `inside_locations` other than the first
 					if let Some(after_first) = inside_locations.get_mut(1..)
 					{
-						after_first.iter_mut().for_each(|mut l| {
+						after_first.iter_mut().for_each(|l| {
 							l.outer = Some(created.clone().into());
 						})
 					}

@@ -42,10 +42,7 @@ impl RunAction for Delete
 	{
 		/// A generic deletion function which works for any of the provided adapters in the outer
 		/// function, as they all implement `DelRetrievable` at the minimum.
-		async fn del<DelRetrievable, Db, Match>(
-			connection: &Pool<Db>,
-			match_condition: Match,
-		) -> DynResult<()>
+		async fn del<DelRetrievable, Db, Match>(connection: &Pool<Db>, match_condition: Match) -> DynResult<()>
 		where
 			Db: Database,
 			Match: TryInto<Option<DelRetrievable::Match>>,
@@ -71,11 +68,7 @@ impl RunAction for Delete
 				true => retrieved,
 			};
 
-			DelRetrievable::delete(
-				connection,
-				selected.iter().inspect(|s| Delete::report_deleted(*s)),
-			)
-			.await?;
+			DelRetrievable::delete(connection, selected.iter().inspect(|s| Delete::report_deleted(*s))).await?;
 			Ok(())
 		}
 
@@ -86,10 +79,7 @@ impl RunAction for Delete
 			DeleteCommand::Expense => del::<XAdapter, _, _>(&connection, self.match_args).await,
 			DeleteCommand::Job => del::<JAdapter, _, _>(&connection, self.match_args).await,
 			DeleteCommand::Location => del::<LAdapter, _, _>(&connection, self.match_args).await,
-			DeleteCommand::Organization =>
-			{
-				del::<OAdapter, _, _>(&connection, self.match_args).await
-			},
+			DeleteCommand::Organization => del::<OAdapter, _, _>(&connection, self.match_args).await,
 			DeleteCommand::Timesheet => del::<TAdapter, _, _>(&connection, self.match_args).await,
 		}
 	}
@@ -137,13 +127,8 @@ mod tests
 	{
 		/// Runs the given `command`, then [assert](pretty_assertions)s that there are no rows in
 		/// the database matching the `condition` derived `from` the value specified.
-		async fn assert<R, T>(
-			connection: &PgPool,
-			command: DeleteCommand,
-			config: Config,
-			from: T,
-			filepath: PathBuf,
-		) where
+		async fn assert<R, T>(connection: &PgPool, command: DeleteCommand, config: Config, from: T, filepath: PathBuf)
+		where
 			R: Retrievable<Db = Postgres>,
 			R::Entity: Debug + PartialEq,
 			R::Match: From<T> + Serialize,
@@ -189,11 +174,9 @@ mod tests
 		)
 		.unwrap();
 
-		let (contact_label, employee_id, location_id) =
-			(contact.label.clone(), employee.id, location.id);
+		let (contact_label, employee_id, location_id) = (contact.label.clone(), employee.id, location.id);
 
-		let organization =
-			PgOrganization::create(&connection, location, "Foo".into()).await.unwrap();
+		let organization = PgOrganization::create(&connection, location, "Foo".into()).await.unwrap();
 		let organization_id = organization.id;
 
 		let job = PgJob::create(
@@ -211,17 +194,10 @@ mod tests
 		let job_id = job.id;
 
 		let mut transaction = connection.begin().await.unwrap();
-		let timesheet = PgTimesheet::create(
-			&mut transaction,
-			employee,
-			Vec::new(),
-			job,
-			Utc::now(),
-			None,
-			"Notes".into(),
-		)
-		.await
-		.unwrap();
+		let timesheet =
+			PgTimesheet::create(&mut transaction, employee, Vec::new(), job, Utc::now(), None, "Notes".into())
+				.await
+				.unwrap();
 		transaction.commit().await.unwrap();
 
 		let expense = PgExpenses::create(
@@ -235,32 +211,13 @@ mod tests
 
 		/* }}}
 		 * Tests {{{ */
-		assert::<PgExpenses, _>(
-			&connection,
-			DeleteCommand::Expense,
-			config.clone(),
-			expense.id,
-			filepath.clone(),
-		)
-		.await;
+		assert::<PgExpenses, _>(&connection, DeleteCommand::Expense, config.clone(), expense.id, filepath.clone())
+			.await;
 
-		assert::<PgTimesheet, _>(
-			&connection,
-			DeleteCommand::Timesheet,
-			config.clone(),
-			timesheet.id,
-			filepath.clone(),
-		)
-		.await;
+		assert::<PgTimesheet, _>(&connection, DeleteCommand::Timesheet, config.clone(), timesheet.id, filepath.clone())
+			.await;
 
-		assert::<PgJob, _>(
-			&connection,
-			DeleteCommand::Job,
-			config.clone(),
-			job_id,
-			filepath.clone(),
-		)
-		.await;
+		assert::<PgJob, _>(&connection, DeleteCommand::Job, config.clone(), job_id, filepath.clone()).await;
 
 		assert::<PgOrganization, _>(
 			&connection,
@@ -286,13 +243,7 @@ mod tests
 				employee_id,
 				filepath.clone(),
 			),
-			assert::<PgLocation, _>(
-				&connection,
-				DeleteCommand::Location,
-				config,
-				location_id,
-				filepath,
-			),
+			assert::<PgLocation, _>(&connection, DeleteCommand::Location, config, location_id, filepath,),
 		);
 		/* }}} */
 	}

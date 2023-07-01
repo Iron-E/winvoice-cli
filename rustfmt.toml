@@ -11,6 +11,7 @@ imports_granularity = "Crate"
 imports_layout = "HorizontalVertical"
 #match_arm_blocks = false # FIX: see https://github.com/rust-lang/rustfmt/issues/4844
 match_block_trailing_comma = true
+max_width = 120
 normalize_doc_attributes = true
 overflow_delimited_expr = true
 remove_nested_parens = true

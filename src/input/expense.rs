@@ -18,10 +18,7 @@ fn add_menu(expenses: &mut Vec<(String, Money, String)>) -> io::Result<()>
 	let description = super::text(None, format!("Describe the {category} Expense"))?;
 	let cost = super::text(
 		None,
-		format!(
-			"What is the cost of the {category} Expense? e.g. {}",
-			Money::new(20_00, 2, Default::default()),
-		),
+		format!("What is the cost of the {category} Expense? e.g. {}", Money::new(20_00, 2, Default::default()),),
 	)?;
 
 	expenses.push((category, cost, description));

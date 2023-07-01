@@ -60,7 +60,6 @@ impl FlagOrArgument<NaiveDateTime>
 	/// [flag]: Self::flag
 	pub fn iff_flagged_utc_or_now(self) -> Option<DateTime<Utc>>
 	{
-		self.flag()
-			.then(|| self.argument().map_or_else(Utc::now, utils::naive_local_datetime_to_utc))
+		self.flag().then(|| self.argument().map_or_else(Utc::now, utils::naive_local_datetime_to_utc))
 	}
 }

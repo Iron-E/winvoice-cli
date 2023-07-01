@@ -46,8 +46,7 @@ impl RunAction for Update
 		XAdapter: Deletable<Db = Db> + ExpensesAdapter,
 		Db: Database,
 		for<'connection> &'connection mut Db::Connection: Executor<'connection, Database = Db>,
-		for<'connection> &'connection mut Transaction<'connection, Db>:
-			Executor<'connection, Database = Db>,
+		for<'connection> &'connection mut Transaction<'connection, Db>: Executor<'connection, Database = Db>,
 	{
 		/// Uses [`Iterator::filter_map`] to filter out items of `iter` which return [`None`] from
 		/// [`input::confirm_then_some`], otherwise mapping
@@ -64,11 +63,9 @@ impl RunAction for Update
 			TryFn: Fn(&'input mut Input) -> TryFnFut,
 			TryFnFut: Future<Output = DynResult<()>>,
 		{
-			stream::iter(
-				iter.filter_map(move |item| input::confirm_then_some(prompt(item), Ok(item))),
-			)
-			.try_for_each(try_fn)
-			.await
+			stream::iter(iter.filter_map(move |item| input::confirm_then_some(prompt(item), Ok(item))))
+				.try_for_each(try_fn)
+				.await
 		}
 
 		/// Gets the first line of any given [`&str`] `s`.
@@ -79,22 +76,12 @@ impl RunAction for Update
 
 		/// A generic deletion function which works for any of the provided adapters in the outer
 		/// function, as they all implement `Updatable` at the minimum.
-		async fn update<Upd, Db>(
-			connection: &Pool<Db>,
-			entities: &mut [Upd::Entity],
-		) -> DynResult<()>
+		async fn update<Upd, Db>(connection: &Pool<Db>, entities: &mut [Upd::Entity]) -> DynResult<()>
 		where
 			Db: Database,
 			Upd: Updatable<Db = Db>,
-			Upd::Entity: Clone
-				+ DeserializeOwned
-				+ Display
-				+ Identifiable
-				+ RestorableSerde
-				+ Serialize
-				+ Sync,
-			for<'connection> &'connection mut Transaction<'connection, Db>:
-				Executor<'connection, Database = Db>,
+			Upd::Entity: Clone + DeserializeOwned + Display + Identifiable + RestorableSerde + Serialize + Sync,
+			for<'connection> &'connection mut Transaction<'connection, Db>: Executor<'connection, Database = Db>,
 		{
 			#[rustfmt::skip]
 			entities.iter_mut().try_for_each(|e| {
@@ -108,8 +95,7 @@ impl RunAction for Update
 
 			let mut transaction = connection.begin().await?;
 
-			Upd::update(&mut transaction, entities.iter().inspect(|e| Update::report_updated(*e)))
-				.await?;
+			Upd::update(&mut transaction, entities.iter().inspect(|e| Update::report_updated(*e))).await?;
 
 			transaction.commit().await?;
 			Ok(())
@@ -250,12 +236,9 @@ impl RunAction for Update
 			UpdateCommand::Job { close, invoice_issued, invoice_paid, reopen } =>
 			{
 				let match_condition = self.match_args.try_into()?;
-				let mut selected = input::select_retrieved::<JAdapter, _, _>(
-					&connection,
-					match_condition,
-					"Query the Jobs to update",
-				)
-				.await?;
+				let mut selected =
+					input::select_retrieved::<JAdapter, _, _>(&connection, match_condition, "Query the Jobs to update")
+						.await?;
 
 				#[rustfmt::skip]
 				filter_then_try_for_each(
@@ -318,11 +301,7 @@ impl RunAction for Update
 				}
 
 				let mut transaction = connection.begin().await?;
-				JAdapter::update(
-					&mut transaction,
-					selected.iter().inspect(|e| Self::report_updated(*e)),
-				)
-				.await?;
+				JAdapter::update(&mut transaction, selected.iter().inspect(|e| Self::report_updated(*e))).await?;
 
 				transaction.commit().await?;
 			},
@@ -446,11 +425,7 @@ impl RunAction for Update
 				});
 
 				let mut transaction = connection.begin().await?;
-				TAdapter::update(
-					&mut transaction,
-					selected.iter().inspect(|e| Self::report_updated(*e)),
-				)
-				.await?;
+				TAdapter::update(&mut transaction, selected.iter().inspect(|e| Self::report_updated(*e))).await?;
 
 				transaction.commit().await?;
 			},

@@ -53,9 +53,8 @@ where
 	Entity: DeserializeOwned + Serialize,
 	Prompt: AsRef<str>,
 {
-	let to_edit = yaml::to_string(&entity).map(|serialized| {
-		format!("# {}\n\n{serialized}", prompt.as_ref().replace('\n', "\n# "),)
-	})?;
+	let to_edit = yaml::to_string(&entity)
+		.map(|serialized| format!("# {}\n\n{serialized}", prompt.as_ref().replace('\n', "\n# "),))?;
 
 	let maybe_edited = Editor::new().extension(".yaml").edit(&to_edit)?;
 
@@ -90,10 +89,7 @@ where
 
 /// [Retrieve](Retrievable::retrieve) all [entities](Retrievable::Entity) that match a
 /// user-provided query.
-pub async fn retrieve<Retr, Db, Prompt>(
-	connection: &Pool<Db>,
-	prompt: Prompt,
-) -> DynResult<Vec<Retr::Entity>>
+pub async fn retrieve<Retr, Db, Prompt>(connection: &Pool<Db>, prompt: Prompt) -> DynResult<Vec<Retr::Entity>>
 where
 	Db: Database,
 	Prompt: Display,
@@ -103,13 +99,11 @@ where
 {
 	loop
 	{
-		let match_condition: Retr::Match =
-			edit_default(format!("{prompt}\n{}locations", MATCH_PROMPT))?;
+		let match_condition: Retr::Match = edit_default(format!("{prompt}\n{}locations", MATCH_PROMPT))?;
 
 		let results = Retr::retrieve(connection, match_condition).await?;
 
-		if results.is_empty() &&
-			confirm("That query did not return any results, would you like to try again?")?
+		if results.is_empty() && confirm("That query did not return any results, would you like to try again?")?
 		{
 			continue;
 		}
@@ -125,12 +119,7 @@ where
 	Prompt: Into<String>,
 {
 	let indices = select_indices(&entities, prompt)?;
-	Ok(entities
-		.into_iter()
-		.enumerate()
-		.filter(|(i, _)| indices.binary_search(i).is_ok())
-		.map(|(_, e)| e)
-		.collect())
+	Ok(entities.into_iter().enumerate().filter(|(i, _)| indices.binary_search(i).is_ok()).map(|(_, e)| e).collect())
 }
 
 /// `prompt` users to select elements from `entities`, and then return the index where they appear.
@@ -186,9 +175,7 @@ where
 	{
 		match selector.interact()
 		{
-			Err(e)
-				if e.kind() == io::ErrorKind::Other &&
-					e.to_string().contains("Quit not allowed") =>
+			Err(e) if e.kind() == io::ErrorKind::Other && e.to_string().contains("Quit not allowed") =>
 			{
 				println!("Please select something, or press Ctrl+C to quit");
 			},

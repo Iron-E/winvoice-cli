@@ -35,8 +35,7 @@ pub trait RunAction: AsRef<StoreArgs> + Sized
 		TAdapter: Deletable<Db = Db> + TimesheetAdapter,
 		XAdapter: Deletable<Db = Db> + ExpensesAdapter,
 		for<'connection> &'connection mut Db::Connection: Executor<'connection, Database = Db>,
-		for<'connection> &'connection mut Transaction<'connection, Db>:
-			Executor<'connection, Database = Db>;
+		for<'connection> &'connection mut Transaction<'connection, Db>: Executor<'connection, Database = Db>;
 
 	/// Execute this command given the user's [`Config`].
 	async fn run(self, config: Config) -> DynResult<()>
@@ -59,11 +58,10 @@ pub trait RunAction: AsRef<StoreArgs> + Sized
 				};
 
 				let pool = Pool::connect_lazy(&store.url)?;
-				self
-					.action::<PgContact, PgEmployee, PgJob, PgLocation, PgOrganization, PgTimesheet, PgExpenses, _>(
-						pool, config,
-					)
-					.await?
+				self.action::<PgContact, PgEmployee, PgJob, PgLocation, PgOrganization, PgTimesheet, PgExpenses, _>(
+					pool, config,
+				)
+				.await?
 			},
 
 			// NOTE: this is allowed because there may be additional adapters added later, and I

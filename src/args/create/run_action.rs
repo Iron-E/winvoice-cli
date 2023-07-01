@@ -40,8 +40,7 @@ impl RunAction for Create
 		XAdapter: Deletable<Db = Db> + ExpensesAdapter,
 		Db: Database,
 		for<'connection> &'connection mut Db::Connection: Executor<'connection, Database = Db>,
-		for<'connection> &'connection mut Transaction<'connection, Db>:
-			Executor<'connection, Database = Db>,
+		for<'connection> &'connection mut Transaction<'connection, Db>: Executor<'connection, Database = Db>,
 	{
 		match self.command
 		{
@@ -145,9 +144,9 @@ impl RunAction for Create
 			{
 				let mut names_reversed = names.into_iter().rev();
 
-				let final_name = names_reversed.next().expect(
-					"clap config should have ensured that `names` has length of at least one",
-				);
+				let final_name = names_reversed
+					.next()
+					.expect("clap config should have ensured that `names` has length of at least one");
 
 				let outside_of_final = match inside.flag()
 				{
@@ -170,8 +169,7 @@ impl RunAction for Create
 
 				// TODO: convert to `try_fold` after `stream`s merge to `std`? {{{2
 				// TODO: use `inspect` after rust-lang/rust#91345
-				let mut l =
-					LAdapter::create(&mut *transaction, final_name, outside_of_final).await?;
+				let mut l = LAdapter::create(&mut *transaction, final_name, outside_of_final).await?;
 				Self::report_created(&l);
 				for n in names_reversed
 				{
@@ -232,14 +230,7 @@ impl RunAction for Create
 				Self::report_created(&created);
 			},
 
-			CreateCommand::Timesheet {
-				default_employee,
-				employee,
-				job,
-				time_begin,
-				time_end,
-				work_notes,
-			} =>
+			CreateCommand::Timesheet { default_employee, employee, job, time_begin, time_end, work_notes } =>
 			{
 				let match_employee = match default_employee
 				{
@@ -330,13 +321,7 @@ mod tests
 		PgTimesheet,
 	};
 	use winvoice_config::Config;
-	use winvoice_match::{
-		MatchEmployee,
-		MatchJob,
-		MatchLocation,
-		MatchOrganization,
-		MatchTimesheet,
-	};
+	use winvoice_match::{MatchEmployee, MatchJob, MatchLocation, MatchOrganization, MatchTimesheet};
 	use winvoice_schema::{
 		chrono::{DateTime, Duration, Local, NaiveDate, Utc},
 		Currency,
@@ -353,17 +338,11 @@ mod tests
 	#[tokio::test]
 	async fn run_action()
 	{
-		async fn contact(
-			connection: &PgPool,
-			label: &str,
-		) -> Result<<PgContact as Retrievable>::Entity>
+		async fn contact(connection: &PgPool, label: &str) -> Result<<PgContact as Retrievable>::Entity>
 		{
-			PgContact::retrieve(
-				connection,
-				<PgContact as Retrievable>::Match::from(label.to_owned()),
-			)
-			.await
-			.map(|mut v| v.remove(0))
+			PgContact::retrieve(connection, <PgContact as Retrievable>::Match::from(label.to_owned()))
+				.await
+				.map(|mut v| v.remove(0))
 		}
 
 		/// Retrieve the most-recently-created row in the database as its structural counterpart.
@@ -422,17 +401,12 @@ mod tests
 		let status = "bob status";
 		let title = "bob title";
 
-		run(config.clone(), CreateCommand::Employee {
-			name: name.into(),
-			status: status.into(),
-			title: title.into(),
-		})
-		.await;
+		run(config.clone(), CreateCommand::Employee { name: name.into(), status: status.into(), title: title.into() })
+			.await;
 
 		let connection = connection_fut.await.unwrap();
 
-		let most_recent =
-			latest_entity::<PgEmployee, EmployeeColumns<&str>>(&connection).await.unwrap();
+		let most_recent = latest_entity::<PgEmployee, EmployeeColumns<&str>>(&connection).await.unwrap();
 
 		assert_eq!(most_recent.name, name);
 		assert_eq!(most_recent.status, status);
@@ -454,8 +428,7 @@ mod tests
 		})
 		.await;
 
-		let most_recent =
-			latest_entity::<PgLocation, LocationColumns<&str>>(&connection).await.unwrap();
+		let most_recent = latest_entity::<PgLocation, LocationColumns<&str>>(&connection).await.unwrap();
 
 		assert_eq!(most_recent.name, arizona);
 		assert_eq!(most_recent.outer.unwrap().name, usa);
@@ -482,10 +455,8 @@ mod tests
 		})
 		.await;
 
-		let db_desert_view = PgLocation::retrieve(&connection, match_desert_view)
-			.await
-			.map(|mut v| v.remove(0))
-			.unwrap();
+		let db_desert_view =
+			PgLocation::retrieve(&connection, match_desert_view).await.map(|mut v| v.remove(0)).unwrap();
 
 		assert_eq!(db_desert_view.id, desert_view.id);
 		assert_eq!(db_desert_view.name, desert_view.name);
@@ -578,26 +549,16 @@ mod tests
 		// }}}
 
 		// created contacts must be cleaned up
-		PgContact::delete(
-			&connection,
-			[most_recent, most_recent2, most_recent3, most_recent4].iter(),
-		)
-		.await
-		.unwrap();
+		PgContact::delete(&connection, [most_recent, most_recent2, most_recent3, most_recent4].iter()).await.unwrap();
 
 		/* ########## `winvoice create organization` ########## */
 
 		// {{{
 		let name = "Foo";
 
-		run(config.clone(), CreateCommand::Organization {
-			location: Some(filepath.clone()),
-			name: name.into(),
-		})
-		.await;
+		run(config.clone(), CreateCommand::Organization { location: Some(filepath.clone()), name: name.into() }).await;
 
-		let most_recent =
-			latest_entity::<PgOrganization, OrganizationColumns<&str>>(&connection).await.unwrap();
+		let most_recent = latest_entity::<PgOrganization, OrganizationColumns<&str>>(&connection).await.unwrap();
 
 		assert_eq!(most_recent.location.id, location_id);
 		assert_eq!(most_recent.name, name);
@@ -648,18 +609,13 @@ mod tests
 			..invoice
 		};
 
-		utils::write_yaml(
-			&filepath,
-			config.organizations.employer_id.map(MatchOrganization::from).unwrap(),
-		);
+		utils::write_yaml(&filepath, config.organizations.employer_id.map(MatchOrganization::from).unwrap());
 
 		run(config.clone(), {
 			CreateCommand::Job {
 				client: Some(filepath.clone()),
 				date_close: Some(date_close),
-				date_invoice_issued: invoice
-					.date
-					.map(|d| DateTime::<Local>::from(d.issued).naive_local()),
+				date_invoice_issued: invoice.date.map(|d| DateTime::<Local>::from(d.issued).naive_local()),
 				date_invoice_paid: invoice
 					.date
 					.and_then(|d| d.paid)
@@ -703,8 +659,7 @@ mod tests
 		})
 		.await;
 
-		let most_recent =
-			latest_entity::<PgTimesheet, TimesheetColumns<&str>>(&connection).await.unwrap();
+		let most_recent = latest_entity::<PgTimesheet, TimesheetColumns<&str>>(&connection).await.unwrap();
 
 		assert_eq!(most_recent.employee.id, config.employees.id.unwrap());
 		assert!(most_recent.expenses.is_empty());
@@ -736,8 +691,7 @@ mod tests
 		})
 		.await;
 
-		let most_recent =
-			latest_entity::<PgTimesheet, TimesheetColumns<&str>>(&connection).await.unwrap();
+		let most_recent = latest_entity::<PgTimesheet, TimesheetColumns<&str>>(&connection).await.unwrap();
 
 		assert_eq!(most_recent.employee.id, config.employees.id.unwrap());
 		assert!(most_recent.expenses.is_empty());
@@ -748,9 +702,7 @@ mod tests
 		);
 		assert_eq!(
 			most_recent.time_end,
-			Some(utils::naive_local_datetime_to_utc(
-				DateTime::<Local>::from(time_end).naive_local()
-			))
+			Some(utils::naive_local_datetime_to_utc(DateTime::<Local>::from(time_end).naive_local()))
 		);
 		assert_eq!(most_recent.work_notes, work_notes);
 		// }}}
@@ -778,8 +730,7 @@ mod tests
 		})
 		.await;
 
-		let most_recent =
-			latest_entity::<PgExpenses, ExpenseColumns<&str>>(&connection).await.unwrap();
+		let most_recent = latest_entity::<PgExpenses, ExpenseColumns<&str>>(&connection).await.unwrap();
 
 		assert_eq!(most_recent.category, category);
 		assert_eq!(most_recent.cost.exchange(Currency::Usd, &exchange_rates), cost);

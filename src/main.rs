@@ -26,15 +26,10 @@
 //!
 //! ## Source
 //!
-//! 1. Download this repository from GitHub:
-//!    ```sh
-//!    git clone https://github.com/Iron-E/winvoice
-//!    ```
+//! 1. Download this repository from GitHub: ```sh git clone https://github.com/Iron-E/winvoice ```
 //! 2. `cd` to the directory which `git` just created.
-//! 3. Use `cargo` to build and install the cloned repo:
-//!    ```sh
-//!    cargo install --features=<adapters> --path=. --root=<desired install folder>
-//!    ```
+//! 3. Use `cargo` to build and install the cloned repo: ```sh cargo install --features=<adapters>
+//!    --path=. --root=<desired install folder> ```
 //!
 //! # Configuration
 //!

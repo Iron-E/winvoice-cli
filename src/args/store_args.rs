@@ -22,13 +22,8 @@ impl StoreArgs
 {
 	/// Try to get the store named `store_name` from `config` and return it, erroring if it does not
 	/// exist.
-	pub fn try_get_from<'connection>(
-		&self,
-		config: &'connection Config,
-	) -> Result<&'connection Store>
+	pub fn try_get_from<'connection>(&self, config: &'connection Config) -> Result<&'connection Store>
 	{
-		config
-			.get_store(&self.store)
-			.ok_or_else(|| Error::NotConfigured(self.store.clone(), "stores".into()))
+		config.get_store(&self.store).ok_or_else(|| Error::NotConfigured(self.store.clone(), "stores".into()))
 	}
 }

@@ -106,13 +106,11 @@ impl RunAction for Retrieve
 					true => config.employees.id_or_err().map(|id| Some(id.into()))?,
 				};
 
-				let retrieved =
-					retrieve::<EAdapter, _, _>(&connection, match_condition, !set_default).await?;
+				let retrieved = retrieve::<EAdapter, _, _>(&connection, match_condition, !set_default).await?;
 
 				if set_default
 				{
-					let selected =
-						input::select_one(retrieved, "Select the Employee to set as the default")?;
+					let selected = input::select_one(retrieved, "Select the Employee to set as the default")?;
 					let mut c = config;
 					c.employees.id = Some(selected.id);
 					c.write()?;
@@ -126,15 +124,12 @@ impl RunAction for Retrieve
 
 			RetrieveCommand::Job { currency, export, output_dir } =>
 			{
-				let retrieved =
-					retrieve::<JAdapter, _, _>(&connection, self.match_args, export.is_none())
-						.await?;
+				let retrieved = retrieve::<JAdapter, _, _>(&connection, self.match_args, export.is_none()).await?;
 
 				if let Some(format) = export
 				{
 					let match_all_contacts = Default::default();
-					let match_employer =
-						config.organizations.employer_id_or_err().map(MatchOrganization::from)?;
+					let match_employer = config.organizations.employer_id_or_err().map(MatchOrganization::from)?;
 
 					let exchange_rates_fut = ExchangeRates::new().map_ok(Some);
 					let (contact_information, employer) = futures::try_join!(
@@ -142,20 +137,16 @@ impl RunAction for Retrieve
 							vec.sort_by(|lhs, rhs| lhs.label.cmp(&rhs.label));
 							vec
 						}),
-						OAdapter::retrieve(&connection, match_employer).and_then(|mut vec| {
-							future::ready(vec.pop().ok_or(sqlx::Error::RowNotFound))
-						}),
+						OAdapter::retrieve(&connection, match_employer)
+							.and_then(|mut vec| { future::ready(vec.pop().ok_or(sqlx::Error::RowNotFound)) }),
 					)?;
 
 					let exchange_rates = exchange_rates_fut.await?;
 					let mut selected = input::select(retrieved, "Select the Jobs to export")?;
 
-					selected
-						.iter_mut()
-						.filter(|j| j.invoice.date.and_then(|d| d.paid).is_none())
-						.for_each(|j| {
-							j.invoice.date = Some(InvoiceDate { issued: Utc::now(), paid: None });
-						});
+					selected.iter_mut().filter(|j| j.invoice.date.and_then(|d| d.paid).is_none()).for_each(|j| {
+						j.invoice.date = Some(InvoiceDate { issued: Utc::now(), paid: None });
+					});
 
 					#[rustfmt::skip]
 					stream::iter(selected.into_iter().map(Ok)).try_for_each_concurrent(None, |j| {
@@ -215,15 +206,11 @@ impl RunAction for Retrieve
 					true => config.organizations.employer_id_or_err().map(|id| Some(id.into()))?,
 				};
 
-				let retrieved =
-					retrieve::<OAdapter, _, _>(&connection, match_condition, !set_employer).await?;
+				let retrieved = retrieve::<OAdapter, _, _>(&connection, match_condition, !set_employer).await?;
 
 				if set_employer
 				{
-					let selected = input::select_one(
-						retrieved,
-						"Select the Employer to use in your configuration",
-					)?;
+					let selected = input::select_one(retrieved, "Select the Employer to use in your configuration")?;
 					let mut c = config;
 					c.organizations.employer_id = Some(selected.id);
 					c.write()?;

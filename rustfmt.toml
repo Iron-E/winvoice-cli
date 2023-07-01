@@ -1,6 +1,6 @@
 binop_separator = "Back"
 brace_style = "AlwaysNextLine"
-comment_width = 100
+comment_width = 120
 condense_wildcard_suffixes = true
 control_brace_style = "AlwaysNextLine"
 format_macro_matchers = true
